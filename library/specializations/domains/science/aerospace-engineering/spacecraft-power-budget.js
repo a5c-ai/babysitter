@@ -12,35 +12,63 @@ export async function process(inputs, ctx) {
   const { projectName, missionProfile, loadList, orbitParameters = {} } = inputs;
 
   const requirements = await ctx.task(powerRequirementsTask, { projectName, missionProfile, loadList });
-  const orbitPower = await ctx.task(orbitPowerTask, { projectName, orbitParameters, missionProfile });
-  const solarArrayDesign = await ctx.task(solarArrayDesignTask, { projectName, requirements, orbitPower });
-
-  await ctx.breakpoint({
+  let orbitPower = await ctx.task(orbitPowerTask, { projectName, orbitParameters, missionProfile });
+    let lastFeedback_designApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_designApproval) {
+      orbitPower = await ctx.task(orbitPowerTask, { ...{ projectName, orbitParameters, missionProfile }, feedback: lastFeedback_designApproval, attempt: attempt + 1 });
+    }
+  const designApproval = await ctx.breakpoint({
     question: `Solar array sized at ${solarArrayDesign.area} m2 for ${projectName}. Proceed with battery sizing?`,
     title: 'Solar Array Review',
-    context: { runId: ctx.runId, solarArrayDesign }
-  });
-
+    context: { runId: ctx.runId, solarArrayDesign },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_designApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (designApproval.approved) break;
+    lastFeedback_designApproval = designApproval.response || designApproval.feedback || 'Changes requested';
+  }
   const batteryDesign = await ctx.task(batteryDesignTask, { projectName, requirements, orbitPower });
-  const powerBudget = await ctx.task(powerBudgetTask, { projectName, requirements, solarArrayDesign, batteryDesign, loadList });
+  let powerBudget = await ctx.task(powerBudgetTask, { projectName, requirements, solarArrayDesign, batteryDesign, loadList });
 
-  if (powerBudget.margin < 0.15) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        powerBudget = await ctx.task(powerBudgetTask, { ...{ projectName, requirements, solarArrayDesign, batteryDesign, loadList }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `Power margin ${(powerBudget.margin*100).toFixed(1)}% below 15% target. Review loads or increase capacity?`,
       title: 'Power Margin Warning',
-      context: { runId: ctx.runId, powerBudget }
-    });
-  }
+      context: { runId: ctx.runId, powerBudget },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
-  const eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { projectName, batteryDesign, orbitPower, loadList });
-  const report = await ctx.task(powerReportTask, { projectName, requirements, solarArrayDesign, batteryDesign, powerBudget, eclipseAnalysis });
-
-  await ctx.breakpoint({
+  let eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { projectName, batteryDesign, orbitPower, loadList });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { ...{ projectName, batteryDesign, orbitPower, loadList }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Power analysis complete for ${projectName}. Margin: ${(powerBudget.margin*100).toFixed(1)}%. Approve?`,
     title: 'Power Budget Approval',
-    context: { runId: ctx.runId, summary: { margin: powerBudget.margin, solarPower: solarArrayDesign.power, batteryCapacity: batteryDesign.capacity } }
-  });
-
+    context: { runId: ctx.runId, summary: { margin: powerBudget.margin, solarPower: solarArrayDesign.power, batteryCapacity: batteryDesign.capacity } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, powerBudget, solarArrayDesign, batteryDesign, report, metadata: { processId: 'spacecraft-power-budget', timestamp: ctx.now() } };
 }
 

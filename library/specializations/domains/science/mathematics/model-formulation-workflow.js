@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Document System Variables and Parameters
-  const systemDocumentation = await ctx.task(systemDocumentationTask, {
+  let systemDocumentation = await ctx.task(systemDocumentationTask, {
     systemDescription,
     modelingGoal,
     observations
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       mathematicalModel: null
     };
   }
-
-  // Breakpoint: Review system documentation
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      systemDocumentation = await ctx.task(systemDocumentationTask, { ...{
+    systemDescription,
+    modelingGoal,
+    observations
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${systemDocumentation.variables.length} variables and ${systemDocumentation.parameters.length} parameters. Review?`,
     title: 'System Documentation Review',
     context: {
@@ -61,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: systemDocumentation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: State and Justify Assumptions
   const assumptionDocumentation = await ctx.task(assumptionDocumentationTask, {
     systemDescription,
@@ -89,15 +102,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Validate Against Known Limits
-  const limitValidation = await ctx.task(limitValidationTask, {
+  let limitValidation = await ctx.task(limitValidationTask, {
     equationDerivation,
     assumptionDocumentation,
     dimensionalAnalysis,
     observations
   });
 
-  // Final Breakpoint: Model Formulation Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      limitValidation = await ctx.task(limitValidationTask, { ...{
+    equationDerivation,
+    assumptionDocumentation,
+    dimensionalAnalysis,
+    observations
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mathematical model formulation complete. ${equationDerivation.equations.length} governing equations derived. Validate model?`,
     title: 'Model Formulation Complete',
     context: {
@@ -109,9 +131,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/mathematical-model.json`, format: 'json', content: equationDerivation },
         { path: `artifacts/model-validation.json`, format: 'json', content: limitValidation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemDescription,
@@ -141,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const systemDocumentationTask = defineTask('system-documentation', (args, taskCtx) => ({
   kind: 'agent',

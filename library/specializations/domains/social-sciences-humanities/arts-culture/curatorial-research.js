@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Interpretive Synthesis
   ctx.log('info', 'Synthesizing interpretive findings');
-  const interpretiveSynthesis = await ctx.task(interpretiveSynthesisTask, {
+  let interpretiveSynthesis = await ctx.task(interpretiveSynthesisTask, {
     researchQuestions,
     literatureReview,
     primarySourceAnalysis,
@@ -96,8 +96,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...interpretiveSynthesis.artifacts);
 
-  // Breakpoint: Review research findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      interpretiveSynthesis = await ctx.task(interpretiveSynthesisTask, { ...{
+    researchQuestions,
+    literatureReview,
+    primarySourceAnalysis,
+    provenanceResearch,
+    visualAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Curatorial research on "${researchTopic}" complete. ${literatureReview.sourcesReviewed} sources reviewed, ${provenanceResearch.gapsIdentified} provenance gaps. Review findings?`,
     title: 'Curatorial Research Review',
     context: {
@@ -110,9 +121,15 @@ export async function process(inputs, ctx) {
         primarySources: primarySourceAnalysis.sourcesAnalyzed,
         provenanceGaps: provenanceResearch.gapsIdentified
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Research Documentation
   ctx.log('info', 'Generating research documentation');
   const documentation = await ctx.task(researchDocumentationTask, {
@@ -153,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Research Question Development
+  // Task 1: Research Question Development
 export const researchQuestionTask = defineTask('research-questions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop research questions',

@@ -57,23 +57,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Knowledge Repository Design
-  const knowledgeRepository = await ctx.task(knowledgeRepositoryTask, {
+  let knowledgeRepository = await ctx.task(knowledgeRepositoryTask, {
     projectName,
     recordTemplate,
     outcomeTracking,
     organizationContext
   });
 
-  // Breakpoint: Review documentation framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      knowledgeRepository = await ctx.task(knowledgeRepositoryTask, { ...{
+    projectName,
+    recordTemplate,
+    outcomeTracking,
+    organizationContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review decision documentation framework for ${projectName}. Is it practical for regular use?`,
     title: 'Documentation Framework Review',
     context: {
       runId: ctx.runId,
       projectName
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Learning Process Design
   const learningProcess = await ctx.task(learningProcessTask, {
     projectName,
@@ -119,8 +134,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const frameworkDesignTask = defineTask('framework-design', (args, taskCtx) => ({
   kind: 'agent',

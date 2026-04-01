@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Existing Data and Equivalence Evaluation
-  const equivalenceEvaluation = await ctx.task(equivalenceEvaluationTask, {
+  let equivalenceEvaluation = await ctx.task(equivalenceEvaluationTask, {
     deviceName,
     materials,
     materialCharacterization,
     deviceCategorization
   });
 
-  // Breakpoint: Review equivalence assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      equivalenceEvaluation = await ctx.task(equivalenceEvaluationTask, { ...{
+    deviceName,
+    materials,
+    materialCharacterization,
+    deviceCategorization
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review equivalence evaluation for ${deviceName}. Can testing be reduced based on existing data?`,
     title: 'Equivalence Evaluation Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: equivalenceEvaluation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Testing Endpoint Determination
   const testingEndpoints = await ctx.task(testingEndpointTask, {
     deviceName,
@@ -90,7 +105,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Biological Evaluation Plan Documentation
-  const biologicalEvaluationPlan = await ctx.task(bepDocumentationTask, {
+  let biologicalEvaluationPlan = await ctx.task(bepDocumentationTask, {
     deviceName,
     deviceCategorization,
     materialCharacterization,
@@ -100,8 +115,20 @@ export async function process(inputs, ctx) {
     labSelection
   });
 
-  // Final Breakpoint: BEP Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      biologicalEvaluationPlan = await ctx.task(bepDocumentationTask, { ...{
+    deviceName,
+    deviceCategorization,
+    materialCharacterization,
+    equivalenceEvaluation,
+    testingEndpoints,
+    gapAnalysis,
+    labSelection
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Biological Evaluation Plan complete for ${deviceName}. Approve BEP and proceed to testing?`,
     title: 'BEP Approval',
     context: {
@@ -111,9 +138,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/biological-evaluation-plan.json`, format: 'json', content: biologicalEvaluationPlan }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -128,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const deviceCategorizationTask = defineTask('device-categorization', (args, taskCtx) => ({
   kind: 'agent',

@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Risk Management Planning
-  const riskManagementPlan = await ctx.task(riskManagementPlanningTask, {
+  let riskManagementPlan = await ctx.task(riskManagementPlanningTask, {
     projectName,
     projectContext,
     stakeholders,
@@ -48,9 +48,18 @@ export async function process(inputs, ctx) {
       riskRegister: null
     };
   }
-
-  // Breakpoint: Review risk management plan
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      riskManagementPlan = await ctx.task(riskManagementPlanningTask, { ...{
+    projectName,
+    projectContext,
+    stakeholders,
+    riskTolerance,
+    organizationalContext
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review risk management plan for ${projectName}. Methodology: ${riskManagementPlan.methodology}. Risk tolerance: ${riskTolerance}. Proceed with risk identification?`,
     title: 'Risk Management Plan Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: riskManagementPlan
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Risk Identification
   const riskIdentification = await ctx.task(riskIdentificationTask, {
     projectName,
@@ -83,7 +98,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Qualitative Risk Analysis
-  const qualitativeAnalysis = await ctx.task(qualitativeRiskAnalysisTask, {
+  let qualitativeAnalysis = await ctx.task(qualitativeRiskAnalysisTask, {
     projectName,
     categorizedRisks: riskCategorization.categorizedRisks,
     riskManagementPlan
@@ -91,17 +106,31 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: High-priority risks identified
   const highPriorityRisks = qualitativeAnalysis.risks?.filter(r => r.priority === 'high') || [];
-  if (highPriorityRisks.length === 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        qualitativeAnalysis = await ctx.task(qualitativeRiskAnalysisTask, { ...{
+    projectName,
+    categorizedRisks: riskCategorization.categorizedRisks,
+    riskManagementPlan
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `No high-priority risks identified for ${projectName}. Review analysis criteria or proceed with current assessment?`,
       title: 'Risk Priority Review',
       context: {
         runId: ctx.runId,
         totalRisks: qualitativeAnalysis.risks?.length || 0,
         recommendation: 'Review risk criteria and stakeholder input'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Quantitative Risk Analysis (for high-priority risks)
   const quantitativeAnalysis = await ctx.task(quantitativeRiskAnalysisTask, {
@@ -143,7 +172,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Risk Documentation Generation
-  const riskDocumentation = await ctx.task(riskDocumentationGenerationTask, {
+  let riskDocumentation = await ctx.task(riskDocumentationGenerationTask, {
     projectName,
     riskManagementPlan,
     riskRegister,
@@ -157,8 +186,20 @@ export async function process(inputs, ctx) {
   const completenessScore = riskDocumentation.completenessScore || 0;
   const ready = completenessScore >= 80;
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskDocumentation = await ctx.task(riskDocumentationGenerationTask, { ...{
+    projectName,
+    riskManagementPlan,
+    riskRegister,
+    riskResponsePlanning,
+    contingencyPlanning,
+    riskMonitoringSetup,
+    quantitativeAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk assessment complete for ${projectName}. Total risks: ${riskRegister.risks.length}, High priority: ${highPriorityRisks.length}. Completeness: ${completenessScore}/100. Approve?`,
     title: 'Risk Assessment Approval',
     context: {
@@ -171,9 +212,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/risk-register.json`, format: 'json', content: riskRegister },
         { path: `artifacts/risk-management-plan.md`, format: 'markdown', content: riskDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -206,8 +253,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const riskManagementPlanningTask = defineTask('risk-management-planning', (args, taskCtx) => ({
   kind: 'agent',

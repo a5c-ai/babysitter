@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Compile Visual Package
   ctx.log('info', 'Compiling visual production package');
-  const compileResult = await ctx.task(compileVisualPackage, {
+  let compileResult = await ctx.task(compileVisualPackage, {
     styleGuide: styleResult.styleGuide,
     shotLists: shotResult.sceneShotLists,
     storyboards: storyboardResult.storyboardFrames,
@@ -83,8 +83,19 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(compileResult.artifacts || []));
 
-  // Breakpoint: Visual Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compileResult = await ctx.task(compileVisualPackage, { ...{
+    styleGuide: styleResult.styleGuide,
+    shotLists: shotResult.sceneShotLists,
+    storyboards: storyboardResult.storyboardFrames,
+    videoPrompts: videoResult.sceneVideoPrompts,
+    lookbook: lookbookResult.lookbook,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visual package complete with ${shotResult.statistics?.totalShots || 0} shots, ${storyboardResult.frameCount || 0} storyboard frames, and ${videoResult.sceneVideoPrompts?.length || 0} scene video prompts. Review and approve?`,
     title: 'Visual Production Review',
     context: {
@@ -96,9 +107,15 @@ export async function process(inputs, ctx) {
         videoPrompts: videoResult.sceneVideoPrompts?.length,
         visualStyle: styleResult.styleGuide?.overallLook
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -120,8 +137,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const visualStyleGuide = defineTask('visual-style-guide', (args, taskCtx) => ({
   kind: 'agent',

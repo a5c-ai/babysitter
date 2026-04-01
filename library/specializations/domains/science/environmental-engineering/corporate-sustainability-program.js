@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Sustainability Goal Setting');
 
-  const goalSetting = await ctx.task(sustainabilityGoalsTask, {
+  let goalSetting = await ctx.task(sustainabilityGoalsTask, {
     organizationName,
     materialityAssessment,
     baselineAssessment,
@@ -85,8 +85,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...goalSetting.artifacts);
 
-  // Breakpoint: Goal Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      goalSetting = await ctx.task(sustainabilityGoalsTask, { ...{
+    organizationName,
+    materialityAssessment,
+    baselineAssessment,
+    sustainabilityFocus,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sustainability goals developed for ${organizationName}. ${goalSetting.goals.length} goals set. Review goals?`,
     title: 'Sustainability Goals Review',
     context: {
@@ -94,9 +104,15 @@ export async function process(inputs, ctx) {
       goals: goalSetting.goals,
       targetYears: goalSetting.targetYears,
       files: goalSetting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: STRATEGY DEVELOPMENT
   // ============================================================================
@@ -208,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

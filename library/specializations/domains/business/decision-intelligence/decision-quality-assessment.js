@@ -71,23 +71,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Commitment Assessment
-  const commitmentAssessment = await ctx.task(commitmentAssessmentTask, {
+  let commitmentAssessment = await ctx.task(commitmentAssessmentTask, {
     projectName,
     decisionProcess,
     stakeholders
   });
 
-  // Breakpoint: Review quality assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      commitmentAssessment = await ctx.task(commitmentAssessmentTask, { ...{
+    projectName,
+    decisionProcess,
+    stakeholders
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review decision quality assessment for ${projectName}. Are there critical quality gaps?`,
     title: 'Decision Quality Review',
     context: {
       runId: ctx.runId,
       projectName,
       overallScore: 'See element scores'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Overall Quality Synthesis
   const qualitySynthesis = await ctx.task(qualitySynthesisTask, {
     projectName,
@@ -129,8 +143,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const contextReviewTask = defineTask('context-review', (args, taskCtx) => ({
   kind: 'agent',

@@ -21,15 +21,24 @@ export async function process(inputs, ctx) {
   const library = await ctx.task(combinatoricsLibraryTask, { n, modulo, language, outputDir });
   artifacts.push(...library.artifacts);
 
-  const problem = await ctx.task(countingProblemTask, { problemType, n, k, modulo, library, language, outputDir });
-  artifacts.push(...problem.artifacts);
-
-  await ctx.breakpoint({
+  let problem = await ctx.task(countingProblemTask, { problemType, n, k, modulo, library, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      problem = await ctx.task(countingProblemTask, { ...{ problemType, n, k, modulo, library, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Combinatorics solution complete. Problem type: ${problemType}. Review?`,
     title: 'Combinatorics Complete',
-    context: { runId: ctx.runId, problemType, solution: problem.solution }
-  });
-
+    context: { runId: ctx.runId, problemType, solution: problem.solution },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemType,

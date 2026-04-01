@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...cudaPoolsIntegration.artifacts);
 
   // Phase 6: Performance Benchmarking
-  const benchmarking = await ctx.task(allocatorBenchmarkingTask, {
+  let benchmarking = await ctx.task(allocatorBenchmarkingTask, {
     projectName, allocatorImpl, cudaPoolsIntegration, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(allocatorBenchmarkingTask, { ...{
+    projectName, allocatorImpl, cudaPoolsIntegration, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory pool/allocator complete for ${projectName}. Allocation speedup: ${benchmarking.allocationSpeedup}x. Review?`,
     title: 'Memory Allocator Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.allocationSpeedup >= 2.0,
     projectName,

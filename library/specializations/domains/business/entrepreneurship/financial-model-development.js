@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(headcountPlan.artifacts || []));
 
   // Phase 5: Unit Economics
-  const unitEconomics = await ctx.task(unitEconomicsTask, {
+  let unitEconomics = await ctx.task(unitEconomicsTask, {
     companyName,
     revenueModel,
     currentMetrics,
@@ -81,8 +81,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(unitEconomics.artifacts || []));
 
-  // Breakpoint: Review unit economics
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      unitEconomics = await ctx.task(unitEconomicsTask, { ...{
+    companyName,
+    revenueModel,
+    currentMetrics,
+    operatingExpenses
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review unit economics for ${companyName}. LTV:CAC ratio: ${unitEconomics.ltvCacRatio}. Continue with scenario analysis?`,
     title: 'Unit Economics Review',
     context: {
@@ -90,9 +99,15 @@ export async function process(inputs, ctx) {
       companyName,
       ltvCacRatio: unitEconomics.ltvCacRatio,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Scenario Analysis
   const scenarioAnalysis = await ctx.task(scenarioAnalysisTask, {
     companyName,
@@ -114,7 +129,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(cashFlowProjections.artifacts || []));
 
   // Phase 8: Dashboard Creation
-  const dashboard = await ctx.task(dashboardCreationTask, {
+  let dashboard = await ctx.task(dashboardCreationTask, {
     companyName,
     revenueProjections,
     operatingExpenses,
@@ -124,8 +139,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(dashboard.artifacts || []));
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dashboard = await ctx.task(dashboardCreationTask, { ...{
+    companyName,
+    revenueProjections,
+    operatingExpenses,
+    unitEconomics,
+    cashFlowProjections
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Financial model complete for ${companyName}. ${projectionYears}-year projections, scenario analysis, and dashboard ready. Approve?`,
     title: 'Financial Model Complete',
     context: {
@@ -133,9 +158,15 @@ export async function process(inputs, ctx) {
       companyName,
       projectionYears,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -161,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const revenueModelTask = defineTask('revenue-model', (args, taskCtx) => ({
   kind: 'agent',

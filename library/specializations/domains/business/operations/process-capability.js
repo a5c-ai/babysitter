@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Process Stability Check
   ctx.log('info', 'Phase 3: Process Stability Verification');
-  const stabilityCheck = await ctx.task(stabilityCheckTask, {
+  let stabilityCheck = await ctx.task(stabilityCheckTask, {
     processName,
     dataValidation,
     outputDir
@@ -67,8 +67,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...stabilityCheck.artifacts);
 
-  // Quality Gate: Stability and Normality Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      stabilityCheck = await ctx.task(stabilityCheckTask, { ...{
+    processName,
+    dataValidation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data validation complete. Sample size: ${dataValidation.sampleSize}. Process stable: ${stabilityCheck.isStable}. Data normal: ${normalityAssessment.isNormal}. Proceed with capability analysis?`,
     title: 'Process Stability Review',
     context: {
@@ -78,9 +86,15 @@ export async function process(inputs, ctx) {
       stability: stabilityCheck,
       normality: normalityAssessment,
       files: [...dataValidation.artifacts, ...stabilityCheck.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Capability Index Calculation
   ctx.log('info', 'Phase 4: Capability Index Calculation');
   const capabilityCalculation = await ctx.task(capabilityCalculationTask, {
@@ -200,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Validation
+  // Task 1: Data Validation
 export const dataValidationTask = defineTask('capability-data', (args, taskCtx) => ({
   kind: 'agent',
   title: `Process Capability Data Validation - ${args.processName}`,

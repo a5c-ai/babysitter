@@ -33,19 +33,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'model-architecture', result: architectureResult });
 
   // Step 2: Build Base Financial Model
-  const baseModelResult = await ctx.task(buildBaseModelTask, {
+  let baseModelResult = await ctx.task(buildBaseModelTask, {
     architecture: architectureResult,
     historicalData: inputs.historicalData,
     businessDrivers: inputs.businessDrivers
   });
   results.steps.push({ name: 'base-model', result: baseModelResult });
 
-  // Breakpoint for model structure review
-  await ctx.breakpoint('model-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      baseModelResult = await ctx.task(buildBaseModelTask, { ...{
+    architecture: architectureResult,
+    historicalData: inputs.historicalData,
+    businessDrivers: inputs.businessDrivers
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('model-review', {
     message: 'Review base model structure, formulas, and initial outputs before scenario development',
-    data: baseModelResult
-  });
-
+    data: baseModelResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Validate Model Integrity
   const validationResult = await ctx.task(validateModelTask, {
     baseModel: baseModelResult,
@@ -69,18 +83,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'sensitivity-analysis', result: sensitivityResult });
 
   // Step 6: Monte Carlo Simulation
-  const simulationResult = await ctx.task(runMonteCarloSimulationTask, {
+  let simulationResult = await ctx.task(runMonteCarloSimulationTask, {
     baseModel: baseModelResult,
     simulationParameters: inputs.simulationParameters
   });
   results.steps.push({ name: 'monte-carlo-simulation', result: simulationResult });
 
-  // Breakpoint for analysis review
-  await ctx.breakpoint('analysis-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      simulationResult = await ctx.task(runMonteCarloSimulationTask, { ...{
+    baseModel: baseModelResult,
+    simulationParameters: inputs.simulationParameters
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('analysis-review', {
     message: 'Review scenario, sensitivity, and simulation results before finalizing',
-    data: { scenarios: scenariosResult, sensitivity: sensitivityResult, simulation: simulationResult }
-  });
-
+    data: { scenarios: scenariosResult, sensitivity: sensitivityResult, simulation: simulationResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Prepare Decision Support Package
   const decisionPackageResult = await ctx.task(prepareDecisionPackageTask, {
     modelPurpose: inputs.modelPurpose,
@@ -101,8 +128,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const designModelArchitectureTask = defineTask('design-model-architecture', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'financial-modeling' },

@@ -44,7 +44,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
   ctx.log('info', 'DEFINE Phase: Defining project scope and objectives');
 
-  const definePhase = await ctx.task(definePhaseTask, {
+  let definePhase = await ctx.task(definePhaseTask, {
     projectName,
     problemStatement,
     scope,
@@ -57,8 +57,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...definePhase.artifacts);
 
-  // Define Phase Tollgate
-  await ctx.breakpoint({
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      definePhase = await ctx.task(definePhaseTask, { ...{
+    projectName,
+    problemStatement,
+    scope,
+    targetMetric,
+    sponsor,
+    teamMembers,
+    timeline,
+    outputDir
+  }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `DEFINE tollgate: Project charter complete. Problem: ${definePhase.problemStatement}. Goal: ${definePhase.goalStatement}. Scope approved? Approve to proceed to MEASURE phase?`,
     title: 'DEFINE Phase Tollgate Review',
     context: {
@@ -68,15 +81,21 @@ export async function process(inputs, ctx) {
       sipoc: definePhase.sipoc,
       voc: definePhase.voiceOfCustomer,
       files: definePhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // MEASURE PHASE
   // ============================================================================
   ctx.log('info', 'MEASURE Phase: Measuring current process performance');
 
-  const measurePhase = await ctx.task(measurePhaseTask, {
+  let measurePhase = await ctx.task(measurePhaseTask, {
     projectName,
     definePhase,
     targetMetric,
@@ -85,8 +104,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...measurePhase.artifacts);
 
-  // Measure Phase Tollgate
-  await ctx.breakpoint({
+    let lastFeedback_stepApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval2) {
+      measurePhase = await ctx.task(measurePhaseTask, { ...{
+    projectName,
+    definePhase,
+    targetMetric,
+    outputDir
+  }, feedback: lastFeedback_stepApproval2, attempt: attempt + 1 });
+    }
+  const stepApproval2 = await ctx.breakpoint({
     question: `MEASURE tollgate: Baseline established. Current sigma: ${measurePhase.currentSigma}. Baseline: ${measurePhase.baseline}. Data validated? Approve to proceed to ANALYZE phase?`,
     title: 'MEASURE Phase Tollgate Review',
     context: {
@@ -96,15 +124,21 @@ export async function process(inputs, ctx) {
       processCapability: measurePhase.processCapability,
       measurementSystem: measurePhase.msaResults,
       files: measurePhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval2.approved) break;
+    lastFeedback_stepApproval2 = stepApproval2.response || stepApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // ANALYZE PHASE
   // ============================================================================
   ctx.log('info', 'ANALYZE Phase: Analyzing root causes');
 
-  const analyzePhase = await ctx.task(analyzePhaseTask, {
+  let analyzePhase = await ctx.task(analyzePhaseTask, {
     projectName,
     measurePhase,
     outputDir
@@ -112,8 +146,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...analyzePhase.artifacts);
 
-  // Analyze Phase Tollgate
-  await ctx.breakpoint({
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      analyzePhase = await ctx.task(analyzePhaseTask, { ...{
+    projectName,
+    measurePhase,
+    outputDir
+  }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `ANALYZE tollgate: ${analyzePhase.verifiedRootCauses.length} root causes verified. Primary: ${analyzePhase.primaryRootCause}. Statistical validation complete? Approve to proceed to IMPROVE phase?`,
     title: 'ANALYZE Phase Tollgate Review',
     context: {
@@ -122,15 +164,21 @@ export async function process(inputs, ctx) {
       rootCauses: analyzePhase.verifiedRootCauses,
       statisticalAnalysis: analyzePhase.statisticalFindings,
       files: analyzePhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // IMPROVE PHASE
   // ============================================================================
   ctx.log('info', 'IMPROVE Phase: Implementing improvements');
 
-  const improvePhase = await ctx.task(improvePhaseTask, {
+  let improvePhase = await ctx.task(improvePhaseTask, {
     projectName,
     analyzePhase,
     targetMetric,
@@ -139,8 +187,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...improvePhase.artifacts);
 
-  // Improve Phase Tollgate
-  await ctx.breakpoint({
+    let lastFeedback_analysisApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval2) {
+      improvePhase = await ctx.task(improvePhaseTask, { ...{
+    projectName,
+    analyzePhase,
+    targetMetric,
+    outputDir
+  }, feedback: lastFeedback_analysisApproval2, attempt: attempt + 1 });
+    }
+  const analysisApproval2 = await ctx.breakpoint({
     question: `IMPROVE tollgate: ${improvePhase.implementedSolutions.length} solutions implemented. Improvement: ${improvePhase.improvementPercentage}%. Pilot successful? Approve to proceed to CONTROL phase?`,
     title: 'IMPROVE Phase Tollgate Review',
     context: {
@@ -149,15 +206,21 @@ export async function process(inputs, ctx) {
       solutions: improvePhase.implementedSolutions,
       pilotResults: improvePhase.pilotResults,
       files: improvePhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval2.approved) break;
+    lastFeedback_analysisApproval2 = analysisApproval2.response || analysisApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // CONTROL PHASE
   // ============================================================================
   ctx.log('info', 'CONTROL Phase: Sustaining improvements');
 
-  const controlPhase = await ctx.task(controlPhaseTask, {
+  let controlPhase = await ctx.task(controlPhaseTask, {
     projectName,
     improvePhase,
     measurePhase,
@@ -166,8 +229,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...controlPhase.artifacts);
 
-  // Control Phase Tollgate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      controlPhase = await ctx.task(controlPhaseTask, { ...{
+    projectName,
+    improvePhase,
+    measurePhase,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CONTROL tollgate: Control plan established. Final sigma: ${controlPhase.finalSigma}. Improvement sustained: ${controlPhase.improvementSustained}. Approve project closure?`,
     title: 'CONTROL Phase Tollgate Review',
     context: {
@@ -176,9 +248,15 @@ export async function process(inputs, ctx) {
       controlPlan: controlPhase.controlPlan,
       finalResults: controlPhase.finalResults,
       files: controlPhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PROJECT CLOSEOUT
   // ============================================================================
@@ -231,8 +309,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// DEFINE Phase Task
+  // DEFINE Phase Task
 export const definePhaseTask = defineTask('dmaic-define', (args, taskCtx) => ({
   kind: 'agent',
   title: `DMAIC DEFINE - ${args.projectName}`,

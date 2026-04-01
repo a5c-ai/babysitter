@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Legal Agreement Preparation
   ctx.log('info', 'Preparing legal agreement');
-  const legalAgreement = await ctx.task(legalAgreementTask, {
+  let legalAgreement = await ctx.task(legalAgreementTask, {
     loanType,
     artworkIds,
     lenderInfo,
@@ -111,8 +111,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...legalAgreement.artifacts);
 
-  // Breakpoint: Review loan agreement
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      legalAgreement = await ctx.task(legalAgreementTask, { ...{
+    loanType,
+    artworkIds,
+    lenderInfo,
+    borrowerInfo,
+    loanPeriod,
+    insuranceValuation,
+    shippingCoordination,
+    facilityReports,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Loan agreement prepared for ${artworkIds.length} artwork(s). Total insurance value: $${insuranceValuation.totalValue}. Review and approve?`,
     title: 'Loan Agreement Review',
     context: {
@@ -125,9 +139,15 @@ export async function process(inputs, ctx) {
         loanPeriod,
         shippingMethod: shippingCoordination.method
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Loan Documentation Package
   ctx.log('info', 'Generating loan documentation package');
   const documentation = await ctx.task(loanDocumentationTask, {
@@ -161,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Loan Request Processing
+  // Task 1: Loan Request Processing
 export const loanRequestTask = defineTask('loan-request', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Process loan request',

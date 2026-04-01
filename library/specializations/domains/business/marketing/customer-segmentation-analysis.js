@@ -45,17 +45,26 @@ export async function process(inputs, ctx) {
   const targetingStrategy = await ctx.task(targetingStrategyTask, { segmentEvaluation, businessGoals, outputDir });
   artifacts.push(...targetingStrategy.artifacts);
 
-  const qualityAssessment = await ctx.task(segmentationQualityTask, { segmentSynthesis, segmentEvaluation, targetingStrategy, outputDir });
+  let qualityAssessment = await ctx.task(segmentationQualityTask, { segmentSynthesis, segmentEvaluation, targetingStrategy, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const segmentationScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(segmentationQualityTask, { ...{ segmentSynthesis, segmentEvaluation, targetingStrategy, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Segmentation complete. Quality score: ${segmentationScore}/100. Review and approve?`,
     title: 'Segmentation Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     segmentationScore,

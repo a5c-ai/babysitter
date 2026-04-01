@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Heat Treatment Design
   ctx.log('info', 'Phase 3: Designing heat treatment schedule');
-  const heatTreatmentDesign = await ctx.task(heatTreatmentDesignTask, {
+  let heatTreatmentDesign = await ctx.task(heatTreatmentDesignTask, {
     materialId,
     targetMicrostructure,
     transformationDiagrams: transformationDiagrams.diagrams,
@@ -71,9 +71,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...heatTreatmentDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      heatTreatmentDesign = await ctx.task(heatTreatmentDesignTask, { ...{
+    materialId,
+    targetMicrostructure,
+    transformationDiagrams: transformationDiagrams.diagrams,
+    targetHardness,
+    targetStrength,
+    constraints,
+    quenchingMedia,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Heat treatment schedule designed. Austenitizing: ${heatTreatmentDesign.schedule.austenitizing?.temperature}C for ${heatTreatmentDesign.schedule.austenitizing?.time} min. Review schedule?`,
     title: 'Heat Treatment Schedule Review',
     context: {
@@ -84,9 +96,15 @@ export async function process(inputs, ctx) {
         predictedHardness: heatTreatmentDesign.predictedHardness
       },
       files: heatTreatmentDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Microstructure Simulation
   ctx.log('info', 'Phase 4: Simulating microstructure evolution');
   const microstructureSimulation = await ctx.task(microstructureSimulationTask, {
@@ -180,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Material Characterization
+  // Task 1: Material Characterization
 export const htMaterialCharacterizationTask = defineTask('ht-material-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Material Characterization - ${args.materialId}`,

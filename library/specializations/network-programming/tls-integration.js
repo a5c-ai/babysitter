@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Library: ${tlsLibrary}, TLS Version: ${tlsVersion}`);
 
   // Phase 1: TLS Library Selection
-  const librarySelection = await ctx.task(librarySelectionTask, { projectName, language, tlsLibrary, tlsVersion, outputDir });
-  artifacts.push(...librarySelection.artifacts);
-
-  await ctx.breakpoint({
+  let librarySelection = await ctx.task(librarySelectionTask, { projectName, language, tlsLibrary, tlsVersion, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      librarySelection = await ctx.task(librarySelectionTask, { ...{ projectName, language, tlsLibrary, tlsVersion, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Selected ${tlsLibrary} for TLS ${tlsVersion}. Proceed with certificate setup?`,
     title: 'TLS Library Selection Review',
-    context: { runId: ctx.runId, library: librarySelection.library }
-  });
-
+    context: { runId: ctx.runId, library: librarySelection.library },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Certificate Generation/Obtaining
   const certificateSetup = await ctx.task(certificateSetupTask, { projectName, certificates, outputDir });
   artifacts.push(...certificateSetup.artifacts);
@@ -69,15 +78,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...socketWrapping.artifacts);
 
   // Phase 6: Cipher Suite Configuration
-  const cipherConfig = await ctx.task(cipherConfigTask, { projectName, tlsVersion, cipherSuites, tlsContext, outputDir });
-  artifacts.push(...cipherConfig.artifacts);
-
-  await ctx.breakpoint({
+  let cipherConfig = await ctx.task(cipherConfigTask, { projectName, tlsVersion, cipherSuites, tlsContext, outputDir });
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      cipherConfig = await ctx.task(cipherConfigTask, { ...{ projectName, tlsVersion, cipherSuites, tlsContext, outputDir }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Phase 6 Complete: Cipher suites configured (${cipherSuites} profile). Proceed with certificate validation?`,
     title: 'Cipher Configuration Review',
-    context: { runId: ctx.runId, ciphers: cipherConfig.enabledCiphers }
-  });
-
+    context: { runId: ctx.runId, ciphers: cipherConfig.enabledCiphers },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Certificate Validation
   const certValidation = await ctx.task(certValidationTask, { projectName, language, tlsLibrary, outputDir });
   artifacts.push(...certValidation.artifacts);
@@ -87,7 +105,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...sessionResumption.artifacts);
 
   // Phase 9: Security Testing
-  const securityTesting = await ctx.task(securityTestingTask, { projectName, tlsVersion, cipherConfig, outputDir });
+  let securityTesting = await ctx.task(securityTestingTask, { projectName, tlsVersion, cipherConfig, outputDir });
   artifacts.push(...securityTesting.artifacts);
 
   // Phase 10: Documentation and Validation
@@ -95,14 +113,23 @@ export async function process(inputs, ctx) {
     () => ctx.task(documentationTask, { projectName, librarySelection, certificateSetup, tlsContext, cipherConfig, sessionResumption, outputDir }),
     () => ctx.task(validationTask, { projectName, securityTesting, outputDir })
   ]);
-  artifacts.push(...documentation.artifacts, ...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      securityTesting = await ctx.task(securityTestingTask, { ...{ projectName, tlsVersion, cipherConfig, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `TLS Integration Complete for ${projectName}! Security score: ${securityTesting.securityScore}/100. Validation: ${validation.overallScore}/100. Review?`,
     title: 'TLS Integration Complete',
-    context: { runId: ctx.runId, securityScore: securityTesting.securityScore, validationScore: validation.overallScore }
-  });
-
+    context: { runId: ctx.runId, securityScore: securityTesting.securityScore, validationScore: validation.overallScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.overallScore >= 80 && securityTesting.securityScore >= 80,
     projectName,

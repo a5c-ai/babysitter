@@ -47,17 +47,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...conversionResult.artifacts);
 
   // Phase 2: Database Searching
-  const searchResult = await ctx.task(databaseSearchTask, { projectName, msFiles: conversionResult.msFiles, database, modifications, fdrThreshold, outputDir });
+  let searchResult = await ctx.task(databaseSearchTask, { projectName, msFiles: conversionResult.msFiles, database, modifications, fdrThreshold, outputDir });
   artifacts.push(...searchResult.artifacts);
 
-  ctx.log('info', `Database search complete - ${searchResult.proteinGroups} protein groups identified`);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      searchResult = await ctx.task(databaseSearchTask, { ...{ projectName, msFiles: conversionResult.msFiles, database, modifications, fdrThreshold, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Database search complete. ${searchResult.proteinGroups} proteins, ${searchResult.peptides} peptides identified. Review search results?`,
     title: 'Database Search Review',
-    context: { runId: ctx.runId, searchStats: searchResult.statistics, files: searchResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, searchStats: searchResult.statistics, files: searchResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: FDR Control
   const fdrResult = await ctx.task(fdrControlTask, { projectName, searchResults: searchResult.results, fdrThreshold, outputDir });
   artifacts.push(...fdrResult.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...normResult.artifacts);
 
   // Phase 6: Differential Abundance Analysis
-  const deResult = await ctx.task(differentialAbundanceTask, { projectName, normalizedMatrix: normResult.normalizedMatrix, outputDir });
-  artifacts.push(...deResult.artifacts);
-
-  await ctx.breakpoint({
+  let deResult = await ctx.task(differentialAbundanceTask, { projectName, normalizedMatrix: normResult.normalizedMatrix, outputDir });
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      deResult = await ctx.task(differentialAbundanceTask, { ...{ projectName, normalizedMatrix: normResult.normalizedMatrix, outputDir }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Differential analysis complete. ${deResult.significantProteins} significant proteins. Review DE results?`,
     title: 'Differential Analysis Review',
-    context: { runId: ctx.runId, deStats: deResult.statistics, topProteins: deResult.topProteins, files: deResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, deStats: deResult.statistics, topProteins: deResult.topProteins, files: deResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: PTM Identification
   const ptmResult = await ctx.task(ptmIdentificationTask, { projectName, searchResults: searchResult.results, enrichedModifications, outputDir });
   artifacts.push(...ptmResult.artifacts);
@@ -89,15 +107,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...networkResult.artifacts);
 
   // Phase 9: Report Generation
-  const reportResult = await ctx.task(generateProteomicsReportTask, { projectName, quantMethod, searchResult, fdrResult, quantResult, normResult, deResult, ptmResult, networkResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateProteomicsReportTask, { projectName, quantMethod, searchResult, fdrResult, quantResult, normResult, deResult, ptmResult, networkResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateProteomicsReportTask, { ...{ projectName, quantMethod, searchResult, fdrResult, quantResult, normResult, deResult, ptmResult, networkResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Proteomics Analysis Complete. ${fdrResult.proteinsFDR} proteins, ${deResult.significantProteins} DE proteins. Approve results?`,
     title: 'Proteomics Analysis Complete',
-    context: { runId: ctx.runId, summary: { proteins: fdrResult.proteinsFDR, deProteins: deResult.significantProteins, ptmSites: ptmResult.totalSites }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { proteins: fdrResult.proteinsFDR, deProteins: deResult.significantProteins, ptmSites: ptmResult.totalSites }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -113,8 +140,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/ms-proteomics-pipeline', timestamp: startTime, database, quantMethod }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const rawFileProcessingTask = defineTask('raw-file-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Raw File Processing - ${args.projectName}`,

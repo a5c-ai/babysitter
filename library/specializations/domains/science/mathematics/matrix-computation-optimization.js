@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Analyze Matrix Structure and Properties
-  const structureAnalysis = await ctx.task(structureAnalysisTask, {
+  let structureAnalysis = await ctx.task(structureAnalysisTask, {
     matrixDescription,
     matrixProperties,
     computationGoal
@@ -47,9 +47,16 @@ export async function process(inputs, ctx) {
       decompositionRecommendation: null
     };
   }
-
-  // Breakpoint: Review structure analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      structureAnalysis = await ctx.task(structureAnalysisTask, { ...{
+    matrixDescription,
+    matrixProperties,
+    computationGoal
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Matrix structure analysis complete. Key properties: ${structureAnalysis.keyProperties.join(', ')}. Review?`,
     title: 'Structure Analysis Review',
     context: {
@@ -61,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: structureAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Select Optimal Decomposition Method
   const decompositionSelection = await ctx.task(decompositionSelectionTask, {
     matrixDescription,
@@ -89,7 +102,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Benchmark Performance
-  const benchmarkAnalysis = await ctx.task(benchmarkAnalysisTask, {
+  let benchmarkAnalysis = await ctx.task(benchmarkAnalysisTask, {
     matrixDescription,
     structureAnalysis,
     decompositionSelection,
@@ -98,8 +111,19 @@ export async function process(inputs, ctx) {
     performanceRequirements
   });
 
-  // Final Breakpoint: Optimization Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      benchmarkAnalysis = await ctx.task(benchmarkAnalysisTask, { ...{
+    matrixDescription,
+    structureAnalysis,
+    decompositionSelection,
+    algorithmRecommendation,
+    librarySelection,
+    performanceRequirements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Matrix computation optimization complete. Expected speedup: ${benchmarkAnalysis.expectedSpeedup}. Review recommendations?`,
     title: 'Optimization Complete',
     context: {
@@ -111,9 +135,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/optimization-recommendations.json`, format: 'json', content: { decompositionSelection, algorithmRecommendation, librarySelection } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     matrixDescription,
@@ -147,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const structureAnalysisTask = defineTask('structure-analysis', (args, taskCtx) => ({
   kind: 'agent',

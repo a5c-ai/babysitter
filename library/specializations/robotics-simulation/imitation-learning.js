@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const rlFineTuning = await ctx.task(rlFineTuningTask, { projectName, daggerImprovement, outputDir });
   artifacts.push(...rlFineTuning.artifacts);
 
-  const robotDeployment = await ctx.task(imitationDeploymentTask, { projectName, rlFineTuning, outputDir });
-  artifacts.push(...robotDeployment.artifacts);
-
-  await ctx.breakpoint({
+  let robotDeployment = await ctx.task(imitationDeploymentTask, { projectName, rlFineTuning, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      robotDeployment = await ctx.task(imitationDeploymentTask, { ...{ projectName, rlFineTuning, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Imitation Learning Complete for ${projectName}. Success rate: ${accuracyMeasurement.successRate}%. Review?`,
     title: 'Imitation Learning Complete',
-    context: { runId: ctx.runId, successRate: accuracyMeasurement.successRate }
-  });
-
+    context: { runId: ctx.runId, successRate: accuracyMeasurement.successRate },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: accuracyMeasurement.successRate >= 85,
     projectName,

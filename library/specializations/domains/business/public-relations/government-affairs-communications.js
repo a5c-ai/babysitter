@@ -19,17 +19,25 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Policy Landscape Analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting government affairs communications. Analyze policy landscape?',
     title: 'Phase 1: Landscape Analysis',
     context: {
       runId: ctx.runId,
       phase: 'landscape-analysis',
       organization: organization.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [policyAnalysis, regulatoryAnalysis] = await Promise.all([
     ctx.task(analyzePolicyLandscapeTask, {
       policyPriorities,
@@ -41,113 +49,204 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Stakeholder Mapping (Government)
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Landscape analyzed. Map government stakeholders?',
     title: 'Phase 2: Government Stakeholder Mapping',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-mapping'
-    }
-  });
-
-  const governmentStakeholderMap = await ctx.task(mapGovernmentStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let governmentStakeholderMap = await ctx.task(mapGovernmentStakeholdersTask, {
     governmentContacts,
     policyPriorities,
     regulatoryLandscape
   });
 
-  // Phase 3: Advocacy Position Development
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      governmentStakeholderMap = await ctx.task(mapGovernmentStakeholdersTask, { ...{
+    governmentContacts,
+    policyPriorities,
+    regulatoryLandscape
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Stakeholders mapped. Develop advocacy positions?',
     title: 'Phase 3: Advocacy Positions',
     context: {
       runId: ctx.runId,
       phase: 'advocacy-positions'
-    }
-  });
-
-  const advocacyPositions = await ctx.task(developAdvocacyPositionsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let advocacyPositions = await ctx.task(developAdvocacyPositionsTask, {
     policyPriorities,
     policyAnalysis,
     organization
   });
 
-  // Phase 4: Messaging Framework (Government)
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      advocacyPositions = await ctx.task(developAdvocacyPositionsTask, { ...{
+    policyPriorities,
+    policyAnalysis,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Positions developed. Create government affairs messaging?',
     title: 'Phase 4: Messaging Framework',
     context: {
       runId: ctx.runId,
       phase: 'messaging-framework'
-    }
-  });
-
-  const messagingFramework = await ctx.task(createGaMessagingTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let messagingFramework = await ctx.task(createGaMessagingTask, {
     advocacyPositions,
     governmentStakeholderMap,
     organization
   });
 
-  // Phase 5: Engagement Strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      messagingFramework = await ctx.task(createGaMessagingTask, { ...{
+    advocacyPositions,
+    governmentStakeholderMap,
+    organization
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Messaging created. Develop engagement strategy?',
     title: 'Phase 5: Engagement Strategy',
     context: {
       runId: ctx.runId,
       phase: 'engagement-strategy'
-    }
-  });
-
-  const engagementStrategy = await ctx.task(developGaEngagementTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let engagementStrategy = await ctx.task(developGaEngagementTask, {
     governmentStakeholderMap,
     advocacyPositions,
     messagingFramework
   });
 
-  // Phase 6: Coalition Building Plan
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      engagementStrategy = await ctx.task(developGaEngagementTask, { ...{
+    governmentStakeholderMap,
+    advocacyPositions,
+    messagingFramework
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Engagement strategy defined. Plan coalition building?',
     title: 'Phase 6: Coalition Building',
     context: {
       runId: ctx.runId,
       phase: 'coalition-building',
       associationCount: industryAssociations.length
-    }
-  });
-
-  const coalitionPlan = await ctx.task(planCoalitionBuildingTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let coalitionPlan = await ctx.task(planCoalitionBuildingTask, {
     industryAssociations,
     advocacyPositions,
     policyPriorities
   });
 
-  // Phase 7: Legislative Tracking System
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      coalitionPlan = await ctx.task(planCoalitionBuildingTask, { ...{
+    industryAssociations,
+    advocacyPositions,
+    policyPriorities
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Coalition planned. Set up legislative tracking?',
     title: 'Phase 7: Legislative Tracking',
     context: {
       runId: ctx.runId,
       phase: 'legislative-tracking'
-    }
-  });
-
-  const legislativeTracking = await ctx.task(setupLegislativeTrackingTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let legislativeTracking = await ctx.task(setupLegislativeTrackingTask, {
     policyPriorities,
     regulatoryLandscape
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      legislativeTracking = await ctx.task(setupLegislativeTrackingTask, { ...{
+    policyPriorities,
+    regulatoryLandscape
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate government affairs communications quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateGaCommsQualityTask, {
     policyAnalysis,
     regulatoryAnalysis,
@@ -200,8 +299,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzePolicyLandscapeTask = defineTask('analyze-policy-landscape', (args, taskCtx) => ({
   kind: 'agent',

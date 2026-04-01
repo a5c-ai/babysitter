@@ -39,15 +39,24 @@ export async function process(inputs, ctx) {
   const timingAnalysis = await ctx.task(timingAnalysisTask, { designName, targetFrequency, targetDevice, outputDir });
   artifacts.push(...timingAnalysis.artifacts);
 
-  const criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, { designName, timingAnalysis, outputDir });
-  artifacts.push(...criticalPathAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, { designName, timingAnalysis, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, { ...{ designName, timingAnalysis, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Critical path analysis complete. Worst slack: ${criticalPathAnalysis.worstSlack}ns. ${criticalPathAnalysis.failingPaths} failing paths. Proceed with timing closure strategies?`,
     title: 'Critical Path Analysis',
-    context: { runId: ctx.runId, designName, worstSlack: criticalPathAnalysis.worstSlack, failingPaths: criticalPathAnalysis.failingPaths }
-  });
-
+    context: { runId: ctx.runId, designName, worstSlack: criticalPathAnalysis.worstSlack, failingPaths: criticalPathAnalysis.failingPaths },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const rtlOptimizations = await ctx.task(rtlOptimizationsTask, { designName, criticalPathAnalysis, outputDir });
   artifacts.push(...rtlOptimizations.artifacts);
 

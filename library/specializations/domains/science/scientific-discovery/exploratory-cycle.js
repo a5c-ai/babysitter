@@ -105,7 +105,7 @@ export async function process(inputs, ctx) {
 
     // Phase 5: Refine Model Based on Test Results
     ctx.log('info', `Iteration ${iteration}: Refining model based on test results`);
-    const refinement = await ctx.task(refinementTask, {
+    let refinement = await ctx.task(refinementTask, {
       phenomenon,
       domain,
       model: currentModel,
@@ -125,8 +125,20 @@ export async function process(inputs, ctx) {
 
     converged = refinement.convergenceScore >= convergenceThreshold;
 
-    if (!converged && iteration < iterations) {
-      await ctx.breakpoint({
+        let lastFeedback = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback) {
+          refinement = await ctx.task(refinementTask, { ...{
+      phenomenon,
+      domain,
+      model: currentModel,
+      predictions: predictions.predictions,
+      testResults: testResults,
+      convergenceThreshold,
+      iteration
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration} complete. Convergence: ${refinement.convergenceScore}%. Continue exploration?`,
         title: `Exploratory Cycle - Iteration ${iteration}`,
         context: {
@@ -135,11 +147,16 @@ export async function process(inputs, ctx) {
             { path: `artifacts/iteration-${iteration}-model.json`, format: 'json' },
             { path: `artifacts/iteration-${iteration}-test-results.json`, format: 'json' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Final synthesis
   const synthesis = await ctx.task(synthesisTask, {
     phenomenon,

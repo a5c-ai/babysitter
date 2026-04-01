@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Truth Table or Proof Generation
   ctx.log('info', 'Generating formal proof or truth table');
-  const proofGeneration = await ctx.task(proofGenerationTask, {
+  let proofGeneration = await ctx.task(proofGenerationTask, {
     formalizedArgument: symbolization.formalizedArgument,
     logicType,
     validityResult: validityEvaluation.validity,
@@ -79,8 +79,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...proofGeneration.artifacts);
 
-  // Breakpoint: Review analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      proofGeneration = await ctx.task(proofGenerationTask, { ...{
+    formalizedArgument: symbolization.formalizedArgument,
+    logicType,
+    validityResult: validityEvaluation.validity,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Formal logic analysis complete. Argument is ${validityEvaluation.validity.isValid ? 'VALID' : 'INVALID'}. Review the analysis?`,
     title: 'Formal Logic Analysis Results',
     context: {
@@ -92,9 +101,15 @@ export async function process(inputs, ctx) {
         argumentForm: structureAnalysis.structure.argumentForm,
         premiseCount: argumentExtraction.components.premises.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Analysis Report
   ctx.log('info', 'Generating formal logic analysis report');
   const analysisReport = await ctx.task(analysisReportTask, {
@@ -137,8 +152,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Argument Extraction
+  // Task 1: Argument Extraction
 export const argumentExtractionTask = defineTask('argument-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Extract argument components from text',

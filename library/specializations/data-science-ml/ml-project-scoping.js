@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Business Understanding
-  const businessUnderstanding = await ctx.task(businessUnderstandingTask, {
+  let businessUnderstanding = await ctx.task(businessUnderstandingTask, {
     projectName,
     businessDomain,
     initialRequirements,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       scopeDocument: null
     };
   }
-
-  // Breakpoint: Review business objectives with stakeholders
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      businessUnderstanding = await ctx.task(businessUnderstandingTask, { ...{
+    projectName,
+    businessDomain,
+    initialRequirements,
+    stakeholders
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review business objectives for ${projectName}. Are these aligned with stakeholder expectations?`,
     title: 'Business Objectives Review',
     context: {
@@ -62,9 +70,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: businessUnderstanding
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Success Metrics and KPIs Definition
   const metricsDefinition = await ctx.task(metricsDefinitionTask, {
     projectName,
@@ -74,7 +88,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Data Availability Assessment
-  const dataAssessment = await ctx.task(dataAvailabilityTask, {
+  let dataAssessment = await ctx.task(dataAvailabilityTask, {
     projectName,
     objectives: businessUnderstanding.objectives,
     requiredDataTypes: metricsDefinition.requiredDataTypes
@@ -82,17 +96,31 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Data availability must meet minimum threshold
   const dataAvailabilityScore = dataAssessment.availabilityScore || 0;
-  if (dataAvailabilityScore < 60) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        dataAssessment = await ctx.task(dataAvailabilityTask, { ...{
+    projectName,
+    objectives: businessUnderstanding.objectives,
+    requiredDataTypes: metricsDefinition.requiredDataTypes
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Data availability score is ${dataAvailabilityScore}/100 (below threshold of 60). Should we proceed with data collection plan or halt the project?`,
       title: 'Data Availability Warning',
       context: {
         runId: ctx.runId,
         dataAssessment,
         recommendation: 'Consider data collection initiatives or alternative data sources before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Technical Feasibility Analysis
   const feasibilityAnalysis = await ctx.task(feasibilityAnalysisTask, {
@@ -139,7 +167,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Ethical and Fairness Considerations
-  const ethicsAssessment = await ctx.task(ethicsAssessmentTask, {
+  let ethicsAssessment = await ctx.task(ethicsAssessmentTask, {
     projectName,
     businessDomain,
     problemFormulation,
@@ -148,8 +176,18 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Ethical risks must be assessed
-  if (ethicsAssessment.highRiskFactors && ethicsAssessment.highRiskFactors.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        ethicsAssessment = await ctx.task(ethicsAssessmentTask, { ...{
+    projectName,
+    businessDomain,
+    problemFormulation,
+    dataAssessment,
+    stakeholders
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Ethical assessment identified ${ethicsAssessment.highRiskFactors.length} high-risk factors. Review mitigation strategies and approve?`,
       title: 'Ethical Risk Review',
       context: {
@@ -157,12 +195,18 @@ export async function process(inputs, ctx) {
         highRiskFactors: ethicsAssessment.highRiskFactors,
         mitigationStrategies: ethicsAssessment.mitigationStrategies,
         recommendation: 'Ensure fairness assessment and bias detection are included in the ML pipeline'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // Phase 10: Final Scope Document Generation
-  const scopeDocument = await ctx.task(scopeDocumentGenerationTask, {
+  let scopeDocument = await ctx.task(scopeDocumentGenerationTask, {
     projectName,
     businessDomain,
     businessUnderstanding,
@@ -181,8 +225,25 @@ export async function process(inputs, ctx) {
   const feasibilityScore = feasibilityAnalysis.overallFeasibilityScore || 0;
   const proceed = feasibilityScore >= 70;
 
-  // Final Breakpoint: Project Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scopeDocument = await ctx.task(scopeDocumentGenerationTask, { ...{
+    projectName,
+    businessDomain,
+    businessUnderstanding,
+    metricsDefinition,
+    dataAssessment,
+    feasibilityAnalysis,
+    constraintsDocumentation,
+    problemFormulation,
+    resourceEstimation,
+    riskAssessment,
+    ethicsAssessment,
+    stakeholders
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ML Project Scoping Complete for ${projectName}. Feasibility Score: ${feasibilityScore}/100. Approve project to proceed to next phase?`,
     title: 'Project Scoping Approval',
     context: {
@@ -194,9 +255,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-scope-document.json`, format: 'json', content: scopeDocument },
         { path: `artifacts/final-scope-document.md`, format: 'markdown', content: scopeDocument.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -228,8 +295,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const businessUnderstandingTask = defineTask('business-understanding', (args, taskCtx) => ({
   kind: 'agent',

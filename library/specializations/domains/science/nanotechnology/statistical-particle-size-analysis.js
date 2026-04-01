@@ -50,15 +50,21 @@ export async function process(inputs, ctx) {
       recommendations: imageQuality.recommendations
     };
   }
-
   // Phase 2: Segmentation Protocol Development
-  const segmentationProtocol = await ctx.task(segmentationProtocolTask, {
+  let segmentationProtocol = await ctx.task(segmentationProtocolTask, {
     imageData,
     imageQuality
   });
 
-  // Breakpoint: Review segmentation parameters
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      segmentationProtocol = await ctx.task(segmentationProtocolTask, { ...{
+    imageData,
+    imageQuality
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review segmentation protocol. Threshold method: ${segmentationProtocol.thresholdMethod}. Approve to proceed with analysis?`,
     title: 'Segmentation Protocol Review',
     context: {
@@ -70,9 +76,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: segmentationProtocol
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Iterative Particle Analysis
   let iteration = 0;
   let totalParticleCount = 0;
@@ -109,7 +121,7 @@ export async function process(inputs, ctx) {
     });
 
     // Statistical assessment
-    const statisticalAssessment = await ctx.task(statisticalAssessmentTask, {
+    let statisticalAssessment = await ctx.task(statisticalAssessmentTask, {
       aggregatedResults,
       minParticleCount,
       confidenceLevel,
@@ -129,8 +141,17 @@ export async function process(inputs, ctx) {
       significanceAchieved: statisticalSignificance
     });
 
-    if (!statisticalSignificance && iteration < maxIterations) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          statisticalAssessment = await ctx.task(statisticalAssessmentTask, { ...{
+      aggregatedResults,
+      minParticleCount,
+      confidenceLevel,
+      maxAcceptableError
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration}: ${totalParticleCount} particles analyzed. SE=${currentError.toFixed(4)}. Continue sampling?`,
         title: 'Statistical Sampling Progress',
         context: {
@@ -140,11 +161,16 @@ export async function process(inputs, ctx) {
           targetCount: minParticleCount,
           currentError,
           targetError: maxAcceptableError
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 4: Distribution Fitting
   const distributionFitting = await ctx.task(distributionFittingTask, {
     aggregatedResults,
@@ -172,7 +198,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Report Generation
-  const statisticalReport = await ctx.task(reportGenerationTask, {
+  let statisticalReport = await ctx.task(reportGenerationTask, {
     aggregatedResults,
     distributionFitting,
     outlierAnalysis,
@@ -182,8 +208,20 @@ export async function process(inputs, ctx) {
     targetSpecifications
   });
 
-  // Final Breakpoint: Results approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      statisticalReport = await ctx.task(reportGenerationTask, { ...{
+    aggregatedResults,
+    distributionFitting,
+    outlierAnalysis,
+    morphologyAnalysis,
+    complianceAssessment,
+    analysisHistory,
+    targetSpecifications
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete. ${totalParticleCount} particles measured. Mean: ${aggregatedResults.meanSize.toFixed(2)}nm, PDI: ${aggregatedResults.polydispersityIndex.toFixed(3)}. Specification ${complianceAssessment.compliant ? 'MET' : 'NOT MET'}. Approve?`,
     title: 'Statistical Analysis Results Approval',
     context: {
@@ -195,9 +233,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/statistical-report.md', format: 'markdown', content: statisticalReport.markdown },
         { path: 'artifacts/size-data.json', format: 'json', content: aggregatedResults }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     sizeDistribution: {
@@ -226,8 +270,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const imageQualityAssessmentTask = defineTask('image-quality-assessment', (args, taskCtx) => ({
   kind: 'agent',

@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Creating sandboxed execution environment');
 
-  const sandboxedExecution = await ctx.task(sandboxedExecutionTask, {
+  let sandboxedExecution = await ctx.task(sandboxedExecutionTask, {
     projectName,
     securityLevel,
     allowedDirectories,
@@ -96,8 +96,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sandboxedExecution.artifacts);
 
-  // Quality Gate: Security Implementation Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      sandboxedExecution = await ctx.task(sandboxedExecutionTask, { ...{
+    projectName,
+    securityLevel,
+    allowedDirectories,
+    language,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Security measures implemented: path traversal prevention, command injection protection, sandboxed execution. Proceed with rate limiting and audit logging?`,
     title: 'Security Implementation Review',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
       securityLevel,
       allowedDirectories,
       files: artifacts.slice(-4).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RATE LIMITING
   // ============================================================================
@@ -183,7 +199,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...auditLogging.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: SECURITY TESTS
   // ============================================================================
@@ -207,7 +222,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Documenting security model');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     securityLevel,
     allowedDirectories,
@@ -222,8 +237,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    securityLevel,
+    allowedDirectories,
+    rateLimits,
+    inputPathAudit,
+    pathTraversalPrevention,
+    sandboxedExecution,
+    permissionModel,
+    enableAuditLogging,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Server Security Hardening complete for ${projectName}. Review and approve?`,
     title: 'MCP Server Security Hardening Complete',
     context: {
@@ -240,9 +270,15 @@ export async function process(inputs, ctx) {
         { path: documentation.securityDocPath, format: 'markdown', label: 'Security Documentation' },
         { path: pathTraversalPrevention.validationPath, format: 'typescript', label: 'Path Validation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -275,8 +311,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

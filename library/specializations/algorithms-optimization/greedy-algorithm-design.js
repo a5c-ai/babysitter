@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const proof = await ctx.task(greedyProofTask, { analysis, outputDir });
   artifacts.push(...proof.artifacts);
 
-  const implementation = await ctx.task(greedyImplementationTask, { analysis, proof, language, outputDir });
-  artifacts.push(...implementation.artifacts);
-
-  await ctx.breakpoint({
+  let implementation = await ctx.task(greedyImplementationTask, { analysis, proof, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementation = await ctx.task(greedyImplementationTask, { ...{ analysis, proof, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Greedy algorithm designed. Choice: ${analysis.greedyChoice}. Proof valid: ${proof.valid}. Review?`,
     title: 'Greedy Algorithm Complete',
-    context: { runId: ctx.runId, greedyChoice: analysis.greedyChoice, proofValid: proof.valid }
-  });
-
+    context: { runId: ctx.runId, greedyChoice: analysis.greedyChoice, proofValid: proof.valid },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     greedyChoice: analysis.greedyChoice,

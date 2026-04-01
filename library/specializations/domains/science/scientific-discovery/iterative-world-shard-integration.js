@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
     });
 
     // Identify Conflicts and Gaps
-    const conflictAnalysis = await ctx.task(analyzeConflictsTask, {
+    let conflictAnalysis = await ctx.task(analyzeConflictsTask, {
       integrationResult,
       shards: currentShards,
       domain
@@ -94,9 +94,16 @@ export async function process(inputs, ctx) {
         domain
       }).then(r => r.updatedShards);
     }
-
-    if (iteration < integrationIterations - 1) {
-      await ctx.breakpoint({
+  let lastFeedback = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback) {
+          conflictAnalysis = await ctx.task(analyzeConflictsTask, { ...{
+      integrationResult,
+      shards: currentShards,
+      domain
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Integration iteration ${iteration + 1} complete. Conflicts: ${conflictAnalysis.conflicts.length}. Continue?`,
         title: `World Shard Integration - Iteration ${iteration + 1}`,
         context: {
@@ -104,11 +111,16 @@ export async function process(inputs, ctx) {
           files: [
             { path: `artifacts/iteration-${iteration + 1}-integration.json`, format: 'json' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 4: Finalize Integrated Model
   ctx.log('info', 'Finalizing integrated model');
   const finalIntegration = await ctx.task(finalizeIntegrationTask, {

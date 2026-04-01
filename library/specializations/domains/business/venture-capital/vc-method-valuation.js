@@ -101,7 +101,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Sensitivity Analysis
   ctx.log('info', 'Performing sensitivity analysis');
-  const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, {
+  let sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, {
     preMoneyCalculation,
     exitEstimation,
     dilutionModeling,
@@ -110,8 +110,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sensitivityAnalysis.artifacts);
 
-  // Breakpoint: Review valuation analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, { ...{
+    preMoneyCalculation,
+    exitEstimation,
+    dilutionModeling,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VC Method valuation complete for ${companyName}. Pre-money: $${preMoneyCalculation.preMoney}M. Implied exit: $${exitEstimation.baseExitValue}M. Review analysis?`,
     title: 'VC Method Valuation Results',
     context: {
@@ -124,9 +133,15 @@ export async function process(inputs, ctx) {
         targetReturn,
         expectedDilution: dilutionModeling.totalDilution
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Valuation Report
   ctx.log('info', 'Generating valuation report');
   const valuationReport = await ctx.task(valuationReportTask, {
@@ -181,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Exit Value Estimation
+  // Task 1: Exit Value Estimation
 export const exitValueEstimationTask = defineTask('exit-value-estimation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Estimate exit values',

@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
   const design = await ctx.task(systemDesignTask, { topic, requirements, concepts, outputDir });
   artifacts.push(...design.artifacts);
 
-  const deepDive = await ctx.task(deepDiveTask, { design, level, outputDir });
-  artifacts.push(...deepDive.artifacts);
-
-  await ctx.breakpoint({
+  let deepDive = await ctx.task(deepDiveTask, { design, level, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      deepDive = await ctx.task(deepDiveTask, { ...{ design, level, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `System design for ${topic} complete. Design covers: ${design.components.length} components. Review?`,
     title: 'System Design Complete',
-    context: { runId: ctx.runId, topic, components: design.components }
-  });
-
+    context: { runId: ctx.runId, topic, components: design.components },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     topic,

@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing operationalization');
-  const synthesis = await ctx.task(operationalizationSynthesisTask, {
+  let synthesis = await ctx.task(operationalizationSynthesisTask, {
     concept,
     conceptualAnalysis,
     dimensionalDecomposition,
@@ -141,8 +141,23 @@ export async function process(inputs, ctx) {
 
   const validityMet = synthesis.validityScore >= targetValidity;
 
-  // Breakpoint: Review operationalization
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(operationalizationSynthesisTask, { ...{
+    concept,
+    conceptualAnalysis,
+    dimensionalDecomposition,
+    indicatorIdentification,
+    measurementDesign,
+    validityAssessment,
+    reliabilityPlanning,
+    biasAnalysis,
+    targetValidity,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Operationalization complete. Validity: ${synthesis.validityScore}/${targetValidity}. ${validityMet ? 'Validity target met!' : 'Additional refinement may be needed.'} Review operationalization?`,
     title: 'Operationalization Results',
     context: {
@@ -161,9 +176,15 @@ export async function process(inputs, ctx) {
         validityMet,
         biasesIdentified: biasAnalysis.biases.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -192,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

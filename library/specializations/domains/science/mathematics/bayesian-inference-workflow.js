@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Specify Prior Distributions
-  const priorSpecification = await ctx.task(priorSpecificationTask, {
+  let priorSpecification = await ctx.task(priorSpecificationTask, {
     modelDescription,
     priorKnowledge,
     dataDescription
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       posteriorSummary: null
     };
   }
-
-  // Breakpoint: Review prior specification
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      priorSpecification = await ctx.task(priorSpecificationTask, { ...{
+    modelDescription,
+    priorKnowledge,
+    dataDescription
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review prior specifications. ${priorSpecification.priors.length} parameters specified. Appropriate for the model?`,
     title: 'Prior Specification Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: priorSpecification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Implement Likelihood Function
   const likelihoodImplementation = await ctx.task(likelihoodImplementationTask, {
     modelDescription,
@@ -79,34 +92,56 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Check Convergence Diagnostics
-  const convergenceDiagnostics = await ctx.task(convergenceDiagnosticsTask, {
+  let convergenceDiagnostics = await ctx.task(convergenceDiagnosticsTask, {
     mcmcSampling,
     modelDescription
   });
 
   // Quality Gate: Check for convergence issues
-  if (!convergenceDiagnostics.converged) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        convergenceDiagnostics = await ctx.task(convergenceDiagnosticsTask, { ...{
+    mcmcSampling,
+    modelDescription
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `MCMC convergence issues detected. Rhat > 1.01 for ${convergenceDiagnostics.problematicParameters.length} parameters. Investigate or continue?`,
       title: 'Convergence Warning',
       context: {
         runId: ctx.runId,
         diagnostics: convergenceDiagnostics,
         recommendation: 'Consider longer chains, different parameterization, or informative priors'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Generate Posterior Summaries
-  const posteriorSummaries = await ctx.task(posteriorSummariesTask, {
+  let posteriorSummaries = await ctx.task(posteriorSummariesTask, {
     mcmcSampling,
     convergenceDiagnostics,
     priorSpecification,
     modelDescription
   });
 
-  // Final Breakpoint: Inference Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      posteriorSummaries = await ctx.task(posteriorSummariesTask, { ...{
+    mcmcSampling,
+    convergenceDiagnostics,
+    priorSpecification,
+    modelDescription
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bayesian inference complete. Posterior summaries generated for ${posteriorSummaries.parameters.length} parameters. Review results?`,
     title: 'Bayesian Inference Complete',
     context: {
@@ -118,9 +153,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/posterior-summary.json`, format: 'json', content: posteriorSummaries },
         { path: `artifacts/convergence-diagnostics.json`, format: 'json', content: convergenceDiagnostics }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     modelDescription,
@@ -155,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const priorSpecificationTask = defineTask('prior-specification', (args, taskCtx) => ({
   kind: 'agent',

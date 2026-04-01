@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const pluginTesting = await ctx.task(pluginTestingTask, { projectName, language, outputDir });
   artifacts.push(...pluginTesting.artifacts);
 
-  const pluginDocumentation = await ctx.task(pluginDocumentationTask, { projectName, language, features, outputDir });
-  artifacts.push(...pluginDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let pluginDocumentation = await ctx.task(pluginDocumentationTask, { projectName, language, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pluginDocumentation = await ctx.task(pluginDocumentationTask, { ...{ projectName, language, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Plugin Architecture Implementation complete with ${features.length} features. Review and approve?`,
     title: 'Plugin Architecture Complete',
-    context: { runId: ctx.runId, summary: { projectName, pluginType, features } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, pluginType, features } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

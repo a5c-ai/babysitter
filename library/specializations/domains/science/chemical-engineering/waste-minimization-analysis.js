@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Assess Treatment Requirements
   ctx.log('info', 'Assessing treatment requirements');
-  const treatmentResult = await ctx.task(treatmentAssessmentTask, {
+  let treatmentResult = await ctx.task(treatmentAssessmentTask, {
     processName,
     remainingWaste: recyclingResult.remainingWaste,
     regulatoryRequirements,
@@ -84,8 +84,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...treatmentResult.artifacts);
 
-  // Breakpoint: Review waste minimization analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      treatmentResult = await ctx.task(treatmentAssessmentTask, { ...{
+    processName,
+    remainingWaste: recyclingResult.remainingWaste,
+    regulatoryRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Waste minimization analysis complete for ${processName}. Waste streams: ${characterizationResult.inventory.streamCount}. Source reduction potential: ${sourceReductionResult.reductionPercentage}%. Recyclable: ${recyclingResult.recyclablePercentage}%. Review analysis?`,
     title: 'Waste Minimization Analysis Review',
     context: {
@@ -97,9 +106,15 @@ export async function process(inputs, ctx) {
         sourceReductionPotential: sourceReductionResult.reductionPercentage,
         recyclablePotential: recyclingResult.recyclablePercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Perform Economic Analysis
   ctx.log('info', 'Performing economic analysis');
   const economicResult = await ctx.task(economicAnalysisTask, {
@@ -166,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Waste Characterization
+  // Task 1: Waste Characterization
 export const wasteCharacterizationTask = defineTask('waste-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize waste streams',

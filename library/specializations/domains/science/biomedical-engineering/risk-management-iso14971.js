@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Hazard Identification
-  const hazardIdentification = await ctx.task(hazardIdentificationTask, {
+  let hazardIdentification = await ctx.task(hazardIdentificationTask, {
     deviceName,
     useAnalysis,
     deviceCategory,
@@ -62,9 +62,17 @@ export async function process(inputs, ctx) {
       riskManagementFile: null
     };
   }
-
-  // Breakpoint: Review identified hazards
-  await ctx.breakpoint({
+  let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      hazardIdentification = await ctx.task(hazardIdentificationTask, { ...{
+    deviceName,
+    useAnalysis,
+    deviceCategory,
+    existingRiskData
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review ${hazardIdentification.hazards.length} identified hazards for ${deviceName}. Is the hazard identification complete?`,
     title: 'Hazard Identification Review',
     context: {
@@ -77,9 +85,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hazardIdentification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Risk Estimation
   const riskEstimation = await ctx.task(riskEstimationTask, {
     deviceName,
@@ -89,7 +103,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Risk Evaluation
-  const riskEvaluation = await ctx.task(riskEvaluationTask, {
+  let riskEvaluation = await ctx.task(riskEvaluationTask, {
     deviceName,
     estimatedRisks: riskEstimation.risks,
     acceptabilityCriteria: riskManagementPlan.acceptabilityCriteria
@@ -97,17 +111,31 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Unacceptable risks must be addressed
   const unacceptableRisks = riskEvaluation.unacceptableRisks || [];
-  if (unacceptableRisks.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        riskEvaluation = await ctx.task(riskEvaluationTask, { ...{
+    deviceName,
+    estimatedRisks: riskEstimation.risks,
+    acceptabilityCriteria: riskManagementPlan.acceptabilityCriteria
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `${unacceptableRisks.length} unacceptable risks identified for ${deviceName}. Review and proceed to risk control?`,
       title: 'Unacceptable Risks Identified',
       context: {
         runId: ctx.runId,
         unacceptableRisks,
         recommendation: 'Implement risk control measures to reduce risks to acceptable levels'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Risk Control Implementation
   const riskControl = await ctx.task(riskControlTask, {
@@ -141,7 +169,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Risk Management File Compilation
-  const riskManagementFile = await ctx.task(riskManagementFileTask, {
+  let riskManagementFile = await ctx.task(riskManagementFileTask, {
     deviceName,
     deviceCategory,
     intendedUse,
@@ -156,8 +184,25 @@ export async function process(inputs, ctx) {
     monitoringPlan
   });
 
-  // Final Breakpoint: Risk Management Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskManagementFile = await ctx.task(riskManagementFileTask, { ...{
+    deviceName,
+    deviceCategory,
+    intendedUse,
+    riskManagementPlan,
+    useAnalysis,
+    hazardIdentification,
+    riskEstimation,
+    riskEvaluation,
+    riskControl,
+    residualRiskEvaluation,
+    benefitRiskAnalysis,
+    monitoringPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk Management complete for ${deviceName}. Overall risk acceptability: ${residualRiskEvaluation.overallAcceptability}. Approve Risk Management File?`,
     title: 'Risk Management Approval',
     context: {
@@ -170,9 +215,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/risk-management-file.json`, format: 'json', content: riskManagementFile },
         { path: `artifacts/benefit-risk-analysis.json`, format: 'json', content: benefitRiskAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -196,8 +247,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const riskManagementPlanningTask = defineTask('risk-management-planning', (args, taskCtx) => ({
   kind: 'agent',

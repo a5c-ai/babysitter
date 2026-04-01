@@ -44,27 +44,34 @@ export async function process(inputs, ctx) {
     const abTesting = await ctx.task(abTestingSetupTask, { projectName, outputDir });
     artifacts.push(...abTesting.artifacts);
   }
-
   // Phase 6: Privacy Compliance
   if (privacyCompliance) {
     const privacy = await ctx.task(privacyComplianceTask, { projectName, outputDir });
     artifacts.push(...privacy.artifacts);
   }
-
   // Phase 7: Dashboard Creation
   const dashboards = await ctx.task(dashboardCreationTask, { projectName, eventsToTrack, outputDir });
   artifacts.push(...dashboards.artifacts);
 
   // Phase 8: Analytics Testing
-  const testing = await ctx.task(analyticsTestingTask, { projectName, eventImplementation, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(analyticsTestingTask, { projectName, eventImplementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(analyticsTestingTask, { ...{ projectName, eventImplementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analytics integration complete for ${projectName}. ${eventImplementation.eventCount} events. ${dashboards.dashboardCount} dashboards. Test pass: ${testing.passRate}%. Review?`,
     title: 'Analytics Integration Review',
-    context: { runId: ctx.runId, eventImplementation, dashboards, testing }
-  });
-
+    context: { runId: ctx.runId, eventImplementation, dashboards, testing },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

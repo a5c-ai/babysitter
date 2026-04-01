@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Treatment Proposal Development
   ctx.log('info', 'Developing treatment proposal');
-  const treatmentProposal = await ctx.task(treatmentProposalTask, {
+  let treatmentProposal = await ctx.task(treatmentProposalTask, {
     objectTitle,
     objectType,
     conditionAssessment: conditionAssessment.assessment,
@@ -91,8 +91,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...treatmentProposal.artifacts);
 
-  // Breakpoint: Review treatment proposal
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      treatmentProposal = await ctx.task(treatmentProposalTask, { ...{
+    objectTitle,
+    objectType,
+    conditionAssessment: conditionAssessment.assessment,
+    technicalAnalysis: technicalAnalysis.analysis,
+    ethicalDecision: ethicalDecision.framework,
+    treatmentGoals,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Treatment proposal for "${objectTitle}" complete. ${treatmentProposal.interventions.length} interventions proposed. Review and approve treatment approach?`,
     title: 'Conservation Treatment Proposal Review',
     context: {
@@ -105,9 +117,15 @@ export async function process(inputs, ctx) {
         interventionCount: treatmentProposal.interventions.length,
         estimatedTime: treatmentProposal.timeEstimate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Treatment Implementation Plan
   ctx.log('info', 'Creating treatment implementation plan');
   const implementationPlan = await ctx.task(implementationPlanTask, {
@@ -190,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Examination
+  // Task 1: Initial Examination
 export const initialExaminationTask = defineTask('initial-examination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct initial examination',

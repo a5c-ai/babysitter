@@ -88,15 +88,23 @@ export async function process(inputs, ctx) {
 
   // Task 8: Create Attribution Dashboards
   ctx.log('info', 'Phase 8: Creating attribution dashboards');
-  const dashboards = await ctx.task(attributionDashboardsTask, {
+  let dashboards = await ctx.task(attributionDashboardsTask, {
     measurementFramework,
     modelSelection,
     outputDir
   });
   artifacts.push(...dashboards.artifacts);
 
-  // Breakpoint: Review attribution setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dashboards = await ctx.task(attributionDashboardsTask, { ...{
+    measurementFramework,
+    modelSelection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Attribution framework complete. ${modelSelection.modelCount} attribution models configured. Review and approve?`,
     title: 'Attribution Framework Review',
     context: {
@@ -107,9 +115,15 @@ export async function process(inputs, ctx) {
         dashboardCount: dashboards.dashboardCount,
         trackingCompleteness: trackingAudit.completenessScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Analyze Attribution Data
   ctx.log('info', 'Phase 9: Creating attribution data analysis framework');
   const attributionAnalysis = await ctx.task(attributionAnalysisTask, {
@@ -159,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const attributionRequirementsTask = defineTask('attribution-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define attribution requirements and questions',

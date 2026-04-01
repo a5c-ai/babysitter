@@ -102,7 +102,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Waste Classification Determination');
 
-  const wasteClassification = await ctx.task(wasteClassificationTask, {
+  let wasteClassification = await ctx.task(wasteClassificationTask, {
     facilityName,
     wasteIdentification,
     labAnalysis,
@@ -112,8 +112,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...wasteClassification.artifacts);
 
-  // Breakpoint: Classification Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      wasteClassification = await ctx.task(wasteClassificationTask, { ...{
+    facilityName,
+    wasteIdentification,
+    labAnalysis,
+    regulatoryFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Waste classification complete for ${facilityName}. Hazardous waste streams: ${wasteClassification.hazardousCount}. Review classifications?`,
     title: 'Waste Classification Review',
     context: {
@@ -122,9 +132,15 @@ export async function process(inputs, ctx) {
       hazardousCount: wasteClassification.hazardousCount,
       wasteCodes: wasteClassification.wasteCodes,
       files: wasteClassification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MANAGEMENT REQUIREMENTS
   // ============================================================================
@@ -189,8 +205,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

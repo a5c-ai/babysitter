@@ -128,7 +128,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Dimension Design Validation
   ctx.log('info', 'Validating dimensional model design');
-  const validationResult = await ctx.task(dimensionalModelValidationTask, {
+  let validationResult = await ctx.task(dimensionalModelValidationTask, {
     projectName,
     grainDefinition,
     dimensions: dimensionIdentification.dimensions,
@@ -142,8 +142,20 @@ export async function process(inputs, ctx) {
 
   const designValid = validationResult.isValid;
 
-  // Breakpoint: Review dimensional model design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validationResult = await ctx.task(dimensionalModelValidationTask, { ...{
+    projectName,
+    grainDefinition,
+    dimensions: dimensionIdentification.dimensions,
+    factTables: factTableDesign.factTables,
+    schema: schemaDesign,
+    scdStrategy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dimensional model design complete for ${projectName}. Design valid: ${designValid}. Review model?`,
     title: 'Dimensional Model Design Review',
     context: {
@@ -160,9 +172,15 @@ export async function process(inputs, ctx) {
         validationPassed: designValid,
         validationIssues: validationResult.issues?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Generate DDL Scripts
   ctx.log('info', 'Generating DDL scripts for dimensional model');
   const ddlGeneration = await ctx.task(ddlGenerationTask, {
@@ -263,8 +281,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Business Process Selection
+  // Task 1: Business Process Selection
 export const businessProcessSelectionTask = defineTask('business-process-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select and prioritize business processes for dimensional modeling',

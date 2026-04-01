@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Assessing simplification in each frame');
-  const simplificationAssessment = await ctx.task(simplificationAssessmentTask, {
+  let simplificationAssessment = await ctx.task(simplificationAssessmentTask, {
     candidateFrames: frameEnumeration.candidateFrames,
     transformations: transformationAnalysis.transformations,
     currentFormulation,
@@ -76,8 +76,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...simplificationAssessment.artifacts);
 
-  // Breakpoint: Review frame options
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      simplificationAssessment = await ctx.task(simplificationAssessmentTask, { ...{
+    candidateFrames: frameEnumeration.candidateFrames,
+    transformations: transformationAnalysis.transformations,
+    currentFormulation,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Analyzed ${frameEnumeration.candidateFrames.length} reference frames. Optimal frame: "${simplificationAssessment.optimalFrame.name}" with simplification score ${simplificationAssessment.optimalFrame.simplificationScore}. Review before equation derivation?`,
     title: 'Frame of Reference Analysis Review',
     context: {
@@ -93,9 +102,15 @@ export async function process(inputs, ctx) {
         framesAnalyzed: frameEnumeration.candidateFrames.length,
         optimalFrame: simplificationAssessment.optimalFrame.name
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: EQUATION DERIVATION IN OPTIMAL FRAME
   // ============================================================================
@@ -128,7 +143,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Extracting physical insights from frame choice');
-  const insightExtraction = await ctx.task(insightExtractionTask, {
+  let insightExtraction = await ctx.task(insightExtractionTask, {
     optimalFrame: simplificationAssessment.optimalFrame,
     simplifiedEquations: equationDerivation.simplifiedEquations,
     invariants: invariantIdentification.invariants,
@@ -138,8 +153,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...insightExtraction.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      insightExtraction = await ctx.task(insightExtractionTask, { ...{
+    optimalFrame: simplificationAssessment.optimalFrame,
+    simplifiedEquations: equationDerivation.simplifiedEquations,
+    invariants: invariantIdentification.invariants,
+    physicalProblem,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Frame analysis complete. Equations simplified in ${simplificationAssessment.optimalFrame.name} frame. ${insightExtraction.insights.length} physical insights extracted. Review findings?`,
     title: 'Frame of Reference Analysis Complete',
     context: {
@@ -156,9 +181,15 @@ export async function process(inputs, ctx) {
         invariantsFound: invariantIdentification.invariants.length,
         insightCount: insightExtraction.insights.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -180,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

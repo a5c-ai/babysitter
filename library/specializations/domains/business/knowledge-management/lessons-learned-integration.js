@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Lessons Analysis
   ctx.log('info', 'Phase 1: Analyzing lessons for integration');
-  const lessonsAnalysis = await ctx.task(lessonsAnalysisTask, { lessonsRepository, integrationScope, outputDir });
-  artifacts.push(...lessonsAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let lessonsAnalysis = await ctx.task(lessonsAnalysisTask, { lessonsRepository, integrationScope, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      lessonsAnalysis = await ctx.task(lessonsAnalysisTask, { ...{ lessonsRepository, integrationScope, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analyzed ${lessonsAnalysis.lessonsCount} lessons with ${lessonsAnalysis.actionableCount} actionable items. Review?`,
     title: 'Lessons Analysis Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { lessonsCount: lessonsAnalysis.lessonsCount, actionableCount: lessonsAnalysis.actionableCount } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { lessonsCount: lessonsAnalysis.lessonsCount, actionableCount: lessonsAnalysis.actionableCount } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Integration Opportunity Mapping
   ctx.log('info', 'Phase 2: Mapping integration opportunities');
   const integrationMapping = await ctx.task(integrationMappingTask, { lessonsAnalysis, targetProcesses, standardsFramework, trainingPrograms, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { integrationPlan: implementationRoadmap.roadmap, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -101,8 +109,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/lessons-learned-integration', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const lessonsAnalysisTask = defineTask('lessons-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze lessons for integration',

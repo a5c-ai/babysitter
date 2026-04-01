@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring focus group plan quality');
-  const qualityScore = await ctx.task(focusGroupQualityScoringTask, {
+  let qualityScore = await ctx.task(focusGroupQualityScoringTask, {
     recruitmentPlan,
     discussionGuide,
     facilitationTechniques,
@@ -124,8 +124,20 @@ export async function process(inputs, ctx) {
   const focusGroupScore = qualityScore.overallScore;
   const qualityMet = focusGroupScore >= 80;
 
-  // Breakpoint: Review focus group plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(focusGroupQualityScoringTask, { ...{
+    recruitmentPlan,
+    discussionGuide,
+    facilitationTechniques,
+    dynamicsManagement,
+    documentationProtocol,
+    logistics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Focus group plan complete. Quality score: ${focusGroupScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Focus Group Facilitation Plan Review',
     context: {
@@ -142,9 +154,15 @@ export async function process(inputs, ctx) {
         totalParticipants: numberOfGroups * participantsPerGroup,
         estimatedDuration: discussionGuide.estimatedDuration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -175,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Recruitment Planning
+  // Task 1: Recruitment Planning
 export const focusGroupRecruitmentTask = defineTask('focus-group-recruitment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan participant recruitment',

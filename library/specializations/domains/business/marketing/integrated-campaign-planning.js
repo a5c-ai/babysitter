@@ -149,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing campaign plan quality');
-  const qualityAssessment = await ctx.task(campaignPlanQualityTask, {
+  let qualityAssessment = await ctx.task(campaignPlanQualityTask, {
     campaignName,
     objectivesDefinition,
     audienceStrategy,
@@ -167,8 +167,23 @@ export async function process(inputs, ctx) {
   const campaignScore = qualityAssessment.overallScore;
   const qualityMet = campaignScore >= 80;
 
-  // Breakpoint: Review campaign plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(campaignPlanQualityTask, { ...{
+    campaignName,
+    objectivesDefinition,
+    audienceStrategy,
+    messagingFramework,
+    channelMixPlan,
+    budgetAllocation,
+    campaignTimeline,
+    creativeBrief,
+    measurementFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Campaign plan complete. Quality score: ${campaignScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Campaign Plan Review & Approval',
     context: {
@@ -188,9 +203,15 @@ export async function process(inputs, ctx) {
         channelCount: channelMixPlan.channels?.length || 0,
         kpiCount: measurementFramework.kpis?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,8 +253,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

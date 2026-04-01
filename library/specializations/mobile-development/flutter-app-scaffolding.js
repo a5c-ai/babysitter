@@ -180,7 +180,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...codeGenSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: TESTING FRAMEWORK SETUP
   // ============================================================================
@@ -201,15 +200,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Creating design system foundation');
 
-  const designSystem = await ctx.task(designSystemTask, {
+  let designSystem = await ctx.task(designSystemTask, {
     appName,
     outputDir
   });
 
   artifacts.push(...designSystem.artifacts);
 
-  // Quality Gate: Architecture Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      designSystem = await ctx.task(designSystemTask, { ...{
+    appName,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Flutter project scaffolding complete for ${appName}. Architecture: ${architecture}, State: ${stateManagement}. Review and approve?`,
     title: 'Architecture Review',
     context: {
@@ -220,9 +226,15 @@ export async function process(inputs, ctx) {
       features,
       folderStructure: architectureSetup.folderStructure,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'dart' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: DOCUMENTATION
   // ============================================================================
@@ -278,8 +290,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

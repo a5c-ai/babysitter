@@ -67,18 +67,30 @@ export async function process(inputs, ctx) {
   artifacts.push(...(successMetrics.artifacts || []));
 
   // Phase 8: Onboarding Plan Compilation
-  const onboardingPlan = await ctx.task(onboardingPlanCompilationTask, {
+  let onboardingPlan = await ctx.task(onboardingPlanCompilationTask, {
     hireName, role, startDate, manager, weeklyPlan, milestones, certifications,
     mentorAssignment, successMetrics, outputDir
   });
-  artifacts.push(...(onboardingPlan.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      onboardingPlan = await ctx.task(onboardingPlanCompilationTask, { ...{
+    hireName, role, startDate, manager, weeklyPlan, milestones, certifications,
+    mentorAssignment, successMetrics, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Onboarding plan ready for ${hireName}. ${rampPeriod}-day ramp. Review and finalize?`,
     title: 'Sales Onboarding Plan Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     hireName,

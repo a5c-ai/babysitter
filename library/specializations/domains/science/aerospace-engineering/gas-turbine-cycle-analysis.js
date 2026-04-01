@@ -39,24 +39,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Cycle Architecture Selection
-  const cycleArchitecture = await ctx.task(cycleArchitectureTask, {
+  let cycleArchitecture = await ctx.task(cycleArchitectureTask, {
     projectName,
     engineType,
     designPoint: designPointDef,
     requirements: designRequirements
   });
 
-  // Breakpoint: Review cycle architecture
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      cycleArchitecture = await ctx.task(cycleArchitectureTask, { ...{
+    projectName,
+    engineType,
+    designPoint: designPointDef,
+    requirements: designRequirements
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review cycle architecture for ${projectName}. Configuration: ${cycleArchitecture.configuration}. Proceed with cycle analysis?`,
     title: 'Cycle Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: cycleArchitecture,
       keyParameters: cycleArchitecture.keyParameters
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Component Performance Modeling
   const componentModeling = await ctx.task(componentModelingTask, {
     projectName,
@@ -65,7 +80,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Thermodynamic Cycle Analysis
-  const cycleAnalysis = await ctx.task(cycleAnalysisTask, {
+  let cycleAnalysis = await ctx.task(cycleAnalysisTask, {
     projectName,
     architecture: cycleArchitecture,
     componentMaps: componentModeling,
@@ -73,17 +88,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check cycle convergence
-  if (!cycleAnalysis.converged) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        cycleAnalysis = await ctx.task(cycleAnalysisTask, { ...{
+    projectName,
+    architecture: cycleArchitecture,
+    componentMaps: componentModeling,
+    designPoint: designPointDef
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Cycle analysis did not converge. Error: ${cycleAnalysis.convergenceError}. Adjust parameters or review component models?`,
       title: 'Cycle Convergence Warning',
       context: {
         runId: ctx.runId,
         cycleState: cycleAnalysis,
         recommendation: 'Review component efficiencies and pressure ratios'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Off-Design Performance Analysis
   const offDesignAnalysis = await ctx.task(offDesignAnalysisTask, {
@@ -125,7 +155,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  const reportGeneration = await ctx.task(cycleReportTask, {
+  let reportGeneration = await ctx.task(cycleReportTask, {
     projectName,
     engineType,
     designPointDef,
@@ -138,8 +168,23 @@ export async function process(inputs, ctx) {
     performanceMap
   });
 
-  // Final Breakpoint: Results Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportGeneration = await ctx.task(cycleReportTask, { ...{
+    projectName,
+    engineType,
+    designPointDef,
+    cycleArchitecture,
+    cycleAnalysis,
+    offDesignAnalysis,
+    optimization,
+    emissionsAnalysis,
+    sensitivityAnalysis,
+    performanceMap
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gas turbine cycle analysis complete for ${projectName}. SFC improvement: ${optimization.improvement.sfc}%. Approve design?`,
     title: 'Cycle Analysis Approval',
     context: {
@@ -154,9 +199,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/cycle-analysis-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/cycle-analysis-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -181,8 +232,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const designPointDefinitionTask = defineTask('design-point-definition', (args, taskCtx) => ({
   kind: 'agent',

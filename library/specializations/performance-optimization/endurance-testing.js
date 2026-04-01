@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...loadScenario.artifacts);
 
   // Phase 3: Configure Extended Monitoring
-  const monitoring = await ctx.task(configureExtendedMonitoringTask, { projectName, testDuration, outputDir });
-  artifacts.push(...monitoring.artifacts);
-
-  await ctx.breakpoint({
+  let monitoring = await ctx.task(configureExtendedMonitoringTask, { projectName, testDuration, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      monitoring = await ctx.task(configureExtendedMonitoringTask, { ...{ projectName, testDuration, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Endurance test configured for ${testDuration}. Sustained load: ${loadScenario.targetLoad} RPS. Begin execution?`,
     title: 'Endurance Test Configuration',
-    context: { runId: ctx.runId, objectives, loadScenario, monitoring }
-  });
-
+    context: { runId: ctx.runId, objectives, loadScenario, monitoring },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Execute Endurance Test
   const testExecution = await ctx.task(executeEnduranceTestTask, { projectName, loadScenario, testDuration, outputDir });
   artifacts.push(...testExecution.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...findings.artifacts);
 
   // Phase 9: Document Recommendations
-  const documentation = await ctx.task(documentEnduranceRecommendationsTask, { projectName, findings, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentEnduranceRecommendationsTask, { projectName, findings, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentEnduranceRecommendationsTask, { ...{ projectName, findings, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Endurance test complete. Duration: ${testDuration}. Memory issues: ${memoryAnalysis.issuesFound}. Degradation detected: ${degradationAnalysis.degradationDetected}. Accept findings?`,
     title: 'Endurance Test Results',
-    context: { runId: ctx.runId, findings, memoryAnalysis, degradationAnalysis }
-  });
-
+    context: { runId: ctx.runId, findings, memoryAnalysis, degradationAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

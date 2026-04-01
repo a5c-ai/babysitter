@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Writing formal specifications');
 
-  const specificationWriting = await ctx.task(specificationWritingTask, {
+  let specificationWriting = await ctx.task(specificationWritingTask, {
     projectName,
     propertyIdentification,
     verificationTool,
@@ -67,8 +67,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...specificationWriting.artifacts);
 
-  // Quality Gate: Specification Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      specificationWriting = await ctx.task(specificationWritingTask, { ...{
+    projectName,
+    propertyIdentification,
+    verificationTool,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Formal specifications written for ${specificationWriting.specCount} properties. Review specifications before running verification?`,
     title: 'Specification Review',
     context: {
@@ -76,9 +85,15 @@ export async function process(inputs, ctx) {
       projectName,
       specifications: specificationWriting.specifications,
       files: specificationWriting.artifacts.map(a => ({ path: a.path, format: 'cvl' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: CONTRACT MODELING
   // ============================================================================
@@ -118,15 +133,22 @@ export async function process(inputs, ctx) {
   if (verificationExecution.failedProperties.length > 0) {
     ctx.log('info', 'Phase 5: Analyzing counterexamples');
 
-    const counterexampleAnalysis = await ctx.task(counterexampleAnalysisTask, {
+    let counterexampleAnalysis = await ctx.task(counterexampleAnalysisTask, {
       projectName,
       verificationExecution,
       outputDir
     });
 
-    artifacts.push(...counterexampleAnalysis.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        counterexampleAnalysis = await ctx.task(counterexampleAnalysisTask, { ...{
+      projectName,
+      verificationExecution,
+      outputDir
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Found ${verificationExecution.failedProperties.length} failed properties with counterexamples. Review and refine specifications?`,
       title: 'Counterexample Analysis',
       context: {
@@ -134,9 +156,15 @@ export async function process(inputs, ctx) {
         failedProperties: verificationExecution.failedProperties,
         counterexamples: counterexampleAnalysis.analyzedCounterexamples,
         files: counterexampleAnalysis.artifacts.map(a => ({ path: a.path, format: 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: VERIFICATION REPORT
@@ -179,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

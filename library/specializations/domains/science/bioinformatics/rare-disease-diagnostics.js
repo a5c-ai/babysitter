@@ -52,15 +52,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Filtering complete. ${filterResult.rareVariants} rare variants retained`);
 
   // Phase 3: Phenotype-Driven Prioritization
-  const phenotypeResult = await ctx.task(phenotypePrioritizationTask, { projectName, variants: filterResult.filteredVariants, phenotypes, outputDir });
-  artifacts.push(...phenotypeResult.artifacts);
-
-  await ctx.breakpoint({
+  let phenotypeResult = await ctx.task(phenotypePrioritizationTask, { projectName, variants: filterResult.filteredVariants, phenotypes, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      phenotypeResult = await ctx.task(phenotypePrioritizationTask, { ...{ projectName, variants: filterResult.filteredVariants, phenotypes, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phenotype prioritization complete. ${phenotypeResult.phenotypeMatchedGenes} genes match phenotype. Review prioritized candidates?`,
     title: 'Phenotype Prioritization Review',
-    context: { runId: ctx.runId, topGenes: phenotypeResult.topGenes, phenotypeMatches: phenotypeResult.matches, files: phenotypeResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, topGenes: phenotypeResult.topGenes, phenotypeMatches: phenotypeResult.matches, files: phenotypeResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: De Novo Mutation Detection
   let deNovoResult = null;
   if (isTrio) {
@@ -68,7 +77,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...deNovoResult.artifacts);
     ctx.log('info', `De novo analysis: ${deNovoResult.deNovoCount} de novo variants identified`);
   }
-
   // Phase 5: Compound Heterozygosity Detection
   const compHetResult = await ctx.task(compoundHetDetectionTask, { projectName, variants: filterResult.filteredVariants, parents, outputDir });
   artifacts.push(...compHetResult.artifacts);
@@ -78,15 +86,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...inheritanceResult.artifacts);
 
   // Phase 7: Variant Classification
-  const classificationResult = await ctx.task(variantClassificationTask, { projectName, candidateVariants: inheritanceResult.candidates, phenotypes, outputDir });
-  artifacts.push(...classificationResult.artifacts);
-
-  await ctx.breakpoint({
+  let classificationResult = await ctx.task(variantClassificationTask, { projectName, candidateVariants: inheritanceResult.candidates, phenotypes, outputDir });
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      classificationResult = await ctx.task(variantClassificationTask, { ...{ projectName, candidateVariants: inheritanceResult.candidates, phenotypes, outputDir }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Variant classification complete. ${classificationResult.pathogenicCount} pathogenic/likely pathogenic variants. Review classifications?`,
     title: 'Variant Classification Review',
-    context: { runId: ctx.runId, classifications: classificationResult.summary, topCandidates: classificationResult.topCandidates, files: classificationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, classifications: classificationResult.summary, topCandidates: classificationResult.topCandidates, files: classificationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Gene-Disease Validation
   const validationResult = await ctx.task(geneDiseaseValidationTask, { projectName, candidates: classificationResult.candidates, phenotypes, outputDir });
   artifacts.push(...validationResult.artifacts);
@@ -96,15 +113,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...reportResult.artifacts);
 
   // Phase 10: Reanalysis Recommendations
-  const reanalysisResult = await ctx.task(reanalysisRecommendationTask, { projectName, diagnosticStatus: reportResult.diagnosticStatus, unsolved: reportResult.unsolved, outputDir });
-  artifacts.push(...reanalysisResult.artifacts);
-
-  await ctx.breakpoint({
+  let reanalysisResult = await ctx.task(reanalysisRecommendationTask, { projectName, diagnosticStatus: reportResult.diagnosticStatus, unsolved: reportResult.unsolved, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reanalysisResult = await ctx.task(reanalysisRecommendationTask, { ...{ projectName, diagnosticStatus: reportResult.diagnosticStatus, unsolved: reportResult.unsolved, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Rare Disease Diagnostics Complete. Diagnostic status: ${reportResult.diagnosticStatus}. ${classificationResult.pathogenicCount} diagnostic candidates. Approve clinical report?`,
     title: 'Diagnostic Analysis Complete',
-    context: { runId: ctx.runId, summary: { status: reportResult.diagnosticStatus, pathogenic: classificationResult.pathogenicCount, deNovo: deNovoResult?.deNovoCount || 0 }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Diagnostic Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { status: reportResult.diagnosticStatus, pathogenic: classificationResult.pathogenicCount, deNovo: deNovoResult?.deNovoCount || 0 }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Diagnostic Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -127,8 +153,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/rare-disease-diagnostics', timestamp: startTime, trioAnalysis: isTrio }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const trioVariantCallingTask = defineTask('trio-variant-calling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Trio Variant Calling - ${args.projectName}`,

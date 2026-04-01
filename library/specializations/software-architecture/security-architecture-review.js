@@ -25,15 +25,23 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Create Threat Model
   ctx.log('Phase 1: Creating threat model using STRIDE methodology');
-  const threatModel = await ctx.task(createThreatModelTask, {
+  let threatModel = await ctx.task(createThreatModelTask, {
     system,
     architecture,
     securityRequirements
   });
   reviewResults.phases.push({ phase: 'threat-modeling', completed: true, result: threatModel });
 
-  // Breakpoint: Review threat model before proceeding
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      threatModel = await ctx.task(createThreatModelTask, { ...{
+    system,
+    architecture,
+    securityRequirements
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: 'Review the threat model. Does it accurately represent the security landscape?',
     title: 'Threat Model Review',
     context: {
@@ -42,9 +50,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/threat-model.json`, format: 'json' },
         { path: `artifacts/threat-model-diagram.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Identify Attack Surfaces (in parallel with Phase 3)
   ctx.log('Phase 2-3: Analyzing attack surfaces and reviewing security patterns in parallel');
   const [attackSurfaces, securityPatterns] = await ctx.parallel.all([
@@ -65,7 +79,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Check Compliance Requirements
   ctx.log('Phase 6: Checking compliance requirements');
-  const complianceCheck = await ctx.task(checkComplianceTask, {
+  let complianceCheck = await ctx.task(checkComplianceTask, {
     system,
     architecture,
     complianceStandards,
@@ -75,8 +89,19 @@ export async function process(inputs, ctx) {
   });
   reviewResults.phases.push({ phase: 'compliance-check', completed: true, result: complianceCheck });
 
-  // Breakpoint: Review findings before security testing
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      complianceCheck = await ctx.task(checkComplianceTask, { ...{
+    system,
+    architecture,
+    complianceStandards,
+    threatModel,
+    authAssessment,
+    dataProtection
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Review security findings. Proceed with security testing phase?',
     title: 'Security Findings Review',
     context: {
@@ -85,9 +110,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/security-findings.json`, format: 'json' },
         { path: `artifacts/security-findings-report.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Perform Security Testing
   ctx.log('Phase 7: Performing security testing');
   const securityTests = await ctx.task(performSecurityTestingTask, {
@@ -114,14 +145,22 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Create Final Report
   ctx.log('Phase 9: Creating final security architecture review report');
-  const finalReport = await ctx.task(createFinalReportTask, {
+  let finalReport = await ctx.task(createFinalReportTask, {
     system,
     reviewResults,
     riskRegisterAndPlan
   });
 
-  // Final breakpoint for approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReport = await ctx.task(createFinalReportTask, { ...{
+    system,
+    reviewResults,
+    riskRegisterAndPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review the final security architecture report. Approve findings and remediation plan?',
     title: 'Final Security Review Approval',
     context: {
@@ -131,9 +170,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/risk-register.json`, format: 'json' },
         { path: `artifacts/remediation-plan.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - reviewResults.startTime;
 
@@ -161,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const createThreatModelTask = defineTask('create-threat-model', (args, taskCtx) => ({
   kind: 'agent',

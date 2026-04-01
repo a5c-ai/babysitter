@@ -68,15 +68,23 @@ export async function process(inputs, ctx) {
 
   // Task 6: Draft Outreach Templates
   ctx.log('info', 'Phase 6: Drafting personalized outreach templates');
-  const outreachTemplates = await ctx.task(outreachTemplatesTask, {
+  let outreachTemplates = await ctx.task(outreachTemplatesTask, {
     targetLists,
     linkableContent,
     outputDir
   });
   artifacts.push(...outreachTemplates.artifacts);
 
-  // Breakpoint: Review before outreach
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      outreachTemplates = await ctx.task(outreachTemplatesTask, { ...{
+    targetLists,
+    linkableContent,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Link building preparation complete. ${targetLists.totalTargets} outreach targets identified with ${linkableContent.assetCount} linkable assets. Begin outreach?`,
     title: 'Link Building Campaign Review',
     context: {
@@ -88,9 +96,15 @@ export async function process(inputs, ctx) {
         opportunities: opportunityIdentification.opportunityCount,
         currentDomainAuthority: profileAnalysis.domainAuthority
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Execute Outreach Campaigns
   ctx.log('info', 'Phase 7: Setting up outreach campaign execution');
   const outreachExecution = await ctx.task(outreachExecutionTask, {
@@ -155,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const backlinkProfileAnalysisTask = defineTask('backlink-profile-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze current backlink profile',

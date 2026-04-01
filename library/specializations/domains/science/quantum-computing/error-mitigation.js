@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Validate Mitigation Effectiveness
   ctx.log('info', 'Validating mitigation effectiveness');
-  const validation = await ctx.task(mitigationValidationTask, {
+  let validation = await ctx.task(mitigationValidationTask, {
     unmitigatedResults: mitigatedExecution.unmitigatedResults,
     mitigatedResults: mitigatedExecution.mitigatedResults,
     idealResults: mitigatedExecution.idealResults,
@@ -106,8 +106,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  // Breakpoint: Review mitigation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(mitigationValidationTask, { ...{
+    unmitigatedResults: mitigatedExecution.unmitigatedResults,
+    mitigatedResults: mitigatedExecution.mitigatedResults,
+    idealResults: mitigatedExecution.idealResults,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Error mitigation complete. Fidelity improvement: ${validation.fidelityImprovement}%. Techniques applied: ${techniqueSelection.selectedTechniques.join(', ')}. Review results?`,
     title: 'Error Mitigation Results',
     context: {
@@ -119,9 +128,15 @@ export async function process(inputs, ctx) {
         overheadFactor: validation.overheadFactor,
         backend
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Mitigation Pipeline Report
   ctx.log('info', 'Generating mitigation pipeline documentation');
   const pipelineReport = await ctx.task(mitigationReportTask, {
@@ -170,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Noise Characterization
+  // Task 1: Noise Characterization
 export const noiseCharacterizationTask = defineTask('noise-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize hardware noise model',

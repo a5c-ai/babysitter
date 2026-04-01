@@ -70,7 +70,6 @@ export async function process(inputs, ctx) {
     testResults.tensile = tensileResult;
     artifacts.push(...tensileResult.artifacts);
   }
-
   // Phase 3: Compression Testing (if requested)
   if (testTypes.includes('compression')) {
     ctx.log('info', 'Phase 2b: Performing compression testing');
@@ -87,7 +86,6 @@ export async function process(inputs, ctx) {
     testResults.compression = compressionResult;
     artifacts.push(...compressionResult.artifacts);
   }
-
   // Phase 4: Hardness Testing (if requested)
   if (testTypes.includes('hardness')) {
     ctx.log('info', 'Phase 2c: Performing hardness testing');
@@ -102,7 +100,6 @@ export async function process(inputs, ctx) {
     testResults.hardness = hardnessResult;
     artifacts.push(...hardnessResult.artifacts);
   }
-
   // Phase 5: Impact Testing (if requested)
   if (testTypes.includes('impact')) {
     ctx.log('info', 'Phase 2d: Performing impact testing');
@@ -119,7 +116,6 @@ export async function process(inputs, ctx) {
     testResults.impact = impactResult;
     artifacts.push(...impactResult.artifacts);
   }
-
   // Phase 6: Bend Testing (if requested)
   if (testTypes.includes('bend')) {
     ctx.log('info', 'Phase 2e: Performing bend testing');
@@ -134,10 +130,9 @@ export async function process(inputs, ctx) {
     testResults.bend = bendResult;
     artifacts.push(...bendResult.artifacts);
   }
-
   // Phase 7: Statistical Analysis
   ctx.log('info', 'Phase 3: Performing statistical analysis');
-  const statistics = await ctx.task(mechanicalStatisticsTask, {
+  let statistics = await ctx.task(mechanicalStatisticsTask, {
     sampleId,
     testResults,
     replicates,
@@ -146,8 +141,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...statistics.artifacts);
 
-  // Breakpoint: Review mechanical testing results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      statistics = await ctx.task(mechanicalStatisticsTask, { ...{
+    sampleId,
+    testResults,
+    replicates,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mechanical testing complete for ${sampleId}. Review results and statistical analysis?`,
     title: 'Mechanical Testing Review',
     context: {
@@ -165,9 +169,15 @@ export async function process(inputs, ctx) {
         statistics: statistics.summary
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Report Generation
   ctx.log('info', 'Phase 4: Generating mechanical testing report');
   const report = await ctx.task(mechanicalReportTask, {
@@ -234,8 +244,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Specimen Verification
+  // Task 1: Specimen Verification
 export const specimenVerificationTask = defineTask('specimen-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Specimen Verification - ${args.sampleId}`,

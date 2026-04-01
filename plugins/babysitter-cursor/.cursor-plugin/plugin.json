@@ -1,0 +1,22 @@
+{
+  "name": "babysitter",
+  "version": "0.1.0",
+  "description": "Babysitter orchestration plugin for Cursor IDE/CLI with lifecycle hooks and SDK-managed process-library bootstrapping",
+  "author": {
+    "name": "a5c.ai",
+    "email": "support@a5c.ai"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-cursor#readme",
+  "repository": "https://github.com/a5c-ai/babysitter",
+  "license": "MIT",
+  "keywords": [
+    "babysitter",
+    "cursor",
+    "orchestration",
+    "hooks",
+    "skills"
+  ],
+  "skills": "skills/",
+  "commands": "commands/",
+  "hooks": "hooks/hooks-cursor.json"
+}

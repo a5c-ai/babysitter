@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: BMP Selection and Sizing');
 
-  const bmpSelection = await ctx.task(bmpSelectionTask, {
+  let bmpSelection = await ctx.task(bmpSelectionTask, {
     projectName,
     siteCharacterization,
     regulatoryAnalysis,
@@ -102,8 +102,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bmpSelection.artifacts);
 
-  // Breakpoint: BMP Selection Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bmpSelection = await ctx.task(bmpSelectionTask, { ...{
+    projectName,
+    siteCharacterization,
+    regulatoryAnalysis,
+    hydrologicAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `BMP selection complete for ${projectName}. ${bmpSelection.selectedBMPs.length} BMPs selected. Review selection?`,
     title: 'BMP Selection Review',
     context: {
@@ -111,9 +121,15 @@ export async function process(inputs, ctx) {
       selectedBMPs: bmpSelection.selectedBMPs,
       treatmentTrain: bmpSelection.treatmentTrain,
       files: bmpSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: HYDRAULIC DESIGN
   // ============================================================================
@@ -209,8 +225,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

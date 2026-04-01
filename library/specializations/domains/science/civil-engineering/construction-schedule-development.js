@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Critical Path Analysis
   ctx.log('info', 'Performing critical path analysis');
-  const criticalPathAnalysis = await ctx.task(criticalPathTask, {
+  let criticalPathAnalysis = await ctx.task(criticalPathTask, {
     projectId,
     activitySequencing,
     durationEstimation,
@@ -87,8 +87,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...criticalPathAnalysis.artifacts);
 
-  // Breakpoint: Review schedule
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      criticalPathAnalysis = await ctx.task(criticalPathTask, { ...{
+    projectId,
+    activitySequencing,
+    durationEstimation,
+    milestones,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Schedule development complete for ${projectId}. Duration: ${criticalPathAnalysis.projectDuration} days. Review schedule?`,
     title: 'Construction Schedule Review',
     context: {
@@ -100,9 +110,15 @@ export async function process(inputs, ctx) {
         criticalPathLength: criticalPathAnalysis.criticalPath.length,
         milestoneCount: milestones?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Resource Loading
   ctx.log('info', 'Loading resources');
   const resourceLoading = await ctx.task(resourceLoadingTask, {
@@ -169,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: WBS Development
+  // Task 1: WBS Development
 export const wbsDevelopmentTask = defineTask('wbs-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop work breakdown structure',

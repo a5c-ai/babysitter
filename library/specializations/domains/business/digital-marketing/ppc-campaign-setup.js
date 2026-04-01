@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: QA and Launch Checklist
   ctx.log('info', 'Phase 8: QA campaign settings and preparing launch checklist');
-  const qaResult = await ctx.task(campaignQATask, {
+  let qaResult = await ctx.task(campaignQATask, {
     structureDesign,
     adCopyResult,
     biddingConfig,
@@ -106,8 +106,19 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...qaResult.artifacts);
 
-  // Breakpoint: Review campaign before launch
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qaResult = await ctx.task(campaignQATask, { ...{
+    structureDesign,
+    adCopyResult,
+    biddingConfig,
+    audienceSetup,
+    trackingSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PPC campaign setup complete. ${qaResult.passedChecks}/${qaResult.totalChecks} QA checks passed. Ready to launch?`,
     title: 'PPC Campaign Review',
     context: {
@@ -121,9 +132,15 @@ export async function process(inputs, ctx) {
         budget,
         qaScore: qaResult.qaScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Launch and Initial Monitoring Plan
   ctx.log('info', 'Phase 9: Creating launch and monitoring plan');
   const launchPlan = await ctx.task(launchMonitoringTask, {
@@ -158,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Campaign Objectives and KPIs Definition
+  // Task 1: Campaign Objectives and KPIs Definition
 export const campaignObjectivesTask = defineTask('campaign-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define campaign objectives and KPIs',

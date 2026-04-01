@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Exception Alerting Configuration
-  const alertingConfig = await ctx.task(exceptionAlertingTask, {
+  let alertingConfig = await ctx.task(exceptionAlertingTask, {
     projectName,
     requirementsAnalysis,
     pipelineArchitecture,
     stakeholders
   });
 
-  // Breakpoint: Review reporting system design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      alertingConfig = await ctx.task(exceptionAlertingTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    pipelineArchitecture,
+    stakeholders
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review operational reporting system design for ${projectName}. Ready for implementation?`,
     title: 'Reporting System Design Review',
     context: {
@@ -77,9 +86,15 @@ export async function process(inputs, ctx) {
       projectName,
       reportCount: reportTemplates.reports?.length || 0,
       alertCount: alertingConfig.alerts?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Implementation Plan
   const implementationPlan = await ctx.task(reportingImplementationTask, {
     projectName,
@@ -106,8 +121,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const reportingRequirementsTask = defineTask('reporting-requirements', (args, taskCtx) => ({
   kind: 'agent',

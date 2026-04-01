@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Commission and Validate Performance
   ctx.log('info', 'Commissioning and validating MPC performance');
-  const commissioningResult = await ctx.task(mpcCommissioningTask, {
+  let commissioningResult = await ctx.task(mpcCommissioningTask, {
     processName,
     mpcConfiguration: horizonTuningResult.tunedConfiguration,
     outputDir
@@ -83,8 +83,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...commissioningResult.artifacts);
 
-  // Breakpoint: Review MPC implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      commissioningResult = await ctx.task(mpcCommissioningTask, { ...{
+    processName,
+    mpcConfiguration: horizonTuningResult.tunedConfiguration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MPC implementation complete for ${processName}. CVs: ${configurationResult.configuration.cvCount}. MVs: ${configurationResult.configuration.mvCount}. Benefit estimate: $${candidateResult.benefitEstimate}/year. Validation passed: ${commissioningResult.validationPassed}. Review implementation?`,
     title: 'MPC Implementation Review',
     context: {
@@ -97,9 +105,15 @@ export async function process(inputs, ctx) {
         controlHorizon: horizonTuningResult.controlHorizon,
         benefitEstimate: candidateResult.benefitEstimate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Train Operators on MPC Operation
   ctx.log('info', 'Developing operator training materials');
   const trainingResult = await ctx.task(operatorTrainingTask, {
@@ -130,8 +144,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: MPC Candidate Identification
+  // Task 1: MPC Candidate Identification
 export const mpcCandidateIdentificationTask = defineTask('mpc-candidate-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify MPC candidates and benefits',

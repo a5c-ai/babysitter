@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Outreach Campaign Development
   ctx.log('info', 'Developing co-investor outreach campaign');
-  const outreachCampaign = await ctx.task(coInvestorOutreachTask, {
+  let outreachCampaign = await ctx.task(coInvestorOutreachTask, {
     dealInfo,
     prioritizedCoInvestors: coInvestorAnalysis.prioritized,
     syndicationStructure: syndicationStructure.structure,
@@ -84,8 +84,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...outreachCampaign.artifacts);
 
-  // Breakpoint: Review syndication plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      outreachCampaign = await ctx.task(coInvestorOutreachTask, { ...{
+    dealInfo,
+    prioritizedCoInvestors: coInvestorAnalysis.prioritized,
+    syndicationStructure: syndicationStructure.structure,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Syndication plan complete. ${coInvestorAnalysis.prioritized.length} co-investors identified. Review outreach strategy?`,
     title: 'Co-Investor Syndication Plan',
     context: {
@@ -97,9 +106,15 @@ export async function process(inputs, ctx) {
         followAllocation: syndicationStructure.structure.followAllocation,
         priorityCoInvestors: coInvestorAnalysis.prioritized.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Relationship Tracking Setup
   ctx.log('info', 'Setting up relationship tracking');
   const relationshipTracking = await ctx.task(relationshipTrackingTask, {
@@ -147,8 +162,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Co-Investor Universe Analysis
+  // Task 1: Co-Investor Universe Analysis
 export const coInvestorUniverseTask = defineTask('co-investor-universe', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze co-investor universe',

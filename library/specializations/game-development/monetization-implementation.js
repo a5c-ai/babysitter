@@ -45,16 +45,25 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Ethics Review
   if (ethicalGuidelines) {
-    const ethicsReview = await ctx.task(ethicsReviewTask, { projectName, strategy, economyDesign, outputDir });
+    let ethicsReview = await ctx.task(ethicsReviewTask, { projectName, strategy, economyDesign, outputDir });
     artifacts.push(...ethicsReview.artifacts);
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      ethicsReview = await ctx.task(ethicsReviewTask, { ...{ projectName, strategy, economyDesign, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Monetization implementation complete for ${projectName}. ${storeImpl.productCount} products. IAP integration: ${iapIntegration.integrated}. Review?`,
     title: 'Monetization Review',
-    context: { runId: ctx.runId, strategy, economyDesign, storeImpl }
-  });
-
+    context: { runId: ctx.runId, strategy, economyDesign, storeImpl },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -11,15 +11,24 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, softwareDefinition, dalLevel, supplements = [] } = inputs;
 
-  const objectivesAnalysis = await ctx.task(objectivesAnalysisTask, { projectName, dalLevel, supplements });
-  const psac = await ctx.task(psacDevelopmentTask, { projectName, softwareDefinition, dalLevel, objectivesAnalysis });
-
-  await ctx.breakpoint({
+  let objectivesAnalysis = await ctx.task(objectivesAnalysisTask, { projectName, dalLevel, supplements });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      objectivesAnalysis = await ctx.task(objectivesAnalysisTask, { ...{ projectName, dalLevel, supplements }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `PSAC drafted for ${projectName} at DAL ${dalLevel}. ${objectivesAnalysis.objectives.length} objectives. Proceed with plans development?`,
     title: 'PSAC Review',
-    context: { runId: ctx.runId, psac }
-  });
-
+    context: { runId: ctx.runId, psac },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const sdp = await ctx.task(sdpTask, { projectName, psac, dalLevel });
   const svp = await ctx.task(svpTask, { projectName, psac, dalLevel });
   const scmp = await ctx.task(scmpTask, { projectName, psac, dalLevel });
@@ -28,26 +37,45 @@ export async function process(inputs, ctx) {
   const softwarePlans = { sdp, svp, scmp, sqap };
 
   const sas = await ctx.task(sasTask, { projectName, psac, softwarePlans, supplements });
-  const complianceMatrix = await ctx.task(do178ComplianceMatrixTask, { projectName, objectivesAnalysis, softwarePlans, sas });
+  let complianceMatrix = await ctx.task(do178ComplianceMatrixTask, { projectName, objectivesAnalysis, softwarePlans, sas });
 
-  if (complianceMatrix.independenceGaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_analysisApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_analysisApproval2) {
+        complianceMatrix = await ctx.task(do178ComplianceMatrixTask, { ...{ projectName, objectivesAnalysis, softwarePlans, sas }, feedback: lastFeedback_analysisApproval2, attempt: attempt + 1 });
+      }
+  const analysisApproval2 = await ctx.breakpoint({
       question: `${complianceMatrix.independenceGaps.length} independence requirements need attention. Review?`,
       title: 'Independence Gap Warning',
-      context: { runId: ctx.runId, gaps: complianceMatrix.independenceGaps }
-    });
-  }
+      context: { runId: ctx.runId, gaps: complianceMatrix.independenceGaps },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_analysisApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (analysisApproval2.approved) break;
+      lastFeedback_analysisApproval2 = analysisApproval2.response || analysisApproval2.feedback || 'Changes requested';
+    } }
 
   const toolQualification = await ctx.task(toolQualificationTask, { projectName, dalLevel, softwarePlans });
-  const certificationLiaison = await ctx.task(certificationLiaisonTask, { projectName, psac, complianceMatrix });
-  const report = await ctx.task(do178ReportTask, { projectName, psac, softwarePlans, complianceMatrix, toolQualification });
-
-  await ctx.breakpoint({
+  let certificationLiaison = await ctx.task(certificationLiaisonTask, { projectName, psac, complianceMatrix });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      certificationLiaison = await ctx.task(certificationLiaisonTask, { ...{ projectName, psac, complianceMatrix }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DO-178C planning complete for ${projectName}. Coverage: ${complianceMatrix.coverage}%. Approve?`,
     title: 'DO-178C Plan Approval',
-    context: { runId: ctx.runId, summary: { dalLevel, objectives: objectivesAnalysis.objectives.length, coverage: complianceMatrix.coverage } }
-  });
-
+    context: { runId: ctx.runId, summary: { dalLevel, objectives: objectivesAnalysis.objectives.length, coverage: complianceMatrix.coverage } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, psac, softwarePlans, complianceMatrix, toolQualification, report, metadata: { processId: 'do-178c-compliance-planning', timestamp: ctx.now() } };
 }
 

@@ -90,7 +90,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...dpaLiaison.artifacts);
 
   // Phase 9: Compliance Report
-  const report = await ctx.task(gdprComplianceReportTask, {
+  let report = await ctx.task(gdprComplianceReportTask, {
     organizationProfile,
     gapAssessment,
     lawfulBasis,
@@ -99,9 +99,20 @@ export async function process(inputs, ctx) {
     transferAssessment,
     outputDir
   });
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(gdprComplianceReportTask, { ...{
+    organizationProfile,
+    gapAssessment,
+    lawfulBasis,
+    ropa,
+    dpiaFramework,
+    transferAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `GDPR compliance assessment for ${organizationProfile.name} complete. Compliance score: ${gapAssessment.complianceScore}%. ${gapAssessment.gaps.length} gaps identified. Review report?`,
     title: 'GDPR Compliance Review',
     context: {
@@ -109,9 +120,15 @@ export async function process(inputs, ctx) {
       complianceScore: gapAssessment.complianceScore,
       gapsCount: gapAssessment.gaps.length,
       files: [{ path: report.reportPath, format: 'markdown', label: 'GDPR Compliance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     organization: organizationProfile.name,

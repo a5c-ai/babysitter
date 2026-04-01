@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Analytical Stress Calculations');
 
-  const stressResult = await ctx.task(analyticalStressTask, {
+  let stressResult = await ctx.task(analyticalStressTask, {
     projectName,
     componentType,
     geometry,
@@ -104,8 +104,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Stress calculations complete - Max stress: ${stressResult.maxStress} MPa`);
 
   // Quality Gate: Stress exceeds yield
-  if (stressResult.maxStress > material.yieldStrength) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        stressResult = await ctx.task(analyticalStressTask, { ...{
+    projectName,
+    componentType,
+    geometry,
+    sectionResult,
+    material,
+    loads,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Maximum stress ${stressResult.maxStress} MPa exceeds yield strength ${material.yieldStrength} MPa. Yielding predicted at location: ${stressResult.criticalLocation}. Review and redesign?`,
       title: 'Yield Strength Exceeded',
       context: {
@@ -114,9 +127,15 @@ export async function process(inputs, ctx) {
         criticalLocation: stressResult.criticalLocation,
         stressDistribution: stressResult.stressDistribution,
         files: stressResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: DEFLECTION CALCULATIONS
@@ -124,7 +143,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Deflection Calculations');
 
-  const deflectionResult = await ctx.task(deflectionCalculationsTask, {
+  let deflectionResult = await ctx.task(deflectionCalculationsTask, {
     projectName,
     componentType,
     geometry,
@@ -141,8 +160,21 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Deflection exceeds limit
   const deflectionLimit = designCriteria.deflectionLimit || geometry.length / 250;
-  if (deflectionResult.maxDeflection > deflectionLimit) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        deflectionResult = await ctx.task(deflectionCalculationsTask, { ...{
+    projectName,
+    componentType,
+    geometry,
+    sectionResult,
+    material,
+    loads,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Maximum deflection ${deflectionResult.maxDeflection} mm exceeds limit ${deflectionLimit} mm (L/${Math.round(geometry.length / deflectionLimit)}). Stiffness insufficient. Review design?`,
       title: 'Deflection Limit Exceeded',
       context: {
@@ -151,9 +183,15 @@ export async function process(inputs, ctx) {
         deflectionLimit,
         deflectionCurve: deflectionResult.deflectionCurve,
         files: deflectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: COMBINED STRESS ANALYSIS
@@ -179,7 +217,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Safety Factor Calculations');
 
-  const safetyResult = await ctx.task(safetyFactorTask, {
+  let safetyResult = await ctx.task(safetyFactorTask, {
     projectName,
     stressResult,
     combinedResult,
@@ -194,8 +232,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Safety factor below requirement
   const requiredSF = designCriteria.safetyFactor || 2.0;
-  if (safetyResult.yieldSF < requiredSF) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        safetyResult = await ctx.task(safetyFactorTask, { ...{
+    projectName,
+    stressResult,
+    combinedResult,
+    material,
+    designCriteria,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Yield safety factor ${safetyResult.yieldSF} is below required ${requiredSF}. Design does not meet safety requirements. Redesign required?`,
       title: 'Safety Factor Warning',
       context: {
@@ -204,9 +253,15 @@ export async function process(inputs, ctx) {
         requiredSF,
         recommendations: safetyResult.recommendations,
         files: safetyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: FEA CORRELATION (IF APPLICABLE)
@@ -232,14 +287,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `FEA correlation complete - Stress difference: ${feaCorrelationResult.stressDifference}%`);
   }
-
   // ============================================================================
   // PHASE 8: GENERATE ANALYSIS REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating Analysis Report');
 
-  const reportResult = await ctx.task(generateStressReportTask, {
+  let reportResult = await ctx.task(generateStressReportTask, {
     projectName,
     componentType,
     geometry,
@@ -257,8 +311,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateStressReportTask, { ...{
+    projectName,
+    componentType,
+    geometry,
+    material,
+    loads,
+    sectionResult,
+    stressResult,
+    deflectionResult,
+    combinedResult,
+    safetyResult,
+    feaCorrelationResult,
+    designCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stress and Deflection Analysis Complete for ${projectName}. Max stress: ${stressResult.maxStress} MPa, Max deflection: ${deflectionResult.maxDeflection} mm, Yield SF: ${safetyResult.yieldSF}. Approve analysis?`,
     title: 'Stress Analysis Complete',
     context: {
@@ -274,9 +346,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -315,8 +393,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

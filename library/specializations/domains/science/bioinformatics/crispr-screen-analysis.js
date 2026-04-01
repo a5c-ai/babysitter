@@ -50,15 +50,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Count extraction complete. ${countResult.totalReads} total reads, ${countResult.mappedReads} mapped`);
 
   // Phase 2: Quality Control
-  const qcResult = await ctx.task(screenQcTask, { projectName, countData: countResult.countMatrix, libraryInfo, outputDir });
-  artifacts.push(...qcResult.artifacts);
-
-  await ctx.breakpoint({
+  let qcResult = await ctx.task(screenQcTask, { projectName, countData: countResult.countMatrix, libraryInfo, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      qcResult = await ctx.task(screenQcTask, { ...{ projectName, countData: countResult.countMatrix, libraryInfo, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Screen QC complete. Mapping rate: ${qcResult.mappingRate}%, Library coverage: ${qcResult.libraryCoverage}%, Gini index: ${qcResult.giniIndex}. Review quality metrics?`,
     title: 'CRISPR Screen QC Review',
-    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, sampleCorrelations: qcResult.correlations, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, sampleCorrelations: qcResult.correlations, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Count Normalization
   const normResult = await ctx.task(countNormalizationTask, { projectName, countData: countResult.countMatrix, qcResult, outputDir });
   artifacts.push(...normResult.artifacts);
@@ -69,7 +78,6 @@ export async function process(inputs, ctx) {
     cnvResult = await ctx.task(cnvCorrectionTask, { projectName, normalizedCounts: normResult.normalizedMatrix, cellLine: libraryInfo.cellLine, outputDir });
     artifacts.push(...cnvResult.artifacts);
   }
-
   // Phase 5: Hit Identification
   const hitResult = await ctx.task(hitIdentificationTask, {
     projectName,
@@ -91,17 +99,25 @@ export async function process(inputs, ctx) {
     essentialResult = await ctx.task(essentialGeneAnalysisTask, { projectName, hitResults: hitResult, essentialGeneList, outputDir });
     artifacts.push(...essentialResult.artifacts);
   }
-
   // Phase 7: Guide-Level Analysis
-  const guideResult = await ctx.task(guideLevelAnalysisTask, { projectName, countData: normResult.normalizedMatrix, hitResults: hitResult, libraryInfo, outputDir });
-  artifacts.push(...guideResult.artifacts);
-
-  await ctx.breakpoint({
+  let guideResult = await ctx.task(guideLevelAnalysisTask, { projectName, countData: normResult.normalizedMatrix, hitResults: hitResult, libraryInfo, outputDir });
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      guideResult = await ctx.task(guideLevelAnalysisTask, { ...{ projectName, countData: normResult.normalizedMatrix, hitResults: hitResult, libraryInfo, outputDir }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Hit analysis complete. ${hitResult.significantGenes} hits identified. Top enriched: ${hitResult.topEnriched?.slice(0, 5).join(', ') || 'N/A'}. Top depleted: ${hitResult.topDepleted?.slice(0, 5).join(', ') || 'N/A'}. Review hit list?`,
     title: 'CRISPR Screen Hit Review',
-    context: { runId: ctx.runId, hitSummary: hitResult.summary, topHits: { enriched: hitResult.topEnriched?.slice(0, 10), depleted: hitResult.topDepleted?.slice(0, 10) }, files: hitResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, hitSummary: hitResult.summary, topHits: { enriched: hitResult.topEnriched?.slice(0, 10), depleted: hitResult.topDepleted?.slice(0, 10) }, files: hitResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Pathway Enrichment
   const pathwayResult = await ctx.task(pathwayEnrichmentTask, { projectName, hitGenes: hitResult.significantHits, screenType, outputDir });
   artifacts.push(...pathwayResult.artifacts);
@@ -116,21 +132,29 @@ export async function process(inputs, ctx) {
     synlethalResult = await ctx.task(syntheticLethalityTask, { projectName, hitResults: hitResult, treatmentContext: inputs.treatmentContext, outputDir });
     artifacts.push(...synlethalResult.artifacts);
   }
-
   // Phase 11: Visualization Generation
   const vizResult = await ctx.task(screenVisualizationTask, { projectName, countData: normResult.normalizedMatrix, hitResults: hitResult, qcResult, pathwayResult, outputDir });
   artifacts.push(...vizResult.artifacts);
 
   // Phase 12: Report Generation
-  const reportResult = await ctx.task(generateScreenReportTask, { projectName, screenType, libraryInfo, qcResult, hitResult, guideResult, pathwayResult, ppiResult, synlethalResult, vizResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateScreenReportTask, { projectName, screenType, libraryInfo, qcResult, hitResult, guideResult, pathwayResult, ppiResult, synlethalResult, vizResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateScreenReportTask, { ...{ projectName, screenType, libraryInfo, qcResult, hitResult, guideResult, pathwayResult, ppiResult, synlethalResult, vizResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CRISPR Screen Analysis Complete. ${hitResult.significantGenes} significant genes, ${pathwayResult.enrichedPathways} enriched pathways. Approve final report?`,
     title: 'CRISPR Screen Analysis Complete',
-    context: { runId: ctx.runId, summary: { screenType, library: libraryInfo.name, significantGenes: hitResult.significantGenes, enrichedPathways: pathwayResult.enrichedPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Screen Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { screenType, library: libraryInfo.name, significantGenes: hitResult.significantGenes, enrichedPathways: pathwayResult.enrichedPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Screen Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -159,8 +183,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/crispr-screen-analysis', timestamp: startTime, screenType, analysisMethod }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const readCountExtractionTask = defineTask('read-count-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: `Read Count Extraction - ${args.projectName}`,

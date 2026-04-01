@@ -37,14 +37,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Foundation Brake Design
-  const foundationBrakes = await ctx.task(foundationBrakesTask, {
+  let foundationBrakes = await ctx.task(foundationBrakesTask, {
     vehicleProgram,
     brakeArchitecture,
     performanceTargets
   });
 
-  // Breakpoint: Foundation brake review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      foundationBrakes = await ctx.task(foundationBrakesTask, { ...{
+    vehicleProgram,
+    brakeArchitecture,
+    performanceTargets
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review foundation brake design for ${vehicleProgram}. Approve design?`,
     title: 'Foundation Brake Review',
     context: {
@@ -56,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: foundationBrakes
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: ESC Control Strategy
   const escControl = await ctx.task(escControlTask, {
     vehicleProgram,
@@ -75,7 +89,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Regulatory and Performance Testing
-  const brakeTesting = await ctx.task(brakeTestingTask, {
+  let brakeTesting = await ctx.task(brakeTestingTask, {
     vehicleProgram,
     foundationBrakes,
     escControl,
@@ -83,8 +97,18 @@ export async function process(inputs, ctx) {
     performanceTargets
   });
 
-  // Final Breakpoint: Brake system approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      brakeTesting = await ctx.task(brakeTestingTask, { ...{
+    vehicleProgram,
+    foundationBrakes,
+    escControl,
+    regenIntegration,
+    performanceTargets
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Brake System Development complete for ${vehicleProgram}. Stopping distance: ${brakeTesting.stoppingDistance}m. Approve?`,
     title: 'Brake System Approval',
     context: {
@@ -95,9 +119,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/brake-system-design.json`, format: 'json', content: brakeArchitecture },
         { path: `artifacts/test-reports.json`, format: 'json', content: brakeTesting }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     vehicleProgram,

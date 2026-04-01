@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Configuring fuzzing harness');
 
-  const harnessConfig = await ctx.task(harnessConfigTask, {
+  let harnessConfig = await ctx.task(harnessConfigTask, {
     projectName,
     targetBinary,
     fuzzingEngine,
@@ -101,9 +101,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...harnessConfig.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      harnessConfig = await ctx.task(harnessConfigTask, { ...{
+    projectName,
+    targetBinary,
+    fuzzingEngine,
+    instrumentedBuild,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Fuzzing setup complete for ${projectName}. Corpus: ${corpusCreation.corpusSize} seeds. Ready to start campaign?`,
     title: 'Fuzzing Campaign Ready',
     context: {
@@ -114,9 +123,15 @@ export async function process(inputs, ctx) {
         engine: fuzzingEngine
       },
       files: harnessConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CAMPAIGN EXECUTION
   // ============================================================================
@@ -171,7 +186,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating fuzzing campaign report');
 
-  const report = await ctx.task(fuzzingReportTask, {
+  let report = await ctx.task(fuzzingReportTask, {
     projectName,
     campaignExecution,
     crashTriage,
@@ -179,9 +194,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(fuzzingReportTask, { ...{
+    projectName,
+    campaignExecution,
+    crashTriage,
+    crashMinimization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fuzzing campaign complete. ${crashMinimization.uniqueVulnerabilities} unique vulnerabilities found. Review results?`,
     title: 'Fuzzing Campaign Complete',
     context: {
@@ -192,9 +216,15 @@ export async function process(inputs, ctx) {
         coverageAchieved: campaignExecution.coverageMetrics
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -214,8 +244,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

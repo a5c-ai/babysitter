@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...scriptInjection.artifacts);
 
   // Phase 3: Configure Core Web Vitals Collection
-  const webVitals = await ctx.task(configureCoreWebVitalsTask, { projectName, outputDir });
-  artifacts.push(...webVitals.artifacts);
-
-  await ctx.breakpoint({
+  let webVitals = await ctx.task(configureCoreWebVitalsTask, { projectName, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      webVitals = await ctx.task(configureCoreWebVitalsTask, { ...{ projectName, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `RUM script injected in ${scriptInjection.injectedCount} pages. Configure user journey tracking?`,
     title: 'RUM Script Injection',
-    context: { runId: ctx.runId, scriptInjection }
-  });
-
+    context: { runId: ctx.runId, scriptInjection },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Set Up User Journey Tracking
   const journeyTracking = await ctx.task(setupUserJourneyTrackingTask, { projectName, outputDir });
   artifacts.push(...journeyTracking.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...alerts.artifacts);
 
   // Phase 9: Document RUM Setup
-  const documentation = await ctx.task(documentRUMSetupTask, { projectName, scriptInjection, dashboards, alerts, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentRUMSetupTask, { projectName, scriptInjection, dashboards, alerts, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentRUMSetupTask, { ...{ projectName, scriptInjection, dashboards, alerts, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RUM setup complete. ${dashboards.dashboards.length} dashboards, ${alerts.alerts.length} alerts. Accept?`,
     title: 'RUM Setup Review',
-    context: { runId: ctx.runId, dashboards, alerts }
-  });
-
+    context: { runId: ctx.runId, dashboards, alerts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

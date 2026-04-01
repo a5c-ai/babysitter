@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Developing improvement strategy');
 
-  const developmentStrategy = await ctx.task(developmentStrategyTask, {
+  let developmentStrategy = await ctx.task(developmentStrategyTask, {
     supplier,
     gapAnalysis,
     investmentBudget,
@@ -82,8 +82,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...developmentStrategy.artifacts);
 
-  // Breakpoint: Review development strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      developmentStrategy = await ctx.task(developmentStrategyTask, { ...{
+    supplier,
+    gapAnalysis,
+    investmentBudget,
+    timeline,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Development strategy created for ${supplier}. ${developmentStrategy.initiatives.length} initiatives identified. Investment: $${developmentStrategy.totalInvestment}. Review strategy?`,
     title: 'Supplier Development Strategy Review',
     context: {
@@ -95,9 +105,15 @@ export async function process(inputs, ctx) {
         totalInvestment: developmentStrategy.totalInvestment,
         expectedROI: developmentStrategy.expectedROI
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: JOINT IMPROVEMENT PLANNING
   // ============================================================================
@@ -203,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

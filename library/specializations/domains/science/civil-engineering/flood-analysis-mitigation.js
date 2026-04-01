@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Flood Damage Assessment
   ctx.log('info', 'Assessing flood damages');
-  const damageAssessment = await ctx.task(damageAssessmentTask, {
+  let damageAssessment = await ctx.task(damageAssessmentTask, {
     projectId,
     floodplainMapping,
     structureInventory,
@@ -76,8 +76,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...damageAssessment.artifacts);
 
-  // Breakpoint: Review flood analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      damageAssessment = await ctx.task(damageAssessmentTask, { ...{
+    projectId,
+    floodplainMapping,
+    structureInventory,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Flood analysis complete for ${projectId}. 100-year flood elevation: ${hydraulicModeling.bfe100}. Review results?`,
     title: 'Flood Analysis Review',
     context: {
@@ -90,9 +99,15 @@ export async function process(inputs, ctx) {
         structuresAtRisk: damageAssessment.structuresAtRisk,
         annualDamages: damageAssessment.expectedAnnualDamages
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 5: Mitigation Alternatives Analysis
   ctx.log('info', 'Analyzing mitigation alternatives');
   const mitigationAlternatives = await ctx.task(mitigationAlternativesTask, {
@@ -167,8 +182,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Flood Frequency Analysis
+  // Task 1: Flood Frequency Analysis
 export const frequencyAnalysisTask = defineTask('frequency-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform flood frequency analysis',

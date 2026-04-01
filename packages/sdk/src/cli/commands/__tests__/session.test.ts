@@ -135,10 +135,103 @@ describe('session commands', () => {
       });
 
       // Try to associate again
+      const errorSpy = vi.spyOn(console, 'error');
+      errorSpy.mockClear();
+
       const result = await handleSessionAssociate({
         sessionId,
         stateDir,
         runId: 'different-run',
+        json: true,
+      });
+
+      expect(result).toBe(1);
+      const errorOutput = errorSpy.mock.calls.map(c => c[0]).join(' ');
+      expect(errorOutput).toContain('--force');
+    });
+
+    it('allows rebind with --force when no runsDir provided', async () => {
+      const runId = 'run-456';
+
+      await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId,
+        json: true,
+      });
+
+      // Force rebind without runsDir (trusts user intent)
+      const result = await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId: 'run-789',
+        force: true,
+        json: true,
+      });
+
+      expect(result).toBe(0);
+
+      const stateFile = path.join(stateDir, `${sessionId}.md`);
+      const content = await fs.readFile(stateFile, 'utf8');
+      expect(content).toContain('run_id: "run-789"');
+    });
+
+    it('allows rebind with --force when old run is terminal', async () => {
+      const oldRunId = 'run-terminal';
+
+      await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId: oldRunId,
+        json: true,
+      });
+
+      // Create a terminal run journal
+      const oldRunDir = path.join(runsDir, oldRunId);
+      const journalDir = path.join(oldRunDir, 'journal');
+      await fs.mkdir(journalDir, { recursive: true });
+      await fs.writeFile(
+        path.join(journalDir, '000001.01AAAAAAAAAAAAAAAAAAAAAAAAA.json'),
+        JSON.stringify({ type: 'RUN_COMPLETED', recordedAt: new Date().toISOString(), data: {}, checksum: 'abc' }),
+      );
+
+      const result = await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId: 'run-new',
+        force: true,
+        runsDir,
+        json: true,
+      });
+
+      expect(result).toBe(0);
+    });
+
+    it('rejects --force when old run is still active', async () => {
+      const oldRunId = 'run-active';
+
+      await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId: oldRunId,
+        json: true,
+      });
+
+      // Create a non-terminal run journal (only RUN_CREATED, no RUN_COMPLETED/FAILED)
+      const oldRunDir = path.join(runsDir, oldRunId);
+      const journalDir = path.join(oldRunDir, 'journal');
+      await fs.mkdir(journalDir, { recursive: true });
+      await fs.writeFile(
+        path.join(journalDir, '000001.01AAAAAAAAAAAAAAAAAAAAAAAAA.json'),
+        JSON.stringify({ type: 'RUN_CREATED', recordedAt: new Date().toISOString(), data: {}, checksum: 'abc' }),
+      );
+
+      const result = await handleSessionAssociate({
+        sessionId,
+        stateDir,
+        runId: 'run-new',
+        force: true,
+        runsDir,
         json: true,
       });
 

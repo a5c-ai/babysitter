@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Predict Catalyst Lifetime
   ctx.log('info', 'Predicting catalyst lifetime');
-  const lifetimeResult = await ctx.task(lifetimePredictionTask, {
+  let lifetimeResult = await ctx.task(lifetimePredictionTask, {
     processName,
     catalyst: optimizationResult.bestCatalyst,
     operatingConditions: optimizationResult.optimizedConditions,
@@ -89,8 +89,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...lifetimeResult.artifacts);
 
-  // Breakpoint: Review catalyst evaluation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      lifetimeResult = await ctx.task(lifetimePredictionTask, { ...{
+    processName,
+    catalyst: optimizationResult.bestCatalyst,
+    operatingConditions: optimizationResult.optimizedConditions,
+    deactivationModel: deactivationResult.deactivationModel,
+    regenerationCapability: regenerationResult.regenerationCapability,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Catalyst evaluation complete for ${processName}. Selected: ${optimizationResult.bestCatalyst.name}. Predicted lifetime: ${lifetimeResult.predictedLifetime} hours. Activity: ${optimizationResult.bestCatalyst.activity}. Review results?`,
     title: 'Catalyst Evaluation Review',
     context: {
@@ -103,9 +114,15 @@ export async function process(inputs, ctx) {
         predictedLifetime: lifetimeResult.predictedLifetime,
         regenerable: regenerationResult.regenerationCapability.isRegenerable
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Evaluate Catalyst Economics
   ctx.log('info', 'Evaluating catalyst cost and supply chain');
   const economicsResult = await ctx.task(catalystEconomicsTask, {
@@ -157,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Catalyst Screening
+  // Task 1: Catalyst Screening
 export const catalystScreeningTask = defineTask('catalyst-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Screen candidate catalysts for activity and selectivity',

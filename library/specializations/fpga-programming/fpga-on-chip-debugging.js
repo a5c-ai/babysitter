@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const ilaInsertion = await ctx.task(ilaInsertionTask, { designName, debugPlanning, captureDepth, debugHubType, outputDir });
   artifacts.push(...ilaInsertion.artifacts);
 
-  const triggerSetup = await ctx.task(triggerSetupTask, { designName, ilaInsertion, triggerConditions, outputDir });
-  artifacts.push(...triggerSetup.artifacts);
-
-  await ctx.breakpoint({
+  let triggerSetup = await ctx.task(triggerSetupTask, { designName, ilaInsertion, triggerConditions, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      triggerSetup = await ctx.task(triggerSetupTask, { ...{ designName, ilaInsertion, triggerConditions, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Debug cores configured for ${designName}. ${ilaInsertion.coreCount} ILA cores, ${triggerSetup.triggerCount} triggers. Review debug setup?`,
     title: 'Debug Setup Review',
-    context: { runId: ctx.runId, designName, cores: ilaInsertion.coreCount, triggers: triggerSetup.triggerCount }
-  });
-
+    context: { runId: ctx.runId, designName, cores: ilaInsertion.coreCount, triggers: triggerSetup.triggerCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const vioSetup = await ctx.task(vioSetupTask, { designName, debugPlanning, outputDir });
   artifacts.push(...vioSetup.artifacts);
 

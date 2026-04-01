@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Storage Facility Design
   ctx.log('info', 'Designing storage facilities');
-  const storageDesign = await ctx.task(storageDesignTask, {
+  let storageDesign = await ctx.task(storageDesignTask, {
     projectId,
     demandAnalysis,
     hydraulicModel,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...storageDesign.artifacts);
 
-  // Breakpoint: Review distribution design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      storageDesign = await ctx.task(storageDesignTask, { ...{
+    projectId,
+    demandAnalysis,
+    hydraulicModel,
+    pressureRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Water distribution design complete for ${projectId}. Peak demand: ${demandAnalysis.peakDemand} gpm. Review design?`,
     title: 'Water Distribution Design Review',
     context: {
@@ -108,9 +118,15 @@ export async function process(inputs, ctx) {
         storageVolume: storageDesign.totalVolume,
         minPressure: hydraulicModel.minPressure
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Pump Station Design
   ctx.log('info', 'Designing pump stations');
   const pumpStationDesign = await ctx.task(pumpStationDesignTask, {
@@ -188,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Demand Analysis
+  // Task 1: Demand Analysis
 export const demandAnalysisTask = defineTask('demand-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform water demand analysis',

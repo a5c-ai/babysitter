@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring backward design quality');
-  const qualityScore = await ctx.task(backwardDesignQualityScoringTask, {
+  let qualityScore = await ctx.task(backwardDesignQualityScoringTask, {
     courseName,
     stage1Results,
     stage2Evidence,
@@ -120,8 +120,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review backward design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(backwardDesignQualityScoringTask, { ...{
+    courseName,
+    stage1Results,
+    stage2Evidence,
+    stage3Plan,
+    wheretoElements,
+    unitDesign,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Backward design complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Backward Design (UbD) Review',
     context: {
@@ -135,9 +148,15 @@ export async function process(inputs, ctx) {
         totalAssessments: stage2Evidence.evidence?.performanceTasks?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -174,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Identify Desired Results (Stage 1)
+  // Task 1: Identify Desired Results (Stage 1)
 export const desiredResultsTask = defineTask('desired-results', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify desired results (Stage 1)',

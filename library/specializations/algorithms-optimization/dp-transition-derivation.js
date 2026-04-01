@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(dpImplementationTask, { derivation, baseCases, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const verification = await ctx.task(transitionVerificationTask, { derivation, implementation, outputDir });
-  artifacts.push(...verification.artifacts);
-
-  await ctx.breakpoint({
+  let verification = await ctx.task(transitionVerificationTask, { derivation, implementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      verification = await ctx.task(transitionVerificationTask, { ...{ derivation, implementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DP transition derived. Recurrence: ${derivation.formula}. Verified: ${verification.isCorrect}. Review?`,
     title: 'DP Transition Derivation Complete',
-    context: { runId: ctx.runId, recurrence: derivation.formula, verified: verification.isCorrect }
-  });
-
+    context: { runId: ctx.runId, recurrence: derivation.formula, verified: verification.isCorrect },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     recurrence: derivation.formula,

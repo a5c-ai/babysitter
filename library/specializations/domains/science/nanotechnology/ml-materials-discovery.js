@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Data Curation
-  const dataCuration = await ctx.task(dataCurationTask, {
+  let dataCuration = await ctx.task(dataCurationTask, {
     discoveryGoal,
     candidateSpace,
     existingData,
@@ -50,9 +50,17 @@ export async function process(inputs, ctx) {
       recommendations: dataCuration.recommendations
     };
   }
-
-  // Breakpoint: Review curated data
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dataCuration = await ctx.task(dataCurationTask, { ...{
+    discoveryGoal,
+    candidateSpace,
+    existingData,
+    targetProperty
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Data curation complete. ${dataCuration.dataPoints} data points from ${dataCuration.sources.length} sources. ${dataCuration.propertyCompleteness}% property completeness. Proceed?`,
     title: 'Training Data Review',
     context: {
@@ -63,9 +71,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataCuration.summary
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Feature Engineering
   const featureEngineering = await ctx.task(featureEngineeringTask, {
     dataCuration,
@@ -74,42 +88,70 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Model Selection and Training
-  const modelTraining = await ctx.task(modelTrainingTask, {
+  let modelTraining = await ctx.task(modelTrainingTask, {
     featureEngineering,
     dataCuration,
     targetProperty
   });
 
-  // Breakpoint: Review model performance
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      modelTraining = await ctx.task(modelTrainingTask, { ...{
+    featureEngineering,
+    dataCuration,
+    targetProperty
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Model training complete. Best model: ${modelTraining.bestModel.type}. CV Score: ${modelTraining.bestModel.cvScore.toFixed(3)}. Test R2: ${modelTraining.bestModel.testScore.toFixed(3)}. Approve?`,
     title: 'Model Performance Review',
     context: {
       runId: ctx.runId,
       modelComparison: modelTraining.modelComparison,
       featureImportance: modelTraining.featureImportance
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Model Validation
-  const modelValidation = await ctx.task(modelValidationTask, {
+  let modelValidation = await ctx.task(modelValidationTask, {
     modelTraining,
     featureEngineering,
     dataCuration
   });
 
   // Quality Gate: Model must pass validation
-  if (!modelValidation.passed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        modelValidation = await ctx.task(modelValidationTask, { ...{
+    modelTraining,
+    featureEngineering,
+    dataCuration
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Model validation concerns: ${modelValidation.concerns.join(', ')}. Proceed with caution?`,
       title: 'Model Validation Warning',
       context: {
         runId: ctx.runId,
         modelValidation,
         recommendations: modelValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Virtual Screening
   const virtualScreening = await ctx.task(virtualScreeningTask, {
@@ -129,7 +171,7 @@ export async function process(inputs, ctx) {
     activeLearningCycle++;
 
     // Select candidates for validation
-    const candidateSelection = await ctx.task(candidateSelectionTask, {
+    let candidateSelection = await ctx.task(candidateSelectionTask, {
       currentRankings,
       currentModel,
       discoveryGoal,
@@ -137,18 +179,34 @@ export async function process(inputs, ctx) {
       cycle: activeLearningCycle
     });
 
-    // Breakpoint: Review selected candidates
-    await ctx.breakpoint({
+      let lastFeedback_iterationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_iterationApproval) {
+        candidateSelection = await ctx.task(candidateSelectionTask, { ...{
+      currentRankings,
+      currentModel,
+      discoveryGoal,
+      validationBudget: Math.floor(validationBudget / activeLearningCycles),
+      cycle: activeLearningCycle
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+      }
+  const iterationApproval = await ctx.breakpoint({
       question: `Active learning cycle ${activeLearningCycle}: ${candidateSelection.selectedCandidates.length} candidates selected for validation. Approve selections?`,
       title: 'Candidate Selection Review',
       context: {
         runId: ctx.runId,
         selectedCandidates: candidateSelection.selectedCandidates,
         selectionRationale: candidateSelection.rationale
-      }
-    });
-
-    // Simulate validation (in practice, this triggers experiments)
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_iterationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (iterationApproval.approved) break;
+      lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+    }
+  // Simulate validation (in practice, this triggers experiments)
     const validationResults = await ctx.task(validationSimulationTask, {
       selectedCandidates: candidateSelection.selectedCandidates,
       discoveryGoal,
@@ -183,7 +241,6 @@ export async function process(inputs, ctx) {
       topCandidates: currentRankings.slice(0, 10)
     });
   }
-
   // Phase 7: Final Candidate Analysis
   const finalAnalysis = await ctx.task(finalAnalysisTask, {
     currentRankings,
@@ -208,7 +265,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  const discoveryReport = await ctx.task(reportGenerationTask, {
+  let discoveryReport = await ctx.task(reportGenerationTask, {
     dataCuration,
     modelTraining,
     modelValidation,
@@ -220,8 +277,22 @@ export async function process(inputs, ctx) {
     discoveryGoal
   });
 
-  // Final Breakpoint: Results approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      discoveryReport = await ctx.task(reportGenerationTask, { ...{
+    dataCuration,
+    modelTraining,
+    modelValidation,
+    virtualScreening,
+    activeLearningHistory,
+    finalAnalysis,
+    validationPlan,
+    uncertaintyAnalysis,
+    discoveryGoal
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ML materials discovery complete. ${finalAnalysis.topCandidates.length} top candidates identified. Best predicted ${targetProperty}: ${finalAnalysis.bestPrediction}. Approve results?`,
     title: 'ML Discovery Results Approval',
     context: {
@@ -232,9 +303,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/discovery-report.md', format: 'markdown', content: discoveryReport.markdown },
         { path: 'artifacts/candidates.json', format: 'json', content: currentRankings }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     predictiveModel: {
@@ -254,8 +331,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dataCurationTask = defineTask('data-curation', (args, taskCtx) => ({
   kind: 'agent',

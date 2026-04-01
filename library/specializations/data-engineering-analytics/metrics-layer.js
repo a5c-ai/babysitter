@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and cataloging business metrics');
 
-  const discoveryResult = await ctx.task(discoverBusinessMetricsTask, {
+  let discoveryResult = await ctx.task(discoverBusinessMetricsTask, {
     projectName,
     metricsScope,
     businessDomains,
@@ -83,8 +83,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Discovery complete - Identified ${metricsCount} metrics across ${discoveryResult.domains.length} domains`);
   ctx.log('info', `Metric types: ${discoveryResult.metricTypes.derived} derived, ${discoveryResult.metricTypes.base} base, ${discoveryResult.metricTypes.compound} compound`);
 
-  // Quality Gate: Metrics catalog review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      discoveryResult = await ctx.task(discoverBusinessMetricsTask, { ...{
+    projectName,
+    metricsScope,
+    businessDomains,
+    existingMetrics,
+    dataWarehouse,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Metrics discovery complete for ${projectName}. Identified ${metricsCount} metrics across ${discoveryResult.domains.length} business domains. Review metric catalog and business definitions?`,
     title: 'Metrics Catalog Review',
     context: {
@@ -98,16 +109,22 @@ export async function process(inputs, ctx) {
         coverage: discoveryResult.estimatedCoverage
       },
       files: discoveryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SEMANTIC MODEL DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing semantic models and entity relationships');
 
-  const semanticDesignResult = await ctx.task(designSemanticModelsTask, {
+  let semanticDesignResult = await ctx.task(designSemanticModelsTask, {
     projectName,
     metrics: discoveryResult.metrics,
     businessDomains,
@@ -123,8 +140,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Semantic design complete - ${semanticModels.length} models created with ${semanticDesignResult.entities.length} entities`);
   ctx.log('info', `Relationships mapped: ${semanticDesignResult.relationships.length}`);
 
-  // Quality Gate: Semantic model review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      semanticDesignResult = await ctx.task(designSemanticModelsTask, { ...{
+    projectName,
+    metrics: discoveryResult.metrics,
+    businessDomains,
+    dataWarehouse,
+    platform,
+    includeLineage,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Semantic models designed. Created ${semanticModels.length} models with ${semanticDesignResult.entities.length} entities and ${semanticDesignResult.relationships.length} relationships. Review semantic layer architecture?`,
     title: 'Semantic Model Review',
     context: {
@@ -136,16 +165,22 @@ export async function process(inputs, ctx) {
         hierarchies: semanticDesignResult.hierarchies
       },
       files: semanticDesignResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: METRIC DEFINITIONS AND BUSINESS LOGIC
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Implementing metric definitions and business logic');
 
-  const metricDefinitionsResult = await ctx.task(implementMetricDefinitionsTask, {
+  let metricDefinitionsResult = await ctx.task(implementMetricDefinitionsTask, {
     projectName,
     platform,
     semanticModels,
@@ -166,8 +201,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Metric definitions implemented - ${metricDefinitionsResult.definitionsCreated} definitions`);
   ctx.log('info', `Business logic: ${metricDefinitionsResult.calculationLogic.length} calculations, ${metricDefinitionsResult.transformations.length} transformations`);
 
-  // Quality Gate: Metric definitions review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval3) {
+      metricDefinitionsResult = await ctx.task(implementMetricDefinitionsTask, { ...{
+    projectName,
+    platform,
+    semanticModels,
+    metrics: discoveryResult.metrics,
+    dataWarehouse,
+    enableCaching,
+    refreshStrategy,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+    }
+  const qualityGateApproval3 = await ctx.breakpoint({
     question: `Metric definitions implemented using ${platform}. Created ${metricDefinitionsResult.definitionsCreated} definitions with business logic centralized. Review metric calculations and transformations?`,
     title: 'Metric Definitions Review',
     context: {
@@ -182,9 +230,15 @@ export async function process(inputs, ctx) {
         exampleMetrics: metricDefinitionsResult.exampleDefinitions.slice(0, 5)
       },
       files: metricDefinitionsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval3.approved) break;
+    lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: VERSION CONTROL AND CHANGE MANAGEMENT
   // ============================================================================
@@ -192,7 +246,7 @@ export async function process(inputs, ctx) {
   if (versionControl) {
     ctx.log('info', 'Phase 4: Implementing version control and change management');
 
-    const versionControlResult = await ctx.task(setupVersionControlTask, {
+    let versionControlResult = await ctx.task(setupVersionControlTask, {
       projectName,
       platform,
       metricDefinitions: metricDefinitionsResult.definitions,
@@ -211,8 +265,19 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Version control configured - Git repository initialized with ${versionControlResult.branches.length} branches`);
     ctx.log('info', `Change management: ${versionControlResult.workflows.length} workflows, ${versionControlResult.approvalGates.length} approval gates`);
 
-    // Quality Gate: Version control review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        versionControlResult = await ctx.task(setupVersionControlTask, { ...{
+      projectName,
+      platform,
+      metricDefinitions: metricDefinitionsResult.definitions,
+      semanticModels,
+      governanceLevel,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Version control and change management configured. Git repository initialized with branching strategy and ${versionControlResult.approvalGates.length} approval gates. Review version control setup?`,
       title: 'Version Control Review',
       context: {
@@ -225,9 +290,15 @@ export async function process(inputs, ctx) {
           cicdIntegration: versionControlResult.cicdIntegration
         },
         files: versionControlResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: GOVERNANCE AND ACCESS CONTROL
@@ -236,7 +307,7 @@ export async function process(inputs, ctx) {
   if (accessControl !== 'none') {
     ctx.log('info', 'Phase 5: Implementing governance policies and access control');
 
-    const governanceResult = await ctx.task(implementGovernanceTask, {
+    let governanceResult = await ctx.task(implementGovernanceTask, {
       projectName,
       platform,
       semanticModels,
@@ -257,8 +328,21 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Governance implemented - ${governanceResult.policies.length} policies, ${governanceResult.roles.length} roles defined`);
     ctx.log('info', `Access control: ${governanceResult.permissions.length} permission rules configured`);
 
-    // Quality Gate: Governance review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        governanceResult = await ctx.task(implementGovernanceTask, { ...{
+      projectName,
+      platform,
+      semanticModels,
+      metrics: discoveryResult.metrics,
+      accessControl,
+      governanceLevel,
+      businessDomains,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Governance and access control implemented with ${governanceResult.policies.length} policies and ${governanceResult.roles.length} roles. Review governance framework and access permissions?`,
       title: 'Governance Review',
       context: {
@@ -272,9 +356,15 @@ export async function process(inputs, ctx) {
           auditingEnabled: governanceResult.auditingEnabled
         },
         files: governanceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: METRIC LINEAGE AND DOCUMENTATION
@@ -282,7 +372,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating metric lineage and comprehensive documentation');
 
-  const documentationResult = await ctx.task(generateMetricDocumentationTask, {
+  let documentationResult = await ctx.task(generateMetricDocumentationTask, {
     projectName,
     platform,
     semanticModels,
@@ -299,9 +389,21 @@ export async function process(inputs, ctx) {
   if (includeLineage) {
     ctx.log('info', `Lineage tracked: ${documentationResult.lineage.metricToTable} metric-to-table, ${documentationResult.lineage.metricToMetric} metric-to-metric dependencies`);
   }
-
-  // Quality Gate: Documentation review
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval6 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval6) {
+      documentationResult = await ctx.task(generateMetricDocumentationTask, { ...{
+    projectName,
+    platform,
+    semanticModels,
+    metrics: discoveryResult.metrics,
+    metricDefinitions: metricDefinitionsResult.definitions,
+    includeLineage,
+    documentationLevel,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+    }
+  const qualityGateApproval6 = await ctx.breakpoint({
     question: `Metric documentation generated with ${documentationResult.pages.length} pages${includeLineage ? ` and complete lineage tracking (${documentationResult.lineage.metricToTable} metric-to-table relationships)` : ''}. Review documentation completeness?`,
     title: 'Documentation Review',
     context: {
@@ -315,9 +417,15 @@ export async function process(inputs, ctx) {
         completeness: documentationResult.completeness
       },
       files: documentationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval6.approved) break;
+    lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: METRIC TESTING AND VALIDATION
   // ============================================================================
@@ -325,7 +433,7 @@ export async function process(inputs, ctx) {
   if (enableTesting) {
     ctx.log('info', 'Phase 7: Testing and validating metric definitions');
 
-    const testingResult = await ctx.task(testMetricDefinitionsTask, {
+    let testingResult = await ctx.task(testMetricDefinitionsTask, {
       projectName,
       platform,
       metricDefinitions: metricDefinitionsResult.definitions,
@@ -344,8 +452,19 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Testing complete - ${testingResult.testsPassed}/${testingResult.testsRun} tests passed`);
     ctx.log('info', `Validation: ${testingResult.validationChecks.passed}/${testingResult.validationChecks.total} checks passed`);
 
-    // Quality Gate: Testing results
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval7 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval7) {
+        testingResult = await ctx.task(testMetricDefinitionsTask, { ...{
+      projectName,
+      platform,
+      metricDefinitions: metricDefinitionsResult.definitions,
+      semanticModels,
+      dataWarehouse,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
+      }
+  const qualityGateApproval7 = await ctx.breakpoint({
       question: `Metric testing complete. ${testingResult.testsPassed}/${testingResult.testsRun} tests passed, ${testingResult.validationChecks.passed}/${testingResult.validationChecks.total} validation checks passed. ${testingResult.testsFailed > 0 ? `Review and fix ${testingResult.testsFailed} failed tests?` : 'Proceed to deployment?'}`,
       title: 'Testing Results Review',
       context: {
@@ -359,9 +478,15 @@ export async function process(inputs, ctx) {
           coverage: testingResult.coverage
         },
         files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval7.approved) break;
+      lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: DEPLOYMENT AND INTEGRATION
@@ -369,7 +494,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Deploying metrics layer and integrating with BI tools');
 
-  const deploymentResult = await ctx.task(deployMetricsLayerTask, {
+  let deploymentResult = await ctx.task(deployMetricsLayerTask, {
     projectName,
     platform,
     dataWarehouse,
@@ -390,8 +515,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Deployment complete - Metrics layer deployed to ${deploymentResult.environment}`);
   ctx.log('info', `Integrations: ${deploymentResult.integrations.length} BI tools connected`);
 
-  // Quality Gate: Deployment verification
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval8 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval8) {
+      deploymentResult = await ctx.task(deployMetricsLayerTask, { ...{
+    projectName,
+    platform,
+    dataWarehouse,
+    semanticModels,
+    metricDefinitions: metricDefinitionsResult.definitions,
+    enableCaching,
+    refreshStrategy,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval8, attempt: attempt + 1 });
+    }
+  const qualityGateApproval8 = await ctx.breakpoint({
     question: `Metrics layer deployed to ${deploymentResult.environment}. ${deploymentResult.integrations.length} BI tool integrations configured. Verify deployment and test integrations?`,
     title: 'Deployment Verification',
     context: {
@@ -405,16 +543,22 @@ export async function process(inputs, ctx) {
         performance: deploymentResult.performance
       },
       files: deploymentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval8 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval8.approved) break;
+    lastFeedback_qualityGateApproval8 = qualityGateApproval8.response || qualityGateApproval8.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: QUALITY VALIDATION AND FINAL ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Final quality validation and coverage assessment');
 
-  const qualityResult = await ctx.task(validateMetricsLayerQualityTask, {
+  let qualityResult = await ctx.task(validateMetricsLayerQualityTask, {
     projectName,
     metricsCount,
     semanticModels,
@@ -435,8 +579,22 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Quality assessment complete - Score: ${qualityScore}/100, Coverage: ${coverage}%`);
   ctx.log('info', `Completeness: Definitions ${qualityResult.completeness.definitions}%, Documentation ${qualityResult.completeness.documentation}%, Testing ${qualityResult.completeness.testing}%`);
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityResult = await ctx.task(validateMetricsLayerQualityTask, { ...{
+    projectName,
+    metricsCount,
+    semanticModels,
+    implementations,
+    targetCoverage,
+    governanceLevel,
+    documentationLevel,
+    testingResults: enableTesting ? implementations.find(i => i.phase === 'Metric Testing')?.result : null,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Metrics layer implementation complete for ${projectName}. Quality score: ${qualityScore}/100, Coverage: ${coverage}% (target: ${targetCoverage}%). ${meetsTarget ? 'Target met!' : 'Below target.'} Review final results and sign off?`,
     title: 'Final Quality Assessment',
     context: {
@@ -453,9 +611,15 @@ export async function process(inputs, ctx) {
         nextSteps: qualityResult.nextSteps
       },
       files: qualityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // FINAL SUMMARY
   // ============================================================================
@@ -504,8 +668,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

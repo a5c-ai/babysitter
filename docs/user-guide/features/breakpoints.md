@@ -1,7 +1,7 @@
 # Breakpoints: Human-in-the-Loop Approval
 
-**Version:** 2.0
-**Last Updated:** 2026-02-03
+**Version:** 3.0
+**Last Updated:** 2026-03-30
 **Category:** Feature Guide
 
 ---
@@ -23,7 +23,7 @@
 
 ## Overview
 
-Breakpoints provide human-in-the-loop approval gates within Babysitter workflows. Use `ctx.breakpoint()` to pause automated execution at critical decision points, present context to the user, and make informed approvals before proceeding.
+Breakpoints provide human-in-the-loop approval gates within Babysitter workflows. Use `ctx.breakpoint()` to pause automated execution at critical decision points, present context to the user, and make informed approvals before proceeding. The call returns a `BreakpointResult` object containing the reviewer's decision and any feedback provided.
 
 ### How Breakpoints Work
 
@@ -33,6 +33,7 @@ When running Babysitter within a Claude Code session, breakpoints are handled **
 2. Claude uses the `AskUserQuestion` tool to present the question
 3. You respond in the chat (approve, reject, or provide feedback)
 4. Claude posts your response and the process continues
+5. The call resolves with a `BreakpointResult` containing your decision
 
 **Key benefits:**
 - No external services required
@@ -62,7 +63,7 @@ export async function process(inputs, ctx) {
   const plan = await ctx.task(generatePlanTask, { feature: inputs.feature });
 
   // Request human approval
-  await ctx.breakpoint({
+  const review = await ctx.breakpoint({
     question: 'Review the implementation plan. Approve to proceed?',
     title: 'Plan Review',
     context: {
@@ -72,6 +73,10 @@ export async function process(inputs, ctx) {
       ]
     }
   });
+
+  if (!review.approved) {
+    return { success: false, reason: review.feedback };
+  }
 
   // Continue only after approval
   const result = await ctx.task(implementTask, { plan });
@@ -128,16 +133,18 @@ Add breakpoints to your process definition using `ctx.breakpoint()`:
 **Simple breakpoint:**
 
 ```javascript
-await ctx.breakpoint({
+const result = await ctx.breakpoint({
   question: 'Approve the changes?',
   title: 'Review Required'
 });
+// result.approved — boolean indicating approval
+// result.feedback — optional reviewer feedback
 ```
 
-**Breakpoint with context files:**
+**Breakpoint with rejection handling:**
 
 ```javascript
-await ctx.breakpoint({
+const result = await ctx.breakpoint({
   question: 'Approve the implementation plan?',
   title: 'Plan Approval',
   context: {
@@ -149,7 +156,15 @@ await ctx.breakpoint({
     ]
   }
 });
+
+if (!result.approved) {
+  // Handle rejection — use result.feedback for reviewer's reasoning
+  ctx.log('Plan rejected', { feedback: result.feedback });
+  return { success: false, reason: result.feedback };
+}
 ```
+
+> **Backward compatibility:** Existing processes that do not capture the return value (`await ctx.breakpoint(...)`) continue to work without changes.
 
 ### Interactive Approval Flow
 
@@ -176,6 +191,20 @@ Claude: Plan approved. Proceeding with implementation...
 
 ## Configuration Options
 
+### BreakpointResult Interface
+
+`ctx.breakpoint()` returns `Promise<BreakpointResult>` with the following fields:
+
+| Field | Type | Always Present | Description |
+|-------|------|----------------|-------------|
+| `approved` | boolean | Yes | Whether the reviewer approved the breakpoint |
+| `response` | string | No | The reviewer's raw response text |
+| `feedback` | string | No | Structured feedback from the reviewer |
+| `option` | string | No | The selected option when multiple choices are presented |
+| `respondedBy` | string | No | Identifier of the person who responded |
+| `allResponses` | array | No | All responses collected (for `collect-all` or `quorum` strategies) |
+| `[key: string]` | unknown | No | Additional custom fields from the resolution |
+
 ### Breakpoint Payload Schema
 
 | Field | Type | Required | Description |
@@ -185,6 +214,68 @@ Claude: Plan approved. Proceeding with implementation...
 | `context` | object | No | Additional context for the reviewer |
 | `context.runId` | string | No | The run ID for linking context files |
 | `context.files` | array | No | Array of files to display for review |
+| `expert` | string \| string[] | No | Domain expert(s) to route to, or `'owner'` for the project owner |
+| `tags` | string[] | No | Categorization tags for the breakpoint |
+| `strategy` | string | No | Resolution strategy: `'single'` (default), `'first-response-wins'`, `'collect-all'`, or `'quorum'` |
+| `previousFeedback` | string | No | Feedback from a prior rejection (used for retry context) |
+| `attempt` | number | No | Current retry attempt number |
+
+### Breakpoint Routing
+
+Breakpoint routing controls who receives the approval request and how responses are collected.
+
+**Expert routing** directs the breakpoint to specific reviewers:
+
+```javascript
+await ctx.breakpoint({
+  question: 'Review the security audit results?',
+  title: 'Security Review',
+  expert: 'security-team',  // Route to a specific expert
+  tags: ['security', 'audit'],
+});
+```
+
+Route to multiple experts:
+
+```javascript
+await ctx.breakpoint({
+  question: 'Approve the architecture changes?',
+  title: 'Architecture Review',
+  expert: ['tech-lead', 'architect'],  // Route to multiple experts
+  tags: ['architecture', 'design'],
+});
+```
+
+Route to the project owner:
+
+```javascript
+await ctx.breakpoint({
+  question: 'Approve the release?',
+  title: 'Release Approval',
+  expert: 'owner',  // Route to the project owner
+});
+```
+
+**Resolution strategies** control how multiple responses are handled:
+
+| Strategy | Description |
+|----------|-------------|
+| `single` | Default. One reviewer responds. |
+| `first-response-wins` | First response from any expert is accepted. |
+| `collect-all` | Waits for all experts to respond. Results available in `result.allResponses`. |
+| `quorum` | Waits for a majority of experts to respond. |
+
+```javascript
+const result = await ctx.breakpoint({
+  question: 'Approve production deployment?',
+  title: 'Production Deployment',
+  expert: ['tech-lead', 'ops-lead', 'security-lead'],
+  strategy: 'quorum',
+});
+// result.approved — true if a quorum approved
+// result.respondedBy — who responded
+// result.allResponses — all collected responses
+```
 
 ### Context File Schema
 
@@ -208,7 +299,7 @@ export async function process(inputs, ctx) {
 
   // Only request approval for high-risk changes
   if (analysis.riskLevel === 'high') {
-    await ctx.breakpoint({
+    const review = await ctx.breakpoint({
       question: `High-risk changes detected (${analysis.riskFactors.join(', ')}). Approve to proceed?`,
       title: 'High-Risk Change Review',
       context: {
@@ -218,6 +309,10 @@ export async function process(inputs, ctx) {
         ]
       }
     });
+
+    if (!review.approved) {
+      return { success: false, reason: 'High-risk changes rejected', feedback: review.feedback };
+    }
   }
 
   return await ctx.task(applyChangesTask, { changes: analysis.changes });
@@ -283,6 +378,62 @@ await ctx.breakpoint({
 });
 ```
 
+### Example 4: Robust Rejection Pattern (Retry on Rejection)
+
+Breakpoints should never fail a process. When a reviewer rejects, retry with their feedback incorporated. Always use a clean question string (no ternary operators in the question text).
+
+```javascript
+export async function process(inputs, ctx) {
+  const plan = await ctx.task(generatePlanTask, { feature: inputs.feature });
+
+  let approved = false;
+  let attempt = 0;
+  let previousFeedback = undefined;
+
+  while (!approved) {
+    attempt++;
+
+    // Refine plan if we have feedback from a prior rejection
+    if (previousFeedback) {
+      await ctx.task(refinePlanTask, {
+        plan,
+        feedback: previousFeedback,
+      });
+    }
+
+    const question = previousFeedback
+      ? `Plan revised based on your feedback. Please review again.`
+      : `Review the implementation plan. Approve to proceed?`;
+
+    const review = await ctx.breakpoint({
+      question,
+      title: 'Plan Review',
+      previousFeedback,
+      attempt,
+      context: {
+        runId: ctx.runId,
+        files: [{ path: 'artifacts/plan.md', format: 'markdown' }],
+      },
+    });
+
+    if (review.approved) {
+      approved = true;
+    } else {
+      previousFeedback = review.feedback;
+      ctx.log(`Plan rejected (attempt ${attempt})`, { feedback: review.feedback });
+    }
+  }
+
+  return await ctx.task(implementTask, { plan });
+}
+```
+
+**Key principles for the robust rejection pattern:**
+- Breakpoints NEVER fail the process -- always loop and retry
+- Pass `previousFeedback` and `attempt` so reviewers have context
+- Use the feedback to refine the work before the next review
+- Keep the question string clean and readable (no ternary in the question itself)
+
 ### Best Practices
 
 1. **Write Clear Questions**: Make the question specific and actionable
@@ -291,6 +442,8 @@ await ctx.breakpoint({
 4. **Place Strategically**: Add breakpoints before irreversible actions
 5. **Minimize Unnecessary Approvals**: Too many breakpoints slow down workflows
 6. **Ensure Files Exist**: Write context files before calling the breakpoint
+7. **Use Routing for Team Workflows**: Set `expert` and `strategy` to direct breakpoints to the right people
+8. **Never Fail on Rejection**: Use the robust rejection pattern to retry with feedback instead of failing the process
 
 ---
 
@@ -380,7 +533,13 @@ Breakpoints enable human-in-the-loop approval within automated workflows. Use `c
 
 **Key points:**
 - Call `ctx.breakpoint()` with a question and optional context files
+- Returns a `BreakpointResult` with `approved`, `response`, `feedback`, `option`, `respondedBy`, and `allResponses` fields
+- Use `result.approved` to branch on approval/rejection
+- Route breakpoints to specific experts with `expert` and control resolution with `strategy`
+- Use `previousFeedback` and `attempt` for retry context on rejection
+- Breakpoints should never fail a process -- use the robust rejection pattern to retry with feedback
 - Claude presents the question directly in the chat via `AskUserQuestion`
 - You respond to approve, reject, or provide feedback
 - The workflow continues based on your response
 - No external services or setup required - breakpoints work in-session
+- Backward compatible: existing code that ignores the return value still works

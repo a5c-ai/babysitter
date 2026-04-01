@@ -46,10 +46,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...editorial.artifacts);
 
   // PHASE 4: Performance Review
-  const review = await ctx.task(performanceReviewTask, { contestId, solving, editorial, outputDir });
-  artifacts.push(...review.artifacts);
-
-  await ctx.breakpoint({
+  let review = await ctx.task(performanceReviewTask, { contestId, solving, editorial, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      review = await ctx.task(performanceReviewTask, { ...{ contestId, solving, editorial, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AtCoder contest ${contestId} complete. Problems solved: ${solving.solvedCount}. Review results?`,
     title: 'AtCoder Contest Complete',
     context: {
@@ -57,9 +60,15 @@ export async function process(inputs, ctx) {
       solvedCount: solving.solvedCount,
       editorialNotes: editorial.notes,
       files: review.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contestId,

@@ -11,37 +11,65 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, productType, regulatoryAuthority, certificationScope = {} } = inputs;
 
-  const regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, { projectName, productType, regulatoryAuthority });
-  const certificationBasis = await ctx.task(certificationBasisTask, { projectName, regulatoryAnalysis, certificationScope });
-
-  await ctx.breakpoint({
+  let regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, { projectName, productType, regulatoryAuthority });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, { ...{ projectName, productType, regulatoryAuthority }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Certification basis established for ${projectName}: ${certificationBasis.regulations.length} regulations. Proceed with MOC development?`,
     title: 'Certification Basis Review',
-    context: { runId: ctx.runId, certificationBasis }
-  });
-
+    context: { runId: ctx.runId, certificationBasis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const mocDefinition = await ctx.task(mocDefinitionTask, { projectName, certificationBasis });
   const complianceMatrix = await ctx.task(complianceMatrixTask, { projectName, certificationBasis, mocDefinition });
-  const testPlan = await ctx.task(certificationTestPlanTask, { projectName, complianceMatrix, mocDefinition });
+  let testPlan = await ctx.task(certificationTestPlanTask, { projectName, complianceMatrix, mocDefinition });
 
-  if (complianceMatrix.gaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        testPlan = await ctx.task(certificationTestPlanTask, { ...{ projectName, complianceMatrix, mocDefinition }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `${complianceMatrix.gaps.length} compliance gaps identified. Review and resolve?`,
       title: 'Compliance Gap Warning',
-      context: { runId: ctx.runId, gaps: complianceMatrix.gaps }
-    });
-  }
+      context: { runId: ctx.runId, gaps: complianceMatrix.gaps },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
   const scheduleRisk = await ctx.task(certificationScheduleTask, { projectName, complianceMatrix, testPlan });
-  const certificationPlan = await ctx.task(certificationPlanTask, { projectName, certificationBasis, complianceMatrix, testPlan, scheduleRisk });
-  const report = await ctx.task(certificationReportTask, { projectName, certificationBasis, complianceMatrix, certificationPlan });
-
-  await ctx.breakpoint({
+  let certificationPlan = await ctx.task(certificationPlanTask, { projectName, certificationBasis, complianceMatrix, testPlan, scheduleRisk });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      certificationPlan = await ctx.task(certificationPlanTask, { ...{ projectName, certificationBasis, complianceMatrix, testPlan, scheduleRisk }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Certification plan complete for ${projectName}. ${complianceMatrix.compliantCount}/${complianceMatrix.totalRequirements} requirements addressed. Approve?`,
     title: 'Certification Plan Approval',
-    context: { runId: ctx.runId, summary: { authority: regulatoryAuthority, totalRequirements: complianceMatrix.totalRequirements, compliant: complianceMatrix.compliantCount } }
-  });
-
+    context: { runId: ctx.runId, summary: { authority: regulatoryAuthority, totalRequirements: complianceMatrix.totalRequirements, compliant: complianceMatrix.compliantCount } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, certificationBasis, complianceMatrix, certificationPlan, report, metadata: { processId: 'certification-planning', timestamp: ctx.now() } };
 }
 

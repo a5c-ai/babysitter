@@ -30,15 +30,24 @@ export async function process(inputs, ctx) {
   const situationAnalysis = await ctx.task(situationAnalysisTask, { situation, symptoms, domain, outputDir });
   artifacts.push(...situationAnalysis.artifacts);
 
-  const archetypeMatching = await ctx.task(archetypeMatchingTask, { situationAnalysis, symptoms, outputDir });
-  artifacts.push(...archetypeMatching.artifacts);
-
-  await ctx.breakpoint({
+  let archetypeMatching = await ctx.task(archetypeMatchingTask, { situationAnalysis, symptoms, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      archetypeMatching = await ctx.task(archetypeMatchingTask, { ...{ situationAnalysis, symptoms, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Matched ${archetypeMatching.matches?.length || 0} archetypes. Top match: "${archetypeMatching.topMatch?.archetype || 'N/A'}" (${archetypeMatching.topMatch?.score || 0}%). Review matches?`,
     title: 'Archetype Matching Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { matches: archetypeMatching.matches?.length || 0, topMatch: archetypeMatching.topMatch?.archetype || 'N/A' }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { matches: archetypeMatching.matches?.length || 0, topMatch: archetypeMatching.topMatch?.archetype || 'N/A' }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const archetypeMapping = await ctx.task(archetypeMappingTask, { situation, topArchetypes: archetypeMatching.matches?.slice(0, 3), domain, outputDir });
   artifacts.push(...archetypeMapping.artifacts);
 
@@ -51,15 +60,24 @@ export async function process(inputs, ctx) {
   const leverageIdentification = await ctx.task(archetypeLeverageTask, { diagnosis: systemicDiagnosis, interventions: interventionDesign.interventions, outputDir });
   artifacts.push(...leverageIdentification.artifacts);
 
-  const qualityScore = await ctx.task(archetypeQualityScoringTask, { situationAnalysis, archetypeMatching, systemicDiagnosis, interventionDesign, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(archetypeQualityScoringTask, { situationAnalysis, archetypeMatching, systemicDiagnosis, interventionDesign, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(archetypeQualityScoringTask, { ...{ situationAnalysis, archetypeMatching, systemicDiagnosis, interventionDesign, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Archetype analysis complete. ${interventionDesign.interventions?.length || 0} interventions designed. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Archetype Analysis Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { interventions: interventionDesign.interventions?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { interventions: interventionDesign.interventions?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, situation, archetypes: archetypeMatching.matches, diagnosis: systemicDiagnosis,
     interventions: interventionDesign.interventions, leverage: leverageIdentification.leveragePoints,

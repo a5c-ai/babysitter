@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       narrative: null
     };
   }
-
   // Phase 2: Causal Connection Identification
   const causalConnections = await ctx.task(causalConnectionTask, {
     events: eventDocumentation.orderedEvents,
@@ -63,14 +62,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Context and Setting Construction
-  const contextConstruction = await ctx.task(contextSettingTask, {
+  let contextConstruction = await ctx.task(contextSettingTask, {
     events: eventDocumentation.orderedEvents,
     domain,
     temporalScope
   });
 
-  // Breakpoint: Review narrative elements
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      contextConstruction = await ctx.task(contextSettingTask, { ...{
+    events: eventDocumentation.orderedEvents,
+    domain,
+    temporalScope
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review narrative elements for "${purpose}". ${eventDocumentation.orderedEvents.length} events, ${causalConnections.connections?.length || 0} causal connections. Proceed?`,
     title: 'Narrative Elements Review',
     context: {
@@ -83,9 +90,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { eventDocumentation, causalConnections, actorAnalysis, contextConstruction }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Plot Structure Identification
   const plotStructure = await ctx.task(plotStructureTask, {
     events: eventDocumentation.orderedEvents,
@@ -127,7 +140,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Final Narrative Synthesis
-  const narrativeSynthesis = await ctx.task(narrativeSynthesisTask, {
+  let narrativeSynthesis = await ctx.task(narrativeSynthesisTask, {
     events: eventDocumentation.orderedEvents,
     causalConnections,
     actorAnalysis,
@@ -141,8 +154,24 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint: Narrative Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      narrativeSynthesis = await ctx.task(narrativeSynthesisTask, { ...{
+    events: eventDocumentation.orderedEvents,
+    causalConnections,
+    actorAnalysis,
+    contextConstruction,
+    plotStructure,
+    turningPoints,
+    counterfactualAnalysis,
+    narrativeArc,
+    coherenceCheck,
+    purpose,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Narrative construction complete for "${purpose}". Coherence score: ${coherenceCheck.coherenceScore}. Approve narrative?`,
     title: 'Narrative Approval',
     context: {
@@ -154,9 +183,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/narrative-report.json', format: 'json', content: narrativeSynthesis },
         { path: 'artifacts/narrative-report.md', format: 'markdown', content: narrativeSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     purpose,
@@ -180,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const eventDocumentationTask = defineTask('event-documentation', (args, taskCtx) => ({
   kind: 'agent',

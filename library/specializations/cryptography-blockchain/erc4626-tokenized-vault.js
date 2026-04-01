@@ -117,7 +117,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...feeImplementation.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: EDGE CASE HANDLING
   // ============================================================================
@@ -139,7 +138,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Running comprehensive tests');
 
-  const testingSuite = await ctx.task(testingSuiteTask, {
+  let testingSuite = await ctx.task(testingSuiteTask, {
     projectName,
     vaultImplementation,
     shareCalculationDesign,
@@ -149,8 +148,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingSuite.artifacts);
 
-  // Quality Gate: Test Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingSuite = await ctx.task(testingSuiteTask, { ...{
+    projectName,
+    vaultImplementation,
+    shareCalculationDesign,
+    framework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Vault tests complete. Coverage: ${testingSuite.coverage}%, All passing: ${testingSuite.allPassing}. Proceed with DeFi integration testing?`,
     title: 'Vault Test Review',
     context: {
@@ -158,9 +167,15 @@ export async function process(inputs, ctx) {
       projectName,
       testResults: testingSuite,
       files: testingSuite.artifacts.map(a => ({ path: a.path, format: 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DEFI INTEGRATION TESTING
   // ============================================================================
@@ -237,8 +252,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

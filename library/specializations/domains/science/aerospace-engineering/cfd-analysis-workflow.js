@@ -48,9 +48,8 @@ export async function process(inputs, ctx) {
       details: geometryPrep.issues
     };
   }
-
   // Phase 2: Domain Definition and Meshing Strategy
-  const meshStrategy = await ctx.task(meshStrategyTask, {
+  let meshStrategy = await ctx.task(meshStrategyTask, {
     projectName,
     geometryCharacteristics: geometryPrep.characteristics,
     flowRegime,
@@ -58,8 +57,18 @@ export async function process(inputs, ctx) {
     boundaryConditions
   });
 
-  // Breakpoint: Review mesh strategy before generation
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      meshStrategy = await ctx.task(meshStrategyTask, { ...{
+    projectName,
+    geometryCharacteristics: geometryPrep.characteristics,
+    flowRegime,
+    analysisType,
+    boundaryConditions
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review mesh strategy for ${projectName}. Target cell count: ${meshStrategy.estimatedCellCount}. Proceed with mesh generation?`,
     title: 'CFD Mesh Strategy Review',
     context: {
@@ -70,11 +79,17 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: meshStrategy
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Mesh Generation
-  const meshGeneration = await ctx.task(meshGenerationTask, {
+  let meshGeneration = await ctx.task(meshGenerationTask, {
     projectName,
     geometryData: geometryPrep,
     meshStrategy,
@@ -83,17 +98,32 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Mesh quality must meet minimum standards
   if (meshGeneration.qualityMetrics.minOrthogonality < 0.1 ||
-      meshGeneration.qualityMetrics.maxSkewness > 0.95) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        meshGeneration = await ctx.task(meshGenerationTask, { ...{
+    projectName,
+    geometryData: geometryPrep,
+    meshStrategy,
+    flowRegime
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Mesh quality below standards. Min orthogonality: ${meshGeneration.qualityMetrics.minOrthogonality}, Max skewness: ${meshGeneration.qualityMetrics.maxSkewness}. Proceed or regenerate?`,
       title: 'Mesh Quality Warning',
       context: {
         runId: ctx.runId,
         meshQualityMetrics: meshGeneration.qualityMetrics,
         recommendation: 'Consider mesh refinement or geometry cleanup'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Solver Setup and Configuration
   const solverSetup = await ctx.task(solverSetupTask, {
@@ -105,7 +135,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Solution Initialization and Execution
-  const solutionExecution = await ctx.task(solutionExecutionTask, {
+  let solutionExecution = await ctx.task(solutionExecutionTask, {
     projectName,
     solverConfiguration: solverSetup,
     meshData: meshGeneration,
@@ -113,17 +143,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check solution convergence
-  if (!solutionExecution.converged) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        solutionExecution = await ctx.task(solutionExecutionTask, { ...{
+    projectName,
+    solverConfiguration: solverSetup,
+    meshData: meshGeneration,
+    convergenceCriteria: solverSetup.convergenceCriteria
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Solution did not converge after ${solutionExecution.iterations} iterations. Residuals: ${JSON.stringify(solutionExecution.finalResiduals)}. Continue iterations or adjust settings?`,
       title: 'Convergence Warning',
       context: {
         runId: ctx.runId,
         solutionStatus: solutionExecution,
         recommendation: 'Consider relaxation factor adjustment or mesh refinement'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Post-Processing and Results Extraction
   const postProcessing = await ctx.task(postProcessingTask, {
@@ -149,7 +194,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Report Generation
-  const reportGeneration = await ctx.task(reportGenerationTask, {
+  let reportGeneration = await ctx.task(reportGenerationTask, {
     projectName,
     geometryPrep,
     meshGeneration,
@@ -159,8 +204,20 @@ export async function process(inputs, ctx) {
     validation
   });
 
-  // Final Breakpoint: Results Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportGeneration = await ctx.task(reportGenerationTask, { ...{
+    projectName,
+    geometryPrep,
+    meshGeneration,
+    solverSetup,
+    solutionExecution,
+    postProcessing,
+    validation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CFD analysis complete for ${projectName}. Review results and approve for release?`,
     title: 'CFD Analysis Results Review',
     context: {
@@ -175,9 +232,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/cfd-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/cfd-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -199,8 +262,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const geometryPreparationTask = defineTask('geometry-preparation', (args, taskCtx) => ({
   kind: 'agent',

@@ -53,7 +53,8 @@ export const HARNESS_CLI_MAP: Readonly<Record<string, HarnessCliSpec>> = {
   pi: { cli: "pi", workspaceFlag: "--workspace", supportsModel: true, promptStyle: "flag" },
   "oh-my-pi": { cli: "omp", workspaceFlag: "--workspace", supportsModel: true, promptStyle: "flag" },
   "gemini-cli": { cli: "gemini", supportsModel: true, promptStyle: "flag" },
-  cursor: { cli: "cursor", supportsModel: false, promptStyle: "flag" },
+  "github-copilot": { cli: "copilot", supportsModel: true, promptStyle: "flag" },
+  cursor: { cli: "cursor", supportsModel: true, promptStyle: "positional", baseArgs: ["agent"], workspaceFlag: "--workspace" },
   opencode: { cli: "opencode", supportsModel: false, promptStyle: "flag" },
 } as const;
 

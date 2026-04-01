@@ -1,0 +1,31 @@
+{
+  "name": "a5c-ai",
+  "metadata": {
+    "description": "Babysitter orchestration plugins for GitHub Copilot",
+    "version": "1.0.0"
+  },
+  "owner": {
+    "name": "a5c.ai",
+    "email": "support@a5c.ai"
+  },
+  "plugins": [
+    {
+      "name": "babysitter",
+      "source": "./plugins/babysitter-github",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management and human-in-the-loop approval",
+      "version": "0.1.0",
+      "skills": [
+        "./skills/assimilate",
+        "./skills/babysit",
+        "./skills/call",
+        "./skills/doctor",
+        "./skills/help",
+        "./skills/observe",
+        "./skills/plan",
+        "./skills/resume",
+        "./skills/retrospect",
+        "./skills/user-install"
+      ]
+    }
+  ]
+}

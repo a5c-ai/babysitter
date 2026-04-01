@@ -59,15 +59,22 @@ export async function process(inputs, ctx) {
   artifacts.push(...organizationalAnalysis.artifacts);
 
   // Phase 3: Job/Role Analysis
-  const roleAnalysis = await ctx.task(roleAnalysisTask, {
+  let roleAnalysis = await ctx.task(roleAnalysisTask, {
     organizationName,
     departments,
     outputDir
   });
 
-  artifacts.push(...roleAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      roleAnalysis = await ctx.task(roleAnalysisTask, { ...{
+    organizationName,
+    departments,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Role analysis complete. ${roleAnalysis.rolesAnalyzed} roles analyzed with competency requirements defined. Review before proceeding to gap assessment?`,
     title: 'Role Analysis Review',
     context: {
@@ -76,9 +83,15 @@ export async function process(inputs, ctx) {
       competencyFramework: roleAnalysis.competencyFramework,
       criticalRoles: roleAnalysis.criticalRoles,
       files: roleAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Performance Data Analysis
   let performanceAnalysis = null;
   if (includePerformanceData) {
@@ -89,7 +102,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...performanceAnalysis.artifacts);
   }
-
   // Phase 5: Skills Survey Administration
   let surveyResults = null;
   if (includeSurveys) {
@@ -101,7 +113,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...surveyResults.artifacts);
   }
-
   // Phase 6: Competency Assessment
   let competencyAssessment = null;
   if (includeCompetencyAssessment) {
@@ -114,7 +125,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...competencyAssessment.artifacts);
   }
-
   // Phase 7: Stakeholder Interviews
   const stakeholderInterviews = await ctx.task(stakeholderInterviewsTask, {
     organizationName,
@@ -126,7 +136,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...stakeholderInterviews.artifacts);
 
   // Phase 8: Gap Analysis
-  const gapAnalysis = await ctx.task(gapAnalysisTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisTask, {
     organizationName,
     roleAnalysis,
     performanceAnalysis,
@@ -136,9 +146,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...gapAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
+    organizationName,
+    roleAnalysis,
+    performanceAnalysis,
+    surveyResults,
+    competencyAssessment,
+    stakeholderInterviews,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Gap analysis complete. ${gapAnalysis.skillGaps.length} skill gaps identified. ${gapAnalysis.criticalGaps.length} critical gaps requiring immediate attention. Review gap analysis?`,
     title: 'Gap Analysis Review',
     context: {
@@ -147,9 +168,15 @@ export async function process(inputs, ctx) {
       criticalGaps: gapAnalysis.criticalGaps,
       gapsByDepartment: gapAnalysis.gapsByDepartment,
       files: gapAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: Training Solution Design
   const solutionDesign = await ctx.task(solutionDesignTask, {
     organizationName,
@@ -174,7 +201,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...prioritization.artifacts);
 
   // Phase 11: Budget and Resource Planning
-  const budgetPlanning = await ctx.task(budgetPlanningTask, {
+  let budgetPlanning = await ctx.task(budgetPlanningTask, {
     organizationName,
     prioritization: prioritization.prioritizedInitiatives,
     solutionDesign: solutionDesign.solutions,
@@ -182,9 +209,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...budgetPlanning.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      budgetPlanning = await ctx.task(budgetPlanningTask, { ...{
+    organizationName,
+    prioritization: prioritization.prioritizedInitiatives,
+    solutionDesign: solutionDesign.solutions,
+    budgetConstraints,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Training budget plan developed. Total estimated investment: ${budgetPlanning.totalBudget}. Review budget allocation before finalizing?`,
     title: 'Budget Plan Review',
     context: {
@@ -193,9 +229,15 @@ export async function process(inputs, ctx) {
       budgetByCategory: budgetPlanning.budgetByCategory,
       budgetByDepartment: budgetPlanning.budgetByDepartment,
       files: budgetPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 12: TNA Report Generation
   const tnaReport = await ctx.task(tnaReportTask, {
     organizationName,
@@ -238,8 +280,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const strategicAlignmentTask = defineTask('strategic-alignment', (args, taskCtx) => ({
   kind: 'agent',

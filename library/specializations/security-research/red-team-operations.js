@@ -39,8 +39,10 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Red Team Operation for ${projectName}`);
   ctx.log('info', `Target: ${targetOrg.name}, Objectives: ${objectives.join(', ')}`);
 
-  // Rules of engagement verification
-  await ctx.breakpoint({
+  let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const stepApproval = await ctx.breakpoint({
     question: `Red team operation for ${targetOrg.name}. Confirm rules of engagement are documented and authorization is obtained. Proceed?`,
     title: 'Red Team Authorization',
     context: {
@@ -48,9 +50,15 @@ export async function process(inputs, ctx) {
       targetOrg,
       objectives,
       rules
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 1: RECONNAISSANCE
   // ============================================================================
@@ -173,7 +181,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating red team report');
 
-  const report = await ctx.task(redTeamReportTask, {
+  let report = await ctx.task(redTeamReportTask, {
     projectName,
     targetOrg,
     objectives,
@@ -182,9 +190,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(redTeamReportTask, { ...{
+    projectName,
+    targetOrg,
+    objectives,
+    objectivesAchieved,
+    ttps,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Red team operation complete. ${objectivesAchieved.length}/${objectives.length} objectives achieved. Review findings and debrief?`,
     title: 'Red Team Operation Complete',
     context: {
@@ -195,9 +213,15 @@ export async function process(inputs, ctx) {
         ttpsUsed: ttps.length
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -220,8 +244,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

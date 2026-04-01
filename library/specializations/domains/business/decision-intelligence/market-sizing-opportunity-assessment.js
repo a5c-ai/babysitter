@@ -64,14 +64,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: SOM (Serviceable Obtainable Market) Analysis
-  const somAnalysis = await ctx.task(somAnalysisTask, {
+  let somAnalysis = await ctx.task(somAnalysisTask, {
     projectName,
     samAnalysis,
     marketContext
   });
 
-  // Breakpoint: Review market sizing
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      somAnalysis = await ctx.task(somAnalysisTask, { ...{
+    projectName,
+    samAnalysis,
+    marketContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review market sizing analysis for ${projectName}. Are the estimates well-supported?`,
     title: 'Market Sizing Review',
     context: {
@@ -80,9 +88,15 @@ export async function process(inputs, ctx) {
       tam: tamAnalysis.totalMarket,
       sam: samAnalysis.serviceableMarket,
       som: somAnalysis.obtainableMarket
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Market Growth Analysis
   const growthAnalysis = await ctx.task(growthAnalysisTask, {
     projectName,
@@ -128,8 +142,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const marketDefinitionTask = defineTask('market-definition', (args, taskCtx) => ({
   kind: 'agent',

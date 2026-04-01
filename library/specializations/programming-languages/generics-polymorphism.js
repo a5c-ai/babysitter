@@ -55,24 +55,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Type Parameters');
 
-  const typeParameters = await ctx.task(typeParametersTask, {
+  let typeParameters = await ctx.task(typeParametersTask, {
     languageName,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...typeParameters.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      typeParameters = await ctx.task(typeParametersTask, { ...{
+    languageName,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Type parameters implemented. Features: ${typeParameters.features.join(', ')}. Proceed with bounds?`,
     title: 'Type Parameters Review',
     context: {
       runId: ctx.runId,
       features: typeParameters.features,
       files: typeParameters.artifacts.map(a => ({ path: a.path, format: a.format || 'rust' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TYPE BOUNDS AND CONSTRAINTS
   // ============================================================================
@@ -188,7 +201,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Documentation');
 
-  const documentation = await ctx.task(genericsDocumentationTask, {
+  let documentation = await ctx.task(genericsDocumentationTask, {
     languageName,
     polymorphismStyle,
     integration,
@@ -196,9 +209,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(genericsDocumentationTask, { ...{
+    languageName,
+    polymorphismStyle,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Generics System Complete for ${languageName}! Style: ${polymorphismStyle}, Variance: ${variance.varianceTypes.join(', ')}. Review deliverables?`,
     title: 'Generics Complete',
     context: {
@@ -213,9 +235,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Generics System' },
         { path: documentation.guidePath, format: 'markdown', label: 'Generics Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -244,8 +272,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -78,24 +78,38 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Transport Testing and Documentation
   ctx.log.info('Phase 5: Creating testing and documentation');
-  const testingDocs = await ctx.task(transportTestingDocsTask, {
+  let testingDocs = await ctx.task(transportTestingDocsTask, {
     sdkName,
     languages,
     transportArchitecture: transportArchitecture.result,
     middlewareSystem: middlewareSystem.result
   });
 
-  // Quality Gate
-  await ctx.breakpoint('transport-middleware-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingDocs = await ctx.task(transportTestingDocsTask, { ...{
+    sdkName,
+    languages,
+    transportArchitecture: transportArchitecture.result,
+    middlewareSystem: middlewareSystem.result
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('transport-middleware-review', {
     question: 'Review the transport and middleware implementation. Is the architecture flexible and performant?',
     context: {
       transportArchitecture: transportArchitecture.result,
       middlewareSystem: middlewareSystem.result,
       customTransports: customTransports.result
-    }
-  });
-
-  ctx.log.info('Custom transport and middleware implementation completed');
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  ctx.log.info('Custom transport and middleware implementation completed');
 
   return {
     transportArchitecture: transportArchitecture.result,

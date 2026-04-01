@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Structure Relaxation
   ctx.log('info', 'Phase 3: Performing structure relaxation');
-  const relaxation = await ctx.task(structureRelaxationTask, {
+  let relaxation = await ctx.task(structureRelaxationTask, {
     materialId,
     inputFiles: inputGeneration.inputPaths,
     convergenceThreshold,
@@ -81,9 +81,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...relaxation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      relaxation = await ctx.task(structureRelaxationTask, { ...{
+    materialId,
+    inputFiles: inputGeneration.inputPaths,
+    convergenceThreshold,
+    code,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Structure relaxation complete for ${materialId}. Energy: ${relaxation.totalEnergy} eV. Forces converged: ${relaxation.forcesConverged}. Proceed with property calculations?`,
     title: 'Structure Relaxation Review',
     context: {
@@ -95,9 +104,15 @@ export async function process(inputs, ctx) {
         volumeChange: relaxation.volumeChange
       },
       files: relaxation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   let electronicStructure = null;
   let formationEnergy = null;
   let elasticConstants = null;
@@ -118,7 +133,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...electronicStructure.artifacts);
   }
-
   // Phase 5: Formation Energy Calculation
   if (calculationType === 'formation-energy' || calculationType === 'all') {
     ctx.log('info', 'Phase 5: Calculating formation energy');
@@ -133,7 +147,6 @@ export async function process(inputs, ctx) {
     formationEnergy = formationEnergyResult;
     artifacts.push(...formationEnergyResult.artifacts);
   }
-
   // Phase 6: Elastic Constants Calculation
   if (calculationType === 'elastic-constants' || calculationType === 'all') {
     ctx.log('info', 'Phase 6: Calculating elastic constants');
@@ -146,7 +159,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...elasticConstants.artifacts);
   }
-
   // Phase 7: Optical Properties (if requested)
   if (calculationType === 'optical') {
     ctx.log('info', 'Phase 7: Calculating optical properties');
@@ -159,7 +171,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...opticalProperties.artifacts);
   }
-
   // Phase 8: Data Analysis and Visualization
   ctx.log('info', 'Phase 8: Analyzing and visualizing results');
   const dataAnalysis = await ctx.task(dftDataAnalysisTask, {
@@ -240,8 +251,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Structure Preparation
+  // Task 1: Structure Preparation
 export const structurePreparationTask = defineTask('dft-structure-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Structure Preparation - ${args.materialId}`,

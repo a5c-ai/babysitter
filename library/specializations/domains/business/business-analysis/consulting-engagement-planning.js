@@ -529,19 +529,33 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Quality Planning
   ctx.log('Phase 6: Creating quality management plan');
-  const qualityResult = await ctx.task(qualityPlanTask, {
+  let qualityResult = await ctx.task(qualityPlanTask, {
     scopeDefinition: artifacts.scopeDefinition,
     workPlan: artifacts.workPlan,
     governanceFramework: artifacts.governanceFramework
   });
   artifacts.qualityPlan = qualityResult;
 
-  // Breakpoint for plan review
-  await ctx.breakpoint('engagement-plan-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityResult = await ctx.task(qualityPlanTask, { ...{
+    scopeDefinition: artifacts.scopeDefinition,
+    workPlan: artifacts.workPlan,
+    governanceFramework: artifacts.governanceFramework
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('engagement-plan-review', {
     question: 'Review the engagement planning artifacts. Are all components complete and aligned?',
-    artifacts: artifacts
-  });
-
+    artifacts: artifacts,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Charter Consolidation
   ctx.log('Phase 7: Consolidating engagement charter');
   const charterResult = await ctx.task(charterConsolidationTask, {

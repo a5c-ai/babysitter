@@ -59,23 +59,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Data Analysis Execution
-  const analysisExecution = await ctx.task(analysisExecutionTask, {
+  let analysisExecution = await ctx.task(analysisExecutionTask, {
     projectName,
     analysisPlanning,
     hypothesisPrioritization
   });
 
-  // Breakpoint: Review analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisExecution = await ctx.task(analysisExecutionTask, { ...{
+    projectName,
+    analysisPlanning,
+    hypothesisPrioritization
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review hypothesis testing results for ${projectName}. Are findings statistically significant?`,
     title: 'Analysis Results Review',
     context: {
       runId: ctx.runId,
       projectName,
       hypothesesTested: hypothesisPrioritization.prioritized?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Hypothesis Validation
   const hypothesisValidation = await ctx.task(hypothesisValidationTask, {
     projectName,
@@ -116,8 +130,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemDefinitionTask = defineTask('problem-definition', (args, taskCtx) => ({
   kind: 'agent',

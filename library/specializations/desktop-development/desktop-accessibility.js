@@ -34,15 +34,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Desktop Accessibility Implementation: ${projectName}`);
 
-  const audit = await ctx.task(accessibilityAuditTask, { projectName, framework, accessibilityLevel, outputDir });
-  artifacts.push(...audit.artifacts);
-
-  await ctx.breakpoint({
+  let audit = await ctx.task(accessibilityAuditTask, { projectName, framework, accessibilityLevel, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      audit = await ctx.task(accessibilityAuditTask, { ...{ projectName, framework, accessibilityLevel, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Accessibility audit complete. Found ${audit.issues.length} issues. Current score: ${audit.score}/100. Proceed with fixes?`,
     title: 'Accessibility Audit Review',
-    context: { runId: ctx.runId, issues: audit.issues.length, score: audit.score }
-  });
-
+    context: { runId: ctx.runId, issues: audit.issues.length, score: audit.score },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const screenReader = await ctx.task(implementScreenReaderSupportTask, { projectName, framework, targetPlatforms, outputDir });
   artifacts.push(...screenReader.artifacts);
 

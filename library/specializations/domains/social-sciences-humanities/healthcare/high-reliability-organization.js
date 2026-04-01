@@ -42,15 +42,22 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Leadership Commitment Assessment
   ctx.log('info', 'Phase 1: Leadership Commitment Assessment');
-  const leadershipAssessment = await ctx.task(leadershipCommitmentTask, {
+  let leadershipAssessment = await ctx.task(leadershipCommitmentTask, {
     organizationName,
     assessmentScope,
     outputDir
   });
 
-  artifacts.push(...leadershipAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      leadershipAssessment = await ctx.task(leadershipCommitmentTask, { ...{
+    organizationName,
+    assessmentScope,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Leadership assessment complete. Commitment level: ${leadershipAssessment.commitmentLevel}. Executive sponsor: ${leadershipAssessment.executiveSponsor}. Proceed with culture assessment?`,
     title: 'Leadership Commitment Review',
     context: {
@@ -58,9 +65,15 @@ export async function process(inputs, ctx) {
       organizationName,
       commitment: leadershipAssessment.findings,
       files: leadershipAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Safety Culture Assessment
   ctx.log('info', 'Phase 2: Safety Culture Assessment');
   const cultureAssessment = await ctx.task(safetyCultureAssessmentTask, {
@@ -73,24 +86,37 @@ export async function process(inputs, ctx) {
 
   // Phase 3: HRO Principles Assessment
   ctx.log('info', 'Phase 3: HRO Principles Assessment');
-  const principlesAssessment = await ctx.task(hroPrinciplesAssessmentTask, {
+  let principlesAssessment = await ctx.task(hroPrinciplesAssessmentTask, {
     cultureAssessment,
     currentMaturity,
     outputDir
   });
 
-  artifacts.push(...principlesAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      principlesAssessment = await ctx.task(hroPrinciplesAssessmentTask, { ...{
+    cultureAssessment,
+    currentMaturity,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `HRO principles assessed. Overall maturity: ${principlesAssessment.overallMaturity}. Strongest: ${principlesAssessment.strongestPrinciple}. Weakest: ${principlesAssessment.weakestPrinciple}. Proceed with gap analysis?`,
     title: 'HRO Principles Assessment Review',
     context: {
       runId: ctx.runId,
       principleScores: principlesAssessment.principleScores,
       files: principlesAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Gap Analysis
   ctx.log('info', 'Phase 4: HRO Gap Analysis');
   const gapAnalysis = await ctx.task(hroGapAnalysisTask, {
@@ -114,15 +140,22 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Safety Behaviors Design
   ctx.log('info', 'Phase 6: Safety Behaviors Design');
-  const safetyBehaviors = await ctx.task(safetyBehaviorsDesignTask, {
+  let safetyBehaviors = await ctx.task(safetyBehaviorsDesignTask, {
     principlesAssessment,
     justCulture,
     outputDir
   });
 
-  artifacts.push(...safetyBehaviors.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      safetyBehaviors = await ctx.task(safetyBehaviorsDesignTask, { ...{
+    principlesAssessment,
+    justCulture,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Just culture framework and ${safetyBehaviors.behaviors.length} safety behaviors designed. Proceed with implementation roadmap?`,
     title: 'Culture and Behaviors Review',
     context: {
@@ -130,9 +163,15 @@ export async function process(inputs, ctx) {
       justCultureFramework: justCulture.framework,
       behaviors: safetyBehaviors.behaviors,
       files: [...justCulture.artifacts, ...safetyBehaviors.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Implementation Roadmap
   ctx.log('info', 'Phase 7: Implementation Roadmap Development');
   const implementationRoadmap = await ctx.task(hroImplementationRoadmapTask, {
@@ -219,8 +258,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Leadership Commitment
+  // Task 1: Leadership Commitment
 export const leadershipCommitmentTask = defineTask('hro-leadership', (args, taskCtx) => ({
   kind: 'agent',
   title: `HRO Leadership Assessment - ${args.organizationName}`,

@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...classificationResult.artifacts);
 
   // Phase 2: Sensitivity Assessment
-  const sensitivityResult = await ctx.task(sensitivityAssessmentTask, { projectName, classifiedData: classificationResult.classifiedData, outputDir });
-  artifacts.push(...sensitivityResult.artifacts);
-
-  await ctx.breakpoint({
+  let sensitivityResult = await ctx.task(sensitivityAssessmentTask, { projectName, classifiedData: classificationResult.classifiedData, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      sensitivityResult = await ctx.task(sensitivityAssessmentTask, { ...{ projectName, classifiedData: classificationResult.classifiedData, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Data classification complete. ${sensitivityResult.highSensitivity} high-sensitivity datasets identified. Review classification?`,
     title: 'Data Classification Review',
-    context: { runId: ctx.runId, classification: sensitivityResult.summary, files: sensitivityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, classification: sensitivityResult.summary, files: sensitivityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Access Control Policy
   const accessResult = await ctx.task(accessControlPolicyTask, { projectName, sensitivityResult, regulations, outputDir });
   artifacts.push(...accessResult.artifacts);
@@ -68,15 +77,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...auditResult.artifacts);
 
   // Phase 7: Compliance Verification
-  const complianceResult = await ctx.task(complianceVerificationTask, { projectName, regulations, accessResult, consentResult, deidentResult, auditResult, outputDir });
-  artifacts.push(...complianceResult.artifacts);
-
-  await ctx.breakpoint({
+  let complianceResult = await ctx.task(complianceVerificationTask, { projectName, regulations, accessResult, consentResult, deidentResult, auditResult, outputDir });
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      complianceResult = await ctx.task(complianceVerificationTask, { ...{ projectName, regulations, accessResult, consentResult, deidentResult, auditResult, outputDir }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Compliance verification complete. Compliance score: ${complianceResult.score}%. Gaps identified: ${complianceResult.gaps.length}. Review compliance status?`,
     title: 'Compliance Review',
-    context: { runId: ctx.runId, complianceStatus: complianceResult.status, gaps: complianceResult.gaps, files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, complianceStatus: complianceResult.status, gaps: complianceResult.gaps, files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Data Sharing Agreements
   const sharingResult = await ctx.task(dataSharingAgreementsTask, { projectName, dataInventory, regulations, includeInternational, outputDir });
   artifacts.push(...sharingResult.artifacts);
@@ -86,15 +104,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...breachResult.artifacts);
 
   // Phase 10: Governance Report
-  const reportResult = await ctx.task(generateGovernanceReportTask, { projectName, classificationResult, sensitivityResult, accessResult, consentResult, deidentResult, auditResult, complianceResult, sharingResult, breachResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateGovernanceReportTask, { projectName, classificationResult, sensitivityResult, accessResult, consentResult, deidentResult, auditResult, complianceResult, sharingResult, breachResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateGovernanceReportTask, { ...{ projectName, classificationResult, sensitivityResult, accessResult, consentResult, deidentResult, auditResult, complianceResult, sharingResult, breachResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Genomic Data Governance Complete. Compliance: ${complianceResult.score}%, ${sharingResult.agreementTemplates} agreement templates created. Approve governance framework?`,
     title: 'Governance Framework Complete',
-    context: { runId: ctx.runId, summary: { compliance: complianceResult.score, policies: accessResult.policies.length, agreements: sharingResult.agreementTemplates }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Governance Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { compliance: complianceResult.score, policies: accessResult.policies.length, agreements: sharingResult.agreementTemplates }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Governance Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -111,8 +138,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/genomic-data-governance', timestamp: startTime, regulations }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const dataClassificationTask = defineTask('data-classification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Data Classification - ${args.projectName}`,

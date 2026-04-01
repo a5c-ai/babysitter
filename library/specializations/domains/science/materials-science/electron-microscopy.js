@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Instrument Setup and Alignment
   ctx.log('info', 'Phase 2: Instrument setup and alignment');
-  const instrumentSetup = await ctx.task(instrumentSetupTask, {
+  let instrumentSetup = await ctx.task(instrumentSetupTask, {
     sampleId,
     technique,
     acceleratingVoltage,
@@ -78,9 +78,19 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...imagingResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        instrumentSetup = await ctx.task(instrumentSetupTask, { ...{
+    sampleId,
+    technique,
+    acceleratingVoltage,
+    workingDistance,
+    detector,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Imaging complete for ${sampleId}. Acquired ${imagingResults.imageCount} images. Review quality before proceeding?`,
       title: 'Imaging Review',
       context: {
@@ -91,9 +101,15 @@ export async function process(inputs, ctx) {
           imageQuality: imagingResults.qualityAssessment
         },
         files: imagingResults.artifacts.map(a => ({ path: a.path, format: a.format || 'image' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: EDS Elemental Analysis
   let edsResults = null;
@@ -108,7 +124,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...edsResults.artifacts);
   }
-
   // Phase 5: WDS Analysis (if requested)
   let wdsResults = null;
   if (analysisTypes.includes('WDS')) {
@@ -121,7 +136,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...wdsResults.artifacts);
   }
-
   // Phase 6: EBSD Orientation Analysis
   let ebsdResults = null;
   if (analysisTypes.includes('EBSD')) {
@@ -133,9 +147,19 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...ebsdResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        instrumentSetup = await ctx.task(instrumentSetupTask, { ...{
+    sampleId,
+    technique,
+    acceleratingVoltage,
+    workingDistance,
+    detector,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `EBSD analysis complete. Indexing rate: ${ebsdResults.indexingRate}%. Review orientation maps?`,
       title: 'EBSD Analysis Review',
       context: {
@@ -147,9 +171,15 @@ export async function process(inputs, ctx) {
           textureStrength: ebsdResults.textureStrength
         },
         files: ebsdResults.artifacts.map(a => ({ path: a.path, format: a.format || 'image' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Microstructural Quantification
   ctx.log('info', 'Phase 7: Quantifying microstructure');
@@ -165,7 +195,7 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Report Generation
   ctx.log('info', 'Phase 8: Generating analysis report');
-  const report = await ctx.task(emReportTask, {
+  let report = await ctx.task(emReportTask, {
     sampleId,
     technique,
     analysisTypes,
@@ -179,8 +209,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(emReportTask, { ...{
+    sampleId,
+    technique,
+    analysisTypes,
+    imagingResults,
+    edsResults,
+    wdsResults,
+    ebsdResults,
+    microstructure,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Electron microscopy analysis complete for ${sampleId}. Review final results?`,
     title: 'EM Analysis Complete',
     context: {
@@ -194,9 +238,15 @@ export async function process(inputs, ctx) {
         grainCount: ebsdResults?.grainCount || null
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -240,8 +290,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Sample Preparation Assessment
+  // Task 1: Sample Preparation Assessment
 export const samplePrepAssessmentTask = defineTask('em-sample-prep-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Sample Preparation Assessment - ${args.sampleId}`,

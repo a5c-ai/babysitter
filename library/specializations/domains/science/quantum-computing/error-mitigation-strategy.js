@@ -44,30 +44,42 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Hardware Noise Characterization');
 
-  const noiseResult = await ctx.task(noiseCharacterizationTask, {
+  let noiseResult = await ctx.task(noiseCharacterizationTask, {
     hardware,
     framework
   });
 
-  artifacts.push(...(noiseResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      noiseResult = await ctx.task(noiseCharacterizationTask, { ...{
+    hardware,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Noise characterization complete. Average gate error: ${noiseResult.averageGateError}, Average T1: ${noiseResult.averageT1}us. Proceed with mitigation strategy selection?`,
     title: 'Noise Characterization Review',
     context: {
       runId: ctx.runId,
       noiseProfile: noiseResult,
       files: (noiseResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MITIGATION STRATEGY SELECTION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Mitigation Strategy Selection');
 
-  const strategyResult = await ctx.task(mitigationStrategySelectionTask, {
+  let strategyResult = await ctx.task(mitigationStrategySelectionTask, {
     circuit,
     noiseProfile: noiseResult,
     techniques,
@@ -97,7 +109,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Measurement calibration complete. Readout fidelity: ${measurementMitigationResult.readoutFidelity}`);
   }
-
   // ============================================================================
   // PHASE 4: DYNAMICAL DECOUPLING
   // ============================================================================
@@ -117,7 +128,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Dynamical decoupling applied with ${ddSequence} sequence`);
   }
-
   // ============================================================================
   // PHASE 5: ZERO-NOISE EXTRAPOLATION (ZNE)
   // ============================================================================
@@ -134,18 +144,32 @@ export async function process(inputs, ctx) {
       framework
     });
 
-    artifacts.push(...(zneResult.artifacts || []));
-
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        strategyResult = await ctx.task(mitigationStrategySelectionTask, { ...{
+    circuit,
+    noiseProfile: noiseResult,
+    techniques,
+    targetFidelity
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `ZNE complete. Extrapolated value: ${zneResult.extrapolatedValue}, Noise amplification successful for factors: ${zneResult.successfulFactors.join(', ')}. Review extrapolation?`,
       title: 'ZNE Results Review',
       context: {
         runId: ctx.runId,
         zneResults: zneResult,
         files: (zneResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: PROBABILISTIC ERROR CANCELLATION (if selected)
@@ -167,14 +191,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `PEC complete. Sampling overhead: ${pecResult.samplingOverhead}x`);
   }
-
   // ============================================================================
   // PHASE 7: MITIGATION VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Mitigation Validation');
 
-  const validationResult = await ctx.task(mitigationValidationTask, {
+  let validationResult = await ctx.task(mitigationValidationTask, {
     circuit,
     hardware,
     unmitgatedResults: noiseResult.baselineResults,
@@ -189,17 +212,38 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(validationResult.artifacts || []));
 
-  if (validationResult.achievedFidelity < targetFidelity) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        validationResult = await ctx.task(mitigationValidationTask, { ...{
+    circuit,
+    hardware,
+    unmitgatedResults: noiseResult.baselineResults,
+    measurementMitigation: measurementMitigationResult,
+    ddResults: ddResult,
+    zneResults: zneResult,
+    pecResults: pecResult,
+    targetFidelity,
+    shots,
+    framework
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Target fidelity not achieved. Achieved: ${validationResult.achievedFidelity}, Target: ${targetFidelity}. Consider additional techniques or accept current results?`,
       title: 'Fidelity Warning',
       context: {
         runId: ctx.runId,
         validation: validationResult,
         files: (validationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: DOCUMENTATION AND REPORTING
@@ -207,7 +251,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Documentation and Reporting');
 
-  const reportResult = await ctx.task(mitigationReportTask, {
+  let reportResult = await ctx.task(mitigationReportTask, {
     hardware,
     techniques,
     noiseResult,
@@ -220,9 +264,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(mitigationReportTask, { ...{
+    hardware,
+    techniques,
+    noiseResult,
+    strategyResult,
+    measurementMitigationResult,
+    ddResult,
+    zneResult,
+    pecResult,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Error mitigation complete. Fidelity improvement: ${validationResult.fidelityImprovement}x, Achieved fidelity: ${validationResult.achievedFidelity}. Approve results?`,
     title: 'Error Mitigation Complete',
     context: {
@@ -233,9 +291,15 @@ export async function process(inputs, ctx) {
         achievedFidelity: validationResult.achievedFidelity
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -267,8 +331,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

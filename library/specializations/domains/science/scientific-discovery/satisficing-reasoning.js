@@ -642,18 +642,32 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Design search strategy
-  const searchStrategy = await ctx.task(designSearchStrategyTask, {
+  let searchStrategy = await ctx.task(designSearchStrategyTask, {
     problem: inputs.problem,
     constraintAnalysis,
     aspirationLevels
   });
 
-  // Quality gate: Search strategy review
-  await ctx.breakpoint('search-strategy-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      searchStrategy = await ctx.task(designSearchStrategyTask, { ...{
+    problem: inputs.problem,
+    constraintAnalysis,
+    aspirationLevels
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('search-strategy-review', {
     question: 'Is the sequential search strategy appropriate for finding satisficing solutions?',
-    context: { searchStrategy, aspirationLevels, constraintAnalysis }
-  });
-
+    context: { searchStrategy, aspirationLevels, constraintAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Generate and screen alternatives
   const screeningResults = await ctx.task(generateAndScreenAlternativesTask, {
     problem: inputs.problem,
@@ -678,20 +692,33 @@ export async function process(inputs, ctx) {
     });
     currentAspirations = adaptedAspirations;
   }
-
   // Phase 7: Compare strategies
-  const strategyComparison = await ctx.task(compareSatisficingOptimizingTask, {
+  let strategyComparison = await ctx.task(compareSatisficingOptimizingTask, {
     satisficingEvaluation,
     constraintAnalysis,
     currentAspirations
   });
 
-  // Quality gate: Strategy appropriateness
-  await ctx.breakpoint('strategy-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyComparison = await ctx.task(compareSatisficingOptimizingTask, { ...{
+    satisficingEvaluation,
+    constraintAnalysis,
+    currentAspirations
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('strategy-review', {
     question: 'Is satisficing the appropriate decision strategy for this context?',
-    context: { strategyComparison, satisficingEvaluation }
-  });
-
+    context: { strategyComparison, satisficingEvaluation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Select solution
   const selectedSolution = await ctx.task(selectSolutionTask, {
     satisficingEvaluation,

@@ -94,7 +94,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Network Analysis Report
   ctx.log('info', 'Generating network analysis report');
-  const analysisReport = await ctx.task(networkReportTask, {
+  let analysisReport = await ctx.task(networkReportTask, {
     networkData,
     dataModeling,
     networkConstruction,
@@ -108,8 +108,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...analysisReport.artifacts);
 
-  // Breakpoint: Review network analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisReport = await ctx.task(networkReportTask, { ...{
+    networkData,
+    dataModeling,
+    networkConstruction,
+    centralityAnalysis,
+    communityDetection,
+    temporalAnalysis,
+    networkVisualization,
+    analysisGoals,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Network analysis complete. Nodes: ${networkConstruction.statistics?.nodes || 0}. Communities: ${communityDetection.communities?.length || 0}. Review analysis?`,
     title: 'Network Analysis for Humanities Results',
     context: {
@@ -121,9 +135,15 @@ export async function process(inputs, ctx) {
         communities: communityDetection.communities?.length || 0,
         centralFigures: centralityAnalysis.topNodes?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -150,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Network Data Modeling
+  // Task 1: Network Data Modeling
 export const networkDataModelingTask = defineTask('network-data-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model network data',

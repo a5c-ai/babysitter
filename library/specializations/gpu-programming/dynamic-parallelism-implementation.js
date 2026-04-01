@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...implementation.artifacts);
 
   // Phase 6: Performance Analysis
-  const performanceAnalysis = await ctx.task(dynamicParallelismPerformanceTask, {
+  let performanceAnalysis = await ctx.task(dynamicParallelismPerformanceTask, {
     projectName, implementation, maxNestingDepth, outputDir
   });
-  artifacts.push(...performanceAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performanceAnalysis = await ctx.task(dynamicParallelismPerformanceTask, { ...{
+    projectName, implementation, maxNestingDepth, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dynamic parallelism implementation complete for ${projectName}. Speedup vs host-launch: ${performanceAnalysis.speedupVsHost}x. Review?`,
     title: 'Dynamic Parallelism Complete',
-    context: { runId: ctx.runId, performanceAnalysis }
-  });
-
+    context: { runId: ctx.runId, performanceAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: performanceAnalysis.speedupVsHost >= 1.0,
     projectName,

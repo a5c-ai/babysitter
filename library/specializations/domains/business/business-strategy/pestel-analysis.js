@@ -117,7 +117,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Assessing impact and prioritizing factors');
-  const impactAssessment = await ctx.task(impactAssessmentTask, {
+  let impactAssessment = await ctx.task(impactAssessmentTask, {
     politicalAnalysis,
     economicAnalysis,
     socialAnalysis,
@@ -130,8 +130,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...impactAssessment.artifacts);
 
-  // Breakpoint: Review PESTEL analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      impactAssessment = await ctx.task(impactAssessmentTask, { ...{
+    politicalAnalysis,
+    economicAnalysis,
+    socialAnalysis,
+    technologicalAnalysis,
+    environmentalAnalysis,
+    legalAnalysis,
+    organizationContext,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PESTEL analysis complete. Identified ${impactAssessment.totalFactors} macro-environmental factors with ${impactAssessment.criticalFactors.length} critical factors. Review findings?`,
     title: 'PESTEL Analysis Review',
     context: {
@@ -149,9 +162,15 @@ export async function process(inputs, ctx) {
         legalFactors: legalAnalysis.factors.length,
         criticalFactors: impactAssessment.criticalFactors.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: SCENARIO DEVELOPMENT (OPTIONAL)
   // ============================================================================
@@ -174,7 +193,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...scenarioAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: STRATEGIC IMPLICATIONS
   // ============================================================================
@@ -246,8 +264,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

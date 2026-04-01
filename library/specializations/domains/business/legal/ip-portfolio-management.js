@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...valuation.artifacts);
 
   // Phase 4: Optimization Analysis
-  const optimization = await ctx.task(portfolioOptimizationTask, {
+  let optimization = await ctx.task(portfolioOptimizationTask, {
     assets: inventory.assets,
     valuation: valuation.valuations,
     maintenanceSchedule: maintenanceSchedule.schedule,
@@ -67,8 +67,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...optimization.artifacts);
 
   // Quality Gate: Review optimization recommendations
-  if (optimization.recommendations.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        optimization = await ctx.task(portfolioOptimizationTask, { ...{
+    assets: inventory.assets,
+    valuation: valuation.valuations,
+    maintenanceSchedule: maintenanceSchedule.schedule,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Portfolio optimization analysis complete. ${optimization.recommendations.length} recommendations. ${optimization.abandonmentCandidates} assets flagged for potential abandonment. Review?`,
       title: 'IP Portfolio Optimization Review',
       context: {
@@ -76,9 +85,15 @@ export async function process(inputs, ctx) {
         recommendationsCount: optimization.recommendations.length,
         abandonmentCandidates: optimization.abandonmentCandidates,
         files: optimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Report Generation
   const report = await ctx.task(portfolioReportTask, {

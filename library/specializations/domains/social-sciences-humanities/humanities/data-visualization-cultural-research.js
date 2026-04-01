@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Visualization Documentation
   ctx.log('info', 'Generating visualization documentation');
-  const visualizationDocumentation = await ctx.task(visualizationDocumentationTask, {
+  let visualizationDocumentation = await ctx.task(visualizationDocumentationTask, {
     dataAssessment,
     visualizationStrategy,
     designSystem,
@@ -111,8 +111,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...visualizationDocumentation.artifacts);
 
-  // Breakpoint: Review visualizations
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      visualizationDocumentation = await ctx.task(visualizationDocumentationTask, { ...{
+    dataAssessment,
+    visualizationStrategy,
+    designSystem,
+    staticVisualizations,
+    interactiveComponents,
+    narrativeIntegration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visualization development complete. Static: ${staticVisualizations.visualizations?.length || 0}. Interactive: ${interactiveComponents.components?.length || 0}. Review visualizations?`,
     title: 'Data Visualization for Cultural Research Results',
     context: {
@@ -124,9 +136,15 @@ export async function process(inputs, ctx) {
         staticCount: staticVisualizations.visualizations?.length || 0,
         interactiveCount: interactiveComponents.components?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -146,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Assessment and Preparation
+  // Task 1: Data Assessment and Preparation
 export const dataAssessmentTask = defineTask('data-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess and prepare data for visualization',

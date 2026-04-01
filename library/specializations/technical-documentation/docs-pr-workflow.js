@@ -19,8 +19,10 @@ export async function process(inputs, ctx) {
     strictMode = true
   } = inputs;
 
-  // Phase 1: PR Metadata and Change Analysis
-  await ctx.breakpoint({
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint({
     question: `Starting documentation PR review for #${prNumber}. Fetch and analyze changes?`,
     title: 'Phase 1: PR Metadata Analysis',
     context: {
@@ -29,10 +31,16 @@ export async function process(inputs, ctx) {
       prNumber,
       repository,
       branch
-    }
-  });
-
-  const prAnalysis = await ctx.task(analyzePrMetadataTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
+  let prAnalysis = await ctx.task(analyzePrMetadataTask, {
     prNumber,
     repository,
     branch
@@ -47,9 +55,16 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'docs-pr-workflow', timestamp: ctx.now() }
     };
   }
-
-  // Phase 2: Automated Quality Checks (Parallel Execution)
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      prAnalysis = await ctx.task(analyzePrMetadataTask, { ...{
+    prNumber,
+    repository,
+    branch
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `PR analyzed: ${prAnalysis.filesChanged} files changed. Run automated quality checks?`,
     title: 'Phase 2: Automated Quality Checks',
     context: {
@@ -58,9 +73,15 @@ export async function process(inputs, ctx) {
       filesChanged: prAnalysis.filesChanged,
       additions: prAnalysis.additions,
       deletions: prAnalysis.deletions
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [
     styleCheck,
     linkCheck,
@@ -103,27 +124,47 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Code Example Validation (if applicable)
   let codeExampleValidation = null;
-  if (prAnalysis.hasCodeExamples) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        prAnalysis = await ctx.task(analyzePrMetadataTask, { ...{
+    prNumber,
+    repository,
+    branch
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: 'Code examples detected. Validate code examples?',
       title: 'Phase 3: Code Example Validation',
       context: {
         runId: ctx.runId,
         phase: 'code-example-validation',
         exampleCount: prAnalysis.codeExampleCount
-      }
-    });
-
-    codeExampleValidation = await ctx.task(validateCodeExamplesTask, {
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    }    codeExampleValidation = await ctx.task(validateCodeExamplesTask, {
       files: prAnalysis.changedFiles,
       examples: prAnalysis.codeExamples,
       repository,
       branch
     });
   }
-
-  // Phase 4: Content Quality Review
-  await ctx.breakpoint({
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      prAnalysis = await ctx.task(analyzePrMetadataTask, { ...{
+    prNumber,
+    repository,
+    branch
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Automated checks complete. Review documentation content quality?',
     title: 'Phase 4: Content Quality Review',
     context: {
@@ -132,10 +173,16 @@ export async function process(inputs, ctx) {
       styleIssues: styleCheck.issueCount,
       brokenLinks: linkCheck.brokenCount,
       spellingErrors: spellCheck.errorCount
-    }
-  });
-
-  const contentQuality = await ctx.task(reviewContentQualityTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let contentQuality = await ctx.task(reviewContentQualityTask, {
     prAnalysis,
     changedFiles: prAnalysis.changedFiles,
     checks: {
@@ -151,18 +198,42 @@ export async function process(inputs, ctx) {
     branch
   });
 
-  // Phase 5: Technical Accuracy Verification
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contentQuality = await ctx.task(reviewContentQualityTask, { ...{
+    prAnalysis,
+    changedFiles: prAnalysis.changedFiles,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    repository,
+    branch
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Content quality reviewed. Verify technical accuracy?',
     title: 'Phase 5: Technical Accuracy Verification',
     context: {
       runId: ctx.runId,
       phase: 'technical-accuracy',
       contentQualityScore: contentQuality.score
-    }
-  });
-
-  const technicalAccuracy = await ctx.task(verifyTechnicalAccuracyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let technicalAccuracy = await ctx.task(verifyTechnicalAccuracyTask, {
     prAnalysis,
     changedFiles: prAnalysis.changedFiles,
     contentQuality,
@@ -170,18 +241,34 @@ export async function process(inputs, ctx) {
     branch
   });
 
-  // Phase 6: Comprehensive Quality Scoring
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      technicalAccuracy = await ctx.task(verifyTechnicalAccuracyTask, { ...{
+    prAnalysis,
+    changedFiles: prAnalysis.changedFiles,
+    contentQuality,
+    repository,
+    branch
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Technical accuracy verified. Calculate overall quality score?',
     title: 'Phase 6: Quality Scoring',
     context: {
       runId: ctx.runId,
       phase: 'quality-scoring',
       technicalAccuracyScore: technicalAccuracy.score
-    }
-  });
-
-  const qualityScore = await ctx.task(calculateQualityScoreTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let qualityScore = await ctx.task(calculateQualityScoreTask, {
     prAnalysis,
     checks: {
       style: styleCheck,
@@ -202,25 +289,48 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Build Preview and Screenshots
   let buildPreview = null;
-  if (prAnalysis.requiresBuild) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        qualityScore = await ctx.task(calculateQualityScoreTask, { ...{
+    prAnalysis,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    contentQuality,
+    technicalAccuracy,
+    targetQuality,
+    strictMode
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: 'Generate documentation build preview?',
       title: 'Phase 7: Build Preview',
       context: {
         runId: ctx.runId,
         phase: 'build-preview',
         overallQuality
-      }
-    });
-
-    buildPreview = await ctx.task(generateBuildPreviewTask, {
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    }    buildPreview = await ctx.task(generateBuildPreviewTask, {
       prNumber,
       repository,
       branch,
       changedFiles: prAnalysis.changedFiles
     });
   }
-
   // Phase 8: Approval Decision
   const criticalIssues = qualityScore.criticalIssues || [];
   const blockingIssues = qualityScore.blockingIssues || [];
@@ -231,8 +341,27 @@ export async function process(inputs, ctx) {
   let approvalReason = '';
 
   if (meetsQualityGate) {
-    if (autoApprove) {
-      await ctx.breakpoint({
+        let lastFeedback_phase8Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase8Review) {
+          qualityScore = await ctx.task(calculateQualityScoreTask, { ...{
+    prAnalysis,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    contentQuality,
+    technicalAccuracy,
+    targetQuality,
+    strictMode
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+        }
+  const phase8Review = await ctx.breakpoint({
         question: `Quality gate passed (${overallQuality}/${targetQuality}). Auto-approve enabled. Approve PR?`,
         title: 'Phase 8: Auto-Approval Decision',
         context: {
@@ -245,13 +374,37 @@ export async function process(inputs, ctx) {
             { path: `artifacts/pr-${prNumber}-review-report.md`, format: 'markdown' },
             { path: `artifacts/pr-${prNumber}-quality-score.json`, format: 'json' }
           ]
-        }
-      });
-
-      approved = true;
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase8Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase8Review.approved) break;
+        lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+      }      approved = true;
       approvalReason = `Auto-approved: Quality score ${overallQuality}/${targetQuality}, no blocking issues`;
-    } else {
-      await ctx.breakpoint({
+        let lastFeedback_phase8Review2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase8Review2) {
+          qualityScore = await ctx.task(calculateQualityScoreTask, { ...{
+    prAnalysis,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    contentQuality,
+    technicalAccuracy,
+    targetQuality,
+    strictMode
+  }, feedback: lastFeedback_phase8Review2, attempt: attempt + 1 });
+        }
+  const phase8Review2 = await ctx.breakpoint({
         question: `Quality gate passed (${overallQuality}/${targetQuality}). Manual approval required. Review and approve?`,
         title: 'Phase 8: Manual Approval Required',
         context: {
@@ -265,15 +418,40 @@ export async function process(inputs, ctx) {
             { path: `artifacts/pr-${prNumber}-quality-score.json`, format: 'json' },
             { path: buildPreview?.previewUrl ? `artifacts/build-preview.html` : null, format: 'html' }
           ].filter(f => f.path)
-        }
-      });
-
-      // This will be resolved by human via breakpoint
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase8Review2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase8Review2.approved) break;
+        lastFeedback_phase8Review2 = phase8Review2.response || phase8Review2.feedback || 'Changes requested';
+      }
+  // This will be resolved by human via breakpoint
       approved = false;
       approvalReason = 'Awaiting manual approval';
     }
-  } else {
-    await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        qualityScore = await ctx.task(calculateQualityScoreTask, { ...{
+    prAnalysis,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    contentQuality,
+    technicalAccuracy,
+    targetQuality,
+    strictMode
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `Quality gate FAILED (${overallQuality}/${targetQuality})${hasBlockingIssues ? ` with ${blockingIssues.length} blocking issue(s)` : ''}. Request changes?`,
       title: 'Phase 8: Quality Gate Failed',
       context: {
@@ -288,17 +466,40 @@ export async function process(inputs, ctx) {
           { path: `artifacts/pr-${prNumber}-quality-score.json`, format: 'json' },
           { path: `artifacts/pr-${prNumber}-issues.json`, format: 'json' }
         ]
-      }
-    });
-
-    approved = false;
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    }    approved = false;
     approvalReason = hasBlockingIssues
       ? `Rejected: ${blockingIssues.length} blocking issue(s) must be resolved`
       : `Quality below threshold: ${overallQuality}/${targetQuality}`;
   }
-
-  // Phase 9: Post Review Comment
-  await ctx.breakpoint({
+  let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      qualityScore = await ctx.task(calculateQualityScoreTask, { ...{
+    prAnalysis,
+    checks: {
+      style: styleCheck,
+      links: linkCheck,
+      spelling: spellCheck,
+      grammar: grammarCheck,
+      format: formatCheck,
+      accessibility: accessibilityCheck,
+      codeExamples: codeExampleValidation
+    },
+    contentQuality,
+    technicalAccuracy,
+    targetQuality,
+    strictMode
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Post review comment to PR #${prNumber}?`,
     title: 'Phase 9: Post Review Comment',
     context: {
@@ -306,9 +507,15 @@ export async function process(inputs, ctx) {
       phase: 'post-comment',
       approved,
       approvalReason
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const reviewComment = await ctx.task(postReviewCommentTask, {
     prNumber,
     repository,
@@ -417,8 +624,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzePrMetadataTask = defineTask('analyze-pr-metadata', (args, taskCtx) => ({
   kind: 'agent',

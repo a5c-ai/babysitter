@@ -45,10 +45,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...verification.artifacts);
 
   // PHASE 4: Performance Benchmarking
-  const benchmarking = await ctx.task(performanceBenchmarkingTask, { dataStructure, implementation, language, outputDir });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarking = await ctx.task(performanceBenchmarkingTask, { dataStructure, implementation, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(performanceBenchmarkingTask, { ...{ dataStructure, implementation, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${dataStructure} implemented. All operations verified: ${verification.allVerified}. Review?`,
     title: 'Data Structure Implementation Complete',
     context: {
@@ -60,9 +63,15 @@ export async function process(inputs, ctx) {
         { path: implementation.codePath, format: language, label: 'Implementation' },
         { path: benchmarking.reportPath, format: 'markdown', label: 'Benchmarks' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     dataStructure,

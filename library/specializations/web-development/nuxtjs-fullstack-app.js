@@ -126,15 +126,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Setting up Pinia state management');
 
-  const stateSetup = await ctx.task(stateSetupTask, {
+  let stateSetup = await ctx.task(stateSetupTask, {
     projectName,
     outputDir
   });
 
   artifacts.push(...stateSetup.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      stateSetup = await ctx.task(stateSetupTask, { ...{
+    projectName,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Nuxt.js application setup complete for ${projectName}. ${pagesSetup.pages.length} pages, ${serverRoutesSetup.routes.length} server routes. Approve configuration?`,
     title: 'Nuxt.js Application Review',
     context: {
@@ -143,9 +150,15 @@ export async function process(inputs, ctx) {
       serverRoutes: serverRoutesSetup.routes,
       composables: composablesSetup.composables,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'vue' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DEPLOYMENT
   // ============================================================================
@@ -204,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

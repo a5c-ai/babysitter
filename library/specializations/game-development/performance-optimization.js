@@ -74,17 +74,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...platformOptimization.artifacts);
 
   // Phase 7: Final Profiling
-  const finalProfiling = await ctx.task(finalProfilingTask, {
+  let finalProfiling = await ctx.task(finalProfilingTask, {
     projectName, baselineProfiling, fpsTarget, memoryBudget, loadTimeTarget, outputDir
   });
-  artifacts.push(...finalProfiling.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      finalProfiling = await ctx.task(finalProfilingTask, { ...{
+    projectName, baselineProfiling, fpsTarget, memoryBudget, loadTimeTarget, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance optimization complete for ${projectName}. FPS: ${finalProfiling.avgFps}. Memory: ${finalProfiling.memoryUsage}. Load time: ${finalProfiling.loadTime}s. Targets met: ${finalProfiling.targetsMet}. Review report?`,
     title: 'Performance Optimization Complete',
-    context: { runId: ctx.runId, finalProfiling, improvements: finalProfiling.improvements }
-  });
-
+    context: { runId: ctx.runId, finalProfiling, improvements: finalProfiling.improvements },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

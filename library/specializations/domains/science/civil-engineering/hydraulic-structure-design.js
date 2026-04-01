@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Structural Design
   ctx.log('info', 'Performing structural design');
-  const structuralDesign = await ctx.task(structuralDesignTask, {
+  let structuralDesign = await ctx.task(structuralDesignTask, {
     projectId,
     structureType,
     structureSizing,
@@ -95,8 +95,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...structuralDesign.artifacts);
 
-  // Breakpoint: Review hydraulic structure design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      structuralDesign = await ctx.task(structuralDesignTask, { ...{
+    projectId,
+    structureType,
+    structureSizing,
+    geotechnicalData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hydraulic structure design complete for ${projectId}. Structure type: ${structureType}. Review design?`,
     title: 'Hydraulic Structure Design Review',
     context: {
@@ -110,9 +120,15 @@ export async function process(inputs, ctx) {
         outletVelocity: outletDesign.velocity,
         energyDissipatorType: outletDesign.dissipatorType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Scour Analysis
   ctx.log('info', 'Performing scour analysis');
   const scourAnalysis = await ctx.task(scourAnalysisTask, {
@@ -179,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Hydrologic and Hydraulic Analysis
+  // Task 1: Hydrologic and Hydraulic Analysis
 export const hhAnalysisTask = defineTask('hh-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform hydrologic and hydraulic analysis',

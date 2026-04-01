@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const testingSetup = await ctx.task(testingSetupTask, { projectName, browsers, outputDir });
   artifacts.push(...testingSetup.artifacts);
 
-  const compatibilityFixes = await ctx.task(compatibilityFixesTask, { projectName, outputDir });
-  artifacts.push(...compatibilityFixes.artifacts);
-
-  await ctx.breakpoint({ question: `Cross-browser compatibility complete for ${projectName}. Approve?`, title: 'Compatibility Review', context: { runId: ctx.runId, report: browserAnalysis.report } });
-
+  let compatibilityFixes = await ctx.task(compatibilityFixesTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compatibilityFixes = await ctx.task(compatibilityFixesTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Cross-browser compatibility complete for ${projectName}. Approve?`, title: 'Compatibility Review', context: { runId: ctx.runId, report: browserAnalysis.report }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

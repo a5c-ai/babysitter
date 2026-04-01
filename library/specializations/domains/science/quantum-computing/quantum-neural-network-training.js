@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: QNN Architecture Design');
 
-  const architectureResult = await ctx.task(qnnArchitectureDesignTask, {
+  let architectureResult = await ctx.task(qnnArchitectureDesignTask, {
     task,
     architecture,
     numQubits,
@@ -56,25 +56,41 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(architectureResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      architectureResult = await ctx.task(qnnArchitectureDesignTask, { ...{
+    task,
+    architecture,
+    numQubits,
+    numLayers,
+    entanglement,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `QNN architecture designed. Qubits: ${architectureResult.qubitCount}, Parameters: ${architectureResult.parameterCount}, Depth: ${architectureResult.circuitDepth}. Proceed with trainability analysis?`,
     title: 'QNN Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureResult,
       files: (architectureResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: BARREN PLATEAU ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Barren Plateau Analysis');
 
-  const barrenResult = await ctx.task(barrenPlateauAnalysisTask, {
+  let barrenResult = await ctx.task(barrenPlateauAnalysisTask, {
     architecture: architectureResult,
     numQubits,
     numLayers,
@@ -83,17 +99,32 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(barrenResult.artifacts || []));
 
-  if (barrenResult.barrenPlateauRisk === 'high') {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        barrenResult = await ctx.task(barrenPlateauAnalysisTask, { ...{
+    architecture: architectureResult,
+    numQubits,
+    numLayers,
+    framework
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `High barren plateau risk detected. Variance: ${barrenResult.gradientVariance}. Apply mitigation or modify architecture?`,
       title: 'Barren Plateau Warning',
       context: {
         runId: ctx.runId,
         barrenPlateau: barrenResult,
         files: (barrenResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: PARAMETER INITIALIZATION
@@ -131,7 +162,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Training Loop');
 
-  const trainingResult = await ctx.task(qnnTrainingLoopTask, {
+  let trainingResult = await ctx.task(qnnTrainingLoopTask, {
     architecture: architectureResult,
     initialParameters: initResult.initialParameters,
     gradientConfig: gradientResult,
@@ -144,18 +175,38 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(trainingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      trainingResult = await ctx.task(qnnTrainingLoopTask, { ...{
+    architecture: architectureResult,
+    initialParameters: initResult.initialParameters,
+    gradientConfig: gradientResult,
+    dataset,
+    task,
+    optimizer,
+    learningRate,
+    batchSize,
+    epochs,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Training complete. Epochs: ${trainingResult.epochsRun}, Final loss: ${trainingResult.finalLoss}, Best validation: ${trainingResult.bestValidationMetric}. Review training history?`,
     title: 'Training Results Review',
     context: {
       runId: ctx.runId,
       training: trainingResult,
       files: (trainingResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: EXPRESSIBILITY ANALYSIS
   // ============================================================================
@@ -207,7 +258,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Documentation');
 
-  const reportResult = await ctx.task(qnnReportTask, {
+  let reportResult = await ctx.task(qnnReportTask, {
     task,
     architectureResult,
     barrenResult,
@@ -219,9 +270,22 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(qnnReportTask, { ...{
+    task,
+    architectureResult,
+    barrenResult,
+    initResult,
+    trainingResult,
+    expressibilityResult,
+    performanceResult,
+    recommendationsResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QNN training complete. Test performance: ${performanceResult.testMetric}, Expressibility: ${expressibilityResult.expressibilityScore}. Approve results?`,
     title: 'QNN Training Complete',
     context: {
@@ -233,9 +297,15 @@ export async function process(inputs, ctx) {
         trainable: barrenResult.barrenPlateauRisk !== 'high'
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -278,8 +348,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

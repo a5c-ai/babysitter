@@ -39,15 +39,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Options Identification
-  const optionsIdentification = await ctx.task(optionsIdentificationTask, {
+  let optionsIdentification = await ctx.task(optionsIdentificationTask, {
     projectName,
     problemAnalysis,
     proposedSolution,
     constraints
   });
 
-  // Breakpoint: Review options
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      optionsIdentification = await ctx.task(optionsIdentificationTask, { ...{
+    projectName,
+    problemAnalysis,
+    proposedSolution,
+    constraints
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Identified ${optionsIdentification.options.length} solution options for ${projectName}. Review before detailed analysis?`,
     title: 'Options Review',
     context: {
@@ -59,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: optionsIdentification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Benefits Analysis
   const benefitsAnalysis = await ctx.task(benefitsAnalysisTask, {
     projectName,
@@ -119,7 +134,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Business Case Document
-  const businessCaseDocument = await ctx.task(businessCaseDocumentTask, {
+  let businessCaseDocument = await ctx.task(businessCaseDocumentTask, {
     projectName,
     problemAnalysis,
     optionsIdentification,
@@ -132,8 +147,23 @@ export async function process(inputs, ctx) {
     recommendation
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      businessCaseDocument = await ctx.task(businessCaseDocumentTask, { ...{
+    projectName,
+    problemAnalysis,
+    optionsIdentification,
+    benefitsAnalysis,
+    costAnalysis,
+    financialAnalysis,
+    riskAssessment,
+    strategicAlignment,
+    optionsComparison,
+    recommendation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Business case complete for ${projectName}. Recommended option: ${recommendation.recommendedOption}. ROI: ${financialAnalysis.recommendedROI}%. Submit for approval?`,
     title: 'Business Case Approval',
     context: {
@@ -146,9 +176,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/business-case.json`, format: 'json', content: businessCaseDocument },
         { path: `artifacts/business-case.md`, format: 'markdown', content: businessCaseDocument.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -175,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemAnalysisTask = defineTask('problem-analysis', (args, taskCtx) => ({
   kind: 'agent',

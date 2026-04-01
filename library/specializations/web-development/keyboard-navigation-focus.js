@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const trapImplementation = await ctx.task(focusTrapTask, { projectName, outputDir });
   artifacts.push(...trapImplementation.artifacts);
 
-  const skipLinks = await ctx.task(skipLinksTask, { projectName, outputDir });
-  artifacts.push(...skipLinks.artifacts);
-
-  await ctx.breakpoint({ question: `Keyboard navigation setup complete for ${projectName}. Approve?`, title: 'Navigation Review', context: { runId: ctx.runId, patterns: focusManagement.patterns } });
-
+  let skipLinks = await ctx.task(skipLinksTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      skipLinks = await ctx.task(skipLinksTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Keyboard navigation setup complete for ${projectName}. Approve?`, title: 'Navigation Review', context: { runId: ctx.runId, patterns: focusManagement.patterns }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

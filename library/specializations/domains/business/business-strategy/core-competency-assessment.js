@@ -64,7 +64,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Benchmarking against competitors');
-  const competitiveBenchmarking = await ctx.task(competitiveBenchmarkingTask, {
+  let competitiveBenchmarking = await ctx.task(competitiveBenchmarkingTask, {
     coreCompetencies: competencyTesting.coreCompetencies,
     competitors,
     industry,
@@ -73,8 +73,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...competitiveBenchmarking.artifacts);
 
-  // Breakpoint: Review core competency identification
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      competitiveBenchmarking = await ctx.task(competitiveBenchmarkingTask, { ...{
+    coreCompetencies: competencyTesting.coreCompetencies,
+    competitors,
+    industry,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Core competency analysis complete. Identified ${competencyTesting.coreCompetencies.length} core competencies. Review detailed assessment?`,
     title: 'Core Competency Assessment Review',
     context: {
@@ -89,9 +98,15 @@ export async function process(inputs, ctx) {
         confirmedCoreCompetencies: competencyTesting.coreCompetencies.length,
         competitiveAdvantage: competitiveBenchmarking.competitivePosition
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: COMPETENCY GAP ANALYSIS
   // ============================================================================
@@ -171,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

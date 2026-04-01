@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Creating C4 Context Diagram (Level 1) - System Landscape');
-  const contextDiagram = await ctx.task(contextDiagramGenerationTask, {
+  let contextDiagram = await ctx.task(contextDiagramGenerationTask, {
     systemName,
     systemContext,
     diagramFormat,
@@ -84,8 +84,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contextDiagram.artifacts);
 
-  // Breakpoint: Review Context Diagram and executive summary
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      contextDiagram = await ctx.task(contextDiagramGenerationTask, { ...{
+    systemName,
+    systemContext,
+    diagramFormat,
+    documentationStyle,
+    targetAudience: 'executive-and-architects',
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Context diagram and executive summary created. Review system boundaries, ${contextDiagram.userCount} users, and ${contextDiagram.externalSystemCount} external systems. Documentation clarity acceptable for executive audience?`,
     title: 'C4 Context Diagram & Executive Documentation Review',
     context: {
@@ -103,9 +114,15 @@ export async function process(inputs, ctx) {
         systemPurpose: contextDiagram.systemPurpose,
         targetAudience: 'Executive & Architects'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: CONTAINER IDENTIFICATION & TECHNOLOGY DOCUMENTATION
   // ============================================================================
@@ -128,7 +145,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Creating C4 Container Diagram (Level 2) - Technology Architecture');
-  const containerDiagram = await ctx.task(containerDiagramGenerationTask, {
+  let containerDiagram = await ctx.task(containerDiagramGenerationTask, {
     systemName,
     systemContext,
     containerIdentification,
@@ -140,8 +157,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...containerDiagram.artifacts);
 
-  // Breakpoint: Review Container Diagram and technology documentation
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      containerDiagram = await ctx.task(containerDiagramGenerationTask, { ...{
+    systemName,
+    systemContext,
+    containerIdentification,
+    diagramFormat,
+    documentationStyle,
+    targetAudience: 'architects-and-developers',
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Container diagram created with ${containerDiagram.containerCount} containers and technology documentation. Review technology stack, inter-container communication patterns, and documentation clarity. Ready for component-level documentation?`,
     title: 'C4 Container Diagram & Technology Stack Documentation Review',
     context: {
@@ -159,9 +188,15 @@ export async function process(inputs, ctx) {
         databases: containerDiagram.databases,
         targetAudience: 'Architects & Developers'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: COMPONENT BREAKDOWN (PARALLEL) - DEVELOPER VIEW
   // ============================================================================
@@ -219,8 +254,20 @@ export async function process(inputs, ctx) {
 
   const totalComponents = componentDiagrams.reduce((sum, d) => sum + d.componentCount, 0);
 
-  // Breakpoint: Review Component Diagrams and developer documentation
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      containerDiagram = await ctx.task(containerDiagramGenerationTask, { ...{
+    systemName,
+    systemContext,
+    containerIdentification,
+    diagramFormat,
+    documentationStyle,
+    targetAudience: 'architects-and-developers',
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Component diagrams and developer documentation created for ${componentDiagrams.length} containers with ${totalComponents} components. Review component responsibilities, interfaces, and documentation completeness. Approve for supplementary diagrams?`,
     title: 'C4 Component Diagrams & Developer Documentation Review',
     context: {
@@ -244,9 +291,15 @@ export async function process(inputs, ctx) {
         })),
         targetAudience: 'Developers'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: CODE DIAGRAMS (LEVEL 4) - OPTIONAL
   // ============================================================================
@@ -288,7 +341,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', 'No complex components identified requiring code-level diagrams');
     }
   }
-
   // ============================================================================
   // PHASE 9: SUPPLEMENTARY DIAGRAMS - OPERATIONAL VIEW
   // ============================================================================
@@ -313,7 +365,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // Dynamic Diagram (user journeys and scenarios)
   if (requirements.some(r => r.userJourney || r.scenario)) {
     supplementaryTasks.push({
@@ -329,7 +380,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // System Landscape (enterprise context)
   if (externalSystems.length > 0) {
     supplementaryTasks.push({
@@ -345,7 +395,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   let supplementaryDiagrams = [];
   if (supplementaryTasks.length > 0) {
     supplementaryDiagrams = await ctx.parallel.all(
@@ -358,7 +407,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Generated ${supplementaryDiagrams.length} supplementary diagrams with operational documentation`);
   }
-
   // ============================================================================
   // PHASE 10: COMPREHENSIVE ARCHITECTURE NARRATIVE
   // ============================================================================
@@ -446,7 +494,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Generating complete documentation package with navigation and indexes');
-  const documentationPackage = await ctx.task(documentationPackageGenerationTask, {
+  let documentationPackage = await ctx.task(documentationPackageGenerationTask, {
     systemName,
     artifacts,
     narrativeDocument,
@@ -457,8 +505,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentationPackage.artifacts);
 
-  // Final Breakpoint: Review complete documentation package
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentationPackage = await ctx.task(documentationPackageGenerationTask, { ...{
+    systemName,
+    artifacts,
+    narrativeDocument,
+    audienceGuides,
+    documentationStyle,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `C4 Model architecture documentation package complete. Quality score: ${qualityScore}/100. ${qualityMet ? 'Documentation meets quality standards!' : 'Documentation may need refinement.'} Package includes ${artifacts.length} artifacts, ${audienceGuides.length} audience guides, and comprehensive navigation. Final approval?`,
     title: 'C4 Architecture Documentation Package Final Review',
     context: {
@@ -499,9 +558,15 @@ export async function process(inputs, ctx) {
         packagePath: documentationPackage.packagePath,
         accessibilityLevel: documentationStyle.accessibilityLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -571,8 +636,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

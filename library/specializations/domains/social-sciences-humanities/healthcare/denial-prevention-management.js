@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Denial Prevention and Management Program for: ${organizationName}`);
 
-  const denialAnalysis = await ctx.task(denialAnalysisTask, { organizationName, denialScope, topDenialReasons, currentMetrics, outputDir });
-  artifacts.push(...denialAnalysis.artifacts);
-
-  await ctx.breakpoint({ question: `Denial analysis complete. Overall denial rate: ${denialAnalysis.denialRate}%. Top ${denialAnalysis.topReasons.length} denial reasons identified. Proceed?`, title: 'Denial Analysis Review', context: { runId: ctx.runId, denialRate: denialAnalysis.denialRate, topReasons: denialAnalysis.topReasons } });
-
+  let denialAnalysis = await ctx.task(denialAnalysisTask, { organizationName, denialScope, topDenialReasons, currentMetrics, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      denialAnalysis = await ctx.task(denialAnalysisTask, { ...{ organizationName, denialScope, topDenialReasons, currentMetrics, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({ question: `Denial analysis complete. Overall denial rate: ${denialAnalysis.denialRate}%. Top ${denialAnalysis.topReasons.length} denial reasons identified. Proceed?`, title: 'Denial Analysis Review', context: { runId: ctx.runId, denialRate: denialAnalysis.denialRate, topReasons: denialAnalysis.topReasons }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_analysisApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const preventionStrategies = await ctx.task(denialPreventionTask, { denialAnalysis, outputDir });
   artifacts.push(...preventionStrategies.artifacts);
 
   const eligibilityVerification = await ctx.task(eligibilityVerificationTask, { denialAnalysis, outputDir });
   artifacts.push(...eligibilityVerification.artifacts);
 
-  const authorizationManagement = await ctx.task(authorizationManagementTask, { denialAnalysis, outputDir });
-  artifacts.push(...authorizationManagement.artifacts);
-
-  await ctx.breakpoint({ question: `Prevention strategies designed. ${preventionStrategies.strategies.length} prevention strategies. Proceed with management workflow?`, title: 'Prevention Strategies Review', context: { runId: ctx.runId, strategies: preventionStrategies.strategies } });
-
+  let authorizationManagement = await ctx.task(authorizationManagementTask, { denialAnalysis, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      authorizationManagement = await ctx.task(authorizationManagementTask, { ...{ denialAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Prevention strategies designed. ${preventionStrategies.strategies.length} prevention strategies. Proceed with management workflow?`, title: 'Prevention Strategies Review', context: { runId: ctx.runId, strategies: preventionStrategies.strategies }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const denialManagementWorkflow = await ctx.task(denialManagementWorkflowTask, { denialAnalysis, outputDir });
   artifacts.push(...denialManagementWorkflow.artifacts);
 

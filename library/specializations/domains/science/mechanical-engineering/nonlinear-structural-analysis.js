@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Material Model Definition');
 
-  const materialResult = await ctx.task(nonlinearMaterialTask, {
+  let materialResult = await ctx.task(nonlinearMaterialTask, {
     projectName,
     materials,
     nonlinearityType,
@@ -79,8 +79,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Material models defined - ${materialResult.materialCount} materials`);
 
   // Breakpoint: Review material models
-  if (nonlinearityType.includes('material')) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        materialResult = await ctx.task(nonlinearMaterialTask, { ...{
+    projectName,
+    materials,
+    nonlinearityType,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Material nonlinearity included. Models: ${materialResult.materialModels.join(', ')}. Material stability verified: ${materialResult.stabilityVerified}. Review material definitions?`,
       title: 'Material Model Review',
       context: {
@@ -88,9 +97,15 @@ export async function process(inputs, ctx) {
         materialModels: materialResult.materialModels,
         materialParameters: materialResult.parameters,
         files: materialResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: CONTACT DEFINITION
@@ -111,7 +126,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Contact defined - ${contactResult.contactPairCount} pairs`);
   }
-
   // ============================================================================
   // PHASE 4: BOUNDARY CONDITIONS AND LOADING
   // ============================================================================
@@ -155,7 +169,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Nonlinear Solver Execution');
 
-  const solveResult = await ctx.task(nonlinearSolveTask, {
+  let solveResult = await ctx.task(nonlinearSolveTask, {
     projectName,
     solverResult,
     outputDir
@@ -166,8 +180,16 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Solver complete - Status: ${solveResult.convergenceStatus}`);
 
   // Quality Gate: Convergence issues
-  if (solveResult.convergenceStatus !== 'converged') {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        solveResult = await ctx.task(nonlinearSolveTask, { ...{
+    projectName,
+    solverResult,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Solver ${solveResult.convergenceStatus}. ${solveResult.convergenceMessage}. Last converged load: ${solveResult.lastConvergedLoad * 100}%. Review solver diagnostics and adjust?`,
       title: 'Convergence Issue',
       context: {
@@ -177,9 +199,15 @@ export async function process(inputs, ctx) {
         diagnostics: solveResult.diagnostics,
         suggestions: solveResult.suggestions,
         files: solveResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: BUCKLING ANALYSIS (IF APPLICABLE)
@@ -200,14 +228,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Buckling analysis complete - Critical load factor: ${bucklingResult.criticalLoadFactor}`);
   }
-
   // ============================================================================
   // PHASE 8: RESULTS EXTRACTION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Results Extraction');
 
-  const resultsResult = await ctx.task(nonlinearResultsTask, {
+  let resultsResult = await ctx.task(nonlinearResultsTask, {
     projectName,
     solveResult,
     nonlinearityType,
@@ -220,8 +247,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Results extracted - Max stress: ${resultsResult.maxStress} MPa`);
 
-  // Breakpoint: Review results
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      resultsResult = await ctx.task(nonlinearResultsTask, { ...{
+    projectName,
+    solveResult,
+    nonlinearityType,
+    contactResult,
+    bucklingResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Nonlinear analysis complete. Max stress: ${resultsResult.maxStress} MPa, Max strain: ${resultsResult.maxStrain}, Max displacement: ${resultsResult.maxDisplacement} mm. Review results?`,
     title: 'Nonlinear Results Review',
     context: {
@@ -230,16 +268,22 @@ export async function process(inputs, ctx) {
       loadDisplacementCurve: resultsResult.loadDisplacementCurve,
       contactResults: resultsResult.contactResults,
       files: resultsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: GENERATE REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating Nonlinear Analysis Report');
 
-  const reportResult = await ctx.task(generateNonlinearReportTask, {
+  let reportResult = await ctx.task(generateNonlinearReportTask, {
     projectName,
     nonlinearityType,
     meshResult,
@@ -255,8 +299,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateNonlinearReportTask, { ...{
+    projectName,
+    nonlinearityType,
+    meshResult,
+    materialResult,
+    contactResult,
+    boundaryResult,
+    solverResult,
+    solveResult,
+    bucklingResult,
+    resultsResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Nonlinear Analysis Complete for ${projectName}. Convergence: ${solveResult.convergenceStatus}. Max stress: ${resultsResult.maxStress} MPa. Approve analysis?`,
     title: 'Nonlinear Analysis Complete',
     context: {
@@ -271,9 +331,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Nonlinear Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -303,8 +369,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

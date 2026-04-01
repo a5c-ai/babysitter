@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Identifying and analyzing best practices');
-  const practiceAnalysis = await ctx.task(practiceAnalysisTask, {
+  let practiceAnalysis = await ctx.task(practiceAnalysisTask, {
     practiceArea,
     sourcePractices,
     existingDocumentation,
@@ -47,8 +47,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...practiceAnalysis.artifacts);
 
-  // Breakpoint: Review practice analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      practiceAnalysis = await ctx.task(practiceAnalysisTask, { ...{
+    practiceArea,
+    sourcePractices,
+    existingDocumentation,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${practiceAnalysis.practices.length} best practices for documentation. Review analysis?`,
     title: 'Practice Analysis Review',
     context: {
@@ -64,9 +74,15 @@ export async function process(inputs, ctx) {
         practicesIdentified: practiceAnalysis.practices.length,
         successFactors: practiceAnalysis.successFactors.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SUCCESS CRITERIA AND METRICS DEFINITION
   // ============================================================================
@@ -86,7 +102,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Documenting best practices');
-  const practiceDocumentation = await ctx.task(practiceDocumentationTask, {
+  let practiceDocumentation = await ctx.task(practiceDocumentationTask, {
     practices: practiceAnalysis.practices,
     successCriteria: successCriteria.criteria,
     targetAudience,
@@ -96,8 +112,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...practiceDocumentation.artifacts);
 
-  // Breakpoint: Review documentation
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      practiceDocumentation = await ctx.task(practiceDocumentationTask, { ...{
+    practices: practiceAnalysis.practices,
+    successCriteria: successCriteria.criteria,
+    targetAudience,
+    documentationStandards,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Created ${practiceDocumentation.documents.length} practice documents. Review documentation?`,
     title: 'Documentation Review',
     context: {
@@ -112,9 +138,15 @@ export async function process(inputs, ctx) {
         documentsCreated: practiceDocumentation.documents.length,
         documentTypes: practiceDocumentation.documentTypes
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PROCEDURE STANDARDIZATION
   // ============================================================================
@@ -190,7 +222,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Planning adoption and rollout');
-  const adoptionPlan = await ctx.task(adoptionPlanningTask, {
+  let adoptionPlan = await ctx.task(adoptionPlanningTask, {
     documents: practiceDocumentation.documents,
     standardizedProcedures: procedureStandardization.standardizedProcedures,
     trainingMaterials: trainingMaterials.materials,
@@ -218,8 +250,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        adoptionPlan = await ctx.task(adoptionPlanningTask, { ...{
+    documents: practiceDocumentation.documents,
+    standardizedProcedures: procedureStandardization.standardizedProcedures,
+    trainingMaterials: trainingMaterials.materials,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize documentation?`,
       title: 'Final Approval Gate',
       context: {
@@ -235,9 +277,15 @@ export async function process(inputs, ctx) {
           qualityScore: qualityAssessment.overallScore,
           documentsProduced: practiceDocumentation.documents.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -272,8 +320,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

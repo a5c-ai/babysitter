@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/session-start.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/session-start.ps1\"",
+        "timeoutSec": 30
+      }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/stop-hook.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/stop-hook.ps1\"",
+        "loop_limit": null
+      }
+    ]
+  }
+}

@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Establishing member selection criteria and process');
-  const selectionCriteria = await ctx.task(memberSelectionCriteriaTask, {
+  let selectionCriteria = await ctx.task(memberSelectionCriteriaTask, {
     productName,
     programCharter,
     boardSize,
@@ -69,8 +69,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Selection criteria defined with ${selectionCriteria.criteria.length} key criteria`);
 
-  // Breakpoint: Review charter and selection criteria
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      selectionCriteria = await ctx.task(memberSelectionCriteriaTask, { ...{
+    productName,
+    programCharter,
+    boardSize,
+    customerBase,
+    industryFocus,
+    includeExternalExperts,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `CAB charter and member selection criteria complete. Board size: ${boardSize} members, ${selectionCriteria.diversityDimensions.length} diversity dimensions. Review before member identification?`,
     title: 'CAB Foundation Review',
     context: {
@@ -87,9 +99,15 @@ export async function process(inputs, ctx) {
         meetingFrequency,
         criteriaCount: selectionCriteria.criteria.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IDEAL MEMBER PROFILE DEVELOPMENT
   // ============================================================================
@@ -131,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Designing program structure and governance');
-  const programStructure = await ctx.task(programStructureTask, {
+  let programStructure = await ctx.task(programStructureTask, {
     productName,
     programCharter,
     boardSize,
@@ -147,8 +165,21 @@ export async function process(inputs, ctx) {
   const meetingStructure = programStructure.meetingStructure;
   ctx.log('info', `Program structure created with ${meetingStructure.meetingTypes.length} meeting types`);
 
-  // Breakpoint: Review program structure
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      programStructure = await ctx.task(programStructureTask, { ...{
+    productName,
+    programCharter,
+    boardSize,
+    meetingFrequency,
+    programDuration,
+    executiveSponsorRequired,
+    virtualMeetings,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Program structure and governance designed. ${meetingStructure.meetingTypes.length} meeting types, ${programStructure.governance.roles.length} governance roles. Review structure?`,
     title: 'Program Structure Review',
     context: {
@@ -165,9 +196,15 @@ export async function process(inputs, ctx) {
         governanceRoles: programStructure.governance.roles.length,
         virtualMeetings
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MEETING CADENCE AND AGENDA FRAMEWORK
   // ============================================================================
@@ -211,7 +248,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Defining value exchange and member benefits');
-  const valueExchange = await ctx.task(valueExchangeTask, {
+  let valueExchange = await ctx.task(valueExchangeTask, {
     productName,
     programCharter,
     boardSize,
@@ -224,8 +261,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Value exchange framework created with ${valueExchange.memberBenefits.length} member benefits`);
 
-  // Breakpoint: Review feedback and value exchange
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      valueExchange = await ctx.task(valueExchangeTask, { ...{
+    productName,
+    programCharter,
+    boardSize,
+    compensationModel,
+    meetingCadence,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Feedback mechanisms (${mechanisms.length}) and value exchange framework complete. Compensation model: ${compensationModel}. Review engagement approach?`,
     title: 'Engagement Framework Review',
     context: {
@@ -242,9 +290,15 @@ export async function process(inputs, ctx) {
         compensationModel,
         timeCommitment: valueExchange.timeCommitment
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: COMMUNICATION AND ENGAGEMENT PLAN
   // ============================================================================
@@ -340,7 +394,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Validating program design and readiness');
-  const programValidation = await ctx.task(programValidationTask, {
+  let programValidation = await ctx.task(programValidationTask, {
     productName,
     programPlaybook: programPlaybook.playbook,
     programCharter,
@@ -355,8 +409,20 @@ export async function process(inputs, ctx) {
   const readinessScore = programValidation.readinessScore;
   const programReady = readinessScore >= 85;
 
-  // Final Breakpoint: Review complete program
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      programValidation = await ctx.task(programValidationTask, { ...{
+    productName,
+    programPlaybook: programPlaybook.playbook,
+    programCharter,
+    programStructure,
+    selectionCriteria,
+    valueExchange,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CAB program design complete. Readiness score: ${readinessScore}/100. ${programReady ? 'Ready to launch!' : 'May need adjustments before launch.'} Review complete program?`,
     title: 'CAB Program Readiness Review',
     context: {
@@ -378,9 +444,15 @@ export async function process(inputs, ctx) {
         compensationModel,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -450,8 +522,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -39,14 +39,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Continuous Symmetry Identification
-  const continuousSymmetries = await ctx.task(continuousSymmetriesTask, {
+  let continuousSymmetries = await ctx.task(continuousSymmetriesTask, {
     systemName,
     systemCharacterization,
     knownSymmetries
   });
 
-  // Breakpoint: Review identified continuous symmetries
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      continuousSymmetries = await ctx.task(continuousSymmetriesTask, { ...{
+    systemName,
+    systemCharacterization,
+    knownSymmetries
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review continuous symmetries for ${systemName}. Are all relevant symmetries identified?`,
     title: 'Continuous Symmetries Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: continuousSymmetries
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Discrete Symmetry Identification
   const discreteSymmetries = await ctx.task(discreteSymmetriesTask, {
     systemName,
@@ -68,24 +82,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Noether Theorem Application
-  const noetherAnalysis = await ctx.task(noetherAnalysisTask, {
+  let noetherAnalysis = await ctx.task(noetherAnalysisTask, {
     systemName,
     continuousSymmetries,
     systemCharacterization
   });
 
   // Quality Gate: Verify conservation laws
-  if (!noetherAnalysis.conservedQuantities || noetherAnalysis.conservedQuantities.length === 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        noetherAnalysis = await ctx.task(noetherAnalysisTask, { ...{
+    systemName,
+    continuousSymmetries,
+    systemCharacterization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `No conserved quantities derived for ${systemName}. This may indicate no continuous symmetries. Proceed?`,
       title: 'Conservation Law Warning',
       context: {
         runId: ctx.runId,
         noetherAnalysis,
         recommendation: 'Verify system has continuous symmetries or focus on discrete symmetry analysis'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Group Theory Analysis
   const groupTheoryAnalysis = await ctx.task(groupTheoryAnalysisTask, {
@@ -109,15 +137,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Calculation Simplification
-  const simplificationStrategies = await ctx.task(simplificationTask, {
+  let simplificationStrategies = await ctx.task(simplificationTask, {
     systemName,
     groupTheoryAnalysis,
     selectionRules,
     conservedQuantities: noetherAnalysis.conservedQuantities
   });
 
-  // Final Breakpoint: Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      simplificationStrategies = await ctx.task(simplificationTask, { ...{
+    systemName,
+    groupTheoryAnalysis,
+    selectionRules,
+    conservedQuantities: noetherAnalysis.conservedQuantities
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Symmetry analysis complete for ${systemName}. Approve results for use?`,
     title: 'Symmetry Analysis Approval',
     context: {
@@ -127,9 +164,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/symmetry-analysis.json`, format: 'json', content: groupTheoryAnalysis },
         { path: `artifacts/selection-rules.json`, format: 'json', content: selectionRules }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -151,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const systemCharacterizationTask = defineTask('system-characterization', (args, taskCtx) => ({
   kind: 'agent',

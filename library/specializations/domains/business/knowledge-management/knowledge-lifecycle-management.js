@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Lifecycle Framework Design
   ctx.log('info', 'Phase 1: Designing lifecycle framework');
-  const frameworkDesign = await ctx.task(frameworkDesignTask, { governancePolicies, contentTypes, outputDir });
-  artifacts.push(...frameworkDesign.artifacts);
-
-  await ctx.breakpoint({
+  let frameworkDesign = await ctx.task(frameworkDesignTask, { governancePolicies, contentTypes, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      frameworkDesign = await ctx.task(frameworkDesignTask, { ...{ governancePolicies, contentTypes, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lifecycle framework designed with ${frameworkDesign.stages.length} stages. Review?`,
     title: 'Lifecycle Framework Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { stages: frameworkDesign.stages.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { stages: frameworkDesign.stages.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Creation Process Design
   ctx.log('info', 'Phase 2: Designing creation process');
   const creationProcess = await ctx.task(creationProcessTask, { frameworkDesign: frameworkDesign.framework, governancePolicies, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { lifecycleProcess: frameworkDesign.framework, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -107,8 +115,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/knowledge-lifecycle-management', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const frameworkDesignTask = defineTask('framework-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design lifecycle framework',

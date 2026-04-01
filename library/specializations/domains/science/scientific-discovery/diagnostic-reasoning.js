@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
       diagnosis: null
     };
   }
-
   // Phase 4: Consistency-Based Diagnosis
   const consistencyDiagnosis = await ctx.task(consistencyBasedDiagnosisTask, {
     candidates: candidateGeneration.candidates,
@@ -103,14 +102,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Discriminating Tests
-  const discriminatingTests = await ctx.task(discriminatingTestsTask, {
+  let discriminatingTests = await ctx.task(discriminatingTestsTask, {
     integratedDiagnosis,
     faultModel,
     domain
   });
 
-  // Breakpoint: Review differential diagnosis
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      discriminatingTests = await ctx.task(discriminatingTestsTask, { ...{
+    integratedDiagnosis,
+    faultModel,
+    domain
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Diagnostic analysis complete. Top diagnosis: ${integratedDiagnosis.primaryDiagnosis.name} (${integratedDiagnosis.primaryDiagnosis.confidence}% confidence). Review differential diagnosis?`,
     title: 'Diagnostic Review',
     context: {
@@ -118,9 +125,15 @@ export async function process(inputs, ctx) {
       domain,
       symptoms: symptoms.map(s => s.name),
       differentialDiagnosis: integratedDiagnosis.differentialDiagnosis.slice(0, 5)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Treatment/Intervention Recommendations
   const recommendations = await ctx.task(recommendationsTask, {
     integratedDiagnosis,
@@ -130,15 +143,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Validation
-  const validation = await ctx.task(diagnosticValidationTask, {
+  let validation = await ctx.task(diagnosticValidationTask, {
     integratedDiagnosis,
     symptomAnalysis,
     recommendations,
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(diagnosticValidationTask, { ...{
+    integratedDiagnosis,
+    symptomAnalysis,
+    recommendations,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Diagnostic process complete. Root cause: ${rootCauseAnalysis.rootCause}. Confidence: ${validation.overallConfidence}. Accept diagnosis and recommendations?`,
     title: 'Final Diagnostic Review',
     context: {
@@ -148,9 +170,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/diagnosis.json', format: 'json', content: integratedDiagnosis },
         { path: 'artifacts/recommendations.json', format: 'json', content: recommendations }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -176,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const symptomAnalysisTask = defineTask('symptom-analysis', (args, taskCtx) => ({
   kind: 'agent',

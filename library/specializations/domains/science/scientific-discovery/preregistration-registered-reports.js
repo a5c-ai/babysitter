@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Specifying sampling plan');
-  const samplingPlan = await ctx.task(samplingPlanTask, {
+  let samplingPlan = await ctx.task(samplingPlanTask, {
     studyTitle,
     methods,
     designPlan,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...samplingPlan.artifacts);
 
-  // Breakpoint: Review core preregistration elements
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      samplingPlan = await ctx.task(samplingPlanTask, { ...{
+    studyTitle,
+    methods,
+    designPlan,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Core preregistration elements complete. ${hypothesesSpec.hypothesesCount} hypotheses specified. Sample size: ${samplingPlan.targetN}. Review before analysis plan?`,
     title: 'Preregistration Core Review',
     context: {
@@ -113,9 +122,15 @@ export async function process(inputs, ctx) {
         targetN: samplingPlan.targetN,
         designType: designPlan.designType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: VARIABLES SPECIFICATION
   // ============================================================================
@@ -202,7 +217,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Scoring preregistration completeness');
-  const completenessScore = await ctx.task(completenessScoringTask, {
+  let completenessScore = await ctx.task(completenessScoringTask, {
     studyTitle,
     preregistrationDoc,
     registryTarget,
@@ -214,8 +229,18 @@ export async function process(inputs, ctx) {
 
   const completenessMet = completenessScore.overallScore >= minimumCompletenessScore;
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      completenessScore = await ctx.task(completenessScoringTask, { ...{
+    studyTitle,
+    preregistrationDoc,
+    registryTarget,
+    minimumCompletenessScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Preregistration complete for "${studyTitle}". Completeness score: ${completenessScore.overallScore}/100. ${completenessMet ? 'Ready for submission!' : 'May need additional detail.'} Approve for registration?`,
     title: 'Preregistration Approval',
     context: {
@@ -233,9 +258,15 @@ export async function process(inputs, ctx) {
         registryTarget,
         hypothesesCount: hypothesesSpec.hypothesesCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -275,8 +306,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

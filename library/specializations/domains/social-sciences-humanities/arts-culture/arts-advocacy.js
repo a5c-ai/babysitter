@@ -48,15 +48,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Legislative Strategy Development
-  const legislativeStrategy = await ctx.task(legislativeStrategyTask, {
+  let legislativeStrategy = await ctx.task(legislativeStrategyTask, {
     advocacyGoals: inputs.advocacyGoals,
     targetAudience: inputs.targetAudience,
     landscapeAnalysis: landscapeAnalysis,
     timeline: inputs.timeline
   });
 
-  // Breakpoint: Strategy Review
-  await ctx.breakpoint('strategy-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      legislativeStrategy = await ctx.task(legislativeStrategyTask, { ...{
+    advocacyGoals: inputs.advocacyGoals,
+    targetAudience: inputs.targetAudience,
+    landscapeAnalysis: landscapeAnalysis,
+    timeline: inputs.timeline
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('strategy-review', {
     title: 'Advocacy Strategy Review',
     description: 'Review advocacy strategy, messaging, and legislative approach before campaign launch',
     context: {
@@ -64,9 +73,15 @@ export async function process(inputs, ctx) {
       coalitionStrategy: coalitionStrategy,
       messagingFramework: messagingFramework,
       legislativeStrategy: legislativeStrategy
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Grassroots Mobilization Planning
   const grassrootsPlan = await ctx.task(grassrootsMobilizationTask, {
     stakeholders: inputs.stakeholders,
@@ -91,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Campaign Implementation Plan
-  const campaignPlan = await ctx.task(campaignImplementationTask, {
+  let campaignPlan = await ctx.task(campaignImplementationTask, {
     legislativeStrategy: legislativeStrategy,
     grassrootsPlan: grassrootsPlan,
     mediaStrategy: mediaStrategy,
@@ -99,16 +114,32 @@ export async function process(inputs, ctx) {
     resources: inputs.resources
   });
 
-  // Final Breakpoint: Campaign Launch Approval
-  await ctx.breakpoint('campaign-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      campaignPlan = await ctx.task(campaignImplementationTask, { ...{
+    legislativeStrategy: legislativeStrategy,
+    grassrootsPlan: grassrootsPlan,
+    mediaStrategy: mediaStrategy,
+    timeline: inputs.timeline,
+    resources: inputs.resources
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('campaign-approval', {
     title: 'Advocacy Campaign Launch Approval',
     description: 'Approve advocacy campaign plan and materials for launch',
     context: {
       campaignPlan: campaignPlan,
       advocacyToolkit: advocacyToolkit
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     landscapeAnalysis: landscapeAnalysis,
     coalitionStrategy: coalitionStrategy,

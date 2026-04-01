@@ -77,25 +77,39 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Plugin Registry and Discovery
   ctx.log.info('Phase 5: Creating plugin registry');
-  const pluginRegistry = await ctx.task(pluginRegistryCreationTask, {
+  let pluginRegistry = await ctx.task(pluginRegistryCreationTask, {
     sdkName,
     languages,
     pluginTypes,
     security: pluginSecurity.result
   });
 
-  // Quality Gate
-  await ctx.breakpoint('plugin-architecture-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pluginRegistry = await ctx.task(pluginRegistryCreationTask, { ...{
+    sdkName,
+    languages,
+    pluginTypes,
+    security: pluginSecurity.result
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('plugin-architecture-review', {
     question: 'Review the plugin architecture. Is the extension system flexible yet secure?',
     context: {
       pluginArchitecture: pluginArchitecture.result,
       extensionPointsDesign: extensionPointsDesign.result,
       hookSystem: hookSystem.result,
       pluginSecurity: pluginSecurity.result
-    }
-  });
-
-  ctx.log.info('Plugin and extension architecture design completed');
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  ctx.log.info('Plugin and extension architecture design completed');
 
   return {
     pluginArchitecture: pluginArchitecture.result,

@@ -127,7 +127,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring item writing quality');
-  const qualityScore = await ctx.task(itemWritingQualityScoringTask, {
+  let qualityScore = await ctx.task(itemWritingQualityScoringTask, {
     itemSpecs,
     stemWriting,
     responseOptions,
@@ -142,8 +142,20 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review items
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(itemWritingQualityScoringTask, { ...{
+    itemSpecs,
+    stemWriting,
+    responseOptions,
+    itemReview,
+    biasReview,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Item writing complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Item Writing Review',
     context: {
@@ -157,9 +169,15 @@ export async function process(inputs, ctx) {
         totalItems: itemAssembly.items?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Item Specification Development
+  // Task 1: Item Specification Development
 export const itemSpecificationDevelopmentTask = defineTask('item-specification-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop detailed item specifications',

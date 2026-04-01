@@ -45,14 +45,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Test Method Selection
-  const testMethods = await ctx.task(testMethodSelectionTask, {
+  let testMethods = await ctx.task(testMethodSelectionTask, {
     deviceName,
     testRequirements: testRequirements.requirements,
     deviceClass
   });
 
-  // Breakpoint: Review test methods
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      testMethods = await ctx.task(testMethodSelectionTask, { ...{
+    deviceName,
+    testRequirements: testRequirements.requirements,
+    deviceClass
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review test methods for ${deviceName}. Are all test methods appropriate and validated?`,
     title: 'Test Method Review',
     context: {
@@ -64,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: testMethods
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Sample Size Determination
   const sampleSizes = await ctx.task(sampleSizeDeterminationTask, {
     deviceName,
@@ -96,15 +110,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Traceability Verification
-  const traceabilityVerification = await ctx.task(traceabilityVerificationTask, {
+  let traceabilityVerification = await ctx.task(traceabilityVerificationTask, {
     deviceName,
     designInputs,
     testRequirements: testRequirements.requirements,
     testProtocols: testProtocols.protocols
   });
 
-  // Final Breakpoint: V&V Plan Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      traceabilityVerification = await ctx.task(traceabilityVerificationTask, { ...{
+    deviceName,
+    designInputs,
+    testRequirements: testRequirements.requirements,
+    testProtocols: testProtocols.protocols
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `V&V Planning complete for ${deviceName}. Traceability coverage: ${traceabilityVerification.coverageScore}%. Approve V&V Master Plan?`,
     title: 'V&V Plan Approval',
     context: {
@@ -115,9 +138,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/vv-master-plan.json`, format: 'json', content: vvMasterPlan },
         { path: `artifacts/traceability-matrix.json`, format: 'json', content: traceabilityVerification }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -136,8 +165,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const vvStrategyTask = defineTask('vv-strategy', (args, taskCtx) => ({
   kind: 'agent',

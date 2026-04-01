@@ -78,15 +78,23 @@ export async function process(inputs, ctx) {
 
   // Task 7: Test Email Rendering
   ctx.log('info', 'Phase 7: Testing email rendering across clients');
-  const renderingTest = await ctx.task(emailRenderingTestTask, {
+  let renderingTest = await ctx.task(emailRenderingTestTask, {
     templateDesign,
     personalization,
     outputDir
   });
   artifacts.push(...renderingTest.artifacts);
 
-  // Breakpoint: Review before sending
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      renderingTest = await ctx.task(emailRenderingTestTask, { ...{
+    templateDesign,
+    personalization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Email campaign ready. ${renderingTest.passedTests}/${renderingTest.totalTests} rendering tests passed. ${abTestSetup.variationCount} A/B test variations. Approve for sending?`,
     title: 'Email Campaign Review',
     context: {
@@ -98,9 +106,15 @@ export async function process(inputs, ctx) {
         renderingTestsPassed: renderingTest.passedTests,
         totalRenderingTests: renderingTest.totalTests
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Schedule or Trigger Send
   ctx.log('info', 'Phase 8: Scheduling or triggering email send');
   const sendSetup = await ctx.task(emailSendSetupTask, {
@@ -161,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const emailObjectivesTask = defineTask('email-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define email campaign objectives',

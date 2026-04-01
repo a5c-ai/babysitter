@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Validating IaC environment and dependencies');
 
-  const environmentSetup = await ctx.task(environmentSetupTask, {
+  let environmentSetup = await ctx.task(environmentSetupTask, {
     projectName,
     iacTool,
     iacPath,
@@ -124,8 +124,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...environmentSetup.artifacts);
 
   // Quality Gate: Environment properly configured
-  if (!environmentSetup.toolsInstalled || environmentSetup.missingDependencies.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        environmentSetup = await ctx.task(environmentSetupTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    environmentConfig,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Environment setup completed with missing dependencies: ${environmentSetup.missingDependencies.join(', ')}. Install dependencies and continue?`,
       title: 'Environment Setup Gate',
       context: {
@@ -138,9 +149,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(environmentSetup, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   testResults.environmentSetup = environmentSetup;
 
@@ -182,9 +199,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: No syntax errors
   if (!syntaxValidation.valid || syntaxValidation.errors.length > 0) {
-    ctx.log('error', `Found ${syntaxValidation.errors.length} syntax errors`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        environmentSetup = await ctx.task(environmentSetupTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    environmentConfig,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Phase 2 Quality Gate: Found ${syntaxValidation.errors.length} syntax errors. IaC cannot proceed until fixed. Review and fix?`,
       title: 'Syntax Validation Failed',
       context: {
@@ -198,9 +225,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify({ syntaxValidation, lintingCheck }, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   testResults.syntaxValidation = syntaxValidation;
   testResults.linting = lintingCheck;
@@ -259,9 +292,19 @@ export async function process(inputs, ctx) {
   const highVulns = securityFindings.filter(f => f.severity === 'high').length;
 
   if (criticalVulns > qualityGates.maxCriticalVulnerabilities) {
-    ctx.log('error', `Found ${criticalVulns} critical vulnerabilities (threshold: ${qualityGates.maxCriticalVulnerabilities})`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        environmentSetup = await ctx.task(environmentSetupTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    environmentConfig,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Phase 3 Quality Gate: Found ${criticalVulns} CRITICAL security vulnerabilities. These MUST be fixed before proceeding. Continue?`,
       title: 'Critical Security Vulnerabilities Detected',
       context: {
@@ -275,12 +318,28 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify({ tfsecScan, checkovScan, customSecurityPolicies, securityFindings }, null, 2)
         }]
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } } else if (highVulns > qualityGates.maxHighVulnerabilities) {
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        environmentSetup = await ctx.task(environmentSetupTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    environmentConfig,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
       }
-    });
-  } else if (highVulns > qualityGates.maxHighVulnerabilities) {
-    ctx.log('warn', `Found ${highVulns} high-severity vulnerabilities (threshold: ${qualityGates.maxHighVulnerabilities})`);
-
-    await ctx.breakpoint({
+  const finalApproval = await ctx.breakpoint({
       question: `Phase 3 Quality Gate: Found ${highVulns} HIGH security vulnerabilities (threshold: ${qualityGates.maxHighVulnerabilities}). Review and approve?`,
       title: 'High Security Vulnerabilities Warning',
       context: {
@@ -293,9 +352,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify({ securityFindings }, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   testResults.securityScanning = { tfsecScan, checkovScan, customSecurityPolicies };
 
@@ -305,7 +370,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Validating compliance against industry standards');
 
-  const complianceValidation = await ctx.task(complianceValidationTask, {
+  let complianceValidation = await ctx.task(complianceValidationTask, {
     projectName,
     iacTool,
     iacPath,
@@ -332,9 +397,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Compliance score
   const complianceScore = complianceValidation.overallScore;
   if (complianceScore < qualityGates.minComplianceScore) {
-    ctx.log('warn', `Compliance score ${complianceScore}% below threshold ${qualityGates.minComplianceScore}%`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        complianceValidation = await ctx.task(complianceValidationTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    complianceStandards: testingRequirements.complianceChecks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Phase 4 Quality Gate: Compliance score (${complianceScore}%) is below required threshold (${qualityGates.minComplianceScore}%). Review compliance gaps?`,
       title: 'Compliance Score Below Threshold',
       context: {
@@ -348,9 +423,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(complianceValidation, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   testResults.compliance = complianceValidation;
 
@@ -360,7 +441,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Running policy-as-code validation');
 
-  const policyValidation = await ctx.task(policyValidationTask, {
+  let policyValidation = await ctx.task(policyValidationTask, {
     projectName,
     iacTool,
     iacPath,
@@ -378,9 +459,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Policy violations
   const hardMandatoryViolations = policyValidation.violations.filter(v => v.enforcementLevel === 'hard-mandatory');
   if (hardMandatoryViolations.length > 0) {
-    ctx.log('error', `Found ${hardMandatoryViolations.length} hard-mandatory policy violations`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        policyValidation = await ctx.task(policyValidationTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    policyFramework: 'opa', // 'opa', 'sentinel', 'both'
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Phase 5 Quality Gate: Found ${hardMandatoryViolations.length} hard-mandatory policy violations. These must be fixed. Continue?`,
       title: 'Policy Violations Detected',
       context: {
@@ -393,9 +484,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(policyValidation, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   testResults.policyValidation = policyValidation;
 
@@ -405,7 +502,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating and analyzing infrastructure plan');
 
-  const planAnalysis = await ctx.task(planAnalysisTask, {
+  let planAnalysis = await ctx.task(planAnalysisTask, {
     projectName,
     iacTool,
     iacPath,
@@ -431,9 +528,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Destructive changes
   const destructiveChanges = planAnalysis.destructiveChanges || [];
   if (destructiveChanges.length > 0) {
-    ctx.log('warn', `Plan contains ${destructiveChanges.length} potentially destructive changes`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval6 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval6) {
+        planAnalysis = await ctx.task(planAnalysisTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    environmentConfig,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+      }
+  const qualityGateApproval6 = await ctx.breakpoint({
       question: `Phase 6 Quality Gate: Infrastructure plan contains ${destructiveChanges.length} potentially destructive changes. Review and approve?`,
       title: 'Destructive Changes Detected',
       context: {
@@ -447,9 +554,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(planAnalysis, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval6.approved) break;
+      lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+    } }
 
   testResults.planAnalysis = planAnalysis;
 
@@ -459,7 +572,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Estimating infrastructure costs');
 
-  const costEstimation = await ctx.task(costEstimationTask, {
+  let costEstimation = await ctx.task(costEstimationTask, {
     projectName,
     iacTool,
     iacPath,
@@ -480,9 +593,20 @@ export async function process(inputs, ctx) {
       const overage = estimatedMonthlyCost - qualityGates.costBudget;
       const overagePercent = ((overage / qualityGates.costBudget) * 100).toFixed(1);
 
-      ctx.log('warn', `Estimated cost $${estimatedMonthlyCost} exceeds budget $${qualityGates.costBudget} by $${overage} (${overagePercent}%)`);
-
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval7 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval7) {
+          costEstimation = await ctx.task(costEstimationTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    environmentConfig,
+    budget: qualityGates.costBudget,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
+        }
+  const qualityGateApproval7 = await ctx.breakpoint({
         question: `Phase 7 Quality Gate: Estimated monthly cost ($${estimatedMonthlyCost}) exceeds budget ($${qualityGates.costBudget}) by $${overage}. Review and approve?`,
         title: 'Cost Budget Exceeded',
         context: {
@@ -497,9 +621,15 @@ export async function process(inputs, ctx) {
             format: 'json',
             content: JSON.stringify(costEstimation, null, 2)
           }]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval7.approved) break;
+        lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
+      }   }
   }
 
   testResults.costEstimation = costEstimation;
@@ -511,7 +641,7 @@ export async function process(inputs, ctx) {
   if (testingRequirements.unitTesting) {
     ctx.log('info', 'Phase 8: Running IaC unit tests');
 
-    const unitTests = await ctx.task(unitTestingTask, {
+    let unitTests = await ctx.task(unitTestingTask, {
       projectName,
       iacTool,
       iacPath,
@@ -524,9 +654,18 @@ export async function process(inputs, ctx) {
     // Quality Gate: Unit test pass rate
     const unitTestPassRate = unitTests.passRate || 0;
     if (unitTestPassRate < qualityGates.minTestCoverage) {
-      ctx.log('warn', `Unit test pass rate ${unitTestPassRate}% below threshold ${qualityGates.minTestCoverage}%`);
-
-      await ctx.breakpoint({
+        let lastFeedback_phase8Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase8Review) {
+          unitTests = await ctx.task(unitTestingTask, { ...{
+      projectName,
+      iacTool,
+      iacPath,
+      cloudProvider,
+      outputDir
+    }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+        }
+  const phase8Review = await ctx.breakpoint({
         question: `Phase 8 Quality Gate: Unit test pass rate (${unitTestPassRate}%) is below threshold (${qualityGates.minTestCoverage}%). Review failures?`,
         title: 'Unit Test Pass Rate Low',
         context: {
@@ -542,13 +681,18 @@ export async function process(inputs, ctx) {
             format: 'json',
             content: JSON.stringify(unitTests, null, 2)
           }]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase8Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase8Review.approved) break;
+        lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+      }   }
 
     testResults.unitTesting = unitTests;
   }
-
   // ============================================================================
   // PHASE 9: INTEGRATION TESTING (Ephemeral Environment)
   // ============================================================================
@@ -556,7 +700,7 @@ export async function process(inputs, ctx) {
   if (testingRequirements.integrationTesting) {
     ctx.log('info', 'Phase 9: Running integration tests in ephemeral environment');
 
-    const integrationTests = await ctx.task(integrationTestingTask, {
+    let integrationTests = await ctx.task(integrationTestingTask, {
       projectName,
       iacTool,
       iacPath,
@@ -569,9 +713,19 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Integration test results
     if (!integrationTests.success || integrationTests.failed > 0) {
-      ctx.log('warn', `Integration tests: ${integrationTests.failed} failures out of ${integrationTests.totalTests}`);
-
-      await ctx.breakpoint({
+        let lastFeedback_phase9Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase9Review) {
+          integrationTests = await ctx.task(integrationTestingTask, { ...{
+      projectName,
+      iacTool,
+      iacPath,
+      cloudProvider,
+      environmentConfig,
+      outputDir
+    }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+        }
+  const phase9Review = await ctx.breakpoint({
         question: `Phase 9 Quality Gate: Integration tests completed with ${integrationTests.failed} failures. Review and approve?`,
         title: 'Integration Test Failures',
         context: {
@@ -586,13 +740,18 @@ export async function process(inputs, ctx) {
             format: 'json',
             content: JSON.stringify(integrationTests, null, 2)
           }]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase9Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase9Review.approved) break;
+        lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+      }   }
 
     testResults.integrationTesting = integrationTests;
   }
-
   // ============================================================================
   // PHASE 10: DRIFT DETECTION
   // ============================================================================
@@ -600,7 +759,7 @@ export async function process(inputs, ctx) {
   if (testingRequirements.driftDetection) {
     ctx.log('info', 'Phase 10: Detecting configuration drift');
 
-    const driftDetection = await ctx.task(driftDetectionTask, {
+    let driftDetection = await ctx.task(driftDetectionTask, {
       projectName,
       iacTool,
       iacPath,
@@ -613,9 +772,19 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Configuration drift
     if (driftDetection.driftDetected) {
-      ctx.log('warn', `Configuration drift detected: ${driftDetection.driftedResources.length} resources`);
-
-      await ctx.breakpoint({
+        let lastFeedback_phase10Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase10Review) {
+          driftDetection = await ctx.task(driftDetectionTask, { ...{
+      projectName,
+      iacTool,
+      iacPath,
+      cloudProvider,
+      environmentConfig,
+      outputDir
+    }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+        }
+  const phase10Review = await ctx.breakpoint({
         question: `Phase 10 Quality Gate: Configuration drift detected for ${driftDetection.driftedResources.length} resources. Review drift?`,
         title: 'Configuration Drift Detected',
         context: {
@@ -629,20 +798,25 @@ export async function process(inputs, ctx) {
             format: 'json',
             content: JSON.stringify(driftDetection, null, 2)
           }]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase10Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase10Review.approved) break;
+        lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+      }   }
 
     testResults.driftDetection = driftDetection;
   }
-
   // ============================================================================
   // PHASE 11: COMPREHENSIVE TEST REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Generating comprehensive test report');
 
-  const finalReport = await ctx.task(testReportGenerationTask, {
+  let finalReport = await ctx.task(testReportGenerationTask, {
     projectName,
     iacTool,
     cloudProvider,
@@ -686,9 +860,22 @@ export async function process(inputs, ctx) {
                           testingScope === 'standard' ? 75 : 65;
 
   if (qualityScore < qualityThreshold) {
-    ctx.log('warn', `Overall quality score (${qualityScore}) below threshold (${qualityThreshold})`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval8 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval8) {
+        finalReport = await ctx.task(testReportGenerationTask, { ...{
+    projectName,
+    iacTool,
+    cloudProvider,
+    testingScope,
+    testResults,
+    securityFindings,
+    complianceStatus,
+    qualityGates,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval8, attempt: attempt + 1 });
+      }
+  const qualityGateApproval8 = await ctx.breakpoint({
       question: `Final Quality Gate: Overall quality score (${qualityScore}/100) is below threshold (${qualityThreshold}). Review recommendations and approve deployment?`,
       title: 'Final Quality Gate',
       context: {
@@ -709,9 +896,15 @@ export async function process(inputs, ctx) {
           format: 'markdown',
           content: finalReport.executiveSummary
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval8 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval8.approved) break;
+      lastFeedback_qualityGateApproval8 = qualityGateApproval8.response || qualityGateApproval8.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -758,8 +951,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -793,8 +985,7 @@ function calculateFailedTests(testResults) {
   if (testResults.integrationTesting) failed += testResults.integrationTesting.failed || 0;
   return failed;
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

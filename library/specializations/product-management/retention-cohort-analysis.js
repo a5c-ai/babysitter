@@ -80,13 +80,12 @@ export async function process(inputs, ctx) {
       recommendations: dataCollection.recommendations
     };
   }
-
   // ============================================================================
   // PHASE 2: COHORT DEFINITION AND SEGMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Defining cohorts and user segments');
-  const cohortSegmentation = await ctx.task(cohortSegmentationTask, {
+  let cohortSegmentation = await ctx.task(cohortSegmentationTask, {
     productName,
     analysisTimeframe,
     cohortDefinition,
@@ -97,8 +96,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...cohortSegmentation.artifacts);
 
-  // Breakpoint: Review cohort definitions
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      cohortSegmentation = await ctx.task(cohortSegmentationTask, { ...{
+    productName,
+    analysisTimeframe,
+    cohortDefinition,
+    userData: dataCollection.userData,
+    minimumCohortSize,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Cohort segmentation complete for ${productName}. ${cohortSegmentation.cohorts.length} cohorts identified with ${cohortSegmentation.totalUsers} users. Review cohort structure?`,
     title: 'Cohort Segmentation Review',
     context: {
@@ -116,9 +126,15 @@ export async function process(inputs, ctx) {
         segmentationDimensions: cohortSegmentation.dimensions,
         analysisTimeframe
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: RETENTION METRICS CALCULATION
   // ============================================================================
@@ -156,7 +172,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Analyzing churn patterns and risk factors');
-  const churnAnalysis = await ctx.task(churnAnalysisTask, {
+  let churnAnalysis = await ctx.task(churnAnalysisTask, {
     productName,
     cohorts: cohortSegmentation.cohorts,
     retentionData: retentionCalculation.retentionData,
@@ -168,8 +184,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...churnAnalysis.artifacts);
 
-  // Breakpoint: Review retention and churn insights
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      churnAnalysis = await ctx.task(churnAnalysisTask, { ...{
+    productName,
+    cohorts: cohortSegmentation.cohorts,
+    retentionData: retentionCalculation.retentionData,
+    userData: dataCollection.userData,
+    eventData: dataCollection.eventData,
+    churnThreshold,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Retention and churn analysis complete. Overall D7 retention: ${cohortRetentionAnalysis.overallRetention.D7.toFixed(1)}%, Churn rate: ${churnAnalysis.overallChurnRate.toFixed(1)}%. Review insights?`,
     title: 'Retention & Churn Analysis Review',
     context: {
@@ -189,9 +217,15 @@ export async function process(inputs, ctx) {
         highRiskUsers: churnAnalysis.highRiskUsers,
         topChurnReasons: churnAnalysis.topChurnReasons.slice(0, 3)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ENGAGEMENT PATTERN ANALYSIS
   // ============================================================================
@@ -211,7 +245,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 6: Skipping engagement analysis (disabled)');
   }
-
   // ============================================================================
   // PHASE 7: ACTIVATION ANALYSIS AND OPTIMIZATION
   // ============================================================================
@@ -232,7 +265,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 7: Skipping activation analysis (disabled)');
   }
-
   // ============================================================================
   // PHASE 8: BEHAVIORAL SEGMENTATION
   // ============================================================================
@@ -299,7 +331,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 11: Skipping benchmark comparison (disabled)');
   }
-
   // ============================================================================
   // PHASE 12: PREDICTIVE CHURN MODELING
   // ============================================================================
@@ -361,7 +392,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Validating analysis quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     dataCollection,
     cohortSegmentation,
@@ -377,8 +408,21 @@ export async function process(inputs, ctx) {
   const analysisScore = qualityValidation.overallScore;
   const qualityMet = analysisScore >= 80;
 
-  // Final Breakpoint: Review complete analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    productName,
+    dataCollection,
+    cohortSegmentation,
+    retentionCalculation,
+    cohortRetentionAnalysis,
+    churnAnalysis,
+    minimumCohortSize,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Retention and Cohort Analysis complete for ${productName}. Quality score: ${analysisScore}/100. D7 retention: ${cohortRetentionAnalysis.overallRetention.D7.toFixed(1)}%, ${interventionStrategy.recommendations.length} improvement recommendations generated. Review and approve?`,
     title: 'Final Analysis Review',
     context: {
@@ -402,9 +446,15 @@ export async function process(inputs, ctx) {
         highImpactRecommendations: interventionStrategy.highImpactRecommendations,
         duration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -497,8 +547,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

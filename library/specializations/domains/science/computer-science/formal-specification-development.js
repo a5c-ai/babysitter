@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Refinement development
-  const refinementHierarchy = await ctx.task(refinementDeveloper, {
+  let refinementHierarchy = await ctx.task(refinementDeveloper, {
     specification: {
       state: stateSpecification,
       operations: operationSpecification
@@ -87,16 +87,32 @@ export async function process(inputs, ctx) {
     targetAbstraction: inputs.systemDescription.abstractionLevel
   });
 
-  // Phase 9: Review breakpoint
-  await ctx.breakpoint('specification-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      refinementHierarchy = await ctx.task(refinementDeveloper, { ...{
+    specification: {
+      state: stateSpecification,
+      operations: operationSpecification
+    },
+    targetAbstraction: inputs.systemDescription.abstractionLevel
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('specification-review', {
     message: 'Review formal specification development',
     stateSpecification,
     operationSpecification,
     propertyFormalization,
     consistencyCheck,
-    completenessAnalysis
-  });
-
+    completenessAnalysis,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Verification condition generation
   const verificationConditions = await ctx.task(verificationConditionGenerator, {
     specification: {

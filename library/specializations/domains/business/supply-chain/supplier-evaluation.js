@@ -144,14 +144,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...riskAssessment.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: SCORECARD GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating supplier scorecard');
 
-  const scorecardGeneration = await ctx.task(scorecardGenerationTask, {
+  let scorecardGeneration = await ctx.task(scorecardGenerationTask, {
     supplierName,
     evaluationCriteria,
     qualityEvaluation,
@@ -165,8 +164,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scorecardGeneration.artifacts);
 
-  // Breakpoint: Review evaluation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scorecardGeneration = await ctx.task(scorecardGenerationTask, { ...{
+    supplierName,
+    evaluationCriteria,
+    qualityEvaluation,
+    costAnalysis,
+    deliveryEvaluation,
+    serviceAssessment,
+    sustainabilityAssessment,
+    riskAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Supplier evaluation complete for ${supplierName}. Overall Score: ${scorecardGeneration.overallScore}/100. Qualification Status: ${scorecardGeneration.qualificationStatus}. Review evaluation?`,
     title: 'Supplier Evaluation Review',
     context: {
@@ -177,9 +190,15 @@ export async function process(inputs, ctx) {
         qualificationStatus: scorecardGeneration.qualificationStatus,
         categoryScores: scorecardGeneration.categoryScores
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: QUALIFICATION DECISION
   // ============================================================================
@@ -226,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

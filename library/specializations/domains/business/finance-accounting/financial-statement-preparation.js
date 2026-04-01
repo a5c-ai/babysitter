@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'equity-statement', result: equityStatementResult });
 
   // Step 5: Prepare Cash Flow Statement
-  const cashFlowResult = await ctx.task(prepareCashFlowStatementTask, {
+  let cashFlowResult = await ctx.task(prepareCashFlowStatementTask, {
     incomeStatement: incomeStatementResult,
     balanceSheet: balanceSheetResult,
     priorPeriodBalanceSheet: inputs.priorPeriodStatements?.balanceSheet,
@@ -66,17 +66,32 @@ export async function process(inputs, ctx) {
   });
   results.steps.push({ name: 'cash-flow-statement', result: cashFlowResult });
 
-  // Breakpoint for statement review
-  await ctx.breakpoint('statement-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      cashFlowResult = await ctx.task(prepareCashFlowStatementTask, { ...{
+    incomeStatement: incomeStatementResult,
+    balanceSheet: balanceSheetResult,
+    priorPeriodBalanceSheet: inputs.priorPeriodStatements?.balanceSheet,
+    accountingFramework: inputs.accountingFramework
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('statement-review', {
     message: 'Review all financial statements for accuracy and completeness before preparing disclosures',
     data: {
       incomeStatement: incomeStatementResult,
       balanceSheet: balanceSheetResult,
       equityStatement: equityStatementResult,
       cashFlow: cashFlowResult
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 6: Prepare Footnote Disclosures
   const disclosuresResult = await ctx.task(prepareDisclosuresTask, {
     financialStatements: {
@@ -91,7 +106,7 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'footnote-disclosures', result: disclosuresResult });
 
   // Step 7: Cross-Reference and Tie-Out
-  const tieOutResult = await ctx.task(performTieOutTask, {
+  let tieOutResult = await ctx.task(performTieOutTask, {
     financialStatements: {
       incomeStatement: incomeStatementResult,
       balanceSheet: balanceSheetResult,
@@ -102,12 +117,30 @@ export async function process(inputs, ctx) {
   });
   results.steps.push({ name: 'tie-out-verification', result: tieOutResult });
 
-  // Breakpoint for final approval
-  await ctx.breakpoint('final-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      tieOutResult = await ctx.task(performTieOutTask, { ...{
+    financialStatements: {
+      incomeStatement: incomeStatementResult,
+      balanceSheet: balanceSheetResult,
+      equityStatement: equityStatementResult,
+      cashFlow: cashFlowResult
+    },
+    disclosures: disclosuresResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('final-approval', {
     message: 'Final review and approval of complete financial statement package',
-    data: { statements: results.steps, tieOut: tieOutResult }
-  });
-
+    data: { statements: results.steps, tieOut: tieOutResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 8: Finalize and Format
   const finalResult = await ctx.task(finalizeStatementsTask, {
     allStatements: {
@@ -130,8 +163,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const reviewTrialBalanceTask = defineTask('review-trial-balance', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'accounting-operations' },

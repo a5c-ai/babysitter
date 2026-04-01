@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: PREREQUISITES AND CONTEXT IDENTIFICATION
   // ============================================================================
@@ -123,7 +122,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...troubleshootingSection.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: VISUAL ASSET CREATION (SCREENSHOTS/DIAGRAMS)
   // ============================================================================
@@ -140,7 +138,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...visualAssets.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: GUIDE DOCUMENT COMPOSITION
   // ============================================================================
@@ -166,7 +163,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating guide quality and completeness');
-  const qualityScore = await ctx.task(guideQualityScoringTask, {
+  let qualityScore = await ctx.task(guideQualityScoringTask, {
     guideTopic,
     taskAnalysis,
     prerequisitesAnalysis,
@@ -182,8 +179,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= 85;
 
-  // Breakpoint: Review how-to guide draft
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      qualityScore = await ctx.task(guideQualityScoringTask, { ...{
+    guideTopic,
+    taskAnalysis,
+    prerequisitesAnalysis,
+    procedureDevelopment,
+    outcomesDefinition,
+    guideDocument,
+    targetCompletionTime,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `How-to guide "${guideTopic}" draft complete. Quality score: ${overallScore}/100. ${qualityMet ? 'Guide meets quality standards!' : 'Guide may need refinement.'} Review draft?`,
     title: 'How-To Guide Draft Review',
     context: {
@@ -204,9 +214,15 @@ export async function process(inputs, ctx) {
         screenshotsPlanned: visualAssets ? visualAssets.screenshots.length : 0,
         troubleshootingItemsCount: troubleshootingSection ? troubleshootingSection.commonIssues.length : 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: USABILITY TESTING SIMULATION
   // ============================================================================
@@ -240,13 +256,12 @@ export async function process(inputs, ctx) {
     finalGuide = revision;
     artifacts.push(...revision.artifacts);
   }
-
   // ============================================================================
   // PHASE 11: METADATA AND TAGGING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Adding metadata and search tags');
-  const metadataEnrichment = await ctx.task(metadataEnrichmentTask, {
+  let metadataEnrichment = await ctx.task(metadataEnrichmentTask, {
     guideTopic,
     taskAnalysis,
     targetAudience,
@@ -258,8 +273,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metadataEnrichment.artifacts);
 
-  // Final breakpoint: Approve and publish
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metadataEnrichment = await ctx.task(metadataEnrichmentTask, { ...{
+    guideTopic,
+    taskAnalysis,
+    targetAudience,
+    prerequisitesAnalysis,
+    tools,
+    platform,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `How-to guide "${guideTopic}" complete and validated. Usability score: ${usabilityTest.usabilityScore}/100. Ready to publish?`,
     title: 'How-To Guide Publication Approval',
     context: {
@@ -279,9 +306,15 @@ export async function process(inputs, ctx) {
         estimatedTime: procedureDevelopment.estimatedCompletionTime,
         tags: metadataEnrichment.tags
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -334,8 +367,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

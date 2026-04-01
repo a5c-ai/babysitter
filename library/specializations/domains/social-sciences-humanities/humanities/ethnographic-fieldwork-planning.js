@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Comprehensive Fieldwork Plan
   ctx.log('info', 'Generating comprehensive fieldwork plan');
-  const fieldworkPlan = await ctx.task(fieldworkPlanGenerationTask, {
+  let fieldworkPlan = await ctx.task(fieldworkPlanGenerationTask, {
     researchQuestion,
     fieldSite,
     duration,
@@ -115,8 +115,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fieldworkPlan.artifacts);
 
-  // Breakpoint: Review fieldwork plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      fieldworkPlan = await ctx.task(fieldworkPlanGenerationTask, { ...{
+    researchQuestion,
+    fieldSite,
+    duration,
+    siteAssessment,
+    ethicsProtocol,
+    communityEngagement,
+    methodologyFramework,
+    logisticsPlanning,
+    dataProtocols,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fieldwork plan complete for ${fieldSite}. Duration: ${duration}. Ethics protocol: ${ethicsProtocol.irbStatus}. Review plan?`,
     title: 'Ethnographic Fieldwork Planning Results',
     context: {
@@ -129,9 +144,15 @@ export async function process(inputs, ctx) {
         communityPartners: communityEngagement.partners?.length || 0,
         methodologies: methodologyFramework.methods
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_ms = endTime - startTime;
 
@@ -172,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Site Selection and Feasibility Assessment
+  // Task 1: Site Selection and Feasibility Assessment
 export const siteSelectionTask = defineTask('site-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess site selection and feasibility',

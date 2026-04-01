@@ -136,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating audit report');
 
-  const report = await ctx.task(contractAuditReportTask, {
+  let report = await ctx.task(contractAuditReportTask, {
     projectName,
     contractPath,
     blockchain,
@@ -145,9 +145,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(contractAuditReportTask, { ...{
+    projectName,
+    contractPath,
+    blockchain,
+    vulnerabilities,
+    contractAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Smart contract audit complete for ${projectName}. Found ${vulnerabilities.length} issues. Review audit report?`,
     title: 'Smart Contract Audit Complete',
     context: {
@@ -159,9 +169,15 @@ export async function process(inputs, ctx) {
         critical: report.bySeverity.critical || 0
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -183,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

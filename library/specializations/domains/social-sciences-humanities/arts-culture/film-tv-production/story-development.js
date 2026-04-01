@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Compile Story Package
   ctx.log('info', 'Compiling story development package');
-  const packageResult = await ctx.task(compileStoryPackageTask, {
+  let packageResult = await ctx.task(compileStoryPackageTask, {
     concept,
     refinedPremise: conceptResult.premise,
     logline: loglineResult,
@@ -108,8 +108,22 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(packageResult.artifacts || []));
 
-  // Breakpoint: Story Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      packageResult = await ctx.task(compileStoryPackageTask, { ...{
+    concept,
+    refinedPremise: conceptResult.premise,
+    logline: loglineResult,
+    treatment: treatmentResult.treatment,
+    beats: beatSheetResult.beats,
+    sceneOutline: outlineResult.scenes,
+    format,
+    genre,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Story development complete for "${conceptResult.premise?.title || concept}". Logline, treatment, beat sheet, and outline generated. Review and approve?`,
     title: 'Story Development Review',
     context: {
@@ -122,9 +136,15 @@ export async function process(inputs, ctx) {
         format,
         genre
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -146,8 +166,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conceptRefinementTask = defineTask('concept-refinement', (args, taskCtx) => ({
   kind: 'agent',

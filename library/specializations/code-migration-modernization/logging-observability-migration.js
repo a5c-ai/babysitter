@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing observability stack');
-  const observabilityDesign = await ctx.task(observabilityDesignTask, {
+  let observabilityDesign = await ctx.task(observabilityDesignTask, {
     projectName,
     loggingAnalysis,
     targetStack,
@@ -65,8 +65,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...observabilityDesign.artifacts);
 
-  // Breakpoint: Design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      observabilityDesign = await ctx.task(observabilityDesignTask, { ...{
+    projectName,
+    loggingAnalysis,
+    targetStack,
+    services,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Observability design complete for ${projectName}. Stack: ${observabilityDesign.stackDescription}. Services: ${services.length}. Approve design?`,
     title: 'Observability Design Review',
     context: {
@@ -74,9 +84,15 @@ export async function process(inputs, ctx) {
       projectName,
       observabilityDesign,
       recommendation: 'Review stack components and integration plan'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STRUCTURED LOGGING IMPLEMENTATION
   // ============================================================================
@@ -139,7 +155,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Creating dashboards and alerts');
-  const dashboardsAlerts = await ctx.task(dashboardsAlertsTask, {
+  let dashboardsAlerts = await ctx.task(dashboardsAlertsTask, {
     projectName,
     centralizedCollection,
     services,
@@ -148,8 +164,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dashboardsAlerts.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dashboardsAlerts = await ctx.task(dashboardsAlertsTask, { ...{
+    projectName,
+    centralizedCollection,
+    services,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Observability migration complete for ${projectName}. Services instrumented: ${services.length}. Dashboards: ${dashboardsAlerts.dashboardCount}. Alerts: ${dashboardsAlerts.alertCount}. Approve?`,
     title: 'Observability Migration Complete',
     context: {
@@ -160,9 +185,15 @@ export async function process(inputs, ctx) {
         dashboards: dashboardsAlerts.dashboardCount,
         alerts: dashboardsAlerts.alertCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

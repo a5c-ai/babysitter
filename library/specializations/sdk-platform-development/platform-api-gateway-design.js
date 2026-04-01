@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Setting up authentication and authorization');
 
-  const authConfig = await ctx.task(gatewayAuthTask, {
+  let authConfig = await ctx.task(gatewayAuthTask, {
     projectName,
     gatewayType,
     architecture,
@@ -97,8 +97,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...authConfig.artifacts);
 
-  // Quality Gate: Security Configuration Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      authConfig = await ctx.task(gatewayAuthTask, { ...{
+    projectName,
+    gatewayType,
+    architecture,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gateway security configured for ${projectName}. Auth methods: ${authConfig.methods.length}, Rate limiting tiers: ${rateLimiting.tiers.length}. Approve configuration?`,
     title: 'Gateway Security Review',
     context: {
@@ -107,9 +116,15 @@ export async function process(inputs, ctx) {
       authMethods: authConfig.methods,
       rateLimitingTiers: rateLimiting.tiers,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CIRCUIT BREAKER AND RETRY
   // ============================================================================
@@ -208,8 +223,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

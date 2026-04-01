@@ -50,17 +50,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...metricsIdentification.artifacts);
 
   // Phase 3: Define Latency SLOs
-  const latencySLOs = await ctx.task(defineLatencySLOsTask, {
+  let latencySLOs = await ctx.task(defineLatencySLOsTask, {
     projectName, services, targetLatencyP95, targetLatencyP99, historicalAnalysis, outputDir
   });
-  artifacts.push(...latencySLOs.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      latencySLOs = await ctx.task(defineLatencySLOsTask, { ...{
+    projectName, services, targetLatencyP95, targetLatencyP99, historicalAnalysis, outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Latency SLOs defined: P95=${targetLatencyP95}ms, P99=${targetLatencyP99}ms. Review and approve?`,
     title: 'Latency SLO Review',
-    context: { runId: ctx.runId, slos: latencySLOs.slos }
-  });
-
+    context: { runId: ctx.runId, slos: latencySLOs.slos },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Define Throughput SLOs
   const throughputSLOs = await ctx.task(defineThroughputSLOsTask, {
     projectName, services, targetThroughput, outputDir
@@ -86,17 +97,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...alerts.artifacts);
 
   // Phase 8: Document SLO Definitions
-  const documentation = await ctx.task(documentSLODefinitionsTask, {
+  let documentation = await ctx.task(documentSLODefinitionsTask, {
     projectName, latencySLOs, throughputSLOs, errorSLOs, dashboards, alerts, outputDir
   });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentSLODefinitionsTask, { ...{
+    projectName, latencySLOs, throughputSLOs, errorSLOs, dashboards, alerts, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance SLOs defined with ${dashboards.dashboards.length} dashboards and ${alerts.alerts.length} alerts. Approve?`,
     title: 'Final SLO Review',
-    context: { runId: ctx.runId, summary: { latencySLOs: latencySLOs.slos.length, throughputSLOs: throughputSLOs.slos.length, errorSLOs: errorSLOs.slos.length } }
-  });
-
+    context: { runId: ctx.runId, summary: { latencySLOs: latencySLOs.slos.length, throughputSLOs: throughputSLOs.slos.length, errorSLOs: errorSLOs.slos.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

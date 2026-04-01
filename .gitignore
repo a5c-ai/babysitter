@@ -63,3 +63,4 @@ e2e-artifacts/test-results.json
 .tmp-agentsh/
 .tmp/
 e2e-artifacts/ci-run-*/
+.cursor/settings.json

@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarkAnalysis.artifacts);
 
   // Phase 3: Identify Performance Gaps
-  const performanceGaps = await ctx.task(identifyPerformanceGapsTask, { projectName, profilingAnalysis, benchmarkAnalysis, outputDir });
-  artifacts.push(...performanceGaps.artifacts);
-
-  await ctx.breakpoint({
+  let performanceGaps = await ctx.task(identifyPerformanceGapsTask, { projectName, profilingAnalysis, benchmarkAnalysis, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      performanceGaps = await ctx.task(identifyPerformanceGapsTask, { ...{ projectName, profilingAnalysis, benchmarkAnalysis, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${performanceGaps.gaps.length} performance gaps. Generate optimization recommendations?`,
     title: 'Performance Gap Analysis',
-    context: { runId: ctx.runId, performanceGaps }
-  });
-
+    context: { runId: ctx.runId, performanceGaps },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Generate Optimization Recommendations
   const recommendations = await ctx.task(generateOptimizationRecommendationsTask, { projectName, performanceGaps, outputDir });
   artifacts.push(...recommendations.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...implementationPlan.artifacts);
 
   // Phase 8: Document Recommendations
-  const documentation = await ctx.task(documentTuningRecommendationsTask, { projectName, recommendations, priorityMatrix, implementationPlan, impactEstimation, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentTuningRecommendationsTask, { projectName, recommendations, priorityMatrix, implementationPlan, impactEstimation, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentTuningRecommendationsTask, { ...{ projectName, recommendations, priorityMatrix, implementationPlan, impactEstimation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${recommendations.recommendations.length} recommendations generated. Estimated improvement: ${impactEstimation.totalImprovement}%. Accept?`,
     title: 'Tuning Recommendations Review',
-    context: { runId: ctx.runId, recommendations, impactEstimation }
-  });
-
+    context: { runId: ctx.runId, recommendations, impactEstimation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

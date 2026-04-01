@@ -37,14 +37,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Component Specification
-  const componentSpec = await ctx.task(componentSpecTask, {
+  let componentSpec = await ctx.task(componentSpecTask, {
     vehicleProgram,
     geometryKinematics,
     performanceTargets
   });
 
-  // Breakpoint: Component specification review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      componentSpec = await ctx.task(componentSpecTask, { ...{
+    vehicleProgram,
+    geometryKinematics,
+    performanceTargets
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review suspension component specifications for ${vehicleProgram}. Approve specifications?`,
     title: 'Suspension Component Review',
     context: {
@@ -56,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: componentSpec
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Suspension Tuning
   const suspensionTuning = await ctx.task(suspensionTuningTask, {
     vehicleProgram,
@@ -75,14 +89,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Durability and NVH Validation
-  const durabilityNvh = await ctx.task(durabilityNvhTask, {
+  let durabilityNvh = await ctx.task(durabilityNvhTask, {
     vehicleProgram,
     suspensionTuning,
     componentSpec
   });
 
-  // Final Breakpoint: Suspension approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      durabilityNvh = await ctx.task(durabilityNvhTask, { ...{
+    vehicleProgram,
+    suspensionTuning,
+    componentSpec
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Suspension System Development complete for ${vehicleProgram}. Ride rating: ${rideHandlingTest.rideRating}, Handling rating: ${rideHandlingTest.handlingRating}. Approve?`,
     title: 'Suspension System Approval',
     context: {
@@ -93,9 +115,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/suspension-design.json`, format: 'json', content: geometryKinematics },
         { path: `artifacts/tuning-specifications.json`, format: 'json', content: suspensionTuning }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     vehicleProgram,

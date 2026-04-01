@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Prior Authorization Workflow Design for: ${organizationName}`);
 
-  const currentStateAssessment = await ctx.task(authCurrentStateTask, { organizationName, authScope, serviceTypes, outputDir });
-  artifacts.push(...currentStateAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Current state assessed. Auth approval rate: ${currentStateAssessment.approvalRate}%. Average turnaround: ${currentStateAssessment.avgTurnaround} days. Proceed?`, title: 'Auth Assessment Review', context: { runId: ctx.runId, approvalRate: currentStateAssessment.approvalRate, turnaround: currentStateAssessment.avgTurnaround } });
-
+  let currentStateAssessment = await ctx.task(authCurrentStateTask, { organizationName, authScope, serviceTypes, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      currentStateAssessment = await ctx.task(authCurrentStateTask, { ...{ organizationName, authScope, serviceTypes, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Current state assessed. Auth approval rate: ${currentStateAssessment.approvalRate}%. Average turnaround: ${currentStateAssessment.avgTurnaround} days. Proceed?`, title: 'Auth Assessment Review', context: { runId: ctx.runId, approvalRate: currentStateAssessment.approvalRate, turnaround: currentStateAssessment.avgTurnaround }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const requirementsDatabase = await ctx.task(authRequirementsTask, { currentStateAssessment, payerMix, outputDir });
   artifacts.push(...requirementsDatabase.artifacts);
 
   const submissionWorkflow = await ctx.task(authSubmissionTask, { requirementsDatabase, serviceTypes, outputDir });
   artifacts.push(...submissionWorkflow.artifacts);
 
-  const trackingSystem = await ctx.task(authTrackingTask, { submissionWorkflow, outputDir });
-  artifacts.push(...trackingSystem.artifacts);
-
-  await ctx.breakpoint({ question: `Submission workflow designed. ${submissionWorkflow.automationOpportunities.length} automation opportunities identified. Proceed with appeals process?`, title: 'Submission Workflow Review', context: { runId: ctx.runId, automation: submissionWorkflow.automationOpportunities } });
-
+  let trackingSystem = await ctx.task(authTrackingTask, { submissionWorkflow, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trackingSystem = await ctx.task(authTrackingTask, { ...{ submissionWorkflow, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Submission workflow designed. ${submissionWorkflow.automationOpportunities.length} automation opportunities identified. Proceed with appeals process?`, title: 'Submission Workflow Review', context: { runId: ctx.runId, automation: submissionWorkflow.automationOpportunities }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const appealsProcess = await ctx.task(authAppealsTask, { currentStateAssessment, outputDir });
   artifacts.push(...appealsProcess.artifacts);
 

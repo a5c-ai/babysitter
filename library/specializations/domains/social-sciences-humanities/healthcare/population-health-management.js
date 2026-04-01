@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Population Health Management Program for: ${organizationName}`);
 
-  const populationAssessment = await ctx.task(phAssessmentTask, { organizationName, populationScope, riskCategories, outputDir });
-  artifacts.push(...populationAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Population assessed. ${populationAssessment.totalPopulation} patients. High-risk: ${populationAssessment.riskDistribution.high}%. Proceed with stratification?`, title: 'Population Assessment Review', context: { runId: ctx.runId, population: populationAssessment.totalPopulation, risk: populationAssessment.riskDistribution } });
-
+  let populationAssessment = await ctx.task(phAssessmentTask, { organizationName, populationScope, riskCategories, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      populationAssessment = await ctx.task(phAssessmentTask, { ...{ organizationName, populationScope, riskCategories, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Population assessed. ${populationAssessment.totalPopulation} patients. High-risk: ${populationAssessment.riskDistribution.high}%. Proceed with stratification?`, title: 'Population Assessment Review', context: { runId: ctx.runId, population: populationAssessment.totalPopulation, risk: populationAssessment.riskDistribution }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const riskStratification = await ctx.task(phRiskStratificationTask, { populationAssessment, outputDir });
   artifacts.push(...riskStratification.artifacts);
 
   const careManagementModels = await ctx.task(phCareManagementTask, { riskStratification, outputDir });
   artifacts.push(...careManagementModels.artifacts);
 
-  const chronicCarePrograms = await ctx.task(phChronicCareTask, { riskStratification, outputDir });
-  artifacts.push(...chronicCarePrograms.artifacts);
-
-  await ctx.breakpoint({ question: `Care management models designed for ${careManagementModels.models.length} risk tiers. ${chronicCarePrograms.programs.length} chronic care programs. Proceed?`, title: 'Care Models Review', context: { runId: ctx.runId, models: careManagementModels.models, programs: chronicCarePrograms.programs } });
-
+  let chronicCarePrograms = await ctx.task(phChronicCareTask, { riskStratification, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      chronicCarePrograms = await ctx.task(phChronicCareTask, { ...{ riskStratification, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Care management models designed for ${careManagementModels.models.length} risk tiers. ${chronicCarePrograms.programs.length} chronic care programs. Proceed?`, title: 'Care Models Review', context: { runId: ctx.runId, models: careManagementModels.models, programs: chronicCarePrograms.programs }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const wellnessPrograms = await ctx.task(phWellnessTask, { populationAssessment, outputDir });
   artifacts.push(...wellnessPrograms.artifacts);
 

@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Compile Intelligence Reports
   ctx.log('info', 'Phase 7: Compiling competitive intelligence reports');
-  const intelligenceReports = await ctx.task(intelligenceReportCompilationTask, {
+  let intelligenceReports = await ctx.task(intelligenceReportCompilationTask, {
     adMonitoring,
     contentSeoTracking,
     socialAnalysis,
@@ -85,8 +85,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...intelligenceReports.artifacts);
 
-  // Breakpoint: Review intelligence
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      intelligenceReports = await ctx.task(intelligenceReportCompilationTask, { ...{
+    adMonitoring,
+    contentSeoTracking,
+    socialAnalysis,
+    trendMonitoring,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Competitive intelligence gathering complete. ${competitiveSet.competitorCount} competitors tracked. ${trendMonitoring.trendCount} industry trends identified. Review findings?`,
     title: 'Competitive Intelligence Review',
     context: {
@@ -97,9 +107,15 @@ export async function process(inputs, ctx) {
         trendsIdentified: trendMonitoring.trendCount,
         opportunitiesFound: intelligenceReports.opportunityCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Identify Gaps and Opportunities
   ctx.log('info', 'Phase 8: Identifying competitive gaps and opportunities');
   const gapOpportunityAnalysis = await ctx.task(gapOpportunityTask, {
@@ -150,8 +166,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const competitiveSetDefinitionTask = defineTask('competitive-set-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define competitive set and monitoring scope',

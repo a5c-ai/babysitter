@@ -126,15 +126,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Implementing error handling');
 
-  const errorHandling = await ctx.task(errorHandlingTask, {
+  let errorHandling = await ctx.task(errorHandlingTask, {
     projectName,
     outputDir
   });
 
   artifacts.push(...errorHandling.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      errorHandling = await ctx.task(errorHandlingTask, { ...{
+    projectName,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Remix application setup complete for ${projectName}. ${routingSetup.routes.length} routes with loaders and actions. Approve configuration?`,
     title: 'Remix Application Review',
     context: {
@@ -143,9 +150,15 @@ export async function process(inputs, ctx) {
       loaders: loadersSetup.loaders,
       actions: actionsSetup.actions,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DEPLOYMENT
   // ============================================================================
@@ -202,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

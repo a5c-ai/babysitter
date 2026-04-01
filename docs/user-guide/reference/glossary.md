@@ -142,17 +142,24 @@ All verbs (build, create, implement) trigger the same orchestration workflow.
 
 ### Breakpoint
 
-A pause point in a process that requires human approval before continuing. Breakpoints enable human-in-the-loop workflows for critical decisions like deployment approval, plan review, or security-sensitive changes.
+A pause point in a process that requires human approval before continuing. Breakpoints enable human-in-the-loop workflows for critical decisions like deployment approval, plan review, or security-sensitive changes. `ctx.breakpoint()` returns a `BreakpointResult` containing `{ approved: boolean; response?: string; feedback?: string; option?: string; respondedBy?: string; allResponses?: array }`.
+
+Breakpoints support **routing** to direct approval requests to specific experts via the `expert` field (a string, array of strings, or `'owner'`), categorization via `tags`, and multi-reviewer resolution via `strategy` (`'single'`, `'first-response-wins'`, `'collect-all'`, or `'quorum'`). The `previousFeedback` and `attempt` fields provide retry context when a breakpoint is re-presented after rejection.
 
 **Example:**
 ```javascript
-await ctx.breakpoint({
+const result = await ctx.breakpoint({
   question: 'Approve the deployment?',
   title: 'Production Deployment',
+  expert: 'ops-lead',
+  tags: ['deployment', 'production'],
   context: {
     files: [{ path: 'artifacts/plan.md', format: 'markdown' }]
   }
 });
+if (!result.approved) {
+  ctx.log('Deployment rejected', { feedback: result.feedback, by: result.respondedBy });
+}
 ```
 
 **See Also:** [Breakpoints Feature](../features/breakpoints.md)
@@ -212,7 +219,7 @@ The interface available to process functions for interacting with the orchestrat
 
 **Methods:**
 - `ctx.task(taskDef, inputs)` - Execute a task
-- `ctx.breakpoint(payload)` - Request human approval
+- `ctx.breakpoint(payload)` - Request human approval, returns `BreakpointResult`. Supports `expert`, `tags`, `strategy`, `previousFeedback`, and `attempt` routing fields.
 - `ctx.sleepUntil(timestamp)` - Time gate
 - `ctx.parallel.all(tasks)` - Parallel execution
 - `ctx.hook(name, payload)` - Call custom hooks
@@ -417,7 +424,7 @@ A built-in SDK function callable from within a process. Intrinsics provide the c
 
 **Core Intrinsics:**
 - `ctx.task()` - Execute a task
-- `ctx.breakpoint()` - Request approval
+- `ctx.breakpoint()` - Request approval, returns `BreakpointResult`. Supports routing (`expert`, `tags`, `strategy`) and retry context (`previousFeedback`, `attempt`).
 - `ctx.sleepUntil()` - Time gate
 - `ctx.parallel.all()` - Batch execution
 - `ctx.hook()` - Custom hooks
@@ -670,7 +677,8 @@ A JavaScript/TypeScript function that is the *low-level code implementation* of 
 ```javascript
 export async function process(inputs, ctx) {
   const plan = await ctx.task(planTask, inputs);
-  await ctx.breakpoint({ question: 'Approve plan?' });
+  const review = await ctx.breakpoint({ question: 'Approve plan?' });
+  if (!review.approved) return { success: false, feedback: review.feedback };
   const result = await ctx.task(buildTask, { plan });
   return result;
 }

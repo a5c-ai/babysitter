@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Creating "did you mean" suggestions for typos');
 
-  const didYouMean = await ctx.task(didYouMeanTask, {
+  let didYouMean = await ctx.task(didYouMeanTask, {
     projectName,
     language,
     outputDir
@@ -105,8 +105,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...didYouMean.artifacts);
 
-  // Quality Gate: Error Handling Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      didYouMean = await ctx.task(didYouMeanTask, { ...{
+    projectName,
+    language,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Error handling implemented with ${errorHierarchy.types.length} error types. Proceed with exit codes and documentation?`,
     title: 'Error Handling Review',
     context: {
@@ -114,9 +122,15 @@ export async function process(inputs, ctx) {
       projectName,
       errorTypes: errorHierarchy.types.length,
       files: artifacts.slice(-4).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: STACK TRACE HANDLING
   // ============================================================================
@@ -177,7 +191,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...errorTelemetry.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: ERROR SCENARIO TESTING
   // ============================================================================
@@ -200,7 +213,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Documenting error handling patterns');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     errorFormatDesign,
     errorHierarchy,
@@ -213,8 +226,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    errorFormatDesign,
+    errorHierarchy,
+    contextualErrors,
+    fixSuggestions,
+    didYouMean,
+    errorCodes,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Error Handling and User Feedback complete for ${projectName}. Review and approve?`,
     title: 'Error Handling Complete',
     context: {
@@ -230,9 +256,15 @@ export async function process(inputs, ctx) {
         { path: documentation.errorDocPath, format: 'markdown', label: 'Error Documentation' },
         { path: errorHierarchy.hierarchyPath, format: 'typescript', label: 'Error Types' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -257,8 +289,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

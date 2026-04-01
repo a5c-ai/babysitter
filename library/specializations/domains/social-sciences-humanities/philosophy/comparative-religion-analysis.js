@@ -32,7 +32,6 @@ export async function process(inputs, ctx) {
     religionProfiles.push(profile);
     artifacts.push(...profile.artifacts);
   }
-
   // Task 2: Phenomenological Analysis
   ctx.log('info', 'Conducting phenomenological analysis');
   const phenomenologicalAnalysis = await ctx.task(phenomenologicalAnalysisTask, {
@@ -73,7 +72,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Synthesis and Insights
   ctx.log('info', 'Synthesizing comparative insights');
-  const synthesis = await ctx.task(synthesisInsightsTask, {
+  let synthesis = await ctx.task(synthesisInsightsTask, {
     religionProfiles,
     phenomenologicalAnalysis,
     structuralComparison,
@@ -84,8 +83,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...synthesis.artifacts);
 
-  // Breakpoint: Review comparative analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(synthesisInsightsTask, { ...{
+    religionProfiles,
+    phenomenologicalAnalysis,
+    structuralComparison,
+    beliefsComparison,
+    practicesComparison,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Comparative religion analysis complete. Compared ${religions.length} traditions. Review the analysis?`,
     title: 'Comparative Religion Analysis Results',
     context: {
@@ -97,9 +107,15 @@ export async function process(inputs, ctx) {
         similaritiesFound: synthesis.similarities.length,
         differencesFound: synthesis.differences.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Comparative Report
   ctx.log('info', 'Generating comparative religion report');
   const comparativeReport = await ctx.task(comparativeReportTask, {
@@ -144,8 +160,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const religionProfilingTask = defineTask('religion-profiling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Profile religious tradition',

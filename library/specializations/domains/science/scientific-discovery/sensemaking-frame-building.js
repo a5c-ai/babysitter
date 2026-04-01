@@ -47,7 +47,6 @@ export async function process(inputs, ctx) {
       frames: null
     };
   }
-
   // Phase 2: Frame Retrieval and Activation
   const frameRetrieval = await ctx.task(frameRetrievalTask, {
     situationAnalysis,
@@ -63,14 +62,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Anomaly and Gap Identification
-  const anomalyIdentification = await ctx.task(anomalyIdentificationTask, {
+  let anomalyIdentification = await ctx.task(anomalyIdentificationTask, {
     frames: frameFitAssessment.assessedFrames,
     cues: situationAnalysis.extractedCues,
     situation
   });
 
-  // Breakpoint: Review initial sensemaking
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      anomalyIdentification = await ctx.task(anomalyIdentificationTask, { ...{
+    frames: frameFitAssessment.assessedFrames,
+    cues: situationAnalysis.extractedCues,
+    situation
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review initial sensemaking for situation. ${frameRetrieval.activatedFrames?.length || 0} frames retrieved, ${anomalyIdentification.anomalies?.length || 0} anomalies detected. Continue?`,
     title: 'Sensemaking Progress Review',
     context: {
@@ -83,9 +90,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { situationAnalysis, frameRetrieval, frameFitAssessment, anomalyIdentification }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Frame Construction and Modification
   const frameConstruction = await ctx.task(frameConstructionTask, {
     existingFrames: frameFitAssessment.assessedFrames,
@@ -127,7 +140,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Sensemaking Synthesis
-  const sensemakingSynthesis = await ctx.task(sensemakingSynthesisTask, {
+  let sensemakingSynthesis = await ctx.task(sensemakingSynthesisTask, {
     situation,
     situationAnalysis,
     frames: plausibilityAssessment.assessedFrames,
@@ -138,8 +151,21 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Sensemaking Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sensemakingSynthesis = await ctx.task(sensemakingSynthesisTask, { ...{
+    situation,
+    situationAnalysis,
+    frames: plausibilityAssessment.assessedFrames,
+    selectedFrame: frameSelection.selectedFrame,
+    actionImplications,
+    validation: sensemakingValidation,
+    goals,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sensemaking complete. Selected frame: "${frameSelection.selectedFrame?.name}". Confidence: ${frameSelection.confidence}. Approve frame?`,
     title: 'Sensemaking Approval',
     context: {
@@ -151,9 +177,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/sensemaking-report.json', format: 'json', content: sensemakingSynthesis },
         { path: 'artifacts/sensemaking-report.md', format: 'markdown', content: sensemakingSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     situation,
@@ -174,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const situationAnalysisTask = defineTask('situation-analysis', (args, taskCtx) => ({
   kind: 'agent',

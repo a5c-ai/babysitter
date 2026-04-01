@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...(traitsResult.artifacts || []));
 
     // Task 1.7: Compile Persona
-    const personaCompileResult = await ctx.task(compilePersonaTask, {
+    let personaCompileResult = await ctx.task(compilePersonaTask, {
       identity: identityResult.identity,
       backstory: backstoryResult.backstory,
       voice: voiceResult.voice,
@@ -112,21 +112,38 @@ export async function process(inputs, ctx) {
       traits: traitsResult.traits
     };
 
-    // Quality Gate: Persona Review
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        personaCompileResult = await ctx.task(compilePersonaTask, { ...{
+      identity: identityResult.identity,
+      backstory: backstoryResult.backstory,
+      voice: voiceResult.voice,
+      visual: visualResult.visual,
+      discography: discographyResult.discography,
+      traits: traitsResult.traits,
+      outputDir
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Artist persona "${persona.identity.artistName}" created. Genre: ${persona.voice.primaryGenre}. Review and approve to continue to album conceptualization?`,
       title: 'Phase 1 Complete: Persona Review',
       context: {
         runId: ctx.runId,
         files: artifacts.filter(a => a.path?.includes('persona')).map(a => ({ path: a.path, format: 'markdown' })),
         phase: 1
-      }
-    });
-  } else {
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } } else {
     ctx.log('info', `PHASE 1: Using existing persona "${existingPersona.identity?.artistName}"`);
     persona = existingPersona;
   }
-
   const artistName = persona.identity.artistName;
 
   // =========================================================================
@@ -195,7 +212,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(visualDirectionResult.artifacts || []));
 
   // Task 2.7: Compile Album Concept
-  const albumConceptCompileResult = await ctx.task(compileAlbumConceptTask, {
+  let albumConceptCompileResult = await ctx.task(compileAlbumConceptTask, {
     persona,
     coreConcept: coreConceptResult.concept,
     motifs: motifsResult.motifs,
@@ -216,8 +233,21 @@ export async function process(inputs, ctx) {
     visualDirection: visualDirectionResult.visual
   };
 
-  // Quality Gate: Album Concept Review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      albumConceptCompileResult = await ctx.task(compileAlbumConceptTask, { ...{
+    persona,
+    coreConcept: coreConceptResult.concept,
+    motifs: motifsResult.motifs,
+    sonicPalette: sonicPaletteResult.palette,
+    narrativeArc: narrativeArcResult.arc,
+    trackSequencing: sequencingResult.sequencing,
+    visualDirection: visualDirectionResult.visual,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Album "${albumConcept.coreConcept.title}" concept complete with ${trackCount} tracks planned. Review and approve to start song composition?`,
     title: 'Phase 2 Complete: Album Concept Review',
     context: {
@@ -225,9 +255,15 @@ export async function process(inputs, ctx) {
       files: artifacts.filter(a => a.path?.includes('album-concept')).map(a => ({ path: a.path, format: 'markdown' })),
       phase: 2,
       trackList: sequencingResult.sequencing.tracks.map(t => `${t.trackNumber}. ${t.title}`)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // =========================================================================
   // PHASE 3: SONG COMPOSITION (ALL TRACKS)
   // =========================================================================
@@ -283,7 +319,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...(coverResult.artifacts || []));
 
     // Task 3.X.5: Compile Song Package
-    const packageResult = await ctx.task(compileSongPackageTask, {
+    let packageResult = await ctx.task(compileSongPackageTask, {
       persona,
       albumConcept,
       songConcept: songConceptResult.concept,
@@ -315,18 +351,36 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Progress checkpoint: ${i + 1}/${tracks.length} songs complete`);
     }
   }
-
-  // Quality Gate: Songs Review
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      packageResult = await ctx.task(compileSongPackageTask, { ...{
+      persona,
+      albumConcept,
+      songConcept: songConceptResult.concept,
+      lyrics: lyricsResult.lyrics,
+      style: styleResult.style,
+      coverPrompt: coverResult.coverPrompt,
+      trackNumber: trackNum,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `All ${tracks.length} songs composed for "${albumConcept.coreConcept.title}". Review and approve to generate album cover?`,
     title: 'Phase 3 Complete: Songs Review',
     context: {
       runId: ctx.runId,
       phase: 3,
       completedTracks: completedSongs.map(s => ({ track: s.trackNumber, title: s.title, genre: s.style.primaryGenre }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // =========================================================================
   // PHASE 4: ALBUM COVER
   // =========================================================================
@@ -349,7 +403,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', 'PHASE 5: Final compilation');
 
   // Task 5.1: Generate Final Package
-  const finalPackageResult = await ctx.task(finalCompilationTask, {
+  let finalPackageResult = await ctx.task(finalCompilationTask, {
     persona,
     albumConcept,
     completedSongs,
@@ -358,8 +412,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(finalPackageResult.artifacts || []));
 
-  // Final Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalPackageResult = await ctx.task(finalCompilationTask, { ...{
+    persona,
+    albumConcept,
+    completedSongs,
+    albumCover: albumCoverResult.coverPrompt,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Album "${albumConcept.coreConcept.title}" by ${artistName} is complete! ${tracks.length} songs with lyrics, styles, and covers. Album cover prompt generated. Review final package?`,
     title: 'Production Complete: Final Review',
     context: {
@@ -371,9 +435,15 @@ export async function process(inputs, ctx) {
         trackCount: tracks.length,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -397,8 +467,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// =========================================================================
+  // =========================================================================
 // TASK DEFINITIONS
 // =========================================================================
 

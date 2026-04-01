@@ -148,7 +148,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating test strategy quality and completeness');
-  const strategyQualityScore = await ctx.task(strategyQualityScoringTask, {
+  let strategyQualityScore = await ctx.task(strategyQualityScoringTask, {
     projectName,
     requirementsAnalysis,
     riskAssessment,
@@ -165,8 +165,22 @@ export async function process(inputs, ctx) {
   const strategyScore = strategyQualityScore.overallScore;
   const qualityMet = strategyScore >= 85;
 
-  // Breakpoint: Review test strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      strategyQualityScore = await ctx.task(strategyQualityScoringTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    riskAssessment,
+    testLevelDefinition,
+    automationStrategy,
+    resourcePlanning,
+    qualityMetricsDefinition,
+    strategyDocument,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Test strategy complete. Quality score: ${strategyScore}/100. ${qualityMet ? 'Strategy meets quality standards!' : 'Strategy may need refinement.'} Review and approve?`,
     title: 'Test Strategy Review & Approval',
     context: {
@@ -187,9 +201,15 @@ export async function process(inputs, ctx) {
         automationTools: automationStrategy.selectedTools?.length || 0,
         estimatedDuration: resourcePlanning.estimatedDuration || 'N/A'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: GENERATE AUTOMATION ROADMAP (if needed)
   // ============================================================================
@@ -207,7 +227,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...automationRoadmap.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -260,8 +279,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

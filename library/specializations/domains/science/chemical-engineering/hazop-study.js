@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Evaluate Causes and Consequences
   ctx.log('info', 'Evaluating causes and consequences');
-  const causesConsequencesResult = await ctx.task(causesConsequencesTask, {
+  let causesConsequencesResult = await ctx.task(causesConsequencesTask, {
     processName,
     deviations: deviationResult.deviations,
     processDescription,
@@ -84,8 +84,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...causesConsequencesResult.artifacts);
 
-  // Breakpoint: Review HAZOP findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      causesConsequencesResult = await ctx.task(causesConsequencesTask, { ...{
+    processName,
+    deviations: deviationResult.deviations,
+    processDescription,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HAZOP analysis in progress for ${processName}. Nodes analyzed: ${nodeIdentificationResult.nodes.length}. Deviations identified: ${deviationResult.deviations.length}. High-risk scenarios: ${causesConsequencesResult.highRiskCount}. Review findings?`,
     title: 'HAZOP Study Progress Review',
     context: {
@@ -97,9 +106,15 @@ export async function process(inputs, ctx) {
         highRiskScenarios: causesConsequencesResult.highRiskCount,
         safeguardsIdentified: causesConsequencesResult.existingSafeguards.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Evaluate Existing Safeguards
   ctx.log('info', 'Evaluating existing safeguards');
   const safeguardsResult = await ctx.task(safeguardsEvaluationTask, {
@@ -162,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scope Definition
+  // Task 1: Scope Definition
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define HAZOP study scope and objectives',

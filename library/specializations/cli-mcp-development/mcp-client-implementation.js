@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const clientTesting = await ctx.task(clientTestingTask, { projectName, language, transports, outputDir });
   artifacts.push(...clientTesting.artifacts);
 
-  const clientDocumentation = await ctx.task(clientDocumentationTask, { projectName, language, features, outputDir });
-  artifacts.push(...clientDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let clientDocumentation = await ctx.task(clientDocumentationTask, { projectName, language, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clientDocumentation = await ctx.task(clientDocumentationTask, { ...{ projectName, language, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Client Implementation complete with ${transports.length} transports. Review and approve?`,
     title: 'MCP Client Complete',
-    context: { runId: ctx.runId, summary: { projectName, transports, features } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, transports, features } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

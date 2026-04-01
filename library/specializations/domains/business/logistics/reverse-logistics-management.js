@@ -50,20 +50,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: INSPECTION AND GRADING
   ctx.log('info', 'Phase 4: Planning inspection and grading');
-  const inspectionPlanning = await ctx.task(inspectionGradingTask, { returnItems: collectionLogistics.scheduledPickups, outputDir });
+  let inspectionPlanning = await ctx.task(inspectionGradingTask, { returnItems: collectionLogistics.scheduledPickups, outputDir });
   artifacts.push(...inspectionPlanning.artifacts);
 
-  // Quality Gate: Review return volume
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      inspectionPlanning = await ctx.task(inspectionGradingTask, { ...{ returnItems: collectionLogistics.scheduledPickups, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `${returnAuthorization.authorizedReturns.length} returns authorized. Estimated value: $${returnAnalysis.totalValue}. ${returnAnalysis.defectiveRate}% defective. Review return plan?`,
     title: 'Reverse Logistics Review',
     context: {
       runId: ctx.runId,
       summary: { authorizedReturns: returnAuthorization.authorizedReturns.length, totalValue: returnAnalysis.totalValue, defectiveRate: returnAnalysis.defectiveRate },
       files: returnAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: DISPOSITION DECISION
   ctx.log('info', 'Phase 5: Making disposition decisions');
   const dispositionDecision = await ctx.task(dispositionDecisionTask, { inspectedItems: inspectionPlanning.inspectionPlan, dispositionRules, outputDir });
@@ -91,11 +101,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 10: SUSTAINABILITY REPORTING
   ctx.log('info', 'Phase 10: Generating sustainability report');
-  const sustainabilityReport = await ctx.task(reverseSustainabilityTask, { recyclingDisposal, valueRecovery, outputDir });
+  let sustainabilityReport = await ctx.task(reverseSustainabilityTask, { recyclingDisposal, valueRecovery, outputDir });
   artifacts.push(...sustainabilityReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sustainabilityReport = await ctx.task(reverseSustainabilityTask, { ...{ recyclingDisposal, valueRecovery, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reverse logistics planning complete. Value recovery: ${valueRecovery.recoveryRate}%. Diversion rate: ${sustainabilityReport.diversionRate}%. Approve plan?`,
     title: 'Reverse Logistics Management Complete',
     context: {
@@ -107,9 +121,15 @@ export async function process(inputs, ctx) {
         netRecoveredValue: `$${valueRecovery.netValue}`
       },
       files: [{ path: sustainabilityReport.reportPath, format: 'markdown', label: 'Sustainability Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -122,8 +142,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/reverse-logistics-management', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const returnRequestAnalysisTask = defineTask('return-request-analysis', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze return requests', agent: { name: 'return-request-analyst', prompt: { role: 'Return Request Analyst', task: 'Analyze and validate return requests', context: args, instructions: ['Validate return requests', 'Categorize by reason', 'Calculate return value', 'Identify patterns', 'Flag fraud indicators', 'Generate return analysis'] }, outputSchema: { type: 'object', required: ['validatedRequests', 'totalValue', 'defectiveRate', 'artifacts'], properties: { validatedRequests: { type: 'array' }, totalValue: { type: 'number' }, defectiveRate: { type: 'number' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'reverse-logistics', 'return-analysis']
 }));

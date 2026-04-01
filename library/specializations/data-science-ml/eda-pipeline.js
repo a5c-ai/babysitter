@@ -108,7 +108,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Generate Comprehensive EDA Report
   ctx.log('info', 'Generating comprehensive EDA report');
-  const edaReport = await ctx.task(edaReportGenerationTask, {
+  let edaReport = await ctx.task(edaReportGenerationTask, {
     dataPath,
     dataLoadResult,
     statsSummary,
@@ -122,8 +122,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...edaReport.artifacts);
 
-  // Breakpoint: Review EDA results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      edaReport = await ctx.task(edaReportGenerationTask, { ...{
+    dataPath,
+    dataLoadResult,
+    statsSummary,
+    missingValueAnalysis,
+    distributionAnalysis,
+    correlationAnalysis,
+    outlierDetection,
+    dataQualityResult,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `EDA complete. Data quality: ${dataQualityScore}/${targetDataQuality}. ${qualityMet ? 'Quality target met!' : 'Quality target not met.'} Review findings?`,
     title: 'EDA Pipeline Results',
     context: {
@@ -138,9 +152,15 @@ export async function process(inputs, ctx) {
         missingValuePercentage: missingValueAnalysis.overallMissingPercentage,
         outlierCount: outlierDetection.totalOutliers
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Generate Action Items (if quality not met)
   let actionItems = [];
   if (!qualityMet) {
@@ -156,7 +176,6 @@ export async function process(inputs, ctx) {
     actionItems = recommendations.actionItems;
     artifacts.push(...recommendations.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -200,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Loading and Initial Validation
+  // Task 1: Data Loading and Initial Validation
 export const dataLoadingTask = defineTask('data-loading', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Load and validate dataset',

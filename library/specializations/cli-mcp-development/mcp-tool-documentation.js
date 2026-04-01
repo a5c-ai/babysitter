@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const changelogDocs = await ctx.task(changelogDocsTask, { projectName, outputDir });
   artifacts.push(...changelogDocs.artifacts);
 
-  const publishingSetup = await ctx.task(publishingSetupTask, { projectName, outputFormats, outputDir });
-  artifacts.push(...publishingSetup.artifacts);
-
-  await ctx.breakpoint({
+  let publishingSetup = await ctx.task(publishingSetupTask, { projectName, outputFormats, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      publishingSetup = await ctx.task(publishingSetupTask, { ...{ projectName, outputFormats, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Tool Documentation complete for ${tools.length || 'all'} tools. Review and approve?`,
     title: 'MCP Tool Documentation Complete',
-    context: { runId: ctx.runId, summary: { projectName, tools, outputFormats } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, tools, outputFormats } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

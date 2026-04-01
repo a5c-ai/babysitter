@@ -63,7 +63,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: STRUCTURAL ANALYSIS
   // ============================================================================
@@ -148,7 +147,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...accessibilityAudit.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: TECHNICAL ACCURACY VERIFICATION
   // ============================================================================
@@ -205,13 +203,12 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...competitorAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: SCORING AND AGGREGATION
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Calculating overall scores');
-  const scoring = await ctx.task(scoringAggregationTask, {
+  let scoring = await ctx.task(scoringAggregationTask, {
     discovery,
     structuralAnalysis,
     contentQuality,
@@ -232,8 +229,26 @@ export async function process(inputs, ctx) {
   const overallScore = scoring.overallScore;
   const passesThreshold = overallScore >= 80;
 
-  // Breakpoint: Review audit results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scoring = await ctx.task(scoringAggregationTask, { ...{
+    discovery,
+    structuralAnalysis,
+    contentQuality,
+    completenessAnalysis,
+    clarityAssessment,
+    consistencyEvaluation,
+    accessibilityAudit,
+    accuracyVerification,
+    maintainabilityAssessment,
+    uxEvaluation,
+    benchmarkStandards,
+    auditScope,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Documentation audit complete. Overall score: ${overallScore}/100. ${passesThreshold ? 'Documentation meets quality standards!' : 'Documentation needs improvement.'} Review audit report?`,
     title: 'Documentation Audit Results',
     context: {
@@ -252,9 +267,15 @@ export async function process(inputs, ctx) {
         recommendations: scoring.recommendations?.length || 0,
         componentScores: scoring.componentScores
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: RECOMMENDATIONS AND PRIORITIZATION
   // ============================================================================
@@ -294,7 +315,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...actionPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 15: FINAL REPORT GENERATION
   // ============================================================================
@@ -402,8 +422,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

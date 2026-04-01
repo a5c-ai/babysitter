@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Assembling complete correctness proof');
-  const completeProof = await ctx.task(completeProofAssemblyTask, {
+  let completeProof = await ctx.task(completeProofAssemblyTask, {
     algorithmDescription,
     pseudocode,
     specificationDefinition,
@@ -126,8 +126,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...completeProof.artifacts);
 
-  // Breakpoint: Review correctness proof
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      completeProof = await ctx.task(completeProofAssemblyTask, { ...{
+    algorithmDescription,
+    pseudocode,
+    specificationDefinition,
+    loopInvariantAnalysis,
+    inductionProof,
+    invariantVerification,
+    terminationProof,
+    edgeCaseAnalysis,
+    proofStyle,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Correctness proof complete. Proof status: ${completeProof.proofStatus}. Review proof documentation?`,
     title: 'Algorithm Correctness Proof Review',
     context: {
@@ -143,9 +158,15 @@ export async function process(inputs, ctx) {
         terminationProved: terminationProof.terminationProved,
         edgeCasesCovered: edgeCaseAnalysis.edgeCasesCovered
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

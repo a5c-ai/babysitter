@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Business Context Analysis
-  const businessContext = await ctx.task(businessContextAnalysisTask, {
+  let businessContext = await ctx.task(businessContextAnalysisTask, {
     projectName,
     problemStatement,
     businessNeed,
@@ -50,9 +50,17 @@ export async function process(inputs, ctx) {
       charter: null
     };
   }
-
-  // Breakpoint: Review business context
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      businessContext = await ctx.task(businessContextAnalysisTask, { ...{
+    projectName,
+    problemStatement,
+    businessNeed,
+    organizationalContext
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review business context for ${projectName}. Strategic alignment score: ${businessContext.alignmentScore}/100. Proceed with charter development?`,
     title: 'Business Context Review',
     context: {
@@ -65,9 +73,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: businessContext
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Stakeholder Identification
   const stakeholderAnalysis = await ctx.task(stakeholderIdentificationTask, {
     projectName,
@@ -85,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Objectives and Success Criteria
-  const objectivesAndCriteria = await ctx.task(objectivesDefinitionTask, {
+  let objectivesAndCriteria = await ctx.task(objectivesDefinitionTask, {
     projectName,
     businessNeed,
     scopeDefinition,
@@ -93,16 +107,31 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: SMART objectives must be defined
-  if (!objectivesAndCriteria.objectives || objectivesAndCriteria.objectives.length === 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        objectivesAndCriteria = await ctx.task(objectivesDefinitionTask, { ...{
+    projectName,
+    businessNeed,
+    scopeDefinition,
+    successCriteria
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `No measurable objectives defined for ${projectName}. Define objectives before proceeding?`,
       title: 'Objectives Required',
       context: {
         runId: ctx.runId,
         recommendation: 'Define at least 3-5 SMART objectives with measurable success criteria'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Constraints and Assumptions
   const constraintsAssumptions = await ctx.task(constraintsAssumptionsTask, {
@@ -154,7 +183,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Charter Document Generation
-  const charterDocument = await ctx.task(charterDocumentGenerationTask, {
+  let charterDocument = await ctx.task(charterDocumentGenerationTask, {
     projectName,
     businessContext,
     stakeholderAnalysis,
@@ -172,8 +201,24 @@ export async function process(inputs, ctx) {
   const charterCompletenessScore = charterDocument.completenessScore || 0;
   const ready = charterCompletenessScore >= 80;
 
-  // Final Breakpoint: Charter Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      charterDocument = await ctx.task(charterDocumentGenerationTask, { ...{
+    projectName,
+    businessContext,
+    stakeholderAnalysis,
+    scopeDefinition,
+    objectivesAndCriteria,
+    constraintsAssumptions,
+    highLevelRequirements,
+    riskOverview,
+    milestoneSchedule,
+    budgetSummary,
+    governanceStructure
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Project Charter complete for ${projectName}. Completeness: ${charterCompletenessScore}/100. Submit for sponsor approval?`,
     title: 'Charter Approval Review',
     context: {
@@ -186,9 +231,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/project-charter.json`, format: 'json', content: charterDocument },
         { path: `artifacts/project-charter.md`, format: 'markdown', content: charterDocument.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -218,8 +269,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const businessContextAnalysisTask = defineTask('business-context-analysis', (args, taskCtx) => ({
   kind: 'agent',

@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and analyzing API endpoints');
 
-  const apiDiscovery = await ctx.task(apiDiscoveryTask, {
+  let apiDiscovery = await ctx.task(apiDiscoveryTask, {
     projectName,
     apiBaseUrl,
     apiType,
@@ -101,8 +101,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...apiDiscovery.artifacts);
 
   // Quality Gate: Minimum endpoint coverage
-  if (apiDiscovery.discoveredEndpoints.length < 5 && endpoints.length === 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        apiDiscovery = await ctx.task(apiDiscoveryTask, { ...{
+    projectName,
+    apiBaseUrl,
+    apiType,
+    endpoints,
+    authType,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Only ${apiDiscovery.discoveredEndpoints.length} API endpoints discovered. This may indicate incomplete API discovery. Review and approve to continue?`,
       title: 'API Endpoint Discovery Review',
       context: {
@@ -111,9 +122,15 @@ export async function process(inputs, ctx) {
         apiDocumentation: apiDiscovery.apiDocumentation,
         recommendation: 'Verify all critical endpoints are included',
         files: apiDiscovery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: SCHEMA VALIDATION AND CONTRACT DEFINITION
@@ -122,7 +139,7 @@ export async function process(inputs, ctx) {
   if (schemaValidationEnabled) {
     ctx.log('info', 'Phase 2: Extracting API schemas and defining contracts');
 
-    const schemaExtraction = await ctx.task(schemaExtractionTask, {
+    let schemaExtraction = await ctx.task(schemaExtractionTask, {
       projectName,
       apiBaseUrl,
       apiType,
@@ -135,8 +152,19 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Schema completeness
     const schemaCompleteness = (schemaExtraction.schemasExtracted / apiDiscovery.discoveredEndpoints.length) * 100;
-    if (schemaCompleteness < 80) {
-      await ctx.breakpoint({
+        let lastFeedback_phase2Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase2Review) {
+          schemaExtraction = await ctx.task(schemaExtractionTask, { ...{
+      projectName,
+      apiBaseUrl,
+      apiType,
+      discoveredEndpoints: apiDiscovery.discoveredEndpoints,
+      apiDocumentation: apiDiscovery.apiDocumentation,
+      outputDir
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+        }
+  const phase2Review = await ctx.breakpoint({
         question: `Schema completeness: ${schemaCompleteness.toFixed(0)}%. ${schemaExtraction.schemasExtracted}/${apiDiscovery.discoveredEndpoints.length} endpoints have schemas. Below 80% threshold. Continue?`,
         title: 'Schema Completeness Review',
         context: {
@@ -146,11 +174,16 @@ export async function process(inputs, ctx) {
           totalEndpoints: apiDiscovery.discoveredEndpoints.length,
           missingSchemas: schemaExtraction.missingSchemas,
           files: schemaExtraction.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase2Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase2Review.approved) break;
+        lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 3: TEST FRAMEWORK SETUP
   // ============================================================================
@@ -179,14 +212,13 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 4: TEST DATA AND FIXTURES CREATION
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Creating test data, fixtures, and factories');
 
-  const testDataCreation = await ctx.task(apiTestDataCreationTask, {
+  let testDataCreation = await ctx.task(apiTestDataCreationTask, {
     projectName,
     apiType,
     discoveredEndpoints: apiDiscovery.discoveredEndpoints,
@@ -198,8 +230,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...testDataCreation.artifacts);
 
   // Quality Gate: Test data availability
-  if (!testDataCreation.dataReady || testDataCreation.dataGaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        testDataCreation = await ctx.task(apiTestDataCreationTask, { ...{
+    projectName,
+    apiType,
+    discoveredEndpoints: apiDiscovery.discoveredEndpoints,
+    schemas: schemaValidationEnabled ? apiDiscovery.schemas : [],
+    authType,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Test data setup completed with ${testDataCreation.dataGaps.length} gaps. Review data gaps and approve to continue?`,
       title: 'Test Data Review',
       context: {
@@ -208,9 +251,15 @@ export async function process(inputs, ctx) {
         dataGaps: testDataCreation.dataGaps,
         availableData: testDataCreation.availableData,
         files: testDataCreation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: FUNCTIONAL TEST IMPLEMENTATION (PARALLEL)
@@ -268,14 +317,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...contractTestResults.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: INITIAL TEST EXECUTION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Running initial test execution');
 
-  const initialExecution = await ctx.task(apiTestExecutionTask, {
+  let initialExecution = await ctx.task(apiTestExecutionTask, {
     projectName,
     apiBaseUrl,
     testScope: ['functional'],
@@ -288,8 +336,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Initial test pass rate
   const initialPassRate = initialExecution.passRate;
-  if (initialPassRate < 50) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        initialExecution = await ctx.task(apiTestExecutionTask, { ...{
+    projectName,
+    apiBaseUrl,
+    testScope: ['functional'],
+    frameworkSetup,
+    outputDir,
+    executionType: 'initial'
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Initial test pass rate: ${initialPassRate}%. Below 50% threshold. This is common for initial runs. Review failures and continue debugging?`,
       title: 'Initial Execution Results',
       context: {
@@ -300,9 +359,15 @@ export async function process(inputs, ctx) {
         failed: initialExecution.failed,
         failureCategories: initialExecution.failureCategories,
         files: initialExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: DEBUGGING AND FIXES
@@ -310,7 +375,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Debugging test failures and implementing fixes');
 
-  const debuggingPhase = await ctx.task(apiTestDebuggingTask, {
+  let debuggingPhase = await ctx.task(apiTestDebuggingTask, {
     projectName,
     executionResults: initialExecution,
     discoveredEndpoints: apiDiscovery.discoveredEndpoints,
@@ -339,7 +404,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...schemaValidationResults.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: PERFORMANCE TESTING
   // ============================================================================
@@ -363,8 +427,18 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Performance criteria
     const performancePassRate = performanceTestResults.passRate;
-    if (performancePassRate < acceptanceCriteria.performancePassRate) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval2) {
+          debuggingPhase = await ctx.task(apiTestDebuggingTask, { ...{
+    projectName,
+    executionResults: initialExecution,
+    discoveredEndpoints: apiDiscovery.discoveredEndpoints,
+    testData: testDataCreation.testDatasets,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+        }
+  const qualityGateApproval2 = await ctx.breakpoint({
         question: `Performance test pass rate: ${performancePassRate}%. Target: ${acceptanceCriteria.performancePassRate}%. Below acceptance criteria. Review performance issues and decide to proceed or optimize?`,
         title: 'Performance Quality Gate',
         context: {
@@ -375,11 +449,16 @@ export async function process(inputs, ctx) {
           performanceMetrics: performanceTestResults.metrics,
           recommendation: 'Consider API optimization or adjust performance criteria',
           files: performanceTestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval2.approved) break;
+        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 11: SECURITY TESTING
   // ============================================================================
@@ -406,8 +485,18 @@ export async function process(inputs, ctx) {
     const criticalVulnerabilities = securityFindings.filter(f => f.severity === 'critical').length;
     const highVulnerabilities = securityFindings.filter(f => f.severity === 'high').length;
 
-    if (criticalVulnerabilities > 0 || highVulnerabilities > acceptanceCriteria.securityIssues) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval3 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval3) {
+          debuggingPhase = await ctx.task(apiTestDebuggingTask, { ...{
+    projectName,
+    executionResults: initialExecution,
+    discoveredEndpoints: apiDiscovery.discoveredEndpoints,
+    testData: testDataCreation.testDatasets,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+        }
+  const qualityGateApproval3 = await ctx.breakpoint({
         question: `Security scan found ${criticalVulnerabilities} critical and ${highVulnerabilities} high severity vulnerabilities. Target: ${acceptanceCriteria.securityIssues} critical/high issues. Review security findings and address before proceeding?`,
         title: 'Security Quality Gate',
         context: {
@@ -418,11 +507,16 @@ export async function process(inputs, ctx) {
           findings: securityFindings,
           recommendation: 'Address critical and high severity security issues before production',
           files: securityTestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval3.approved) break;
+        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 12: NEGATIVE TESTING AND ERROR HANDLING
   // ============================================================================
@@ -445,7 +539,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Running final comprehensive test execution');
 
-  const finalExecution = await ctx.task(apiTestExecutionTask, {
+  let finalExecution = await ctx.task(apiTestExecutionTask, {
     projectName,
     apiBaseUrl,
     testScope: ['functional', 'negative', 'schema'],
@@ -459,8 +553,19 @@ export async function process(inputs, ctx) {
   const finalPassRate = finalExecution.passRate;
 
   // Quality Gate: Final test pass rate
-  if (finalPassRate < acceptanceCriteria.passRate) {
-    await ctx.breakpoint({
+      let lastFeedback_phase13Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase13Review) {
+        finalExecution = await ctx.task(apiTestExecutionTask, { ...{
+    projectName,
+    apiBaseUrl,
+    testScope: ['functional', 'negative', 'schema'],
+    frameworkSetup,
+    outputDir,
+    executionType: 'final'
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+      }
+  const phase13Review = await ctx.breakpoint({
       question: `Final test pass rate: ${finalPassRate}%. Target: ${acceptanceCriteria.passRate}%. Below acceptance criteria. Review and decide to proceed or iterate?`,
       title: 'Pass Rate Quality Gate',
       context: {
@@ -472,9 +577,15 @@ export async function process(inputs, ctx) {
         failed: finalExecution.failed,
         recommendation: 'Consider additional debugging iteration or adjust acceptance criteria',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase13Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase13Review.approved) break;
+      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 14: API COVERAGE ANALYSIS
@@ -482,7 +593,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Analyzing API test coverage');
 
-  const coverageAnalysis = await ctx.task(apiCoverageAnalysisTask, {
+  let coverageAnalysis = await ctx.task(apiCoverageAnalysisTask, {
     projectName,
     discoveredEndpoints: apiDiscovery.discoveredEndpoints,
     functionalTestResults,
@@ -500,8 +611,22 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Test coverage
   const endpointCoverage = coverageAnalysis.endpointCoverage;
-  if (endpointCoverage < acceptanceCriteria.testCoverage) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        coverageAnalysis = await ctx.task(apiCoverageAnalysisTask, { ...{
+    projectName,
+    discoveredEndpoints: apiDiscovery.discoveredEndpoints,
+    functionalTestResults,
+    contractTestResults,
+    schemaValidationResults,
+    performanceTestResults,
+    securityTestResults,
+    negativeTestResults,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `API endpoint coverage: ${endpointCoverage}%. Target: ${acceptanceCriteria.testCoverage}%. Below acceptance criteria. Continue or add more tests?`,
       title: 'Coverage Quality Gate',
       context: {
@@ -512,9 +637,15 @@ export async function process(inputs, ctx) {
         uncoveredEndpoints: coverageAnalysis.uncoveredEndpoints,
         coverageByCategory: coverageAnalysis.coverageByCategory,
         files: coverageAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 15: MOCK SERVER SETUP (if enabled)
@@ -534,7 +665,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...mockServerSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 16: DOCUMENTATION GENERATION
   // ============================================================================
@@ -583,7 +713,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Computing final API test suite metrics and assessment');
 
-  const finalAssessment = await ctx.task(apiFinalAssessmentTask, {
+  let finalAssessment = await ctx.task(apiFinalAssessmentTask, {
     projectName,
     apiDiscovery,
     functionalTestResults,
@@ -604,8 +734,25 @@ export async function process(inputs, ctx) {
   ctx.log('info', `API test suite quality score: ${finalAssessment.qualityScore}/100`);
   ctx.log('info', `Total tests: ${testSuiteStats.totalTests}, Pass rate: ${testSuiteStats.passRate}%`);
 
-  // Final Breakpoint: API Test Suite Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(apiFinalAssessmentTask, { ...{
+    projectName,
+    apiDiscovery,
+    functionalTestResults,
+    contractTestResults,
+    schemaValidationResults,
+    performanceTestResults,
+    securityTestResults,
+    negativeTestResults,
+    finalExecution,
+    coverageAnalysis,
+    acceptanceCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `API Test Automation Suite Complete for ${projectName}. Quality Score: ${finalAssessment.qualityScore}/100, Pass Rate: ${testSuiteStats.passRate}%, Coverage: ${apiCoverage.endpointCoverage}%. Approve test suite for production use?`,
     title: 'Final API Test Suite Review',
     context: {
@@ -630,9 +777,15 @@ export async function process(inputs, ctx) {
         { path: finalExecution.reportPath, format: 'html', label: 'Test Execution Report' },
         { path: coverageAnalysis.coverageReportPath, format: 'html', label: 'Coverage Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -709,8 +862,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

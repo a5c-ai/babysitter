@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing and selecting optimal incremental strategy');
 
-  const strategyAnalysis = await ctx.task(incrementalStrategyAnalysisTask, {
+  let strategyAnalysis = await ctx.task(incrementalStrategyAnalysisTask, {
     projectName,
     dataWarehouse,
     modelName,
@@ -74,9 +74,22 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...strategyAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      strategyAnalysis = await ctx.task(incrementalStrategyAnalysisTask, { ...{
+    projectName,
+    dataWarehouse,
+    modelName,
+    sourceModel,
+    incrementalStrategy,
+    dataVolume,
+    updateFrequency,
+    uniqueKey,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Incremental strategy "${strategyAnalysis.selectedStrategy}" selected for ${modelName}. Strategy supports: ${strategyAnalysis.capabilities.join(', ')}. Review strategy selection?`,
     title: 'Incremental Strategy Analysis',
     context: {
@@ -87,9 +100,15 @@ export async function process(inputs, ctx) {
       tradeoffs: strategyAnalysis.tradeoffs,
       recommendedFor: strategyAnalysis.recommendedFor,
       files: strategyAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: UNIQUE KEY CONFIGURATION
   // ============================================================================
@@ -114,7 +133,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing incremental filter logic and watermarking');
 
-  const filterLogic = await ctx.task(incrementalFilterLogicTask, {
+  let filterLogic = await ctx.task(incrementalFilterLogicTask, {
     projectName,
     modelName,
     sourceModel,
@@ -123,9 +142,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...filterLogic.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      filterLogic = await ctx.task(incrementalFilterLogicTask, { ...{
+    projectName,
+    modelName,
+    sourceModel,
+    updateFrequency,
+    dataWarehouse,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phase 3 Complete: Incremental filter configured with ${filterLogic.filterStrategy} strategy. Watermark field: ${filterLogic.watermarkField}. Lookback period: ${filterLogic.lookbackPeriod}. Proceed with partitioning?`,
     title: 'Incremental Filter Logic Review',
     context: {
@@ -135,9 +164,15 @@ export async function process(inputs, ctx) {
       lookbackPeriod: filterLogic.lookbackPeriod,
       filterSQL: filterLogic.filterSQL,
       files: filterLogic.artifacts.map(a => ({ path: a.path, format: 'sql' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PARTITIONING STRATEGY
   // ============================================================================
@@ -162,7 +197,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Configuring clustering keys for query optimization');
 
-  const clusteringConfig = await ctx.task(clusteringConfigurationTask, {
+  let clusteringConfig = await ctx.task(clusteringConfigurationTask, {
     projectName,
     modelName,
     dataWarehouse,
@@ -172,9 +207,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...clusteringConfig.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      clusteringConfig = await ctx.task(clusteringConfigurationTask, { ...{
+    projectName,
+    modelName,
+    dataWarehouse,
+    clusterBy,
+    uniqueKey: uniqueKeyConfig.uniqueKey,
+    partitionConfig: partitionStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Phase 5 Complete: Partitioning configured on [${partitionStrategy.partitionField}], clustering on [${clusteringConfig.clusterKeys.join(', ')}]. Estimated query performance gain: ${clusteringConfig.estimatedGain}. Review optimization configuration?`,
     title: 'Partitioning and Clustering Review',
     context: {
@@ -194,9 +240,15 @@ export async function process(inputs, ctx) {
         ...partitionStrategy.artifacts.map(a => ({ path: a.path, format: 'markdown' })),
         ...clusteringConfig.artifacts.map(a => ({ path: a.path, format: 'markdown' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MODEL IMPLEMENTATION
   // ============================================================================
@@ -224,7 +276,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Creating comprehensive tests for incremental model');
 
-  const testingSuite = await ctx.task(incrementalTestingTask, {
+  let testingSuite = await ctx.task(incrementalTestingTask, {
     projectName,
     modelName,
     uniqueKeyConfig,
@@ -233,9 +285,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...testingSuite.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      testingSuite = await ctx.task(incrementalTestingTask, { ...{
+    projectName,
+    modelName,
+    uniqueKeyConfig,
+    filterLogic,
+    strategyAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Phase 7 Complete: Incremental model implemented with ${testingSuite.totalTests} tests covering: uniqueness, completeness, idempotency, and performance. Review model and tests?`,
     title: 'Model Implementation and Testing',
     context: {
@@ -249,16 +311,22 @@ export async function process(inputs, ctx) {
         { path: modelImplementation.schemaPath, format: 'yaml', label: 'Model Schema & Tests' },
         ...testingSuite.artifacts.map(a => ({ path: a.path, format: 'sql', label: 'Custom Test' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: BACKFILL STRATEGY
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Designing backfill and historical data load strategy');
 
-  const backfillStrategy = await ctx.task(backfillStrategyTask, {
+  let backfillStrategy = await ctx.task(backfillStrategyTask, {
     projectName,
     modelName,
     backfillRequired,
@@ -271,8 +339,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...backfillStrategy.artifacts);
 
-  if (backfillRequired) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        backfillStrategy = await ctx.task(backfillStrategyTask, { ...{
+    projectName,
+    modelName,
+    backfillRequired,
+    dataVolume,
+    partitionStrategy,
+    filterLogic,
+    dataWarehouse,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `Phase 8 Complete: Backfill strategy designed for ${backfillStrategy.backfillScope}. Approach: ${backfillStrategy.approach}. Estimated duration: ${backfillStrategy.estimatedDuration}. ${backfillStrategy.batchCount} batches planned. Review backfill plan?`,
       title: 'Backfill Strategy Review',
       context: {
@@ -284,9 +365,15 @@ export async function process(inputs, ctx) {
         batches: backfillStrategy.batches,
         rollbackPlan: backfillStrategy.rollbackPlan,
         files: backfillStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: PERFORMANCE OPTIMIZATION
@@ -314,7 +401,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Setting up monitoring and observability');
 
-  const monitoring = await ctx.task(monitoringSetupTask, {
+  let monitoring = await ctx.task(monitoringSetupTask, {
     projectName,
     modelName,
     updateFrequency,
@@ -323,9 +410,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...monitoring.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      monitoring = await ctx.task(monitoringSetupTask, { ...{
+    projectName,
+    modelName,
+    updateFrequency,
+    performanceOptimization,
+    testingSuite,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint({
     question: `Phase 10 Complete: Performance optimizations applied with estimated ${performanceOptimization.estimatedSpeedupFactor}x speedup. Monitoring configured with ${monitoring.metricCount} metrics and ${monitoring.alertCount} alerts. Review optimization results?`,
     title: 'Performance and Monitoring Review',
     context: {
@@ -345,16 +442,22 @@ export async function process(inputs, ctx) {
         ...performanceOptimization.artifacts.map(a => ({ path: a.path, format: 'markdown' })),
         ...monitoring.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: VALIDATION AND TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating incremental model configuration');
 
-  const validation = await ctx.task(incrementalModelValidationTask, {
+  let validation = await ctx.task(incrementalModelValidationTask, {
     projectName,
     modelName,
     modelImplementation,
@@ -373,8 +476,24 @@ export async function process(inputs, ctx) {
   const validationScore = validation.overallScore;
   const validationPassed = validationScore >= 85;
 
-  if (!validationPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        validation = await ctx.task(incrementalModelValidationTask, { ...{
+    projectName,
+    modelName,
+    modelImplementation,
+    strategyAnalysis,
+    uniqueKeyConfig,
+    filterLogic,
+    partitionStrategy,
+    clusteringConfig,
+    testingSuite,
+    backfillStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Phase 11 Warning: Validation score: ${validationScore}/100 (below threshold of 85). ${validation.issues.length} issue(s) found. Review and address issues?`,
       title: 'Incremental Model Validation Issues',
       context: {
@@ -384,9 +503,15 @@ export async function process(inputs, ctx) {
         issues: validation.issues,
         recommendations: validation.recommendations,
         files: validation.artifacts.map(a => ({ path: a.path, format: 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: DOCUMENTATION
@@ -394,7 +519,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating comprehensive incremental model documentation');
 
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     projectName,
     modelName,
     strategyAnalysis,
@@ -415,9 +540,27 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // FINAL BREAKPOINT: SETUP COMPLETE
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    projectName,
+    modelName,
+    strategyAnalysis,
+    uniqueKeyConfig,
+    filterLogic,
+    partitionStrategy,
+    clusteringConfig,
+    modelImplementation,
+    testingSuite,
+    backfillStrategy,
+    performanceOptimization,
+    monitoring,
+    validation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Incremental Model Setup Complete for "${modelName}"! Validation score: ${validationScore}/100. Model uses ${strategyAnalysis.selectedStrategy} strategy with ${partitionStrategy.enabled ? 'partitioning' : 'no partitioning'} and ${clusteringConfig.enabled ? 'clustering' : 'no clustering'}. Expected performance gain: ${performanceOptimization.estimatedSpeedupFactor}x. Review deliverables?`,
     title: 'Incremental Model Setup Complete',
     context: {
@@ -444,9 +587,15 @@ export async function process(inputs, ctx) {
         { path: documentation.operationalGuidePath, format: 'markdown', label: 'Operational Guide' },
         { path: validation.reportPath, format: 'json', label: 'Validation Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -521,8 +670,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

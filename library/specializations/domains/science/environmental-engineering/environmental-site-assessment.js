@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...recordsReview.artifacts);
   }
-
   // ============================================================================
   // PHASE I: SITE RECONNAISSANCE
   // ============================================================================
@@ -74,7 +73,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...siteRecon.artifacts);
   }
-
   // ============================================================================
   // PHASE I: INTERVIEWS
   // ============================================================================
@@ -92,7 +90,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...interviews.artifacts);
   }
-
   // ============================================================================
   // PHASE I: REC EVALUATION
   // ============================================================================
@@ -111,8 +108,10 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...recEvaluation.artifacts);
 
-    // Breakpoint: Phase I Review
-    await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      // No preceding task identified for re-run with feedback
+      const reviewApproval = await ctx.breakpoint({
       question: `Phase I ESA complete for ${siteName}. RECs identified: ${recEvaluation.recs.length}. Review findings before proceeding?`,
       title: 'Phase I ESA Review',
       context: {
@@ -121,10 +120,16 @@ export async function process(inputs, ctx) {
         hrecs: recEvaluation.hrecs,
         crecs: recEvaluation.crecs,
         files: recEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    }
   }
-
   // ============================================================================
   // PHASE II: SAMPLING PLAN (if Phase II or III)
   // ============================================================================
@@ -142,7 +147,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...samplingPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE II: FIELD INVESTIGATION
   // ============================================================================
@@ -159,7 +163,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...fieldInvestigation.artifacts);
   }
-
   // ============================================================================
   // PHASE II: LABORATORY ANALYSIS
   // ============================================================================
@@ -177,7 +180,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...labAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE II: DATA EVALUATION
   // ============================================================================
@@ -195,8 +197,10 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dataEvaluation.artifacts);
 
-    // Breakpoint: Phase II Review
-    await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      // No preceding task identified for re-run with feedback
+      const finalApproval = await ctx.breakpoint({
       question: `Phase II ESA complete for ${siteName}. Contamination detected: ${dataEvaluation.contaminationDetected}. Review findings?`,
       title: 'Phase II ESA Review',
       context: {
@@ -205,10 +209,16 @@ export async function process(inputs, ctx) {
         exceedances: dataEvaluation.exceedances,
         affectedMedia: dataEvaluation.affectedMedia,
         files: dataEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
   }
-
   // ============================================================================
   // PHASE III: DELINEATION (if Phase III)
   // ============================================================================
@@ -225,7 +235,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...delineation.artifacts);
   }
-
   // ============================================================================
   // ASSESSMENT REPORT
   // ============================================================================
@@ -277,8 +286,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

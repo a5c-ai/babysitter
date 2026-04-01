@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const registryTesting = await ctx.task(registryTestingTask, { projectName, language, outputDir });
   artifacts.push(...registryTesting.artifacts);
 
-  const registryDocumentation = await ctx.task(registryDocumentationTask, { projectName, registryType, features, outputDir });
-  artifacts.push(...registryDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let registryDocumentation = await ctx.task(registryDocumentationTask, { projectName, registryType, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      registryDocumentation = await ctx.task(registryDocumentationTask, { ...{ projectName, registryType, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Server Registry and Discovery complete with ${features.length} features. Review and approve?`,
     title: 'MCP Registry Complete',
-    context: { runId: ctx.runId, summary: { projectName, registryType, features } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, registryType, features } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

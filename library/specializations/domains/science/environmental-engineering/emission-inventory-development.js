@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Emission Calculations');
 
-  const emissionCalcs = await ctx.task(emissionCalculationsTask, {
+  let emissionCalcs = await ctx.task(emissionCalculationsTask, {
     facilityName,
     sourceIdentification,
     emissionFactors,
@@ -99,8 +99,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...emissionCalcs.artifacts);
 
-  // Breakpoint: Calculation Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      emissionCalcs = await ctx.task(emissionCalculationsTask, { ...{
+    facilityName,
+    sourceIdentification,
+    emissionFactors,
+    activityData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Emission calculations complete for ${facilityName}. Total emissions: ${JSON.stringify(emissionCalcs.totalEmissions)}. Review calculations?`,
     title: 'Emission Calculation Review',
     context: {
@@ -108,9 +118,15 @@ export async function process(inputs, ctx) {
       totalEmissions: emissionCalcs.totalEmissions,
       emissionsByCategory: emissionCalcs.emissionsByCategory,
       files: emissionCalcs.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: QA/QC REVIEW
   // ============================================================================
@@ -187,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

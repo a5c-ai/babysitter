@@ -45,20 +45,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 3: DEFECT ANALYSIS
   ctx.log('info', 'Phase 3: Analyzing defects');
-  const defectAnalysis = await ctx.task(defectAnalysisTask, { validClaims: warrantyValidation.validClaims, outputDir });
+  let defectAnalysis = await ctx.task(defectAnalysisTask, { validClaims: warrantyValidation.validClaims, outputDir });
   artifacts.push(...defectAnalysis.artifacts);
 
-  // Quality Gate: Review claim validity
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      defectAnalysis = await ctx.task(defectAnalysisTask, { ...{ validClaims: warrantyValidation.validClaims, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `${warrantyValidation.validClaims.length} valid claims of ${claims.length} total. ${warrantyValidation.deniedClaims.length} denied. Top defect: ${defectAnalysis.topDefect}. Review findings?`,
     title: 'Warranty Claims Review',
     context: {
       runId: ctx.runId,
       summary: { validClaims: warrantyValidation.validClaims.length, deniedClaims: warrantyValidation.deniedClaims.length, topDefect: defectAnalysis.topDefect },
       files: warrantyValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // PHASE 4: RESOLUTION DECISION
   ctx.log('info', 'Phase 4: Making resolution decisions');
   const resolutionDecision = await ctx.task(resolutionDecisionTask, { validClaims: warrantyValidation.validClaims, defectAnalysis, outputDir });
@@ -91,11 +101,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 10: CLAIM METRICS REPORTING
   ctx.log('info', 'Phase 10: Generating claim metrics');
-  const claimMetrics = await ctx.task(warrantyMetricsTask, { resolutionDecision, supplierRecovery, rootCauseAnalysis, outputDir });
+  let claimMetrics = await ctx.task(warrantyMetricsTask, { resolutionDecision, supplierRecovery, rootCauseAnalysis, outputDir });
   artifacts.push(...claimMetrics.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      claimMetrics = await ctx.task(warrantyMetricsTask, { ...{ resolutionDecision, supplierRecovery, rootCauseAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Warranty claims processing complete. ${claims.length} claims processed. Resolution: ${resolutionDecision.repairRate}% repair, ${resolutionDecision.replacementRate}% replace, ${resolutionDecision.refundRate}% refund. Supplier recovery: $${supplierRecovery.totalRecovery}. Approve results?`,
     title: 'Warranty Claims Processing Complete',
     context: {
@@ -108,9 +122,15 @@ export async function process(inputs, ctx) {
         supplierRecovery: `$${supplierRecovery.totalRecovery}`
       },
       files: [{ path: claimMetrics.reportPath, format: 'markdown', label: 'Warranty Metrics Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -123,8 +143,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/warranty-claims-processing', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const claimIntakeTask = defineTask('claim-intake', (args, taskCtx) => ({
   kind: 'agent', title: 'Process claim intake', agent: { name: 'claim-intake-specialist', prompt: { role: 'Claim Intake Specialist', task: 'Register and process warranty claim intake', context: args, instructions: ['Register claims', 'Validate customer info', 'Verify purchase proof', 'Assign claim numbers', 'Collect defect details', 'Generate intake report'] }, outputSchema: { type: 'object', required: ['registeredClaims', 'artifacts'], properties: { registeredClaims: { type: 'array' }, incompleteSubmissions: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'warranty', 'intake']
 }));

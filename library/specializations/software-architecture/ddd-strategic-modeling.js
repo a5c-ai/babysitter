@@ -63,13 +63,12 @@ export async function process(inputs, ctx) {
       domainKnowledge
     };
   }
-
   // ============================================================================
   // PHASE 2: SUBDOMAIN CLASSIFICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Classifying subdomains into Core, Supporting, and Generic');
-  const subdomainClassification = await ctx.task(subdomainClassificationTask, {
+  let subdomainClassification = await ctx.task(subdomainClassificationTask, {
     projectName,
     domainKnowledge,
     businessCapabilities: domainKnowledge.businessCapabilities,
@@ -89,9 +88,17 @@ export async function process(inputs, ctx) {
       subdomainClassification
     };
   }
-
-  // Breakpoint: Review subdomain classification
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      subdomainClassification = await ctx.task(subdomainClassificationTask, { ...{
+    projectName,
+    domainKnowledge,
+    businessCapabilities: domainKnowledge.businessCapabilities,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Subdomain classification complete. Identified ${coreSubdomains.length} core domain(s), ${subdomainClassification.subdomains.filter(s => s.type === 'supporting').length} supporting domain(s), and ${subdomainClassification.subdomains.filter(s => s.type === 'generic').length} generic domain(s). Core domains receive highest investment. Approve classification?`,
     title: 'Subdomain Classification Review',
     context: {
@@ -105,9 +112,15 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: BOUNDED CONTEXT IDENTIFICATION
   // ============================================================================
@@ -142,7 +155,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Mapping context relationships and integration patterns');
-  const contextMapping = await ctx.task(contextMappingTask, {
+  let contextMapping = await ctx.task(contextMappingTask, {
     projectName,
     boundedContexts: boundedContexts.contexts,
     subdomainClassification,
@@ -152,8 +165,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contextMapping.artifacts);
 
-  // Breakpoint: Review bounded contexts and context map
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contextMapping = await ctx.task(contextMappingTask, { ...{
+    projectName,
+    boundedContexts: boundedContexts.contexts,
+    subdomainClassification,
+    domainKnowledge,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Bounded contexts and context map complete. Identified ${boundedContexts.contexts.length} bounded context(s) with ${contextMapping.relationships.length} relationship(s). Context mapping patterns include: ${contextMapping.strategicPatterns.join(', ')}. Review strategic model?`,
     title: 'Strategic Model Review',
     context: {
@@ -168,9 +191,15 @@ export async function process(inputs, ctx) {
         language: a.language || undefined,
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: AGGREGATE IDENTIFICATION
   // ============================================================================
@@ -277,7 +306,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Validating strategic model consistency and completeness');
-  const modelValidation = await ctx.task(strategicModelValidationTask, {
+  let modelValidation = await ctx.task(strategicModelValidationTask, {
     projectName,
     domainKnowledge,
     subdomainClassification,
@@ -296,8 +325,25 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Model must pass validation
   const validationIssues = modelValidation.issues.filter(issue => issue.severity === 'critical');
-  if (validationIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        modelValidation = await ctx.task(strategicModelValidationTask, { ...{
+    projectName,
+    domainKnowledge,
+    subdomainClassification,
+    boundedContexts: boundedContexts.contexts,
+    contextMapping,
+    ubiquitousLanguage,
+    aggregateAnalysis,
+    domainEvents,
+    teamAlignment,
+    aclDesign,
+    integrationStrategy,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Strategic model validation found ${validationIssues.length} critical issue(s). These must be resolved before proceeding. Review validation results?`,
       title: 'Critical Validation Issues',
       context: {
@@ -305,9 +351,15 @@ export async function process(inputs, ctx) {
         projectName,
         criticalIssues: validationIssues,
         recommendation: 'Address critical issues before finalizing strategic model'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: STRATEGIC DESIGN QUALITY SCORING
@@ -354,7 +406,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Generating comprehensive strategic DDD documentation');
-  const strategyDocument = await ctx.task(strategyDocumentationTask, {
+  let strategyDocument = await ctx.task(strategyDocumentationTask, {
     projectName,
     domainKnowledge,
     subdomainClassification,
@@ -375,8 +427,29 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyDocument.artifacts);
 
-  // Final Breakpoint: Review complete strategic model
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyDocument = await ctx.task(strategyDocumentationTask, { ...{
+    projectName,
+    domainKnowledge,
+    subdomainClassification,
+    boundedContexts: boundedContexts.contexts,
+    ubiquitousLanguage,
+    contextMapping,
+    aggregateAnalysis,
+    domainEvents,
+    teamAlignment,
+    aclDesign,
+    sharedKernelAnalysis,
+    integrationStrategy,
+    modelValidation,
+    qualityScore,
+    adrGeneration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DDD Strategic Modeling complete for ${projectName}. Overall quality score: ${overallScore}/100. ${qualityMet ? 'Strategic model meets quality standards!' : 'Strategic model may need refinement.'} Total bounded contexts: ${boundedContexts.contexts.length}. Core subdomains: ${coreSubdomains.length}. Strategic patterns identified: ${contextMapping.strategicPatterns.length}. Approve strategic model for tactical design?`,
     title: 'Strategic Model Approval',
     context: {
@@ -404,9 +477,15 @@ export async function process(inputs, ctx) {
         teams: teamAlignment.teams.length,
         qualityScore: overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -490,8 +569,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

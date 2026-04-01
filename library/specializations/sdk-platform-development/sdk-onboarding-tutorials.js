@@ -84,14 +84,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...sandboxSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: CODE EXAMPLES REPOSITORY
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Building code examples repository');
 
-  const examplesRepo = await ctx.task(codeExamplesRepoTask, {
+  let examplesRepo = await ctx.task(codeExamplesRepoTask, {
     projectName,
     sdkLanguages,
     gettingStartedTutorials,
@@ -100,8 +99,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...examplesRepo.artifacts);
 
-  // Quality Gate: Tutorial Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      examplesRepo = await ctx.task(codeExamplesRepoTask, { ...{
+    projectName,
+    sdkLanguages,
+    gettingStartedTutorials,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Onboarding content created for ${projectName}. Tutorials: ${gettingStartedTutorials.length} languages, Examples: ${examplesRepo.exampleCount}. Approve content?`,
     title: 'Onboarding Content Review',
     context: {
@@ -111,9 +119,15 @@ export async function process(inputs, ctx) {
       tutorialCount: gettingStartedTutorials.length,
       exampleCount: examplesRepo.exampleCount,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: INTERACTIVE LEARNING EXPERIENCES
   // ============================================================================
@@ -130,7 +144,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...interactiveLearning.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: LEARNING PATHS
   // ============================================================================
@@ -206,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

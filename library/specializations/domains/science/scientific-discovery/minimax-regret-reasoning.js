@@ -63,13 +63,20 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Minimax Regret Selection
-  const minimaxSelection = await ctx.task(minimaxRegretSelectionTask, {
+  let minimaxSelection = await ctx.task(minimaxRegretSelectionTask, {
     maxRegretAnalysis,
     alternatives
   });
 
-  // Breakpoint: Review regret analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      minimaxSelection = await ctx.task(minimaxRegretSelectionTask, { ...{
+    maxRegretAnalysis,
+    alternatives
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Minimax regret analysis complete. Choice: ${minimaxSelection.minimaxChoice} with max regret ${minimaxSelection.minimaxRegretValue}. Review regret matrix?`,
     title: 'Minimax Regret Review',
     context: {
@@ -77,9 +84,15 @@ export async function process(inputs, ctx) {
       domain,
       minimaxChoice: minimaxSelection.minimaxChoice,
       maximRegret: minimaxSelection.minimaxRegretValue
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Regret Distribution Analysis
   const regretDistribution = await ctx.task(regretDistributionTask, {
     regretMatrix,
@@ -101,7 +114,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Recommendation Synthesis
-  const recommendation = await ctx.task(regretRecommendationTask, {
+  let recommendation = await ctx.task(regretRecommendationTask, {
     minimaxSelection,
     regretDistribution,
     criteriaComparison,
@@ -109,8 +122,18 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendation = await ctx.task(regretRecommendationTask, { ...{
+    minimaxSelection,
+    regretDistribution,
+    criteriaComparison,
+    robustnessAnalysis,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete. Recommendation: ${recommendation.recommendedAlternative}. Confidence: ${recommendation.confidence}. Accept?`,
     title: 'Final Regret Analysis Review',
     context: {
@@ -120,9 +143,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/regret-matrix.json', format: 'json', content: regretMatrix },
         { path: 'artifacts/recommendation.json', format: 'json', content: recommendation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -146,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const regretProblemStructuringTask = defineTask('regret-problem-structuring', (args, taskCtx) => ({
   kind: 'agent',

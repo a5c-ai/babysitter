@@ -1,11 +1,12 @@
 /**
  * @process methodologies/cc10x/cc10x-debug
- * @description CC10X DEBUG Workflow - Log-first bug investigation with root cause analysis, targeted fix, code review, and evidence-backed verification
+ * @description CC10X DEBUG Workflow - Log-first bug investigation with root cause analysis, targeted fix, code review, and evidence-backed verification. Phase 0: Root-cause diagnosis with git diff analysis, 2+ evidence signals, no code changes.
  * @inputs { request: string, projectRoot?: string, errorOutput?: string, memory?: object, confidenceThreshold?: number }
  * @outputs { success: boolean, rootCause: object, fix: object, reviewResult: object, verificationResult: object, evidence: object }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+
 
 // ============================================================================
 // TASK DEFINITIONS
@@ -21,6 +22,9 @@ const logInvestigationTask = defineTask('cc10x-debug-investigate', (args, taskCt
       task: 'Investigate the reported bug using LOG-FIRST methodology. Read logs and error output BEFORE forming any hypothesis. Never guess.',
       context: { ...args },
       instructions: [
+        'PHASE 0 RULE: Run `git diff` (not just git log) to identify the exact breaking change that introduced the regression',
+        'PHASE 0 RULE: You MUST NOT make any code changes during investigation. This is diagnosis only.',
+        'PHASE 0 RULE: Gather at least 2 independent evidence signals before concluding. Each signal must come from a different source (e.g., log output + git diff, test output + code reading).',
         'Read all available logs, error output, stack traces, and crash reports FIRST',
         'DO NOT hypothesize before reading evidence',
         'Identify the exact error message, file, line number, and call stack',

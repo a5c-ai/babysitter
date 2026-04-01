@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating semantics specification document');
-  const specificationDocument = await ctx.task(semanticsSpecificationTask, {
+  let specificationDocument = await ctx.task(semanticsSpecificationTask, {
     languageDescription,
     styleSelection,
     abstractSyntaxDef,
@@ -138,8 +138,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...specificationDocument.artifacts);
 
-  // Breakpoint: Review operational semantics
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      specificationDocument = await ctx.task(semanticsSpecificationTask, { ...{
+    languageDescription,
+    styleSelection,
+    abstractSyntaxDef,
+    runtimeEntities,
+    evaluationRules,
+    bindingSubstitution,
+    evaluationContexts,
+    propertyProofs,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Operational semantics specification complete. Style: ${styleSelection.selectedStyle}. Deterministic: ${propertyProofs.determinism}. Review specification?`,
     title: 'Operational Semantics Review',
     context: {
@@ -154,9 +168,15 @@ export async function process(inputs, ctx) {
         isDeterministic: propertyProofs.determinism,
         isConfluent: propertyProofs.confluence
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

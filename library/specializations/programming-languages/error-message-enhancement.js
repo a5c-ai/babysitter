@@ -53,25 +53,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing Message Format');
 
-  const messageFormat = await ctx.task(messageFormatTask, {
+  let messageFormat = await ctx.task(messageFormatTask, {
     languageName,
     colorSupport,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...messageFormat.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      messageFormat = await ctx.task(messageFormatTask, { ...{
+    languageName,
+    colorSupport,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Message format designed. Color: ${colorSupport}, Sections: ${messageFormat.sections.join(', ')}. Proceed with rendering?`,
     title: 'Message Format Review',
     context: {
       runId: ctx.runId,
       sections: messageFormat.sections,
       files: messageFormat.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: SOURCE CONTEXT RENDERING
   // ============================================================================
@@ -157,7 +171,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(errorMessageDocumentationTask, {
+  let documentation = await ctx.task(errorMessageDocumentationTask, {
     languageName,
     errorTaxonomy,
     messageTemplates,
@@ -165,9 +179,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(errorMessageDocumentationTask, { ...{
+    languageName,
+    errorTaxonomy,
+    messageTemplates,
+    integration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Error Message Enhancement Complete for ${languageName}! ${messageTemplates.templateCount} templates, ${suggestions.suggestionCount} suggestion rules. Review deliverables?`,
     title: 'Error Messages Complete',
     context: {
@@ -183,9 +206,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Error System' },
         { path: documentation.errorIndexPath, format: 'markdown', label: 'Error Index' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -221,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

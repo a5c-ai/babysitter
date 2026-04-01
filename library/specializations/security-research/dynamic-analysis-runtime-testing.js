@@ -142,7 +142,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating dynamic analysis report');
 
-  const report = await ctx.task(dynamicReportTask, {
+  let report = await ctx.task(dynamicReportTask, {
     projectName,
     vulnerabilities,
     analysisResults: {
@@ -155,18 +155,38 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(dynamicReportTask, { ...{
+    projectName,
+    vulnerabilities,
+    analysisResults: {
+      sanitizerAnalysis,
+      debuggingAnalysis,
+      memoryAnalysis,
+      raceConditionAnalysis,
+      boundaryTesting
+    },
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dynamic analysis complete for ${projectName}. Found ${vulnerabilities.length} runtime vulnerabilities. Review findings?`,
     title: 'Dynamic Analysis Complete',
     context: {
       runId: ctx.runId,
       summary: report.summary,
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -188,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -145,7 +145,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating Action Items');
-  const actionItems = await ctx.task(actionItemGenerationTask, {
+  let actionItems = await ctx.task(actionItemGenerationTask, {
     salesRep,
     healthAnalysis,
     dealInspection,
@@ -156,8 +156,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(actionItems.artifacts || []));
 
-  // Breakpoint: Review forecast before submission
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      actionItems = await ctx.task(actionItemGenerationTask, { ...{
+    salesRep,
+    healthAnalysis,
+    dealInspection,
+    riskUpside,
+    gapAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pipeline review complete for ${salesRep}. Forecast: ${forecastCalculation.totalForecast}. Submit forecast?`,
     title: 'Pipeline Review and Forecast Submission',
     context: {
@@ -175,9 +186,15 @@ export async function process(inputs, ctx) {
         coverage: healthAnalysis.coverageRatio,
         riskDeals: riskUpside.atRiskDeals?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -222,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -33,22 +33,35 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'pre-test-prep', data: preTestPrep });
 
   // Phase 2: Instrumentation Verification
-  const instrumentVerification = await ctx.task(instrumentVerificationTask, {
+  let instrumentVerification = await ctx.task(instrumentVerificationTask, {
     prototype: inputs.prototype,
     instrumentationPlan: inputs.testPlan.instrumentation
   });
   artifacts.push({ phase: 'instrument-verification', data: instrumentVerification });
 
-  // Breakpoint: Pre-Test Readiness Review
-  await ctx.breakpoint('pre-test-review', {
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      instrumentVerification = await ctx.task(instrumentVerificationTask, { ...{
+    prototype: inputs.prototype,
+    instrumentationPlan: inputs.testPlan.instrumentation
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint('pre-test-review', {
     question: 'Pre-test readiness review complete. Proceed with testing?',
     context: {
       instrumentationStatus: instrumentVerification.status,
       calibrationStatus: instrumentVerification.calibrationStatus,
       predictedResults: preTestPrep.predictions
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Test Execution
   const testExecution = await ctx.task(testExecutionTask, {
     testPlan: inputs.testPlan,
@@ -74,23 +87,37 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'correlation', data: correlation });
 
   // Phase 6: Discrepancy Investigation
-  const discrepancyInvestigation = await ctx.task(discrepancyTask, {
+  let discrepancyInvestigation = await ctx.task(discrepancyTask, {
     correlation: correlation,
     testResults: dataProcessing.processedResults,
     analyticalModels: inputs.analyticalModels
   });
   artifacts.push({ phase: 'discrepancy-investigation', data: discrepancyInvestigation });
 
-  // Breakpoint: Correlation Review
-  await ctx.breakpoint('correlation-review', {
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      discrepancyInvestigation = await ctx.task(discrepancyTask, { ...{
+    correlation: correlation,
+    testResults: dataProcessing.processedResults,
+    analyticalModels: inputs.analyticalModels
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint('correlation-review', {
     question: 'Review test-analysis correlation. Are model updates needed?',
     context: {
       correlationMetrics: correlation.metrics,
       discrepancies: discrepancyInvestigation.significantDiscrepancies,
       proposedUpdates: discrepancyInvestigation.modelUpdates
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Model Update and Validation
   const modelUpdate = await ctx.task(modelUpdateTask, {
     analyticalModels: inputs.analyticalModels,
@@ -108,7 +135,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'requirements-assessment', data: requirementsAssessment });
 
   // Phase 9: Test Report Generation
-  const testReport = await ctx.task(testReportTask, {
+  let testReport = await ctx.task(testReportTask, {
     projectId: inputs.projectId,
     testExecution: testExecution,
     dataProcessing: dataProcessing,
@@ -117,16 +144,32 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'test-report', data: testReport });
 
-  // Final Breakpoint: Test Completion Review
-  await ctx.breakpoint('test-completion', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testReport = await ctx.task(testReportTask, { ...{
+    projectId: inputs.projectId,
+    testExecution: testExecution,
+    dataProcessing: dataProcessing,
+    correlation: correlation,
+    requirementsAssessment: requirementsAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('test-completion', {
     question: 'Approve test report and results for release?',
     context: {
       requirementsStatus: requirementsAssessment.summary,
       correlationStatus: correlation.overallStatus,
       anomalies: testExecution.anomalies
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -147,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const preTestPrepTask = defineTask('pre-test-prep', (args) => ({
+  const preTestPrepTask = defineTask('pre-test-prep', (args) => ({
   kind: 'agent',
   title: 'Pre-Test Preparation and Prediction Generation',
   agent: {

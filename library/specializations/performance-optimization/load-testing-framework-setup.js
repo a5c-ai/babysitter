@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...scenarios.artifacts);
 
   // Phase 3: Create Load Profiles
-  const loadProfiles = await ctx.task(createLoadProfilesTask, { projectName, scenarios, outputDir });
-  artifacts.push(...loadProfiles.artifacts);
-
-  await ctx.breakpoint({
+  let loadProfiles = await ctx.task(createLoadProfilesTask, { projectName, scenarios, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      loadProfiles = await ctx.task(createLoadProfilesTask, { ...{ projectName, scenarios, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Designed ${scenarios.scenarios.length} test scenarios with ${loadProfiles.profiles.length} load profiles. Configure thresholds?`,
     title: 'Load Test Design Review',
-    context: { runId: ctx.runId, scenarios, loadProfiles }
-  });
-
+    context: { runId: ctx.runId, scenarios, loadProfiles },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Configure Performance Thresholds
   const thresholds = await ctx.task(configurePerformanceThresholdsTask, { projectName, scenarios, outputDir });
   artifacts.push(...thresholds.artifacts);
@@ -68,15 +77,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...cicdIntegration.artifacts);
 
   // Phase 8: Document Framework
-  const documentation = await ctx.task(documentLoadTestingFrameworkTask, { projectName, scenarios, loadProfiles, thresholds, scripts, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentLoadTestingFrameworkTask, { projectName, scenarios, loadProfiles, thresholds, scripts, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentLoadTestingFrameworkTask, { ...{ projectName, scenarios, loadProfiles, thresholds, scripts, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Load testing framework setup complete. ${scripts.scripts.length} test scripts created. CI/CD integrated: ${cicdIntegration.integrated}. Accept?`,
     title: 'Load Testing Framework Review',
-    context: { runId: ctx.runId, scripts, cicdIntegration }
-  });
-
+    context: { runId: ctx.runId, scripts, cicdIntegration },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

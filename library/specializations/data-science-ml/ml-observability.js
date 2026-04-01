@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
   if (incidentType) {
     ctx.log('warn', `Active incident detected: ${incidentType}`);
   }
-
   // ============================================================================
   // PHASE 1: OBSERVABILITY SETUP AND HEALTH CHECK
   // ============================================================================
@@ -151,7 +150,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...incidentTriage.artifacts);
 
     // Task 2.2: Assess Incident Severity and Impact
-    const severityAssessment = await ctx.task(assessIncidentSeverityTask, {
+    let severityAssessment = await ctx.task(assessIncidentSeverityTask, {
       modelId,
       environment,
       incidentType: activeIncident.type,
@@ -165,8 +164,22 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...severityAssessment.artifacts);
 
-    // Breakpoint: Review incident triage and severity
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        severityAssessment = await ctx.task(assessIncidentSeverityTask, { ...{
+      modelId,
+      environment,
+      incidentType: activeIncident.type,
+      triage: incidentTriage,
+      currentMetrics: currentMetrics.metrics,
+      businessImpact: {
+        affectedUsers: currentMetrics.activeUsers || 'unknown',
+        affectedRequests: currentMetrics.requestsPerMinute || 'unknown'
+      }
+    }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `Incident detected: ${activeIncident.type}. Severity: ${severityAssessment.severity}. Impact: ${severityAssessment.impactSummary}. Proceed with incident response?`,
       title: 'Incident Triage Review',
       context: {
@@ -180,10 +193,16 @@ export async function process(inputs, ctx) {
           { path: `artifacts/incident-triage-${activeIncident.type}.json`, format: 'json' },
           { path: `artifacts/severity-assessment.md`, format: 'markdown' }
         ]
-      }
-    });
-
-    // ============================================================================
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    }
+  // ============================================================================
     // PHASE 3: ROOT CAUSE ANALYSIS
     // ============================================================================
 
@@ -239,7 +258,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...modelPerformanceAnalysis.artifacts);
 
     // Task 3.2: Root Cause Synthesis
-    const rootCauseAnalysis = await ctx.task(synthesizeRootCauseTask, {
+    let rootCauseAnalysis = await ctx.task(synthesizeRootCauseTask, {
       modelId,
       environment,
       incidentType: activeIncident.type,
@@ -256,8 +275,22 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Root cause identified: ${rootCauseIdentified}`);
 
-    // Breakpoint: Review root cause analysis
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval2) {
+        rootCauseAnalysis = await ctx.task(synthesizeRootCauseTask, { ...{
+      modelId,
+      environment,
+      incidentType: activeIncident.type,
+      triage: incidentTriage,
+      severity: severityAssessment,
+      logsFindings: logsAnalysis.findings,
+      metricsFindings: metricsAnalysis.findings,
+      tracesFindings: tracesAnalysis.findings,
+      modelPerformanceFindings: modelPerformanceAnalysis.findings
+    }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+      }
+  const reviewApproval2 = await ctx.breakpoint({
       question: `Root cause analysis complete. Primary cause: ${rootCauseIdentified}. Confidence: ${rootCauseAnalysis.confidence}%. Review findings and proceed with remediation?`,
       title: 'Root Cause Analysis Review',
       context: {
@@ -273,10 +306,16 @@ export async function process(inputs, ctx) {
           { path: `artifacts/rca-evidence.json`, format: 'json' },
           { path: `artifacts/metrics-timeline.png`, format: 'image', label: 'Metrics Timeline' }
         ]
-      }
-    });
-
-    // ============================================================================
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval2.approved) break;
+      lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+    }
+  // ============================================================================
     // PHASE 4: REMEDIATION STRATEGY
     // ============================================================================
 
@@ -300,7 +339,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...remediationPlan.artifacts);
 
     // Task 4.2: Assess Remediation Risk
-    const remediationRisk = await ctx.task(assessRemediationRiskTask, {
+    let remediationRisk = await ctx.task(assessRemediationRiskTask, {
       modelId,
       environment,
       remediationPlan: remediationPlan.plan,
@@ -313,8 +352,20 @@ export async function process(inputs, ctx) {
     artifacts.push(...remediationRisk.artifacts);
 
     // Quality Gate: High-risk remediations require manual approval
-    if (remediationRisk.riskLevel === 'high' || !enableAutoRemediation) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval) {
+          remediationRisk = await ctx.task(assessRemediationRiskTask, { ...{
+      modelId,
+      environment,
+      remediationPlan: remediationPlan.plan,
+      currentState: {
+        severity: severityAssessment.severity,
+        impact: severityAssessment.impactSummary
+      }
+    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+        }
+  const qualityGateApproval = await ctx.breakpoint({
         question: `Remediation plan ready. Risk level: ${remediationRisk.riskLevel}. ${remediationPlan.plan.steps.length} steps planned. Approve remediation execution?`,
         title: 'Remediation Plan Approval',
         context: {
@@ -331,9 +382,15 @@ export async function process(inputs, ctx) {
             { path: `artifacts/remediation-plan.md`, format: 'markdown' },
             { path: `artifacts/risk-assessment.json`, format: 'json' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval.approved) break;
+        lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+      }   }
 
     // ============================================================================
     // PHASE 5: REMEDIATION EXECUTION
@@ -393,8 +450,7 @@ export async function process(inputs, ctx) {
             }
           };
         }
-
-        return {
+  return {
           success: false,
           incidentResolved: false,
           error: `Remediation failed at step ${i + 1}`,
@@ -409,10 +465,9 @@ export async function process(inputs, ctx) {
           }
         };
       }
-
-      // Verify step effectiveness
+  // Verify step effectiveness
       if (step.verificationRequired) {
-        const verification = await ctx.task(verifyRemediationStepTask, {
+        let verification = await ctx.task(verifyRemediationStepTask, {
           modelId,
           environment,
           step,
@@ -423,9 +478,18 @@ export async function process(inputs, ctx) {
         artifacts.push(...verification.artifacts);
 
         if (!verification.verified) {
-          ctx.log('warn', `Remediation step ${i + 1} verification failed: ${verification.reason}`);
-
-          await ctx.breakpoint({
+            let lastFeedback_iterationApproval = null;
+          for (let attempt = 0; attempt < 3; attempt++) {
+            if (lastFeedback_iterationApproval) {
+              verification = await ctx.task(verifyRemediationStepTask, { ...{
+          modelId,
+          environment,
+          step,
+          stepResult,
+          expectedOutcome: step.expectedOutcome
+        }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+            }
+  const iterationApproval = await ctx.breakpoint({
             question: `Remediation step "${step.name}" verification failed. Continue with remaining steps or abort?`,
             title: `Remediation Step ${i + 1} Verification Failed`,
             context: {
@@ -436,9 +500,15 @@ export async function process(inputs, ctx) {
               files: [
                 { path: `artifacts/step-${i + 1}-verification.json`, format: 'json' }
               ]
-            }
-          });
-        }
+            },
+            expert: 'owner',
+            tags: ['approval-gate'],
+            previousFeedback: lastFeedback_iterationApproval || undefined,
+            attempt: attempt > 0 ? attempt + 1 : undefined
+            });
+            if (iterationApproval.approved) break;
+            lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+          }       }
       }
     }
 
@@ -477,7 +547,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...postRemediationMetrics.artifacts);
 
     // Task 6.2: Validate Remediation Effectiveness
-    const remediationValidation = await ctx.task(validateRemediationEffectivenessTask, {
+    let remediationValidation = await ctx.task(validateRemediationEffectivenessTask, {
       modelId,
       environment,
       incidentType: activeIncident.type,
@@ -493,9 +563,20 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Incident must be resolved
     if (!incidentResolved) {
-      ctx.log('error', 'Incident not resolved after remediation');
-
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval2) {
+          remediationValidation = await ctx.task(validateRemediationEffectivenessTask, { ...{
+      modelId,
+      environment,
+      incidentType: activeIncident.type,
+      preRemediationMetrics: currentMetrics.metrics,
+      postRemediationMetrics: postRemediationMetrics.metrics,
+      alertThresholds,
+      remediationPlan: remediationPlan.plan
+    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+        }
+  const qualityGateApproval2 = await ctx.breakpoint({
         question: `Remediation completed but incident not fully resolved. ${remediationValidation.remainingIssues.length} issue(s) remain. Escalate or continue investigation?`,
         title: 'Incident Not Fully Resolved',
         context: {
@@ -509,13 +590,18 @@ export async function process(inputs, ctx) {
             { path: `artifacts/post-remediation-validation.md`, format: 'markdown' },
             { path: `artifacts/metrics-comparison.json`, format: 'json' }
           ]
-        }
-      });
-    } else {
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval2.approved) break;
+        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+      }   } else {
       ctx.log('info', 'Incident successfully resolved');
     }
-
-    // ============================================================================
+  // ============================================================================
     // PHASE 7: POST-INCIDENT ACTIVITIES
     // ============================================================================
 
@@ -563,7 +649,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...monitoringUpdate.artifacts);
 
     // Task 7.3: Schedule Post-Incident Review
-    const pirSchedule = await ctx.task(schedulePostIncidentReviewTask, {
+    let pirSchedule = await ctx.task(schedulePostIncidentReviewTask, {
       modelId,
       environment,
       incidentType: activeIncident.type,
@@ -574,8 +660,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...pirSchedule.artifacts);
 
-    // Final Breakpoint: Review incident resolution
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        pirSchedule = await ctx.task(schedulePostIncidentReviewTask, { ...{
+      modelId,
+      environment,
+      incidentType: activeIncident.type,
+      severity: severityAssessment.severity,
+      incidentReport: incidentReport.reportPath,
+      stakeholders: severityAssessment.affectedStakeholders || []
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Incident response complete. Incident resolved: ${incidentResolved}. Remediation applied: ${remediationApplied}. Review incident report and approve closure?`,
       title: 'Incident Response Complete',
       context: {
@@ -591,10 +688,16 @@ export async function process(inputs, ctx) {
           { path: incidentReport.timelinePath, format: 'markdown', label: 'Incident Timeline' },
           { path: monitoringUpdate.dashboardUrl, format: 'link', label: 'Monitoring Dashboard' }
         ]
-      }
-    });
-
-    const endTime = ctx.now();
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  const endTime = ctx.now();
 
     return {
       success: true,
@@ -673,8 +776,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -54,25 +54,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Calling Conventions');
 
-  const callingConventions = await ctx.task(callingConventionsTask, {
+  let callingConventions = await ctx.task(callingConventionsTask, {
     languageName,
     targetLanguages,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...callingConventions.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      callingConventions = await ctx.task(callingConventionsTask, { ...{
+    languageName,
+    targetLanguages,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Calling conventions implemented: ${callingConventions.conventions.join(', ')}. Proceed with memory management?`,
     title: 'Calling Conventions Review',
     context: {
       runId: ctx.runId,
       conventions: callingConventions.conventions,
       files: callingConventions.artifacts.map(a => ({ path: a.path, format: a.format || 'rust' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: MEMORY MANAGEMENT
   // ============================================================================
@@ -143,7 +157,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Documentation');
 
-  const documentation = await ctx.task(ffiDocumentationTask, {
+  let documentation = await ctx.task(ffiDocumentationTask, {
     languageName,
     targetLanguages,
     typeMapping,
@@ -151,9 +165,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(ffiDocumentationTask, { ...{
+    languageName,
+    targetLanguages,
+    typeMapping,
+    integration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FFI Implementation Complete for ${languageName}! Target: ${targetLanguages.join(', ')}, Test coverage: ${testSuite.coverage}%. Review deliverables?`,
     title: 'FFI Complete',
     context: {
@@ -168,9 +191,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'FFI System' },
         { path: documentation.guidePath, format: 'markdown', label: 'FFI Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -198,8 +227,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

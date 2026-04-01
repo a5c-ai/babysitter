@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Establishing requirements baseline');
-  const baselineEstablishment = await ctx.task(baselineEstablishmentTask, {
+  let baselineEstablishment = await ctx.task(baselineEstablishmentTask, {
     projectName,
     requirements,
     traceabilityMatrix,
@@ -114,8 +114,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...baselineEstablishment.artifacts);
 
-  // Breakpoint: Review traceability and baseline
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      baselineEstablishment = await ctx.task(baselineEstablishmentTask, { ...{
+    projectName,
+    requirements,
+    traceabilityMatrix,
+    existingBaseline: baseline,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Traceability matrix complete for ${projectName}. Coverage: ${coverageAnalysis.overallCoverage}%. Review baseline and approve?`,
     title: 'Traceability Review',
     context: {
@@ -132,9 +142,15 @@ export async function process(inputs, ctx) {
         orphanRequirements: coverageAnalysis.orphanRequirements?.length || 0,
         baselineVersion: baselineEstablishment.version
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: CHANGE CONTROL SETUP
   // ============================================================================
@@ -151,7 +167,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...changeControl.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: TRACEABILITY REPORTING
   // ============================================================================
@@ -205,8 +220,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

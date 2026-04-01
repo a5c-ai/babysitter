@@ -46,17 +46,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...qcResult.artifacts);
 
   // Phase 2: Somatic Mutation Calling
-  const somaticResult = await ctx.task(somaticMutationCallingTask, { projectName, tumorSample, normalSample, referenceGenome, outputDir });
+  let somaticResult = await ctx.task(somaticMutationCallingTask, { projectName, tumorSample, normalSample, referenceGenome, outputDir });
   artifacts.push(...somaticResult.artifacts);
 
-  ctx.log('info', `Somatic calling complete. ${somaticResult.totalMutations} somatic mutations identified`);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      somaticResult = await ctx.task(somaticMutationCallingTask, { ...{ projectName, tumorSample, normalSample, referenceGenome, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Somatic mutation calling complete. ${somaticResult.totalMutations} mutations (${somaticResult.snvCount} SNVs, ${somaticResult.indelCount} indels). Review results?`,
     title: 'Somatic Mutation Review',
-    context: { runId: ctx.runId, mutationStats: somaticResult.statistics, topMutations: somaticResult.topMutations, files: somaticResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, mutationStats: somaticResult.statistics, topMutations: somaticResult.topMutations, files: somaticResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Copy Number Alteration Detection
   const cnvResult = await ctx.task(cnvDetectionTask, { projectName, tumorSample, normalSample, panelType, outputDir });
   artifacts.push(...cnvResult.artifacts);
@@ -71,7 +80,6 @@ export async function process(inputs, ctx) {
     msiResult = await ctx.task(msiAssessmentTask, { projectName, tumorSample, normalSample, outputDir });
     artifacts.push(...msiResult.artifacts);
   }
-
   // Phase 6: TMB Calculation
   const tmbResult = await ctx.task(tmbCalculationTask, { projectName, somaticMutations: somaticResult.mutations, panelType, outputDir });
   artifacts.push(...tmbResult.artifacts);
@@ -82,31 +90,48 @@ export async function process(inputs, ctx) {
     hrdResult = await ctx.task(hrdAssessmentTask, { projectName, tumorSample, normalSample, cnvProfile: cnvResult.profile, outputDir });
     artifacts.push(...hrdResult.artifacts);
   }
-
   // Phase 8: Actionable Mutation Identification
-  const actionableResult = await ctx.task(actionableMutationTask, { projectName, somaticMutations: somaticResult.mutations, cnvProfile: cnvResult.profile, fusions: fusionResult.fusions, cancerType, outputDir });
-  artifacts.push(...actionableResult.artifacts);
-
-  await ctx.breakpoint({
+  let actionableResult = await ctx.task(actionableMutationTask, { projectName, somaticMutations: somaticResult.mutations, cnvProfile: cnvResult.profile, fusions: fusionResult.fusions, cancerType, outputDir });
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      actionableResult = await ctx.task(actionableMutationTask, { ...{ projectName, somaticMutations: somaticResult.mutations, cnvProfile: cnvResult.profile, fusions: fusionResult.fusions, cancerType, outputDir }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Actionable mutation analysis complete. ${actionableResult.actionableCount} actionable alterations found. Review for therapy matching?`,
     title: 'Actionable Mutations Review',
-    context: { runId: ctx.runId, actionableMutations: actionableResult.actionable, therapyMatches: actionableResult.therapyMatches, files: actionableResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, actionableMutations: actionableResult.actionable, therapyMatches: actionableResult.therapyMatches, files: actionableResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: Therapy Matching
   const therapyResult = await ctx.task(therapyMatchingTask, { projectName, actionableMutations: actionableResult.actionable, cancerType, msiStatus: msiResult?.status, tmbScore: tmbResult.tmb, outputDir });
   artifacts.push(...therapyResult.artifacts);
 
   // Phase 10: Report Generation
-  const reportResult = await ctx.task(generateTumorReportTask, { projectName, cancerType, qcResult, somaticResult, cnvResult, fusionResult, msiResult, tmbResult, hrdResult, actionableResult, therapyResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateTumorReportTask, { projectName, cancerType, qcResult, somaticResult, cnvResult, fusionResult, msiResult, tmbResult, hrdResult, actionableResult, therapyResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateTumorReportTask, { ...{ projectName, cancerType, qcResult, somaticResult, cnvResult, fusionResult, msiResult, tmbResult, hrdResult, actionableResult, therapyResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Tumor Molecular Profiling Complete. ${somaticResult.totalMutations} mutations, TMB: ${tmbResult.tmb}, ${actionableResult.actionableCount} actionable. Approve clinical report?`,
     title: 'Tumor Profiling Complete',
-    context: { runId: ctx.runId, summary: { mutations: somaticResult.totalMutations, tmb: tmbResult.tmb, actionable: actionableResult.actionableCount, therapyOptions: therapyResult.therapyOptions.length }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Clinical Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { mutations: somaticResult.totalMutations, tmb: tmbResult.tmb, actionable: actionableResult.actionableCount, therapyOptions: therapyResult.therapyOptions.length }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Clinical Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -129,8 +154,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/tumor-molecular-profiling', timestamp: startTime, panelType, cancerType }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const tumorQcTask = defineTask('tumor-qc', (args, taskCtx) => ({
   kind: 'agent',
   title: `Tumor QC - ${args.projectName}`,

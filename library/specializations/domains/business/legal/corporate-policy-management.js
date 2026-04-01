@@ -52,15 +52,23 @@ export async function process(inputs, ctx) {
   artifacts.push(...legalReview.artifacts);
 
   // Phase 3: Approval Workflow
-  const approval = await ctx.task(policyApprovalTask, {
+  let approval = await ctx.task(policyApprovalTask, {
     policyId: actualPolicyId,
     policy: policyDraft.policy,
     legalReview,
     outputDir
   });
-  artifacts.push(...approval.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      approval = await ctx.task(policyApprovalTask, { ...{
+    policyId: actualPolicyId,
+    policy: policyDraft.policy,
+    legalReview,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Policy ${actualPolicyId} drafted and reviewed. Legal review: ${legalReview.status}. Submit for approval?`,
     title: 'Policy Review',
     context: {
@@ -68,9 +76,15 @@ export async function process(inputs, ctx) {
       policyId: actualPolicyId,
       legalReviewStatus: legalReview.status,
       files: [{ path: policyDraft.policyPath, format: 'docx', label: 'Policy Document' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Distribution
   const distribution = await ctx.task(policyDistributionTask, {
     policyId: actualPolicyId,

@@ -57,13 +57,12 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: STYLE GUIDE FRAMEWORK SELECTION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Selecting and customizing style guide framework');
-  const frameworkSelection = await ctx.task(frameworkSelectionTask, {
+  let frameworkSelection = await ctx.task(frameworkSelectionTask, {
     framework,
     organization,
     documentationTypes,
@@ -146,9 +145,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...examplesTemplates.artifacts);
   }
-
-  // Breakpoint: Review style guide draft
-  await ctx.breakpoint({
+  let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      frameworkSelection = await ctx.task(frameworkSelectionTask, { ...{
+    framework,
+    organization,
+    documentationTypes,
+    targetAudience,
+    existingStyleGuide,
+    industryStandards: requirementsAnalysis.industryStandards || [],
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Style guide drafted with ${grammarRules.ruleCount} grammar rules, ${terminology.termCount} terminology entries, and ${examplesTemplates ? examplesTemplates.exampleCount : 0} examples. Review draft?`,
     title: 'Style Guide Draft Review',
     context: {
@@ -167,9 +177,15 @@ export async function process(inputs, ctx) {
         examplesCreated: examplesTemplates ? examplesTemplates.exampleCount : 0,
         documentationTypes
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ASSEMBLE COMPLETE STYLE GUIDE
   // ============================================================================
@@ -242,7 +258,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating style guide quality');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     styleGuide: styleGuideAssembly.styleGuideDocument,
     grammarRules: grammarRules.ruleCount,
     terminologyTerms: terminology.termCount,
@@ -256,8 +272,20 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityValidation.overallScore >= 85;
 
-  // Breakpoint: Review quality validation
-  await ctx.breakpoint({
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    styleGuide: styleGuideAssembly.styleGuideDocument,
+    grammarRules: grammarRules.ruleCount,
+    terminologyTerms: terminology.termCount,
+    enforcementRules: enforcementRules.ruleCount,
+    examplesIncluded: includeExamples,
+    framework: frameworkSelection.selectedFramework,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint({
     question: `Style guide quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review validation results?`,
     title: 'Quality Validation Review',
     context: {
@@ -276,9 +304,15 @@ export async function process(inputs, ctx) {
         usability: qualityValidation.usability,
         enforcementAutomation: qualityValidation.enforcementAutomation
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: PEER REVIEW AND APPROVAL
   // ============================================================================
@@ -301,8 +335,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    styleGuide: styleGuideAssembly.styleGuideDocument,
+    grammarRules: grammarRules.ruleCount,
+    terminologyTerms: terminology.termCount,
+    enforcementRules: enforcementRules.ruleCount,
+    examplesIncluded: includeExamples,
+    framework: frameworkSelection.selectedFramework,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Style guide review complete. ${reviewResult.approved ? 'Approved by reviewers!' : 'Requires revisions.'} Proceed with publication?`,
       title: 'Style Guide Approval Gate',
       context: {
@@ -320,10 +366,16 @@ export async function process(inputs, ctx) {
           revisionsNeeded: reviewResult.revisionsNeeded,
           criticalIssues: reviewResult.criticalIssues || 0
         }
-      }
-    });
-
-    // If revisions needed, incorporate feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If revisions needed, incorporate feedback
     if (reviewResult.revisionsNeeded && reviewResult.approved) {
       ctx.log('info', 'Incorporating review feedback');
       const revision = await ctx.task(revisionTask, {
@@ -336,7 +388,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...revision.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 12: PUBLICATION AND ROLLOUT
   // ============================================================================
@@ -430,8 +481,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

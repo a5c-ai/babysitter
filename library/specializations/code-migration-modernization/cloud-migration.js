@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing cloud architecture');
-  const architectureDesign = await ctx.task(cloudArchitectureDesignTask, {
+  let architectureDesign = await ctx.task(cloudArchitectureDesignTask, {
     projectName,
     discoveryAssessment,
     targetCloud,
@@ -69,8 +69,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...architectureDesign.artifacts);
 
-  // Breakpoint: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      architectureDesign = await ctx.task(cloudArchitectureDesignTask, { ...{
+    projectName,
+    discoveryAssessment,
+    targetCloud,
+    migrationStrategy,
+    complianceRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Cloud architecture designed for ${projectName}. Target: ${targetCloud}. Strategy: ${migrationStrategy}. Estimated monthly cost: ${architectureDesign.estimatedMonthlyCost}. Approve architecture?`,
     title: 'Cloud Architecture Review',
     context: {
@@ -78,9 +89,15 @@ export async function process(inputs, ctx) {
       projectName,
       architectureDesign,
       recommendation: 'Review cost estimates and compliance alignment'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: INFRASTRUCTURE AS CODE
   // ============================================================================
@@ -130,7 +147,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Migrating applications');
-  const applicationMigration = await ctx.task(applicationMigrationTask, {
+  let applicationMigration = await ctx.task(applicationMigrationTask, {
     projectName,
     discoveryAssessment,
     architectureDesign,
@@ -141,8 +158,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...applicationMigration.artifacts);
 
-  // Breakpoint: Migration progress
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      applicationMigration = await ctx.task(applicationMigrationTask, { ...{
+    projectName,
+    discoveryAssessment,
+    architectureDesign,
+    infrastructureCode,
+    migrationStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Application migration progress for ${projectName}. Migrated: ${applicationMigration.migratedCount}/${applicationMigration.totalCount}. Continue with validation?`,
     title: 'Application Migration Progress',
     context: {
@@ -150,9 +178,15 @@ export async function process(inputs, ctx) {
       projectName,
       applicationMigration,
       recommendation: 'Validate migrated applications before data migration'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DATA MIGRATION EXECUTION
   // ============================================================================
@@ -200,7 +234,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Ensuring operational readiness');
-  const operationalReadiness = await ctx.task(operationalReadinessTask, {
+  let operationalReadiness = await ctx.task(operationalReadinessTask, {
     projectName,
     architectureDesign,
     applicationMigration,
@@ -210,8 +244,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...operationalReadiness.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      operationalReadiness = await ctx.task(operationalReadinessTask, { ...{
+    projectName,
+    architectureDesign,
+    applicationMigration,
+    targetCloud,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cloud migration complete for ${projectName}. Apps migrated: ${applicationMigration.migratedCount}. Data migrated: ${dataMigrationExecution.success}. Operational readiness: ${operationalReadiness.readinessScore}%. Approve migration?`,
     title: 'Cloud Migration Complete',
     context: {
@@ -224,9 +268,15 @@ export async function process(inputs, ctx) {
         dataMigrated: dataMigrationExecution.success,
         operationalReadiness: operationalReadiness.readinessScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -266,8 +316,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

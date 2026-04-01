@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Predicting reactivity patterns');
-  const reactivityPrediction = await ctx.task(reactivityPredictionTask, {
+  let reactivityPrediction = await ctx.task(reactivityPredictionTask, {
     functionalGroups: groupIdentification.functionalGroups,
     electronicCharacter: electronicAnalysis.electronicCharacter,
     reactionContext,
@@ -60,8 +60,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reactivityPrediction.artifacts);
 
-  // Breakpoint: Review functional groups and reactivity
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      reactivityPrediction = await ctx.task(reactivityPredictionTask, { ...{
+    functionalGroups: groupIdentification.functionalGroups,
+    electronicCharacter: electronicAnalysis.electronicCharacter,
+    reactionContext,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${groupIdentification.functionalGroups.length} functional groups. ${reactivityPrediction.reactivitySites.length} reactive sites characterized. Review before transformation analysis?`,
     title: 'Functional Group Analysis Review',
     context: {
@@ -76,9 +85,15 @@ export async function process(inputs, ctx) {
         functionalGroupCount: groupIdentification.functionalGroups.length,
         reactiveSiteCount: reactivityPrediction.reactivitySites.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: GROUP INTERACTION ANALYSIS
   // ============================================================================
@@ -127,7 +142,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Evaluating protection strategies if needed');
-  const protectionStrategy = await ctx.task(protectionStrategyTask, {
+  let protectionStrategy = await ctx.task(protectionStrategyTask, {
     functionalGroups: groupIdentification.functionalGroups,
     selectivityIssues: selectivityAnalysis.selectivityIssues,
     targetTransformation,
@@ -136,8 +151,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...protectionStrategy.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      protectionStrategy = await ctx.task(protectionStrategyTask, { ...{
+    functionalGroups: groupIdentification.functionalGroups,
+    selectivityIssues: selectivityAnalysis.selectivityIssues,
+    targetTransformation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Functional group analysis complete. ${transformationAnalysis.pathways.length} pathways identified. Primary selectivity: ${selectivityAnalysis.primarySelectivity}. Review findings?`,
     title: 'Functional Group Analysis Complete',
     context: {
@@ -153,9 +177,15 @@ export async function process(inputs, ctx) {
         primarySelectivity: selectivityAnalysis.primarySelectivity,
         protectionNeeded: protectionStrategy.protectionNeeded
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

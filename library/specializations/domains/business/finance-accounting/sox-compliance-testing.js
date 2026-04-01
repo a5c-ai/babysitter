@@ -32,18 +32,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'scoping', result: scopingResult });
 
   // Step 2: Control Documentation and Walkthroughs
-  const documentationResult = await ctx.task(documentControlsTask, {
+  let documentationResult = await ctx.task(documentControlsTask, {
     controlFramework: inputs.controlFramework,
     scopingResults: scopingResult
   });
   results.steps.push({ name: 'control-documentation', result: documentationResult });
 
-  // Breakpoint for documentation review
-  await ctx.breakpoint('documentation-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      documentationResult = await ctx.task(documentControlsTask, { ...{
+    controlFramework: inputs.controlFramework,
+    scopingResults: scopingResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('documentation-review', {
     message: 'Review control documentation and risk assessment before testing',
-    data: { scoping: scopingResult, documentation: documentationResult }
-  });
-
+    data: { scoping: scopingResult, documentation: documentationResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: IT General Controls Testing
   const itgcResult = await ctx.task(testITGCTask, {
     itEnvironment: inputs.itEnvironment,
@@ -52,19 +65,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'itgc-testing', result: itgcResult });
 
   // Step 4: Business Process Controls Testing
-  const processControlsResult = await ctx.task(testProcessControlsTask, {
+  let processControlsResult = await ctx.task(testProcessControlsTask, {
     controlDocumentation: documentationResult,
     scopingResults: scopingResult,
     fiscalYear: inputs.fiscalYear
   });
   results.steps.push({ name: 'process-controls-testing', result: processControlsResult });
 
-  // Breakpoint for testing review
-  await ctx.breakpoint('testing-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      processControlsResult = await ctx.task(testProcessControlsTask, { ...{
+    controlDocumentation: documentationResult,
+    scopingResults: scopingResult,
+    fiscalYear: inputs.fiscalYear
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('testing-review', {
     message: 'Review testing results and identify potential deficiencies',
-    data: { itgc: itgcResult, processControls: processControlsResult }
-  });
-
+    data: { itgc: itgcResult, processControls: processControlsResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 5: Deficiency Evaluation
   const deficiencyResult = await ctx.task(evaluateDeficienciesTask, {
     itgcResults: itgcResult,
@@ -110,8 +137,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const performScopingTask = defineTask('perform-sox-scoping', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'sox-compliance' },

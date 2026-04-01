@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Quality Standards Definition
   ctx.log('info', 'Phase 1: Defining quality standards');
-  const standardsDefinition = await ctx.task(standardsDefinitionTask, { qualityStandards, knowledgeBase, outputDir });
-  artifacts.push(...standardsDefinition.artifacts);
-
-  await ctx.breakpoint({
+  let standardsDefinition = await ctx.task(standardsDefinitionTask, { qualityStandards, knowledgeBase, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      standardsDefinition = await ctx.task(standardsDefinitionTask, { ...{ qualityStandards, knowledgeBase, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quality standards defined with ${standardsDefinition.criteria.length} criteria. Review?`,
     title: 'Quality Standards Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { criteria: standardsDefinition.criteria.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { criteria: standardsDefinition.criteria.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Review Schedule Planning
   ctx.log('info', 'Phase 2: Planning review schedule');
   const reviewSchedule = await ctx.task(reviewSchedulePlanningTask, { contentInventory, reviewFrequency, reviewScope, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { qualityFramework: standardsDefinition.standards, reviewResults: qualityScoring.results, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -99,8 +107,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/knowledge-base-quality-assurance', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const standardsDefinitionTask = defineTask('standards-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define quality standards',

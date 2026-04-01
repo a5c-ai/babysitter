@@ -114,7 +114,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Calculating total cost-to-serve');
 
-  const costToServeCalculation = await ctx.task(costToServeCalculationTask, {
+  let costToServeCalculation = await ctx.task(costToServeCalculationTask, {
     procurementCosts,
     inventoryCosts,
     logisticsCosts,
@@ -127,8 +127,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...costToServeCalculation.artifacts);
 
-  // Breakpoint: Review cost-to-serve analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      costToServeCalculation = await ctx.task(costToServeCalculationTask, { ...{
+    procurementCosts,
+    inventoryCosts,
+    logisticsCosts,
+    serviceCosts,
+    customers,
+    products,
+    channels,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cost-to-serve analysis complete. Average CTS: $${costToServeCalculation.averageCts}. Highest cost customer: ${costToServeCalculation.highestCostCustomer}. Review analysis?`,
     title: 'Cost-to-Serve Analysis Review',
     context: {
@@ -139,9 +152,15 @@ export async function process(inputs, ctx) {
         highestCostCustomer: costToServeCalculation.highestCostCustomer,
         ctsRange: costToServeCalculation.ctsRange
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: PROFITABILITY ANALYSIS
   // ============================================================================
@@ -206,8 +225,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

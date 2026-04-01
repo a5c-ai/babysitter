@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Performance Review Cycle for ${organizationName} - ${reviewPeriod}`);
 
   // Phase 1: Review Cycle Planning
-  const cyclePlanning = await ctx.task(cyclePlanningTask, {
+  let cyclePlanning = await ctx.task(cyclePlanningTask, {
     organizationName,
     reviewPeriod,
     reviewCycle,
@@ -51,9 +51,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...cyclePlanning.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      cyclePlanning = await ctx.task(cyclePlanningTask, { ...{
+    organizationName,
+    reviewPeriod,
+    reviewCycle,
+    departments,
+    ratingScale,
+    include360Feedback,
+    includeGoalReview,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Performance review cycle planned. Timeline: ${cyclePlanning.timeline.startDate} to ${cyclePlanning.timeline.endDate}. Review and approve cycle plan?`,
     title: 'Cycle Planning Review',
     context: {
@@ -62,9 +74,15 @@ export async function process(inputs, ctx) {
       milestones: cyclePlanning.milestones,
       participants: cyclePlanning.participantCount,
       files: cyclePlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Form and Template Setup
   const formSetup = await ctx.task(formSetupTask, {
     organizationName,
@@ -114,9 +132,8 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...feedback360.artifacts);
   }
-
   // Phase 6: Manager Evaluation
-  const managerEvaluations = await ctx.task(managerEvaluationTask, {
+  let managerEvaluations = await ctx.task(managerEvaluationTask, {
     organizationName,
     reviewPeriod,
     departments,
@@ -127,9 +144,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...managerEvaluations.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      managerEvaluations = await ctx.task(managerEvaluationTask, { ...{
+    organizationName,
+    reviewPeriod,
+    departments,
+    selfAssessments: selfAssessments.assessments,
+    feedback360: feedback360?.feedback,
+    ratingScale,
+    formSetup: formSetup.forms,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Manager evaluations in progress. ${managerEvaluations.completionRate}% complete. Monitor progress and send reminders?`,
     title: 'Manager Evaluation Progress',
     context: {
@@ -138,9 +167,15 @@ export async function process(inputs, ctx) {
       pendingManagers: managerEvaluations.pendingManagers,
       completedEvaluations: managerEvaluations.completedCount,
       files: managerEvaluations.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Rating Calibration
   let calibrationResults = null;
   if (includeCalibration) {
@@ -153,9 +188,21 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...calibrationResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        managerEvaluations = await ctx.task(managerEvaluationTask, { ...{
+    organizationName,
+    reviewPeriod,
+    departments,
+    selfAssessments: selfAssessments.assessments,
+    feedback360: feedback360?.feedback,
+    ratingScale,
+    formSetup: formSetup.forms,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Calibration sessions complete. Rating distribution adjusted. Review calibration outcomes before finalizing?`,
       title: 'Calibration Review',
       context: {
@@ -164,9 +211,15 @@ export async function process(inputs, ctx) {
         postCalibrationDistribution: calibrationResults.postCalibrationDistribution,
         adjustments: calibrationResults.adjustments,
         files: calibrationResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Review Finalization
   const finalization = await ctx.task(finalizationTask, {
@@ -190,7 +243,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...feedbackPrep.artifacts);
 
   // Phase 10: Performance Conversations
-  const performanceConversations = await ctx.task(performanceConversationsTask, {
+  let performanceConversations = await ctx.task(performanceConversationsTask, {
     organizationName,
     reviewPeriod,
     departments,
@@ -199,9 +252,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...performanceConversations.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceConversations = await ctx.task(performanceConversationsTask, { ...{
+    organizationName,
+    reviewPeriod,
+    departments,
+    finalReviews: finalization.finalReviews,
+    feedbackPrep: feedbackPrep.preparation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance conversations scheduled. ${performanceConversations.scheduledCount} meetings set up. Monitor conversation completion?`,
     title: 'Performance Conversation Monitoring',
     context: {
@@ -210,9 +273,15 @@ export async function process(inputs, ctx) {
       conversationGuides: performanceConversations.guides,
       timeline: performanceConversations.timeline,
       files: performanceConversations.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Development Planning
   const developmentPlanning = await ctx.task(developmentPlanningTask, {
     organizationName,
@@ -270,8 +339,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const cyclePlanningTask = defineTask('cycle-planning', (args, taskCtx) => ({
   kind: 'agent',

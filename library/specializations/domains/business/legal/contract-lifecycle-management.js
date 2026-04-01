@@ -92,8 +92,7 @@ export async function process(inputs, ctx) {
       };
   }
 }
-
-// ============================================================================
+  // ============================================================================
 // STAGE PROCESSORS
 // ============================================================================
 
@@ -119,7 +118,6 @@ async function processIntake(ctx, contractId, requestDetails, workflowConfig, ou
       artifacts
     };
   }
-
   // Phase 2: Risk Classification
   const riskClassification = await ctx.task(riskClassificationTask, {
     contractId,
@@ -130,7 +128,7 @@ async function processIntake(ctx, contractId, requestDetails, workflowConfig, ou
   artifacts.push(...riskClassification.artifacts);
 
   // Phase 3: Workflow Assignment
-  const workflowAssignment = await ctx.task(workflowAssignmentTask, {
+  let workflowAssignment = await ctx.task(workflowAssignmentTask, {
     contractId,
     requestDetails,
     riskLevel: riskClassification.riskLevel,
@@ -140,8 +138,18 @@ async function processIntake(ctx, contractId, requestDetails, workflowConfig, ou
 
   artifacts.push(...workflowAssignment.artifacts);
 
-  // Breakpoint: Intake Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      workflowAssignment = await ctx.task(workflowAssignmentTask, { ...{
+    contractId,
+    requestDetails,
+    riskLevel: riskClassification.riskLevel,
+    workflowConfig,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Contract request ${contractId} validated. Risk Level: ${riskClassification.riskLevel}. Assigned workflow: ${workflowAssignment.workflowName}. Approve intake and proceed to authoring?`,
     title: 'Contract Intake Review',
     context: {
@@ -151,9 +159,15 @@ async function processIntake(ctx, contractId, requestDetails, workflowConfig, ou
       riskLevel: riskClassification.riskLevel,
       workflow: workflowAssignment.workflowName,
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -198,15 +212,22 @@ async function processAuthoring(ctx, contractId, requestDetails, outputDir, arti
   artifacts.push(...draftGeneration.artifacts);
 
   // Phase 3: Initial Quality Check
-  const qualityCheck = await ctx.task(authoringQualityCheckTask, {
+  let qualityCheck = await ctx.task(authoringQualityCheckTask, {
     contractId,
     draftPath: draftGeneration.draftPath,
     outputDir
   });
 
-  artifacts.push(...qualityCheck.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      qualityCheck = await ctx.task(authoringQualityCheckTask, { ...{
+    contractId,
+    draftPath: draftGeneration.draftPath,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Contract ${contractId} draft created. Quality Score: ${qualityCheck.score}/100. Review draft and proceed to review stage?`,
     title: 'Contract Authoring Review',
     context: {
@@ -215,9 +236,15 @@ async function processAuthoring(ctx, contractId, requestDetails, outputDir, arti
       draftPath: draftGeneration.draftPath,
       qualityScore: qualityCheck.score,
       files: [{ path: draftGeneration.draftPath, format: 'docx', label: 'Contract Draft' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -236,15 +263,22 @@ async function processAuthoring(ctx, contractId, requestDetails, outputDir, arti
 async function processReview(ctx, contractId, action, outputDir, artifacts) {
   ctx.log('info', 'Processing Contract Review');
 
-  const internalReview = await ctx.task(internalReviewTask, {
+  let internalReview = await ctx.task(internalReviewTask, {
     contractId,
     action,
     outputDir
   });
 
-  artifacts.push(...internalReview.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      internalReview = await ctx.task(internalReviewTask, { ...{
+    contractId,
+    action,
+    outputDir
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Internal review of ${contractId} complete. Status: ${internalReview.status}. ${internalReview.comments.length} comments. Proceed to negotiation?`,
     title: 'Internal Review Complete',
     context: {
@@ -253,9 +287,15 @@ async function processReview(ctx, contractId, action, outputDir, artifacts) {
       reviewStatus: internalReview.status,
       comments: internalReview.comments,
       files: internalReview.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -285,15 +325,22 @@ async function processNegotiation(ctx, contractId, action, requestDetails, outpu
   artifacts.push(...negotiationTracking.artifacts);
 
   // Analyze counterparty changes
-  const changeAnalysis = await ctx.task(negotiationChangeAnalysisTask, {
+  let changeAnalysis = await ctx.task(negotiationChangeAnalysisTask, {
     contractId,
     changes: negotiationTracking.changes,
     outputDir
   });
 
-  artifacts.push(...changeAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval4) {
+      changeAnalysis = await ctx.task(negotiationChangeAnalysisTask, { ...{
+    contractId,
+    changes: negotiationTracking.changes,
+    outputDir
+  }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+    }
+  const finalApproval4 = await ctx.breakpoint({
     question: `Negotiation round ${negotiationTracking.roundNumber} for ${contractId}. ${changeAnalysis.acceptableChanges} acceptable, ${changeAnalysis.needsEscalation} need escalation. Respond or escalate?`,
     title: 'Negotiation Round Review',
     context: {
@@ -302,9 +349,15 @@ async function processNegotiation(ctx, contractId, action, requestDetails, outpu
       roundNumber: negotiationTracking.roundNumber,
       analysis: changeAnalysis,
       files: artifacts.slice(-2).map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval4.approved) break;
+    lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -334,7 +387,7 @@ async function processApproval(ctx, contractId, action, requestDetails, outputDi
   artifacts.push(...approvalChain.artifacts);
 
   // Collect approvals
-  const approvalCollection = await ctx.task(approvalCollectionTask, {
+  let approvalCollection = await ctx.task(approvalCollectionTask, {
     contractId,
     approvers: approvalChain.approvers,
     action,
@@ -343,9 +396,17 @@ async function processApproval(ctx, contractId, action, requestDetails, outputDi
 
   artifacts.push(...approvalCollection.artifacts);
 
-  const allApproved = approvalCollection.approvals.every(a => a.status === 'approved');
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval5 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval5) {
+      approvalCollection = await ctx.task(approvalCollectionTask, { ...{
+    contractId,
+    approvers: approvalChain.approvers,
+    action,
+    outputDir
+  }, feedback: lastFeedback_finalApproval5, attempt: attempt + 1 });
+    }
+  const finalApproval5 = await ctx.breakpoint({
     question: `Approval status for ${contractId}: ${approvalCollection.approvedCount}/${approvalCollection.totalApprovers} approved. ${allApproved ? 'Ready for execution.' : 'Pending approvals remain.'}`,
     title: 'Contract Approval Status',
     context: {
@@ -354,9 +415,15 @@ async function processApproval(ctx, contractId, action, requestDetails, outputDi
       approvals: approvalCollection.approvals,
       allApproved,
       files: artifacts.slice(-2).map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval5 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval5.approved) break;
+    lastFeedback_finalApproval5 = finalApproval5.response || finalApproval5.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -385,7 +452,7 @@ async function processExecution(ctx, contractId, requestDetails, outputDir, arti
   artifacts.push(...signaturePrep.artifacts);
 
   // Track signature status
-  const signatureTracking = await ctx.task(signatureTrackingTask, {
+  let signatureTracking = await ctx.task(signatureTrackingTask, {
     contractId,
     envelopeId: signaturePrep.envelopeId,
     outputDir
@@ -393,9 +460,16 @@ async function processExecution(ctx, contractId, requestDetails, outputDir, arti
 
   artifacts.push(...signatureTracking.artifacts);
 
-  const fullyExecuted = signatureTracking.allSigned;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval6 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval6) {
+      signatureTracking = await ctx.task(signatureTrackingTask, { ...{
+    contractId,
+    envelopeId: signaturePrep.envelopeId,
+    outputDir
+  }, feedback: lastFeedback_finalApproval6, attempt: attempt + 1 });
+    }
+  const finalApproval6 = await ctx.breakpoint({
     question: `Execution status for ${contractId}: ${signatureTracking.signedCount}/${signatureTracking.totalSignatories} signed. ${fullyExecuted ? 'Contract fully executed!' : 'Awaiting signatures.'}`,
     title: 'Contract Execution Status',
     context: {
@@ -404,9 +478,15 @@ async function processExecution(ctx, contractId, requestDetails, outputDir, arti
       signatureStatus: signatureTracking,
       fullyExecuted,
       files: fullyExecuted ? [{ path: signatureTracking.executedContractPath, format: 'pdf', label: 'Executed Contract' }] : []
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval6 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval6.approved) break;
+    lastFeedback_finalApproval6 = finalApproval6.response || finalApproval6.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -462,15 +542,22 @@ async function processActive(ctx, contractId, trackObligations, enableReminders,
 async function processRenewal(ctx, contractId, requestDetails, outputDir, artifacts) {
   ctx.log('info', 'Processing Contract Renewal');
 
-  const renewalAnalysis = await ctx.task(renewalAnalysisTask, {
+  let renewalAnalysis = await ctx.task(renewalAnalysisTask, {
     contractId,
     currentTerms: requestDetails.currentTerms,
     outputDir
   });
 
-  artifacts.push(...renewalAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval7 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval7) {
+      renewalAnalysis = await ctx.task(renewalAnalysisTask, { ...{
+    contractId,
+    currentTerms: requestDetails.currentTerms,
+    outputDir
+  }, feedback: lastFeedback_finalApproval7, attempt: attempt + 1 });
+    }
+  const finalApproval7 = await ctx.breakpoint({
     question: `Renewal analysis for ${contractId}. Recommendation: ${renewalAnalysis.recommendation}. Proceed with ${renewalAnalysis.recommendation}?`,
     title: 'Contract Renewal Decision',
     context: {
@@ -478,9 +565,15 @@ async function processRenewal(ctx, contractId, requestDetails, outputDir, artifa
       contractId,
       analysis: renewalAnalysis,
       files: renewalAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval7 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval7.approved) break;
+    lastFeedback_finalApproval7 = finalApproval7.response || finalApproval7.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -498,15 +591,22 @@ async function processRenewal(ctx, contractId, requestDetails, outputDir, artifa
 async function processCloseout(ctx, contractId, requestDetails, outputDir, artifacts) {
   ctx.log('info', 'Processing Contract Closeout');
 
-  const closeoutChecklist = await ctx.task(closeoutChecklistTask, {
+  let closeoutChecklist = await ctx.task(closeoutChecklistTask, {
     contractId,
     reason: requestDetails.closeoutReason || 'term-expiration',
     outputDir
   });
 
-  artifacts.push(...closeoutChecklist.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval8 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval8) {
+      closeoutChecklist = await ctx.task(closeoutChecklistTask, { ...{
+    contractId,
+    reason: requestDetails.closeoutReason || 'term-expiration',
+    outputDir
+  }, feedback: lastFeedback_finalApproval8, attempt: attempt + 1 });
+    }
+  const finalApproval8 = await ctx.breakpoint({
     question: `Closeout checklist for ${contractId}. ${closeoutChecklist.completedItems}/${closeoutChecklist.totalItems} items complete. Finalize closeout?`,
     title: 'Contract Closeout Review',
     context: {
@@ -514,9 +614,15 @@ async function processCloseout(ctx, contractId, requestDetails, outputDir, artif
       contractId,
       checklist: closeoutChecklist,
       files: closeoutChecklist.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval8 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval8.approved) break;
+    lastFeedback_finalApproval8 = finalApproval8.response || finalApproval8.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -531,8 +637,7 @@ async function processCloseout(ctx, contractId, requestDetails, outputDir, artif
     artifacts
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

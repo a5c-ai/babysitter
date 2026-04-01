@@ -1,6 +1,6 @@
 /**
  * @process pilot-shell/bugfix
- * @description Bugfix mode: analysis -> behavior contract -> test-before-fix -> verify
+ * @description Bugfix mode with Phase 0 root-cause diagnosis: analysis (git diff + 2 evidence signals) -> behavior contract -> test-before-fix -> verify
  * @inputs { description: string, reproSteps?: string[], targetQuality?: number }
  * @outputs { success: boolean, analysis: object, contract: object, fix: object, verification: object }
  *
@@ -8,6 +8,7 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+
 
 /**
  * Pilot Shell Bugfix Mode
@@ -204,6 +205,9 @@ export const bugTraceTask = defineTask('bug-trace', (args, taskCtx) => ({
       task: 'Trace the bug to its exact file:line root cause and assess impact',
       context: args,
       instructions: [
+        'PHASE 0 RULE: Run `git diff` and `git log --oneline -20` to identify the specific commit(s) that introduced this bug',
+        'PHASE 0 RULE: You MUST NOT make any code changes during analysis. This is diagnosis only.',
+        'PHASE 0 RULE: Gather at least 2 independent evidence signals before identifying root cause',
         'If reproduction steps are provided, trace the execution path',
         'Use semantic search to find related code and recent changes',
         'Identify the exact file:line where the bug originates',
@@ -214,10 +218,11 @@ export const bugTraceTask = defineTask('bug-trace', (args, taskCtx) => ({
     },
     outputSchema: {
       type: 'object',
-      required: ['rootCause', 'affectedFiles', 'blastRadius'],
+      required: ['rootCause', 'affectedFiles', 'blastRadius', 'evidenceSignals'],
       properties: {
         rootCause: {
           type: 'object',
+          required: ['file', 'line', 'description', 'recentChange'],
           properties: {
             file: { type: 'string' },
             line: { type: 'number' },
@@ -227,6 +232,16 @@ export const bugTraceTask = defineTask('bug-trace', (args, taskCtx) => ({
         },
         affectedFiles: { type: 'array', items: { type: 'string' } },
         blastRadius: { type: 'string', enum: ['low', 'medium', 'high'] },
+        evidenceSignals: {
+          type: 'array',
+          items: { type: 'string' },
+          minItems: 2,
+          description: 'At least 2 independent evidence signals supporting the root cause identification'
+        },
+        gitDiffSummary: {
+          type: 'string',
+          description: 'Summary of git diff/log output identifying the breaking change'
+        },
         executionPath: { type: 'array', items: { type: 'string' } },
         analysisMarkdown: { type: 'string' }
       }

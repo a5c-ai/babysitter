@@ -50,20 +50,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: TREND ANALYSIS
   ctx.log('info', 'Phase 4: Analyzing trends');
-  const trendAnalysis = await ctx.task(fleetTrendAnalysisTask, { tripData, kpis: kpiCalculation.kpis, outputDir });
+  let trendAnalysis = await ctx.task(fleetTrendAnalysisTask, { tripData, kpis: kpiCalculation.kpis, outputDir });
   artifacts.push(...trendAnalysis.artifacts);
 
-  // Quality Gate: Review performance metrics
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      trendAnalysis = await ctx.task(fleetTrendAnalysisTask, { ...{ tripData, kpis: kpiCalculation.kpis, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Fleet performance analysis complete. Overall score: ${benchmarkingAnalysis.overallScore}/100. ${benchmarkingAnalysis.belowBenchmark} KPIs below benchmark. Review findings?`,
     title: 'Fleet Performance Review',
     context: {
       runId: ctx.runId,
       summary: { overallScore: benchmarkingAnalysis.overallScore, belowBenchmark: benchmarkingAnalysis.belowBenchmark },
       files: benchmarkingAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: COST ANALYSIS
   ctx.log('info', 'Phase 5: Analyzing costs');
   const costAnalysis = await ctx.task(fleetCostAnalysisTask, { costData, vehicles, kpis: kpiCalculation.kpis, outputDir });
@@ -86,11 +96,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 9: DASHBOARD GENERATION
   ctx.log('info', 'Phase 9: Generating performance dashboard');
-  const dashboardGeneration = await ctx.task(fleetDashboardTask, { kpiCalculation, benchmarkingAnalysis, trendAnalysis, recommendations, outputDir });
+  let dashboardGeneration = await ctx.task(fleetDashboardTask, { kpiCalculation, benchmarkingAnalysis, trendAnalysis, recommendations, outputDir });
   artifacts.push(...dashboardGeneration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dashboardGeneration = await ctx.task(fleetDashboardTask, { ...{ kpiCalculation, benchmarkingAnalysis, trendAnalysis, recommendations, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fleet analytics complete. Overall score: ${benchmarkingAnalysis.overallScore}/100. Cost per mile: $${costAnalysis.costPerMile}. ${recommendations.recommendations.length} recommendations generated. Approve report?`,
     title: 'Fleet Performance Analytics Complete',
     context: {
@@ -103,9 +117,15 @@ export async function process(inputs, ctx) {
         recommendations: recommendations.recommendations.length
       },
       files: [{ path: dashboardGeneration.dashboardPath, format: 'markdown', label: 'Performance Dashboard' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -118,8 +138,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/fleet-performance-analytics', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const fleetDataAggregationTask = defineTask('fleet-data-aggregation', (args, taskCtx) => ({
   kind: 'agent', title: 'Aggregate fleet data', agent: { name: 'fleet-data-aggregator', prompt: { role: 'Fleet Data Aggregation Specialist', task: 'Aggregate and normalize fleet data for analysis', context: args, instructions: ['Collect vehicle data', 'Normalize trip records', 'Aggregate cost data', 'Handle missing data', 'Create analysis datasets', 'Generate data summary'] }, outputSchema: { type: 'object', required: ['data', 'artifacts'], properties: { data: { type: 'object' }, dataSummary: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'fleet-analytics', 'data-aggregation']
 }));

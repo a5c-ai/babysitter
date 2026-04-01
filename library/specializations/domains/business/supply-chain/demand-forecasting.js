@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'supply-chain/demand-forecasting', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 2: DEMAND PATTERN ANALYSIS
   // ============================================================================
@@ -136,7 +135,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Measuring forecast accuracy');
 
-  const accuracyMeasurement = await ctx.task(accuracyMeasurementTask, {
+  let accuracyMeasurement = await ctx.task(accuracyMeasurementTask, {
     forecastGeneration,
     dataCollection,
     outputDir
@@ -144,8 +143,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...accuracyMeasurement.artifacts);
 
-  // Breakpoint: Review forecast results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      accuracyMeasurement = await ctx.task(accuracyMeasurementTask, { ...{
+    forecastGeneration,
+    dataCollection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Demand forecasts generated. Overall MAPE: ${accuracyMeasurement.mape}%. Forecast bias: ${accuracyMeasurement.bias}%. Review forecast accuracy and adjust models?`,
     title: 'Demand Forecast Review',
     context: {
@@ -159,9 +166,15 @@ export async function process(inputs, ctx) {
         bias: accuracyMeasurement.bias,
         confidenceInterval
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: FORECAST IMPROVEMENT RECOMMENDATIONS
   // ============================================================================
@@ -210,8 +223,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

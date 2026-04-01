@@ -59,20 +59,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'metrics-definition', output: metricsDefinition });
 
   // Phase 4: Partner Identification and Selection
-  const partnerSelection = await ctx.task(selectPartners, {
+  let partnerSelection = await ctx.task(selectPartners, {
     partnerCriteria,
     benchmarkingScope,
     organizationContext
   });
   artifacts.push({ phase: 'partner-selection', output: partnerSelection });
 
-  // Quality Gate: Benchmarking Setup Review
-  await ctx.breakpoint('benchmarking-setup-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      partnerSelection = await ctx.task(selectPartners, { ...{
+    partnerCriteria,
+    benchmarkingScope,
+    organizationContext
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('benchmarking-setup-review', {
     title: 'Benchmarking Setup Review',
     description: 'Review benchmarking plan, processes, metrics, and partners before data collection',
-    artifacts: [benchmarkingPlan, processDocumentation, metricsDefinition, partnerSelection]
-  });
-
+    artifacts: [benchmarkingPlan, processDocumentation, metricsDefinition, partnerSelection],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Internal Data Collection
   const internalData = await ctx.task(collectInternalData, {
     metricsDefinition,
@@ -114,20 +128,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'best-practices', output: bestPractices });
 
   // Phase 10: Enabler Analysis
-  const enablerAnalysis = await ctx.task(analyzeEnablers, {
+  let enablerAnalysis = await ctx.task(analyzeEnablers, {
     bestPractices,
     gapAnalysis,
     organizationContext
   });
   artifacts.push({ phase: 'enabler-analysis', output: enablerAnalysis });
 
-  // Quality Gate: Findings Review
-  await ctx.breakpoint('findings-review', {
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      enablerAnalysis = await ctx.task(analyzeEnablers, { ...{
+    bestPractices,
+    gapAnalysis,
+    organizationContext
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint('findings-review', {
     title: 'Benchmarking Findings Review',
     description: 'Review gap analysis, best practices, and enablers before adaptation planning',
-    artifacts: [gapAnalysis, bestPractices, enablerAnalysis]
-  });
-
+    artifacts: [gapAnalysis, bestPractices, enablerAnalysis],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // Phase 11: Practice Adaptation Design
   const practiceAdaptation = await ctx.task(designPracticeAdaptation, {
     bestPractices,
@@ -164,20 +192,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'benchmarking-report', output: benchmarkingReport });
 
   // Phase 15: Knowledge Transfer Planning
-  const knowledgeTransfer = await ctx.task(planKnowledgeTransfer, {
+  let knowledgeTransfer = await ctx.task(planKnowledgeTransfer, {
     bestPractices,
     practiceAdaptation,
     organizationContext
   });
   artifacts.push({ phase: 'knowledge-transfer', output: knowledgeTransfer });
 
-  // Final Quality Gate: Benchmarking Program Approval
-  await ctx.breakpoint('benchmarking-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      knowledgeTransfer = await ctx.task(planKnowledgeTransfer, { ...{
+    bestPractices,
+    practiceAdaptation,
+    organizationContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('benchmarking-approval', {
     title: 'Benchmarking Program Approval',
     description: 'Final approval of benchmarking results and adaptation plan',
-    artifacts: [benchmarkingReport, implementationRoadmap, impactProjection]
-  });
-
+    artifacts: [benchmarkingReport, implementationRoadmap, impactProjection],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     benchmarkingResults: {

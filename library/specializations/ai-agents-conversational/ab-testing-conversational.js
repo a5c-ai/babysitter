@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating results report');
 
-  const resultsReport = await ctx.task(resultsReportTask, {
+  let resultsReport = await ctx.task(resultsReportTask, {
     experimentName,
     experimentDesign: experimentDesign.design,
     statisticalAnalysis: statisticalAnalysis.results,
@@ -130,8 +130,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...resultsReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      resultsReport = await ctx.task(resultsReportTask, { ...{
+    experimentName,
+    experimentDesign: experimentDesign.design,
+    statisticalAnalysis: statisticalAnalysis.results,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `A/B test ${experimentName} complete. Winner: ${resultsReport.winningVariant}. Statistical significance: ${statisticalAnalysis.results.isSignificant}. Review results?`,
     title: 'A/B Test Results Review',
     context: {
@@ -144,9 +153,15 @@ export async function process(inputs, ctx) {
         pValue: statisticalAnalysis.results.pValue
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -166,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

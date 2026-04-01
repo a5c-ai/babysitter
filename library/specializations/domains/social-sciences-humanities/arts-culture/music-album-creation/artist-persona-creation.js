@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Compile Complete Persona Document
   ctx.log('info', 'Compiling complete persona document');
-  const personaResult = await ctx.task(compilePersonaTask, {
+  let personaResult = await ctx.task(compilePersonaTask, {
     identity: identityResult.identity,
     backstory: backstoryResult.backstory,
     voice: voiceResult.voice,
@@ -109,8 +109,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(personaResult.artifacts || []));
 
-  // Breakpoint: Review persona
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      personaResult = await ctx.task(compilePersonaTask, { ...{
+    identity: identityResult.identity,
+    backstory: backstoryResult.backstory,
+    voice: voiceResult.voice,
+    visual: visualResult.visual,
+    discography: discographyResult.discography,
+    traits: traitsResult.traits,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Artist persona "${identityResult.identity.artistName}" created. Review the complete persona and approve to continue?`,
     title: 'Artist Persona Review',
     context: {
@@ -122,9 +134,15 @@ export async function process(inputs, ctx) {
         era: voiceResult.voice.eraInfluence,
         discographyPhases: discographyResult.discography.phases?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -148,8 +166,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Identity Foundation
+  // Task 1: Identity Foundation
 export const identityFoundationTask = defineTask('identity-foundation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate artist identity foundation',

@@ -79,14 +79,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...credentialManagement.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: API CONSOLE INTEGRATION
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Building interactive API console');
 
-  const apiConsole = await ctx.task(apiConsoleTask, {
+  let apiConsole = await ctx.task(apiConsoleTask, {
     projectName,
     serviceCatalog,
     outputDir
@@ -94,8 +93,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...apiConsole.artifacts);
 
-  // Quality Gate: Portal Features Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      apiConsole = await ctx.task(apiConsoleTask, { ...{
+    projectName,
+    serviceCatalog,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Portal core features implemented for ${projectName}. Service catalog: ready, API console: ready. Approve configuration?`,
     title: 'Portal Features Review',
     context: {
@@ -103,9 +110,15 @@ export async function process(inputs, ctx) {
       projectName,
       features: features,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ANALYTICS DASHBOARD
   // ============================================================================
@@ -196,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

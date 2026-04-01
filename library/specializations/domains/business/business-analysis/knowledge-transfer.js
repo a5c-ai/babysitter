@@ -537,23 +537,37 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Transfer Plan Development
   ctx.log('Phase 3: Developing knowledge transfer plan');
-  const planResult = await ctx.task(transferPlanTask, {
+  let planResult = await ctx.task(transferPlanTask, {
     knowledgeInventory: artifacts.knowledgeInventory,
     recipientAssessment: artifacts.recipientAssessment,
     timeline: inputs.timeline
   });
   artifacts.transferPlan = planResult;
 
-  // Breakpoint for plan approval
-  await ctx.breakpoint('transfer-plan-approval', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      planResult = await ctx.task(transferPlanTask, { ...{
+    knowledgeInventory: artifacts.knowledgeInventory,
+    recipientAssessment: artifacts.recipientAssessment,
+    timeline: inputs.timeline
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('transfer-plan-approval', {
     question: 'Review the knowledge transfer plan. Is the approach appropriate for the client team?',
     artifacts: {
       knowledgeInventory: artifacts.knowledgeInventory,
       recipientAssessment: artifacts.recipientAssessment,
       transferPlan: artifacts.transferPlan
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Documentation Package
   ctx.log('Phase 4: Creating documentation package');
   const docResult = await ctx.task(documentationPackageTask, {

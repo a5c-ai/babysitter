@@ -137,7 +137,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing positioning quality and completeness');
-  const qualityAssessment = await ctx.task(positioningQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(positioningQualityAssessmentTask, {
     brandName,
     marketAnalysis,
     audienceDefinition,
@@ -154,8 +154,22 @@ export async function process(inputs, ctx) {
   const positioningScore = qualityAssessment.overallScore;
   const qualityMet = positioningScore >= 80;
 
-  // Breakpoint: Review brand positioning
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(positioningQualityAssessmentTask, { ...{
+    brandName,
+    marketAnalysis,
+    audienceDefinition,
+    frameOfReference,
+    differentiationAnalysis,
+    reasonsToBelieve,
+    positioningStatement,
+    validationPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Brand positioning complete. Quality score: ${positioningScore}/100. ${qualityMet ? 'Positioning meets quality standards!' : 'Positioning may need refinement.'} Review and approve?`,
     title: 'Brand Positioning Review & Approval',
     context: {
@@ -175,9 +189,15 @@ export async function process(inputs, ctx) {
         targetSegments: audienceDefinition.segments?.length || 0,
         validationMethods: validationPlan.methods?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -223,8 +243,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

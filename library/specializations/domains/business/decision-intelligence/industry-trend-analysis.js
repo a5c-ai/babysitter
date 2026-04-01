@@ -54,15 +54,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Trend Prioritization and Timing
-  const trendPrioritization = await ctx.task(trendPrioritizationTask, {
+  let trendPrioritization = await ctx.task(trendPrioritizationTask, {
     projectName,
     trendScanning,
     technologyRadar,
     marketForcesAnalysis
   });
 
-  // Breakpoint: Review trend analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      trendPrioritization = await ctx.task(trendPrioritizationTask, { ...{
+    projectName,
+    trendScanning,
+    technologyRadar,
+    marketForcesAnalysis
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review industry trend analysis for ${projectName}. Are the prioritized trends aligned with business focus?`,
     title: 'Trend Analysis Review',
     context: {
@@ -70,9 +79,15 @@ export async function process(inputs, ctx) {
       projectName,
       trendCount: trendScanning.trends?.length || 0,
       prioritizedCount: trendPrioritization.prioritizedTrends?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Scenario Development
   const scenarioDevelopment = await ctx.task(scenarioDevelopmentTask, {
     projectName,
@@ -127,8 +142,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const trendScanningTask = defineTask('trend-scanning', (args, taskCtx) => ({
   kind: 'agent',

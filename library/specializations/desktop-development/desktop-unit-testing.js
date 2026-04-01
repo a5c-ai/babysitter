@@ -46,15 +46,24 @@ export async function process(inputs, ctx) {
   const ipcMocks = await ctx.task(createIpcMocksTask, { projectName, framework, testingFramework, outputDir });
   artifacts.push(...ipcMocks.artifacts);
 
-  const coverageConfig = await ctx.task(configureCoverageTask, { projectName, testingFramework, coverageTarget, outputDir });
-  artifacts.push(...coverageConfig.artifacts);
-
-  await ctx.breakpoint({
+  let coverageConfig = await ctx.task(configureCoverageTask, { projectName, testingFramework, coverageTarget, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coverageConfig = await ctx.task(configureCoverageTask, { ...{ projectName, testingFramework, coverageTarget, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Unit testing configured with ${testingFramework}. Coverage target: ${coverageTarget}%. ${mocks.mockCount} mocks created. Review?`,
     title: 'Unit Testing Setup Review',
-    context: { runId: ctx.runId, testingFramework, coverageTarget, mockCount: mocks.mockCount }
-  });
-
+    context: { runId: ctx.runId, testingFramework, coverageTarget, mockCount: mocks.mockCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testHelpers = await ctx.task(createTestHelpersTask, { projectName, framework, testingFramework, outputDir });
   artifacts.push(...testHelpers.artifacts);
 

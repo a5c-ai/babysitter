@@ -40,16 +40,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Process Selection and Team Formation
   ctx.log('info', 'Phase 1: Process Selection and Team Formation');
-  const processSelection = await ctx.task(processSelectionTask, {
+  let processSelection = await ctx.task(processSelectionTask, {
     processName,
     processScope,
     teamMembers,
     outputDir
   });
 
-  artifacts.push(...processSelection.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      processSelection = await ctx.task(processSelectionTask, { ...{
+    processName,
+    processScope,
+    teamMembers,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Process selected: ${processSelection.processName}. Team of ${processSelection.team.length} assembled. Scope defined. Proceed with process mapping?`,
     title: 'Process Selection Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
       scope: processSelection.scope,
       team: processSelection.team,
       files: processSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Process Mapping
   ctx.log('info', 'Phase 2: Process Mapping');
   const processMapping = await ctx.task(processMappingTask, {
@@ -72,15 +86,22 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Failure Mode Identification
   ctx.log('info', 'Phase 3: Failure Mode Identification');
-  const failureModeIdentification = await ctx.task(failureModeIdentificationTask, {
+  let failureModeIdentification = await ctx.task(failureModeIdentificationTask, {
     processMapping,
     existingControls,
     outputDir
   });
 
-  artifacts.push(...failureModeIdentification.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      failureModeIdentification = await ctx.task(failureModeIdentificationTask, { ...{
+    processMapping,
+    existingControls,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `${failureModeIdentification.failureModes.length} failure modes identified across ${processMapping.steps.length} process steps. Proceed with hazard scoring?`,
     title: 'Failure Mode Identification Review',
     context: {
@@ -88,9 +109,15 @@ export async function process(inputs, ctx) {
       failureModes: failureModeIdentification.failureModes,
       byStep: failureModeIdentification.failuresByStep,
       files: failureModeIdentification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Hazard Scoring
   ctx.log('info', 'Phase 4: Hazard Scoring (Severity, Occurrence, Detection)');
   const hazardScoring = await ctx.task(hazardScoringTask, {
@@ -103,15 +130,22 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Risk Prioritization
   ctx.log('info', 'Phase 5: Risk Prioritization');
-  const riskPrioritization = await ctx.task(riskPrioritizationTask, {
+  let riskPrioritization = await ctx.task(riskPrioritizationTask, {
     hazardScoring,
     riskThreshold,
     outputDir
   });
 
-  artifacts.push(...riskPrioritization.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskPrioritization = await ctx.task(riskPrioritizationTask, { ...{
+    hazardScoring,
+    riskThreshold,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk prioritization complete. ${riskPrioritization.highPriorityRisks.length} high-priority risks (RPN >= ${riskThreshold}). Top risk: ${riskPrioritization.topRisk.failureMode}. Proceed with action development?`,
     title: 'Risk Prioritization Review',
     context: {
@@ -119,9 +153,15 @@ export async function process(inputs, ctx) {
       highPriorityRisks: riskPrioritization.highPriorityRisks,
       rpnDistribution: riskPrioritization.rpnDistribution,
       files: riskPrioritization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Action Development
   ctx.log('info', 'Phase 6: Action Development');
   const actionDevelopment = await ctx.task(actionDevelopmentTask, {
@@ -207,8 +247,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Selection
+  // Task 1: Process Selection
 export const processSelectionTask = defineTask('fmea-process-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `FMEA Process Selection - ${args.processName}`,

@@ -58,23 +58,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Model Development
-  const modelDevelopment = await ctx.task(predictiveModelDevelopmentTask, {
+  let modelDevelopment = await ctx.task(predictiveModelDevelopmentTask, {
     projectName,
     modelSelection,
     featureEngineering
   });
 
-  // Breakpoint: Review model performance
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      modelDevelopment = await ctx.task(predictiveModelDevelopmentTask, { ...{
+    projectName,
+    modelSelection,
+    featureEngineering
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review predictive model performance for ${projectName}. Does it meet business requirements?`,
     title: 'Model Performance Review',
     context: {
       runId: ctx.runId,
       projectName,
       modelType: modelSelection.selectedModel || 'N/A'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Deployment Planning
   const deploymentPlan = await ctx.task(predictiveDeploymentPlanTask, {
     projectName,
@@ -117,8 +131,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const useCaseDefinitionTask = defineTask('use-case-definition', (args, taskCtx) => ({
   kind: 'agent',

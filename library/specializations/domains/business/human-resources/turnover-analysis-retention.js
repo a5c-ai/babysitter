@@ -87,8 +87,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 5: Analysis Review
-  await ctx.breakpoint('analysis-review', {
+  let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase5Review = await ctx.breakpoint('analysis-review', {
     title: 'Turnover Analysis Review',
     description: 'Review turnover analysis findings',
     artifacts: {
@@ -100,9 +102,15 @@ export async function process(inputs, ctx) {
       'Is the data quality sufficient for analysis?',
       'Are the segmentation categories appropriate?',
       'Are the cost calculations realistic?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Exit Interview Analysis
   const exitAnalysis = await ctx.task('analyze-exit-interviews', {
     dataCollection,
@@ -144,8 +152,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 9: Root Cause Review
-  await ctx.breakpoint('root-cause-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('root-cause-review', {
     title: 'Root Cause Analysis Review',
     description: 'Review root cause findings and validate drivers',
     artifacts: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
       'Are the root causes accurately identified?',
       'Which factors are within our control?',
       'What priority should be given to each driver?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Retention Strategy Development
   const retentionStrategy = await ctx.task('develop-retention-strategy', {
     rootCauseAnalysis,

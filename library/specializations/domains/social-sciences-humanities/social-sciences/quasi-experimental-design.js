@@ -113,7 +113,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring quasi-experimental design quality');
-  const qualityScore = await ctx.task(quasiDesignQualityScoringTask, {
+  let qualityScore = await ctx.task(quasiDesignQualityScoringTask, {
     causalAnalysis,
     designSelection,
     identificationStrategy,
@@ -128,8 +128,20 @@ export async function process(inputs, ctx) {
   const designScore = qualityScore.overallScore;
   const qualityMet = designScore >= 75;
 
-  // Breakpoint: Review quasi-experimental design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(quasiDesignQualityScoringTask, { ...{
+    causalAnalysis,
+    designSelection,
+    identificationStrategy,
+    validityAssessment,
+    analysisPlan,
+    robustnessChecks,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quasi-experimental design complete. Quality score: ${designScore}/100. ${qualityMet ? 'Design meets quality standards!' : 'Design may need refinement.'} Review and approve?`,
     title: 'Quasi-Experimental Design Review',
     context: {
@@ -145,9 +157,15 @@ export async function process(inputs, ctx) {
         identificationAssumptions: identificationStrategy.keyAssumptions,
         validityThreats: validityAssessment.threatsIdentified
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -182,8 +200,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Causal Question Analysis
+  // Task 1: Causal Question Analysis
 export const causalQuestionAnalysisTask = defineTask('causal-question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze causal question and identification challenges',

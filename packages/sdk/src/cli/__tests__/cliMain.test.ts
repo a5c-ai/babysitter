@@ -87,7 +87,17 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok", "--runs-dir", "."]);
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-123",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"ok":true}',
+      "--runs-dir",
+      ".",
+    ]);
 
     expect(exitCode).toBe(0);
     expect(commitEffectResultMock).toHaveBeenCalledWith(
@@ -115,6 +125,8 @@ describe("CLI main entry", () => {
       "ef-123",
       "--status",
       "ok",
+      "--value-inline",
+      '{"dryRun":true}',
       "--dry-run",
       "--json",
       "--runs-dir",
@@ -128,11 +140,97 @@ describe("CLI main entry", () => {
     expect(payload.dryRun).toBe(true);
   });
 
+  it("accepts inline JSON values for task:post", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"approved":true,"response":"Proceed"}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runDir: path.resolve("runs/demo"),
+        effectId: "ef-inline",
+        result: expect.objectContaining({
+          status: "ok",
+          value: {
+            approved: true,
+            response: "Proceed",
+          },
+        }),
+      })
+    );
+  });
+
+  it("rejects task:post when --value and --value-inline are combined", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "ok",
+      "--value",
+      "tasks/ef-inline/output.json",
+      "--value-inline",
+      '{"approved":true}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] cannot combine --value with --value-inline");
+  });
+
+  it("rejects task:post --value-inline when posting an error result", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "error",
+      "--value-inline",
+      '{"message":"nope"}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] --value-inline is only supported with --status ok");
+  });
+
   it("errors when the effect id is missing from the index", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-missing", "--status", "ok", "--runs-dir", "."]);
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-missing",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"ok":true}',
+      "--runs-dir",
+      ".",
+    ]);
 
     expect(exitCode).toBe(1);
     expect(commitEffectResultMock).not.toHaveBeenCalled();
@@ -158,6 +256,17 @@ describe("CLI main entry", () => {
     expect(logSpy).toHaveBeenCalledWith(
       "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/ef-err/result.json"
     );
+  });
+
+  it("rejects task:post ok results without a value payload", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-no-value")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-no-value", "--status", "ok", "--runs-dir", "."]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] ok results require --value or --value-inline");
   });
 
   it("accepts harness:create-run --non-interactive as an alias for --no-interactive", async () => {

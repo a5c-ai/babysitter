@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       rhetoricalStrategy: null
     };
   }
-
   // Phase 2: Audience Analysis
   const audienceAnalysis = await ctx.task(audienceAnalysisTask, {
     audience,
@@ -67,14 +66,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Ethos Development
-  const ethosStrategy = await ctx.task(ethosStrategyTask, {
+  let ethosStrategy = await ctx.task(ethosStrategyTask, {
     audience: audienceAnalysis,
     situation: situationAnalysis,
     claim: claimAnalysis
   });
 
-  // Breakpoint: Review rhetorical analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      ethosStrategy = await ctx.task(ethosStrategyTask, { ...{
+    audience: audienceAnalysis,
+    situation: situationAnalysis,
+    claim: claimAnalysis
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review rhetorical analysis for claim: "${claim}". Audience: ${audience.type}. Proceed with strategy development?`,
     title: 'Rhetorical Analysis Review',
     context: {
@@ -87,9 +94,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { claimAnalysis, audienceAnalysis, situationAnalysis, ethosStrategy }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Logos Development
   const logosStrategy = await ctx.task(logosStrategyTask, {
     claim: claimAnalysis,
@@ -134,7 +147,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Rhetorical Strategy Synthesis
-  const strategySynthesis = await ctx.task(rhetoricalStrategySynthesisTask, {
+  let strategySynthesis = await ctx.task(rhetoricalStrategySynthesisTask, {
     claim: claimAnalysis,
     audience: audienceAnalysis,
     situation: situationAnalysis,
@@ -148,8 +161,24 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Rhetorical Strategy Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategySynthesis = await ctx.task(rhetoricalStrategySynthesisTask, { ...{
+    claim: claimAnalysis,
+    audience: audienceAnalysis,
+    situation: situationAnalysis,
+    ethos: ethosStrategy,
+    logos: logosStrategy,
+    pathos: pathosStrategy,
+    framing: framingStrategy,
+    arguments: argumentConstruction,
+    counterarguments: counterargumentStrategy,
+    purpose,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Rhetorical strategy complete for "${claim}". Primary approach: ${strategySynthesis.primaryApproach}. Approve strategy?`,
     title: 'Rhetorical Strategy Approval',
     context: {
@@ -161,9 +190,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/rhetorical-strategy.json', format: 'json', content: strategySynthesis },
         { path: 'artifacts/rhetorical-strategy.md', format: 'markdown', content: strategySynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     claim: claimAnalysis.refinedClaim,
@@ -184,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const claimAnalysisTask = defineTask('claim-analysis', (args, taskCtx) => ({
   kind: 'agent',

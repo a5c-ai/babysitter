@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring assessment quality');
-  const qualityScore = await ctx.task(policyAssessmentQualityScoringTask, {
+  let qualityScore = await ctx.task(policyAssessmentQualityScoringTask, {
     policyAnalysis,
     logicModel,
     stakeholderAnalysis,
@@ -125,8 +125,20 @@ export async function process(inputs, ctx) {
   const assessmentScore = qualityScore.overallScore;
   const qualityMet = assessmentScore >= 80;
 
-  // Breakpoint: Review policy assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(policyAssessmentQualityScoringTask, { ...{
+    policyAnalysis,
+    logicModel,
+    stakeholderAnalysis,
+    impactEvaluation,
+    costBenefit,
+    evidenceSynthesis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Policy impact assessment complete. Quality score: ${assessmentScore}/100. ${qualityMet ? 'Assessment meets quality standards!' : 'Assessment may need refinement.'} Review and approve?`,
     title: 'Policy Impact Assessment Review',
     context: {
@@ -142,9 +154,15 @@ export async function process(inputs, ctx) {
         overallImpact: impactEvaluation.overallAssessment,
         costBenefitRatio: costBenefit.ratio
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -173,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Policy Context Analysis
+  // Task 1: Policy Context Analysis
 export const policyContextAnalysisTask = defineTask('policy-context-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze policy context',

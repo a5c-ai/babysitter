@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Population Frequency Filtering');
 
-  const frequencyResult = await ctx.task(populationFrequencyFilteringTask, {
+  let frequencyResult = await ctx.task(populationFrequencyFilteringTask, {
     projectName,
     variants: extractionResult.normalizedVariants,
     databases,
@@ -78,8 +78,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `${frequencyResult.rareVariants.length} variants passed frequency filtering (AF < 0.01)`);
 
-  // Breakpoint: Review frequency filtering
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      frequencyResult = await ctx.task(populationFrequencyFilteringTask, { ...{
+    projectName,
+    variants: extractionResult.normalizedVariants,
+    databases,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Population frequency filtering complete. ${frequencyResult.rareVariants.length}/${extractionResult.normalizedVariants.length} variants are rare (AF < 0.01). Review filtering results?`,
     title: 'Population Frequency Review',
     context: {
@@ -88,9 +97,15 @@ export async function process(inputs, ctx) {
       rareVariants: frequencyResult.rareVariants.length,
       filteredOut: frequencyResult.commonVariants.length,
       files: frequencyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IN SILICO PREDICTION ANALYSIS
   // ============================================================================
@@ -114,7 +129,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Literature and Database Evidence Review');
 
-  const evidenceResult = await ctx.task(evidenceReviewTask, {
+  let evidenceResult = await ctx.task(evidenceReviewTask, {
     projectName,
     variants: frequencyResult.rareVariants,
     phenotype,
@@ -126,8 +141,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Evidence review complete - ${evidenceResult.variantsWithEvidence} variants have supporting evidence`);
 
-  // Breakpoint: Review evidence
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      evidenceResult = await ctx.task(evidenceReviewTask, { ...{
+    projectName,
+    variants: frequencyResult.rareVariants,
+    phenotype,
+    databases,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Literature and database evidence review complete. ${evidenceResult.variantsWithEvidence} variants have clinical evidence. Review evidence summary?`,
     title: 'Evidence Review',
     context: {
@@ -136,16 +161,22 @@ export async function process(inputs, ctx) {
       clinvarMatches: evidenceResult.clinvarMatches,
       literatureReferences: evidenceResult.literatureCount,
       files: evidenceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ACMG/AMP CRITERIA ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 5: ACMG/AMP Criteria Assessment');
 
-  const acmgResult = await ctx.task(acmgCriteriaAssessmentTask, {
+  let acmgResult = await ctx.task(acmgCriteriaAssessmentTask, {
     projectName,
     variants: frequencyResult.rareVariants,
     predictionResult,
@@ -159,8 +190,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `ACMG assessment complete - Pathogenic: ${acmgResult.pathogenicCount}, VUS: ${acmgResult.vusCount}`);
 
-  // Quality Gate: ACMG classification review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      acmgResult = await ctx.task(acmgCriteriaAssessmentTask, { ...{
+    projectName,
+    variants: frequencyResult.rareVariants,
+    predictionResult,
+    evidenceResult,
+    phenotype,
+    inheritancePattern,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `ACMG/AMP classification complete. Pathogenic: ${acmgResult.pathogenicCount}, Likely Pathogenic: ${acmgResult.likelyPathogenicCount}, VUS: ${acmgResult.vusCount}. Review classifications?`,
     title: 'ACMG Classification Review',
     context: {
@@ -174,9 +217,15 @@ export async function process(inputs, ctx) {
       },
       criteriaApplied: acmgResult.criteriaBreakdown,
       files: acmgResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: INHERITANCE PATTERN ANALYSIS
   // ============================================================================
@@ -220,7 +269,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Actionability Assessment');
 
-  const actionabilityResult = await ctx.task(actionabilityAssessmentTask, {
+  let actionabilityResult = await ctx.task(actionabilityAssessmentTask, {
     projectName,
     classifiedVariants: acmgResult.classifiedVariants,
     correlationResult,
@@ -232,8 +281,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Actionability assessment complete - ${actionabilityResult.actionableVariants} actionable variants`);
 
   // Breakpoint: Review actionable findings
-  if (actionabilityResult.actionableVariants > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        actionabilityResult = await ctx.task(actionabilityAssessmentTask, { ...{
+    projectName,
+    classifiedVariants: acmgResult.classifiedVariants,
+    correlationResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `${actionabilityResult.actionableVariants} clinically actionable variants identified. Management recommendations available. Review actionable findings?`,
       title: 'Actionable Findings Review',
       context: {
@@ -241,9 +299,15 @@ export async function process(inputs, ctx) {
         actionableVariants: actionabilityResult.actionableFindings,
         recommendations: actionabilityResult.recommendations,
         files: actionabilityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: GENERATE CLINICAL REPORT
@@ -251,7 +315,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Clinical Report');
 
-  const reportResult = await ctx.task(generateClinicalReportTask, {
+  let reportResult = await ctx.task(generateClinicalReportTask, {
     projectName,
     phenotype,
     inheritancePattern,
@@ -266,8 +330,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint: Report approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateClinicalReportTask, { ...{
+    projectName,
+    phenotype,
+    inheritancePattern,
+    acmgResult,
+    inheritanceResult,
+    correlationResult,
+    actionabilityResult,
+    predictionResult,
+    evidenceResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clinical Variant Interpretation Complete for ${projectName}. ${acmgResult.pathogenicCount + acmgResult.likelyPathogenicCount} pathogenic/likely pathogenic variants identified. Approve clinical report?`,
     title: 'Clinical Report Approval',
     context: {
@@ -284,9 +363,15 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'Clinical Report' },
         { path: reportResult.jsonReportPath, format: 'json', label: 'Structured Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -334,8 +419,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const optimizationSetup = await ctx.task(optimizationSetupTask, { projectName, outputDir });
   artifacts.push(...optimizationSetup.artifacts);
 
-  const devServerSetup = await ctx.task(devServerSetupTask, { projectName, outputDir });
-  artifacts.push(...devServerSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Vite configuration complete for ${projectName}. Approve?`, title: 'Vite Review', context: { runId: ctx.runId, config: viteSetup.config } });
-
+  let devServerSetup = await ctx.task(devServerSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      devServerSetup = await ctx.task(devServerSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Vite configuration complete for ${projectName}. Approve?`, title: 'Vite Review', context: { runId: ctx.runId, config: viteSetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

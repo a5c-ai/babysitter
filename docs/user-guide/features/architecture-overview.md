@@ -167,6 +167,7 @@ For more details on the journal system, see [Journal System](./journal-system.md
 |                                                          |
 |  - ctx.task(task, args, opts)       Execute task        |
 |  - ctx.breakpoint(opts)             Wait for approval   |
+|    Returns BreakpointResult: { approved, feedback, ... }|
 |  - ctx.parallel.all([...])          Run in parallel     |
 |  - ctx.hook(name, data)             Trigger hooks       |
 |  - ctx.log(msg, data)               Log to journal      |

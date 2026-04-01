@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Level Layout and Flow Design');
 
-  const layoutDesign = await ctx.task(layoutDesignTask, {
+  let layoutDesign = await ctx.task(layoutDesignTask, {
     levelName,
     levelType,
     levelRequirements,
@@ -78,8 +78,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...layoutDesign.artifacts);
 
-  // Quality Gate: Layout review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      layoutDesign = await ctx.task(layoutDesignTask, { ...{
+    levelName,
+    levelType,
+    levelRequirements,
+    environmentTheme,
+    estimatedPlaytime,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Level layout designed for ${levelName}. ${layoutDesign.roomCount} rooms/areas, ${layoutDesign.criticalPathLength} critical path nodes. Review layout flowchart?`,
     title: 'Level Layout Review',
     context: {
@@ -89,9 +100,15 @@ export async function process(inputs, ctx) {
       criticalPath: layoutDesign.criticalPath,
       branches: layoutDesign.branches,
       files: [{ path: layoutDesign.flowchartPath, format: 'svg', label: 'Level Flowchart' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: GREYBOX BLOCKOUT
   // ============================================================================
@@ -164,7 +181,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Level Playtesting and Feedback');
 
-  const playtesting = await ctx.task(levelPlaytestingTask, {
+  let playtesting = await ctx.task(levelPlaytestingTask, {
     levelName,
     greybox,
     gameplayPlacement,
@@ -175,8 +192,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...playtesting.artifacts);
 
-  // Quality Gate: Playtest results
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      playtesting = await ctx.task(levelPlaytestingTask, { ...{
+    levelName,
+    greybox,
+    gameplayPlacement,
+    pacingAnalysis,
+    objectives,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Level playtest complete for ${levelName}. Completion rate: ${playtesting.completionRate}%. Average time: ${playtesting.averagePlaytime}. Navigation issues: ${playtesting.navigationIssues.length}. Review and iterate?`,
     title: 'Level Playtest Results',
     context: {
@@ -187,9 +215,15 @@ export async function process(inputs, ctx) {
       difficultyFeedback: playtesting.difficultyFeedback,
       positives: playtesting.positives,
       files: playtesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: ITERATION AND REFINEMENT
   // ============================================================================
@@ -228,7 +262,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Level Design Documentation');
 
-  const documentation = await ctx.task(levelDocumentationTask, {
+  let documentation = await ctx.task(levelDocumentationTask, {
     levelName,
     levelType,
     levelRequirements,
@@ -244,8 +278,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(levelDocumentationTask, { ...{
+    levelName,
+    levelType,
+    levelRequirements,
+    layoutDesign,
+    gameplayPlacement,
+    pacingAnalysis,
+    environmentalStorytelling,
+    playtesting,
+    iteration,
+    optimization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Level Design complete for ${levelName}. Ready for art pass and final polish?`,
     title: 'Level Design Complete',
     context: {
@@ -264,9 +314,15 @@ export async function process(inputs, ctx) {
         { path: layoutDesign.flowchartPath, format: 'svg', label: 'Level Flowchart' },
         { path: greybox.greyboxPath, format: 'scene', label: 'Greybox Scene' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -309,8 +365,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

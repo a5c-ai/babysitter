@@ -108,7 +108,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Assessing reasoning quality');
-  const qualityScore = await ctx.task(manyValuedQualityTask, {
+  let qualityScore = await ctx.task(manyValuedQualityTask, {
     logicSetup,
     truthAssignment,
     partialModel: partialModel.model,
@@ -120,8 +120,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review many-valued logic results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(manyValuedQualityTask, { ...{
+    logicSetup,
+    truthAssignment,
+    partialModel: partialModel.model,
+    inference,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Many-valued logic analysis complete. Quality score: ${qualityScore.overallScore}/100. Unknown propositions: ${uncertaintyAnalysis.unknownCount}. ${qualityMet ? 'Quality meets standards!' : 'Review truth value assignments.'} Review results?`,
     title: 'Many-Valued Logic Results Review',
     context: {
@@ -140,9 +150,15 @@ export async function process(inputs, ctx) {
         unknownCount: uncertaintyAnalysis.unknownCount,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: REPORT GENERATION
   // ============================================================================
@@ -181,8 +197,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

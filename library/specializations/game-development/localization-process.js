@@ -48,27 +48,34 @@ export async function process(inputs, ctx) {
     const adaptation = await ctx.task(culturalAdaptationTask, { projectName, targetLanguages, outputDir });
     artifacts.push(...adaptation.artifacts);
   }
-
   // Phase 5: Voice Localization (if applicable)
   if (voiceLocalization) {
     const voiceLoc = await ctx.task(voiceLocalizationTask, { projectName, targetLanguages, outputDir });
     artifacts.push(...voiceLoc.artifacts);
   }
-
   // Phase 6: Integration
   const integration = await ctx.task(locIntegrationTask, { projectName, translation, targetLanguages, outputDir });
   artifacts.push(...integration.artifacts);
 
   // Phase 7: Localization QA
-  const locQA = await ctx.task(localizationQATask, { projectName, targetLanguages, outputDir });
-  artifacts.push(...locQA.artifacts);
-
-  await ctx.breakpoint({
+  let locQA = await ctx.task(localizationQATask, { projectName, targetLanguages, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      locQA = await ctx.task(localizationQATask, { ...{ projectName, targetLanguages, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Localization complete for ${projectName}. ${targetLanguages.length} languages. ${stringExtraction.stringCount} strings. QA pass rate: ${locQA.passRate}%. Review?`,
     title: 'Localization Review',
-    context: { runId: ctx.runId, translation, locQA }
-  });
-
+    context: { runId: ctx.runId, translation, locQA },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

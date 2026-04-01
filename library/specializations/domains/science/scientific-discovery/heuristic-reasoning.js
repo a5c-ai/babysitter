@@ -632,17 +632,30 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Assess ecological rationality
-  const ecologicalAssessment = await ctx.task(assessEcologicalRationalityTask, {
+  let ecologicalAssessment = await ctx.task(assessEcologicalRationalityTask, {
     environmentAnalysis,
     heuristicRepertoire
   });
 
-  // Quality gate: Heuristic fit review
-  await ctx.breakpoint('heuristic-fit-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      ecologicalAssessment = await ctx.task(assessEcologicalRationalityTask, { ...{
+    environmentAnalysis,
+    heuristicRepertoire
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('heuristic-fit-review', {
     question: 'Is the heuristic repertoire appropriate for this decision environment?',
-    context: { environmentAnalysis, heuristicRepertoire, ecologicalAssessment }
-  });
-
+    context: { environmentAnalysis, heuristicRepertoire, ecologicalAssessment },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Select heuristic
   const heuristicSelection = await ctx.task(selectHeuristicTask, {
     heuristicRepertoire,
@@ -665,18 +678,32 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Analyze speed-accuracy trade-off
-  const speedAccuracyAnalysis = await ctx.task(analyzeSpeedAccuracyTask, {
+  let speedAccuracyAnalysis = await ctx.task(analyzeSpeedAccuracyTask, {
     applicationResults,
     biasErrorAnalysis,
     constraints: inputs.constraints
   });
 
-  // Quality gate: Trade-off acceptance
-  await ctx.breakpoint('tradeoff-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      speedAccuracyAnalysis = await ctx.task(analyzeSpeedAccuracyTask, { ...{
+    applicationResults,
+    biasErrorAnalysis,
+    constraints: inputs.constraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('tradeoff-review', {
     question: 'Are the speed-accuracy trade-offs acceptable for this decision?',
-    context: { speedAccuracyAnalysis, biasErrorAnalysis, applicationResults }
-  });
-
+    context: { speedAccuracyAnalysis, biasErrorAnalysis, applicationResults },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Calibrate and design learning
   const calibrationPlan = await ctx.task(calibrateHeuristicTask, {
     heuristicSelection,

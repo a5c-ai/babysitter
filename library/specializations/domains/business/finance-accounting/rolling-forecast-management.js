@@ -32,18 +32,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'gather-actuals', result: actualsResult });
 
   // Step 2: Analyze Forecast-to-Actual Variances
-  const varianceResult = await ctx.task(analyzeVariancesTask, {
+  let varianceResult = await ctx.task(analyzeVariancesTask, {
     actuals: actualsResult,
     priorForecast: inputs.priorForecast
   });
   results.steps.push({ name: 'variance-analysis', result: varianceResult });
 
-  // Breakpoint for variance review
-  await ctx.breakpoint('variance-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      varianceResult = await ctx.task(analyzeVariancesTask, { ...{
+    actuals: actualsResult,
+    priorForecast: inputs.priorForecast
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('variance-review', {
     message: 'Review forecast-to-actual variances and identify drivers before updating assumptions',
-    data: varianceResult
-  });
-
+    data: varianceResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Update Business Drivers and Assumptions
   const driversResult = await ctx.task(updateDriversTask, {
     businessDrivers: inputs.businessDrivers,
@@ -61,18 +74,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'generate-forecast', result: forecastResult });
 
   // Step 5: Scenario Analysis
-  const scenarioResult = await ctx.task(runScenarioAnalysisTask, {
+  let scenarioResult = await ctx.task(runScenarioAnalysisTask, {
     baseForecast: forecastResult,
     businessDrivers: driversResult
   });
   results.steps.push({ name: 'scenario-analysis', result: scenarioResult });
 
-  // Breakpoint for management review
-  await ctx.breakpoint('management-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scenarioResult = await ctx.task(runScenarioAnalysisTask, { ...{
+    baseForecast: forecastResult,
+    businessDrivers: driversResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('management-review', {
     message: 'Review rolling forecast and scenarios before finalization',
-    data: { forecast: forecastResult, scenarios: scenarioResult }
-  });
-
+    data: { forecast: forecastResult, scenarios: scenarioResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 6: Finalize and Distribute Forecast
   const distributionResult = await ctx.task(finalizeAndDistributeTask, {
     forecast: forecastResult,
@@ -90,8 +116,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const gatherActualsTask = defineTask('gather-actuals', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'financial-reporting' },

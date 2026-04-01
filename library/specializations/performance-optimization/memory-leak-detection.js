@@ -47,17 +47,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...profiling.artifacts);
 
   // Phase 3: Capture Heap Snapshots Over Time
-  const snapshots = await ctx.task(captureHeapSnapshotsTask, {
+  let snapshots = await ctx.task(captureHeapSnapshotsTask, {
     projectName, profiling, outputDir
   });
-  artifacts.push(...snapshots.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      snapshots = await ctx.task(captureHeapSnapshotsTask, { ...{
+    projectName, profiling, outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Captured ${snapshots.snapshotCount} heap snapshots. Analyze for growing memory patterns?`,
     title: 'Heap Snapshot Collection',
-    context: { runId: ctx.runId, snapshots }
-  });
-
+    context: { runId: ctx.runId, snapshots },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Identify Growing Memory Patterns
   const growthAnalysis = await ctx.task(identifyMemoryGrowthPatternsTask, {
     projectName, snapshots, outputDir
@@ -71,17 +82,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...retentionPaths.artifacts);
 
   // Phase 6: Locate Leak Source in Code
-  const leakSources = await ctx.task(locateLeakSourceTask, {
+  let leakSources = await ctx.task(locateLeakSourceTask, {
     projectName, retentionPaths, growthAnalysis, outputDir
   });
-  artifacts.push(...leakSources.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      leakSources = await ctx.task(locateLeakSourceTask, { ...{
+    projectName, retentionPaths, growthAnalysis, outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Found ${leakSources.leaks.length} potential memory leaks. Review and approve fixes?`,
     title: 'Memory Leak Analysis',
-    context: { runId: ctx.runId, leaks: leakSources.leaks }
-  });
-
+    context: { runId: ctx.runId, leaks: leakSources.leaks },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Implement Fixes for Identified Leaks
   const fixes = await ctx.task(implementLeakFixesTask, {
     projectName, leakSources, outputDir
@@ -95,17 +117,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...validation.artifacts);
 
   // Phase 9: Add Regression Tests for Leaks
-  const regressionTests = await ctx.task(addLeakRegressionTestsTask, {
+  let regressionTests = await ctx.task(addLeakRegressionTestsTask, {
     projectName, leakSources, fixes, outputDir
   });
-  artifacts.push(...regressionTests.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      regressionTests = await ctx.task(addLeakRegressionTestsTask, { ...{
+    projectName, leakSources, fixes, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${fixes.fixedCount} leaks fixed. ${regressionTests.testCount} regression tests added. Accept changes?`,
     title: 'Memory Leak Resolution',
-    context: { runId: ctx.runId, validation, regressionTests }
-  });
-
+    context: { runId: ctx.runId, validation, regressionTests },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -174,7 +174,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Implementing Core Data migration strategy');
 
-  const migrationSetup = await ctx.task(migrationSetupTask, {
+  let migrationSetup = await ctx.task(migrationSetupTask, {
     projectName,
     migrationStrategy,
     modelDesign,
@@ -183,8 +183,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...migrationSetup.artifacts);
 
-  // Quality Gate: Data Model Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      migrationSetup = await ctx.task(migrationSetupTask, { ...{
+    projectName,
+    migrationStrategy,
+    modelDesign,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Core Data model designed for ${projectName} with ${modelDesign.entities.length} entities. Review data model and relationships?`,
     title: 'Data Model Review',
     context: {
@@ -194,9 +203,15 @@ export async function process(inputs, ctx) {
       relationships: modelDesign.relationships,
       migrationStrategy,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'swift' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: CLOUDKIT SYNC (OPTIONAL)
   // ============================================================================
@@ -213,7 +228,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...cloudKitSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: ERROR HANDLING AND VALIDATION
   // ============================================================================
@@ -312,8 +326,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

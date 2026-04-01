@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Heating and Cooling Load Calculations');
 
-  const loadResult = await ctx.task(loadCalculationsTask, {
+  let loadResult = await ctx.task(loadCalculationsTask, {
     projectName,
     buildingData,
     zoningResult,
@@ -75,8 +75,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Loads calculated - Peak cooling: ${loadResult.peakCooling} tons, Peak heating: ${loadResult.peakHeating} kW`);
 
-  // Breakpoint: Review load calculations
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      loadResult = await ctx.task(loadCalculationsTask, { ...{
+    projectName,
+    buildingData,
+    zoningResult,
+    climateZone,
+    designCriteria,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Load calculations complete. Peak cooling: ${loadResult.peakCooling} tons, Peak heating: ${loadResult.peakHeating} kW. Watts/sqft: ${loadResult.coolingIntensity}. Review load breakdown?`,
     title: 'Load Calculation Review',
     context: {
@@ -85,9 +96,15 @@ export async function process(inputs, ctx) {
       zoneLoads: loadResult.zoneLoads,
       loadComponents: loadResult.loadComponents,
       files: loadResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: VENTILATION REQUIREMENTS
   // ============================================================================
@@ -202,7 +219,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Energy Analysis');
 
-  const energyResult = await ctx.task(energyAnalysisTask, {
+  let energyResult = await ctx.task(energyAnalysisTask, {
     projectName,
     loadResult,
     equipmentResult,
@@ -217,8 +234,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Energy analysis complete - Annual consumption: ${energyResult.annualConsumption} kWh`);
 
   // Quality Gate: Energy code compliance
-  if (!energyResult.codeCompliant) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        energyResult = await ctx.task(energyAnalysisTask, { ...{
+    projectName,
+    loadResult,
+    equipmentResult,
+    systemSelectionResult,
+    climateZone,
+    energyCode,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Design does not meet ${energyCode} requirements. EUI: ${energyResult.eui} vs target ${energyResult.euiTarget}. Review energy measures?`,
       title: 'Energy Code Compliance',
       context: {
@@ -227,9 +256,15 @@ export async function process(inputs, ctx) {
         complianceIssues: energyResult.complianceIssues,
         recommendations: energyResult.recommendations,
         files: energyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: GENERATE HVAC REPORT
@@ -237,7 +272,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating HVAC Design Report');
 
-  const reportResult = await ctx.task(generateHVACReportTask, {
+  let reportResult = await ctx.task(generateHVACReportTask, {
     projectName,
     buildingData,
     zoningResult,
@@ -254,8 +289,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateHVACReportTask, { ...{
+    projectName,
+    buildingData,
+    zoningResult,
+    loadResult,
+    ventilationResult,
+    systemSelectionResult,
+    equipmentResult,
+    airDistributionResult,
+    pipingResult,
+    controlsResult,
+    energyResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HVAC Design Complete for ${projectName}. Peak cooling: ${loadResult.peakCooling} tons, ${equipmentResult.equipmentList.length} equipment items. EUI: ${energyResult.eui}. Approve design?`,
     title: 'HVAC Design Complete',
     context: {
@@ -271,9 +323,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'HVAC Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -306,8 +364,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

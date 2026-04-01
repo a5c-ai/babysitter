@@ -47,17 +47,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...configuration.artifacts);
 
   // Phase 3: Capture Memory Allocation Data
-  const allocationData = await ctx.task(captureMemoryAllocationDataTask, {
+  let allocationData = await ctx.task(captureMemoryAllocationDataTask, {
     projectName, targetApplication, duration, outputDir
   });
-  artifacts.push(...allocationData.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      allocationData = await ctx.task(captureMemoryAllocationDataTask, { ...{
+    projectName, targetApplication, duration, outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Captured ${allocationData.sampleCount} memory samples. Analyze heap patterns?`,
     title: 'Memory Data Collection',
-    context: { runId: ctx.runId, allocationData }
-  });
-
+    context: { runId: ctx.runId, allocationData },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Analyze Heap Allocation Patterns
   const heapAnalysis = await ctx.task(analyzeHeapAllocationPatternsTask, {
     projectName, allocationData, outputDir
@@ -83,17 +94,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...documentation.artifacts);
 
   // Phase 8: Provide Optimization Recommendations
-  const recommendations = await ctx.task(provideMemoryOptimizationRecommendationsTask, {
+  let recommendations = await ctx.task(provideMemoryOptimizationRecommendationsTask, {
     projectName, heapAnalysis, memoryIntensive, retentionAnalysis, outputDir
   });
-  artifacts.push(...recommendations.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendations = await ctx.task(provideMemoryOptimizationRecommendationsTask, { ...{
+    projectName, heapAnalysis, memoryIntensive, retentionAnalysis, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete. Found ${memoryIntensive.operations.length} memory-intensive operations. Review recommendations?`,
     title: 'Memory Profiling Results',
-    context: { runId: ctx.runId, recommendations: recommendations.recommendations }
-  });
-
+    context: { runId: ctx.runId, recommendations: recommendations.recommendations },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Creating strategy map');
-  const strategyMap = await ctx.task(strategyMapTask, {
+  let strategyMap = await ctx.task(strategyMapTask, {
     financialPerspective,
     customerPerspective,
     processPerspective,
@@ -90,8 +90,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyMap.artifacts);
 
-  // Breakpoint: Review strategy map
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      strategyMap = await ctx.task(strategyMapTask, { ...{
+    financialPerspective,
+    customerPerspective,
+    processPerspective,
+    learningPerspective,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategy map complete. ${strategyMap.totalObjectives} objectives across 4 perspectives with ${strategyMap.causalLinks.length} cause-effect links. Review before measurement system?`,
     title: 'Balanced Scorecard Strategy Map Review',
     context: {
@@ -107,9 +117,15 @@ export async function process(inputs, ctx) {
         learningObjectives: learningPerspective.objectives.length,
         causalLinks: strategyMap.causalLinks.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MEASURES AND TARGETS DEFINITION
   // ============================================================================
@@ -208,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

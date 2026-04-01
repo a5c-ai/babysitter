@@ -58,15 +58,24 @@ export async function process(inputs, ctx) {
   const feasibilityValidation = await ctx.task(feasibilityValidationTask, { robotName, testing, outputDir });
   artifacts.push(...feasibilityValidation.artifacts);
 
-  const qualityMetrics = await ctx.task(trajectoryQualityMetricsTask, { robotName, testing, feasibilityValidation, outputDir });
-  artifacts.push(...qualityMetrics.artifacts);
-
-  await ctx.breakpoint({
+  let qualityMetrics = await ctx.task(trajectoryQualityMetricsTask, { robotName, testing, feasibilityValidation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityMetrics = await ctx.task(trajectoryQualityMetricsTask, { ...{ robotName, testing, feasibilityValidation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Trajectory Optimization Complete for ${robotName}. Smoothness: ${qualityMetrics.smoothness}, Feasibility: ${feasibilityValidation.feasible}. Review?`,
     title: 'Trajectory Optimization Complete',
-    context: { runId: ctx.runId, smoothness: qualityMetrics.smoothness, feasible: feasibilityValidation.feasible }
-  });
-
+    context: { runId: ctx.runId, smoothness: qualityMetrics.smoothness, feasible: feasibilityValidation.feasible },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: feasibilityValidation.feasible && qualityMetrics.meetsRequirements,
     robotName,

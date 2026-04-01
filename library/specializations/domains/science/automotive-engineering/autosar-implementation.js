@@ -38,14 +38,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Software Component Design
-  const swcDesign = await ctx.task(swcDesignTask, {
+  let swcDesign = await ctx.task(swcDesignTask, {
     projectName,
     autosarArchitecture,
     swcList
   });
 
-  // Breakpoint: SWC design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      swcDesign = await ctx.task(swcDesignTask, { ...{
+    projectName,
+    autosarArchitecture,
+    swcList
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review SWC design for ${projectName}. ${swcDesign.components?.length || 0} components defined. Approve design?`,
     title: 'SWC Design Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: swcDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Basic Software Configuration
   const bswConfiguration = await ctx.task(bswConfigurationTask, {
     projectName,
@@ -75,7 +89,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: AUTOSAR Compliance Validation
-  const complianceValidation = await ctx.task(complianceValidationTask, {
+  let complianceValidation = await ctx.task(complianceValidationTask, {
     projectName,
     autosarPlatform,
     swcDesign,
@@ -83,8 +97,18 @@ export async function process(inputs, ctx) {
     rteIntegration
   });
 
-  // Final Breakpoint: AUTOSAR implementation approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceValidation = await ctx.task(complianceValidationTask, { ...{
+    projectName,
+    autosarPlatform,
+    swcDesign,
+    bswConfiguration,
+    rteIntegration
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AUTOSAR Implementation complete for ${projectName}. Compliance score: ${complianceValidation.complianceScore}%. Approve?`,
     title: 'AUTOSAR Implementation Approval',
     context: {
@@ -95,9 +119,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/autosar-configuration.json`, format: 'json', content: bswConfiguration },
         { path: `artifacts/integration-reports.json`, format: 'json', content: rteIntegration }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

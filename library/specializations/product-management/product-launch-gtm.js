@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting pre-launch readiness assessment');
 
-  const assessmentResult = await ctx.task(preLaunchAssessmentTask, {
+  let assessmentResult = await ctx.task(preLaunchAssessmentTask, {
     productName,
     launchType,
     launchTier,
@@ -91,8 +91,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Pre-launch assessment complete - Readiness: ${assessmentResult.readinessScore}/100`);
 
-  // Quality Gate: Pre-launch assessment review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      assessmentResult = await ctx.task(preLaunchAssessmentTask, { ...{
+    productName,
+    launchType,
+    launchTier,
+    targetAudience,
+    marketType,
+    competitive,
+    launchDate,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Pre-launch assessment complete for ${productName}. Readiness score: ${assessmentResult.readinessScore}/100. ${assessmentResult.criticalGaps.length} critical gaps identified. Proceed with launch planning?`,
     title: 'Pre-Launch Assessment Review',
     context: {
@@ -105,16 +118,22 @@ export async function process(inputs, ctx) {
         criticalGaps: assessmentResult.criticalGaps
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MARKET POSITIONING AND MESSAGING
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Developing market positioning and messaging framework');
 
-  const messagingResult = await ctx.task(developMessagingFrameworkTask, {
+  let messagingResult = await ctx.task(developMessagingFrameworkTask, {
     productName,
     launchType,
     targetAudience,
@@ -129,8 +148,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Messaging framework complete - Value props: ${messagingResult.valuePropositions.length}, Messages: ${messagingResult.keyMessages.length}`);
 
-  // Quality Gate: Messaging review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      messagingResult = await ctx.task(developMessagingFrameworkTask, { ...{
+    productName,
+    launchType,
+    targetAudience,
+    marketType,
+    competitive,
+    assessmentResult,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Messaging framework developed. ${messagingResult.valuePropositions.length} value propositions, ${messagingResult.keyMessages.length} key messages. Review positioning statement and messaging?`,
     title: 'Messaging Framework Review',
     context: {
@@ -142,9 +173,15 @@ export async function process(inputs, ctx) {
         differentiators: messagingResult.differentiators
       },
       files: messagingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: COMPETITIVE ANALYSIS AND POSITIONING
   // ============================================================================
@@ -171,7 +208,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Developing GTM channel strategy');
 
-  const channelStrategyResult = await ctx.task(developChannelStrategyTask, {
+  let channelStrategyResult = await ctx.task(developChannelStrategyTask, {
     productName,
     launchType,
     launchTier,
@@ -189,8 +226,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Channel strategy developed - ${channelStrategyResult.channels.length} channels selected`);
 
-  // Quality Gate: Channel strategy review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      channelStrategyResult = await ctx.task(developChannelStrategyTask, { ...{
+    productName,
+    launchType,
+    launchTier,
+    targetAudience,
+    messagingResult,
+    channelPreferences,
+    budgetConstraints,
+    companyStage,
+    existingCustomers,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Channel strategy developed with ${channelStrategyResult.channels.length} channels. Primary: ${channelStrategyResult.primaryChannels.join(', ')}. Review channel mix and tactics?`,
     title: 'Channel Strategy Review',
     context: {
@@ -205,9 +257,15 @@ export async function process(inputs, ctx) {
         }))
       },
       files: channelStrategyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: LAUNCH TIMELINE AND MILESTONES
   // ============================================================================
@@ -259,7 +317,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Planning launch content and marketing collateral');
 
-  const contentResult = await ctx.task(planLaunchContentTask, {
+  let contentResult = await ctx.task(planLaunchContentTask, {
     productName,
     launchType,
     launchTier,
@@ -275,8 +333,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Content plan created - ${contentResult.contentAssets.length} assets planned across ${contentResult.contentTypes.length} types`);
 
-  // Quality Gate: Content plan review
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      contentResult = await ctx.task(planLaunchContentTask, { ...{
+    productName,
+    launchType,
+    launchTier,
+    messagingResult,
+    channelStrategyResult,
+    targetAudience,
+    timelineResult,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Launch content planned - ${contentResult.contentAssets.length} assets across ${contentResult.contentTypes.length} content types. Review content calendar and asset list?`,
     title: 'Launch Content Review',
     context: {
@@ -287,9 +358,15 @@ export async function process(inputs, ctx) {
         keyAssets: contentResult.contentAssets.filter(a => a.priority === 'critical').map(a => a.name)
       },
       files: contentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: SUCCESS METRICS AND KPIs
   // ============================================================================
@@ -409,7 +486,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Calculating GTM readiness score and final assessment');
 
-  const scoringResult = await ctx.task(calculateGTMScoreTask, {
+  let scoringResult = await ctx.task(calculateGTMScoreTask, {
     productName,
     launchType,
     launchTier,
@@ -431,8 +508,26 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `GTM Score: ${gtmScore}/100, Launch Ready: ${launchReadiness}`);
 
-  // Final Breakpoint: GTM Plan Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scoringResult = await ctx.task(calculateGTMScoreTask, { ...{
+    productName,
+    launchType,
+    launchTier,
+    launchDate,
+    assessmentResult,
+    messagingResult,
+    channelStrategyResult,
+    timelineResult,
+    contentResult,
+    metricsResult,
+    checklistResult,
+    phaseResults,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Product Launch and GTM Plan Complete for ${productName}. GTM Score: ${gtmScore}/100. Launch Ready: ${launchReadiness ? 'YES' : 'NO'}. ${launchReadiness ? 'Proceed with launch execution?' : 'Address gaps before launch?'}`,
     title: 'Final GTM Plan Review',
     context: {
@@ -471,9 +566,15 @@ export async function process(inputs, ctx) {
         { path: timelineResult.timelinePath, format: 'json', label: 'Launch Timeline' },
         { path: scoringResult.summaryPath, format: 'json', label: 'GTM Score Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -575,8 +676,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

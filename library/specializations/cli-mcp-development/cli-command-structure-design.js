@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Implementing command groups and namespaces');
 
-  const commandGroups = await ctx.task(commandGroupsTask, {
+  let commandGroups = await ctx.task(commandGroupsTask, {
     projectName,
     hierarchyDesign,
     outputDir
@@ -80,8 +80,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...commandGroups.artifacts);
 
-  // Quality Gate: Command Structure Review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      commandGroups = await ctx.task(commandGroupsTask, { ...{
+    projectName,
+    hierarchyDesign,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Command structure designed with ${hierarchyDesign.totalCommands} commands across ${commandGroups.groups.length} groups. Review and approve?`,
     title: 'Command Structure Review',
     context: {
@@ -90,9 +98,15 @@ export async function process(inputs, ctx) {
       totalCommands: hierarchyDesign.totalCommands,
       groups: commandGroups.groups,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: GLOBAL VS COMMAND OPTIONS
   // ============================================================================
@@ -129,7 +143,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating command structure documentation');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     workflowAnalysis,
     hierarchyDesign,
@@ -141,8 +155,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    workflowAnalysis,
+    hierarchyDesign,
+    commandGroups,
+    optionsDesign,
+    aliasesDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Command Structure Design complete for ${projectName}. Review documentation and approve?`,
     title: 'Command Structure Design Complete',
     context: {
@@ -158,9 +184,15 @@ export async function process(inputs, ctx) {
         { path: documentation.structureDocPath, format: 'markdown', label: 'Command Structure' },
         { path: documentation.referenceDocPath, format: 'markdown', label: 'Command Reference' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

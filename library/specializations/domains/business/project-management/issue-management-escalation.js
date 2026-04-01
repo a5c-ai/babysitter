@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Issue Identification and Logging
-  const issueCategorization = await ctx.task(issueCategorizationTask, {
+  let issueCategorization = await ctx.task(issueCategorizationTask, {
     projectName,
     issues,
     framework: frameworkSetup
@@ -45,8 +45,16 @@ export async function process(inputs, ctx) {
 
   // Breakpoint: Review categorized issues
   const criticalIssues = issueCategorization.issues?.filter(i => i.severity === 'critical') || [];
-  if (criticalIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        issueCategorization = await ctx.task(issueCategorizationTask, { ...{
+    projectName,
+    issues,
+    framework: frameworkSetup
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `${criticalIssues.length} critical issues identified for ${projectName}. Review and prioritize?`,
       title: 'Critical Issue Review',
       context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: criticalIssues
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Issue Prioritization
   const issuePrioritization = await ctx.task(issuePrioritizationTask, {
@@ -107,7 +121,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Issue Management Documentation
-  const issueDocumentation = await ctx.task(issueDocumentationTask, {
+  let issueDocumentation = await ctx.task(issueDocumentationTask, {
     projectName,
     framework: frameworkSetup,
     issues: issuePrioritization,
@@ -117,8 +131,20 @@ export async function process(inputs, ctx) {
     reporting: issueReporting
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      issueDocumentation = await ctx.task(issueDocumentationTask, { ...{
+    projectName,
+    framework: frameworkSetup,
+    issues: issuePrioritization,
+    resolutions: resolutionPlanning,
+    escalationPlanning,
+    communicationPlan,
+    reporting: issueReporting
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Issue management setup complete for ${projectName}. ${issuePrioritization.prioritizedIssues?.length || 0} issues tracked. Approve management plan?`,
     title: 'Issue Management Approval',
     context: {
@@ -128,9 +154,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/issue-management.json`, format: 'json', content: issueDocumentation },
         { path: `artifacts/issue-management.md`, format: 'markdown', content: issueDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -146,8 +178,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const issueFrameworkTask = defineTask('issue-framework', (args, taskCtx) => ({
   kind: 'agent',

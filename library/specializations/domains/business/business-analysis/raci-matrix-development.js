@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Defining escalation procedures');
-  const escalationProcedures = await ctx.task(escalationProceduresTask, {
+  let escalationProcedures = await ctx.task(escalationProceduresTask, {
     projectName,
     raciMatrix: raciAssignment.matrix,
     roles: roleIdentification.roles,
@@ -106,8 +106,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...escalationProcedures.artifacts);
 
-  // Breakpoint: Review RACI
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      escalationProcedures = await ctx.task(escalationProceduresTask, { ...{
+    projectName,
+    raciMatrix: raciAssignment.matrix,
+    roles: roleIdentification.roles,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RACI matrix complete for ${projectName}. Validation score: ${raciValidation.validationScore}/100. Review and approve?`,
     title: 'RACI Matrix Review',
     context: {
@@ -125,9 +134,15 @@ export async function process(inputs, ctx) {
         totalRoles: roleIdentification.roles?.length || 0,
         issues: raciValidation.issues?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DOCUMENTATION
   // ============================================================================
@@ -178,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

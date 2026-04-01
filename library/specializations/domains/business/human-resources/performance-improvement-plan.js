@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Performance Improvement Plan Process for ${employeeName} (${pipId})`);
 
   // Phase 1: Initial Assessment and Documentation
-  const initialAssessment = await ctx.task(initialAssessmentTask, {
+  let initialAssessment = await ctx.task(initialAssessmentTask, {
     employeeId,
     employeeName,
     manager,
@@ -51,9 +51,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...initialAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      initialAssessment = await ctx.task(initialAssessmentTask, { ...{
+    employeeId,
+    employeeName,
+    manager,
+    performanceIssues,
+    department,
+    previousWarnings,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Initial assessment completed for ${employeeName}. ${initialAssessment.issueCount} performance issues documented. Review assessment before proceeding?`,
     title: 'PIP Initial Assessment Review',
     context: {
@@ -64,9 +75,15 @@ export async function process(inputs, ctx) {
       impactAssessment: initialAssessment.impactAssessment,
       previousActions: initialAssessment.previousActions,
       files: initialAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: HRBP Consultation
   const hrbpConsultation = await ctx.task(hrbpConsultationTask, {
     pipId,
@@ -81,7 +98,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...hrbpConsultation.artifacts);
 
   // Phase 3: PIP Goal Development
-  const goalDevelopment = await ctx.task(goalDevelopmentTask, {
+  let goalDevelopment = await ctx.task(goalDevelopmentTask, {
     pipId,
     employeeName,
     performanceIssues: initialAssessment.documentedIssues,
@@ -89,9 +106,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...goalDevelopment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      goalDevelopment = await ctx.task(goalDevelopmentTask, { ...{
+    pipId,
+    employeeName,
+    performanceIssues: initialAssessment.documentedIssues,
+    pipDuration,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `PIP goals developed: ${goalDevelopment.goals.length} improvement goals with specific milestones. Review goals before employee meeting?`,
     title: 'PIP Goals Review',
     context: {
@@ -101,9 +127,15 @@ export async function process(inputs, ctx) {
       milestones: goalDevelopment.milestones,
       successCriteria: goalDevelopment.successCriteria,
       files: goalDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Support Plan Development
   const supportPlan = await ctx.task(supportPlanTask, {
     pipId,
@@ -133,7 +165,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...pipDocument.artifacts);
 
   // Phase 6: Employee Meeting and PIP Delivery
-  const pipDelivery = await ctx.task(pipDeliveryTask, {
+  let pipDelivery = await ctx.task(pipDeliveryTask, {
     pipId,
     employeeName,
     manager,
@@ -142,9 +174,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...pipDelivery.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      pipDelivery = await ctx.task(pipDeliveryTask, { ...{
+    pipId,
+    employeeName,
+    manager,
+    pipDocument: pipDocument.document,
+    hrbp,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `PIP delivered to ${employeeName}. Employee acknowledged: ${pipDelivery.acknowledged}. Proceed with monitoring phase?`,
     title: 'PIP Delivery Confirmation',
     context: {
@@ -154,9 +196,15 @@ export async function process(inputs, ctx) {
       employeeResponse: pipDelivery.employeeResponse,
       meetingNotes: pipDelivery.meetingNotes,
       files: pipDelivery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Weekly Check-in Process
   const weeklyCheckIns = await ctx.task(weeklyCheckInTask, {
     pipId,
@@ -171,7 +219,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...weeklyCheckIns.artifacts);
 
   // Phase 8: Mid-Point Review
-  const midPointReview = await ctx.task(midPointReviewTask, {
+  let midPointReview = await ctx.task(midPointReviewTask, {
     pipId,
     employeeName,
     manager,
@@ -180,9 +228,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...midPointReview.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      midPointReview = await ctx.task(midPointReviewTask, { ...{
+    pipId,
+    employeeName,
+    manager,
+    goals: goalDevelopment.goals,
+    weeklyCheckIns: weeklyCheckIns.checkIns,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Mid-point review for ${employeeName}'s PIP. Progress: ${midPointReview.overallProgress}%. Continue, extend, or escalate?`,
     title: 'PIP Mid-Point Review',
     context: {
@@ -193,9 +251,15 @@ export async function process(inputs, ctx) {
       concerns: midPointReview.concerns,
       recommendation: midPointReview.recommendation,
       files: midPointReview.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: Continued Monitoring
   const continuedMonitoring = await ctx.task(continuedMonitoringTask, {
     pipId,
@@ -209,7 +273,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...continuedMonitoring.artifacts);
 
   // Phase 10: Final Evaluation
-  const finalEvaluation = await ctx.task(finalEvaluationTask, {
+  let finalEvaluation = await ctx.task(finalEvaluationTask, {
     pipId,
     employeeName,
     manager,
@@ -219,9 +283,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...finalEvaluation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalEvaluation = await ctx.task(finalEvaluationTask, { ...{
+    pipId,
+    employeeName,
+    manager,
+    goals: goalDevelopment.goals,
+    allCheckIns: [...weeklyCheckIns.checkIns, ...continuedMonitoring.checkIns],
+    midPointReview,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Final PIP evaluation for ${employeeName}. Overall completion: ${finalEvaluation.overallCompletion}%. Recommended outcome: ${finalEvaluation.recommendedOutcome}. Review and confirm outcome?`,
     title: 'PIP Final Evaluation',
     context: {
@@ -232,9 +307,15 @@ export async function process(inputs, ctx) {
       recommendedOutcome: finalEvaluation.recommendedOutcome,
       justification: finalEvaluation.justification,
       files: finalEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Outcome Determination
   const outcomeDetermination = await ctx.task(outcomeDeterminationTask, {
     pipId,
@@ -285,8 +366,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const initialAssessmentTask = defineTask('initial-assessment', (args, taskCtx) => ({
   kind: 'agent',

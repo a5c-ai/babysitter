@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning visual regression testing strategy');
 
-  const strategyPlanning = await ctx.task(visualRegressionStrategyTask, {
+  let strategyPlanning = await ctx.task(visualRegressionStrategyTask, {
     projectName,
     applicationUrl,
     pages,
@@ -105,8 +105,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyPlanning.artifacts);
 
-  // Quality Gate: Strategy review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyPlanning = await ctx.task(visualRegressionStrategyTask, { ...{
+    projectName,
+    applicationUrl,
+    pages,
+    components,
+    framework,
+    tool,
+    viewports,
+    baselineStrategy,
+    thresholds,
+    crossBrowserTesting,
+    browsers,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visual regression strategy planned. Tool: ${tool}, ${strategyPlanning.totalScenarios} test scenarios identified across ${viewports.length} viewport(s). Baseline strategy: ${baselineStrategy}. Review and approve strategy?`,
     title: 'Visual Regression Strategy Review',
     context: {
@@ -121,9 +138,15 @@ export async function process(inputs, ctx) {
       },
       testCoverage: strategyPlanning.testCoverage,
       files: strategyPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: TOOL SETUP AND CONFIGURATION
   // ============================================================================
@@ -231,7 +254,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Page ${page}: ${pageBaseline.baselinesCaptured} baseline(s) captured`);
   }
-
   // Capture component baselines if specified
   const componentBaselineResults = [];
   if (components.length > 0) {
@@ -240,7 +262,7 @@ export async function process(inputs, ctx) {
     for (const component of components) {
       ctx.log('info', `Capturing baselines for component: ${component}`);
 
-      const componentBaseline = await ctx.task(captureComponentBaselinesTask, {
+      let componentBaseline = await ctx.task(captureComponentBaselinesTask, {
         projectName,
         component,
         viewports: viewportConfig.viewports,
@@ -261,8 +283,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Total baselines captured: ${baselinesCaptured}`);
 
-  // Quality Gate: Baseline review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      componentBaseline = await ctx.task(captureComponentBaselinesTask, { ...{
+        projectName,
+        component,
+        viewports: viewportConfig.viewports,
+        tool: toolSetup.toolConfig,
+        outputDir
+      }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Baseline capture complete. ${baselinesCaptured} baseline images captured across ${pages.length} page(s) and ${components.length} component(s). Review baselines and approve to proceed with visual tests?`,
     title: 'Baseline Capture Review',
     context: {
@@ -281,9 +313,15 @@ export async function process(inputs, ctx) {
       files: baselineResults
         .slice(0, 5)
         .map(b => ({ path: b.result.sampleImagePath, format: 'image', label: `Baseline: ${b.page}` }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: VISUAL TEST IMPLEMENTATION
   // ============================================================================
@@ -331,7 +369,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Running initial visual comparison tests');
 
-  const initialComparison = await ctx.task(visualComparisonTask, {
+  let initialComparison = await ctx.task(visualComparisonTask, {
     projectName,
     applicationUrl,
     visualTests: testImplementation.visualTests,
@@ -350,8 +388,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Initial comparison: ${totalDifferences} difference(s) found, ${criticalDifferences} critical`);
 
   // Quality Gate: Initial comparison results
-  if (totalDifferences > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        initialComparison = await ctx.task(visualComparisonTask, { ...{
+    projectName,
+    applicationUrl,
+    visualTests: testImplementation.visualTests,
+    thresholdConfig: thresholdConfig.configuration,
+    tool: toolSetup.toolConfig,
+    runType: 'initial',
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Initial visual comparison found ${totalDifferences} difference(s), including ${criticalDifferences} critical difference(s). This is expected for first run. Review differences and approve to continue?`,
       title: 'Initial Visual Comparison Results',
       context: {
@@ -368,9 +418,15 @@ export async function process(inputs, ctx) {
           { path: initialComparison.reportPath, format: 'html', label: 'Visual Comparison Report' },
           ...initialComparison.diffImages.slice(0, 5).map(img => ({ path: img, format: 'image', label: 'Diff' }))
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: DIFFERENCE ANALYSIS AND CATEGORIZATION
@@ -400,7 +456,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Implementing baseline update strategy');
 
-  const baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, {
+  let baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, {
     projectName,
     differenceAnalysis,
     baselineStrategy,
@@ -412,8 +468,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...baselineUpdateStrategy.artifacts);
 
   // Quality Gate: Baseline update approval
-  if (baselineUpdateStrategy.updatesRequired.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, { ...{
+    projectName,
+    differenceAnalysis,
+    baselineStrategy,
+    acceptanceCriteria,
+    tool: toolSetup.toolConfig,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `${baselineUpdateStrategy.updatesRequired.length} baseline(s) require update based on intentional changes. Review updates and approve baseline refresh?`,
       title: 'Baseline Update Approval',
       context: {
@@ -427,9 +494,15 @@ export async function process(inputs, ctx) {
         files: [
           { path: baselineUpdateStrategy.updatePlanPath, format: 'markdown', label: 'Update Plan' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: REGRESSION REMEDIATION
@@ -448,8 +521,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationResults.artifacts);
 
-    // Quality Gate: Regression review
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        baselineUpdateStrategy = await ctx.task(baselineUpdateStrategyTask, { ...{
+    projectName,
+    differenceAnalysis,
+    baselineStrategy,
+    acceptanceCriteria,
+    tool: toolSetup.toolConfig,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `${regressions.length} visual regression(s) detected. Review regressions and remediation plan. Approve to continue or halt for fixes?`,
       title: 'Visual Regression Detected',
       context: {
@@ -465,9 +549,15 @@ export async function process(inputs, ctx) {
           { path: remediationResults.reportPath, format: 'markdown', label: 'Regression Report' },
           ...regressions.slice(0, 3).map(r => ({ path: r.diffImagePath, format: 'image', label: `Regression: ${r.testName}` }))
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: FALSE POSITIVE ELIMINATION
@@ -510,7 +600,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cross-browser testing: ${crossBrowserResults.browserTestsRun} test(s) across ${browsers.length} browser(s)`);
   }
-
   // ============================================================================
   // PHASE 14: VISUAL TEST OPTIMIZATION
   // ============================================================================
@@ -571,7 +660,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', 'CI/CD integration configured');
   }
-
   // ============================================================================
   // PHASE 17: VISUAL TESTING DOCUMENTATION
   // ============================================================================
@@ -602,7 +690,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Conducting final validation');
 
-  const finalValidation = await ctx.task(visualRegressionValidationTask, {
+  let finalValidation = await ctx.task(visualRegressionValidationTask, {
     projectName,
     baselinesCaptured,
     visualTests: testImplementation.visualTests,
@@ -619,8 +707,22 @@ export async function process(inputs, ctx) {
   const validationScore = finalValidation.validationScore;
   const productionReady = finalValidation.productionReady;
 
-  // Final Breakpoint: Visual regression setup approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalValidation = await ctx.task(visualRegressionValidationTask, { ...{
+    projectName,
+    baselinesCaptured,
+    visualTests: testImplementation.visualTests,
+    comparisonResults: initialComparison,
+    differenceAnalysis,
+    regressions,
+    acceptanceCriteria,
+    cicdIntegrationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Visual Regression Testing Setup Complete! Validation score: ${validationScore}/100. ${baselinesCaptured} baselines, ${visualTests.length} tests, ${regressions.length} regressions. Production ready: ${productionReady}. Approve for deployment?`,
     title: 'Visual Regression Setup Complete',
     context: {
@@ -654,9 +756,15 @@ export async function process(inputs, ctx) {
         { path: finalValidation.reportPath, format: 'markdown', label: 'Validation Report' },
         ...(differenceAnalysis.diffSummaryPath ? [{ path: differenceAnalysis.diffSummaryPath, format: 'html', label: 'Difference Summary' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -734,8 +842,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

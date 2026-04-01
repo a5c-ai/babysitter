@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Peer Review Report
   ctx.log('info', 'Generating peer review report');
-  const reviewReport = await ctx.task(reviewReportTask, {
+  let reviewReport = await ctx.task(reviewReportTask, {
     manuscript,
     initialAssessment,
     argumentEvaluation,
@@ -109,8 +109,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reviewReport.artifacts);
 
-  // Breakpoint: Review peer review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reviewReport = await ctx.task(reviewReportTask, { ...{
+    manuscript,
+    initialAssessment,
+    argumentEvaluation,
+    methodologyAssessment,
+    contributionEvaluation,
+    writingAssessment,
+    feedbackDevelopment,
+    journalGuidelines,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Peer review complete for "${manuscript.title || 'manuscript'}". Recommendation: ${reviewReport.recommendation}. Review feedback?`,
     title: 'Peer Review Evaluation Results',
     context: {
@@ -122,9 +136,15 @@ export async function process(inputs, ctx) {
         majorConcerns: feedbackDevelopment.majorConcerns?.length || 0,
         minorConcerns: feedbackDevelopment.minorConcerns?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -152,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Manuscript Assessment
+  // Task 1: Initial Manuscript Assessment
 export const initialAssessmentTask = defineTask('initial-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct initial manuscript assessment',

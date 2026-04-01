@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Structured Interview Design for ${jobFamily} - ${roleLevel}`);
 
   // Phase 1: Competency Framework Definition
-  const competencyFramework = await ctx.task(competencyFrameworkTask, {
+  let competencyFramework = await ctx.task(competencyFrameworkTask, {
     jobFamily,
     roleLevel,
     competencies,
@@ -47,9 +47,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...competencyFramework.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      competencyFramework = await ctx.task(competencyFrameworkTask, { ...{
+    jobFamily,
+    roleLevel,
+    competencies,
+    existingFramework,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Competency framework defined with ${competencyFramework.competencies.length} competencies. Review and approve before designing questions?`,
     title: 'Competency Framework Review',
     context: {
@@ -59,9 +68,15 @@ export async function process(inputs, ctx) {
       competencies: competencyFramework.competencies,
       behavioralIndicators: competencyFramework.behavioralIndicators,
       files: competencyFramework.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Interview Stage Design
   const interviewStageDesign = await ctx.task(interviewStageDesignTask, {
     jobFamily,
@@ -86,7 +101,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...questionBank.artifacts);
 
   // Phase 4: Scorecard Development
-  const scorecardDesign = await ctx.task(scorecardDesignTask, {
+  let scorecardDesign = await ctx.task(scorecardDesignTask, {
     jobFamily,
     roleLevel,
     competencies: competencyFramework.competencies,
@@ -95,9 +110,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...scorecardDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      scorecardDesign = await ctx.task(scorecardDesignTask, { ...{
+    jobFamily,
+    roleLevel,
+    competencies: competencyFramework.competencies,
+    interviewStages: interviewStageDesign.stages,
+    questionBank: questionBank.questions,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Scorecards designed for ${scorecardDesign.scorecards.length} interview stages. Review scoring criteria and rating scales?`,
     title: 'Scorecard Review',
     context: {
@@ -106,9 +131,15 @@ export async function process(inputs, ctx) {
       ratingScale: scorecardDesign.ratingScale,
       competencyWeights: scorecardDesign.competencyWeights,
       files: scorecardDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Bias Reduction Measures
   let biasReduction = null;
   if (biasReductionFocus) {
@@ -122,7 +153,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...biasReduction.artifacts);
   }
-
   // Phase 6: Interview Guide Creation
   const interviewGuide = await ctx.task(interviewGuideTask, {
     jobFamily,
@@ -138,7 +168,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...interviewGuide.artifacts);
 
   // Phase 7: Interviewer Training Materials
-  const trainingMaterials = await ctx.task(interviewerTrainingTask, {
+  let trainingMaterials = await ctx.task(interviewerTrainingTask, {
     jobFamily,
     roleLevel,
     interviewGuide: interviewGuide.guide,
@@ -160,9 +190,19 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...calibrationResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        trainingMaterials = await ctx.task(interviewerTrainingTask, { ...{
+    jobFamily,
+    roleLevel,
+    interviewGuide: interviewGuide.guide,
+    scorecards: scorecardDesign.scorecards,
+    biasReduction: biasReduction?.measures,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `Calibration session designed. Inter-rater reliability target: ${calibrationResults.reliabilityTarget}. Review calibration approach?`,
       title: 'Calibration Session Review',
       context: {
@@ -171,9 +211,15 @@ export async function process(inputs, ctx) {
         exercises: calibrationResults.exercises,
         reliabilityTarget: calibrationResults.reliabilityTarget,
         files: calibrationResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // Phase 9: Pilot Testing Plan
   const pilotPlan = await ctx.task(pilotTestingTask, {
@@ -228,8 +274,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const competencyFrameworkTask = defineTask('competency-framework', (args, taskCtx) => ({
   kind: 'agent',

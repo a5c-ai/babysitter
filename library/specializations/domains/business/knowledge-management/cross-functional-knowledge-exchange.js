@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Exchange Needs Assessment
   ctx.log('info', 'Phase 1: Assessing cross-functional exchange needs');
-  const needsAssessment = await ctx.task(needsAssessmentTask, { exchangeScope, participatingFunctions, knowledgeDomains, organizationalContext, outputDir });
-  artifacts.push(...needsAssessment.artifacts);
-
-  await ctx.breakpoint({
+  let needsAssessment = await ctx.task(needsAssessmentTask, { exchangeScope, participatingFunctions, knowledgeDomains, organizationalContext, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      needsAssessment = await ctx.task(needsAssessmentTask, { ...{ exchangeScope, participatingFunctions, knowledgeDomains, organizationalContext, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Identified ${needsAssessment.exchangeOpportunities.length} exchange opportunities across ${participatingFunctions.length} functions. Review?`,
     title: 'Exchange Needs Assessment Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { opportunities: needsAssessment.exchangeOpportunities.length, functions: participatingFunctions.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { opportunities: needsAssessment.exchangeOpportunities.length, functions: participatingFunctions.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Exchange Program Design
   ctx.log('info', 'Phase 2: Designing exchange program');
   const programDesign = await ctx.task(programDesignTask, { needsAssessment, exchangeMechanisms, duration, outputDir });
@@ -84,7 +93,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { exchangeProgram: programDesign.design, activities: activitiesPlanning.activities, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -103,8 +111,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/cross-functional-knowledge-exchange', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const needsAssessmentTask = defineTask('needs-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess exchange needs',

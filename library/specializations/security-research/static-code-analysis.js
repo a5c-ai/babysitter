@@ -126,25 +126,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Consolidating and documenting findings');
 
-  const consolidation = await ctx.task(findingsConsolidationTask, {
+  let consolidation = await ctx.task(findingsConsolidationTask, {
     projectName,
     vulnerabilities: allVulnerabilities,
     codebaseAssessment,
     outputDir
   });
 
-  artifacts.push(...consolidation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      consolidation = await ctx.task(findingsConsolidationTask, { ...{
+    projectName,
+    vulnerabilities: allVulnerabilities,
+    codebaseAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Static analysis complete for ${projectName}. Found ${consolidation.totalVulnerabilities} vulnerabilities. Review report?`,
     title: 'Static Analysis Complete',
     context: {
       runId: ctx.runId,
       summary: consolidation.summary,
       files: consolidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -168,8 +182,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

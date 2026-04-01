@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/legal/privacy-impact-assessment', timestamp: startTime }
     };
   }
-
   // Phase 2: Data Flow Analysis
   const dataFlowAnalysis = await ctx.task(piaDataFlowTask, {
     assessmentId,
@@ -73,7 +72,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...necessityAssessment.artifacts);
 
   // Phase 4: Risk Assessment
-  const riskAssessment = await ctx.task(piaRiskAssessmentTask, {
+  let riskAssessment = await ctx.task(piaRiskAssessmentTask, {
     assessmentId,
     subject,
     dataFlows: dataFlowAnalysis.flows,
@@ -83,8 +82,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: High risk findings
   const highRisks = riskAssessment.risks.filter(r => r.level === 'high');
-  if (highRisks.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        riskAssessment = await ctx.task(piaRiskAssessmentTask, { ...{
+    assessmentId,
+    subject,
+    dataFlows: dataFlowAnalysis.flows,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `PIA ${assessmentId} identified ${highRisks.length} high privacy risks. Review risks and mitigation measures?`,
       title: 'High Privacy Risk Alert',
       context: {
@@ -92,9 +100,15 @@ export async function process(inputs, ctx) {
         assessmentId,
         highRisks: highRisks.map(r => ({ risk: r.description, mitigation: r.mitigation })),
         files: riskAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Mitigation Measures
   const mitigation = await ctx.task(mitigationMeasuresTask, {
@@ -124,7 +138,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...dpoConsultation.artifacts);
   }
-
   // Phase 8: Assessment Report
   const report = await ctx.task(piaReportTask, {
     assessmentId,
@@ -142,16 +155,25 @@ export async function process(inputs, ctx) {
   artifacts.push(...report.artifacts);
 
   // Phase 9: Approval
-  const approval = await ctx.task(piaApprovalTask, {
+  let approval = await ctx.task(piaApprovalTask, {
     assessmentId,
     subject,
     residualRiskLevel: residualRisk.overallLevel,
     reportPath: report.reportPath,
     outputDir
   });
-  artifacts.push(...approval.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      approval = await ctx.task(piaApprovalTask, { ...{
+    assessmentId,
+    subject,
+    residualRiskLevel: residualRisk.overallLevel,
+    reportPath: report.reportPath,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PIA ${assessmentId} complete. Residual risk: ${residualRisk.overallLevel}. ${mitigation.measures.length} mitigations recommended. Approve assessment?`,
     title: 'PIA Approval Review',
     context: {
@@ -160,9 +182,15 @@ export async function process(inputs, ctx) {
       residualRiskLevel: residualRisk.overallLevel,
       mitigationsCount: mitigation.measures.length,
       files: [{ path: report.reportPath, format: 'markdown', label: 'PIA Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     assessmentId,

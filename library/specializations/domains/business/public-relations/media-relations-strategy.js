@@ -20,8 +20,10 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Organizational Assessment and Goal Alignment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting media relations strategy development. Analyze organizational context and goals?',
     title: 'Phase 1: Organizational Assessment',
     context: {
@@ -29,17 +31,31 @@ export async function process(inputs, ctx) {
       phase: 'organizational-assessment',
       organizationProfile,
       goals
-    }
-  });
-
-  const orgAssessment = await ctx.task(analyzeOrganizationalContextTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let orgAssessment = await ctx.task(analyzeOrganizationalContextTask, {
     organizationProfile,
     goals,
     industryVertical
   });
 
-  // Phase 2: Media Landscape Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      orgAssessment = await ctx.task(analyzeOrganizationalContextTask, { ...{
+    organizationProfile,
+    goals,
+    industryVertical
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Organization assessed. Analyze media landscape and identify target outlets?',
     title: 'Phase 2: Media Landscape Analysis',
     context: {
@@ -47,9 +63,15 @@ export async function process(inputs, ctx) {
       phase: 'media-landscape',
       industry: industryVertical,
       geographicScope
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [mediaLandscape, competitorAnalysis] = await Promise.all([
     ctx.task(analyzeMediaLandscapeTask, {
       industryVertical,
@@ -63,8 +85,16 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 3: Media Tiering and Prioritization
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      orgAssessment = await ctx.task(analyzeOrganizationalContextTask, { ...{
+    organizationProfile,
+    goals,
+    industryVertical
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Media landscape analyzed. Create media tier structure?',
     title: 'Phase 3: Media Tiering',
     context: {
@@ -72,46 +102,82 @@ export async function process(inputs, ctx) {
       phase: 'media-tiering',
       outletsIdentified: mediaLandscape.outletCount,
       journalistsIdentified: mediaLandscape.journalistCount
-    }
-  });
-
-  const mediaTiers = await ctx.task(createMediaTieringTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let mediaTiers = await ctx.task(createMediaTieringTask, {
     mediaLandscape,
     goals,
     targetAudience,
     organizationProfile
   });
 
-  // Phase 4: PESO Model Integration
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      mediaTiers = await ctx.task(createMediaTieringTask, { ...{
+    mediaLandscape,
+    goals,
+    targetAudience,
+    organizationProfile
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Media tiers created. Develop PESO model integration strategy?',
     title: 'Phase 4: PESO Model Integration',
     context: {
       runId: ctx.runId,
       phase: 'peso-integration',
       pesoModelWeights
-    }
-  });
-
-  const pesoStrategy = await ctx.task(developPesoStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let pesoStrategy = await ctx.task(developPesoStrategyTask, {
     mediaTiers,
     pesoModelWeights,
     goals,
     organizationProfile
   });
 
-  // Phase 5: Pitch Strategy Development
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      pesoStrategy = await ctx.task(developPesoStrategyTask, { ...{
+    mediaTiers,
+    pesoModelWeights,
+    goals,
+    organizationProfile
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'PESO strategy defined. Develop pitch strategies for each tier?',
     title: 'Phase 5: Pitch Strategy Development',
     context: {
       runId: ctx.runId,
       phase: 'pitch-strategy',
       tiers: mediaTiers.tiers.length
-    }
-  });
-
-  const pitchStrategies = await ctx.task(developPitchStrategiesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let pitchStrategies = await ctx.task(developPitchStrategiesTask, {
     mediaTiers,
     pesoStrategy,
     goals,
@@ -119,33 +185,63 @@ export async function process(inputs, ctx) {
     competitorAnalysis
   });
 
-  // Phase 6: Relationship Building Plan
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      pitchStrategies = await ctx.task(developPitchStrategiesTask, { ...{
+    mediaTiers,
+    pesoStrategy,
+    goals,
+    organizationProfile,
+    competitorAnalysis
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Pitch strategies developed. Create relationship building plan?',
     title: 'Phase 6: Relationship Building Plan',
     context: {
       runId: ctx.runId,
       phase: 'relationship-building'
-    }
-  });
-
-  const relationshipPlan = await ctx.task(createRelationshipPlanTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let relationshipPlan = await ctx.task(createRelationshipPlanTask, {
     mediaTiers,
     pitchStrategies,
     goals
   });
 
-  // Phase 7: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      relationshipPlan = await ctx.task(createRelationshipPlanTask, { ...{
+    mediaTiers,
+    pitchStrategies,
+    goals
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate media relations strategy quality?',
     title: 'Phase 7: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateStrategyQualityTask, {
     orgAssessment,
     mediaLandscape,
@@ -195,8 +291,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzeOrganizationalContextTask = defineTask('analyze-org-context', (args, taskCtx) => ({
   kind: 'agent',

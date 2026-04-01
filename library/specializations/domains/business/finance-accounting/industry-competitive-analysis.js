@@ -37,18 +37,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'market-analysis', result: marketResult });
 
   // Step 3: Porter's Five Forces Analysis
-  const fivesForcesResult = await ctx.task(analyzePortersFiveForcesTask, {
+  let fivesForcesResult = await ctx.task(analyzePortersFiveForcesTask, {
     industry: inputs.industry,
     structureAnalysis: structureResult
   });
   results.steps.push({ name: 'five-forces', result: fivesForcesResult });
 
-  // Breakpoint for industry review
-  await ctx.breakpoint('industry-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      fivesForcesResult = await ctx.task(analyzePortersFiveForcesTask, { ...{
+    industry: inputs.industry,
+    structureAnalysis: structureResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('industry-review', {
     message: 'Review industry analysis before competitive assessment',
-    data: { structure: structureResult, market: marketResult, forces: fivesForcesResult }
-  });
-
+    data: { structure: structureResult, market: marketResult, forces: fivesForcesResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Competitor Analysis
   const competitorResult = await ctx.task(analyzeCompetitorsTask, {
     competitors: inputs.competitors,
@@ -66,18 +79,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'competitive-positioning', result: positioningResult });
 
   // Step 6: Industry Trends and Disruption
-  const trendsResult = await ctx.task(analyzeIndustryTrendsTask, {
+  let trendsResult = await ctx.task(analyzeIndustryTrendsTask, {
     industry: inputs.industry,
     marketData: inputs.marketData
   });
   results.steps.push({ name: 'industry-trends', result: trendsResult });
 
-  // Breakpoint for comprehensive review
-  await ctx.breakpoint('comprehensive-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trendsResult = await ctx.task(analyzeIndustryTrendsTask, { ...{
+    industry: inputs.industry,
+    marketData: inputs.marketData
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('comprehensive-review', {
     message: 'Review complete competitive analysis before strategic implications',
-    data: { competitors: competitorResult, positioning: positioningResult, trends: trendsResult }
-  });
-
+    data: { competitors: competitorResult, positioning: positioningResult, trends: trendsResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Strategic Implications
   const strategicResult = await ctx.task(developStrategicImplicationsTask, {
     industryAnalysis: {
@@ -118,8 +144,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const analyzeIndustryStructureTask = defineTask('analyze-industry-structure', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'industry-analysis' },

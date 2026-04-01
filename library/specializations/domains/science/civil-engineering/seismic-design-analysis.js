@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Drift and Stability Analysis
   ctx.log('info', 'Analyzing drift and stability');
-  const driftAnalysis = await ctx.task(driftAnalysisTask, {
+  let driftAnalysis = await ctx.task(driftAnalysisTask, {
     projectId,
     forceAnalysis,
     rsaAnalysis,
@@ -103,8 +103,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...driftAnalysis.artifacts);
 
-  // Breakpoint: Review seismic analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      driftAnalysis = await ctx.task(driftAnalysisTask, { ...{
+    projectId,
+    forceAnalysis,
+    rsaAnalysis,
+    systemSelection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Seismic analysis complete for ${projectId}. SDC: ${sdcDetermination.sdc}. Review results and proceed to detailing?`,
     title: 'Seismic Design Analysis Review',
     context: {
@@ -118,9 +128,15 @@ export async function process(inputs, ctx) {
         R: systemSelection.R,
         maxDriftRatio: driftAnalysis.maxDriftRatio
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Seismic Detailing Requirements
   ctx.log('info', 'Developing seismic detailing requirements');
   const detailingRequirements = await ctx.task(seismicDetailingTask, {
@@ -197,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Seismic Hazard Analysis
+  // Task 1: Seismic Hazard Analysis
 export const seismicHazardTask = defineTask('seismic-hazard', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform site seismic hazard analysis',

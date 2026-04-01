@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Design for Diagnostics and Testing
   ctx.log('info', 'Designing diagnostics and proof testing');
-  const diagnosticsResult = await ctx.task(diagnosticsDesignTask, {
+  let diagnosticsResult = await ctx.task(diagnosticsDesignTask, {
     processName,
     sisArchitecture: architectureResult.architecture,
     silVerification: silVerificationResult,
@@ -84,8 +84,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...diagnosticsResult.artifacts);
 
-  // Breakpoint: Review SIS design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      diagnosticsResult = await ctx.task(diagnosticsDesignTask, { ...{
+    processName,
+    sisArchitecture: architectureResult.architecture,
+    silVerification: silVerificationResult,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SIS design complete for ${processName}. SIFs identified: ${sifIdentificationResult.sifs.length}. All SIL targets met: ${silVerificationResult.allTargetsMet}. Architecture: ${architectureResult.architecture.type}. Review design?`,
     title: 'SIS Design Review',
     context: {
@@ -97,9 +106,15 @@ export async function process(inputs, ctx) {
         architectureType: architectureResult.architecture.type,
         proofTestInterval: diagnosticsResult.proofTestInterval
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Develop Safety Requirements Specification
   ctx.log('info', 'Developing Safety Requirements Specification');
   const srsResult = await ctx.task(srsDocumentTask, {
@@ -148,8 +163,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: SIF Identification
+  // Task 1: SIF Identification
 export const sifIdentificationTask = defineTask('sif-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify safety instrumented functions',

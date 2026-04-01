@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Visual Examination');
 
-  const visualResult = await ctx.task(visualExaminationTask, {
+  let visualResult = await ctx.task(visualExaminationTask, {
     projectName,
     failedComponent,
     samples,
@@ -78,8 +78,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Visual examination complete - Preliminary failure mode: ${visualResult.preliminaryMode}`);
 
-  // Breakpoint: Review visual findings
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      visualResult = await ctx.task(visualExaminationTask, { ...{
+    projectName,
+    failedComponent,
+    samples,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Visual examination complete. Preliminary failure mode: ${visualResult.preliminaryMode}. Origin location identified: ${visualResult.originIdentified}. Review visual findings?`,
     title: 'Visual Examination Review',
     context: {
@@ -87,9 +96,15 @@ export async function process(inputs, ctx) {
       visualFindings: visualResult.findings,
       photographs: visualResult.photographs,
       files: visualResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: FRACTOGRAPHIC ANALYSIS
   // ============================================================================
@@ -180,7 +195,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Root Cause Determination');
 
-  const rootCauseResult = await ctx.task(rootCauseDeterminationTask, {
+  let rootCauseResult = await ctx.task(rootCauseDeterminationTask, {
     projectName,
     backgroundResult,
     visualResult,
@@ -196,8 +211,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Root cause determined: ${rootCauseResult.rootCause}`);
 
-  // Breakpoint: Review root cause
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      rootCauseResult = await ctx.task(rootCauseDeterminationTask, { ...{
+    projectName,
+    backgroundResult,
+    visualResult,
+    fractographyResult,
+    metalloResult,
+    chemicalResult,
+    mechanicalResult,
+    stressResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Root cause analysis complete. Primary root cause: ${rootCauseResult.rootCause}. Contributing factors: ${rootCauseResult.contributingFactors.length}. Review root cause determination?`,
     title: 'Root Cause Review',
     context: {
@@ -206,9 +235,15 @@ export async function process(inputs, ctx) {
       contributingFactors: rootCauseResult.contributingFactors,
       evidenceSummary: rootCauseResult.evidenceSummary,
       files: rootCauseResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: CORRECTIVE ACTION RECOMMENDATIONS
   // ============================================================================
@@ -232,7 +267,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Failure Analysis Report');
 
-  const reportResult = await ctx.task(generateFailureReportTask, {
+  let reportResult = await ctx.task(generateFailureReportTask, {
     projectName,
     failedComponent,
     failureDescription,
@@ -250,8 +285,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateFailureReportTask, { ...{
+    projectName,
+    failedComponent,
+    failureDescription,
+    backgroundResult,
+    visualResult,
+    fractographyResult,
+    metalloResult,
+    chemicalResult,
+    mechanicalResult,
+    stressResult,
+    rootCauseResult,
+    correctiveResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Failure Analysis Complete for ${failedComponent}. Root cause: ${rootCauseResult.rootCause}. ${correctiveResult.recommendations.length} corrective actions. Approve report?`,
     title: 'Failure Analysis Complete',
     context: {
@@ -265,9 +318,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Failure Analysis Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -292,8 +351,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

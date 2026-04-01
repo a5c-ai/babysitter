@@ -63,7 +63,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: PMF SURVEY ANALYSIS (40% RULE)
   // ============================================================================
@@ -100,7 +99,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Analyzing Net Promoter Score and customer satisfaction');
-  const npsAnalysis = await ctx.task(npsAnalysisTask, {
+  let npsAnalysis = await ctx.task(npsAnalysisTask, {
     productName,
     npsData: dataValidation.validatedNpsData,
     userSegments: dataValidation.identifiedSegments,
@@ -110,8 +109,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...npsAnalysis.artifacts);
 
-  // Breakpoint: Review quantitative metrics
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      npsAnalysis = await ctx.task(npsAnalysisTask, { ...{
+    productName,
+    npsData: dataValidation.validatedNpsData,
+    userSegments: dataValidation.identifiedSegments,
+    feedbackData: dataValidation.validatedQualitativeData,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Quantitative PMF metrics analyzed for ${productName}. PMF Survey: ${surveyAnalysis.pmfPercentage}%, Retention: ${retentionAnalysis.retentionScore}/100, NPS: ${npsAnalysis.npsScore}. Review metrics before analyzing growth?`,
     title: 'Quantitative Metrics Review',
     context: {
@@ -129,9 +138,15 @@ export async function process(inputs, ctx) {
         npsScore: npsAnalysis.npsScore,
         userBase
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: GROWTH INDICATORS ANALYSIS
   // ============================================================================
@@ -257,7 +272,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...actionPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: PMF ASSESSMENT REPORT
   // ============================================================================
@@ -288,7 +302,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Validating assessment quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     dataValidation,
     surveyAnalysis,
@@ -307,8 +321,24 @@ export async function process(inputs, ctx) {
   const qualityMet = qualityValidation.overallScore >= minimumQualityScore;
   const pmfAchieved = pmfScoring.pmfAchieved;
 
-  // Final breakpoint: Review complete PMF assessment
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    productName,
+    dataValidation,
+    surveyAnalysis,
+    retentionAnalysis,
+    npsAnalysis,
+    growthAnalysis,
+    qualitativeAnalysis,
+    pmfScoring,
+    recommendations,
+    minimumQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Product-Market Fit assessment complete for ${productName}. PMF Score: ${pmfScoring.overallPmfScore}/100, PMF ${pmfAchieved ? 'ACHIEVED' : 'NOT YET ACHIEVED'}. Quality score: ${qualityValidation.overallScore}/100. Review and approve?`,
     title: 'Final PMF Assessment Review',
     context: {
@@ -332,9 +362,15 @@ export async function process(inputs, ctx) {
         topRecommendations: recommendations.criticalRecommendations.length,
         strongestSegment: segmentAnalysis.strongestSegment
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -430,8 +466,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

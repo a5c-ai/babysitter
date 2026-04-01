@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Compilation Triggers');
 
-  const compilationTriggers = await ctx.task(compilationTriggersTask, {
+  let compilationTriggers = await ctx.task(compilationTriggersTask, {
     languageName,
     profilingSystem,
     optimizationTiers,
@@ -63,9 +63,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...compilationTriggers.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      compilationTriggers = await ctx.task(compilationTriggersTask, { ...{
+    languageName,
+    profilingSystem,
+    optimizationTiers,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `JIT triggers configured: ${compilationTriggers.triggerTypes.join(', ')}. Hot threshold: ${compilationTriggers.hotThreshold}. Proceed with code generation?`,
     title: 'Compilation Triggers Review',
     context: {
@@ -73,9 +82,15 @@ export async function process(inputs, ctx) {
       triggerTypes: compilationTriggers.triggerTypes,
       hotThreshold: compilationTriggers.hotThreshold,
       files: compilationTriggers.artifacts.map(a => ({ path: a.path, format: a.format || 'cpp' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IR FOR JIT
   // ============================================================================
@@ -195,7 +210,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Documentation');
 
-  const documentation = await ctx.task(jitDocumentationTask, {
+  let documentation = await ctx.task(jitDocumentationTask, {
     languageName,
     profilingSystem,
     optimizationTiersImpl,
@@ -204,9 +219,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(jitDocumentationTask, { ...{
+    languageName,
+    profilingSystem,
+    optimizationTiersImpl,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `JIT Compiler Complete for ${languageName}! ${optimizationTiers} tiers, Test coverage: ${testSuite.coverage}%. Review deliverables?`,
     title: 'JIT Compiler Complete',
     context: {
@@ -222,9 +247,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'JIT Compiler' },
         { path: documentation.architecturePath, format: 'markdown', label: 'Architecture Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -263,8 +294,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

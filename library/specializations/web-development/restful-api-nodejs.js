@@ -46,15 +46,24 @@ export async function process(inputs, ctx) {
   const authSetup = await ctx.task(authSetupTask, { projectName, auth, outputDir });
   artifacts.push(...authSetup.artifacts);
 
-  const apiDocumentation = await ctx.task(apiDocumentationTask, { projectName, documentation, routingSetup, outputDir });
-  artifacts.push(...apiDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let apiDocumentation = await ctx.task(apiDocumentationTask, { projectName, documentation, routingSetup, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      apiDocumentation = await ctx.task(apiDocumentationTask, { ...{ projectName, documentation, routingSetup, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RESTful API setup complete for ${projectName}. ${routingSetup.endpoints.length} endpoints created. Approve?`,
     title: 'RESTful API Review',
-    context: { runId: ctx.runId, endpoints: routingSetup.endpoints }
-  });
-
+    context: { runId: ctx.runId, endpoints: routingSetup.endpoints },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testingSetup = await ctx.task(testingSetupTask, { projectName, outputDir });
   artifacts.push(...testingSetup.artifacts);
 

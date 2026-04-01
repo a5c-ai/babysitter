@@ -117,7 +117,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring rubric quality');
-  const qualityScore = await ctx.task(rubricQualityScoringTask, {
+  let qualityScore = await ctx.task(rubricQualityScoringTask, {
     assessmentTask,
     criteriaIdentification,
     levelDefinition,
@@ -133,8 +133,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review rubric
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(rubricQualityScoringTask, { ...{
+    assessmentTask,
+    criteriaIdentification,
+    levelDefinition,
+    descriptorWriting,
+    anchorDevelopment,
+    rubricValidation,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Rubric development complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Rubric Development Review',
     context: {
@@ -149,9 +162,15 @@ export async function process(inputs, ctx) {
         performanceLevels,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -181,8 +200,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Criteria Identification
+  // Task 1: Criteria Identification
 export const criteriaIdentificationTask = defineTask('criteria-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify assessment criteria',

@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...retention.artifacts);
 
   // Phase 6: Records Report
-  const report = await ctx.task(recordsReportTask, {
+  let report = await ctx.task(recordsReportTask, {
     entityId,
     inventory,
     complianceCheck,
@@ -80,9 +80,19 @@ export async function process(inputs, ctx) {
     retention,
     outputDir
   });
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(recordsReportTask, { ...{
+    entityId,
+    inventory,
+    complianceCheck,
+    filingStatus,
+    retention,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Corporate records audit for ${entityId} complete. ${inventory.records.length} records, compliance: ${complianceCheck.complianceRate}%. Review report?`,
     title: 'Corporate Records Review',
     context: {
@@ -90,9 +100,15 @@ export async function process(inputs, ctx) {
       recordsCount: inventory.records.length,
       complianceRate: complianceCheck.complianceRate,
       files: [{ path: report.reportPath, format: 'markdown', label: 'Records Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     entityId,

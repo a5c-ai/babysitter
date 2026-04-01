@@ -35,15 +35,24 @@ export async function process(inputs, ctx) {
   const valueTreeConstruction = await ctx.task(valueTreeTask, { criteria, problemStructuring, outputDir });
   artifacts.push(...valueTreeConstruction.artifacts);
 
-  const alternativeGeneration = await ctx.task(alternativeGenerationTask, { alternatives, decision, valueTree: valueTreeConstruction, outputDir });
-  artifacts.push(...alternativeGeneration.artifacts);
-
-  await ctx.breakpoint({
+  let alternativeGeneration = await ctx.task(alternativeGenerationTask, { alternatives, decision, valueTree: valueTreeConstruction, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      alternativeGeneration = await ctx.task(alternativeGenerationTask, { ...{ alternatives, decision, valueTree: valueTreeConstruction, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Problem structured. ${alternativeGeneration.alternatives?.length || 0} alternatives, ${valueTreeConstruction.criteria?.length || 0} criteria. Review structure before scoring?`,
     title: 'MCDA Structure Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { alternatives: alternativeGeneration.alternatives?.length || 0, criteria: valueTreeConstruction.criteria?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { alternatives: alternativeGeneration.alternatives?.length || 0, criteria: valueTreeConstruction.criteria?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const criteriaWeighting = await ctx.task(criteriaWeightingTask, { criteria: valueTreeConstruction.criteria, stakeholders, outputDir });
   artifacts.push(...criteriaWeighting.artifacts);
 
@@ -65,15 +74,24 @@ export async function process(inputs, ctx) {
   const recommendationGeneration = await ctx.task(mcdaRecommendationTask, { aggregation, sensitivityAnalysis, robustnessAnalysis, decision, outputDir });
   artifacts.push(...recommendationGeneration.artifacts);
 
-  const qualityScore = await ctx.task(mcdaQualityScoringTask, { problemStructuring, criteriaWeighting, performanceScoring, aggregation, sensitivityAnalysis, minimumConsensusScore, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(mcdaQualityScoringTask, { problemStructuring, criteriaWeighting, performanceScoring, aggregation, sensitivityAnalysis, minimumConsensusScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(mcdaQualityScoringTask, { ...{ problemStructuring, criteriaWeighting, performanceScoring, aggregation, sensitivityAnalysis, minimumConsensusScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCDA complete. Top choice: "${aggregation.ranking?.[0]?.alternative || 'N/A'}". Robustness: ${robustnessAnalysis.robustnessLevel || 'N/A'}. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'MCDA Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { topChoice: aggregation.ranking?.[0]?.alternative || 'N/A', robustness: robustnessAnalysis.robustnessLevel || 'N/A', qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { topChoice: aggregation.ranking?.[0]?.alternative || 'N/A', robustness: robustnessAnalysis.robustnessLevel || 'N/A', qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, decision, ranking: aggregation.ranking, sensitivityAnalysis: sensitivityAnalysis,
     recommendation: recommendationGeneration, documentation: { valueTree: valueTreeConstruction, weights: criteriaWeighting, scores: performanceScoring },

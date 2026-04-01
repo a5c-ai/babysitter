@@ -8,7 +8,7 @@ const { spawnSync } = require('child_process');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
-const EXTENSION_DIR_NAME = 'babysitter-gemini';
+const EXTENSION_DIR_NAME = 'babysitter';
 const INSTALL_ENTRIES = [
   { source: 'GEMINI.md', required: true },
   { source: 'commands', required: true },
@@ -118,7 +118,7 @@ function ensureGlobalProcessLibrary() {
       ['process-library:active', '--state-dir', getGlobalStateDir(), '--json'],
     ),
   );
-  console.log(`[babysitter-gemini]   process library: ${active.binding?.dir}`);
+  console.log(`[babysitter]   process library: ${active.binding?.dir}`);
 }
 
 function installEntry(extensionRoot, entry) {
@@ -129,13 +129,13 @@ function installEntry(extensionRoot, entry) {
     return;
   }
   copyRecursive(src, dest);
-  console.log(`[babysitter-gemini]   ${entry.source}${fs.statSync(src).isDirectory() ? '/' : ''}`);
+  console.log(`[babysitter]   ${entry.source}${fs.statSync(src).isDirectory() ? '/' : ''}`);
 }
 
 function main() {
   const args = parseArgs(process.argv);
   const extensionRoot = getExtensionRoot(args.workspace);
-  console.log(`[babysitter-gemini] Installing extension to ${extensionRoot}`);
+  console.log(`[babysitter] Installing extension to ${extensionRoot}`);
 
   try {
     fs.rmSync(extensionRoot, { recursive: true, force: true });
@@ -145,9 +145,9 @@ function main() {
     }
     ensureExecutableHooks(path.join(extensionRoot, 'hooks'));
     ensureGlobalProcessLibrary();
-    console.log('[babysitter-gemini] Installation complete!');
+    console.log('[babysitter] Installation complete!');
   } catch (err) {
-    console.error(`[babysitter-gemini] Failed to install extension files: ${err.message}`);
+    console.error(`[babysitter] Failed to install extension files: ${err.message}`);
     process.exitCode = 1;
   }
 }

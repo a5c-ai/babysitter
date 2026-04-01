@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
   const optimizations = await ctx.task(algorithmicOptimizationTask, { algorithm, bottlenecks, targetComplexity, outputDir });
   artifacts.push(...optimizations.artifacts);
 
-  const verification = await ctx.task(complexityVerificationTask, { algorithm, optimizations, outputDir });
-  artifacts.push(...verification.artifacts);
-
-  await ctx.breakpoint({
+  let verification = await ctx.task(complexityVerificationTask, { algorithm, optimizations, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      verification = await ctx.task(complexityVerificationTask, { ...{ algorithm, optimizations, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Optimization complete. Original: O(${analysis.timeComplexity}) -> New: O(${verification.newTimeComplexity}). Review?`,
     title: 'Complexity Optimization Complete',
-    context: { runId: ctx.runId, original: analysis.timeComplexity, optimized: verification.newTimeComplexity }
-  });
-
+    context: { runId: ctx.runId, original: analysis.timeComplexity, optimized: verification.newTimeComplexity },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     analysis: { original: analysis, bottlenecks: bottlenecks.identified },

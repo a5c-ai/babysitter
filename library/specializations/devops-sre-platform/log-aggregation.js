@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Log aggregation requirements and architecture design');
 
-  const requirementsResult = await ctx.task(defineLogRequirementsTask, {
+  let requirementsResult = await ctx.task(defineLogRequirementsTask, {
     systemName,
     logSources,
     aggregationPlatform,
@@ -84,8 +84,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Identified ${requirementsResult.logTypes.length} log types across ${requirementsResult.sourcesAnalyzed} sources`);
 
-  // Quality Gate: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsResult = await ctx.task(defineLogRequirementsTask, { ...{
+    systemName,
+    logSources,
+    aggregationPlatform,
+    retentionDays,
+    logLevel,
+    structuredFormat,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Log aggregation architecture designed for ${systemName}. Platform: ${aggregationPlatform}. ${requirementsResult.logTypes.length} log types identified. Review and approve architecture?`,
     title: 'Log Aggregation Architecture Review',
     context: {
@@ -98,16 +110,22 @@ export async function process(inputs, ctx) {
         components: requirementsResult.components
       },
       files: requirementsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: LOG COLLECTION AND FORWARDING
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Configuring log collection and forwarding');
 
-  const collectionResult = await ctx.task(configureLogCollectionTask, {
+  let collectionResult = await ctx.task(configureLogCollectionTask, {
     systemName,
     logSources,
     aggregationPlatform,
@@ -127,8 +145,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Configured log collection from ${collectionResult.sourcesConfigured} sources using ${collectionResult.collectorType}`);
 
-  // Quality Gate: Collection configuration review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      collectionResult = await ctx.task(configureLogCollectionTask, { ...{
+    systemName,
+    logSources,
+    aggregationPlatform,
+    logLevel,
+    structuredFormat,
+    samplingRate,
+    compressionEnabled,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Log collection configured for ${collectionResult.sourcesConfigured} sources. Collector: ${collectionResult.collectorType}. Review configuration?`,
     title: 'Log Collection Configuration Review',
     context: {
@@ -141,9 +172,15 @@ export async function process(inputs, ctx) {
         samplingRate: collectionResult.samplingRate
       },
       files: collectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: LOG PARSING AND STRUCTURING
   // ============================================================================
@@ -151,7 +188,7 @@ export async function process(inputs, ctx) {
   if (enableParsing) {
     ctx.log('info', 'Phase 3: Configuring log parsing and structuring');
 
-    const parsingResult = await ctx.task(configureLogParsingTask, {
+    let parsingResult = await ctx.task(configureLogParsingTask, {
       systemName,
       logSources,
       logTypes: requirementsResult.logTypes,
@@ -169,8 +206,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Configured ${parsingResult.parsersCreated} parsers for ${parsingResult.logTypesHandled} log types`);
 
-    // Quality Gate: Parsing configuration review
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        parsingResult = await ctx.task(configureLogParsingTask, { ...{
+      systemName,
+      logSources,
+      logTypes: requirementsResult.logTypes,
+      structuredFormat,
+      aggregationPlatform,
+      outputDir
+    }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Log parsing configured. ${parsingResult.parsersCreated} parsers created for ${parsingResult.logTypesHandled} log types. Review parsing rules?`,
       title: 'Log Parsing Configuration Review',
       context: {
@@ -182,9 +230,15 @@ export async function process(inputs, ctx) {
           grokPatterns: parsingResult.grokPatterns || []
         },
         files: parsingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: INDEXING AND STORAGE
@@ -193,7 +247,7 @@ export async function process(inputs, ctx) {
   if (enableIndexing) {
     ctx.log('info', 'Phase 4: Configuring log indexing and storage');
 
-    const indexingResult = await ctx.task(configureLogIndexingTask, {
+    let indexingResult = await ctx.task(configureLogIndexingTask, {
       systemName,
       aggregationPlatform,
       retentionDays,
@@ -212,8 +266,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Configured ${indexingResult.indicesCreated} indices with ${retentionDays}-day retention`);
 
-    // Quality Gate: Indexing configuration review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        indexingResult = await ctx.task(configureLogIndexingTask, { ...{
+      systemName,
+      aggregationPlatform,
+      retentionDays,
+      logTypes: requirementsResult.logTypes,
+      estimatedVolume: requirementsResult.estimatedVolume,
+      compressionEnabled,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Log indexing configured. ${indexingResult.indicesCreated} indices created with retention policy. Review indexing strategy?`,
       title: 'Log Indexing Configuration Review',
       context: {
@@ -226,9 +292,15 @@ export async function process(inputs, ctx) {
           estimatedStorageGB: indexingResult.estimatedStorageGB
         },
         files: indexingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: SEARCH AND QUERY CAPABILITIES
@@ -260,7 +332,7 @@ export async function process(inputs, ctx) {
   if (enableVisualization) {
     ctx.log('info', 'Phase 6: Creating log visualization dashboards');
 
-    const dashboardsResult = await ctx.task(createLogDashboardsTask, {
+    let dashboardsResult = await ctx.task(createLogDashboardsTask, {
       systemName,
       aggregationPlatform,
       logSources,
@@ -277,8 +349,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Created ${dashboardsResult.dashboards.length} log dashboards`);
 
-    // Quality Gate: Dashboard review
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        dashboardsResult = await ctx.task(createLogDashboardsTask, { ...{
+      systemName,
+      aggregationPlatform,
+      logSources,
+      logTypes: requirementsResult.logTypes,
+      outputDir
+    }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Created ${dashboardsResult.dashboards.length} log dashboards. Dashboard URL: ${dashboardsResult.primaryDashboardUrl}. Review dashboards?`,
       title: 'Log Dashboards Review',
       context: {
@@ -290,9 +372,15 @@ export async function process(inputs, ctx) {
           url: d.url
         })),
         files: dashboardsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: ALERTING AND NOTIFICATIONS
@@ -301,7 +389,7 @@ export async function process(inputs, ctx) {
   if (enableAlerts) {
     ctx.log('info', 'Phase 7: Configuring log-based alerts and notifications');
 
-    const alertingResult = await ctx.task(configureLogAlertsTask, {
+    let alertingResult = await ctx.task(configureLogAlertsTask, {
       systemName,
       aggregationPlatform,
       alertThresholds,
@@ -319,8 +407,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Configured ${alertsConfigured} log-based alerts`);
 
-    // Quality Gate: Alert configuration review
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        alertingResult = await ctx.task(configureLogAlertsTask, { ...{
+      systemName,
+      aggregationPlatform,
+      alertThresholds,
+      logTypes: requirementsResult.logTypes,
+      outputDir
+    }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Configured ${alertsConfigured} log-based alerts. Critical alerts: ${alertingResult.criticalAlerts.length}. Review alert configuration?`,
       title: 'Log Alerts Configuration Review',
       context: {
@@ -333,9 +431,15 @@ export async function process(inputs, ctx) {
         },
         topAlerts: alertingResult.criticalAlerts.slice(0, 10),
         files: alertingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: LOG ANALYSIS AND PATTERN DETECTION
@@ -367,7 +471,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Testing log aggregation pipeline');
 
-  const testingResult = await ctx.task(testLogAggregationTask, {
+  let testingResult = await ctx.task(testLogAggregationTask, {
     systemName,
     aggregationPlatform,
     logSources,
@@ -383,8 +487,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Pipeline testing complete. Processed ${logsAggregated} test logs. Success rate: ${testingResult.successRate}%`);
 
   // Quality Gate: Testing validation
-  if (testingResult.successRate < 95) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        testingResult = await ctx.task(testLogAggregationTask, { ...{
+    systemName,
+    aggregationPlatform,
+    logSources,
+    implementations,
+    collectionResult,
+    indexingResult: enableIndexing ? indexingResult : null,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Log aggregation pipeline success rate ${testingResult.successRate}% is below target 95%. Issues: ${testingResult.issues.length}. Review and address issues?`,
       title: 'Pipeline Testing Issues',
       context: {
@@ -396,9 +512,15 @@ export async function process(inputs, ctx) {
           recommendation: 'Address critical issues before proceeding to production'
         },
         files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: OPERATIONAL RUNBOOKS AND DOCUMENTATION
@@ -424,7 +546,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Generating final assessment and comprehensive report');
 
-  const assessmentResult = await ctx.task(logAggregationAssessmentTask, {
+  let assessmentResult = await ctx.task(logAggregationAssessmentTask, {
     systemName,
     aggregationPlatform,
     logSources,
@@ -442,8 +564,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Log Aggregation Pipeline Score: ${pipelineScore}/100`);
 
-  // Final Breakpoint: Pipeline approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      assessmentResult = await ctx.task(logAggregationAssessmentTask, { ...{
+    systemName,
+    aggregationPlatform,
+    logSources,
+    implementations,
+    testingResult,
+    logsAggregated,
+    alertsConfigured,
+    retentionDays,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Log Aggregation Pipeline Complete for ${systemName}. Score: ${pipelineScore}/100. ${logsAggregated} logs processed. ${alertsConfigured} alerts configured. Approve for production?`,
     title: 'Final Pipeline Approval',
     context: {
@@ -474,9 +610,15 @@ export async function process(inputs, ctx) {
         { path: assessmentResult.summaryPath, format: 'json', label: 'Assessment Summary' },
         { path: enableVisualization ? dashboardsResult.primaryDashboardUrl : 'N/A', format: 'link', label: 'Primary Dashboard' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: PRODUCTION DEPLOYMENT
   // ============================================================================
@@ -589,8 +731,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

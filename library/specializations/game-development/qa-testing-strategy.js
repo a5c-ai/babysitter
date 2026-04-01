@@ -50,15 +50,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...compatibilityTesting.artifacts);
 
   // Phase 6: Bug Triage and Reporting
-  const bugReporting = await ctx.task(bugTriageReportingTask, { projectName, functionalTesting, compatibilityTesting, outputDir });
-  artifacts.push(...bugReporting.artifacts);
-
-  await ctx.breakpoint({
+  let bugReporting = await ctx.task(bugTriageReportingTask, { projectName, functionalTesting, compatibilityTesting, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bugReporting = await ctx.task(bugTriageReportingTask, { ...{ projectName, functionalTesting, compatibilityTesting, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QA testing complete for ${projectName}. Tests passed: ${functionalTesting.passRate}%. Bugs found: ${bugReporting.totalBugs}. Critical: ${bugReporting.criticalBugs}. Review report?`,
     title: 'QA Testing Review',
-    context: { runId: ctx.runId, functionalTesting, bugReporting }
-  });
-
+    context: { runId: ctx.runId, functionalTesting, bugReporting },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

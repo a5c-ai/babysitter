@@ -44,15 +44,23 @@ export async function process(inputs, ctx) {
   artifacts.push(...intake.artifacts);
 
   // Phase 2: Identity Verification
-  const verification = await ctx.task(identityVerificationTask, {
+  let verification = await ctx.task(identityVerificationTask, {
     requestId,
     dataSubject: intake.dataSubject,
     outputDir
   });
   artifacts.push(...verification.artifacts);
 
-  if (!verification.verified) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        verification = await ctx.task(identityVerificationTask, { ...{
+    requestId,
+    dataSubject: intake.dataSubject,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Identity verification for ${requestId} requires additional information. Request additional verification from data subject?`,
       title: 'DSR Identity Verification',
       context: {
@@ -60,9 +68,15 @@ export async function process(inputs, ctx) {
         requestId,
         verificationStatus: verification.status,
         requiredInfo: verification.requiredInfo
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Data Location
   const dataLocation = await ctx.task(dataLocationTask, {
@@ -92,7 +106,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...response.artifacts);
 
   // Phase 6: Compliance Documentation
-  const compliance = await ctx.task(dsrComplianceDocTask, {
+  let compliance = await ctx.task(dsrComplianceDocTask, {
     requestId,
     requestType,
     intake,
@@ -101,9 +115,20 @@ export async function process(inputs, ctx) {
     response,
     outputDir
   });
-  artifacts.push(...compliance.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      compliance = await ctx.task(dsrComplianceDocTask, { ...{
+    requestId,
+    requestType,
+    intake,
+    verification,
+    fulfillment,
+    response,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DSR ${requestId} (${requestType}) ready for response. Completed within ${compliance.daysToComplete} days. Approve and send response?`,
     title: 'DSR Response Review',
     context: {
@@ -113,9 +138,15 @@ export async function process(inputs, ctx) {
       daysToComplete: compliance.daysToComplete,
       withinDeadline: compliance.withinDeadline,
       files: [{ path: response.responsePath, format: 'docx', label: 'DSR Response' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     requestId,

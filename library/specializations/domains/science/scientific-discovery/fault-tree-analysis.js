@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Constructing fault tree');
-  const faultTreeConstruction = await ctx.task(faultTreeConstructionTask, {
+  let faultTreeConstruction = await ctx.task(faultTreeConstructionTask, {
     topEvent: topEventDefinition.clarifiedTopEvent,
     system,
     boundaryDefinition,
@@ -78,8 +78,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...faultTreeConstruction.artifacts);
 
-  // Breakpoint: Review fault tree structure
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      faultTreeConstruction = await ctx.task(faultTreeConstructionTask, { ...{
+    topEvent: topEventDefinition.clarifiedTopEvent,
+    system,
+    boundaryDefinition,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Fault tree constructed with ${faultTreeConstruction.gatesCount} gates and ${faultTreeConstruction.basicEventsCount} basic events. Review structure?`,
     title: 'Fault Tree Structure Review',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         basicEvents: faultTreeConstruction.basicEventsCount,
         treeDepth: faultTreeConstruction.treeDepth
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MINIMAL CUT SET ANALYSIS
   // ============================================================================
@@ -142,7 +157,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...quantitativeAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: IMPORTANCE ANALYSIS
   // ============================================================================
@@ -213,7 +227,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Scoring FTA quality');
-  const qualityScore = await ctx.task(ftaQualityScoringTask, {
+  let qualityScore = await ctx.task(ftaQualityScoringTask, {
     topEventDefinition,
     faultTreeConstruction,
     cutSetAnalysis,
@@ -225,8 +239,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityScore.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(ftaQualityScoringTask, { ...{
+    topEventDefinition,
+    faultTreeConstruction,
+    cutSetAnalysis,
+    qualitativeAnalysis,
+    quantitativeAnalysis,
+    recommendations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FTA complete for "${topEvent}". ${cutSetAnalysis.singlePointFailures || 0} single-point failures identified. Quality score: ${qualityScore.overallScore}/100. Approve analysis?`,
     title: 'FTA Approval',
     context: {
@@ -244,9 +270,15 @@ export async function process(inputs, ctx) {
         topEventProbability: quantitativeAnalysis?.topEventProbability || 'N/A',
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -284,8 +316,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

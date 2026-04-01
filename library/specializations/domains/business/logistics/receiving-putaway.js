@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: RECEIPT VALIDATION AND INSPECTION
   ctx.log('info', 'Phase 4: Validating receipts');
-  const receiptValidation = await ctx.task(receiptValidationTask, {
+  let receiptValidation = await ctx.task(receiptValidationTask, {
     receivingTasks: receivingPrep.tasks,
     inboundShipments,
     outputDir
@@ -65,17 +65,31 @@ export async function process(inputs, ctx) {
   artifacts.push(...receiptValidation.artifacts);
 
   // Quality Gate: Review discrepancies
-  if (receiptValidation.discrepancies.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        receiptValidation = await ctx.task(receiptValidationTask, { ...{
+    receivingTasks: receivingPrep.tasks,
+    inboundShipments,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `${receiptValidation.discrepancies.length} receiving discrepancies found. Review before putaway?`,
       title: 'Receiving Discrepancy Review',
       context: {
         runId: ctx.runId,
         discrepancies: receiptValidation.discrepancies,
         files: receiptValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // PHASE 5: PUTAWAY LOCATION OPTIMIZATION
   ctx.log('info', 'Phase 5: Optimizing putaway locations');
@@ -105,7 +119,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: PERFORMANCE REPORTING
   ctx.log('info', 'Phase 8: Generating performance report');
-  const performanceReport = await ctx.task(receivingPerformanceTask, {
+  let performanceReport = await ctx.task(receivingPerformanceTask, {
     receipts: receiptValidation.receipts,
     putawayResults: putawayExecution.results,
     dockUtilization: dockScheduling.utilization,
@@ -113,8 +127,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...performanceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceReport = await ctx.task(receivingPerformanceTask, { ...{
+    receipts: receiptValidation.receipts,
+    putawayResults: putawayExecution.results,
+    dockUtilization: dockScheduling.utilization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Receiving complete. ${receiptValidation.receipts.length} receipts processed, ${putawayExecution.completedTasks} putaway tasks completed. Finalize?`,
     title: 'Receiving and Putaway Complete',
     context: {
@@ -126,9 +149,15 @@ export async function process(inputs, ctx) {
         dockUtilization: `${dockScheduling.utilization.average}%`
       },
       files: [{ path: performanceReport.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -141,8 +170,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/receiving-putaway', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const asnProcessingTask = defineTask('asn-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Process ASN data',

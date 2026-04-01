@@ -47,17 +47,26 @@ export async function process(inputs, ctx) {
   const implementationRoadmap = await ctx.task(seoImplementationRoadmapTask, { technicalAudit, onPageOptimization, contentGapAnalysis, linkBuildingStrategy, outputDir });
   artifacts.push(...implementationRoadmap.artifacts);
 
-  const qualityAssessment = await ctx.task(seoStrategyQualityTask, { keywordResearch, technicalAudit, onPageOptimization, linkBuildingStrategy, implementationRoadmap, outputDir });
+  let qualityAssessment = await ctx.task(seoStrategyQualityTask, { keywordResearch, technicalAudit, onPageOptimization, linkBuildingStrategy, implementationRoadmap, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const strategyScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(seoStrategyQualityTask, { ...{ keywordResearch, technicalAudit, onPageOptimization, linkBuildingStrategy, implementationRoadmap, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SEO strategy complete. Quality score: ${strategyScore}/100. Review and approve?`,
     title: 'SEO Strategy Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     website,

@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Observation Report
   ctx.log('info', 'Generating observation report');
-  const observationReport = await ctx.task(observationReportTask, {
+  let observationReport = await ctx.task(observationReportTask, {
     protocolSetup,
     fieldNotes,
     dailyReflections,
@@ -109,8 +109,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...observationReport.artifacts);
 
-  // Breakpoint: Review observation findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      observationReport = await ctx.task(observationReportTask, { ...{
+    protocolSetup,
+    fieldNotes,
+    dailyReflections,
+    iterativeAnalysis,
+    themeIdentification,
+    analyticalMemos,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Observation cycle complete at ${observationSite}. ${themeIdentification.themes?.length || 0} emergent themes identified. Review findings?`,
     title: 'Participant Observation Results',
     context: {
@@ -123,9 +135,15 @@ export async function process(inputs, ctx) {
         fieldNoteCount: fieldNotes.notes?.length || 0,
         emergentThemes: themeIdentification.themes?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_ms = endTime - startTime;
 
@@ -150,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Observation Protocol Setup
+  // Task 1: Observation Protocol Setup
 export const observationSetupTask = defineTask('observation-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up observation protocols',

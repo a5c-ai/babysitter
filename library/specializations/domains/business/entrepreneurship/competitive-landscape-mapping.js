@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(competitorProfiling.artifacts || []));
 
   // Phase 3: Porter's Five Forces Analysis
-  const fiveForcesAnalysis = await ctx.task(fiveForcesAnalysisTask, {
+  let fiveForcesAnalysis = await ctx.task(fiveForcesAnalysisTask, {
     projectName,
     industryVertical,
     competitorProfiling
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(fiveForcesAnalysis.artifacts || []));
 
-  // Breakpoint: Review competitive landscape
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      fiveForcesAnalysis = await ctx.task(fiveForcesAnalysisTask, { ...{
+    projectName,
+    industryVertical,
+    competitorProfiling
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review competitive landscape for ${projectName}. ${competitorIdentification.competitors.length} competitors identified. Industry rivalry: ${fiveForcesAnalysis.industryRivalry}. Continue with positioning analysis?`,
     title: 'Competitive Landscape Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
       competitorCount: competitorIdentification.competitors.length,
       fiveForcesScore: fiveForcesAnalysis.overallScore,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Competitive Dimensions Analysis
   const dimensionsAnalysis = await ctx.task(dimensionsAnalysisTask, {
     projectName,
@@ -123,7 +137,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(whitespaceAnalysis.artifacts || []));
 
   // Phase 9: Strategic Implications
-  const strategicImplications = await ctx.task(strategicImplicationsTask, {
+  let strategicImplications = await ctx.task(strategicImplicationsTask, {
     projectName,
     fiveForcesAnalysis,
     differentiationAnalysis,
@@ -133,8 +147,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(strategicImplications.artifacts || []));
 
-  // Final Breakpoint: Complete analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategicImplications = await ctx.task(strategicImplicationsTask, { ...{
+    projectName,
+    fiveForcesAnalysis,
+    differentiationAnalysis,
+    whitespaceAnalysis,
+    barriersAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Competitive analysis complete for ${projectName}. Key opportunities identified: ${whitespaceAnalysis.opportunities?.length || 0}. Approve analysis?`,
     title: 'Competitive Analysis Approval',
     context: {
@@ -143,9 +167,15 @@ export async function process(inputs, ctx) {
       opportunities: whitespaceAnalysis.opportunities?.length || 0,
       threats: strategicImplications.threats?.length || 0,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -171,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const competitorIdentificationTask = defineTask('competitor-identification', (args, taskCtx) => ({
   kind: 'agent',

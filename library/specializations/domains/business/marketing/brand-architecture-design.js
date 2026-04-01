@@ -135,7 +135,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing architecture quality');
-  const qualityAssessment = await ctx.task(architectureQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(architectureQualityAssessmentTask, {
     corporateBrand,
     portfolioAudit,
     architectureModel,
@@ -152,8 +152,22 @@ export async function process(inputs, ctx) {
   const architectureScore = qualityAssessment.overallScore;
   const qualityMet = architectureScore >= 80;
 
-  // Breakpoint: Review brand architecture
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(architectureQualityAssessmentTask, { ...{
+    corporateBrand,
+    portfolioAudit,
+    architectureModel,
+    brandHierarchy,
+    namingConventions,
+    visualHierarchy,
+    portfolioStrategy,
+    governanceFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Brand architecture complete. Quality score: ${architectureScore}/100. ${qualityMet ? 'Architecture meets quality standards!' : 'Architecture may need refinement.'} Review and approve?`,
     title: 'Brand Architecture Review & Approval',
     context: {
@@ -173,9 +187,15 @@ export async function process(inputs, ctx) {
         brandCount: brandHierarchy.totalBrands || 0,
         hierarchyLevels: brandHierarchy.levels?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -219,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

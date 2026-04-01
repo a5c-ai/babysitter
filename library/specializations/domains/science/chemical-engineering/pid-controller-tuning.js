@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Fine-Tune for Robustness
   ctx.log('info', 'Fine-tuning for robustness');
-  const fineTuningResult = await ctx.task(robustnessTuningTask, {
+  let fineTuningResult = await ctx.task(robustnessTuningTask, {
     processName,
     implementationResults: implementationResult.results,
     performanceTargets,
@@ -83,8 +83,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fineTuningResult.artifacts);
 
-  // Breakpoint: Review tuning results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      fineTuningResult = await ctx.task(robustnessTuningTask, { ...{
+    processName,
+    implementationResults: implementationResult.results,
+    performanceTargets,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PID tuning complete for ${processName}. Loops tuned: ${controlLoops.length}. Performance met: ${fineTuningResult.performanceMet}. Average IAE improvement: ${fineTuningResult.iaeImprovement}%. Review tuning?`,
     title: 'PID Controller Tuning Review',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         performanceMet: fineTuningResult.performanceMet,
         iaeImprovement: fineTuningResult.iaeImprovement
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Document Final Parameters and Performance
   ctx.log('info', 'Documenting final parameters and performance');
   const documentationResult = await ctx.task(tuningDocumentationTask, {
@@ -129,8 +144,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Dynamics Identification
+  // Task 1: Process Dynamics Identification
 export const processDynamicsTask = defineTask('process-dynamics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify process dynamics',

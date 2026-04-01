@@ -34,23 +34,37 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'review-planning', data: reviewPlanning });
 
   // Phase 2: Design Package Completeness Assessment
-  const completenessAssessment = await ctx.task(completenessTask, {
+  let completenessAssessment = await ctx.task(completenessTask, {
     designPackage: inputs.designPackage,
     reviewType: inputs.reviewType,
     entryCriteria: inputs.entryCriteria
   });
   artifacts.push({ phase: 'completeness', data: completenessAssessment });
 
-  // Breakpoint: Entrance Criteria Gate
-  await ctx.breakpoint('entrance-criteria', {
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      completenessAssessment = await ctx.task(completenessTask, { ...{
+    designPackage: inputs.designPackage,
+    reviewType: inputs.reviewType,
+    entryCriteria: inputs.entryCriteria
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint('entrance-criteria', {
     question: 'Entrance criteria assessment complete. Proceed with formal review?',
     context: {
       completenessScore: completenessAssessment.completenessScore,
       criteriaStatus: completenessAssessment.criteriaStatus,
       gaps: completenessAssessment.gaps
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Technical Review Package Preparation
   const reviewPackagePrep = await ctx.task(reviewPackagePrepTask, {
     designPackage: inputs.designPackage,
@@ -81,7 +95,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'risk-assessment', data: riskAssessment });
 
   // Phase 7: Review Board Findings Compilation
-  const reviewFindings = await ctx.task(reviewFindingsTask, {
+  let reviewFindings = await ctx.task(reviewFindingsTask, {
     preReviewAnalysis: preReviewAnalysis,
     requirementsStatus: requirementsStatus,
     riskAssessment: riskAssessment,
@@ -89,16 +103,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'review-findings', data: reviewFindings });
 
-  // Breakpoint: Review Findings Discussion
-  await ctx.breakpoint('findings-review', {
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      reviewFindings = await ctx.task(reviewFindingsTask, { ...{
+    preReviewAnalysis: preReviewAnalysis,
+    requirementsStatus: requirementsStatus,
+    riskAssessment: riskAssessment,
+    reviewBoard: inputs.reviewBoard
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint('findings-review', {
     question: 'Review technical findings with board. Any additional concerns?',
     context: {
       totalFindings: reviewFindings.totalFindings,
       criticalFindings: reviewFindings.criticalCount,
       majorFindings: reviewFindings.majorCount
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Action Item Definition
   const actionItems = await ctx.task(actionItemsTask, {
     reviewFindings: reviewFindings,
@@ -116,7 +145,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'exit-assessment', data: exitAssessment });
 
   // Phase 10: Review Documentation and Minutes
-  const reviewDocumentation = await ctx.task(reviewDocumentationTask, {
+  let reviewDocumentation = await ctx.task(reviewDocumentationTask, {
     projectId: inputs.projectId,
     reviewType: inputs.reviewType,
     reviewFindings: reviewFindings,
@@ -126,16 +155,33 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'documentation', data: reviewDocumentation });
 
-  // Final Breakpoint: Review Board Decision
-  await ctx.breakpoint('board-decision', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reviewDocumentation = await ctx.task(reviewDocumentationTask, { ...{
+    projectId: inputs.projectId,
+    reviewType: inputs.reviewType,
+    reviewFindings: reviewFindings,
+    actionItems: actionItems,
+    exitAssessment: exitAssessment,
+    reviewBoard: inputs.reviewBoard
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('board-decision', {
     question: 'Review board decision: Approve, Conditionally Approve, or Disapprove?',
     context: {
       recommendation: exitAssessment.recommendation,
       openActions: actionItems.openCount,
       criticalFindings: reviewFindings.criticalCount
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -155,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const reviewPlanningTask = defineTask('review-planning', (args) => ({
+  const reviewPlanningTask = defineTask('review-planning', (args) => ({
   kind: 'agent',
   title: 'Review Planning and Entrance Criteria',
   agent: {

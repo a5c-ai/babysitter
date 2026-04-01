@@ -77,8 +77,7 @@ export async function process(inputs, ctx) {
       };
   }
 }
-
-// ============================================================================
+  // ============================================================================
 // ACTION PROCESSORS
 // ============================================================================
 
@@ -102,7 +101,6 @@ async function extractObligations(ctx, contractId, contractPath, outputDir, arti
       artifacts
     };
   }
-
   // Extract obligations
   ctx.log('info', 'Phase 2: Identifying obligations');
 
@@ -139,7 +137,7 @@ async function extractObligations(ctx, contractId, contractPath, outputDir, arti
   // Assign owners
   ctx.log('info', 'Phase 5: Assigning obligation owners');
 
-  const ownerAssignment = await ctx.task(ownerAssignmentTask, {
+  let ownerAssignment = await ctx.task(ownerAssignmentTask, {
     contractId,
     obligations: deadlineExtraction.obligations,
     outputDir
@@ -147,9 +145,16 @@ async function extractObligations(ctx, contractId, contractPath, outputDir, arti
 
   artifacts.push(...ownerAssignment.artifacts);
 
-  const obligations = ownerAssignment.obligations;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      ownerAssignment = await ctx.task(ownerAssignmentTask, { ...{
+    contractId,
+    obligations: deadlineExtraction.obligations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Extracted ${obligations.length} obligations from contract ${contractId}. ${deadlineExtraction.upcomingCount} have upcoming deadlines. Review and approve?`,
     title: 'Obligation Extraction Review',
     context: {
@@ -159,9 +164,15 @@ async function extractObligations(ctx, contractId, contractPath, outputDir, arti
       categories: categorization.categories,
       upcomingDeadlines: deadlineExtraction.upcomingCount,
       files: artifacts.slice(-2).map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -190,7 +201,6 @@ async function trackObligations(ctx, contractId, alertDays, enableNotifications,
     artifacts.push(...loadResult.artifacts);
     obligations = loadResult.obligations;
   }
-
   // Check compliance status
   ctx.log('info', 'Checking compliance status');
 
@@ -226,7 +236,6 @@ async function trackObligations(ctx, contractId, alertDays, enableNotifications,
 
     artifacts.push(...notifications.artifacts);
   }
-
   // Generate tracking report
   const trackingReport = await ctx.task(trackingReportTask, {
     contractId,
@@ -266,16 +275,24 @@ async function generateReport(ctx, contractId, reportPeriod, outputDir, artifact
   artifacts.push(...loadResult.artifacts);
 
   // Generate comprehensive report
-  const report = await ctx.task(comprehensiveReportTask, {
+  let report = await ctx.task(comprehensiveReportTask, {
     contractId,
     obligations: loadResult.obligations,
     reportPeriod,
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      report = await ctx.task(comprehensiveReportTask, { ...{
+    contractId,
+    obligations: loadResult.obligations,
+    reportPeriod,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Obligation report for ${contractId} generated. Compliance rate: ${report.complianceRate}%. Review report?`,
     title: 'Obligation Report Review',
     context: {
@@ -284,9 +301,15 @@ async function generateReport(ctx, contractId, reportPeriod, outputDir, artifact
       reportPeriod,
       complianceRate: report.complianceRate,
       files: [{ path: report.reportPath, format: 'markdown', label: 'Obligation Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   return {
     success: true,
     contractId,
@@ -328,8 +351,7 @@ async function updateObligation(ctx, contractId, obligationId, updateData, outpu
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

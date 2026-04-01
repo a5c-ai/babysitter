@@ -123,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing development plan quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     gapAnalysis,
     architectureDesign,
     articlePlanning,
@@ -137,9 +137,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityAssessment.artifacts);
 
   const qualityScore = qualityAssessment.overallScore;
-  const qualityMet = qualityScore >= 85;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    gapAnalysis,
+    architectureDesign,
+    articlePlanning,
+    creationGuidelines,
+    templateDevelopment,
+    qualityCriteria,
+    reviewWorkflow,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Knowledge base development plan complete. Articles planned: ${articlePlanning.articleCount}. Gaps identified: ${gapAnalysis.gaps?.length || 0}. Quality score: ${qualityScore}/100. ${qualityMet ? 'Plan meets standards!' : 'May need refinement.'} Review and execute?`,
     title: 'KB Development Plan Review',
     context: {
@@ -158,9 +170,15 @@ export async function process(inputs, ctx) {
         templatesCreated: templateDevelopment.templates?.length || 0,
         categories: architectureDesign.categories?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

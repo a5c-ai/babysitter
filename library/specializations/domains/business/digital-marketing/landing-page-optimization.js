@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Launch and Drive Traffic
   ctx.log('info', 'Phase 8: Creating launch plan and traffic strategy');
-  const launchPlan = await ctx.task(launchTrafficTask, {
+  let launchPlan = await ctx.task(launchTrafficTask, {
     pageBuild,
     abTestSetup,
     campaignBrief,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...launchPlan.artifacts);
 
-  // Breakpoint: Review before launch
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      launchPlan = await ctx.task(launchTrafficTask, { ...{
+    pageBuild,
+    abTestSetup,
+    campaignBrief,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Landing page ready for launch. ${abTestSetup.variationCount} A/B test variations configured. Tracking verified: ${trackingSetup.verified}. Approve launch?`,
     title: 'Landing Page Review',
     context: {
@@ -108,9 +117,15 @@ export async function process(inputs, ctx) {
         trackingVerified: trackingSetup.verified,
         formFields: formConfig.fieldCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Analyze Conversion Performance
   ctx.log('info', 'Phase 9: Creating conversion performance analysis framework');
   const conversionAnalysis = await ctx.task(conversionAnalysisTask, {
@@ -159,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const landingPageObjectivesTask = defineTask('landing-page-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define landing page objectives and KPIs',

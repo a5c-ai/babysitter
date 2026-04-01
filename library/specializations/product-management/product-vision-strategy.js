@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Defining product positioning and differentiation');
 
-  const positioning = await ctx.task(productPositioningTask, {
+  let positioning = await ctx.task(productPositioningTask, {
     productName,
     industry,
     targetSegments,
@@ -83,8 +83,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...positioning.artifacts);
 
-  // Breakpoint: Review market analysis and positioning
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      positioning = await ctx.task(productPositioningTask, { ...{
+    productName,
+    industry,
+    targetSegments,
+    marketAnalysis,
+    currentState,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Market analysis complete. ${targetSegments.length} segments identified. Positioning: "${positioning.positioningStatement}". Review before vision crafting?`,
     title: 'Market Analysis Review',
     context: {
@@ -101,9 +112,15 @@ export async function process(inputs, ctx) {
         segmentsCount: targetSegments.length,
         positioningStatement: positioning.positioningStatement
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: VISION STATEMENT CRAFTING
   // ============================================================================
@@ -153,7 +170,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Identifying and defining competitive moats');
 
-  const competitiveMoatsAnalysis = await ctx.task(competitiveMoatsAnalysisTask, {
+  let competitiveMoatsAnalysis = await ctx.task(competitiveMoatsAnalysisTask, {
     productName,
     visionStatement,
     strategicPillars,
@@ -168,8 +185,20 @@ export async function process(inputs, ctx) {
   const competitiveMoats = competitiveMoatsAnalysis.moats;
   ctx.log('info', `Identified ${competitiveMoats.length} competitive moats`);
 
-  // Breakpoint: Review vision and strategic foundation
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      competitiveMoatsAnalysis = await ctx.task(competitiveMoatsAnalysisTask, { ...{
+    productName,
+    visionStatement,
+    strategicPillars,
+    positioning,
+    marketAnalysis,
+    currentState,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Vision statement and strategic foundation complete. ${strategicPillars.length} pillars, ${competitiveMoats.length} competitive moats. Review before roadmap planning?`,
     title: 'Strategic Foundation Review',
     context: {
@@ -186,9 +215,15 @@ export async function process(inputs, ctx) {
         moatsCount: competitiveMoats.length,
         pillars: strategicPillars.map(p => p.title)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: THREE-YEAR ROADMAP PLANNING
   // ============================================================================
@@ -252,7 +287,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...financialProjections.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: STRATEGIC RISK ASSESSMENT
   // ============================================================================
@@ -302,7 +336,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Validating strategy quality and completeness');
 
-  const qualityValidation = await ctx.task(strategyQualityValidationTask, {
+  let qualityValidation = await ctx.task(strategyQualityValidationTask, {
     productName,
     strategyDocument: strategyAssembly.strategyDocument,
     visionStatement,
@@ -318,8 +352,21 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityValidation.overallScore;
   const qualityMet = qualityScore >= 85;
 
-  // Breakpoint: Review strategy quality
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      qualityValidation = await ctx.task(strategyQualityValidationTask, { ...{
+    productName,
+    strategyDocument: strategyAssembly.strategyDocument,
+    visionStatement,
+    strategicPillars,
+    roadmap,
+    successCriteria,
+    competitiveMoats,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `Strategy quality score: ${qualityScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review strategy?`,
     title: 'Strategy Quality Review',
     context: {
@@ -339,9 +386,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Quality Validation Report'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: STAKEHOLDER ALIGNMENT AND APPROVAL (IF ENABLED)
   // ============================================================================
@@ -364,8 +417,21 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...stakeholderAlignment.artifacts);
 
-    // Breakpoint: Alignment gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityValidation = await ctx.task(strategyQualityValidationTask, { ...{
+    productName,
+    strategyDocument: strategyAssembly.strategyDocument,
+    visionStatement,
+    strategicPillars,
+    roadmap,
+    successCriteria,
+    competitiveMoats,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder alignment complete. ${stakeholderAlignment.aligned ? 'Strategy approved!' : 'Alignment issues identified.'} Proceed?`,
       title: 'Strategy Alignment Gate',
       context: {
@@ -380,10 +446,16 @@ export async function process(inputs, ctx) {
           format: a.format || 'markdown',
           label: a.label || undefined
         }))
-      }
-    });
-
-    // If revisions needed, incorporate feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If revisions needed, incorporate feedback
     if (stakeholderAlignment.revisionsNeeded) {
       ctx.log('info', 'Incorporating stakeholder feedback');
 
@@ -400,7 +472,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...revision.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 14: COMMUNICATION PLAN DEVELOPMENT
   // ============================================================================
@@ -489,8 +560,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

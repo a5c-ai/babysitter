@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Scenario Analysis
   ctx.log('info', 'Running scenario analysis');
-  const scenarioAnalysis = await ctx.task(dcfScenarioTask, {
+  let scenarioAnalysis = await ctx.task(dcfScenarioTask, {
     revenueModeling,
     fcfProjections,
     discountRate: discountRateAnalysis.rate,
@@ -105,8 +105,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioAnalysis.artifacts);
 
-  // Breakpoint: Review DCF analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioAnalysis = await ctx.task(dcfScenarioTask, { ...{
+    revenueModeling,
+    fcfProjections,
+    discountRate: discountRateAnalysis.rate,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DCF analysis complete for ${companyName}. Enterprise value: $${presentValue.enterpriseValue}M. Equity value: $${presentValue.equityValue}M. Review analysis?`,
     title: 'DCF Analysis Results',
     context: {
@@ -119,9 +128,15 @@ export async function process(inputs, ctx) {
         terminalValue: terminalValue.value,
         terminalValuePercent: terminalValue.percentOfValue
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate DCF Report
   ctx.log('info', 'Generating DCF analysis report');
   const dcfReport = await ctx.task(dcfReportTask, {
@@ -171,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Revenue and Growth Modeling
+  // Task 1: Revenue and Growth Modeling
 export const revenueModelingTask = defineTask('revenue-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model revenue and growth',

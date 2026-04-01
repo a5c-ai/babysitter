@@ -58,20 +58,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'resource-leveling', output: resourceLeveling });
 
   // Phase 4: Critical Chain Identification
-  const criticalChain = await ctx.task(identifyCriticalChain, {
+  let criticalChain = await ctx.task(identifyCriticalChain, {
     networkDiagram,
     resourceLeveling,
     durationAnalysis
   });
   artifacts.push({ phase: 'critical-chain', output: criticalChain });
 
-  // Quality Gate: Critical Chain Review
-  await ctx.breakpoint('critical-chain-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      criticalChain = await ctx.task(identifyCriticalChain, { ...{
+    networkDiagram,
+    resourceLeveling,
+    durationAnalysis
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('critical-chain-review', {
     title: 'Critical Chain Review',
     description: 'Review and validate the identified critical chain before buffer insertion',
-    artifacts: [criticalChain, resourceLeveling]
-  });
-
+    artifacts: [criticalChain, resourceLeveling],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Project Buffer Sizing
   const projectBuffer = await ctx.task(sizeProjectBuffer, {
     criticalChain,
@@ -123,20 +137,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'execution-guidelines', output: executionGuidelines });
 
   // Phase 11: Reporting and Dashboard Design
-  const reportingDesign = await ctx.task(designReporting, {
+  let reportingDesign = await ctx.task(designReporting, {
     bufferManagementSystem,
     bufferedSchedule,
     projectContext
   });
   artifacts.push({ phase: 'reporting-design', output: reportingDesign });
 
-  // Final Quality Gate: CCPM Plan Approval
-  await ctx.breakpoint('ccpm-plan-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportingDesign = await ctx.task(designReporting, { ...{
+    bufferManagementSystem,
+    bufferedSchedule,
+    projectContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('ccpm-plan-approval', {
     title: 'CCPM Plan Approval',
     description: 'Final approval of the complete CCPM plan before execution',
-    artifacts: [bufferedSchedule, bufferManagementSystem, executionGuidelines]
-  });
-
+    artifacts: [bufferedSchedule, bufferManagementSystem, executionGuidelines],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     criticalChain: {

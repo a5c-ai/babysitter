@@ -491,7 +491,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Impact Consolidation
   ctx.log('Phase 6: Consolidating impact assessment');
-  const consolidationResult = await ctx.task(impactConsolidationTask, {
+  let consolidationResult = await ctx.task(impactConsolidationTask, {
     changeAnalysis: artifacts.changeAnalysis,
     peopleImpacts: artifacts.peopleImpacts,
     processImpacts: artifacts.processImpacts,
@@ -500,12 +500,28 @@ export async function process(inputs, ctx) {
   });
   artifacts.consolidatedAssessment = consolidationResult;
 
-  // Breakpoint for impact review
-  await ctx.breakpoint('impact-assessment-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      consolidationResult = await ctx.task(impactConsolidationTask, { ...{
+    changeAnalysis: artifacts.changeAnalysis,
+    peopleImpacts: artifacts.peopleImpacts,
+    processImpacts: artifacts.processImpacts,
+    technologyImpacts: artifacts.technologyImpacts,
+    organizationalImpacts: artifacts.organizationalImpacts
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('impact-assessment-review', {
     question: 'Review the change impact analysis results. Are all significant impacts identified?',
-    artifacts: artifacts
-  });
-
+    artifacts: artifacts,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Mitigation Planning
   ctx.log('Phase 7: Developing mitigation plan');
   const mitigationResult = await ctx.task(mitigationPlanningTask, {

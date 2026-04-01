@@ -111,7 +111,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...auditLogging.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: SANDBOXED EXECUTION
   // ============================================================================
@@ -129,14 +128,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...sandboxExecution.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: SAFETY DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Creating safety documentation');
 
-  const safetyDocumentation = await ctx.task(safetyDocumentationTask, {
+  let safetyDocumentation = await ctx.task(safetyDocumentationTask, {
     agentName,
     securityAssessment: securityAssessment.assessment,
     validationFramework: validationFramework.framework,
@@ -149,8 +147,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...safetyDocumentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      safetyDocumentation = await ctx.task(safetyDocumentationTask, { ...{
+    agentName,
+    securityAssessment: securityAssessment.assessment,
+    validationFramework: validationFramework.framework,
+    authImplementation: authImplementation.auth,
+    rateLimiting: rateLimiting.config,
+    auditLogging,
+    sandboxExecution,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Tool safety framework for ${agentName} complete. Security level: ${securityPolicy.level}. Review implementation?`,
     title: 'Tool Safety Review',
     context: {
@@ -163,9 +174,15 @@ export async function process(inputs, ctx) {
         enableAudit
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -189,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

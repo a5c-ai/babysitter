@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 5: REORDER POINT CALCULATION
   ctx.log('info', 'Phase 5: Calculating reorder points');
-  const reorderPointCalc = await ctx.task(reorderPointCalculationTask, {
+  let reorderPointCalc = await ctx.task(reorderPointCalculationTask, {
     demandAnalysis: demandAnalysis.statistics,
     leadTimeAnalysis: leadTimeAnalysis.statistics,
     safetyStocks: safetyStockCalc.safetyStocks,
@@ -73,8 +73,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...reorderPointCalc.artifacts);
 
-  // Quality Gate: Review reorder points
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      reorderPointCalc = await ctx.task(reorderPointCalculationTask, { ...{
+    demandAnalysis: demandAnalysis.statistics,
+    leadTimeAnalysis: leadTimeAnalysis.statistics,
+    safetyStocks: safetyStockCalc.safetyStocks,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Reorder points calculated for ${reorderPointCalc.reorderPoints.length} items. Average safety stock days: ${safetyStockCalc.averageSafetyDays}. Review before EOQ calculation?`,
     title: 'Reorder Point Review',
     context: {
@@ -85,9 +94,15 @@ export async function process(inputs, ctx) {
         totalSafetyStockValue: safetyStockCalc.totalValue
       },
       files: reorderPointCalc.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // PHASE 6: ECONOMIC ORDER QUANTITY
   ctx.log('info', 'Phase 6: Calculating economic order quantities');
   const eoqCalc = await ctx.task(eoqCalculationTask, {
@@ -112,7 +127,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: GENERATE REPORT
   ctx.log('info', 'Phase 8: Generating analysis report');
-  const analysisReport = await ctx.task(reorderReportTask, {
+  let analysisReport = await ctx.task(reorderReportTask, {
     reorderPoints: reorderPointCalc.reorderPoints,
     safetyStocks: safetyStockCalc.safetyStocks,
     eoqs: eoqCalc.orderQuantities,
@@ -121,8 +136,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...analysisReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      analysisReport = await ctx.task(reorderReportTask, { ...{
+    reorderPoints: reorderPointCalc.reorderPoints,
+    safetyStocks: safetyStockCalc.safetyStocks,
+    eoqs: eoqCalc.orderQuantities,
+    recommendations: optimizationRecommendations.recommendations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reorder point calculation complete. ${reorderPointCalc.reorderPoints.length} items analyzed. Total inventory investment optimization: ${optimizationRecommendations.investmentChange}%. Approve?`,
     title: 'Reorder Point Calculation Complete',
     context: {
@@ -134,9 +159,15 @@ export async function process(inputs, ctx) {
         stockoutRiskReduction: `${optimizationRecommendations.stockoutRiskReduction}%`
       },
       files: [{ path: analysisReport.reportPath, format: 'markdown', label: 'Analysis Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -149,8 +180,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/reorder-point-calculation', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const demandAnalysisTask = defineTask('demand-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze demand patterns',

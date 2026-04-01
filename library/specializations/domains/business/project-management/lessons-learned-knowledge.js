@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Data Analysis
-  const dataAnalysis = await ctx.task(dataAnalysisTask, {
+  let dataAnalysis = await ctx.task(dataAnalysisTask, {
     projectName,
     experiences: experienceCollection.experiences,
     interviews: stakeholderInterviews,
@@ -54,8 +54,18 @@ export async function process(inputs, ctx) {
     metrics
   });
 
-  // Breakpoint: Review preliminary findings
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      dataAnalysis = await ctx.task(dataAnalysisTask, { ...{
+    projectName,
+    experiences: experienceCollection.experiences,
+    interviews: stakeholderInterviews,
+    projectDocuments,
+    metrics
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Preliminary lessons learned analysis complete for ${projectName}. ${dataAnalysis.findings?.length || 0} findings identified. Review and validate?`,
     title: 'Findings Review',
     context: {
@@ -66,9 +76,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Lesson Categorization
   const lessonCategorization = await ctx.task(lessonCategorizationTask, {
     projectName,
@@ -103,7 +119,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Documentation and Archive
-  const documentation = await ctx.task(lessonsDocumentationTask, {
+  let documentation = await ctx.task(lessonsDocumentationTask, {
     projectName,
     projectPhase,
     experienceCollection,
@@ -116,8 +132,23 @@ export async function process(inputs, ctx) {
     disseminationPlan
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(lessonsDocumentationTask, { ...{
+    projectName,
+    projectPhase,
+    experienceCollection,
+    stakeholderInterviews,
+    dataAnalysis,
+    lessonCategorization,
+    rootCauseAnalysis,
+    recommendations,
+    knowledgeAssets,
+    disseminationPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lessons learned complete for ${projectName}. ${lessonCategorization.lessons?.length || 0} lessons documented, ${knowledgeAssets.assets?.length || 0} knowledge assets created. Approve and archive?`,
     title: 'Lessons Learned Approval',
     context: {
@@ -127,9 +158,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/lessons-learned.json`, format: 'json', content: documentation },
         { path: `artifacts/lessons-learned.md`, format: 'markdown', content: documentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -146,8 +183,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const experienceCollectionTask = defineTask('experience-collection', (args, taskCtx) => ({
   kind: 'agent',

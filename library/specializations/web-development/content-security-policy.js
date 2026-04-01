@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const nonceSetup = await ctx.task(nonceSetupTask, { projectName, outputDir });
   artifacts.push(...nonceSetup.artifacts);
 
-  const reportingSetup = await ctx.task(reportingSetupTask, { projectName, outputDir });
-  artifacts.push(...reportingSetup.artifacts);
-
-  await ctx.breakpoint({ question: `CSP implementation complete for ${projectName}. Approve?`, title: 'CSP Review', context: { runId: ctx.runId, policy: cspAnalysis.policy } });
-
+  let reportingSetup = await ctx.task(reportingSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reportingSetup = await ctx.task(reportingSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `CSP implementation complete for ${projectName}. Approve?`, title: 'CSP Review', context: { runId: ctx.runId, policy: cspAnalysis.policy }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

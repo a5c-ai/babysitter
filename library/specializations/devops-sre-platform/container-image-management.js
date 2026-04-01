@@ -72,7 +72,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   const startTime = ctx.now();
   const artifacts = [];
   let imageDigests = {};
@@ -89,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing Dockerfile and reviewing best practices');
 
-  const dockerfileAnalysis = await ctx.task(dockerfileAnalysisTask, {
+  let dockerfileAnalysis = await ctx.task(dockerfileAnalysisTask, {
     projectName,
     dockerfilePath,
     buildContext,
@@ -118,9 +117,19 @@ export async function process(inputs, ctx) {
   );
 
   if (criticalDockerfileIssues.length > 0) {
-    ctx.log('warn', `Found ${criticalDockerfileIssues.length} critical/high Dockerfile issues`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        dockerfileAnalysis = await ctx.task(dockerfileAnalysisTask, { ...{
+    projectName,
+    dockerfilePath,
+    buildContext,
+    baseImage,
+    optimizationGoals,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 1 Quality Gate: Found ${criticalDockerfileIssues.length} critical/high severity Dockerfile issues. Review and fix before building?`,
       title: 'Dockerfile Best Practices Gate',
       context: {
@@ -133,9 +142,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Dockerfile Analysis Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: BASE IMAGE SECURITY SCANNING
@@ -143,7 +158,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Scanning base image for vulnerabilities');
 
-  const baseImageScan = await ctx.task(baseImageScanTask, {
+  let baseImageScan = await ctx.task(baseImageScanTask, {
     projectName,
     baseImage: dockerfileAnalysis.detectedBaseImage || baseImage,
     securityCompliance,
@@ -173,9 +188,17 @@ export async function process(inputs, ctx) {
   );
 
   if (criticalVulnerabilities.length > 0 || (securityCompliance === 'high' && highVulnerabilities.length > 5)) {
-    ctx.log('error', `Base image has ${criticalVulnerabilities.length} CRITICAL and ${highVulnerabilities.length} HIGH vulnerabilities`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        baseImageScan = await ctx.task(baseImageScanTask, { ...{
+    projectName,
+    baseImage: dockerfileAnalysis.detectedBaseImage || baseImage,
+    securityCompliance,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Phase 2 Quality Gate: Base image has ${criticalVulnerabilities.length} CRITICAL vulnerabilities. ${securityCompliance === 'high' ? 'High security compliance requires addressing these.' : ''} Review and select alternative base image?`,
       title: 'Base Image Security Gate',
       context: {
@@ -189,9 +212,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Base Image Security Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: MULTI-ARCHITECTURE IMAGE BUILD
@@ -199,7 +228,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Building container images for multiple architectures');
 
-  const imageBuild = await ctx.task(multiArchBuildTask, {
+  let imageBuild = await ctx.task(multiArchBuildTask, {
     projectName,
     containerRegistry,
     imageName,
@@ -231,9 +260,21 @@ export async function process(inputs, ctx) {
   );
 
   if (failedBuilds.length > 0) {
-    ctx.log('error', `Failed to build for architectures: ${failedBuilds.join(', ')}`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        imageBuild = await ctx.task(multiArchBuildTask, { ...{
+    projectName,
+    containerRegistry,
+    imageName,
+    buildContext,
+    dockerfilePath,
+    targetArchitectures,
+    buildArgs,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Phase 3 Quality Gate: Failed to build images for ${failedBuilds.length} architecture(s): ${failedBuilds.join(', ')}. Review build logs and retry?`,
       title: 'Multi-Architecture Build Gate',
       context: {
@@ -247,9 +288,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Build Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   ctx.log('info', `Successfully built images for ${Object.keys(imageDigests).length} architectures`);
 
@@ -311,9 +358,21 @@ export async function process(inputs, ctx) {
       securityReport.highVulnerabilities > threshold.high ||
       allSecrets.length > 0) {
 
-    ctx.log('error', `Security scan failed quality gate: ${securityReport.criticalVulnerabilities} CRITICAL, ${securityReport.highVulnerabilities} HIGH vulnerabilities, ${allSecrets.length} exposed secrets`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        imageBuild = await ctx.task(multiArchBuildTask, { ...{
+    projectName,
+    containerRegistry,
+    imageName,
+    buildContext,
+    dockerfilePath,
+    targetArchitectures,
+    buildArgs,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Phase 4 Quality Gate: Security scan identified ${securityReport.criticalVulnerabilities} CRITICAL and ${securityReport.highVulnerabilities} HIGH vulnerabilities${allSecrets.length > 0 ? `, plus ${allSecrets.length} EXPOSED SECRETS` : ''}. Compliance level: ${securityCompliance}. Review and remediate?`,
       title: 'Security Scan Gate',
       context: {
@@ -330,9 +389,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Comprehensive Security Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: IMAGE OPTIMIZATION AND SIZE REDUCTION
@@ -340,7 +405,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Analyzing and optimizing image size and layers');
 
-  const imageOptimization = await ctx.task(imageOptimizationTask, {
+  let imageOptimization = await ctx.task(imageOptimizationTask, {
     projectName,
     imageDigests,
     dockerfilePath,
@@ -360,9 +425,18 @@ export async function process(inputs, ctx) {
     );
 
     if (oversizedImages.length > 0) {
-      ctx.log('warn', `${oversizedImages.length} image(s) exceed size limit of ${optimizationGoals.maxSizeMB}MB`);
-
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval5 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval5) {
+          imageOptimization = await ctx.task(imageOptimizationTask, { ...{
+    projectName,
+    imageDigests,
+    dockerfilePath,
+    optimizationGoals,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+        }
+  const qualityGateApproval5 = await ctx.breakpoint({
         question: `Phase 5 Quality Gate: ${oversizedImages.length} image(s) exceed size target (${optimizationGoals.maxSizeMB}MB). Review optimization recommendations?`,
         title: 'Image Size Optimization Gate',
         context: {
@@ -376,18 +450,23 @@ export async function process(inputs, ctx) {
             format: 'json',
             label: 'Image Optimization Report'
           }]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval5.approved) break;
+        lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 6: SBOM GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Generating Software Bill of Materials (SBOM)');
 
-  const sbomGeneration = await ctx.task(sbomGenerationTask, {
+  let sbomGeneration = await ctx.task(sbomGenerationTask, {
     projectName,
     imageName,
     imageDigests,
@@ -396,9 +475,18 @@ export async function process(inputs, ctx) {
   });
 
   if (sbomRequired && !sbomGeneration.success) {
-    ctx.log('error', 'SBOM generation failed but is required');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        sbomGeneration = await ctx.task(sbomGenerationTask, { ...{
+    projectName,
+    imageName,
+    imageDigests,
+    sbomRequired,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: 'Phase 6 Quality Gate: SBOM generation is required but failed. Retry or proceed without SBOM?',
       title: 'SBOM Generation Gate',
       context: {
@@ -406,22 +494,27 @@ export async function process(inputs, ctx) {
         sbomRequired,
         error: sbomGeneration.error,
         files: []
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   if (sbomGeneration.success) {
     artifacts.push(...sbomGeneration.artifacts);
     ctx.log('info', `Generated SBOMs for ${Object.keys(sbomGeneration.sboms).length} images`);
   }
-
   // ============================================================================
   // PHASE 7: IMAGE SIGNING AND ATTESTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Signing images and generating attestations');
 
-  const imageSigning = await ctx.task(imageSigningTask, {
+  let imageSigning = await ctx.task(imageSigningTask, {
     projectName,
     imageName,
     containerRegistry,
@@ -432,9 +525,20 @@ export async function process(inputs, ctx) {
   });
 
   if (signingRequired && !imageSigning.success) {
-    ctx.log('error', 'Image signing failed but is required');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        imageSigning = await ctx.task(imageSigningTask, { ...{
+    projectName,
+    imageName,
+    containerRegistry,
+    imageDigests,
+    sboms: sbomGeneration.sboms || {},
+    signingRequired,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: 'Phase 7 Quality Gate: Image signing is required but failed. Retry or proceed without signatures?',
       title: 'Image Signing Gate',
       context: {
@@ -442,22 +546,27 @@ export async function process(inputs, ctx) {
         signingRequired,
         error: imageSigning.error,
         files: []
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   if (imageSigning.success) {
     artifacts.push(...imageSigning.artifacts);
     ctx.log('info', `Signed ${Object.keys(imageSigning.signatures).length} images`);
   }
-
   // ============================================================================
   // PHASE 8: REGISTRY MANAGEMENT AND PUSH
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Configuring registry policies and pushing images');
 
-  const registryManagement = await ctx.task(registryManagementTask, {
+  let registryManagement = await ctx.task(registryManagementTask, {
     projectName,
     containerRegistry,
     imageName,
@@ -489,9 +598,21 @@ export async function process(inputs, ctx) {
   );
 
   if (failedPushes.length > 0) {
-    ctx.log('error', `Failed to push ${failedPushes.length} image(s) to registry`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval6 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval6) {
+        registryManagement = await ctx.task(registryManagementTask, { ...{
+    projectName,
+    containerRegistry,
+    imageName,
+    imageDigests,
+    targetEnvironments,
+    registryConfig,
+    signatures: imageSigning.signatures || {},
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+      }
+  const qualityGateApproval6 = await ctx.breakpoint({
       question: `Phase 8 Quality Gate: Failed to push ${failedPushes.length} image(s) to registry. Review errors and retry?`,
       title: 'Registry Push Gate',
       context: {
@@ -506,9 +627,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Registry Management Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval6.approved) break;
+      lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: MANIFEST LIST CREATION (Multi-arch)
@@ -532,14 +659,13 @@ export async function process(inputs, ctx) {
     artifacts.push(...manifestCreation.artifacts);
     ctx.log('info', `Created manifest lists for ${manifestCreation.manifestTags.length} tags`);
   }
-
   // ============================================================================
   // PHASE 10: RUNTIME TESTING AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Testing images in runtime environment');
 
-  const runtimeTesting = await ctx.task(runtimeTestingTask, {
+  let runtimeTesting = await ctx.task(runtimeTestingTask, {
     projectName,
     containerRegistry,
     imageName,
@@ -553,12 +679,21 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...runtimeTesting.artifacts);
   }
-
   // Quality Gate: Runtime tests pass
   if (runtimeTesting.failedTests > 0) {
-    ctx.log('warn', `${runtimeTesting.failedTests} runtime test(s) failed`);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        runtimeTesting = await ctx.task(runtimeTestingTask, { ...{
+    projectName,
+    containerRegistry,
+    imageName,
+    imageDigests,
+    targetArchitectures,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `Phase 10 Quality Gate: ${runtimeTesting.failedTests} runtime test(s) failed. Review failures and fix issues?`,
       title: 'Runtime Testing Gate',
       context: {
@@ -571,9 +706,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Runtime Test Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: CI/CD INTEGRATION SETUP
@@ -600,14 +741,13 @@ export async function process(inputs, ctx) {
       ctx.log('info', 'CI/CD pipeline configuration generated');
     }
   }
-
   // ============================================================================
   // PHASE 12: DEPLOYMENT READINESS REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Generating deployment readiness report');
 
-  const deploymentReadiness = await ctx.task(deploymentReadinessTask, {
+  let deploymentReadiness = await ctx.task(deploymentReadinessTask, {
     projectName,
     containerRegistry,
     imageName,
@@ -631,8 +771,26 @@ export async function process(inputs, ctx) {
                           (sbomRequired ? sbomGeneration.success : true);
 
   // Final Quality Gate: Deployment readiness
-  if (!deploymentReady) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval7 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval7) {
+        deploymentReadiness = await ctx.task(deploymentReadinessTask, { ...{
+    projectName,
+    containerRegistry,
+    imageName,
+    imageDigests,
+    securityReport,
+    optimizationMetrics,
+    registryStatus,
+    sbomGeneration,
+    imageSigning,
+    runtimeTesting,
+    manifestCreation,
+    targetEnvironments,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
+      }
+  const qualityGateApproval7 = await ctx.breakpoint({
       question: `Final Quality Gate: Deployment readiness score is ${deploymentReadiness.overallScore}/100. ${deploymentReady ? 'PASSED' : 'FAILED'}. Review summary and approve for deployment?`,
       title: 'Deployment Readiness Gate',
       context: {
@@ -660,9 +818,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Deployment Readiness Data'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval7.approved) break;
+      lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -715,8 +879,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

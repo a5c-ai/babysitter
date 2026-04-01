@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Comparative Analysis Report
   ctx.log('info', 'Generating comparative analysis report');
-  const comparativeReport = await ctx.task(comparativeReportTask, {
+  let comparativeReport = await ctx.task(comparativeReportTask, {
     primaryText,
     comparativeTexts,
     contextualFramework,
@@ -114,8 +114,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...comparativeReport.artifacts);
 
-  // Breakpoint: Review comparative analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      comparativeReport = await ctx.task(comparativeReportTask, { ...{
+    primaryText,
+    comparativeTexts,
+    contextualFramework,
+    influenceAnalysis,
+    translationAnalysis,
+    thematicComparison,
+    formalComparison,
+    transnationalAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Comparative analysis complete for ${primaryText.title || 'primary text'}. Texts compared: ${comparativeTexts.length}. Review analysis?`,
     title: 'Comparative Literature Analysis Results',
     context: {
@@ -127,9 +141,15 @@ export async function process(inputs, ctx) {
         comparativeFramework,
         influenceConnections: influenceAnalysis.connections?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -156,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Contextual Framework Establishment
+  // Task 1: Contextual Framework Establishment
 export const contextualFrameworkTask = defineTask('contextual-framework', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish contextual framework',

@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Initial wireframe review');
-  const initialReview = await ctx.task(wireframeReviewTask, {
+  let initialReview = await ctx.task(wireframeReviewTask, {
     projectName,
     wireframes: lowFidelityWireframes.wireframes,
     requirements,
@@ -110,8 +110,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...initialReview.artifacts);
 
-  // Breakpoint: Review low-fidelity wireframes
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      initialReview = await ctx.task(wireframeReviewTask, { ...{
+    projectName,
+    wireframes: lowFidelityWireframes.wireframes,
+    requirements,
+    userFlows,
+    informationArchitecture,
+    iteration: 1,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Low-fidelity wireframes complete. Review score: ${initialReview.reviewScore}/100. Review wireframes and provide feedback for refinement?`,
     title: 'Low-Fidelity Wireframe Review',
     context: {
@@ -132,9 +144,15 @@ export async function process(inputs, ctx) {
         improvementAreas: initialReview.improvementAreas,
         criticalIssues: initialReview.criticalIssues?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MEDIUM-FIDELITY WIREFRAME REFINEMENT
   // ============================================================================
@@ -176,8 +194,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...finalReview.artifacts);
 
-    // Breakpoint: Review medium-fidelity wireframes
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        initialReview = await ctx.task(wireframeReviewTask, { ...{
+    projectName,
+    wireframes: lowFidelityWireframes.wireframes,
+    requirements,
+    userFlows,
+    informationArchitecture,
+    iteration: 1,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Medium-fidelity wireframes complete. Review score: ${finalReview.reviewScore}/100. Approve or request further refinement?`,
       title: 'Medium-Fidelity Wireframe Review',
       context: {
@@ -199,9 +229,15 @@ export async function process(inputs, ctx) {
           improvementAreas: finalReview.improvementAreas,
           criticalIssues: finalReview.criticalIssues?.length || 0
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: ANNOTATION AND DOCUMENTATION
@@ -238,7 +274,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...interactivePrototype.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: COMPREHENSIVE WIREFRAME PACKAGE GENERATION
   // ============================================================================
@@ -264,7 +299,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating wireframe quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     projectName,
     requirements,
     wireframes: mediumFidelityWireframes?.wireframes || lowFidelityWireframes.wireframes,
@@ -280,8 +315,21 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityValidation.overallScore;
   const qualityMet = qualityScore >= 80;
 
-  // Breakpoint: Final approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    projectName,
+    requirements,
+    wireframes: mediumFidelityWireframes?.wireframes || lowFidelityWireframes.wireframes,
+    userFlowMapping,
+    informationArchitecture,
+    annotations: annotationGeneration.annotations,
+    finalReview,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Wireframing complete. Quality score: ${qualityScore}/100. ${qualityMet ? 'Wireframes meet quality standards!' : 'Wireframes may need additional refinement.'} Approve for next phase?`,
     title: 'Final Wireframe Approval',
     context: {
@@ -302,9 +350,15 @@ export async function process(inputs, ctx) {
         hasInteractivePrototype: !!interactivePrototype,
         allRequirementsCovered: qualityValidation.requirementsCoverage === 100
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -343,8 +397,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

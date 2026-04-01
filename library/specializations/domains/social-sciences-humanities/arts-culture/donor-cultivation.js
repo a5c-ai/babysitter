@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Solicitation Planning
   ctx.log('info', 'Planning solicitation approaches');
-  const solicitationPlan = await ctx.task(solicitationPlanTask, {
+  let solicitationPlan = await ctx.task(solicitationPlanTask, {
     cultivationStrategy: cultivationStrategy.strategies,
     majorGiftStrategy: majorGiftStrategy.approach,
     campaignGoal,
@@ -97,8 +97,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...solicitationPlan.artifacts);
 
-  // Breakpoint: Review fundraising strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      solicitationPlan = await ctx.task(solicitationPlanTask, { ...{
+    cultivationStrategy: cultivationStrategy.strategies,
+    majorGiftStrategy: majorGiftStrategy.approach,
+    campaignGoal,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Donor cultivation strategy for ${organizationName} complete. Campaign goal: $${campaignGoal.toLocaleString()}. ${donorSegmentation.totalProspects} prospects identified. Review and approve?`,
     title: 'Donor Cultivation Strategy Review',
     context: {
@@ -111,9 +120,15 @@ export async function process(inputs, ctx) {
         majorGiftProspects: donorSegmentation.majorGiftProspects.length,
         estimatedPotential: donorSegmentation.estimatedPotential
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Stewardship Program Design
   ctx.log('info', 'Designing donor stewardship program');
   const stewardshipProgram = await ctx.task(stewardshipProgramTask, {
@@ -194,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Prospect Research
+  // Task 1: Prospect Research
 export const prospectResearchTask = defineTask('prospect-research', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct prospect research',

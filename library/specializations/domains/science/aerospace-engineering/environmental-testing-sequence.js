@@ -11,40 +11,68 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, productSpecification, environmentalRequirements, standards = ['MIL-STD-810', 'DO-160'] } = inputs;
 
-  const environmentAnalysis = await ctx.task(environmentAnalysisTask, { projectName, productSpecification, environmentalRequirements });
-  const testTailoring = await ctx.task(testTailoringTask, { projectName, environmentAnalysis, standards });
-
-  await ctx.breakpoint({
+  let environmentAnalysis = await ctx.task(environmentAnalysisTask, { projectName, productSpecification, environmentalRequirements });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      environmentAnalysis = await ctx.task(environmentAnalysisTask, { ...{ projectName, productSpecification, environmentalRequirements }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Environmental tests tailored for ${projectName}. ${testTailoring.tests.length} tests identified. Proceed with sequence planning?`,
     title: 'Test Tailoring Review',
-    context: { runId: ctx.runId, testTailoring }
-  });
-
+    context: { runId: ctx.runId, testTailoring },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const vibrationTest = await ctx.task(vibrationTestTask, { projectName, testTailoring, productSpecification });
   const thermalTest = await ctx.task(thermalTestTask, { projectName, testTailoring, productSpecification });
   const emiEmcTest = await ctx.task(emiEmcTestTask, { projectName, testTailoring, productSpecification });
   const combinedEnvTest = await ctx.task(combinedEnvTestTask, { projectName, vibrationTest, thermalTest });
 
-  const testSequence = await ctx.task(testSequenceTask, { projectName, vibrationTest, thermalTest, emiEmcTest, combinedEnvTest, testTailoring });
+  let testSequence = await ctx.task(testSequenceTask, { projectName, vibrationTest, thermalTest, emiEmcTest, combinedEnvTest, testTailoring });
 
-  if (testSequence.preconditioningRequired) {
-    await ctx.breakpoint({
+      let lastFeedback_testApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_testApproval) {
+        testSequence = await ctx.task(testSequenceTask, { ...{ projectName, vibrationTest, thermalTest, emiEmcTest, combinedEnvTest, testTailoring }, feedback: lastFeedback_testApproval, attempt: attempt + 1 });
+      }
+  const testApproval = await ctx.breakpoint({
       question: `Preconditioning tests required before ${testSequence.preconditioningFor.length} tests. Confirm sequence?`,
       title: 'Preconditioning Review',
-      context: { runId: ctx.runId, preconditioning: testSequence.preconditioningFor }
-    });
-  }
+      context: { runId: ctx.runId, preconditioning: testSequence.preconditioningFor },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_testApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (testApproval.approved) break;
+      lastFeedback_testApproval = testApproval.response || testApproval.feedback || 'Changes requested';
+    } }
 
   const testSpecifications = await ctx.task(testSpecificationsTask, { projectName, testSequence, testTailoring });
-  const complianceStatus = await ctx.task(environmentalComplianceTask, { projectName, testSpecifications, standards });
-  const report = await ctx.task(environmentalReportTask, { projectName, testSequence, testSpecifications, complianceStatus });
-
-  await ctx.breakpoint({
+  let complianceStatus = await ctx.task(environmentalComplianceTask, { projectName, testSpecifications, standards });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceStatus = await ctx.task(environmentalComplianceTask, { ...{ projectName, testSpecifications, standards }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Environmental test sequence complete for ${projectName}. ${testSpecifications.length} test specs. Approve?`,
     title: 'Environmental Test Approval',
-    context: { runId: ctx.runId, summary: { tests: testSpecifications.length, duration: testSequence.totalDuration, compliance: complianceStatus.compliant } }
-  });
-
+    context: { runId: ctx.runId, summary: { tests: testSpecifications.length, duration: testSequence.totalDuration, compliance: complianceStatus.compliant } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, testSequence, testSpecifications, complianceStatus, report, metadata: { processId: 'environmental-testing-sequence', timestamp: ctx.now() } };
 }
 

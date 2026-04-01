@@ -64,7 +64,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Refreshing strategic intent and vision');
-  const strategicIntent = await ctx.task(strategicIntentTask, {
+  let strategicIntent = await ctx.task(strategicIntentTask, {
     organizationContext,
     environmentalScan,
     performanceReview,
@@ -74,8 +74,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategicIntent.artifacts);
 
-  // Breakpoint: Review strategic foundation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      strategicIntent = await ctx.task(strategicIntentTask, { ...{
+    organizationContext,
+    environmentalScan,
+    performanceReview,
+    planningHorizon,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategic foundation complete. Vision: "${strategicIntent.vision}". Review before objective setting?`,
     title: 'Strategic Planning - Foundation Review',
     context: {
@@ -89,9 +99,15 @@ export async function process(inputs, ctx) {
         keyThreats: environmentalScan.threats.length,
         performanceGaps: performanceReview.gaps.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: STRATEGIC OBJECTIVES SETTING
   // ============================================================================
@@ -237,8 +253,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

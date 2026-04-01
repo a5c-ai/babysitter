@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Identify Appropriate Benchmarks
-  const benchmarkIdentification = await ctx.task(benchmarkIdentificationTask, {
+  let benchmarkIdentification = await ctx.task(benchmarkIdentificationTask, {
     implementation,
     benchmarkSuite,
     analyticalSolutions
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       benchmarkResults: null
     };
   }
-
-  // Breakpoint: Review benchmark selection
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      benchmarkIdentification = await ctx.task(benchmarkIdentificationTask, { ...{
+    implementation,
+    benchmarkSuite,
+    analyticalSolutions
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Selected ${benchmarkIdentification.benchmarks.length} benchmarks for ${implementation.name}. Proceed with testing?`,
     title: 'Benchmark Selection Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: benchmarkIdentification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Run Benchmark Tests
   const benchmarkExecution = await ctx.task(benchmarkExecutionTask, {
     implementation,
@@ -86,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Validation Reports
-  const validationReport = await ctx.task(validationReportTask, {
+  let validationReport = await ctx.task(validationReportTask, {
     benchmarkIdentification,
     benchmarkExecution,
     analyticalComparison,
@@ -95,8 +108,18 @@ export async function process(inputs, ctx) {
   });
 
   // Final Breakpoint: Validation Complete
-  const passRate = benchmarkExecution.passedTests / benchmarkExecution.totalTests * 100;
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationReport = await ctx.task(validationReportTask, { ...{
+    benchmarkIdentification,
+    benchmarkExecution,
+    analyticalComparison,
+    metricsDocumentation,
+    implementation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benchmark validation complete. Pass rate: ${passRate.toFixed(1)}%. Review results?`,
     title: 'Benchmark Validation Complete',
     context: {
@@ -106,9 +129,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/validation-report.json`, format: 'json', content: validationReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     implementation: implementation.name,
@@ -137,8 +166,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const benchmarkIdentificationTask = defineTask('benchmark-identification', (args, taskCtx) => ({
   kind: 'agent',

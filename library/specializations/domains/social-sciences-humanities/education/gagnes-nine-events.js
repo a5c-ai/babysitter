@@ -184,7 +184,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring Gagne\'s Nine Events implementation quality');
-  const qualityScore = await ctx.task(gagneQualityScoringTask, {
+  let qualityScore = await ctx.task(gagneQualityScoringTask, {
     lessonTopic,
     events: {
       attention: event1Attention,
@@ -207,8 +207,28 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review lesson design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(gagneQualityScoringTask, { ...{
+    lessonTopic,
+    events: {
+      attention: event1Attention,
+      objectives: event2Objectives,
+      recall: event3Recall,
+      content: event4Content,
+      guidance: event5Guidance,
+      practice: event6Practice,
+      feedback: event7Feedback,
+      assessment: event8Assessment,
+      transfer: event9Transfer
+    },
+    lessonPlan,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gagne's Nine Events design complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Gagne\'s Nine Events Review',
     context: {
@@ -221,9 +241,15 @@ export async function process(inputs, ctx) {
         totalObjectives: learningObjectives.length,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -255,8 +281,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Gain Attention
+  // Task 1: Gain Attention
 export const gainAttentionTask = defineTask('gain-attention', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design attention-gaining strategies (Event 1)',

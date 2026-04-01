@@ -51,16 +51,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(channelStrategy.artifacts || []));
 
   // Phase 5: Pricing Strategy
-  const pricingStrategy = await ctx.task(pricingStrategyTask, { companyName, product, positioning, competitors });
+  let pricingStrategy = await ctx.task(pricingStrategyTask, { companyName, product, positioning, competitors });
   artifacts.push(...(pricingStrategy.artifacts || []));
 
-  // Breakpoint: Review GTM strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pricingStrategy = await ctx.task(pricingStrategyTask, { ...{ companyName, product, positioning, competitors }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review GTM strategy for ${companyName}. Positioning: "${positioning.statement}". Continue with launch planning?`,
     title: 'GTM Strategy Review',
-    context: { runId: ctx.runId, companyName, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Launch Planning
   const launchPlan = await ctx.task(launchPlanTask, { companyName, launchTimeline, channelStrategy, messaging });
   artifacts.push(...(launchPlan.artifacts || []));

@@ -122,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing SDT analysis');
-  const synthesis = await ctx.task(sdtSynthesisTask, {
+  let synthesis = await ctx.task(sdtSynthesisTask, {
     taskCharacterization,
     responseClassification,
     sensitivityAnalysis,
@@ -138,8 +138,22 @@ export async function process(inputs, ctx) {
 
   const precisionMet = synthesis.precisionScore >= targetPrecision;
 
-  // Breakpoint: Review SDT analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(sdtSynthesisTask, { ...{
+    taskCharacterization,
+    responseClassification,
+    sensitivityAnalysis,
+    biasAnalysis,
+    rocAnalysis,
+    thresholdAnalysis,
+    optimalThreshold,
+    targetPrecision,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SDT analysis complete. Precision: ${synthesis.precisionScore}/${targetPrecision}. ${precisionMet ? 'Precision target met!' : 'Additional data may be needed.'} Review analysis?`,
     title: 'Signal Detection Theory Analysis Results',
     context: {
@@ -159,9 +173,15 @@ export async function process(inputs, ctx) {
         precisionScore: synthesis.precisionScore,
         precisionMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -192,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

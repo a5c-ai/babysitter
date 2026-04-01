@@ -59,13 +59,12 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: INFORMATION ARCHITECTURE DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing information architecture and taxonomy');
-  const informationArchitecture = await ctx.task(informationArchitectureTask, {
+  let informationArchitecture = await ctx.task(informationArchitectureTask, {
     projectName,
     contentInventory: needsAssessment.contentInventory,
     organizationalStructure,
@@ -76,8 +75,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...informationArchitecture.artifacts);
 
-  // Breakpoint: Review information architecture
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      informationArchitecture = await ctx.task(informationArchitectureTask, { ...{
+    projectName,
+    contentInventory: needsAssessment.contentInventory,
+    organizationalStructure,
+    userRoles,
+    contentTypes,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Information architecture designed with ${informationArchitecture.categoryCount} categories and ${informationArchitecture.subcategoryCount} subcategories. Review structure?`,
     title: 'Information Architecture Review',
     context: {
@@ -95,9 +105,15 @@ export async function process(inputs, ctx) {
         subcategories: informationArchitecture.subcategoryCount,
         depth: informationArchitecture.hierarchyDepth
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TAXONOMY AND METADATA DEVELOPMENT
   // ============================================================================
@@ -151,7 +167,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Organizing and categorizing existing content');
-  const contentOrganization = await ctx.task(contentOrganizationTask, {
+  let contentOrganization = await ctx.task(contentOrganizationTask, {
     projectName,
     contentInventory: needsAssessment.contentInventory,
     informationArchitecture: informationArchitecture.structure,
@@ -161,8 +177,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contentOrganization.artifacts);
 
-  // Breakpoint: Review content organization
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      contentOrganization = await ctx.task(contentOrganizationTask, { ...{
+    projectName,
+    contentInventory: needsAssessment.contentInventory,
+    informationArchitecture: informationArchitecture.structure,
+    taxonomy: taxonomyDevelopment.taxonomy,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `${contentOrganization.organizedItemCount} content items organized into knowledge base structure. Review categorization?`,
     title: 'Content Organization Review',
     context: {
@@ -179,9 +205,15 @@ export async function process(inputs, ctx) {
         needsReview: contentOrganization.needsReviewCount,
         duplicatesFound: contentOrganization.duplicatesFound
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: MIGRATION PLANNING (IF REQUIRED)
   // ============================================================================
@@ -200,8 +232,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...migrationPlan.artifacts);
 
-    // Breakpoint: Review migration plan
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        contentOrganization = await ctx.task(contentOrganizationTask, { ...{
+    projectName,
+    contentInventory: needsAssessment.contentInventory,
+    informationArchitecture: informationArchitecture.structure,
+    taxonomy: taxonomyDevelopment.taxonomy,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Migration plan created with ${migrationPlan.phaseCount} phases. Estimated ${migrationPlan.estimatedDuration}. Review migration strategy?`,
       title: 'Migration Plan Review',
       context: {
@@ -218,9 +260,15 @@ export async function process(inputs, ctx) {
           estimatedDuration: migrationPlan.estimatedDuration,
           risks: migrationPlan.risks.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: ACCESS CONTROL AND PERMISSIONS (IF REQUIRED)
@@ -240,7 +288,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...accessControlSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: SEARCH AND DISCOVERY SETUP
   // ============================================================================
@@ -281,7 +328,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating knowledge base quality and usability');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     projectName,
     informationArchitecture: informationArchitecture.structure,
     taxonomy: taxonomyDevelopment.taxonomy,
@@ -295,8 +342,20 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityValidation.overallScore >= 80;
 
-  // Breakpoint: Review quality validation
-  await ctx.breakpoint({
+    let lastFeedback_phase11Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase11Review) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    projectName,
+    informationArchitecture: informationArchitecture.structure,
+    taxonomy: taxonomyDevelopment.taxonomy,
+    contentOrganization: contentOrganization.organizationMap,
+    navigationDesign: navigationDesign.navigationConfig,
+    searchSetup: searchSetup.searchConfig,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+    }
+  const phase11Review = await ctx.breakpoint({
     question: `Knowledge base quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'Quality standards met!' : 'May need improvements.'} Review results?`,
     title: 'Quality Validation Review',
     context: {
@@ -314,15 +373,21 @@ export async function process(inputs, ctx) {
         usabilityScore: qualityValidation.componentScores.usability,
         issues: qualityValidation.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase11Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase11Review.approved) break;
+    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: GOVERNANCE AND MAINTENANCE PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Creating governance model and maintenance plan');
-  const governance = await ctx.task(governanceTask, {
+  let governance = await ctx.task(governanceTask, {
     projectName,
     informationArchitecture: informationArchitecture.structure,
     userRoles,
@@ -350,8 +415,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Review approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        governance = await ctx.task(governanceTask, { ...{
+    projectName,
+    informationArchitecture: informationArchitecture.structure,
+    userRoles,
+    targetPlatform,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Proceed with finalization?`,
       title: 'Stakeholder Approval Gate',
       context: {
@@ -368,9 +443,15 @@ export async function process(inputs, ctx) {
           feedbackItems: reviewResult.feedback.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 14: DOCUMENTATION AND TRAINING MATERIALS
@@ -457,8 +538,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

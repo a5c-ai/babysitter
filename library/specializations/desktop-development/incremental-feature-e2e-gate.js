@@ -79,7 +79,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 3: GENERATE E2E TESTS FOR UNCOVERED ROUTES/FEATURES
   // ============================================================================
@@ -123,7 +122,7 @@ export async function process(inputs, ctx) {
     convergenceAttempts++;
     ctx.log('info', `Phase 5: Convergence attempt ${convergenceAttempts}/${maxConvergenceAttempts} — ${finalResult.failingTests.length} tests failing`);
 
-    const fixResult = await ctx.task(fixFailingE2eTestsTask, {
+    let fixResult = await ctx.task(fixFailingE2eTestsTask, {
       projectName, framework, testFramework,
       failingTests: finalResult.failingTests,
       existingE2eDir
@@ -135,7 +134,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...(finalResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 6: QUALITY GATE — PASS/FAIL DECISION
   // ============================================================================
@@ -143,8 +141,16 @@ export async function process(inputs, ctx) {
   const totalNewTests = (routeTests.testsAdded || 0) + (featureTests.testsAdded || 0);
   const gatePassed = finalResult.allPassing && totalNewTests > 0;
 
-  if (!gatePassed) {
-    await ctx.breakpoint({
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        fixResult = await ctx.task(fixFailingE2eTestsTask, { ...{
+      projectName, framework, testFramework,
+      failingTests: finalResult.failingTests,
+      existingE2eDir
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: [
         `**E2E Gate ${gatePassed ? 'PASSED' : 'FAILED'}**`,
         '',
@@ -158,9 +164,15 @@ export async function process(inputs, ctx) {
         'The E2E gate did not pass. Review and decide whether to proceed anyway or fix the issues.'
       ].join('\n'),
       title: 'E2E Gate Result',
-      context: { runId: ctx.runId, gatePassed, totalNewTests }
-    });
-  }
+      context: { runId: ctx.runId, gatePassed, totalNewTests },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   return {
     success: gatePassed,
@@ -178,8 +190,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

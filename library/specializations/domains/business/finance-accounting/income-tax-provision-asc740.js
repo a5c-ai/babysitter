@@ -37,18 +37,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'permanent-differences', result: permanentResult });
 
   // Step 3: Identify Temporary Differences
-  const temporaryResult = await ctx.task(identifyTemporaryDifferencesTask, {
+  let temporaryResult = await ctx.task(identifyTemporaryDifferencesTask, {
     financialStatements: inputs.financialStatements,
     priorPeriodTax: inputs.priorPeriodTax
   });
   results.steps.push({ name: 'temporary-differences', result: temporaryResult });
 
-  // Breakpoint for difference review
-  await ctx.breakpoint('difference-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      temporaryResult = await ctx.task(identifyTemporaryDifferencesTask, { ...{
+    financialStatements: inputs.financialStatements,
+    priorPeriodTax: inputs.priorPeriodTax
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('difference-review', {
     message: 'Review permanent and temporary differences before calculating provision',
-    data: { permanent: permanentResult, temporary: temporaryResult }
-  });
-
+    data: { permanent: permanentResult, temporary: temporaryResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Calculate Current Tax Expense
   const currentTaxResult = await ctx.task(calculateCurrentTaxTask, {
     preTaxIncome: preTaxResult,
@@ -67,18 +80,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'deferred-tax', result: deferredTaxResult });
 
   // Step 6: Valuation Allowance Assessment
-  const valuationResult = await ctx.task(assessValuationAllowanceTask, {
+  let valuationResult = await ctx.task(assessValuationAllowanceTask, {
     deferredTaxAssets: deferredTaxResult,
     financialStatements: inputs.financialStatements
   });
   results.steps.push({ name: 'valuation-allowance', result: valuationResult });
 
-  // Breakpoint for valuation allowance review
-  await ctx.breakpoint('valuation-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      valuationResult = await ctx.task(assessValuationAllowanceTask, { ...{
+    deferredTaxAssets: deferredTaxResult,
+    financialStatements: inputs.financialStatements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('valuation-review', {
     message: 'Review valuation allowance assessment',
-    data: valuationResult
-  });
-
+    data: valuationResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Uncertain Tax Positions (ASC 740-10)
   const utpResult = await ctx.task(analyzeUncertainTaxPositionsTask, {
     taxPositions: inputs.taxPositions,
@@ -117,8 +143,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const analyzePreTaxIncomeTask = defineTask('analyze-pretax-income', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'tax-accounting' },

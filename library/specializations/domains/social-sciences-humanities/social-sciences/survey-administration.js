@@ -112,7 +112,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring survey administration plan quality');
-  const qualityScore = await ctx.task(administrationQualityScoringTask, {
+  let qualityScore = await ctx.task(administrationQualityScoringTask, {
     administrationSetup,
     contactProtocol,
     qualityControl,
@@ -127,8 +127,20 @@ export async function process(inputs, ctx) {
   const adminScore = qualityScore.overallScore;
   const qualityMet = adminScore >= 80;
 
-  // Breakpoint: Review survey administration plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(administrationQualityScoringTask, { ...{
+    administrationSetup,
+    contactProtocol,
+    qualityControl,
+    responseMonitoring,
+    dataValidation,
+    fieldManagement,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Survey administration plan complete. Quality score: ${adminScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Survey Administration Plan Review',
     context: {
@@ -144,9 +156,15 @@ export async function process(inputs, ctx) {
         contactAttempts: contactProtocol.contactAttempts,
         qualityChecks: qualityControl.checks
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -175,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Administration Setup
+  // Task 1: Administration Setup
 export const administrationSetupTask = defineTask('administration-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up survey administration',

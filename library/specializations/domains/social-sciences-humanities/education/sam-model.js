@@ -104,7 +104,6 @@ export async function process(inputs, ctx) {
       break;
     }
   }
-
   // ============================================================================
   // ITERATIVE DEVELOPMENT PHASE (SAM2 Cycles)
   // ============================================================================
@@ -146,7 +145,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring SAM implementation quality');
-  const qualityScore = await ctx.task(samQualityScoringTask, {
+  let qualityScore = await ctx.task(samQualityScoringTask, {
     projectName,
     preparationResult,
     iterationHistory,
@@ -162,8 +161,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review SAM implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(samQualityScoringTask, { ...{
+    projectName,
+    preparationResult,
+    iterationHistory,
+    alphaResult,
+    betaResult,
+    goldResult,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SAM implementation complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'SAM Model Review',
     context: {
@@ -176,9 +188,15 @@ export async function process(inputs, ctx) {
         totalIterations: iterationHistory.length,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -209,8 +227,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Preparation Phase
+  // Task 1: Preparation Phase
 export const preparationPhaseTask = defineTask('preparation-phase', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct SAM preparation phase',

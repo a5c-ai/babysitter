@@ -57,7 +57,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: HYPOTHESIS DEFINITION AND VALIDATION
   // ============================================================================
@@ -79,7 +78,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Designing and developing test variations');
-  const variationDesign = await ctx.task(variationDesignTask, {
+  let variationDesign = await ctx.task(variationDesignTask, {
     projectName,
     featureDescription,
     hypothesis: hypothesisDefinition.hypothesis,
@@ -90,8 +89,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...variationDesign.artifacts);
 
-  // Breakpoint: Review variations before implementation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      variationDesign = await ctx.task(variationDesignTask, { ...{
+    projectName,
+    featureDescription,
+    hypothesis: hypothesisDefinition.hypothesis,
+    designPrinciples: experimentPlanning.designPrinciples,
+    userInsights: experimentPlanning.userInsights,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Variations designed for ${projectName}. Control: ${variationDesign.control.name}, Treatment: ${variationDesign.treatment.name}. Review and approve variations?`,
     title: 'Variation Design Review',
     context: {
@@ -110,9 +120,15 @@ export async function process(inputs, ctx) {
         treatmentName: variationDesign.treatment.name,
         keyChanges: variationDesign.treatment.keyChanges
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: SUCCESS METRICS AND MEASUREMENT PLAN
   // ============================================================================
@@ -207,13 +223,12 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 8: EXPERIMENT LAUNCH AND MONITORING SETUP
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Setting up experiment monitoring and launching test');
-  const experimentLaunch = await ctx.task(experimentLaunchTask, {
+  let experimentLaunch = await ctx.task(experimentLaunchTask, {
     projectName,
     experimentSetup: {
       hypothesis: hypothesisDefinition.hypothesis,
@@ -232,8 +247,27 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...experimentLaunch.artifacts);
 
-  // Breakpoint: Confirm experiment launch
-  await ctx.breakpoint({
+    let lastFeedback_validationApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_validationApproval) {
+      experimentLaunch = await ctx.task(experimentLaunchTask, { ...{
+    projectName,
+    experimentSetup: {
+      hypothesis: hypothesisDefinition.hypothesis,
+      variations: {
+        control: variationDesign.control,
+        treatment: variationDesign.treatment
+      },
+      metrics: metricsDefinition,
+      trafficAllocation,
+      duration
+    },
+    implementationPlan,
+    monitoringChecklist: prelaunchValidation.monitoringChecklist,
+    outputDir
+  }, feedback: lastFeedback_validationApproval, attempt: attempt + 1 });
+    }
+  const validationApproval = await ctx.breakpoint({
     question: `Experiment ready to launch for ${projectName}. All validations passed. Launch experiment and begin data collection?`,
     title: 'Experiment Launch Confirmation',
     context: {
@@ -252,9 +286,15 @@ export async function process(inputs, ctx) {
         validationScore: prelaunchValidation.validationScore,
         launchStatus: experimentLaunch.launchStatus
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_validationApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (validationApproval.approved) break;
+    lastFeedback_validationApproval = validationApproval.response || validationApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DATA COLLECTION AND INTERIM MONITORING
   // ============================================================================
@@ -333,7 +373,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...segmentationAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 13: RECOMMENDATIONS AND DECISION FRAMEWORK
   // ============================================================================
@@ -384,7 +423,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Validating experiment quality and rigor');
-  const experimentQualityScore = await ctx.task(experimentQualityScoringTask, {
+  let experimentQualityScore = await ctx.task(experimentQualityScoringTask, {
     projectName,
     experimentPlanning,
     hypothesisDefinition,
@@ -401,8 +440,22 @@ export async function process(inputs, ctx) {
   const experimentScore = experimentQualityScore.overallScore;
   const qualityMet = experimentScore >= 85;
 
-  // Final breakpoint: Review complete results
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      experimentQualityScore = await ctx.task(experimentQualityScoringTask, { ...{
+    projectName,
+    experimentPlanning,
+    hypothesisDefinition,
+    variationDesign,
+    sampleSizeCalculation,
+    dataMonitoring,
+    statisticalAnalysis,
+    resultsInterpretation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `A/B test complete for ${projectName}. Quality score: ${experimentScore}/100. ${statisticalAnalysis.statisticallySignificant ? 'Statistically significant results!' : 'Results not statistically significant.'} Winner: ${recommendations.winningVariation}. Review and approve?`,
     title: 'Final Experiment Results Review',
     context: {
@@ -426,9 +479,15 @@ export async function process(inputs, ctx) {
         sampleSize: dataMonitoring.collectedData.totalSampleSize,
         recommendation: recommendations.primaryRecommendation
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_ms = endTime - startTime;
 
@@ -502,8 +561,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

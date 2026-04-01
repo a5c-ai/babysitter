@@ -58,17 +58,27 @@ export async function process(inputs, ctx) {
   const authCheck = await ctx.task(checkGitHubAuthTask, {});
 
   if (!authCheck.authenticated) {
-    await ctx.breakpoint({
-      question: [
-        'GitHub CLI is not authenticated. You need to authenticate to contribute.',
-        '',
-        'Run `gh auth login` in your terminal to authenticate, then try again.',
-        '',
-        'Would you like to continue anyway (some features may not work) or cancel?'
-      ].join('\n'),
-      title: 'GitHub Authentication Required',
-      context: { runId: ctx.runId }
-    });
+    let authLastFeedback = null;
+    for (let authAttempt = 0; authAttempt < 3; authAttempt++) {
+      const authApproval = await ctx.breakpoint({
+        question: [
+            'GitHub CLI is not authenticated. You need to authenticate to contribute.',
+            '',
+            'Run `gh auth login` in your terminal to authenticate, then try again.',
+            '',
+            'Would you like to continue anyway (some features may not work) or provide feedback?'
+          ].join('\n'),
+        previousFeedback: authLastFeedback || undefined,
+        attempt: authAttempt > 0 ? authAttempt + 1 : undefined,
+        title: 'GitHub Authentication Required',
+        options: ['Approve', 'Request changes'],
+        expert: 'owner',
+        tags: ['approval-gate', 'auth'],
+        context: { runId: ctx.runId }
+      });
+      if (authApproval.approved) break;
+      authLastFeedback = authApproval.response || authApproval.feedback || 'Changes requested';
+    }
   }
 
   // ============================================================================
@@ -81,30 +91,40 @@ export async function process(inputs, ctx) {
 
   if (!selectedType) {
     // Use breakpoint to ask user what kind of contribution they want
-    await ctx.breakpoint({
-      question: [
-        'Welcome to babysitter contributions! Here are the ways you can contribute:',
-        '',
-        '**Quick contributions:**',
-        '1. **star** - Star the repository on GitHub',
-        '',
-        '**Report issues (no code needed):**',
-        '2. **bug-report** - Report a bug in the SDK, processes, or plugins',
-        '3. **feature-request** - Request a new feature or enhancement',
-        '4. **documentation-question** - Ask an unanswered documentation question',
-        '',
-        '**Code contributions (fork + PR):**',
-        '5. **bugfix** - Submit a bugfix you\'ve already written',
-        '6. **feature-implementation** - Submit a feature implementation you\'ve built',
-        '7. **harness-integration** - Submit a harness integration',
-        '8. **library-contribution** - Contribute processes, skills, or agents to the library',
-        '9. **documentation-answer** - Submit an answer to a documentation question',
-        '',
-        'Which type of contribution would you like to make? (Enter the name, e.g., "bug-report")'
-      ].join('\n'),
-      title: 'Choose Contribution Type',
-      context: { runId: ctx.runId }
-    });
+    let contribChoiceLastFeedback = null;
+    for (let contribChoiceAttempt = 0; contribChoiceAttempt < 3; contribChoiceAttempt++) {
+      const contributionChoice = await ctx.breakpoint({
+        question: [
+            'Welcome to babysitter contributions! Here are the ways you can contribute:',
+            '',
+            '**Quick contributions:**',
+            '1. **star** - Star the repository on GitHub',
+            '',
+            '**Report issues (no code needed):**',
+            '2. **bug-report** - Report a bug in the SDK, processes, or plugins',
+            '3. **feature-request** - Request a new feature or enhancement',
+            '4. **documentation-question** - Ask an unanswered documentation question',
+            '',
+            '**Code contributions (fork + PR):**',
+            '5. **bugfix** - Submit a bugfix you\'ve already written',
+            '6. **feature-implementation** - Submit a feature implementation you\'ve built',
+            '7. **harness-integration** - Submit a harness integration',
+            '8. **library-contribution** - Contribute processes, skills, or agents to the library',
+            '9. **documentation-answer** - Submit an answer to a documentation question',
+            '',
+            'Which type of contribution would you like to make? (Enter the name, e.g., "bug-report")'
+          ].join('\n'),
+        previousFeedback: contribChoiceLastFeedback || undefined,
+        attempt: contribChoiceAttempt > 0 ? contribChoiceAttempt + 1 : undefined,
+        title: 'Choose Contribution Type',
+        options: ['Approve', 'Request changes'],
+        expert: 'owner',
+        tags: ['approval-gate', 'contribution-type'],
+        context: { runId: ctx.runId }
+      });
+      if (contributionChoice.approved) break;
+      contribChoiceLastFeedback = contributionChoice.response || contributionChoice.feedback || 'Changes requested';
+    }
 
     // The breakpoint response determines the type - analyze it
     const typeDetection = await ctx.task(detectContributionTypeTask, {
@@ -142,13 +162,15 @@ export async function process(inputs, ctx) {
     });
 
     if (!starCheck.starred && authCheck.authenticated) {
-      await ctx.breakpoint({
+      const starApproval = await ctx.breakpoint({
         question: 'Would you like to star the a5c-ai/babysitter repository on GitHub? This helps the project gain visibility.',
         title: 'Star Repository',
         context: { runId: ctx.runId }
       });
 
-      await ctx.task(starRepoTask, {});
+      if (starApproval.approved) {
+        await ctx.task(starRepoTask, {});
+      }
     }
 
     if (normalizedType === 'star') {

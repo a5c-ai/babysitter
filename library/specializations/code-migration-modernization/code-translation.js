@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Selecting translation tools');
-  const toolSelection = await ctx.task(translationToolSelectionTask, {
+  let toolSelection = await ctx.task(translationToolSelectionTask, {
     projectName,
     translationAnalysis,
     sourceLanguage,
@@ -64,8 +64,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...toolSelection.artifacts);
 
-  // Breakpoint: Tool selection review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      toolSelection = await ctx.task(translationToolSelectionTask, { ...{
+    projectName,
+    translationAnalysis,
+    sourceLanguage,
+    targetLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Translation tools selected for ${projectName}. Primary tool: ${toolSelection.primaryTool}. Manual translation needed: ${toolSelection.manualPercentage}%. Proceed?`,
     title: 'Translation Tool Review',
     context: {
@@ -73,9 +83,15 @@ export async function process(inputs, ctx) {
       projectName,
       toolSelection,
       recommendation: 'Review tool capabilities and limitations'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: AUTOMATED TRANSLATION
   // ============================================================================
@@ -124,7 +140,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing translated code');
-  const testing = await ctx.task(translationTestingTask, {
+  let testing = await ctx.task(translationTestingTask, {
     projectName,
     idiomOptimization,
     translationAnalysis,
@@ -133,8 +149,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testing.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testing = await ctx.task(translationTestingTask, { ...{
+    projectName,
+    idiomOptimization,
+    translationAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Code translation complete for ${projectName}. Files translated: ${automatedTranslation.filesTranslated}. Tests passing: ${testing.allPassed}. Approve?`,
     title: 'Code Translation Complete',
     context: {
@@ -146,9 +171,15 @@ export async function process(inputs, ctx) {
         filesTranslated: automatedTranslation.filesTranslated,
         testsPass: testing.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -176,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

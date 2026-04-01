@@ -103,7 +103,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Generating Discovery Call Guide');
-  const discoveryGuide = await ctx.task(discoveryGuideGenerationTask, {
+  let discoveryGuide = await ctx.task(discoveryGuideGenerationTask, {
     accountName,
     contactName,
     industry,
@@ -117,8 +117,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(discoveryGuide.artifacts || []));
 
-  // Breakpoint: Review discovery guide before meeting
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      discoveryGuide = await ctx.task(discoveryGuideGenerationTask, { ...{
+    accountName,
+    contactName,
+    industry,
+    meetingObjective,
+    situationAnalysis,
+    problemAnalysis,
+    implicationAnalysis,
+    needPayoffAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SPIN Discovery guide prepared for ${accountName}. Review the questioning strategy and approve?`,
     title: 'SPIN Discovery Guide Review',
     context: {
@@ -136,9 +150,15 @@ export async function process(inputs, ctx) {
         implicationQuestions: implicationAnalysis.questions?.length || 0,
         needPayoffQuestions: needPayoffAnalysis.questions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: POST-DISCOVERY ANALYSIS (Optional - after meeting)
   // ============================================================================
@@ -199,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

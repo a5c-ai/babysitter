@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Model Explosion Effects
   ctx.log('info', 'Modeling explosion effects');
-  const explosionResult = await ctx.task(explosionModelingTask, {
+  let explosionResult = await ctx.task(explosionModelingTask, {
     processName,
     scenarios: scenarioDefinitionResult.scenarios,
     sourceTerms: sourceTermResult.sourceTerms,
@@ -85,8 +85,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...explosionResult.artifacts);
 
-  // Breakpoint: Review consequence modeling results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      explosionResult = await ctx.task(explosionModelingTask, { ...{
+    processName,
+    scenarios: scenarioDefinitionResult.scenarios,
+    sourceTerms: sourceTermResult.sourceTerms,
+    dispersionResults: dispersionResult.results,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Consequence modeling complete for ${processName}. Scenarios analyzed: ${scenarioDefinitionResult.scenarios.length}. Maximum toxic impact: ${dispersionResult.maxImpactDistance} m. Maximum thermal impact: ${fireResult.maxThermalDistance} m. Review results?`,
     title: 'Consequence Analysis Review',
     context: {
@@ -98,9 +108,15 @@ export async function process(inputs, ctx) {
         maxThermalDistance: fireResult.maxThermalDistance,
         maxOverpressureDistance: explosionResult.maxOverpressureDistance
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Determine Impact Zones
   ctx.log('info', 'Determining impact zones');
   const impactZonesResult = await ctx.task(impactZoneDeterminationTask, {
@@ -148,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Release Scenario Definition
+  // Task 1: Release Scenario Definition
 export const releaseScenarioDefinitionTask = defineTask('release-scenario-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define release scenarios',

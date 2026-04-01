@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   const infrastructureSetup = await ctx.task(infrastructureSetupTask, { projectName, framework, outputDir });
   artifacts.push(...infrastructureSetup.artifacts);
 
-  const monitoringSetup = await ctx.task(monitoringSetupTask, { projectName, outputDir });
-  artifacts.push(...monitoringSetup.artifacts);
-
-  await ctx.breakpoint({
+  let monitoringSetup = await ctx.task(monitoringSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      monitoringSetup = await ctx.task(monitoringSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Serverless API setup complete for ${projectName}. ${functionsSetup.functions.length} Lambda functions, API Gateway configured. Approve?`,
     title: 'Serverless API Review',
-    context: { runId: ctx.runId, functions: functionsSetup.functions, endpoints: apiGatewaySetup.endpoints }
-  });
-
+    context: { runId: ctx.runId, functions: functionsSetup.functions, endpoints: apiGatewaySetup.endpoints },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testingSetup = await ctx.task(testingSetupTask, { projectName, outputDir });
   artifacts.push(...testingSetup.artifacts);
 

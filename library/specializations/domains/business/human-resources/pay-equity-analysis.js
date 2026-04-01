@@ -73,8 +73,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Framework Approval
-  await ctx.breakpoint('framework-approval', {
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase4Review = await ctx.breakpoint('framework-approval', {
     title: 'Pay Equity Analysis Framework Approval',
     description: 'Review and approve analysis methodology and data approach',
     artifacts: {
@@ -86,9 +88,15 @@ export async function process(inputs, ctx) {
       'Is the statistical methodology appropriate and defensible?',
       'Are all relevant control factors included?',
       'Is the data quality sufficient for analysis?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Similarly Situated Group Analysis
   const groupAnalysis = await ctx.task('analyze-similarly-situated-groups', {
     dataPreparation,
@@ -141,8 +149,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 9: Findings Review
-  await ctx.breakpoint('findings-review', {
+  let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase9Review = await ctx.breakpoint('findings-review', {
     title: 'Pay Equity Findings Review',
     description: 'Review statistical findings and risk assessment with stakeholders',
     artifacts: {
@@ -154,9 +164,15 @@ export async function process(inputs, ctx) {
       'Are the findings statistically and practically significant?',
       'What is the acceptable risk tolerance?',
       'What remediation approach should be taken?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Remediation Strategy Development
   const remediationStrategy = await ctx.task('develop-remediation-strategy', {
     gapAssessment,
@@ -170,8 +186,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 11: Remediation Plan Approval
-  await ctx.breakpoint('remediation-approval', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('remediation-approval', {
     title: 'Remediation Plan Approval',
     description: 'Review and approve pay equity remediation plan',
     artifacts: {
@@ -181,9 +199,15 @@ export async function process(inputs, ctx) {
       'Is the remediation budget approved?',
       'Is the implementation timeline acceptable?',
       'What communication approach should be used?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 12: Ongoing Monitoring Framework
   const monitoringFramework = await ctx.task('establish-monitoring-framework', {
     frameworkDesign,

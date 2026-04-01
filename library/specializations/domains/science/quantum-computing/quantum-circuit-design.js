@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Resource Estimation
   ctx.log('info', 'Generating resource estimation documentation');
-  const resourceEstimation = await ctx.task(resourceEstimationTask, {
+  let resourceEstimation = await ctx.task(resourceEstimationTask, {
     circuit: transpilationResult.transpiledCircuit,
     simulationResults: simulationValidation.results,
     targetBackend,
@@ -102,8 +102,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...resourceEstimation.artifacts);
 
-  // Breakpoint: Review circuit design results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      resourceEstimation = await ctx.task(resourceEstimationTask, { ...{
+    circuit: transpilationResult.transpiledCircuit,
+    simulationResults: simulationValidation.results,
+    targetBackend,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quantum circuit designed. Depth: ${circuitOptimization.metrics.depth}, Gates: ${circuitOptimization.metrics.gateCount}. Fidelity: ${simulationValidation.fidelity}. Review and proceed?`,
     title: 'Quantum Circuit Design Results',
     context: {
@@ -116,9 +125,15 @@ export async function process(inputs, ctx) {
         fidelity: simulationValidation.fidelity,
         targetBackend
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Performance Benchmarking
   ctx.log('info', 'Generating performance benchmarks');
   const benchmarkResult = await ctx.task(performanceBenchmarkTask, {
@@ -162,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Problem Analysis and Resource Requirements
+  // Task 1: Problem Analysis and Resource Requirements
 export const problemAnalysisTask = defineTask('problem-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze problem requirements and quantum resource needs',

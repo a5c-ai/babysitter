@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Compliance Audit
   ctx.log('info', 'Conducting compliance audit');
-  const complianceAudit = await ctx.task(complianceAuditTask, {
+  let complianceAudit = await ctx.task(complianceAuditTask, {
     inventoryResult,
     documentationReview,
     catalogingResult,
@@ -96,8 +96,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...complianceAudit.artifacts);
 
-  // Breakpoint: Review collection status
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complianceAudit = await ctx.task(complianceAuditTask, { ...{
+    inventoryResult,
+    documentationReview,
+    catalogingResult,
+    storageAssessment,
+    loanStatus,
+    complianceStandards,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Collection management review complete. ${inventoryResult.totalObjects} objects assessed, ${complianceAudit.complianceScore}% compliance. Review findings?`,
     title: 'Collection Management Review',
     context: {
@@ -109,9 +121,15 @@ export async function process(inputs, ctx) {
         conservationNeeds: storageAssessment.conservationNeeds,
         complianceScore: complianceAudit.complianceScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Action Plan
   ctx.log('info', 'Generating collection management action plan');
   const actionPlan = await ctx.task(actionPlanTask, {
@@ -152,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Inventory Assessment
+  // Task 1: Inventory Assessment
 export const inventoryAssessmentTask = defineTask('inventory-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess collection inventory',

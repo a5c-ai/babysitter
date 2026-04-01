@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Analyzing individual components');
-  const componentAnalysis = await ctx.task(componentAnalysisTask, {
+  let componentAnalysis = await ctx.task(componentAnalysisTask, {
     components: decomposition.components,
     decompositionLevels: decomposition.levels,
     outputDir
@@ -61,8 +61,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...componentAnalysis.artifacts);
 
-  // Breakpoint: Review decomposition before composition
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      componentAnalysis = await ctx.task(componentAnalysisTask, { ...{
+    components: decomposition.components,
+    decompositionLevels: decomposition.levels,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Decomposition complete. ${decomposition.components.length} components identified across ${decomposition.levels.length} levels. Proceed with interaction and composition analysis?`,
     title: 'Reductionist Analysis Review',
     context: {
@@ -79,9 +87,15 @@ export async function process(inputs, ctx) {
         levelCount: decomposition.levels.length,
         fundamentalUnitsIdentified: componentAnalysis.fundamentalUnits.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: INTERACTION MAPPING
   // ============================================================================
@@ -129,7 +143,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating synthesis and identifying gaps');
-  const validationAnalysis = await ctx.task(validationGapAnalysisTask, {
+  let validationAnalysis = await ctx.task(validationGapAnalysisTask, {
     originalSystem: system,
     synthesizedUnderstanding: compositionalSynthesis.synthesis,
     currentUnderstanding,
@@ -139,8 +153,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validationAnalysis.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationAnalysis = await ctx.task(validationGapAnalysisTask, { ...{
+    originalSystem: system,
+    synthesizedUnderstanding: compositionalSynthesis.synthesis,
+    currentUnderstanding,
+    emergentProperties: emergenceIdentification.emergentProperties,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reductionist-compositional analysis complete. Synthesis completeness: ${validationAnalysis.completenessScore}%. ${validationAnalysis.gaps.length} gaps identified. Review final synthesis?`,
     title: 'Compositional Synthesis Complete',
     context: {
@@ -157,9 +181,15 @@ export async function process(inputs, ctx) {
         emergentPropertiesFound: emergenceIdentification.emergentProperties.length,
         gapsIdentified: validationAnalysis.gaps.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +220,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

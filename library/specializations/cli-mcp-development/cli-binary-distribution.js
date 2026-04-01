@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const aptDebPackaging = await ctx.task(aptDebPackagingTask, { projectName, outputDir });
   artifacts.push(...aptDebPackaging.artifacts);
 
-  const releaseAutomation = await ctx.task(releaseAutomationTask, { projectName, distributionChannels, outputDir });
-  artifacts.push(...releaseAutomation.artifacts);
-
-  await ctx.breakpoint({
+  let releaseAutomation = await ctx.task(releaseAutomationTask, { projectName, distributionChannels, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      releaseAutomation = await ctx.task(releaseAutomationTask, { ...{ projectName, distributionChannels, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Binary Distribution complete for ${platforms.length} platforms. Review and approve?`,
     title: 'Binary Distribution Complete',
-    context: { runId: ctx.runId, summary: { projectName, platforms, distributionChannels } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, platforms, distributionChannels } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

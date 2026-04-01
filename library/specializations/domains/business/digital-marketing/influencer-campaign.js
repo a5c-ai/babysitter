@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Develop Creative Brief
   ctx.log('info', 'Phase 7: Developing creative brief and guidelines');
-  const creativeBrief = await ctx.task(creativeBriefTask, {
+  let creativeBrief = await ctx.task(creativeBriefTask, {
     campaignBrief,
     brandGuidelines,
     confirmedInfluencers: outreachNegotiation,
@@ -88,8 +88,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...creativeBrief.artifacts);
 
-  // Breakpoint: Review before content creation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      creativeBrief = await ctx.task(creativeBriefTask, { ...{
+    campaignBrief,
+    brandGuidelines,
+    confirmedInfluencers: outreachNegotiation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Influencer campaign setup complete. ${influencerVetting.approvedCount} influencers approved with total budget allocation of ${budgetTimeline.allocatedBudget}. Proceed to content creation?`,
     title: 'Influencer Campaign Review',
     context: {
@@ -101,9 +110,15 @@ export async function process(inputs, ctx) {
         allocatedBudget: budgetTimeline.allocatedBudget,
         campaignDuration: budgetTimeline.duration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Onboard Influencers
   ctx.log('info', 'Phase 8: Onboarding influencers and providing materials');
   const onboarding = await ctx.task(influencerOnboardingTask, {
@@ -172,8 +187,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const campaignObjectivesTask = defineTask('campaign-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define campaign objectives and KPIs',

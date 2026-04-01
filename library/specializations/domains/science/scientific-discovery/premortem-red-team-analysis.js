@@ -33,15 +33,24 @@ export async function process(inputs, ctx) {
   const preMortemImagining = await ctx.task(preMortemImaginingTask, { plan, assumptions, planAnalysis, outputDir });
   artifacts.push(...preMortemImagining.artifacts);
 
-  const redTeamAttack = await ctx.task(redTeamAttackTask, { plan, adversaries, assumptions, outputDir });
-  artifacts.push(...redTeamAttack.artifacts);
-
-  await ctx.breakpoint({
+  let redTeamAttack = await ctx.task(redTeamAttackTask, { plan, adversaries, assumptions, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      redTeamAttack = await ctx.task(redTeamAttackTask, { ...{ plan, adversaries, assumptions, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Identified ${preMortemImagining.failureScenarios?.length || 0} premortem scenarios and ${redTeamAttack.attacks?.length || 0} red team attacks. Review before vulnerability analysis?`,
     title: 'Premortem/Red Team Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { preMortemScenarios: preMortemImagining.failureScenarios?.length || 0, redTeamAttacks: redTeamAttack.attacks?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { preMortemScenarios: preMortemImagining.failureScenarios?.length || 0, redTeamAttacks: redTeamAttack.attacks?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const vulnerabilityAnalysis = await ctx.task(vulnerabilityAnalysisTask, { preMortem: preMortemImagining, redTeam: redTeamAttack, plan, outputDir });
   artifacts.push(...vulnerabilityAnalysis.artifacts);
 
@@ -51,15 +60,24 @@ export async function process(inputs, ctx) {
   const planImprovement = await ctx.task(planImprovementTask, { plan, mitigations: mitigationDevelopment.mitigations, vulnerabilities: vulnerabilityAnalysis.vulnerabilities, outputDir });
   artifacts.push(...planImprovement.artifacts);
 
-  const qualityScore = await ctx.task(preMortemQualityScoringTask, { preMortemImagining, redTeamAttack, vulnerabilityAnalysis, mitigationDevelopment, minimumMitigationCoverage, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(preMortemQualityScoringTask, { preMortemImagining, redTeamAttack, vulnerabilityAnalysis, mitigationDevelopment, minimumMitigationCoverage, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(preMortemQualityScoringTask, { ...{ preMortemImagining, redTeamAttack, vulnerabilityAnalysis, mitigationDevelopment, minimumMitigationCoverage, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete. ${vulnerabilityAnalysis.vulnerabilities?.length || 0} vulnerabilities, ${mitigationDevelopment.mitigations?.length || 0} mitigations. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Premortem Analysis Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { vulnerabilities: vulnerabilityAnalysis.vulnerabilities?.length || 0, mitigations: mitigationDevelopment.mitigations?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { vulnerabilities: vulnerabilityAnalysis.vulnerabilities?.length || 0, mitigations: mitigationDevelopment.mitigations?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, plan: plan.name, failureScenarios: preMortemImagining.failureScenarios,
     vulnerabilities: vulnerabilityAnalysis.vulnerabilities, mitigations: mitigationDevelopment.mitigations,

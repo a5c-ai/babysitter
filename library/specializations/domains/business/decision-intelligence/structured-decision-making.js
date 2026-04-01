@@ -53,14 +53,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Consequence Modeling
-  const consequenceModeling = await ctx.task(consequenceModelingTask, {
+  let consequenceModeling = await ctx.task(consequenceModelingTask, {
     projectName,
     alternativesGeneration,
     objectivesDefinition
   });
 
-  // Breakpoint: Review decision framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      consequenceModeling = await ctx.task(consequenceModelingTask, { ...{
+    projectName,
+    alternativesGeneration,
+    objectivesDefinition
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review decision framework for ${projectName}. Are all alternatives properly evaluated?`,
     title: 'Decision Framework Review',
     context: {
@@ -68,9 +76,15 @@ export async function process(inputs, ctx) {
       projectName,
       alternativeCount: alternativesGeneration.alternatives?.length || 0,
       objectiveCount: objectivesDefinition.objectives?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Trade-off Analysis
   const tradeoffAnalysis = await ctx.task(tradeoffAnalysisTask, {
     projectName,
@@ -126,8 +140,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemFramingTask = defineTask('problem-framing', (args, taskCtx) => ({
   kind: 'agent',

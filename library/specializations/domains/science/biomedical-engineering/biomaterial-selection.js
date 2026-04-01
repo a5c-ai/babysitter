@@ -48,14 +48,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Chemical and Surface Characterization
-  const chemicalCharacterization = await ctx.task(chemicalCharacterizationTask, {
+  let chemicalCharacterization = await ctx.task(chemicalCharacterizationTask, {
     deviceName,
     candidateMaterials: candidateMaterials.materials,
     environmentalConditions
   });
 
-  // Breakpoint: Review material characterization
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      chemicalCharacterization = await ctx.task(chemicalCharacterizationTask, { ...{
+    deviceName,
+    candidateMaterials: candidateMaterials.materials,
+    environmentalConditions
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review material characterization for ${deviceName}. Are candidate materials suitable?`,
     title: 'Material Characterization Review',
     context: {
@@ -67,9 +75,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { mechanical: mechanicalCharacterization, chemical: chemicalCharacterization }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Degradation and Stability Assessment
   const stabilityAssessment = await ctx.task(stabilityAssessmentTask, {
     deviceName,
@@ -92,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Material Selection Report
-  const selectionReport = await ctx.task(selectionReportTask, {
+  let selectionReport = await ctx.task(selectionReportTask, {
     deviceName,
     materialRequirements,
     candidateMaterials,
@@ -103,8 +117,21 @@ export async function process(inputs, ctx) {
     supplierQualification
   });
 
-  // Final Breakpoint: Material Selection Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      selectionReport = await ctx.task(selectionReportTask, { ...{
+    deviceName,
+    materialRequirements,
+    candidateMaterials,
+    mechanicalCharacterization,
+    chemicalCharacterization,
+    stabilityAssessment,
+    biocompatibilityScreening,
+    supplierQualification
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Material selection complete for ${deviceName}. Recommended: ${biocompatibilityScreening.recommendedMaterial}. Approve selection?`,
     title: 'Material Selection Approval',
     context: {
@@ -114,9 +141,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/material-selection-report.json`, format: 'json', content: selectionReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -130,8 +163,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const materialRequirementsTask = defineTask('material-requirements', (args, taskCtx) => ({
   kind: 'agent',

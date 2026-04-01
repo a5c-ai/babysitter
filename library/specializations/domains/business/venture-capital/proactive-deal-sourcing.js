@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Event and Conference Planning
   ctx.log('info', 'Planning event and conference participation');
-  const eventPlanning = await ctx.task(eventPlanningTask, {
+  let eventPlanning = await ctx.task(eventPlanningTask, {
     targetSectors,
     geographies,
     ecosystemMap: ecosystemMapping.ecosystemMap,
@@ -92,8 +92,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...eventPlanning.artifacts);
 
-  // Breakpoint: Review sourcing plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      eventPlanning = await ctx.task(eventPlanningTask, { ...{
+    targetSectors,
+    geographies,
+    ecosystemMap: ecosystemMapping.ecosystemMap,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deal sourcing plan complete. ${companyIdentification.companies.length} target companies identified. Review outreach strategy?`,
     title: 'Proactive Deal Sourcing Plan',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
         outreachCampaigns: outreachStrategy.campaigns.length,
         upcomingEvents: eventPlanning.priorityEvents.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Sourcing Playbook
   ctx.log('info', 'Generating sourcing playbook');
   const sourcingPlaybook = await ctx.task(sourcingPlaybookTask, {
@@ -148,8 +163,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Target Definition
+  // Task 1: Target Definition
 export const targetDefinitionTask = defineTask('target-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define target company profiles',

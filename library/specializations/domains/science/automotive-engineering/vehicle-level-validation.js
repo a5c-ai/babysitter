@@ -39,13 +39,20 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Durability Validation
-  const durabilityValidation = await ctx.task(durabilityValidationTask, {
+  let durabilityValidation = await ctx.task(durabilityValidationTask, {
     vehicleProgram,
     validationPlan
   });
 
-  // Breakpoint: Durability results review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      durabilityValidation = await ctx.task(durabilityValidationTask, { ...{
+    vehicleProgram,
+    validationPlan
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review durability validation results for ${vehicleProgram}. Miles accumulated: ${durabilityValidation.milesAccumulated}. Approve continuation?`,
     title: 'Durability Validation Review',
     context: {
@@ -57,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: durabilityValidation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Performance Validation
   const performanceValidation = await ctx.task(performanceValidationTask, {
     vehicleProgram,
@@ -94,7 +107,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Release Assessment
-  const releaseAssessment = await ctx.task(releaseAssessmentTask, {
+  let releaseAssessment = await ctx.task(releaseAssessmentTask, {
     vehicleProgram,
     durabilityValidation,
     performanceValidation,
@@ -104,8 +117,20 @@ export async function process(inputs, ctx) {
     customerEvaluation
   });
 
-  // Final Breakpoint: Vehicle release approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      releaseAssessment = await ctx.task(releaseAssessmentTask, { ...{
+    vehicleProgram,
+    durabilityValidation,
+    performanceValidation,
+    nvhValidation,
+    thermalValidation,
+    emcValidation,
+    customerEvaluation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Vehicle-Level Validation complete for ${vehicleProgram}. Overall readiness: ${releaseAssessment.readinessLevel}. Approve for production release?`,
     title: 'Vehicle Release Approval',
     context: {
@@ -116,9 +141,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/validation-results.json`, format: 'json', content: releaseAssessment },
         { path: `artifacts/durability-reports.json`, format: 'json', content: durabilityValidation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     vehicleProgram,

@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Indirect Cost Calculation
   ctx.log('info', 'Calculating indirect costs');
-  const indirectCosts = await ctx.task(indirectCostTask, {
+  let indirectCosts = await ctx.task(indirectCostTask, {
     projectId,
     directCosts,
     projectScope,
@@ -86,8 +86,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...indirectCosts.artifacts);
 
   // Breakpoint: Review cost estimate
-  const totalCost = directCosts.total + indirectCosts.total;
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      indirectCosts = await ctx.task(indirectCostTask, { ...{
+    projectId,
+    directCosts,
+    projectScope,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cost estimate complete for ${projectId}. Total: $${totalCost.toLocaleString()}. Review estimate breakdown?`,
     title: 'Construction Cost Estimate Review',
     context: {
@@ -99,9 +108,15 @@ export async function process(inputs, ctx) {
         subtotal: totalCost,
         estimateClass: estimateClass
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Contingency Analysis
   ctx.log('info', 'Performing contingency analysis');
   const contingencyAnalysis = await ctx.task(contingencyAnalysisTask, {
@@ -170,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scope Definition
+  // Task 1: Scope Definition
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define project scope',

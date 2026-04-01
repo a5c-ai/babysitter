@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(patternMatchingImplementationTask, { design, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const comparison = await ctx.task(algorithmComparisonTask, { implementation, text, pattern, outputDir });
-  artifacts.push(...comparison.artifacts);
-
-  await ctx.breakpoint({
+  let comparison = await ctx.task(algorithmComparisonTask, { implementation, text, pattern, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      comparison = await ctx.task(algorithmComparisonTask, { ...{ implementation, text, pattern, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pattern matching algorithms implemented. Best for this case: ${comparison.recommended}. Review?`,
     title: 'Pattern Matching Complete',
-    context: { runId: ctx.runId, algorithms: design.algorithms, recommended: comparison.recommended }
-  });
-
+    context: { runId: ctx.runId, algorithms: design.algorithms, recommended: comparison.recommended },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     implementations: implementation.algorithms,

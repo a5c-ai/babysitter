@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
     representations[repType] = representation;
 
     // Phase 3: Analyze Insights from Each Shift
-    const insight = await ctx.task(analyzeShiftInsightTask, {
+    let insight = await ctx.task(analyzeShiftInsightTask, {
       concept,
       fromRepresentation: Object.keys(representations).length > 1
         ? representations[Object.keys(representations)[Object.keys(representations).length - 2]]
@@ -68,9 +68,20 @@ export async function process(inputs, ctx) {
       insight,
       timestamp: ctx.now()
     });
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      insight = await ctx.task(analyzeShiftInsightTask, { ...{
+      concept,
+      fromRepresentation: Object.keys(representations).length > 1
+        ? representations[Object.keys(representations)[Object.keys(representations).length - 2]]
+        : baseUnderstanding,
+      toRepresentation: representation,
+      representationType: repType,
+      domain
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Generated ${targetRepresentations.length} representations. Review before synthesis?`,
     title: 'Representation Shifts - Representations Complete',
     context: {
@@ -79,9 +90,15 @@ export async function process(inputs, ctx) {
         path: `artifacts/representation-${rep}.json`,
         format: 'json'
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Cross-Representation Analysis
   ctx.log('info', 'Performing cross-representation analysis');
   const crossAnalysis = await ctx.task(crossRepresentationAnalysisTask, {
@@ -112,7 +129,6 @@ export async function process(inputs, ctx) {
       domain
     });
   }
-
   return {
     success: true,
     processId: 'domains/science/scientific-discovery/representation-shifts',

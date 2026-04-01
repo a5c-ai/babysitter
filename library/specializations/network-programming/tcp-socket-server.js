@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing server requirements and constraints');
 
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     language,
     ioModel,
@@ -61,9 +61,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirementsAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    projectName,
+    language,
+    ioModel,
+    maxConnections,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Requirements analyzed for ${language} TCP server with ${ioModel} I/O model. Estimated complexity: ${requirementsAnalysis.complexity}. Proceed with architecture design?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -72,9 +82,15 @@ export async function process(inputs, ctx) {
       ioModelSelection: requirementsAnalysis.ioModelDetails,
       platformSupport: requirementsAnalysis.platformSupport,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: ARCHITECTURE DESIGN
   // ============================================================================
@@ -183,7 +199,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Adding logging and monitoring capabilities');
 
-  const monitoring = await ctx.task(monitoringTask, {
+  let monitoring = await ctx.task(monitoringTask, {
     projectName,
     language,
     architectureDesign,
@@ -191,9 +207,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...monitoring.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      monitoring = await ctx.task(monitoringTask, { ...{
+    projectName,
+    language,
+    architectureDesign,
+    connectionManagement,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Phase 8 Complete: Monitoring configured with ${monitoring.metrics.length} metrics. Proceed with testing?`,
     title: 'Implementation Review',
     context: {
@@ -201,9 +226,15 @@ export async function process(inputs, ctx) {
       metrics: monitoring.metrics,
       loggingLevels: monitoring.loggingLevels,
       files: monitoring.artifacts.map(a => ({ path: a.path, format: a.format || 'c' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: TESTING
   // ============================================================================
@@ -250,7 +281,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Validating implementation');
 
-  const validation = await ctx.task(validationTask, {
+  let validation = await ctx.task(validationTask, {
     projectName,
     requirements: requirementsAnalysis.requirements,
     architectureDesign,
@@ -259,9 +290,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validationTask, { ...{
+    projectName,
+    requirements: requirementsAnalysis.requirements,
+    architectureDesign,
+    socketImplementation,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `TCP Socket Server Implementation Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Review deliverables?`,
     title: 'TCP Socket Server Complete - Final Review',
     context: {
@@ -280,9 +321,15 @@ export async function process(inputs, ctx) {
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' },
         { path: validation.reportPath, format: 'json', label: 'Validation Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -325,8 +372,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

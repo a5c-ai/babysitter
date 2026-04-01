@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Clash Analysis and Prioritization
   ctx.log('info', 'Analyzing and prioritizing clashes');
-  const clashAnalysis = await ctx.task(clashAnalysisTask, {
+  let clashAnalysis = await ctx.task(clashAnalysisTask, {
     projectId,
     clashDetection,
     outputDir
@@ -74,8 +74,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...clashAnalysis.artifacts);
 
-  // Breakpoint: Review clash detection results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clashAnalysis = await ctx.task(clashAnalysisTask, { ...{
+    projectId,
+    clashDetection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clash detection complete for ${projectId}. Total clashes: ${clashDetection.totalClashes}, Critical: ${clashAnalysis.criticalClashes}. Review and proceed to resolution?`,
     title: 'BIM Clash Detection Review',
     context: {
@@ -88,9 +96,15 @@ export async function process(inputs, ctx) {
         minorClashes: clashAnalysis.minorClashes,
         disciplinesInvolved: clashAnalysis.disciplinesInvolved
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 5: Clash Resolution Coordination
   ctx.log('info', 'Coordinating clash resolution');
   const clashResolution = await ctx.task(clashResolutionTask, {
@@ -159,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Standards Verification
+  // Task 1: Standards Verification
 export const standardsVerificationTask = defineTask('standards-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify BIM standards compliance',

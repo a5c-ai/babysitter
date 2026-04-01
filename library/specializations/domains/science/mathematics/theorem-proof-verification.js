@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Parse and Structure Informal Proof
-  const proofParsing = await ctx.task(proofParsingTask, {
+  let proofParsing = await ctx.task(proofParsingTask, {
     theoremStatement,
     proofContent,
     informalProof
@@ -47,9 +47,16 @@ export async function process(inputs, ctx) {
       verificationResult: null
     };
   }
-
-  // Breakpoint: Review parsed proof structure
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      proofParsing = await ctx.task(proofParsingTask, { ...{
+    theoremStatement,
+    proofContent,
+    informalProof
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review parsed proof structure for theorem: "${theoremStatement}". Is the structure correctly identified?`,
     title: 'Proof Structure Review',
     context: {
@@ -61,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: proofParsing
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Translate to Formal Syntax
   const formalTranslation = await ctx.task(formalTranslationTask, {
     theoremStatement,
@@ -73,7 +86,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Verify Each Logical Step
-  const stepVerification = await ctx.task(stepVerificationTask, {
+  let stepVerification = await ctx.task(stepVerificationTask, {
     formalProof: formalTranslation.formalProof,
     parsedStructure: proofParsing.parsedStructure,
     proofAssistant,
@@ -84,17 +97,32 @@ export async function process(inputs, ctx) {
   const criticalFailures = stepVerification.verificationResults.filter(
     r => r.status === 'failed' && r.severity === 'critical'
   );
-  if (criticalFailures.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        stepVerification = await ctx.task(stepVerificationTask, { ...{
+    formalProof: formalTranslation.formalProof,
+    parsedStructure: proofParsing.parsedStructure,
+    proofAssistant,
+    theoremStatement
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Found ${criticalFailures.length} critical verification failures. Review and decide how to proceed?`,
       title: 'Critical Verification Failures',
       context: {
         runId: ctx.runId,
         criticalFailures,
         recommendation: 'Address logical gaps before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Generate Counterexample Search
   const counterexampleSearch = await ctx.task(counterexampleSearchTask, {
@@ -105,7 +133,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Identify Gaps and Generate Report
-  const gapAnalysis = await ctx.task(gapAnalysisTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisTask, {
     theoremStatement,
     stepVerification,
     counterexampleSearch,
@@ -113,8 +141,18 @@ export async function process(inputs, ctx) {
     formalProof: formalTranslation.formalProof
   });
 
-  // Final Breakpoint: Verification Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
+    theoremStatement,
+    stepVerification,
+    counterexampleSearch,
+    parsedStructure: proofParsing.parsedStructure,
+    formalProof: formalTranslation.formalProof
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Proof verification complete for "${theoremStatement}". Review final results and approve?`,
     title: 'Proof Verification Complete',
     context: {
@@ -126,9 +164,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/formal-proof.${targetFormalism}`, format: 'text', content: formalTranslation.formalProof },
         { path: `artifacts/verification-report.json`, format: 'json', content: { stepVerification, gapAnalysis } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     theoremStatement,
@@ -152,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const proofParsingTask = defineTask('proof-parsing', (args, taskCtx) => ({
   kind: 'agent',

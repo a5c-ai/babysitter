@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating complete algorithm specification');
-  const algorithmSpecification = await ctx.task(algorithmSpecificationTask, {
+  let algorithmSpecification = await ctx.task(algorithmSpecificationTask, {
     algorithmDescription,
     typeClassification,
     expectedTimeAnalysis,
@@ -135,8 +135,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...algorithmSpecification.artifacts);
 
-  // Breakpoint: Review randomized algorithm analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      algorithmSpecification = await ctx.task(algorithmSpecificationTask, { ...{
+    algorithmDescription,
+    typeClassification,
+    expectedTimeAnalysis,
+    errorProbabilityAnalysis,
+    probabilisticBounds,
+    confidenceIntervals,
+    rngRequirements,
+    derandomization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Randomized algorithm analysis complete. Type: ${typeClassification.algorithmType}. Expected time: ${expectedTimeAnalysis.expectedComplexity}. Review analysis?`,
     title: 'Randomized Algorithm Analysis Review',
     context: {
@@ -151,9 +165,15 @@ export async function process(inputs, ctx) {
         errorProbability: errorProbabilityAnalysis.errorBound,
         derandomizable: derandomization.derandomizable
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -198,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

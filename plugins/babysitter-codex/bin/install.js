@@ -21,7 +21,7 @@ function main() {
   const pluginRoot = getHomePluginRoot();
   const marketplacePath = getHomeMarketplacePath();
 
-  console.log(`[babysitter-codex] Installing plugin to ${pluginRoot}`);
+  console.log(`[babysitter] Installing plugin to ${pluginRoot}`);
 
   try {
     copyPluginBundle(PACKAGE_ROOT, pluginRoot);
@@ -30,17 +30,17 @@ function main() {
     installCodexSurface(PACKAGE_ROOT, codexHome);
 
     const active = ensureGlobalProcessLibrary(PACKAGE_ROOT);
-    console.log(`[babysitter-codex]   marketplace: ${marketplacePath}`);
-    console.log(`[babysitter-codex]   process library: ${active.binding?.dir}`);
+    console.log(`[babysitter]   marketplace: ${marketplacePath}`);
+    console.log(`[babysitter]   process library: ${active.binding?.dir}`);
     if (active.defaultSpec?.cloneDir) {
-      console.log(`[babysitter-codex]   process library clone: ${active.defaultSpec.cloneDir}`);
+      console.log(`[babysitter]   process library clone: ${active.defaultSpec.cloneDir}`);
     }
-    console.log(`[babysitter-codex]   process library state: ${active.stateFile}`);
+    console.log(`[babysitter]   process library state: ${active.stateFile}`);
     warnWindowsHooks();
-    console.log('[babysitter-codex] Installation complete!');
-    console.log('[babysitter-codex] Restart Codex to pick up the installed plugin and config changes.');
+    console.log('[babysitter] Installation complete!');
+    console.log('[babysitter] Restart Codex to pick up the installed plugin and config changes.');
   } catch (err) {
-    console.error(`[babysitter-codex] Failed to install plugin: ${err.message}`);
+    console.error(`[babysitter] Failed to install plugin: ${err.message}`);
     process.exitCode = 1;
   }
 }

@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Fundraising Support Planning
   ctx.log('info', 'Planning fundraising support');
-  const fundraisingSupport = await ctx.task(fundraisingSupportTask, {
+  let fundraisingSupport = await ctx.task(fundraisingSupportTask, {
     companyName,
     companyStage,
     needsAssessment,
@@ -97,8 +97,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fundraisingSupport.artifacts);
 
-  // Breakpoint: Review value creation plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      fundraisingSupport = await ctx.task(fundraisingSupportTask, { ...{
+    companyName,
+    companyStage,
+    needsAssessment,
+    portfolioResources,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Value creation plan complete for ${companyName}. ${needsAssessment.priorityNeeds.length} priority needs identified. Review support plan?`,
     title: 'Portfolio Value Creation Plan',
     context: {
@@ -111,9 +121,15 @@ export async function process(inputs, ctx) {
         customerIntros: customerIntros.introductions.length,
         operationalProjects: operationalSupport.projects.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Impact Tracking Setup
   ctx.log('info', 'Setting up impact tracking');
   const impactTracking = await ctx.task(impactTrackingTask, {
@@ -173,8 +189,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Needs Assessment
+  // Task 1: Needs Assessment
 export const needsAssessmentTask = defineTask('needs-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess value creation needs',

@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Character Development and Profiles');
 
-  const characterDevelopment = await ctx.task(characterDevelopmentTask, {
+  let characterDevelopment = await ctx.task(characterDevelopmentTask, {
     gameName,
     narrativeFoundation,
     genre,
@@ -75,8 +75,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...characterDevelopment.artifacts);
 
-  // Quality Gate: Character review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      characterDevelopment = await ctx.task(characterDevelopmentTask, { ...{
+    gameName,
+    narrativeFoundation,
+    genre,
+    tone,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `${characterDevelopment.characterCount} characters created for ${gameName}. Main characters: ${characterDevelopment.mainCharacters.map(c => c.name).join(', ')}. Review character profiles?`,
     title: 'Character Development Review',
     context: {
@@ -85,9 +95,15 @@ export async function process(inputs, ctx) {
       mainCharacters: characterDevelopment.mainCharacters,
       supportingCharacters: characterDevelopment.supportingCharacters,
       files: [{ path: characterDevelopment.profilesPath, format: 'markdown', label: 'Character Profiles' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STORY STRUCTURE AND BEATS
   // ============================================================================
@@ -175,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Narrative-Gameplay Integration');
 
-  const gameplayIntegration = await ctx.task(narrativeIntegrationTask, {
+  let gameplayIntegration = await ctx.task(narrativeIntegrationTask, {
     gameName,
     storyBeats,
     branchingDesign,
@@ -187,8 +203,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gameplayIntegration.artifacts);
 
-  // Quality Gate: Integration review
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      gameplayIntegration = await ctx.task(narrativeIntegrationTask, { ...{
+    gameName,
+    storyBeats,
+    branchingDesign,
+    dialogueDesign,
+    cutsceneDesign,
+    playerAgency,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Narrative-gameplay integration designed for ${gameName}. ${gameplayIntegration.integrationPoints} integration points. Player agency moments: ${gameplayIntegration.agencyMoments}. Review integration plan?`,
     title: 'Narrative Integration Review',
     context: {
@@ -197,9 +225,15 @@ export async function process(inputs, ctx) {
       agencyMoments: gameplayIntegration.agencyMoments,
       pacingNotes: gameplayIntegration.pacingNotes,
       files: gameplayIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: NARRATIVE PLAYTESTING
   // ============================================================================
@@ -222,7 +256,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Narrative Design Documentation');
 
-  const narrativeDocumentation = await ctx.task(narrativeDocumentationTask, {
+  let narrativeDocumentation = await ctx.task(narrativeDocumentationTask, {
     gameName,
     narrativeFoundation,
     characterDevelopment,
@@ -237,8 +271,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...narrativeDocumentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      narrativeDocumentation = await ctx.task(narrativeDocumentationTask, { ...{
+    gameName,
+    narrativeFoundation,
+    characterDevelopment,
+    storyBeats,
+    branchingDesign,
+    dialogueWriting,
+    cutsceneDesign,
+    gameplayIntegration,
+    narrativePlaytest,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Narrative Design complete for ${gameName}. Total word count: ${dialogueWriting.totalWordCount}. Story satisfaction: ${narrativePlaytest.storySatisfaction}/10. Ready for implementation?`,
     title: 'Narrative Design Complete',
     context: {
@@ -258,9 +307,15 @@ export async function process(inputs, ctx) {
         { path: characterDevelopment.profilesPath, format: 'markdown', label: 'Character Profiles' },
         { path: dialogueWriting.scriptsPath, format: 'folder', label: 'Dialogue Scripts' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -297,8 +352,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

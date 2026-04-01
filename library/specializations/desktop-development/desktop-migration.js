@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Migration: ${sourceFramework} -> ${targetFramework}`);
 
   // Phase 1: Assessment
-  const assessment = await ctx.task(migrationAssessmentTask, { projectName, sourceFramework, targetFramework, migrationScope, outputDir });
-  artifacts.push(...assessment.artifacts);
-
-  await ctx.breakpoint({
+  let assessment = await ctx.task(migrationAssessmentTask, { projectName, sourceFramework, targetFramework, migrationScope, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      assessment = await ctx.task(migrationAssessmentTask, { ...{ projectName, sourceFramework, targetFramework, migrationScope, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Migration assessment complete. Complexity: ${assessment.complexity}. Estimated effort: ${assessment.estimatedEffort}. ${assessment.risks.length} risks identified. Review?`,
     title: 'Migration Assessment Review',
-    context: { runId: ctx.runId, complexity: assessment.complexity, risks: assessment.risks }
-  });
-
+    context: { runId: ctx.runId, complexity: assessment.complexity, risks: assessment.risks },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Architecture Mapping
   const architectureMapping = await ctx.task(mapArchitectureTask, { projectName, sourceFramework, targetFramework, assessment, outputDir });
   artifacts.push(...architectureMapping.artifacts);
@@ -59,15 +68,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataMigration.artifacts);
 
   // Phase 5: Migration Strategy
-  const strategy = await ctx.task(defineMigrationStrategyTask, { projectName, sourceFramework, targetFramework, migrationScope, assessment, architectureMapping, featureAnalysis, outputDir });
-  artifacts.push(...strategy.artifacts);
-
-  await ctx.breakpoint({
+  let strategy = await ctx.task(defineMigrationStrategyTask, { projectName, sourceFramework, targetFramework, migrationScope, assessment, architectureMapping, featureAnalysis, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategy = await ctx.task(defineMigrationStrategyTask, { ...{ projectName, sourceFramework, targetFramework, migrationScope, assessment, architectureMapping, featureAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Migration strategy: ${strategy.approach}. ${strategy.phases.length} phases planned. Total timeline: ${strategy.totalDuration}. Approve strategy?`,
     title: 'Migration Strategy Review',
-    context: { runId: ctx.runId, approach: strategy.approach, phases: strategy.phases }
-  });
-
+    context: { runId: ctx.runId, approach: strategy.approach, phases: strategy.phases },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Risk Mitigation
   const riskMitigation = await ctx.task(planRiskMitigationTask, { projectName, assessment, strategy, outputDir });
   artifacts.push(...riskMitigation.artifacts);

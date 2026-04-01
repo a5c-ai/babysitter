@@ -41,22 +41,35 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'technical-impact', data: technicalImpact });
 
   // Phase 3: Configuration Item Impact Assessment
-  const configurationImpact = await ctx.task(configurationImpactTask, {
+  let configurationImpact = await ctx.task(configurationImpactTask, {
     affectedItems: inputs.affectedItems,
     changeRequest: inputs.changeRequest
   });
   artifacts.push({ phase: 'configuration-impact', data: configurationImpact });
 
-  // Breakpoint: Impact Assessment Review
-  await ctx.breakpoint('impact-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      configurationImpact = await ctx.task(configurationImpactTask, { ...{
+    affectedItems: inputs.affectedItems,
+    changeRequest: inputs.changeRequest
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('impact-review', {
     question: 'Review technical and configuration impact. Proceed with detailed analysis?',
     context: {
       technicalRisk: technicalImpact.riskLevel,
       affectedItemCount: configurationImpact.totalAffected,
       estimatedEffort: technicalImpact.effortEstimate
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Cost and Schedule Impact
   const costScheduleImpact = await ctx.task(costScheduleTask, {
     technicalImpact: technicalImpact,
@@ -93,23 +106,36 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'eco-preparation', data: ecoPreparation });
 
   // Phase 8: Change Control Board Review
-  const ccbReview = await ctx.task(ccbReviewTask, {
+  let ccbReview = await ctx.task(ccbReviewTask, {
     ecoPackage: ecoPreparation,
     priority: inputs.priority
   });
   artifacts.push({ phase: 'ccb-review', data: ccbReview });
 
-  // Breakpoint: CCB Approval
-  await ctx.breakpoint('ccb-approval', {
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      ccbReview = await ctx.task(ccbReviewTask, { ...{
+    ecoPackage: ecoPreparation,
+    priority: inputs.priority
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint('ccb-approval', {
     question: 'CCB review complete. Approve ECO for implementation?',
     context: {
       ecoNumber: ecoPreparation.ecoNumber,
       totalCost: costScheduleImpact.totalCost,
       scheduleImpact: costScheduleImpact.scheduleImpact,
       recommendation: ccbReview.recommendation
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: Implementation Planning
   const implementationPlan = await ctx.task(implementationPlanTask, {
     ecoPackage: ecoPreparation,
@@ -119,7 +145,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'implementation-plan', data: implementationPlan });
 
   // Phase 10: Change Package Release
-  const changePackageRelease = await ctx.task(changePackageReleaseTask, {
+  let changePackageRelease = await ctx.task(changePackageReleaseTask, {
     changeId: inputs.changeId,
     ecoPreparation: ecoPreparation,
     implementationPlan: implementationPlan,
@@ -127,16 +153,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'package-release', data: changePackageRelease });
 
-  // Final Breakpoint: Implementation Initiation
-  await ctx.breakpoint('implementation-start', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      changePackageRelease = await ctx.task(changePackageReleaseTask, { ...{
+    changeId: inputs.changeId,
+    ecoPreparation: ecoPreparation,
+    implementationPlan: implementationPlan,
+    ccbApproval: ccbReview
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('implementation-start', {
     question: 'Approve change package release and initiate implementation?',
     context: {
       ecoNumber: ecoPreparation.ecoNumber,
       effectiveDate: implementationPlan.effectiveDate,
       implementationPhases: implementationPlan.phases.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -162,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const changeDocumentationTask = defineTask('change-documentation', (args) => ({
+  const changeDocumentationTask = defineTask('change-documentation', (args) => ({
   kind: 'agent',
   title: 'Change Request Documentation',
   agent: {

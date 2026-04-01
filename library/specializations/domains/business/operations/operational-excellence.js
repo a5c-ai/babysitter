@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Vision and Strategy
   ctx.log('info', 'Phase 2: OpEx Vision and Strategy Development');
-  const visionStrategy = await ctx.task(visionStrategyTask, {
+  let visionStrategy = await ctx.task(visionStrategyTask, {
     organizationName,
     maturityAssessment,
     focusAreas,
@@ -59,8 +59,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...visionStrategy.artifacts);
 
-  // Quality Gate: Vision and Strategy Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      visionStrategy = await ctx.task(visionStrategyTask, { ...{
+    organizationName,
+    maturityAssessment,
+    focusAreas,
+    timeline,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `OpEx vision defined. Current maturity: ${maturityAssessment.overallMaturity}. Target maturity: ${visionStrategy.targetMaturity}. Focus areas: ${focusAreas.join(', ')}. Approve vision and strategy?`,
     title: 'OpEx Vision and Strategy Review',
     context: {
@@ -70,9 +80,15 @@ export async function process(inputs, ctx) {
       vision: visionStrategy.vision,
       strategy: visionStrategy.strategy,
       files: [...maturityAssessment.artifacts, ...visionStrategy.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Governance Model Design
   ctx.log('info', 'Phase 3: Governance Model Design');
   const governanceModel = await ctx.task(governanceModelTask, {
@@ -108,7 +124,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Deployment Roadmap
   ctx.log('info', 'Phase 6: Deployment Roadmap');
-  const deploymentRoadmap = await ctx.task(deploymentRoadmapTask, {
+  let deploymentRoadmap = await ctx.task(deploymentRoadmapTask, {
     organizationName,
     visionStrategy,
     governanceModel,
@@ -120,8 +136,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...deploymentRoadmap.artifacts);
 
-  // Quality Gate: Program Design Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      deploymentRoadmap = await ctx.task(deploymentRoadmapTask, { ...{
+    organizationName,
+    visionStrategy,
+    governanceModel,
+    methodologyFramework,
+    capabilityPlan,
+    timeline,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OpEx program designed. Governance: ${governanceModel.governanceType}. Methodologies: ${methodologyFramework.methodologies.length}. Deployment phases: ${deploymentRoadmap.phases.length}. Review program design?`,
     title: 'Operational Excellence Program Review',
     context: {
@@ -131,9 +159,15 @@ export async function process(inputs, ctx) {
       methodologies: methodologyFramework.methodologies,
       deployment: deploymentRoadmap.summary,
       files: [...governanceModel.artifacts, ...deploymentRoadmap.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Metrics and KPIs
   ctx.log('info', 'Phase 7: Metrics and KPIs Design');
   const metricsDesign = await ctx.task(metricsDesignTask, {
@@ -231,8 +265,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Maturity Assessment
+  // Task 1: Maturity Assessment
 export const maturityAssessmentTask = defineTask('opex-maturity', (args, taskCtx) => ({
   kind: 'agent',
   title: `OpEx Maturity Assessment - ${args.organizationName}`,

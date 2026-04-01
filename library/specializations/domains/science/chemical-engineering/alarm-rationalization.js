@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Optimize Setpoints and Deadbands
   ctx.log('info', 'Optimizing alarm setpoints and deadbands');
-  const setpointResult = await ctx.task(setpointOptimizationTask, {
+  let setpointResult = await ctx.task(setpointOptimizationTask, {
     processName,
     alarms: classificationResult.classification,
     nuisanceAnalysis: nuisanceResult.analysis,
@@ -83,8 +83,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...setpointResult.artifacts);
 
-  // Breakpoint: Review alarm rationalization
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      setpointResult = await ctx.task(setpointOptimizationTask, { ...{
+    processName,
+    alarms: classificationResult.classification,
+    nuisanceAnalysis: nuisanceResult.analysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Alarm rationalization in progress for ${processName}. Total alarms: ${inventoryResult.inventory.totalCount}. Nuisance alarms identified: ${nuisanceResult.nuisanceCount}. Current alarm rate: ${performanceAnalysisResult.alarmRate}/hour. Target: ${performanceTargets.alarmRate || 6}/hour. Review results?`,
     title: 'Alarm Rationalization Review',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         currentAlarmRate: performanceAnalysisResult.alarmRate,
         targetAlarmRate: performanceTargets.alarmRate || 6
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Design Alarm Response Procedures
   ctx.log('info', 'Designing alarm response procedures');
   const responseProceduresResult = await ctx.task(alarmResponseProceduresTask, {
@@ -144,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Alarm Inventory
+  // Task 1: Alarm Inventory
 export const alarmInventoryTask = defineTask('alarm-inventory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Inventory existing alarms',

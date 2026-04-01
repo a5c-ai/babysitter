@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Spatial Humanities Report
   ctx.log('info', 'Generating spatial humanities report');
-  const spatialReport = await ctx.task(spatialReportTask, {
+  let spatialReport = await ctx.task(spatialReportTask, {
     researchQuestion,
     dataAssessment,
     georeferencing,
@@ -112,8 +112,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...spatialReport.artifacts);
 
-  // Breakpoint: Review spatial analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      spatialReport = await ctx.task(spatialReportTask, { ...{
+    researchQuestion,
+    dataAssessment,
+    georeferencing,
+    databaseDesign,
+    cartographicDesign,
+    spatialAnalysis,
+    temporalSpatial,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Spatial humanities analysis complete. Maps created: ${cartographicDesign.maps?.length || 0}. Patterns identified: ${spatialAnalysis.patterns?.length || 0}. Review analysis?`,
     title: 'Spatial Humanities Mapping Results',
     context: {
@@ -125,9 +138,15 @@ export async function process(inputs, ctx) {
         dataLayers: databaseDesign.layers?.length || 0,
         patterns: spatialAnalysis.patterns?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -154,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Spatial Data Assessment and Preparation
+  // Task 1: Spatial Data Assessment and Preparation
 export const spatialDataAssessmentTask = defineTask('spatial-data-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess and prepare spatial data',

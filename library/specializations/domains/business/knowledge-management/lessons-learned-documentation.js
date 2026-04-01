@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing lesson sources');
-  const sourceAnalysis = await ctx.task(sourceAnalysisTask, {
+  let sourceAnalysis = await ctx.task(sourceAnalysisTask, {
     lessonSources,
     projectContext,
     existingLessons,
@@ -49,8 +49,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sourceAnalysis.artifacts);
 
-  // Breakpoint: Review source analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      sourceAnalysis = await ctx.task(sourceAnalysisTask, { ...{
+    lessonSources,
+    projectContext,
+    existingLessons,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${sourceAnalysis.potentialLessons.length} potential lessons from ${lessonSources.length} sources. Review?`,
     title: 'Source Analysis Review',
     context: {
@@ -65,9 +74,15 @@ export async function process(inputs, ctx) {
         sourcesAnalyzed: lessonSources.length,
         potentialLessons: sourceAnalysis.potentialLessons.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: LESSON EXTRACTION AND FORMULATION
   // ============================================================================
@@ -100,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Documenting root cause analysis');
-  const rootCauseDocumentation = await ctx.task(rootCauseDocumentationTask, {
+  let rootCauseDocumentation = await ctx.task(rootCauseDocumentationTask, {
     lessons: lessonExtraction.lessons,
     contextDocumentation: contextDocumentation.contexts,
     outputDir
@@ -108,8 +123,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...rootCauseDocumentation.artifacts);
 
-  // Breakpoint: Review analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      rootCauseDocumentation = await ctx.task(rootCauseDocumentationTask, { ...{
+    lessons: lessonExtraction.lessons,
+    contextDocumentation: contextDocumentation.contexts,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Documented root causes for ${rootCauseDocumentation.analyzedLessons.length} lessons. Review?`,
     title: 'Root Cause Analysis Review',
     context: {
@@ -124,9 +147,15 @@ export async function process(inputs, ctx) {
         lessonsAnalyzed: rootCauseDocumentation.analyzedLessons.length,
         rootCausesIdentified: rootCauseDocumentation.totalRootCauses
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RECOMMENDATION DEVELOPMENT
   // ============================================================================
@@ -190,7 +219,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing documentation quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     sourceAnalysis,
     lessonExtraction,
     standardizedDocumentation,
@@ -217,8 +246,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    sourceAnalysis,
+    lessonExtraction,
+    standardizedDocumentation,
+    expertValidation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize documentation?`,
       title: 'Final Approval Gate',
       context: {
@@ -234,9 +273,15 @@ export async function process(inputs, ctx) {
           qualityScore: qualityAssessment.overallScore,
           lessonsDocumented: standardizedDocumentation.documentedLessons.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -266,8 +311,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...backwardKernel.artifacts);
   }
-
   // Phase 4: Framework Integration
   const frameworkIntegration = await ctx.task(frameworkIntegrationTask, {
     operatorName, framework, forwardKernel, backwardKernel, outputDir
@@ -71,19 +70,29 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...gradientVerification.artifacts);
   }
-
   // Phase 6: Performance Benchmarking
-  const benchmarking = await ctx.task(operatorBenchmarkingTask, {
+  let benchmarking = await ctx.task(operatorBenchmarkingTask, {
     operatorName, framework, frameworkIntegration, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(operatorBenchmarkingTask, { ...{
+    operatorName, framework, frameworkIntegration, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Custom operator ${operatorName} complete for ${framework}. Speedup vs native: ${benchmarking.speedup}x. Review?`,
     title: 'Custom Operator Complete',
-    context: { runId: ctx.runId, benchmarking, gradientVerification }
-  });
-
+    context: { runId: ctx.runId, benchmarking, gradientVerification },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.speedup >= 1.0 && (!supportBackward || gradientVerification.passed),
     operatorName,

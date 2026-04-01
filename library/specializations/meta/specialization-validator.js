@@ -149,7 +149,6 @@ export async function process(inputs, ctx) {
     weightedScore += phaseScores[phase] * weights[phase];
     totalWeight += weights[phase];
   }
-
   const overallScore = Math.round(weightedScore / totalWeight);
   const valid = overallScore >= 80 && gaps.length === 0;
 
@@ -185,8 +184,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...launchBounds.artifacts);
 
   // Phase 6: Final Occupancy Measurement
-  const finalMeasurement = await ctx.task(finalOccupancyMeasurementTask, {
+  let finalMeasurement = await ctx.task(finalOccupancyMeasurementTask, {
     projectName, targetKernels, targetOccupancy, blockSizeOptimization, outputDir
   });
-  artifacts.push(...finalMeasurement.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      finalMeasurement = await ctx.task(finalOccupancyMeasurementTask, { ...{
+    projectName, targetKernels, targetOccupancy, blockSizeOptimization, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Occupancy optimization complete for ${projectName}. Achieved: ${finalMeasurement.achievedOccupancy}% (target: ${targetOccupancy}%). Review?`,
     title: 'Occupancy Optimization Complete',
-    context: { runId: ctx.runId, finalMeasurement }
-  });
-
+    context: { runId: ctx.runId, finalMeasurement },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: finalMeasurement.achievedOccupancy >= targetOccupancy,
     projectName,

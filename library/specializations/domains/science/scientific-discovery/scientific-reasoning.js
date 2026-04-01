@@ -55,7 +55,6 @@ export async function process(inputs, ctx) {
       hypotheses: null
     };
   }
-
   // Phase 3: Abductive Hypothesis Generation
   const hypothesisGeneration = await ctx.task(abductiveHypothesisTask, {
     phenomenon: phenomenonAnalysis,
@@ -65,15 +64,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Hypothesis Evaluation and Ranking
-  const hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, {
+  let hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, {
     hypotheses: hypothesisGeneration.hypotheses,
     observations: observationAnalysis.systematizedObservations,
     existingTheories,
     constraints
   });
 
-  // Breakpoint: Review hypotheses
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, { ...{
+    hypotheses: hypothesisGeneration.hypotheses,
+    observations: observationAnalysis.systematizedObservations,
+    existingTheories,
+    constraints
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review generated hypotheses for "${phenomenon}". ${hypothesisGeneration.hypotheses?.length || 0} hypotheses generated. Proceed with prediction derivation?`,
     title: 'Hypothesis Review',
     context: {
@@ -86,9 +94,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { phenomenonAnalysis, observationAnalysis, hypothesisGeneration, hypothesisEvaluation }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Deductive Prediction Derivation
   const predictionDerivation = await ctx.task(deductivePredictionTask, {
     hypotheses: hypothesisEvaluation.rankedHypotheses,
@@ -128,7 +142,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Scientific Conclusions Synthesis
-  const conclusionsSynthesis = await ctx.task(scientificConclusionsTask, {
+  let conclusionsSynthesis = await ctx.task(scientificConclusionsTask, {
     phenomenon: phenomenonAnalysis,
     observations: observationAnalysis,
     hypotheses: hypothesisEvaluation.rankedHypotheses,
@@ -140,8 +154,22 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint: Scientific Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      conclusionsSynthesis = await ctx.task(scientificConclusionsTask, { ...{
+    phenomenon: phenomenonAnalysis,
+    observations: observationAnalysis,
+    hypotheses: hypothesisEvaluation.rankedHypotheses,
+    predictions: predictionDerivation.predictions,
+    testDesign,
+    evidenceEvaluation,
+    confirmationAnalysis,
+    theoryRefinement,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scientific reasoning complete for "${phenomenon}". Primary conclusion: ${conclusionsSynthesis.primaryConclusion}. Approve analysis?`,
     title: 'Scientific Analysis Approval',
     context: {
@@ -153,9 +181,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/scientific-report.json', format: 'json', content: conclusionsSynthesis },
         { path: 'artifacts/scientific-report.md', format: 'markdown', content: conclusionsSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     phenomenon,
@@ -176,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const phenomenonCharacterizationTask = defineTask('phenomenon-characterization', (args, taskCtx) => ({
   kind: 'agent',

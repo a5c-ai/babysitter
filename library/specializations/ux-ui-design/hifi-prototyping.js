@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning hi-fi prototype strategy');
 
-  const strategyPlanning = await ctx.task(prototypeStrategyTask, {
+  let strategyPlanning = await ctx.task(prototypeStrategyTask, {
     projectName,
     projectType,
     designTool,
@@ -117,8 +117,27 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyPlanning.artifacts);
 
-  // Quality Gate: Strategy review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyPlanning = await ctx.task(prototypeStrategyTask, { ...{
+    projectName,
+    projectType,
+    designTool,
+    targetPlatforms,
+    pages,
+    components,
+    interactionComplexity,
+    animationStyle,
+    designSystem,
+    brandGuidelines,
+    interactionPatterns,
+    userTestingRequired,
+    handoffFormat,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hi-Fi Prototype strategy planned. ${strategyPlanning.totalScreens} screens, ${strategyPlanning.totalInteractions} interactions planned across ${targetPlatforms.length} platform(s). Design tool: ${designTool}. Review and approve strategy?`,
     title: 'Prototype Strategy Review',
     context: {
@@ -139,9 +158,15 @@ export async function process(inputs, ctx) {
         userTestingRequired
       },
       files: strategyPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: DESIGN TOOL SETUP AND CONFIGURATION
   // ============================================================================
@@ -209,7 +234,7 @@ export async function process(inputs, ctx) {
   for (const page of pages) {
     ctx.log('info', `Designing high-fidelity screens for: ${page}`);
 
-    const screenDesign = await ctx.task(screenDesignTask, {
+    let screenDesign = await ctx.task(screenDesignTask, {
       projectName,
       page,
       projectType,
@@ -233,11 +258,25 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Page ${page}: ${screenDesign.screensCreated} screen(s) created with ${screenDesign.variantsCreated} variant(s)`);
   }
-
   const totalScreensCreated = screenDesignResults.reduce((sum, r) => sum + r.screensCreated, 0);
 
-  // Quality Gate: Screen design review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      screenDesign = await ctx.task(screenDesignTask, { ...{
+      projectName,
+      page,
+      projectType,
+      targetPlatforms,
+      designTool,
+      designSystem: designSystemSetup.designSystemReference,
+      components: designSystemSetup.components,
+      brandGuidelines,
+      projectUrl: prototypeUrl,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `${totalScreensCreated} high-fidelity screen(s) designed across ${pages.length} page(s). Review visual designs for brand consistency, usability, and completeness. Approve to proceed with interaction design?`,
     title: 'Screen Design Review',
     context: {
@@ -257,9 +296,15 @@ export async function process(inputs, ctx) {
         .flatMap(r => r.result.artifacts)
         .filter(a => a.type === 'screenshot')
         .map(a => ({ path: a.path, format: 'image', label: `Screen: ${a.label}` }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: INTERACTION DESIGN PATTERNS
   // ============================================================================
@@ -334,7 +379,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Creating animations and motion design');
 
-  const animations = await ctx.task(animationDesignTask, {
+  let animations = await ctx.task(animationDesignTask, {
     projectName,
     pages,
     screenDesignResults,
@@ -352,8 +397,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `${animationsCreated} animation(s) created: transitions, loading states, feedback animations`);
 
-  // Quality Gate: Interaction and animation review
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      animations = await ctx.task(animationDesignTask, { ...{
+    projectName,
+    pages,
+    screenDesignResults,
+    animationStyle,
+    interactionPatterns,
+    targetPlatforms,
+    projectType,
+    designTool,
+    projectUrl: prototypeUrl,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Interactions and animations complete. ${interactionsImplemented} interactions, ${animationsCreated} animations, ${microinteractions.microinteractionsCreated} microinteractions. Review prototype for interaction quality and motion design. Approve to proceed with testing?`,
     title: 'Interaction Design Review',
     context: {
@@ -381,9 +441,15 @@ export async function process(inputs, ctx) {
         ...interactionDesign.artifacts.filter(a => a.type === 'video').slice(0, 3).map(a => ({ path: a.path, format: 'video', label: 'Interaction Demo' })),
         ...animations.artifacts.filter(a => a.type === 'video').slice(0, 2).map(a => ({ path: a.path, format: 'video', label: 'Animation Demo' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: GESTURE AND TOUCH INTERACTIONS (MOBILE/TABLET)
   // ============================================================================
@@ -407,14 +473,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `${gestureDesign.gesturesImplemented} gesture(s) implemented: ${gestureDesign.gestureTypes.join(', ')}`);
   }
-
   // ============================================================================
   // PHASE 10: LOADING STATES AND FEEDBACK DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Designing loading states and user feedback');
 
-  const feedbackDesign = await ctx.task(feedbackDesignTask, {
+  let feedbackDesign = await ctx.task(feedbackDesignTask, {
     projectName,
     pages,
     screenDesignResults,
@@ -452,7 +517,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Responsive design: ${responsiveDesign.breakpointsCreated} breakpoint(s), ${responsiveDesign.adaptiveVariantsCreated} adaptive variant(s)`);
   }
-
   // ============================================================================
   // PHASE 12: ACCESSIBILITY VALIDATION
   // ============================================================================
@@ -476,8 +540,21 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Accessibility validation: ${accessibilityResults.issuesFound} issue(s) found, ${accessibilityResults.wcagCompliance}% WCAG 2.1 AA compliance`);
 
     // Quality Gate: Accessibility review
-    if (accessibilityResults.issuesFound > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval2) {
+          feedbackDesign = await ctx.task(feedbackDesignTask, { ...{
+    projectName,
+    pages,
+    screenDesignResults,
+    interactionPatterns,
+    animationStyle,
+    designTool,
+    projectUrl: prototypeUrl,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+        }
+  const qualityGateApproval2 = await ctx.breakpoint({
         question: `Accessibility validation found ${accessibilityResults.issuesFound} issue(s). WCAG 2.1 AA compliance: ${accessibilityResults.wcagCompliance}%. Review issues and approve fixes before proceeding?`,
         title: 'Accessibility Review',
         context: {
@@ -492,11 +569,16 @@ export async function process(inputs, ctx) {
           files: [
             { path: accessibilityResults.reportPath, format: 'html', label: 'Accessibility Report' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval2.approved) break;
+        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 13: DEVICE PREVIEW AND TESTING
   // ============================================================================
@@ -523,7 +605,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Refining and polishing prototype');
 
-  const prototypeRefinement = await ctx.task(prototypeRefinementTask, {
+  let prototypeRefinement = await ctx.task(prototypeRefinementTask, {
     projectName,
     pages,
     screenDesignResults,
@@ -541,8 +623,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Prototype refined: ${prototypeRefinement.refinementsApplied} refinement(s) applied`);
 
-  // Quality Gate: Final prototype review
-  await ctx.breakpoint({
+    let lastFeedback_phase14Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase14Review) {
+      prototypeRefinement = await ctx.task(prototypeRefinementTask, { ...{
+    projectName,
+    pages,
+    screenDesignResults,
+    interactionDesign,
+    animations,
+    microinteractions,
+    feedbackDesign,
+    navigationDesign,
+    designTool,
+    projectUrl: prototypeUrl,
+    outputDir
+  }, feedback: lastFeedback_phase14Review, attempt: attempt + 1 });
+    }
+  const phase14Review = await ctx.breakpoint({
     question: `High-fidelity prototype complete with ${totalScreensCreated} screens, ${interactionsImplemented} interactions, ${animationsCreated} animations. Review final prototype for quality and completeness. Approve to proceed with user testing?`,
     title: 'Final Prototype Review',
     context: {
@@ -564,9 +662,15 @@ export async function process(inputs, ctx) {
         { path: prototypeRefinement.prototypeWalkthroughPath, format: 'video', label: 'Prototype Walkthrough' },
         ...devicePreviewResults.artifacts.filter(a => a.type === 'screenshot').slice(0, 5).map(a => ({ path: a.path, format: 'image', label: `Preview: ${a.label}` }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase14Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase14Review.approved) break;
+    lastFeedback_phase14Review = phase14Review.response || phase14Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 15: USER TESTING PREPARATION
   // ============================================================================
@@ -591,7 +695,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `User testing plan: ${userTestingPrep.scenariosCreated} scenario(s), ${userTestingPrep.tasksCreated} task(s), ${testingParticipants} participant(s)`);
   }
-
   // ============================================================================
   // PHASE 16: USER TESTING EXECUTION
   // ============================================================================
@@ -599,7 +702,7 @@ export async function process(inputs, ctx) {
   if (userTestingRequired && userTestingPrep) {
     ctx.log('info', 'Phase 16: Conducting user testing sessions');
 
-    const userTesting = await ctx.task(userTestingExecutionTask, {
+    let userTesting = await ctx.task(userTestingExecutionTask, {
       projectName,
       testingPlan: userTestingPrep.testingPlan,
       testingParticipants,
@@ -613,8 +716,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `User testing complete: ${userTesting.sessionsCompleted} session(s), ${userTesting.issuesFound} issue(s) identified`);
 
-    // Quality Gate: User testing results review
-    await ctx.breakpoint({
+      let lastFeedback_phase16Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase16Review) {
+        userTesting = await ctx.task(userTestingExecutionTask, { ...{
+      projectName,
+      testingPlan: userTestingPrep.testingPlan,
+      testingParticipants,
+      prototypeUrl,
+      targetPlatforms,
+      outputDir
+    }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
+      }
+  const phase16Review = await ctx.breakpoint({
       question: `User testing complete with ${userTesting.sessionsCompleted} session(s). ${userTesting.issuesFound} issue(s) found (${userTesting.criticalIssues} critical). Success rate: ${userTesting.overallSuccessRate}%. Review findings and decide on iterations or proceed to handoff?`,
       title: 'User Testing Results',
       context: {
@@ -633,9 +747,15 @@ export async function process(inputs, ctx) {
           { path: userTesting.reportPath, format: 'html', label: 'User Testing Report' },
           { path: userTesting.videoHighlightsPath, format: 'video', label: 'Testing Highlights' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase16Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase16Review.approved) break;
+      lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 17: INTERACTION SPECIFICATIONS DOCUMENTATION
@@ -748,7 +868,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 21: Conducting final validation');
 
-  const finalValidation = await ctx.task(prototypeValidationTask, {
+  let finalValidation = await ctx.task(prototypeValidationTask, {
     projectName,
     totalScreensCreated,
     interactionsImplemented,
@@ -768,8 +888,25 @@ export async function process(inputs, ctx) {
   const validationScore = finalValidation.validationScore;
   const productionReady = finalValidation.productionReady;
 
-  // Final Breakpoint: Prototype completion approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalValidation = await ctx.task(prototypeValidationTask, { ...{
+    projectName,
+    totalScreensCreated,
+    interactionsImplemented,
+    animationsCreated,
+    strategyPlanning,
+    screenDesignResults,
+    interactionDesign,
+    userTestingResults,
+    accessibilityResults,
+    handoffPackage,
+    prototypeUrl,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Hi-Fi Prototype Complete! Validation score: ${validationScore}/100. ${totalScreensCreated} screens, ${interactionsImplemented} interactions, ${animationsCreated} animations. User testing: ${userTestingResults?.overallSuccessRate || 'N/A'}% success. Production ready: ${productionReady}. Approve for handoff?`,
     title: 'Prototype Complete - Final Approval',
     context: {
@@ -811,9 +948,15 @@ export async function process(inputs, ctx) {
         { path: handoffPackage.handoffGuidePath, format: 'markdown', label: 'Developer Handoff Guide' },
         { path: finalValidation.reportPath, format: 'markdown', label: 'Validation Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -916,8 +1059,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

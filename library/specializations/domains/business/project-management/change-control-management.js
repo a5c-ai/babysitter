@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Change Request Validation
-  const requestValidation = await ctx.task(changeRequestValidationTask, {
+  let requestValidation = await ctx.task(changeRequestValidationTask, {
     projectName,
     changeRequest,
     existingChanges
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       changeDecision: { status: 'rejected', reason: 'Validation failed' }
     };
   }
-
-  // Breakpoint: Review validated change request
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requestValidation = await ctx.task(changeRequestValidationTask, { ...{
+    projectName,
+    changeRequest,
+    existingChanges
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Change request ${changeRequest.id} validated for ${projectName}. Category: ${requestValidation.category}. Proceed with impact assessment?`,
     title: 'Change Request Validation Review',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: requestValidation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Scope Impact Assessment
   const scopeImpact = await ctx.task(scopeImpactAssessmentTask, {
     projectName,
@@ -108,7 +121,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Integrated Impact Analysis
-  const integratedImpact = await ctx.task(integratedImpactAnalysisTask, {
+  let integratedImpact = await ctx.task(integratedImpactAnalysisTask, {
     projectName,
     changeRequest,
     scopeImpact,
@@ -119,8 +132,20 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Impact assessment complete
-  if (integratedImpact.overallImpact === 'critical' || integratedImpact.overallImpact === 'high') {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        integratedImpact = await ctx.task(integratedImpactAnalysisTask, { ...{
+    projectName,
+    changeRequest,
+    scopeImpact,
+    scheduleImpact,
+    costImpact,
+    resourceImpact,
+    riskAssessment
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Change ${changeRequest.id} has ${integratedImpact.overallImpact} impact. Schedule impact: ${scheduleImpact.daysImpact} days. Cost impact: ${costImpact.costImpact}. Continue to CCB review?`,
       title: 'High Impact Change Warning',
       context: {
@@ -129,9 +154,15 @@ export async function process(inputs, ctx) {
         scheduleImpact: scheduleImpact.daysImpact,
         costImpact: costImpact.costImpact,
         recommendation: integratedImpact.recommendation
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: CCB Presentation Preparation
   const ccbPresentation = await ctx.task(ccbPresentationPreparationTask, {
@@ -161,9 +192,8 @@ export async function process(inputs, ctx) {
       projectBaselines
     });
   }
-
   // Phase 11: Change Documentation
-  const changeDocumentation = await ctx.task(changeDocumentationTask, {
+  let changeDocumentation = await ctx.task(changeDocumentationTask, {
     projectName,
     changeRequest,
     requestValidation,
@@ -172,8 +202,19 @@ export async function process(inputs, ctx) {
     implementationPlan
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      changeDocumentation = await ctx.task(changeDocumentationTask, { ...{
+    projectName,
+    changeRequest,
+    requestValidation,
+    integratedImpact,
+    ccbDecision,
+    implementationPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Change control complete for ${changeRequest.id}. Decision: ${ccbDecision.decision}. Document and communicate?`,
     title: 'Change Control Completion',
     context: {
@@ -186,9 +227,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/change-${changeRequest.id}-decision.json`, format: 'json', content: ccbDecision },
         { path: `artifacts/change-${changeRequest.id}-documentation.md`, format: 'markdown', content: changeDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -225,8 +272,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const changeRequestValidationTask = defineTask('change-request-validation', (args, taskCtx) => ({
   kind: 'agent',

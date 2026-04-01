@@ -58,15 +58,24 @@ export async function process(inputs, ctx) {
   const environmentTesting = await ctx.task(explorationEnvironmentTestingTask, { robotName, environmentType, outputDir });
   artifacts.push(...environmentTesting.artifacts);
 
-  const efficiencyMetrics = await ctx.task(explorationEfficiencyTask, { robotName, environmentTesting, outputDir });
-  artifacts.push(...efficiencyMetrics.artifacts);
-
-  await ctx.breakpoint({
+  let efficiencyMetrics = await ctx.task(explorationEfficiencyTask, { robotName, environmentTesting, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      efficiencyMetrics = await ctx.task(explorationEfficiencyTask, { ...{ robotName, environmentTesting, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Autonomous Exploration Complete for ${robotName}. Coverage: ${efficiencyMetrics.coverage}%, Efficiency: ${efficiencyMetrics.efficiency}. Review?`,
     title: 'Autonomous Exploration Complete',
-    context: { runId: ctx.runId, coverage: efficiencyMetrics.coverage, efficiency: efficiencyMetrics.efficiency }
-  });
-
+    context: { runId: ctx.runId, coverage: efficiencyMetrics.coverage, efficiency: efficiencyMetrics.efficiency },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: efficiencyMetrics.coverage >= 95,
     robotName,

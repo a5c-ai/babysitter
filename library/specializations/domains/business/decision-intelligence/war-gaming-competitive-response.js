@@ -54,15 +54,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Response Modeling
-  const responseModeling = await ctx.task(responseModelingTask, {
+  let responseModeling = await ctx.task(responseModelingTask, {
     projectName,
     competitorProfiling,
     scenariosDevelopment,
     strategicOptions
   });
 
-  // Breakpoint: Review war game setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      responseModeling = await ctx.task(responseModelingTask, { ...{
+    projectName,
+    competitorProfiling,
+    scenariosDevelopment,
+    strategicOptions
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review war game design for ${projectName}. Is the scenario setup realistic?`,
     title: 'War Game Design Review',
     context: {
@@ -70,9 +79,15 @@ export async function process(inputs, ctx) {
       projectName,
       competitorCount: competitors.length,
       optionsCount: strategicOptions.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: War Game Execution
   const gameExecution = await ctx.task(gameExecutionTask, {
     projectName,
@@ -121,8 +136,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const warGameDesignTask = defineTask('war-game-design', (args, taskCtx) => ({
   kind: 'agent',

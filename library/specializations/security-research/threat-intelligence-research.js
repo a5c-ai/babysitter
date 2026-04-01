@@ -120,7 +120,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating threat intelligence product');
 
-  const intelProduct = await ctx.task(intelProductTask, {
+  let intelProduct = await ctx.task(intelProductTask, {
     projectName,
     collection,
     ttpExtraction,
@@ -130,9 +130,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...intelProduct.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      intelProduct = await ctx.task(intelProductTask, { ...{
+    projectName,
+    collection,
+    ttpExtraction,
+    iocGeneration,
+    attribution,
+    outputFormat,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Threat intelligence research complete. ${iocs.length} IOCs, ${ttps.length} TTPs identified. Review intelligence product?`,
     title: 'Threat Intel Research Complete',
     context: {
@@ -144,9 +155,15 @@ export async function process(inputs, ctx) {
         attribution: attribution.confidence
       },
       files: intelProduct.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -173,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -58,15 +58,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...(pmfScoring.artifacts || []));
 
   // Phase 8: PMF Determination
-  const pmfDetermination = await ctx.task(pmfDeterminationTask, { companyName, pmfScoring });
-  artifacts.push(...(pmfDetermination.artifacts || []));
-
-  await ctx.breakpoint({
+  let pmfDetermination = await ctx.task(pmfDeterminationTask, { companyName, pmfScoring });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pmfDetermination = await ctx.task(pmfDeterminationTask, { ...{ companyName, pmfScoring }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PMF Assessment complete for ${companyName}. Score: ${pmfScoring.overallScore}/100. Determination: ${pmfDetermination.status}. Approve?`,
     title: 'PMF Assessment Complete',
-    context: { runId: ctx.runId, companyName, score: pmfScoring.overallScore, status: pmfDetermination.status, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, score: pmfScoring.overallScore, status: pmfDetermination.status, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {

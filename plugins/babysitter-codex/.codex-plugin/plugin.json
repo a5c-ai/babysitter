@@ -1,5 +1,5 @@
 {
-  "name": "babysitter-codex",
+  "name": "babysitter",
   "version": "0.1.5",
   "description": "Babysitter orchestration plugin for Codex with skill entrypoints and lifecycle hooks.",
   "author": {

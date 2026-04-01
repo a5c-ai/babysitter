@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Experiment Design
-  const experimentDesign = await ctx.task(experimentDesignTask, {
+  let experimentDesign = await ctx.task(experimentDesignTask, {
     experimentType,
     dynamicProcess,
     characterizationTechniques,
@@ -50,9 +50,18 @@ export async function process(inputs, ctx) {
       recommendations: experimentDesign.recommendations
     };
   }
-
-  // Breakpoint: Review experiment design
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      experimentDesign = await ctx.task(experimentDesignTask, { ...{
+    experimentType,
+    dynamicProcess,
+    characterizationTechniques,
+    temporalRequirements,
+    environmentalConditions
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review in-situ ${experimentType} experiment design. ${characterizationTechniques.length} techniques planned. Approve to proceed?`,
     title: 'In-Situ Experiment Design Review',
     context: {
@@ -66,9 +75,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: experimentDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Sample/Cell Preparation
   const samplePreparation = await ctx.task(sampleCellPreparationTask, {
     experimentDesign,
@@ -85,15 +100,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Data Acquisition Protocol
-  const dataAcquisitionProtocol = await ctx.task(dataAcquisitionProtocolTask, {
+  let dataAcquisitionProtocol = await ctx.task(dataAcquisitionProtocolTask, {
     experimentDesign,
     instrumentConfig,
     temporalRequirements,
     characterizationTechniques
   });
 
-  // Breakpoint: Pre-experiment verification
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      dataAcquisitionProtocol = await ctx.task(dataAcquisitionProtocolTask, { ...{
+    experimentDesign,
+    instrumentConfig,
+    temporalRequirements,
+    characterizationTechniques
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Pre-experiment verification complete. All ${characterizationTechniques.length} instruments configured. Ready to begin data acquisition?`,
     title: 'Pre-Experiment Verification',
     context: {
@@ -101,9 +125,15 @@ export async function process(inputs, ctx) {
       instrumentConfig,
       dataAcquisitionProtocol,
       estimatedDuration: dataAcquisitionProtocol.estimatedDuration
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Real-Time Data Acquisition (Simulated)
   const realTimeData = await ctx.task(realTimeDataAcquisitionTask, {
     experimentDesign,
@@ -135,7 +165,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Data Validation
-  const dataValidation = await ctx.task(dataValidationTask, {
+  let dataValidation = await ctx.task(dataValidationTask, {
     realTimeData,
     processCorrelation,
     kineticAnalysis,
@@ -143,20 +173,35 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Data must pass validation
-  if (!dataValidation.valid) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        dataValidation = await ctx.task(dataValidationTask, { ...{
+    realTimeData,
+    processCorrelation,
+    kineticAnalysis,
+    experimentDesign
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Data validation issues detected: ${dataValidation.issues.length} issues. Review and determine if experiment should be repeated?`,
       title: 'Data Validation Warning',
       context: {
         runId: ctx.runId,
         issues: dataValidation.issues,
         recommendations: dataValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // Phase 10: Report Generation
-  const experimentReport = await ctx.task(reportGenerationTask, {
+  let experimentReport = await ctx.task(reportGenerationTask, {
     experimentDesign,
     realTimeData,
     processCorrelation,
@@ -166,8 +211,20 @@ export async function process(inputs, ctx) {
     dynamicProcess
   });
 
-  // Final Breakpoint: Results approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      experimentReport = await ctx.task(reportGenerationTask, { ...{
+    experimentDesign,
+    realTimeData,
+    processCorrelation,
+    kineticAnalysis,
+    phenomenonDoc,
+    dataValidation,
+    dynamicProcess
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `In-situ experiment complete. ${phenomenonDoc.phenomenaObserved.length} phenomena documented. Data quality: ${dataValidation.qualityScore}/100. Approve results?`,
     title: 'In-Situ Experiment Results Approval',
     context: {
@@ -179,9 +236,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/experiment-report.md', format: 'markdown', content: experimentReport.markdown },
         { path: 'artifacts/realtime-data.json', format: 'json', content: realTimeData }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     experimentDesign,
@@ -202,8 +265,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const experimentDesignTask = defineTask('experiment-design', (args, taskCtx) => ({
   kind: 'agent',

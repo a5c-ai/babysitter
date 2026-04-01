@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Formalize Null and Alternative Hypotheses
-  const hypothesisFormalization = await ctx.task(hypothesisFormalizationTask, {
+  let hypothesisFormalization = await ctx.task(hypothesisFormalizationTask, {
     hypotheses,
     data
   });
@@ -49,9 +49,15 @@ export async function process(inputs, ctx) {
       testResults: null
     };
   }
-
-  // Breakpoint: Review formalized hypotheses
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      hypothesisFormalization = await ctx.task(hypothesisFormalizationTask, { ...{
+    hypotheses,
+    data
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review ${hypothesisFormalization.formalizedHypotheses.length} formalized hypothesis/hypotheses. Correct formulation?`,
     title: 'Hypothesis Formalization Review',
     context: {
@@ -62,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hypothesisFormalization
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Select Appropriate Test Statistic
   const testSelection = await ctx.task(testSelectionTask, {
     hypothesisFormalization,
@@ -89,7 +101,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Report Results with Uncertainty
-  const resultsReporting = await ctx.task(resultsReportingTask, {
+  let resultsReporting = await ctx.task(resultsReportingTask, {
     hypothesisFormalization,
     testSelection,
     multipleComparisonCorrection,
@@ -98,8 +110,19 @@ export async function process(inputs, ctx) {
     data
   });
 
-  // Final Breakpoint: Testing Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      resultsReporting = await ctx.task(resultsReportingTask, { ...{
+    hypothesisFormalization,
+    testSelection,
+    multipleComparisonCorrection,
+    effectSizeComputation,
+    alpha,
+    data
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hypothesis testing complete. ${resultsReporting.significantResults} of ${hypothesisFormalization.formalizedHypotheses.length} tests significant at alpha = ${alpha}. Review results?`,
     title: 'Hypothesis Testing Complete',
     context: {
@@ -110,9 +133,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/test-results.json`, format: 'json', content: resultsReporting }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     hypotheses: hypothesisFormalization.formalizedHypotheses,
@@ -131,8 +160,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const hypothesisFormalizationTask = defineTask('hypothesis-formalization', (args, taskCtx) => ({
   kind: 'agent',

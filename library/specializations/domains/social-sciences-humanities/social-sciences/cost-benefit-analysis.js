@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring CBA quality');
-  const qualityScore = await ctx.task(cbaQualityScoringTask, {
+  let qualityScore = await ctx.task(cbaQualityScoringTask, {
     frameworkSetup,
     costEstimation,
     benefitEstimation,
@@ -130,8 +130,20 @@ export async function process(inputs, ctx) {
   const cbaScore = qualityScore.overallScore;
   const qualityMet = cbaScore >= 80;
 
-  // Breakpoint: Review CBA
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(cbaQualityScoringTask, { ...{
+    frameworkSetup,
+    costEstimation,
+    benefitEstimation,
+    presentValueCalc,
+    sensitivityAnalysis,
+    distributionalAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cost-benefit analysis complete. Quality score: ${cbaScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Review and approve?`,
     title: 'Cost-Benefit Analysis Review',
     context: {
@@ -147,9 +159,15 @@ export async function process(inputs, ctx) {
         bcRatio: presentValueCalc.bcRatio,
         irr: presentValueCalc.irr
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

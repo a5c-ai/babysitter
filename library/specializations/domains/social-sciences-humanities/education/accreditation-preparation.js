@@ -116,7 +116,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring accreditation preparation quality');
-  const qualityScore = await ctx.task(accreditationQualityScoringTask, {
+  let qualityScore = await ctx.task(accreditationQualityScoringTask, {
     programName,
     standardsMapping,
     gapAnalysis,
@@ -132,8 +132,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review accreditation preparation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(accreditationQualityScoringTask, { ...{
+    programName,
+    standardsMapping,
+    gapAnalysis,
+    evidenceCollection,
+    selfStudy,
+    improvementPlan,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Accreditation preparation complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Accreditation Preparation Review',
     context: {
@@ -148,9 +161,15 @@ export async function process(inputs, ctx) {
         gaps: gapAnalysis.analysis?.gaps?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -175,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const standardsMappingTask = defineTask('standards-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Map accreditation standards',

@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Company Summary Reports
   ctx.log('info', 'Generating company summary reports');
-  const companySummaries = await ctx.task(companySummaryTask, {
+  let companySummaries = await ctx.task(companySummaryTask, {
     portfolioData: dataCollection.data,
     kpiAnalysis,
     financialAnalysis,
@@ -92,8 +92,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...companySummaries.artifacts);
 
-  // Breakpoint: Review portfolio data
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      companySummaries = await ctx.task(companySummaryTask, { ...{
+    portfolioData: dataCollection.data,
+    kpiAnalysis,
+    financialAnalysis,
+    milestoneTracking,
+    valuationUpdate,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Portfolio data collected for ${portfolioCompanies.length} companies. ${kpiAnalysis.onTrack} on track, ${kpiAnalysis.needsAttention} need attention. Review analysis?`,
     title: 'Quarterly Portfolio Reporting',
     context: {
@@ -106,9 +117,15 @@ export async function process(inputs, ctx) {
         totalNAV: valuationUpdate.totalNAV,
         quarterlyChange: valuationUpdate.quarterlyChange
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: LP Report Generation
   ctx.log('info', 'Generating LP report');
   const lpReport = await ctx.task(lpReportTask, {
@@ -171,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Collection
+  // Task 1: Data Collection
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Collect portfolio company data',

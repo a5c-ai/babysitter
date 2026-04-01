@@ -38,14 +38,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Plant Model Development
-  const plantModel = await ctx.task(plantModelTask, {
+  let plantModel = await ctx.task(plantModelTask, {
     projectName,
     ecuType,
     hilInfrastructure
   });
 
-  // Breakpoint: Plant model validation review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      plantModel = await ctx.task(plantModelTask, { ...{
+    projectName,
+    ecuType,
+    hilInfrastructure
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review plant model for ${projectName}. Model accuracy: ${plantModel.accuracy}%. Approve for HIL integration?`,
     title: 'Plant Model Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: plantModel
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Test Automation Development
   const testAutomation = await ctx.task(testAutomationTask, {
     projectName,
@@ -96,7 +110,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: HIL Test Reporting
-  const hilReporting = await ctx.task(hilReportingTask, {
+  let hilReporting = await ctx.task(hilReportingTask, {
     projectName,
     functionalTesting,
     faultInjection,
@@ -104,8 +118,18 @@ export async function process(inputs, ctx) {
     regressionTesting
   });
 
-  // Final Breakpoint: HIL testing approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      hilReporting = await ctx.task(hilReportingTask, { ...{
+    projectName,
+    functionalTesting,
+    faultInjection,
+    integrationTesting,
+    regressionTesting
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HIL Testing complete for ${projectName}. Pass rate: ${hilReporting.passRate}%. Test coverage: ${hilReporting.coverage}%. Approve?`,
     title: 'HIL Testing Approval',
     context: {
@@ -116,9 +140,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/hil-configuration.json`, format: 'json', content: hilInfrastructure },
         { path: `artifacts/test-results.json`, format: 'json', content: hilReporting }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

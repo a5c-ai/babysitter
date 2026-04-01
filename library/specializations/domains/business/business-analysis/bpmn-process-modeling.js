@@ -106,7 +106,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Validating BPMN models');
-  const bpmnValidation = await ctx.task(bpmnValidationTask, {
+  let bpmnValidation = await ctx.task(bpmnValidationTask, {
     projectName,
     processName,
     asIsModel: asIsModeling.model,
@@ -118,8 +118,18 @@ export async function process(inputs, ctx) {
 
   const validationPassed = bpmnValidation.overallScore >= 85;
 
-  // Breakpoint: Review BPMN models
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bpmnValidation = await ctx.task(bpmnValidationTask, { ...{
+    projectName,
+    processName,
+    asIsModel: asIsModeling.model,
+    toBeModel: toBeDesign.model,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `BPMN modeling complete for ${processName}. Validation score: ${bpmnValidation.overallScore}/100. ${validationPassed ? 'Models are valid!' : 'Some validation issues found.'} Review and approve?`,
     title: 'BPMN Model Review',
     context: {
@@ -138,9 +148,15 @@ export async function process(inputs, ctx) {
         toBeActivities: toBeDesign.model?.activities?.length || 0,
         gapsIdentified: gapAnalysis.gaps?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DOCUMENTATION GENERATION
   // ============================================================================
@@ -201,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -65,7 +65,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...factExtraction.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: PREFERENCE LEARNING
   // ============================================================================
@@ -111,14 +110,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...personalization.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: PRIVACY AND CONSENT
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Implementing privacy controls');
 
-  const privacyControls = await ctx.task(privacyControlsTask, {
+  let privacyControls = await ctx.task(privacyControlsTask, {
     systemName,
     userAttributes,
     outputDir
@@ -126,8 +124,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...privacyControls.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      privacyControls = await ctx.task(privacyControlsTask, { ...{
+    systemName,
+    userAttributes,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Long-term memory ${systemName} complete. User attributes: ${userAttributes.join(', ')}. Review implementation?`,
     title: 'Long-Term Memory Review',
     context: {
@@ -140,9 +146,15 @@ export async function process(inputs, ctx) {
         enablePersonalization
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -166,8 +178,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

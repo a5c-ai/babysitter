@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Planning and preparing after-action review');
-  const aarPlanning = await ctx.task(aarPlanningTask, {
+  let aarPlanning = await ctx.task(aarPlanningTask, {
     eventContext,
     eventType,
     participants,
@@ -50,8 +50,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...aarPlanning.artifacts);
 
-  // Breakpoint: Review AAR plan
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      aarPlanning = await ctx.task(aarPlanningTask, { ...{
+    eventContext,
+    eventType,
+    participants,
+    scope,
+    existingDocumentation,
+    aarFramework,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `AAR plan created for ${eventType} event with ${participants.length} participants. Review plan?`,
     title: 'AAR Plan Review',
     context: {
@@ -67,9 +79,15 @@ export async function process(inputs, ctx) {
         participants: participants.length,
         focusAreas: aarPlanning.focusAreas.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: WHAT WAS PLANNED
   // ============================================================================
@@ -89,7 +107,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Documenting what actually happened');
-  const whatHappened = await ctx.task(whatHappenedTask, {
+  let whatHappened = await ctx.task(whatHappenedTask, {
     eventContext,
     whatPlanned: whatPlanned.plannedState,
     participants,
@@ -98,8 +116,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...whatHappened.artifacts);
 
-  // Breakpoint: Review planned vs actual
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      whatHappened = await ctx.task(whatHappenedTask, { ...{
+    eventContext,
+    whatPlanned: whatPlanned.plannedState,
+    participants,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${whatHappened.variances.length} variances between planned and actual. Review?`,
     title: 'Planned vs Actual Review',
     context: {
@@ -115,9 +142,15 @@ export async function process(inputs, ctx) {
         successAreas: whatHappened.successes.length,
         challengeAreas: whatHappened.challenges.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: WHY IT WAS DIFFERENT
   // ============================================================================
@@ -154,7 +187,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Developing action items');
-  const actionItemDevelopment = await ctx.task(actionItemDevelopmentTask, {
+  let actionItemDevelopment = await ctx.task(actionItemDevelopmentTask, {
     lessonsLearned: lessonsExtraction.lessons,
     eventContext,
     participants,
@@ -163,8 +196,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...actionItemDevelopment.artifacts);
 
-  // Breakpoint: Review lessons and actions
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      actionItemDevelopment = await ctx.task(actionItemDevelopmentTask, { ...{
+    lessonsLearned: lessonsExtraction.lessons,
+    eventContext,
+    participants,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Extracted ${lessonsExtraction.lessons.length} lessons and ${actionItemDevelopment.actionItems.length} action items. Review?`,
     title: 'Lessons and Actions Review',
     context: {
@@ -180,9 +222,15 @@ export async function process(inputs, ctx) {
         actionItems: actionItemDevelopment.actionItems.length,
         immediateActions: actionItemDevelopment.actionItems.filter(a => a.priority === 'immediate').length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: AAR REPORT COMPILATION
   // ============================================================================
@@ -221,7 +269,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing AAR quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     aarPlanning,
     aarReport,
     lessonsExtraction,
@@ -250,8 +298,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    aarPlanning,
+    aarReport,
+    lessonsExtraction,
+    actionItemDevelopment,
+    participantValidation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize AAR?`,
       title: 'Final Approval Gate',
       context: {
@@ -268,9 +327,15 @@ export async function process(inputs, ctx) {
           lessonsLearned: lessonsExtraction.lessons.length,
           actionItems: actionItemDevelopment.actionItems.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -303,8 +368,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

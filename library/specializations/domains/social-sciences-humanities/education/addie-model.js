@@ -106,7 +106,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring ADDIE implementation quality');
-  const qualityScore = await ctx.task(addieQualityScoringTask, {
+  let qualityScore = await ctx.task(addieQualityScoringTask, {
     courseName,
     needsAnalysis,
     designBlueprint,
@@ -122,8 +122,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review ADDIE implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(addieQualityScoringTask, { ...{
+    courseName,
+    needsAnalysis,
+    designBlueprint,
+    developmentPlan,
+    implementationStrategy,
+    evaluationFramework,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ADDIE implementation complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'ADDIE Model Review',
     context: {
@@ -137,9 +150,15 @@ export async function process(inputs, ctx) {
         totalObjectives: learningObjectives.length,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -183,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Needs Analysis (Analyze Phase)
+  // Task 1: Needs Analysis (Analyze Phase)
 export const needsAnalysisTask = defineTask('needs-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct comprehensive needs analysis',

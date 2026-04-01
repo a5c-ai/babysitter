@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const reconnectionSetup = await ctx.task(reconnectionSetupTask, { projectName, outputDir });
   artifacts.push(...reconnectionSetup.artifacts);
 
-  const scalingSetup = await ctx.task(scalingSetupTask, { projectName, outputDir });
-  artifacts.push(...scalingSetup.artifacts);
-
-  await ctx.breakpoint({ question: `SSE implementation complete for ${projectName}. Approve?`, title: 'SSE Review', context: { runId: ctx.runId, streams: eventStreams.streams } });
-
+  let scalingSetup = await ctx.task(scalingSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scalingSetup = await ctx.task(scalingSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `SSE implementation complete for ${projectName}. Approve?`, title: 'SSE Review', context: { runId: ctx.runId, streams: eventStreams.streams }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

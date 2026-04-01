@@ -43,17 +43,26 @@ export async function process(inputs, ctx) {
   const trackingSetup = await ctx.task(conversionTrackingSetupTask, { businessGoals, campaignStructure, outputDir });
   artifacts.push(...trackingSetup.artifacts);
 
-  const qualityAssessment = await ctx.task(semCampaignQualityTask, { keywordStrategy, campaignStructure, adCopyDevelopment, biddingStrategy, qualityScorePlan, outputDir });
+  let qualityAssessment = await ctx.task(semCampaignQualityTask, { keywordStrategy, campaignStructure, adCopyDevelopment, biddingStrategy, qualityScorePlan, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const campaignScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(semCampaignQualityTask, { ...{ keywordStrategy, campaignStructure, adCopyDevelopment, biddingStrategy, qualityScorePlan, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SEM campaign setup complete. Quality score: ${campaignScore}/100. Review and approve?`,
     title: 'SEM Campaign Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     campaignScore,

@@ -63,7 +63,6 @@ export async function process(inputs, ctx) {
       mechanism: null
     };
   }
-
   // Phase 4: Activity Identification
   const activityIdentification = await ctx.task(activityIdentificationTask, {
     componentIdentification,
@@ -88,7 +87,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Mechanism Integration
-  const mechanismIntegration = await ctx.task(mechanismIntegrationTask, {
+  let mechanismIntegration = await ctx.task(mechanismIntegrationTask, {
     causalChain,
     componentIdentification,
     activityIdentification,
@@ -96,8 +95,18 @@ export async function process(inputs, ctx) {
     phenomenonCharacterization
   });
 
-  // Breakpoint: Review mechanism sketch
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      mechanismIntegration = await ctx.task(mechanismIntegrationTask, { ...{
+    causalChain,
+    componentIdentification,
+    activityIdentification,
+    organizationalAnalysis,
+    phenomenonCharacterization
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Mechanism sketch complete for "${phenomenon}". ${componentIdentification.components.length} components identified. Review before validation?`,
     title: 'Mechanism Sketch Review',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
       phenomenon,
       components: componentIdentification.components.map(c => c.name),
       activities: activityIdentification.activities.map(a => a.name)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Multi-Level Analysis
   const multiLevelAnalysis = await ctx.task(multiLevelAnalysisTask, {
     mechanismIntegration,
@@ -132,7 +147,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Explanation Generation
-  const explanation = await ctx.task(mechanisticExplanationTask, {
+  let explanation = await ctx.task(mechanisticExplanationTask, {
     mechanismIntegration,
     multiLevelAnalysis,
     predictions,
@@ -141,8 +156,19 @@ export async function process(inputs, ctx) {
     phenomenon
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      explanation = await ctx.task(mechanisticExplanationTask, { ...{
+    mechanismIntegration,
+    multiLevelAnalysis,
+    predictions,
+    validation,
+    domain,
+    phenomenon
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mechanistic explanation complete for "${phenomenon}". Validation score: ${validation.score}/100. Accept explanation?`,
     title: 'Mechanistic Explanation Review',
     context: {
@@ -153,9 +179,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/mechanism.json', format: 'json', content: mechanismIntegration },
         { path: 'artifacts/explanation.md', format: 'markdown', content: explanation.narrative }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -183,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const phenomenonCharacterizationTask = defineTask('phenomenon-characterization', (args, taskCtx) => ({
   kind: 'agent',

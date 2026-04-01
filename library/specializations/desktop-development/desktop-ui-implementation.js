@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing UI requirements and design specifications');
 
-  const uiAnalysis = await ctx.task(analyzeUiRequirementsTask, {
+  let uiAnalysis = await ctx.task(analyzeUiRequirementsTask, {
     projectName,
     framework,
     designSystem,
@@ -61,9 +61,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...uiAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      uiAnalysis = await ctx.task(analyzeUiRequirementsTask, { ...{
+    projectName,
+    framework,
+    designSystem,
+    targetPlatforms,
+    uiRequirements,
+    uiLibrary,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: UI requirements analyzed. ${uiAnalysis.screens.length} screens identified, ${uiAnalysis.components.length} components needed. Proceed with design system setup?`,
     title: 'UI Requirements Review',
     context: {
@@ -72,9 +83,15 @@ export async function process(inputs, ctx) {
       components: uiAnalysis.components,
       designSystem,
       files: uiAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: DESIGN SYSTEM AND THEMING SETUP
   // ============================================================================
@@ -115,7 +132,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Implementing core UI components');
 
-  const coreComponents = await ctx.task(implementCoreComponentsTask, {
+  let coreComponents = await ctx.task(implementCoreComponentsTask, {
     projectName,
     framework,
     uiLibrary,
@@ -124,9 +141,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...coreComponents.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      coreComponents = await ctx.task(implementCoreComponentsTask, { ...{
+    projectName,
+    framework,
+    uiLibrary,
+    designSystemSetup,
+    uiAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Phase 4 Complete: ${coreComponents.components.length} core components implemented. Component library includes: ${coreComponents.categories.join(', ')}. Review components?`,
     title: 'Core Components Review',
     context: {
@@ -134,9 +161,15 @@ export async function process(inputs, ctx) {
       components: coreComponents.components,
       categories: coreComponents.categories,
       files: coreComponents.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: SCREEN IMPLEMENTATION
   // ============================================================================
@@ -245,7 +278,7 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  const validation = await ctx.task(validateUiImplementationTask, {
+  let validation = await ctx.task(validateUiImplementationTask, {
     projectName,
     framework,
     uiRequirements,
@@ -258,9 +291,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.validationScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validateUiImplementationTask, { ...{
+    projectName,
+    framework,
+    uiRequirements,
+    coreComponents,
+    screenImplementation,
+    accessibilityImplementation,
+    platformAdaptations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Desktop UI Implementation Complete for ${projectName}! Validation score: ${validation.validationScore}/100. ${coreComponents.components.length} components, ${screenImplementation.screens.length} screens implemented. Approve UI implementation?`,
     title: 'UI Implementation Complete',
     context: {
@@ -279,9 +324,15 @@ export async function process(inputs, ctx) {
         { path: documentation.styleGuidePath, format: 'markdown', label: 'Style Guide' },
         { path: documentation.componentDocsPath, format: 'markdown', label: 'Component Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -333,8 +384,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

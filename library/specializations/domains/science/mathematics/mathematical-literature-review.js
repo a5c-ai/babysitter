@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Formulate Search Queries
-  const queryFormulation = await ctx.task(queryFormulationTask, {
+  let queryFormulation = await ctx.task(queryFormulationTask, {
     researchTopic,
     searchScope,
     dateRange,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       relevantPapers: null
     };
   }
-
-  // Breakpoint: Review search queries
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      queryFormulation = await ctx.task(queryFormulationTask, { ...{
+    researchTopic,
+    searchScope,
+    dateRange,
+    databases
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Formulated ${queryFormulation.queries.length} search queries across ${databases.length} databases. Proceed with search?`,
     title: 'Search Query Review',
     context: {
@@ -61,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: queryFormulation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Search Mathematical Databases
   const databaseSearch = await ctx.task(databaseSearchTask, {
     queries: queryFormulation.queries,
@@ -85,15 +99,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Annotated Bibliography
-  const bibliographyGeneration = await ctx.task(bibliographyGenerationTask, {
+  let bibliographyGeneration = await ctx.task(bibliographyGenerationTask, {
     categorizedPapers: paperCategorization.papers,
     gaps: gapIdentification.gaps,
     openProblems: gapIdentification.openProblems,
     researchTopic
   });
 
-  // Final Breakpoint: Review Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      bibliographyGeneration = await ctx.task(bibliographyGenerationTask, { ...{
+    categorizedPapers: paperCategorization.papers,
+    gaps: gapIdentification.gaps,
+    openProblems: gapIdentification.openProblems,
+    researchTopic
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Literature review complete. Found ${paperCategorization.papers.length} relevant papers and ${gapIdentification.openProblems.length} open problems. Review results?`,
     title: 'Literature Review Complete',
     context: {
@@ -105,9 +128,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/literature-review.json`, format: 'json', content: { paperCategorization, gapIdentification } },
         { path: `artifacts/bibliography.bib`, format: 'bibtex', content: bibliographyGeneration.bibtex }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     researchTopic,
@@ -129,8 +158,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const queryFormulationTask = defineTask('query-formulation', (args, taskCtx) => ({
   kind: 'agent',

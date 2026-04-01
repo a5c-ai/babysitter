@@ -46,17 +46,25 @@ export async function process(inputs, ctx) {
       issues: specificationDefinition.issues
     };
   }
-
   // Phase 2: Select Filter Type
-  const filterTypeSelection = await ctx.task(filterTypeSelectionTask, {
+  let filterTypeSelection = await ctx.task(filterTypeSelectionTask, {
     filterName,
     filterType,
     specifications: specificationDefinition.finalSpecs,
     implementationTarget
   });
 
-  // Breakpoint: Review filter type selection
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      filterTypeSelection = await ctx.task(filterTypeSelectionTask, { ...{
+    filterName,
+    filterType,
+    specifications: specificationDefinition.finalSpecs,
+    implementationTarget
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Filter type selected: ${filterTypeSelection.selectedType}. Order estimate: ${filterTypeSelection.orderEstimate}. Proceed with design?`,
     title: 'Filter Type Review',
     context: {
@@ -68,9 +76,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: filterTypeSelection
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Choose Design Method
   const designMethodSelection = await ctx.task(designMethodSelectionTask, {
     filterName,
@@ -88,15 +102,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Analyze Frequency Response and Phase Characteristics
-  const responseAnalysis = await ctx.task(responseAnalysisTask, {
+  let responseAnalysis = await ctx.task(responseAnalysisTask, {
     filterName,
     coefficients: coefficientCalculation.coefficients,
     filterType: filterTypeSelection.selectedType,
     specifications: specificationDefinition.finalSpecs
   });
 
-  // Breakpoint: Review frequency response
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      responseAnalysis = await ctx.task(responseAnalysisTask, { ...{
+    filterName,
+    coefficients: coefficientCalculation.coefficients,
+    filterType: filterTypeSelection.selectedType,
+    specifications: specificationDefinition.finalSpecs
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review frequency response for ${filterName}. Specifications ${responseAnalysis.meetsSpecs ? 'MET' : 'NOT MET'}. Proceed with stability analysis?`,
     title: 'Response Analysis Review',
     context: {
@@ -107,28 +130,48 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: responseAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Verify Stability (for IIR filters)
-  const stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
+  let stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
     filterName,
     coefficients: coefficientCalculation.coefficients,
     filterType: filterTypeSelection.selectedType
   });
 
   // Quality Gate: Filter must be stable
-  if (!stabilityAnalysis.stable) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        stabilityAnalysis = await ctx.task(stabilityAnalysisTask, { ...{
+    filterName,
+    coefficients: coefficientCalculation.coefficients,
+    filterType: filterTypeSelection.selectedType
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Stability analysis indicates unstable filter. ${stabilityAnalysis.stabilityIssues.length} poles outside unit circle. Redesign required?`,
       title: 'Stability Issue',
       context: {
         runId: ctx.runId,
         stabilityIssues: stabilityAnalysis.stabilityIssues,
         recommendations: stabilityAnalysis.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Implement and Test Filter Structure
   const filterImplementation = await ctx.task(filterImplementationTask, {
@@ -139,7 +182,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Optimize for Fixed-Point Implementation
-  const fixedPointOptimization = await ctx.task(fixedPointOptimizationTask, {
+  let fixedPointOptimization = await ctx.task(fixedPointOptimizationTask, {
     filterName,
     implementation: filterImplementation.implementation,
     coefficients: coefficientCalculation.coefficients,
@@ -147,8 +190,18 @@ export async function process(inputs, ctx) {
     specifications: specificationDefinition.finalSpecs
   });
 
-  // Final Breakpoint: Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      fixedPointOptimization = await ctx.task(fixedPointOptimizationTask, { ...{
+    filterName,
+    implementation: filterImplementation.implementation,
+    coefficients: coefficientCalculation.coefficients,
+    implementationTarget,
+    specifications: specificationDefinition.finalSpecs
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Digital filter design complete for ${filterName}. Order: ${coefficientCalculation.filterOrder}. Fixed-point SQNR: ${fixedPointOptimization.sqnr}. Approve design?`,
     title: 'Design Approval',
     context: {
@@ -164,9 +217,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/filter-coefficients.json`, format: 'json', content: coefficientCalculation.coefficients },
         { path: `artifacts/filter-report.md`, format: 'markdown', content: fixedPointOptimization.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     filterName,
@@ -200,8 +259,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',

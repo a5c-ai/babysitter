@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Operational Design Domain Definition
-  const oddSpecification = await ctx.task(oddSpecificationTask, {
+  let oddSpecification = await ctx.task(oddSpecificationTask, {
     projectName,
     automationLevel,
     oddDefinition
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       planningAlgorithms: null
     };
   }
-
-  // Breakpoint: ODD review
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      oddSpecification = await ctx.task(oddSpecificationTask, { ...{
+    projectName,
+    automationLevel,
+    oddDefinition
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review ODD definition for ${projectName}. Automation level: ${automationLevel}. Approve ODD specification?`,
     title: 'ODD Specification Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: oddSpecification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Behavioral Planning Development
   const behavioralPlanning = await ctx.task(behavioralPlanningTask, {
     projectName,
@@ -93,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Safety and Comfort Metrics
-  const safetyComfortMetrics = await ctx.task(safetyComfortMetricsTask, {
+  let safetyComfortMetrics = await ctx.task(safetyComfortMetricsTask, {
     projectName,
     longitudinalControl,
     lateralControl,
@@ -101,17 +114,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Safety metrics check
-  if (safetyComfortMetrics.safetyViolations && safetyComfortMetrics.safetyViolations.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        safetyComfortMetrics = await ctx.task(safetyComfortMetricsTask, { ...{
+    projectName,
+    longitudinalControl,
+    lateralControl,
+    trajectoryOptimization
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Safety analysis identified ${safetyComfortMetrics.safetyViolations.length} violations. Review and approve mitigation?`,
       title: 'Safety Metrics Warning',
       context: {
         runId: ctx.runId,
         safetyComfortMetrics,
         recommendation: 'Address all safety violations before deployment'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Integration and Validation
   const integrationValidation = await ctx.task(integrationValidationTask, {
@@ -124,7 +152,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Documentation and Release
-  const planningRelease = await ctx.task(planningReleaseTask, {
+  let planningRelease = await ctx.task(planningReleaseTask, {
     projectName,
     automationLevel,
     oddSpecification,
@@ -136,8 +164,22 @@ export async function process(inputs, ctx) {
     integrationValidation
   });
 
-  // Final Breakpoint: Planning system approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      planningRelease = await ctx.task(planningReleaseTask, { ...{
+    projectName,
+    automationLevel,
+    oddSpecification,
+    behavioralPlanning,
+    trajectoryOptimization,
+    longitudinalControl,
+    lateralControl,
+    safetyComfortMetrics,
+    integrationValidation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Path Planning and Motion Control complete for ${projectName}. ODD coverage: ${integrationValidation.oddCoverage}%. Approve for vehicle integration?`,
     title: 'Planning System Approval',
     context: {
@@ -148,9 +190,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/planning-algorithms.json`, format: 'json', content: planningRelease },
         { path: `artifacts/validation-evidence.json`, format: 'json', content: integrationValidation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -173,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const oddSpecificationTask = defineTask('odd-specification', (args, taskCtx) => ({
   kind: 'agent',

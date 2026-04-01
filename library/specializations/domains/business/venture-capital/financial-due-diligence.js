@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Cash Runway Assessment
   ctx.log('info', 'Assessing cash runway');
-  const runwayAssessment = await ctx.task(runwayAssessmentTask, {
+  let runwayAssessment = await ctx.task(runwayAssessmentTask, {
     companyName,
     financialData,
     projections,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...runwayAssessment.artifacts);
 
-  // Breakpoint: Review financial DD findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      runwayAssessment = await ctx.task(runwayAssessmentTask, { ...{
+    companyName,
+    financialData,
+    projections,
+    roundDetails,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Financial DD complete for ${companyName}. Runway: ${runwayAssessment.months} months. Unit economics healthy: ${unitEconomics.healthy}. Review findings?`,
     title: 'Financial Due Diligence Results',
     context: {
@@ -110,9 +120,15 @@ export async function process(inputs, ctx) {
         runway: runwayAssessment.months,
         projectionCredibility: projectionValidation.credibilityScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Financial DD Report
   ctx.log('info', 'Generating financial due diligence report');
   const ddReport = await ctx.task(financialDDReportTask, {
@@ -170,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Historical Financial Analysis
+  // Task 1: Historical Financial Analysis
 export const historicalFinancialTask = defineTask('historical-financial', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze historical financials',

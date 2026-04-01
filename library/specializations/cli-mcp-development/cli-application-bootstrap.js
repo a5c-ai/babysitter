@@ -119,7 +119,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Setting up argument parsing configuration');
 
-  const argumentParsing = await ctx.task(argumentParsingTask, {
+  let argumentParsing = await ctx.task(argumentParsingTask, {
     projectName,
     language,
     framework,
@@ -129,8 +129,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...argumentParsing.artifacts);
 
-  // Quality Gate: Review CLI Structure
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      argumentParsing = await ctx.task(argumentParsingTask, { ...{
+    projectName,
+    language,
+    framework,
+    baseCommand,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Phase 5 Complete: CLI structure initialized with ${baseCommand.commands.length} initial commands. Proceed with tooling setup?`,
     title: 'CLI Structure Review',
     context: {
@@ -140,9 +150,15 @@ export async function process(inputs, ctx) {
       framework,
       commands: baseCommand.commands,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: DEVELOPMENT TOOLING SETUP
   // ============================================================================
@@ -181,7 +197,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating README and usage documentation');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     language,
     framework,
@@ -194,8 +210,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    language,
+    framework,
+    packageManager,
+    description,
+    baseCommand,
+    argumentParsing,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Application Bootstrap complete for ${projectName}. Project ready for development. Review and approve?`,
     title: 'CLI Bootstrap Complete',
     context: {
@@ -213,9 +242,15 @@ export async function process(inputs, ctx) {
         { path: packageConfig.manifestPath, format: 'json', label: 'Package Manifest' },
         { path: baseCommand.entryPointPath, format: language === 'typescript' ? 'typescript' : language, label: 'Entry Point' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -251,8 +286,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

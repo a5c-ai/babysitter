@@ -45,7 +45,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: SOURCE PROBLEM SELECTION
   // ============================================================================
@@ -145,7 +144,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assembling complete NP-completeness proof');
-  const completeProof = await ctx.task(completeProofTask, {
+  let completeProof = await ctx.task(completeProofTask, {
     problemDescription,
     npMembershipVerification,
     sourceSelection,
@@ -161,8 +160,22 @@ export async function process(inputs, ctx) {
 
   const proofComplete = forwardProof.proved && backwardProof.proved && efficiencyProof.proved;
 
-  // Breakpoint: Review NP-completeness proof
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      completeProof = await ctx.task(completeProofTask, { ...{
+    problemDescription,
+    npMembershipVerification,
+    sourceSelection,
+    transformationDesign,
+    gadgetConstruction,
+    forwardProof,
+    backwardProof,
+    efficiencyProof,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `NP-completeness proof ${proofComplete ? 'complete' : 'incomplete'}. Source: ${sourceSelection.selectedProblem}. Review proof?`,
     title: 'NP-Completeness Proof Review',
     context: {
@@ -179,9 +192,15 @@ export async function process(inputs, ctx) {
         polynomialTime: efficiencyProof.proved,
         gadgetCount: gadgetConstruction.gadgets?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -218,8 +237,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -79,18 +79,30 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Generate Report
   ctx.log('info', 'Phase 9: Generating comprehensive monitoring report');
-  const monitoringReport = await ctx.task(executionMonitoringReportTask, {
+  let monitoringReport = await ctx.task(executionMonitoringReportTask, {
     organizationName, governanceStructure, kpiDefinition, reviewCadenceImpl, initiativeTracking,
     environmentalMonitoring, varianceAnalysis, adaptationRecommendations, riskManagement, outputDir
   });
-  artifacts.push(...monitoringReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      monitoringReport = await ctx.task(executionMonitoringReportTask, { ...{
+    organizationName, governanceStructure, kpiDefinition, reviewCadenceImpl, initiativeTracking,
+    environmentalMonitoring, varianceAnalysis, adaptationRecommendations, riskManagement, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategy execution monitoring framework complete for ${organizationName}. Review governance and adaptation recommendations?`,
     title: 'Strategy Execution Monitoring Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName,
     governanceFramework: governanceStructure.framework,

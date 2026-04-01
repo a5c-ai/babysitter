@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Concept Generation
-  const conceptGeneration = await ctx.task(conceptGenerationTask, {
+  let conceptGeneration = await ctx.task(conceptGenerationTask, {
     projectName,
     designChallenge,
     existingConcepts: concepts,
@@ -47,27 +47,51 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: At least 3 concepts required
-  if (conceptGeneration.concepts.length < 3) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        conceptGeneration = await ctx.task(conceptGenerationTask, { ...{
+    projectName,
+    designChallenge,
+    existingConcepts: concepts,
+    challengeAnalysis: challengeAnalysis.analysis
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Only ${conceptGeneration.concepts.length} concepts generated. Should we proceed with limited alternatives or expand concept exploration?`,
       title: 'Concept Count Warning',
       context: {
         runId: ctx.runId,
         concepts: conceptGeneration.concepts
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Criteria Definition and Weighting
-  const criteriaDefinition = await ctx.task(criteriaDefinitionTask, {
+  let criteriaDefinition = await ctx.task(criteriaDefinitionTask, {
     projectName,
     designChallenge,
     existingCriteria: criteria,
     challengeAnalysis: challengeAnalysis.analysis
   });
 
-  // Breakpoint: Review criteria and weights
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      criteriaDefinition = await ctx.task(criteriaDefinitionTask, { ...{
+    projectName,
+    designChallenge,
+    existingCriteria: criteria,
+    challengeAnalysis: challengeAnalysis.analysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review evaluation criteria and weights for ${projectName}. Are the priorities correctly represented?`,
     title: 'Criteria Review',
     context: {
@@ -78,9 +102,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: criteriaDefinition
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Preliminary Technical Analysis
   const technicalAnalysis = await ctx.task(technicalAnalysisTask, {
     projectName,
@@ -109,7 +139,6 @@ export async function process(inputs, ctx) {
       tradeStudyReport: null
     };
   }
-
   // Phase 6: Pugh Matrix Evaluation
   const pughMatrix = await ctx.task(pughMatrixTask, {
     projectName,
@@ -143,7 +172,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Trade Study Report Generation
-  const tradeStudyReport = await ctx.task(tradeStudyReportTask, {
+  let tradeStudyReport = await ctx.task(tradeStudyReportTask, {
     projectName,
     designChallenge,
     challengeAnalysis,
@@ -157,8 +186,24 @@ export async function process(inputs, ctx) {
     riskAssessment
   });
 
-  // Final Breakpoint: Concept Selection Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      tradeStudyReport = await ctx.task(tradeStudyReportTask, { ...{
+    projectName,
+    designChallenge,
+    challengeAnalysis,
+    conceptGeneration,
+    criteriaDefinition,
+    technicalAnalysis,
+    feasibilityAssessment,
+    pughMatrix,
+    weightedScoring,
+    sensitivityAnalysis,
+    riskAssessment
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Trade Study Complete for ${projectName}. Recommended concept: ${tradeStudyReport.selectedConcept.name}. Approve selection?`,
     title: 'Concept Selection Approval',
     context: {
@@ -169,9 +214,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/trade-study-report.json`, format: 'json', content: tradeStudyReport },
         { path: `artifacts/trade-study-report.md`, format: 'markdown', content: tradeStudyReport.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -188,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const challengeAnalysisTask = defineTask('challenge-analysis', (args, taskCtx) => ({
   kind: 'agent',

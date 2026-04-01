@@ -51,15 +51,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Process Development
-  const processDevelopment = await ctx.task(processDevelopmentTask, {
+  let processDevelopment = await ctx.task(processDevelopmentTask, {
     deviceName,
     sterilizationMethod,
     doseEstablishment,
     productCharacteristics
   });
 
-  // Breakpoint: Review process parameters
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      processDevelopment = await ctx.task(processDevelopmentTask, { ...{
+    deviceName,
+    sterilizationMethod,
+    doseEstablishment,
+    productCharacteristics
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review sterilization process parameters for ${deviceName}. Are parameters appropriate for SAL achievement?`,
     title: 'Process Parameter Review',
     context: {
@@ -71,9 +80,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: processDevelopment
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Installation Qualification (IQ)
   const installationQualification = await ctx.task(iqTask, {
     deviceName,
@@ -98,7 +113,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validation Report and Routine Control
-  const validationReport = await ctx.task(validationReportTask, {
+  let validationReport = await ctx.task(validationReportTask, {
     deviceName,
     sterilizationMethod,
     salRequirement,
@@ -111,8 +126,23 @@ export async function process(inputs, ctx) {
     performanceQualification
   });
 
-  // Final Breakpoint: Validation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationReport = await ctx.task(validationReportTask, { ...{
+    deviceName,
+    sterilizationMethod,
+    salRequirement,
+    methodSelection,
+    bioburdenDetermination,
+    doseEstablishment,
+    processDevelopment,
+    installationQualification,
+    operationalQualification,
+    performanceQualification
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sterilization validation complete for ${deviceName}. SAL demonstrated: ${salRequirement}. Approve validation?`,
     title: 'Sterilization Validation Approval',
     context: {
@@ -122,9 +152,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/sterilization-validation-report.json`, format: 'json', content: validationReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -142,8 +178,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const methodSelectionTask = defineTask('method-selection', (args, taskCtx) => ({
   kind: 'agent',

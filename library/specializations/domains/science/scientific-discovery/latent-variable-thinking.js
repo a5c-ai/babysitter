@@ -122,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing latent variable analysis');
-  const synthesis = await ctx.task(latentVariableSynthesisTask, {
+  let synthesis = await ctx.task(latentVariableSynthesisTask, {
     modelSpecification,
     measurementModelDesign,
     indicatorAssessment,
@@ -138,8 +138,22 @@ export async function process(inputs, ctx) {
 
   const fitMet = synthesis.overallFitScore >= targetModelFit;
 
-  // Breakpoint: Review latent variable analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(latentVariableSynthesisTask, { ...{
+    modelSpecification,
+    measurementModelDesign,
+    indicatorAssessment,
+    structuralModelSpec,
+    identificationAnalysis,
+    modelEstimation,
+    modelModification,
+    targetModelFit,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Latent variable analysis complete. Model fit: ${synthesis.overallFitScore}/${targetModelFit}. ${fitMet ? 'Fit target met!' : 'Model may need respecification.'} Review analysis?`,
     title: 'Latent Variable Thinking Results',
     context: {
@@ -158,9 +172,15 @@ export async function process(inputs, ctx) {
         overallFitScore: synthesis.overallFitScore,
         fitMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

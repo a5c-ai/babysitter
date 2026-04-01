@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   const middlewareSetup = await ctx.task(rbacMiddlewareTask, { projectName, outputDir });
   artifacts.push(...middlewareSetup.artifacts);
 
-  const policySetup = await ctx.task(policySetupTask, { projectName, outputDir });
-  artifacts.push(...policySetup.artifacts);
-
-  await ctx.breakpoint({
+  let policySetup = await ctx.task(policySetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      policySetup = await ctx.task(policySetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RBAC implementation complete for ${projectName}. ${rolesSetup.roles.length} roles, ${permissionsSetup.permissions.length} permissions. Approve?`,
     title: 'RBAC Review',
-    context: { runId: ctx.runId, roles: rolesSetup.roles, permissions: permissionsSetup.permissions }
-  });
-
+    context: { runId: ctx.runId, roles: rolesSetup.roles, permissions: permissionsSetup.permissions },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, rolesSetup, permissionsSetup, outputDir });
   artifacts.push(...documentation.artifacts);
 

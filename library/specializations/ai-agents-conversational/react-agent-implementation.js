@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Implementing ReAct agent');
 
-  const agentImplementation = await ctx.task(agentImplementationTask, {
+  let agentImplementation = await ctx.task(agentImplementationTask, {
     agentName,
     toolDefinitions: toolDefinition.toolDefinitions,
     prompts: promptEngineering.prompts,
@@ -110,8 +110,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...agentImplementation.artifacts);
 
-  // Quality Gate: Implementation Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      agentImplementation = await ctx.task(agentImplementationTask, { ...{
+    agentName,
+    toolDefinitions: toolDefinition.toolDefinitions,
+    prompts: promptEngineering.prompts,
+    llmProvider,
+    framework,
+    maxIterations,
+    enableTracing,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `ReAct agent ${agentName} implementation complete. Review agent code and configuration before testing?`,
     title: 'Agent Implementation Review',
     context: {
@@ -123,9 +136,15 @@ export async function process(inputs, ctx) {
         llmProvider
       },
       files: agentImplementation.artifacts.map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: REASONING TRACE TESTING
   // ============================================================================
@@ -147,7 +166,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Evaluating agent performance');
 
-  const evaluation = await ctx.task(agentEvaluationTask, {
+  let evaluation = await ctx.task(agentEvaluationTask, {
     agentName,
     tracesResults: tracesTesting.results,
     testCases: requirementsAnalysis.testCases,
@@ -156,8 +175,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...evaluation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      evaluation = await ctx.task(agentEvaluationTask, { ...{
+    agentName,
+    tracesResults: tracesTesting.results,
+    testCases: requirementsAnalysis.testCases,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ReAct Agent ${agentName} implementation and evaluation complete. Success rate: ${evaluation.metrics.successRate}%. Review final results?`,
     title: 'Final ReAct Agent Review',
     context: {
@@ -169,9 +197,15 @@ export async function process(inputs, ctx) {
         avgLatency: evaluation.metrics.avgLatency
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -196,8 +230,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

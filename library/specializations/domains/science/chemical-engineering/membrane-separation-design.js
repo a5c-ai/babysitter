@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Specify Operating Conditions and Pretreatment
   ctx.log('info', 'Specifying operating conditions and pretreatment');
-  const operatingConditionsResult = await ctx.task(operatingConditionsTask, {
+  let operatingConditionsResult = await ctx.task(operatingConditionsTask, {
     processName,
     membrane: membraneSelectionResult.membrane,
     systemDesign: areaStagingResult.design,
@@ -91,8 +91,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...operatingConditionsResult.artifacts);
 
-  // Breakpoint: Review membrane system design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      operatingConditionsResult = await ctx.task(operatingConditionsTask, { ...{
+    processName,
+    membrane: membraneSelectionResult.membrane,
+    systemDesign: areaStagingResult.design,
+    feedSpecification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Membrane system design complete for ${processName}. Type: ${membraneSelectionResult.membrane.type}. Area: ${areaStagingResult.design.totalArea} m2. Stages: ${areaStagingResult.design.stages}. Recovery: ${areaStagingResult.design.recovery}%. Review design?`,
     title: 'Membrane Separation Design Review',
     context: {
@@ -105,9 +115,15 @@ export async function process(inputs, ctx) {
         stages: areaStagingResult.design.stages,
         recovery: areaStagingResult.design.recovery
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Plan Fouling Management
   ctx.log('info', 'Planning membrane fouling management');
   const foulingPlanResult = await ctx.task(foulingManagementTask, {
@@ -158,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Membrane Applicability Evaluation
+  // Task 1: Membrane Applicability Evaluation
 export const membraneApplicabilityTask = defineTask('membrane-applicability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate membrane applicability for separation',

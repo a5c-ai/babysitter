@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Oral History Protocol Manual
   ctx.log('info', 'Generating oral history protocol manual');
-  const protocolManual = await ctx.task(protocolManualTask, {
+  let protocolManual = await ctx.task(protocolManualTask, {
     preInterviewPlan,
     consentFramework,
     interviewProtocol,
@@ -111,8 +111,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...protocolManual.artifacts);
 
-  // Breakpoint: Review oral history protocols
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      protocolManual = await ctx.task(protocolManualTask, { ...{
+    preInterviewPlan,
+    consentFramework,
+    interviewProtocol,
+    recordingStandards,
+    transcriptionProtocol,
+    archivalStandards,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Oral history protocols complete for ${projectFocus}. Archival destination: ${archivalDestination}. Review protocols?`,
     title: 'Oral History Collection Protocol Results',
     context: {
@@ -124,9 +136,15 @@ export async function process(inputs, ctx) {
         recordingFormat,
         archivalDestination
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -159,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Pre-Interview Planning
+  // Task 1: Pre-Interview Planning
 export const preInterviewPlanningTask = defineTask('pre-interview-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan pre-interview preparation',

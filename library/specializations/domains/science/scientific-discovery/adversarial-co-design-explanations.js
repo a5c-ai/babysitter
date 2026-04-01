@@ -75,10 +75,9 @@ export async function process(inputs, ctx) {
       ctx.log('info', 'No counterexamples found - model may be robust');
       break;
     }
-
-    // Builder refines model to address counterexamples
+  // Builder refines model to address counterexamples
     ctx.log('info', `Round ${round}: Builder refining model`);
-    const refinedModel = await ctx.task(builderRefineModelTask, {
+    let refinedModel = await ctx.task(builderRefineModelTask, {
       phenomenon,
       currentModel,
       counterexamples: counterexamples.counterexamples,
@@ -99,8 +98,19 @@ export async function process(inputs, ctx) {
     // Assess current robustness
     robustnessScore = refinedModel.robustnessScore || 0;
 
-    if (round < rounds) {
-      await ctx.breakpoint({
+        let lastFeedback = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback) {
+          refinedModel = await ctx.task(builderRefineModelTask, { ...{
+      phenomenon,
+      currentModel,
+      counterexamples: counterexamples.counterexamples,
+      allCounterexamples,
+      domain,
+      round
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Round ${round} complete. Robustness: ${robustnessScore}%. Continue adversarial process?`,
         title: `Adversarial Co-Design - Round ${round}`,
         context: {
@@ -109,11 +119,16 @@ export async function process(inputs, ctx) {
             { path: `artifacts/round-${round}-model.json`, format: 'json' },
             { path: `artifacts/round-${round}-counterexamples.json`, format: 'json' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 3: Final Robustness Assessment
   ctx.log('info', 'Performing final robustness assessment');
   const robustnessAssessment = await ctx.task(assessRobustnessTask, {

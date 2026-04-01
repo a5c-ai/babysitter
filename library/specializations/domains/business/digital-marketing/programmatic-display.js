@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Launch Campaign Configuration
   ctx.log('info', 'Phase 7: Configuring campaign launch with frequency caps');
-  const launchConfig = await ctx.task(campaignLaunchTask, {
+  let launchConfig = await ctx.task(campaignLaunchTask, {
     strategy: strategyResult,
     dspSelection,
     audienceSegments,
@@ -87,8 +87,19 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...launchConfig.artifacts);
 
-  // Breakpoint: Review campaign before launch
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      launchConfig = await ctx.task(campaignLaunchTask, { ...{
+    strategy: strategyResult,
+    dspSelection,
+    audienceSegments,
+    creativeDesign,
+    brandSafetyConfig,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Programmatic campaign ready for launch. ${launchConfig.lineItemCount} line items configured across ${dspSelection.selectedDsp}. Proceed?`,
     title: 'Programmatic Campaign Review',
     context: {
@@ -101,9 +112,15 @@ export async function process(inputs, ctx) {
         creativeFormats: creativeDesign.formatCount,
         brandSafetyLevel: brandSafetyConfig.safetyLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Optimization and Attribution Plan
   ctx.log('info', 'Phase 8: Creating optimization and attribution measurement plan');
   const optimizationPlan = await ctx.task(optimizationAttributionTask, {
@@ -134,8 +151,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Programmatic Strategy
+  // Task 1: Programmatic Strategy
 export const programmaticStrategyTask = defineTask('programmatic-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop programmatic strategy and goals',

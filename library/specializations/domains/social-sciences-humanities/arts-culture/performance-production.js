@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Production Budget and Timeline
   ctx.log('info', 'Finalizing production budget and timeline');
-  const budgetTimeline = await ctx.task(productionBudgetTask, {
+  let budgetTimeline = await ctx.task(productionBudgetTask, {
     productionTitle,
     preProduction,
     technicalPlanning,
@@ -108,8 +108,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...budgetTimeline.artifacts);
 
-  // Breakpoint: Review production plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      budgetTimeline = await ctx.task(productionBudgetTask, { ...{
+    productionTitle,
+    preProduction,
+    technicalPlanning,
+    castingPersonnel,
+    rehearsalManagement,
+    budget,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Production plan for "${productionTitle}" complete. Budget: $${budget.toLocaleString()}. ${performanceDates.length} performance dates scheduled. Review and approve?`,
     title: 'Performance Production Plan Review',
     context: {
@@ -122,9 +134,15 @@ export async function process(inputs, ctx) {
         estimatedBudget: budgetTimeline.totalBudget,
         rehearsalWeeks: rehearsalManagement.rehearsalWeeks
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Marketing and Promotion
   ctx.log('info', 'Developing marketing and promotional plan');
   const marketingPlan = await ctx.task(marketingPromotionTask, {
@@ -198,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Pre-Production Planning
+  // Task 1: Pre-Production Planning
 export const preProductionTask = defineTask('pre-production', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan pre-production',

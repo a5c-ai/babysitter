@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...trafficPatterns.artifacts);
 
   // Phase 3: Model Growth Scenarios
-  const growthModels = await ctx.task(modelGrowthScenariosTask, { projectName, currentMetrics, growthForecast, outputDir });
-  artifacts.push(...growthModels.artifacts);
-
-  await ctx.breakpoint({
+  let growthModels = await ctx.task(modelGrowthScenariosTask, { projectName, currentMetrics, growthForecast, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      growthModels = await ctx.task(modelGrowthScenariosTask, { ...{ projectName, currentMetrics, growthForecast, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Growth models created for ${growthForecast}% forecast. Baseline: ${resourceUtilization.cpuUtilization}% CPU. Calculate requirements?`,
     title: 'Growth Modeling Review',
-    context: { runId: ctx.runId, resourceUtilization, growthModels }
-  });
-
+    context: { runId: ctx.runId, resourceUtilization, growthModels },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Calculate Resource Requirements
   const requirements = await ctx.task(calculateResourceRequirementsTask, { projectName, growthModels, outputDir });
   artifacts.push(...requirements.artifacts);
@@ -70,15 +79,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...dashboard.artifacts);
 
   // Phase 9: Document Capacity Plan
-  const documentation = await ctx.task(documentCapacityPlanTask, { projectName, requirements, scalingStrategies, costProjections, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentCapacityPlanTask, { projectName, requirements, scalingStrategies, costProjections, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentCapacityPlanTask, { ...{ projectName, requirements, scalingStrategies, costProjections, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Capacity plan complete. Projected cost: $${costProjections.totalCost}/month. Scaling: ${scalingStrategies.recommendations.length} recommendations. Accept?`,
     title: 'Capacity Planning Review',
-    context: { runId: ctx.runId, requirements, costProjections }
-  });
-
+    context: { runId: ctx.runId, requirements, costProjections },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

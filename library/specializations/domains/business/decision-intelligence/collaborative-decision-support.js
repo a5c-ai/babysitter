@@ -53,23 +53,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Consensus Building Framework
-  const consensusFramework = await ctx.task(consensusBuildingTask, {
+  let consensusFramework = await ctx.task(consensusBuildingTask, {
     projectName,
     collaborationRequirements,
     decisionProcesses
   });
 
-  // Breakpoint: Review collaboration platform design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      consensusFramework = await ctx.task(consensusBuildingTask, { ...{
+    projectName,
+    collaborationRequirements,
+    decisionProcesses
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review collaborative DSS design for ${projectName}. Does it support effective group decision-making?`,
     title: 'Collaborative DSS Review',
     context: {
       runId: ctx.runId,
       projectName,
       participantTypes: participantTypes.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Facilitation Support
   const facilitationSupport = await ctx.task(facilitationSupportTask, {
     projectName,
@@ -120,8 +134,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const collaborationRequirementsTask = defineTask('collaboration-requirements', (args, taskCtx) => ({
   kind: 'agent',

@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const updateTesting = await ctx.task(updateTestingTask, { projectName, language, outputDir });
   artifacts.push(...updateTesting.artifacts);
 
-  const updateDocumentation = await ctx.task(updateDocumentationTask, { projectName, updateStrategy, outputDir });
-  artifacts.push(...updateDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let updateDocumentation = await ctx.task(updateDocumentationTask, { projectName, updateStrategy, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      updateDocumentation = await ctx.task(updateDocumentationTask, { ...{ projectName, updateStrategy, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Update Mechanism complete with ${updateStrategy} strategy. Review and approve?`,
     title: 'Update Mechanism Complete',
-    context: { runId: ctx.runId, summary: { projectName, updateStrategy, distributionChannels } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, updateStrategy, distributionChannels } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

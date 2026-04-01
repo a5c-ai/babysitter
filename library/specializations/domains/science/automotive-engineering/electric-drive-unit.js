@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Motor Requirements and Topology Selection
-  const motorSelection = await ctx.task(motorSelectionTask, {
+  let motorSelection = await ctx.task(motorSelectionTask, {
     projectName,
     vehicleClass,
     performanceTargets,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       eduDesignSpec: null
     };
   }
-
-  // Breakpoint: Motor topology review
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      motorSelection = await ctx.task(motorSelectionTask, { ...{
+    projectName,
+    vehicleClass,
+    performanceTargets,
+    driveConfiguration
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review motor topology selection for ${projectName}. Selected: ${motorSelection.selectedTopology}. Approve motor design direction?`,
     title: 'Motor Topology Review',
     context: {
@@ -61,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: motorSelection
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Inverter and Power Electronics Design
   const inverterDesign = await ctx.task(inverterDesignTask, {
     projectName,
@@ -105,7 +119,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: NVH Analysis
-  const nvhAnalysis = await ctx.task(nvhAnalysisTask, {
+  let nvhAnalysis = await ctx.task(nvhAnalysisTask, {
     projectName,
     motorSelection,
     gearReduction,
@@ -113,20 +127,35 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: NVH targets check
-  if (nvhAnalysis.exceedances && nvhAnalysis.exceedances.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        nvhAnalysis = await ctx.task(nvhAnalysisTask, { ...{
+    projectName,
+    motorSelection,
+    gearReduction,
+    eduIntegration
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `NVH analysis identified ${nvhAnalysis.exceedances.length} target exceedances. Review and approve mitigation plan?`,
       title: 'NVH Target Exceedances',
       context: {
         runId: ctx.runId,
         exceedances: nvhAnalysis.exceedances,
         mitigations: nvhAnalysis.mitigations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Validation Planning
-  const validationPlan = await ctx.task(validationPlanTask, {
+  let validationPlan = await ctx.task(validationPlanTask, {
     projectName,
     motorSelection,
     inverterDesign,
@@ -135,8 +164,19 @@ export async function process(inputs, ctx) {
     nvhAnalysis
   });
 
-  // Final Breakpoint: EDU design approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationPlan = await ctx.task(validationPlanTask, { ...{
+    projectName,
+    motorSelection,
+    inverterDesign,
+    controlAlgorithms,
+    efficiencyOptimization,
+    nvhAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Electric Drive Unit design complete for ${projectName}. Peak power: ${performanceTargets.peakPower} kW. Approve for prototype build?`,
     title: 'EDU Design Approval',
     context: {
@@ -147,9 +187,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/edu-design-specification.json`, format: 'json', content: eduIntegration },
         { path: `artifacts/efficiency-maps.json`, format: 'json', content: efficiencyOptimization }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -171,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const motorSelectionTask = defineTask('motor-selection', (args, taskCtx) => ({
   kind: 'agent',

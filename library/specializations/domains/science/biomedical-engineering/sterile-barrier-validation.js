@@ -51,14 +51,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Accelerated Aging Studies
-  const acceleratedAging = await ctx.task(acceleratedAgingTask, {
+  let acceleratedAging = await ctx.task(acceleratedAgingTask, {
     deviceName,
     packagingSystem,
     distributionConditions
   });
 
-  // Breakpoint: Review aging study design
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      acceleratedAging = await ctx.task(acceleratedAgingTask, { ...{
+    deviceName,
+    packagingSystem,
+    distributionConditions
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review accelerated aging study design for ${deviceName}. Are aging conditions appropriate?`,
     title: 'Aging Study Review',
     context: {
@@ -70,9 +78,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: acceleratedAging
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Distribution Simulation Testing
   const distributionSimulation = await ctx.task(distributionSimulationTask, {
     deviceName,
@@ -88,7 +102,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Packaging Validation Documentation
-  const validationDocumentation = await ctx.task(validationDocumentationTask, {
+  let validationDocumentation = await ctx.task(validationDocumentationTask, {
     deviceName,
     packagingSystem,
     sterilizationMethod,
@@ -100,8 +114,22 @@ export async function process(inputs, ctx) {
     stabilityProtocol
   });
 
-  // Final Breakpoint: Validation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationDocumentation = await ctx.task(validationDocumentationTask, { ...{
+    deviceName,
+    packagingSystem,
+    sterilizationMethod,
+    materialSelection,
+    sealOptimization,
+    integrityTesting,
+    acceleratedAging,
+    distributionSimulation,
+    stabilityProtocol
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sterile barrier validation complete for ${deviceName}. Shelf life: ${acceleratedAging.claimedShelfLife}. Approve validation?`,
     title: 'Packaging Validation Approval',
     context: {
@@ -111,9 +139,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/packaging-validation-report.json`, format: 'json', content: validationDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -131,8 +165,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const materialSelectionTask = defineTask('material-selection', (args, taskCtx) => ({
   kind: 'agent',

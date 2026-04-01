@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(topDownAnalysis.artifacts || []));
 
   // Phase 3: Bottom-Up Analysis
-  const bottomUpAnalysis = await ctx.task(bottomUpAnalysisTask, {
+  let bottomUpAnalysis = await ctx.task(bottomUpAnalysisTask, {
     projectName,
     marketDefinition,
     productDescription,
@@ -65,8 +65,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(bottomUpAnalysis.artifacts || []));
 
-  // Breakpoint: Review TAM calculations
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      bottomUpAnalysis = await ctx.task(bottomUpAnalysisTask, { ...{
+    projectName,
+    marketDefinition,
+    productDescription,
+    targetMarket
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review TAM calculations for ${projectName}. Top-down: ${topDownAnalysis.tam}, Bottom-up: ${bottomUpAnalysis.tamValidation}. Proceed with SAM/SOM analysis?`,
     title: 'TAM Analysis Review',
     context: {
@@ -75,9 +84,15 @@ export async function process(inputs, ctx) {
       topDownTAM: topDownAnalysis.tam,
       bottomUpValidation: bottomUpAnalysis.tamValidation,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: SAM Calculation
   const samCalculation = await ctx.task(samCalculationTask, {
     projectName,
@@ -121,7 +136,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(methodologyDoc.artifacts || []));
 
   // Phase 8: Investor-Ready Analysis
-  const investorAnalysis = await ctx.task(investorReadyAnalysisTask, {
+  let investorAnalysis = await ctx.task(investorReadyAnalysisTask, {
     projectName,
     marketDefinition,
     topDownAnalysis,
@@ -133,8 +148,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(investorAnalysis.artifacts || []));
 
-  // Final Breakpoint: Market sizing complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      investorAnalysis = await ctx.task(investorReadyAnalysisTask, { ...{
+    projectName,
+    marketDefinition,
+    topDownAnalysis,
+    bottomUpAnalysis,
+    samCalculation,
+    somEstimation,
+    growthProjections
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Market sizing analysis complete for ${projectName}. TAM: ${topDownAnalysis.tam}, SAM: ${samCalculation.sam}, SOM: ${somEstimation.som}. Approve analysis?`,
     title: 'Market Sizing Analysis Approval',
     context: {
@@ -144,9 +171,15 @@ export async function process(inputs, ctx) {
       sam: samCalculation.sam,
       som: somEstimation.som,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -174,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const marketDefinitionTask = defineTask('market-definition', (args, taskCtx) => ({
   kind: 'agent',

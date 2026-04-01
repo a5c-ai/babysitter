@@ -53,22 +53,35 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Solution Generation
-  const solutionGeneration = await ctx.task(solutionGenerationTask, {
+  let solutionGeneration = await ctx.task(solutionGenerationTask, {
     projectName,
     modelDevelopment
   });
 
-  // Breakpoint: Review optimization results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      solutionGeneration = await ctx.task(solutionGenerationTask, { ...{
+    projectName,
+    modelDevelopment
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review optimization solution for ${projectName}. Is the solution feasible and implementable?`,
     title: 'Optimization Results Review',
     context: {
       runId: ctx.runId,
       projectName,
       objectiveValue: solutionGeneration.objectiveValue || 'N/A'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Sensitivity Analysis
   const sensitivityAnalysis = await ctx.task(optimizationSensitivityTask, {
     projectName,
@@ -116,8 +129,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const optimizationProblemFormulationTask = defineTask('optimization-problem-formulation', (args, taskCtx) => ({
   kind: 'agent',

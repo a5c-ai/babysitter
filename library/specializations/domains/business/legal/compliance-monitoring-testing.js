@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Compliance Monitoring and Testing`);
 
   // Phase 1: Testing Plan Development
-  const testingPlan = await ctx.task(testingPlanTask, {
+  let testingPlan = await ctx.task(testingPlanTask, {
     scope,
     testingPeriod,
     controls,
@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...monitoringResults.artifacts);
   }
-
   // Phase 3: Control Testing
   let testingResults = null;
   if (includePeriodicTesting) {
@@ -67,19 +66,33 @@ export async function process(inputs, ctx) {
 
     // Quality Gate for failed tests
     const failedTests = testingResults.results.filter(r => r.result === 'failed');
-    if (failedTests.length > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_phase3Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase3Review) {
+          testingPlan = await ctx.task(testingPlanTask, { ...{
+    scope,
+    testingPeriod,
+    controls,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+        }
+  const phase3Review = await ctx.breakpoint({
         question: `${failedTests.length} control tests failed. Review findings before proceeding?`,
         title: 'Control Testing Failures',
         context: {
           runId: ctx.runId,
           failedTests: failedTests.map(t => ({ control: t.controlId, reason: t.failureReason })),
           files: testingResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase3Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase3Review.approved) break;
+        lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 4: Issue Management
   const issueManagement = await ctx.task(issueManagementTask, {
     monitoringResults: monitoringResults?.results,
@@ -89,16 +102,25 @@ export async function process(inputs, ctx) {
   artifacts.push(...issueManagement.artifacts);
 
   // Phase 5: Reporting
-  const report = await ctx.task(complianceTestingReportTask, {
+  let report = await ctx.task(complianceTestingReportTask, {
     testingPlan: testingPlan.plan,
     monitoringResults: monitoringResults?.results,
     testingResults: testingResults?.results,
     issues: issueManagement.issues,
     outputDir
   });
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(complianceTestingReportTask, { ...{
+    testingPlan: testingPlan.plan,
+    monitoringResults: monitoringResults?.results,
+    testingResults: testingResults?.results,
+    issues: issueManagement.issues,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compliance testing complete. ${testingResults?.results.length || 0} controls tested, ${issueManagement.issues.length} issues identified. Approve report?`,
     title: 'Compliance Testing Review',
     context: {
@@ -106,9 +128,15 @@ export async function process(inputs, ctx) {
       controlsTested: testingResults?.results.length || 0,
       issuesFound: issueManagement.issues.length,
       files: [{ path: report.reportPath, format: 'markdown', label: 'Testing Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     scope,

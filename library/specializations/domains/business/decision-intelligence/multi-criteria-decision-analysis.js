@@ -58,24 +58,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: MCDA Calculation
-  const mcdaCalculation = await ctx.task(mcdaCalculationTask, {
+  let mcdaCalculation = await ctx.task(mcdaCalculationTask, {
     projectName,
     criteriaWeighting,
     performanceAssessment,
     methodology
   });
 
-  // Breakpoint: Review MCDA results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      mcdaCalculation = await ctx.task(mcdaCalculationTask, { ...{
+    projectName,
+    criteriaWeighting,
+    performanceAssessment,
+    methodology
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review MCDA results for ${projectName}. Are the rankings consistent with stakeholder expectations?`,
     title: 'MCDA Results Review',
     context: {
       runId: ctx.runId,
       projectName,
       topAlternative: mcdaCalculation.rankings?.[0] || 'N/A'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Sensitivity Analysis
   const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, {
     projectName,
@@ -129,8 +144,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const frameworkSetupTask = defineTask('framework-setup', (args, taskCtx) => ({
   kind: 'agent',

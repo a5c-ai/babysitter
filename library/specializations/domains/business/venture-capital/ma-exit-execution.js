@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Bid Management
   ctx.log('info', 'Managing bid process');
-  const bidManagement = await ctx.task(bidManagementTask, {
+  let bidManagement = await ctx.task(bidManagementTask, {
     companyName,
     buyerOutreach,
     saleParameters,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bidManagement.artifacts);
 
-  // Breakpoint: Review sale process
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bidManagement = await ctx.task(bidManagementTask, { ...{
+    companyName,
+    buyerOutreach,
+    saleParameters,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `M&A sale process prepared for ${companyName}. ${buyerOutreach.contactedBuyers.length} buyers contacted, ${bidManagement.activeBidders.length} active bidders. Review process?`,
     title: 'M&A Exit Execution',
     context: {
@@ -109,9 +118,15 @@ export async function process(inputs, ctx) {
         indicativeBids: bidManagement.indicativeBids.length,
         targetTimeline: processDesign.timeline
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Definitive Agreement Negotiation
   ctx.log('info', 'Supporting definitive agreement negotiation');
   const agreementNegotiation = await ctx.task(agreementNegotiationTask, {
@@ -173,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Sale Process Design
+  // Task 1: Sale Process Design
 export const saleProcessDesignTask = defineTask('sale-process-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design sale process',

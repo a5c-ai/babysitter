@@ -69,14 +69,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...policies.artifacts);
 
   // Phase 6: Training Plan
-  const training = await ctx.task(tradeSecretTrainingTask, {
+  let training = await ctx.task(tradeSecretTrainingTask, {
     organizationProfile,
     policies: policies.policies,
     outputDir
   });
-  artifacts.push(...training.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      training = await ctx.task(tradeSecretTrainingTask, { ...{
+    organizationProfile,
+    policies: policies.policies,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Trade secret protection program for ${organizationProfile.name} complete. ${identification.tradeSecrets.length} trade secrets identified, ${accessControls.controls.length} controls implemented. Approve program?`,
     title: 'Trade Secret Protection Review',
     context: {
@@ -84,9 +91,15 @@ export async function process(inputs, ctx) {
       tradeSecretsCount: identification.tradeSecrets.length,
       controlsCount: accessControls.controls.length,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     organization: organizationProfile.name,

@@ -34,15 +34,24 @@ export async function process(inputs, ctx) {
   const biasScreening = await ctx.task(biasScreeningTask, { analysis, contextAssessment, outputDir });
   artifacts.push(...biasScreening.artifacts);
 
-  const motivatedReasoningCheck = await ctx.task(motivatedReasoningTask, { analysis, decisionContext, biasScreening, outputDir });
-  artifacts.push(...motivatedReasoningCheck.artifacts);
-
-  await ctx.breakpoint({
+  let motivatedReasoningCheck = await ctx.task(motivatedReasoningTask, { analysis, decisionContext, biasScreening, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      motivatedReasoningCheck = await ctx.task(motivatedReasoningTask, { ...{ analysis, decisionContext, biasScreening, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({
     question: `Bias screening complete. ${biasScreening.potentialBiases?.length || 0} potential biases identified. Risk level: ${biasScreening.riskLevel || 'N/A'}. Review before mitigation?`,
     title: 'Bias Screening Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { potentialBiases: biasScreening.potentialBiases?.length || 0, riskLevel: biasScreening.riskLevel || 'N/A' }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { potentialBiases: biasScreening.potentialBiases?.length || 0, riskLevel: biasScreening.riskLevel || 'N/A' }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_assessmentApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const anchoringMitigation = await ctx.task(anchoringMitigationTask, { analysis, biasScreening, outputDir });
   artifacts.push(...anchoringMitigation.artifacts);
 
@@ -64,15 +73,24 @@ export async function process(inputs, ctx) {
   const recommendationGeneration = await ctx.task(biasRecommendationsTask, { biasScreening, mitigations: analysisSynthesis.appliedMitigations, decisionContext, outputDir });
   artifacts.push(...recommendationGeneration.artifacts);
 
-  const qualityScore = await ctx.task(biasQualityScoringTask, { biasScreening, anchoringMitigation, confirmationMitigation, overconfidenceMitigation, analysisSynthesis, minimumMitigationCoverage, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(biasQualityScoringTask, { biasScreening, anchoringMitigation, confirmationMitigation, overconfidenceMitigation, analysisSynthesis, minimumMitigationCoverage, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(biasQualityScoringTask, { ...{ biasScreening, anchoringMitigation, confirmationMitigation, overconfidenceMitigation, analysisSynthesis, minimumMitigationCoverage, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bias mitigation complete. ${analysisSynthesis.appliedMitigations?.length || 0} mitigations applied. Quality: ${qualityScore.overallScore}/100. Approve debiased analysis?`,
     title: 'Bias Mitigation Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { mitigationsApplied: analysisSynthesis.appliedMitigations?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { mitigationsApplied: analysisSynthesis.appliedMitigations?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, decisionContext, biasesIdentified: biasScreening.potentialBiases,
     mitigations: analysisSynthesis.appliedMitigations, improvedAnalysis: analysisSynthesis.improvedAnalysis,

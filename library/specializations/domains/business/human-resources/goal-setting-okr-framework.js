@@ -40,16 +40,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Goal Setting and OKR Framework for ${organizationName} - ${planningPeriod}`);
 
   // Phase 1: Strategic Alignment Analysis
-  const strategicAlignment = await ctx.task(strategicAlignmentTask, {
+  let strategicAlignment = await ctx.task(strategicAlignmentTask, {
     organizationName,
     planningPeriod,
     strategicObjectives,
     outputDir
   });
 
-  artifacts.push(...strategicAlignment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      strategicAlignment = await ctx.task(strategicAlignmentTask, { ...{
+    organizationName,
+    planningPeriod,
+    strategicObjectives,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Strategic alignment analysis complete. ${strategicAlignment.alignedObjectives.length} objectives identified. Review strategic context before creating OKRs?`,
     title: 'Strategic Alignment Review',
     context: {
@@ -58,11 +66,17 @@ export async function process(inputs, ctx) {
       alignedObjectives: strategicAlignment.alignedObjectives,
       strategicPriorities: strategicAlignment.strategicPriorities,
       files: strategicAlignment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Company-Level OKR Development
-  const companyOkrs = await ctx.task(companyOkrTask, {
+  let companyOkrs = await ctx.task(companyOkrTask, {
     organizationName,
     planningPeriod,
     strategicObjectives: strategicAlignment.alignedObjectives,
@@ -71,9 +85,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...companyOkrs.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      companyOkrs = await ctx.task(companyOkrTask, { ...{
+    organizationName,
+    planningPeriod,
+    strategicObjectives: strategicAlignment.alignedObjectives,
+    goalFramework,
+    includeStretchGoals,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Company-level OKRs developed: ${companyOkrs.objectives.length} objectives with ${companyOkrs.totalKeyResults} key results. Review and approve?`,
     title: 'Company OKR Review',
     context: {
@@ -82,9 +106,15 @@ export async function process(inputs, ctx) {
       keyResultsSummary: companyOkrs.keyResultsSummary,
       stretchTargets: companyOkrs.stretchTargets,
       files: companyOkrs.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Department-Level OKR Cascading
   const departmentOkrs = await ctx.task(departmentOkrTask, {
     organizationName,
@@ -120,7 +150,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...individualGoals.artifacts);
 
   // Phase 6: Alignment Validation
-  const alignmentValidation = await ctx.task(alignmentValidationTask, {
+  let alignmentValidation = await ctx.task(alignmentValidationTask, {
     organizationName,
     companyOkrs: companyOkrs.objectives,
     departmentOkrs: departmentOkrs.departmentOkrs,
@@ -129,9 +159,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...alignmentValidation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      alignmentValidation = await ctx.task(alignmentValidationTask, { ...{
+    organizationName,
+    companyOkrs: companyOkrs.objectives,
+    departmentOkrs: departmentOkrs.departmentOkrs,
+    teamOkrs: teamOkrs.teamOkrs,
+    individualGoals: individualGoals.goals,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Goal alignment validation complete. Alignment score: ${alignmentValidation.alignmentScore}%. ${alignmentValidation.gaps.length} alignment gaps identified. Review alignment report?`,
     title: 'Alignment Validation Review',
     context: {
@@ -140,9 +180,15 @@ export async function process(inputs, ctx) {
       gaps: alignmentValidation.gaps,
       recommendations: alignmentValidation.recommendations,
       files: alignmentValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Key Results Measurement Setup
   const measurementSetup = await ctx.task(measurementSetupTask, {
     organizationName,
@@ -243,8 +289,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const strategicAlignmentTask = defineTask('strategic-alignment', (args, taskCtx) => ({
   kind: 'agent',

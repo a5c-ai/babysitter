@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Interactive and Digital Experiences
   ctx.log('info', 'Designing interactive and digital experiences');
-  const interactiveDesign = await ctx.task(interactiveDesignTask, {
+  let interactiveDesign = await ctx.task(interactiveDesignTask, {
     projectName,
     experienceType,
     visitorProfiles,
@@ -103,8 +103,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...interactiveDesign.artifacts);
 
-  // Breakpoint: Review experience design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      interactiveDesign = await ctx.task(interactiveDesignTask, { ...{
+    projectName,
+    experienceType,
+    visitorProfiles,
+    contentFocus,
+    interpretivePlanning: interpretivePlanning.plan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visitor experience design for "${projectName}" complete. ${visitorProfiles.length} visitor profiles addressed. Review and approve?`,
     title: 'Visitor Experience Design Review',
     context: {
@@ -117,9 +128,15 @@ export async function process(inputs, ctx) {
         journeyCount: journeyMapping.journeys.length,
         interpretiveElements: interpretivePlanning.plan.elements?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Visitor Services Design
   ctx.log('info', 'Designing visitor services');
   const visitorServices = await ctx.task(visitorServicesTask, {
@@ -194,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Visitor Research
+  // Task 1: Visitor Research
 export const visitorResearchTask = defineTask('visitor-research', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct visitor research',

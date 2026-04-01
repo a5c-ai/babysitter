@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Identifying reaction intermediates');
-  const intermediateIdentification = await ctx.task(intermediateIdentificationTask, {
+  let intermediateIdentification = await ctx.task(intermediateIdentificationTask, {
     elementarySteps: stepProposal.elementarySteps,
     reactants,
     products,
@@ -66,8 +66,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...intermediateIdentification.artifacts);
 
-  // Breakpoint: Review proposed mechanism
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      intermediateIdentification = await ctx.task(intermediateIdentificationTask, { ...{
+    elementarySteps: stepProposal.elementarySteps,
+    reactants,
+    products,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Proposed ${stepProposal.elementarySteps.length} elementary steps with ${intermediateIdentification.intermediates.length} intermediates. Review before transition state analysis?`,
     title: 'Mechanism Proposal Review',
     context: {
@@ -82,9 +91,15 @@ export async function process(inputs, ctx) {
         elementaryStepCount: stepProposal.elementarySteps.length,
         intermediateCount: intermediateIdentification.intermediates.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TRANSITION STATE ANALYSIS
   // ============================================================================
@@ -141,13 +156,12 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...rateLawDerivation.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: MECHANISM VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating proposed mechanism');
-  const mechanismValidation = await ctx.task(mechanismValidationTask, {
+  let mechanismValidation = await ctx.task(mechanismValidationTask, {
     elementarySteps: stepProposal.elementarySteps,
     intermediates: intermediateIdentification.intermediates,
     overallReaction,
@@ -157,8 +171,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...mechanismValidation.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      mechanismValidation = await ctx.task(mechanismValidationTask, { ...{
+    elementarySteps: stepProposal.elementarySteps,
+    intermediates: intermediateIdentification.intermediates,
+    overallReaction,
+    rateLaw: rateLawDerivation?.rateLaw,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mechanism analysis complete. RDS: ${rdsIdentification.rds.description}. Validation score: ${mechanismValidation.validationScore}%. Review final mechanism?`,
     title: 'Mechanism Analysis Complete',
     context: {
@@ -174,9 +198,15 @@ export async function process(inputs, ctx) {
         validationScore: mechanismValidation.validationScore,
         rateLaw: rateLawDerivation?.rateLaw?.expression
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -202,8 +232,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

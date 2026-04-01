@@ -592,7 +592,7 @@ export async function process(inputs, ctx) {
       methodologyDisplayName
     });
 
-    const gapAnalysis = await ctx.task(researchExistingConversionTask, {
+    let gapAnalysis = await ctx.task(researchExistingConversionTask, {
       existingConversionPath,
       methodologyName,
       methodologyDisplayName,
@@ -603,15 +603,29 @@ export async function process(inputs, ctx) {
 
     // ═══════════════════════════════════════════════════════════════
     // PHASE 1.5: BREAKPOINT — Review research before architecture
-    // ═══════════════════════════════════════════════════════════════
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        gapAnalysis = await ctx.task(researchExistingConversionTask, { ...{
+      existingConversionPath,
+      methodologyName,
+      methodologyDisplayName,
+      sourceResearch
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Research on ${methodologyDisplayName} is complete. Found ${gapAnalysis.missingProcesses?.length || 0} missing processes, ${gapAnalysis.missingSkills?.length || 0} missing skills, ${gapAnalysis.missingAgents?.length || 0} missing agents. Proceed with architecture design?`,
       title: 'Research Review',
-      context: { runId: ctx.runId }
-    });
-
-    // ═══════════════════════════════════════════════════════════════
+      context: { runId: ctx.runId },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // ═══════════════════════════════════════════════════════════════
     // PHASE 2: ARCHITECTURE
     // ═══════════════════════════════════════════════════════════════
 
@@ -719,13 +733,29 @@ export async function process(inputs, ctx) {
       sourceRepo,
       methodologyName,
       methodologyDisplayName
-    });
-
-    await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval2) {
+        verifyResult = await ctx.task(verifyAssimilationTask, { ...{
+      outputBasePath,
+      architecture,
+      sourceResearch,
+      targetScore: targetQuality,
+      methodologyDisplayName
+    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+      }
+  const finalApproval2 = await ctx.breakpoint({
       question: `Research on ${methodologyDisplayName} is complete. Found ${sourceResearch.workflows?.length || 0} workflows, ${sourceResearch.agents?.length || 0} agents, ${sourceResearch.commands?.length || 0} commands. Proceed with architecture design?`,
       title: 'Research Review',
-      context: { runId: ctx.runId }
-    });
+      context: { runId: ctx.runId },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval2.approved) break;
+      lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+    }
 
     ctx.log('info', 'Phase 2: Designing babysitter process architecture');
     const architecture = await ctx.task(designProcessArchitectureTask, {
@@ -759,8 +789,7 @@ export async function process(inputs, ctx) {
         outputBasePath, architecture, sourceResearch, targetScore: targetQuality, methodologyDisplayName
       });
     }
-
-    return {
+  return {
       success: verifyResult.overall >= targetQuality,
       outputPath: outputBasePath,
       processFiles: processResults.filesCreated?.map(f => f.path) || [],

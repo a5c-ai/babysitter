@@ -18,131 +18,238 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Community Assessment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting community relations program development. Assess communities?',
     title: 'Phase 1: Community Assessment',
     context: {
       runId: ctx.runId,
       phase: 'community-assessment',
       communityCount: communities.length
-    }
-  });
-
-  const communityAssessment = await ctx.task(assessCommunitiesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let communityAssessment = await ctx.task(assessCommunitiesTask, {
     communities,
     organization,
     localContext
   });
 
-  // Phase 2: Stakeholder Identification (Community)
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      communityAssessment = await ctx.task(assessCommunitiesTask, { ...{
+    communities,
+    organization,
+    localContext
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Communities assessed. Identify community stakeholders?',
     title: 'Phase 2: Community Stakeholders',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-identification'
-    }
-  });
-
-  const communityStakeholders = await ctx.task(identifyCommunityStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let communityStakeholders = await ctx.task(identifyCommunityStakeholdersTask, {
     communityAssessment,
     organization
   });
 
-  // Phase 3: Program Strategy Development
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      communityStakeholders = await ctx.task(identifyCommunityStakeholdersTask, { ...{
+    communityAssessment,
+    organization
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Stakeholders identified. Develop program strategy?',
     title: 'Phase 3: Program Strategy',
     context: {
       runId: ctx.runId,
       phase: 'program-strategy'
-    }
-  });
-
-  const programStrategy = await ctx.task(developProgramStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let programStrategy = await ctx.task(developProgramStrategyTask, {
     communityAssessment,
     communityStakeholders,
     existingPrograms,
     organization
   });
 
-  // Phase 4: Partnership Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      programStrategy = await ctx.task(developProgramStrategyTask, { ...{
+    communityAssessment,
+    communityStakeholders,
+    existingPrograms,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Strategy developed. Plan community partnerships?',
     title: 'Phase 4: Partnership Planning',
     context: {
       runId: ctx.runId,
       phase: 'partnership-planning'
-    }
-  });
-
-  const partnershipPlan = await ctx.task(planCommunityPartnershipsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let partnershipPlan = await ctx.task(planCommunityPartnershipsTask, {
     communityStakeholders,
     programStrategy,
     localContext
   });
 
-  // Phase 5: Outreach Programs Design
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      partnershipPlan = await ctx.task(planCommunityPartnershipsTask, { ...{
+    communityStakeholders,
+    programStrategy,
+    localContext
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Partnerships planned. Design outreach programs?',
     title: 'Phase 5: Outreach Programs',
     context: {
       runId: ctx.runId,
       phase: 'outreach-programs'
-    }
-  });
-
-  const outreachPrograms = await ctx.task(designOutreachProgramsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let outreachPrograms = await ctx.task(designOutreachProgramsTask, {
     programStrategy,
     communityAssessment,
     partnershipPlan
   });
 
-  // Phase 6: Communications Strategy (Community)
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      outreachPrograms = await ctx.task(designOutreachProgramsTask, { ...{
+    programStrategy,
+    communityAssessment,
+    partnershipPlan
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Programs designed. Create community communications strategy?',
     title: 'Phase 6: Communications Strategy',
     context: {
       runId: ctx.runId,
       phase: 'communications-strategy'
-    }
-  });
-
-  const communicationsStrategy = await ctx.task(createCommunityCommsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let communicationsStrategy = await ctx.task(createCommunityCommsTask, {
     communityStakeholders,
     programStrategy,
     outreachPrograms
   });
 
-  // Phase 7: Engagement Calendar
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      communicationsStrategy = await ctx.task(createCommunityCommsTask, { ...{
+    communityStakeholders,
+    programStrategy,
+    outreachPrograms
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Strategy created. Build engagement calendar?',
     title: 'Phase 7: Engagement Calendar',
     context: {
       runId: ctx.runId,
       phase: 'engagement-calendar'
-    }
-  });
-
-  const engagementCalendar = await ctx.task(buildEngagementCalendarTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let engagementCalendar = await ctx.task(buildEngagementCalendarTask, {
     outreachPrograms,
     partnershipPlan,
     communicationsStrategy,
     localContext
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      engagementCalendar = await ctx.task(buildEngagementCalendarTask, { ...{
+    outreachPrograms,
+    partnershipPlan,
+    communicationsStrategy,
+    localContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate community relations program quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateCommunityProgramTask, {
     communityAssessment,
     communityStakeholders,
@@ -194,8 +301,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessCommunitiesTask = defineTask('assess-communities', (args, taskCtx) => ({
   kind: 'agent',

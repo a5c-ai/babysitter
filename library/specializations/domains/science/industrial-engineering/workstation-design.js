@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Reach Zone Design
   ctx.log('info', 'Phase 3: Defining reach zones and work surface heights');
-  const reachZoneDesign = await ctx.task(reachZoneTask, {
+  let reachZoneDesign = await ctx.task(reachZoneTask, {
     anthropometricAnalysis,
     taskAnalysis,
     outputDir
@@ -65,8 +65,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reachZoneDesign.artifacts);
 
-  // Breakpoint: Review dimensions
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      reachZoneDesign = await ctx.task(reachZoneTask, { ...{
+    anthropometricAnalysis,
+    taskAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Workstation dimensions defined. Work surface height: ${reachZoneDesign.workSurfaceHeight}. Primary reach zone: ${reachZoneDesign.primaryReachRadius}cm. Accommodation: ${anthropometricAnalysis.accommodationPercentage}%. Review before detailed design?`,
     title: 'Workstation Dimensions Review',
     context: {
@@ -74,9 +82,15 @@ export async function process(inputs, ctx) {
       dimensions: reachZoneDesign.keyDimensions,
       accommodation: anthropometricAnalysis.accommodationPercentage,
       files: reachZoneDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Tool and Material Presentation
   ctx.log('info', 'Phase 4: Designing tool and material presentation');
   const materialPresentation = await ctx.task(materialPresentationTask, {
@@ -130,7 +144,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Final Design Specification
   ctx.log('info', 'Phase 9: Creating final design specifications');
-  const finalDesign = await ctx.task(finalDesignTask, {
+  let finalDesign = await ctx.task(finalDesignTask, {
     layoutDesign,
     userTesting,
     adjustabilityDesign,
@@ -139,8 +153,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalDesign.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalDesign = await ctx.task(finalDesignTask, { ...{
+    layoutDesign,
+    userTesting,
+    adjustabilityDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Workstation design complete. User testing satisfaction: ${userTesting.satisfactionScore}/10. ${userTesting.iterationsMade} design iterations made. Review final specifications?`,
     title: 'Workstation Design Results',
     context: {
@@ -153,9 +176,15 @@ export async function process(inputs, ctx) {
         iterations: userTesting.iterationsMade
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -179,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Task Analysis
+  // Task 1: Task Analysis
 export const taskAnalysisTask = defineTask('task-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze work tasks and requirements',

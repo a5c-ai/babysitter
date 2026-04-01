@@ -19,17 +19,25 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Internal Communications Audit
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting internal communications strategy. Audit current state?',
     title: 'Phase 1: Communications Audit',
     context: {
       runId: ctx.runId,
       phase: 'communications-audit',
       organization: organization.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [commsAudit, employeeAnalysis] = await Promise.all([
     ctx.task(auditInternalCommsTask, {
       currentChannels,
@@ -41,114 +49,207 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Strategy Framework Development
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Audit complete. Develop strategy framework?',
     title: 'Phase 2: Strategy Framework',
     context: {
       runId: ctx.runId,
       phase: 'strategy-framework'
-    }
-  });
-
-  const strategyFramework = await ctx.task(developStrategyFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let strategyFramework = await ctx.task(developStrategyFrameworkTask, {
     commsAudit,
     employeeAnalysis,
     strategicPriorities,
     cultureGoals
   });
 
-  // Phase 3: Channel Strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      strategyFramework = await ctx.task(developStrategyFrameworkTask, { ...{
+    commsAudit,
+    employeeAnalysis,
+    strategicPriorities,
+    cultureGoals
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Framework developed. Define channel strategy?',
     title: 'Phase 3: Channel Strategy',
     context: {
       runId: ctx.runId,
       phase: 'channel-strategy'
-    }
-  });
-
-  const channelStrategy = await ctx.task(defineChannelStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let channelStrategy = await ctx.task(defineChannelStrategyTask, {
     commsAudit,
     employeeAnalysis,
     strategyFramework
   });
 
-  // Phase 4: Content Framework (ADKAR Integration)
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      channelStrategy = await ctx.task(defineChannelStrategyTask, { ...{
+    commsAudit,
+    employeeAnalysis,
+    strategyFramework
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Channels defined. Create content framework with ADKAR model?',
     title: 'Phase 4: Content Framework',
     context: {
       runId: ctx.runId,
       phase: 'content-framework'
-    }
-  });
-
-  const contentFramework = await ctx.task(createContentFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let contentFramework = await ctx.task(createContentFrameworkTask, {
     strategyFramework,
     channelStrategy,
     strategicPriorities
   });
 
-  // Phase 5: Cascade Protocol Development
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contentFramework = await ctx.task(createContentFrameworkTask, { ...{
+    strategyFramework,
+    channelStrategy,
+    strategicPriorities
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Content framework ready. Develop cascade protocols?',
     title: 'Phase 5: Cascade Protocols',
     context: {
       runId: ctx.runId,
       phase: 'cascade-protocols'
-    }
-  });
-
-  const cascadeProtocols = await ctx.task(developCascadeProtocolsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let cascadeProtocols = await ctx.task(developCascadeProtocolsTask, {
     organization,
     channelStrategy,
     employeeAnalysis
   });
 
-  // Phase 6: Leader Communication Enablement
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      cascadeProtocols = await ctx.task(developCascadeProtocolsTask, { ...{
+    organization,
+    channelStrategy,
+    employeeAnalysis
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Cascade defined. Plan leader communication enablement?',
     title: 'Phase 6: Leader Enablement',
     context: {
       runId: ctx.runId,
       phase: 'leader-enablement'
-    }
-  });
-
-  const leaderEnablement = await ctx.task(planLeaderEnablementTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let leaderEnablement = await ctx.task(planLeaderEnablementTask, {
     cascadeProtocols,
     strategyFramework,
     organization
   });
 
-  // Phase 7: Engagement Measurement Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      leaderEnablement = await ctx.task(planLeaderEnablementTask, { ...{
+    cascadeProtocols,
+    strategyFramework,
+    organization
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Enablement planned. Define engagement measurement?',
     title: 'Phase 7: Measurement Framework',
     context: {
       runId: ctx.runId,
       phase: 'measurement-framework'
-    }
-  });
-
-  const measurementFramework = await ctx.task(defineMeasurementFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let measurementFramework = await ctx.task(defineMeasurementFrameworkTask, {
     strategyFramework,
     channelStrategy,
     contentFramework
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      measurementFramework = await ctx.task(defineMeasurementFrameworkTask, { ...{
+    strategyFramework,
+    channelStrategy,
+    contentFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate internal communications strategy quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateInternalCommsStrategyTask, {
     commsAudit,
     strategyFramework,
@@ -197,8 +298,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const auditInternalCommsTask = defineTask('audit-internal-comms', (args, taskCtx) => ({
   kind: 'agent',

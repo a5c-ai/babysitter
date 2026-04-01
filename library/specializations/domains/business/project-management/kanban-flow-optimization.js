@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Bottleneck Identification
-  const bottleneckAnalysis = await ctx.task(bottleneckTask, {
+  let bottleneckAnalysis = await ctx.task(bottleneckTask, {
     projectName,
     currentState: currentStateAnalysis,
     workflowStages
@@ -48,8 +48,16 @@ export async function process(inputs, ctx) {
 
   // Breakpoint: Review bottlenecks
   const bottlenecks = bottleneckAnalysis.bottlenecks || [];
-  if (bottlenecks.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        bottleneckAnalysis = await ctx.task(bottleneckTask, { ...{
+    projectName,
+    currentState: currentStateAnalysis,
+    workflowStages
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `${bottlenecks.length} bottlenecks identified in ${projectName} workflow. Review findings?`,
       title: 'Bottleneck Review',
       context: {
@@ -60,9 +68,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: bottleneckAnalysis
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: WIP Limit Optimization
   const wipOptimization = await ctx.task(wipOptimizationTask, {
@@ -113,7 +127,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Optimization Documentation
-  const optimizationDocumentation = await ctx.task(optimizationDocumentationTask, {
+  let optimizationDocumentation = await ctx.task(optimizationDocumentationTask, {
     projectName,
     currentState: currentStateAnalysis,
     bottlenecks: bottleneckAnalysis,
@@ -125,8 +139,22 @@ export async function process(inputs, ctx) {
     dashboard: dashboardDesign
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      optimizationDocumentation = await ctx.task(optimizationDocumentationTask, { ...{
+    projectName,
+    currentState: currentStateAnalysis,
+    bottlenecks: bottleneckAnalysis,
+    wipOptimization,
+    flowMetrics,
+    sleDefinition,
+    improvements: improvementOpportunities,
+    implementationPlan,
+    dashboard: dashboardDesign
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Kanban flow optimization complete for ${projectName}. ${improvementOpportunities.opportunities?.length || 0} improvements identified. Approve optimization plan?`,
     title: 'Flow Optimization Approval',
     context: {
@@ -136,9 +164,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/kanban-optimization.json`, format: 'json', content: optimizationDocumentation },
         { path: `artifacts/kanban-optimization.md`, format: 'markdown', content: optimizationDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -159,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const currentStateTask = defineTask('current-state', (args, taskCtx) => ({
   kind: 'agent',

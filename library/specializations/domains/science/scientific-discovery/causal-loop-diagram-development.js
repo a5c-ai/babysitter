@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   const variableIdentification = await ctx.task(variableIdentificationTask, { system, variables, problemArticulation, outputDir });
   artifacts.push(...variableIdentification.artifacts);
 
-  const causalLinkIdentification = await ctx.task(causalLinkIdentificationTask, { variables: variableIdentification.variables, system, outputDir });
-  artifacts.push(...causalLinkIdentification.artifacts);
-
-  await ctx.breakpoint({
+  let causalLinkIdentification = await ctx.task(causalLinkIdentificationTask, { variables: variableIdentification.variables, system, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      causalLinkIdentification = await ctx.task(causalLinkIdentificationTask, { ...{ variables: variableIdentification.variables, system, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `Identified ${variableIdentification.variables?.length || 0} variables and ${causalLinkIdentification.links?.length || 0} causal links. Review before loop analysis?`,
     title: 'CLD Structure Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { variables: variableIdentification.variables?.length || 0, links: causalLinkIdentification.links?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { variables: variableIdentification.variables?.length || 0, links: causalLinkIdentification.links?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const feedbackLoopIdentification = await ctx.task(feedbackLoopIdentificationTask, { links: causalLinkIdentification.links, variables: variableIdentification.variables, outputDir });
   artifacts.push(...feedbackLoopIdentification.artifacts);
 
@@ -62,15 +71,24 @@ export async function process(inputs, ctx) {
   const diagramGeneration = await ctx.task(cldDiagramGenerationTask, { variables: variableIdentification.variables, links: causalLinkIdentification.links, loops: feedbackLoopIdentification.loops, leveragePoints: leveragePointIdentification.leveragePoints, outputDir });
   artifacts.push(...diagramGeneration.artifacts);
 
-  const qualityScore = await ctx.task(cldQualityScoringTask, { variableIdentification, causalLinkIdentification, feedbackLoopIdentification, diagramGeneration, minimumCoverageScore, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(cldQualityScoringTask, { variableIdentification, causalLinkIdentification, feedbackLoopIdentification, diagramGeneration, minimumCoverageScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(cldQualityScoringTask, { ...{ variableIdentification, causalLinkIdentification, feedbackLoopIdentification, diagramGeneration, minimumCoverageScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLD complete. ${feedbackLoopIdentification.loops?.length || 0} feedback loops identified, ${leveragePointIdentification.leveragePoints?.length || 0} leverage points. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'CLD Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { loops: feedbackLoopIdentification.loops?.length || 0, leveragePoints: leveragePointIdentification.leveragePoints?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { loops: feedbackLoopIdentification.loops?.length || 0, leveragePoints: leveragePointIdentification.leveragePoints?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, system, diagram: diagramGeneration.diagram, loops: feedbackLoopIdentification.loops,
     leverage: leveragePointIdentification.leveragePoints, analysis: loopAnalysis,

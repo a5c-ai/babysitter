@@ -8,6 +8,24 @@ export type { StateCacheJournalHead } from "./replay/stateCache";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ProcessLogger = (...args: any[]) => void;
 
+export type BreakpointStrategy = 'single' | 'first-response-wins' | 'collect-all' | 'quorum';
+
+export interface BreakpointRoutingOptions {
+  expert?: string | string[];
+  tags?: string[];
+  strategy?: BreakpointStrategy;
+}
+
+export interface BreakpointResult {
+  approved: boolean;
+  response?: string;
+  feedback?: string;
+  option?: string;
+  respondedBy?: string;
+  allResponses?: Array<{ expert: string; approved: boolean; response?: string }>;
+  [key: string]: unknown;
+}
+
 export type EffectStatus = "requested" | "resolved_ok" | "resolved_error";
 
 export interface SerializedEffectError {
@@ -94,7 +112,7 @@ export interface ProcessContext {
     args: TArgs,
     options?: TaskInvokeOptions
   ): Promise<TResult>;
-  breakpoint<T = unknown>(payload: T, options?: { label?: string }): Promise<void>;
+  breakpoint<T = unknown>(payload: T, options?: { label?: string } & BreakpointRoutingOptions): Promise<BreakpointResult>;
   sleepUntil(target: string | number, options?: { label?: string }): Promise<void>;
   orchestratorTask<TArgs = unknown, TResult = unknown>(
     payload: TArgs,

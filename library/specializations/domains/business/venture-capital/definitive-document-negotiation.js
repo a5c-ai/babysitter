@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Negotiation Points Summary
   ctx.log('info', 'Summarizing negotiation points');
-  const negotiationSummary = await ctx.task(negotiationSummaryTask, {
+  let negotiationSummary = await ctx.task(negotiationSummaryTask, {
     spaReview,
     iraReview,
     votingReview,
@@ -96,8 +96,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...negotiationSummary.artifacts);
 
-  // Breakpoint: Review negotiation points
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      negotiationSummary = await ctx.task(negotiationSummaryTask, { ...{
+    spaReview,
+    iraReview,
+    votingReview,
+    rofrReview,
+    coiReview,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Document review complete for ${companyName}. ${negotiationSummary.openIssues.length} open issues identified. Review negotiation points?`,
     title: 'Definitive Document Negotiation',
     context: {
@@ -109,9 +120,15 @@ export async function process(inputs, ctx) {
         resolvedIssues: negotiationSummary.resolvedIssues.length,
         criticalIssues: negotiationSummary.criticalIssues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Closing Checklist
   ctx.log('info', 'Creating closing checklist');
   const closingChecklist = await ctx.task(closingChecklistTask, {
@@ -168,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Stock Purchase Agreement Review
+  // Task 1: Stock Purchase Agreement Review
 export const spaReviewTask = defineTask('spa-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review Stock Purchase Agreement',

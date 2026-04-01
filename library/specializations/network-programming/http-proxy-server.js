@@ -45,7 +45,6 @@ export async function process(inputs, ctx) {
     results[phase.name] = result;
     artifacts.push(...result.artifacts);
   }
-
   const validation = await ctx.task(validationTask, { projectName, proxyMode, features, results, outputDir });
   artifacts.push(...validation.artifacts);
 

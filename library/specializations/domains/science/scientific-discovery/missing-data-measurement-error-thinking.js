@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing analysis');
-  const synthesis = await ctx.task(missingErrorSynthesisTask, {
+  let synthesis = await ctx.task(missingErrorSynthesisTask, {
     missingCharacterization,
     mechanismAssessment,
     errorIdentification,
@@ -140,8 +140,22 @@ export async function process(inputs, ctx) {
 
   const robustnessMet = synthesis.robustnessScore >= targetRobustness;
 
-  // Breakpoint: Review missing data and error analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(missingErrorSynthesisTask, { ...{
+    missingCharacterization,
+    mechanismAssessment,
+    errorIdentification,
+    errorStructure,
+    biasAssessment,
+    strategySelection,
+    sensitivityPlanning,
+    targetRobustness,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Missing data/error analysis complete. Robustness: ${synthesis.robustnessScore}/${targetRobustness}. ${robustnessMet ? 'Robustness target met!' : 'Additional sensitivity analysis may be needed.'} Review analysis?`,
     title: 'Missing Data and Measurement Error Results',
     context: {
@@ -160,9 +174,15 @@ export async function process(inputs, ctx) {
         robustnessScore: synthesis.robustnessScore,
         robustnessMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -194,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

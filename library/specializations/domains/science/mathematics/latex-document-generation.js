@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Structure Document Layout
-  const documentStructure = await ctx.task(documentStructureTask, {
+  let documentStructure = await ctx.task(documentStructureTask, {
     content,
     documentType,
     style
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       latexDocument: null
     };
   }
-
-  // Breakpoint: Review document structure
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      documentStructure = await ctx.task(documentStructureTask, { ...{
+    content,
+    documentType,
+    style
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Document structure created with ${documentStructure.sections.length} sections. Review layout?`,
     title: 'Document Structure Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: documentStructure
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Format Mathematical Expressions
   const mathFormatting = await ctx.task(mathFormattingTask, {
     content,
@@ -91,7 +104,7 @@ export async function process(inputs, ctx) {
   });
 
   // Generate final LaTeX document
-  const finalDocument = await ctx.task(finalDocumentGenerationTask, {
+  let finalDocument = await ctx.task(finalDocumentGenerationTask, {
     documentStructure,
     mathFormatting,
     theoremEnvironments,
@@ -101,8 +114,20 @@ export async function process(inputs, ctx) {
     style
   });
 
-  // Final Breakpoint: Document Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalDocument = await ctx.task(finalDocumentGenerationTask, { ...{
+    documentStructure,
+    mathFormatting,
+    theoremEnvironments,
+    bibliographyManagement,
+    notationConsistency,
+    documentType,
+    style
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `LaTeX document generated (${finalDocument.lineCount} lines). Preview and approve?`,
     title: 'Document Generation Complete',
     context: {
@@ -113,9 +138,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/document.tex`, format: 'latex', content: finalDocument.latex },
         { path: `artifacts/references.bib`, format: 'bibtex', content: bibliographyManagement.bibtex }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     latexDocument: finalDocument.latex,
@@ -138,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const documentStructureTask = defineTask('document-structure', (args, taskCtx) => ({
   kind: 'agent',

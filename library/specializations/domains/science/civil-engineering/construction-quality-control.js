@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Acceptance Criteria
   ctx.log('info', 'Establishing acceptance criteria');
-  const acceptanceCriteria = await ctx.task(acceptanceCriteriaTask, {
+  let acceptanceCriteria = await ctx.task(acceptanceCriteriaTask, {
     projectId,
     projectSpecifications,
     testingRequirements,
@@ -88,8 +88,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...acceptanceCriteria.artifacts);
 
-  // Breakpoint: Review QC program
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      acceptanceCriteria = await ctx.task(acceptanceCriteriaTask, { ...{
+    projectId,
+    projectSpecifications,
+    testingRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QC program development complete for ${projectId}. Review QC plan and inspection protocols?`,
     title: 'Quality Control Program Review',
     context: {
@@ -101,9 +110,15 @@ export async function process(inputs, ctx) {
         testTypes: testingRequirements.testTypes.length,
         checklistCount: inspectionProtocols.checklists.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Inspection Checklists
   ctx.log('info', 'Creating inspection checklists');
   const inspectionChecklists = await ctx.task(inspectionChecklistsTask, {
@@ -162,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Requirements Analysis
+  // Task 1: Requirements Analysis
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze quality requirements',

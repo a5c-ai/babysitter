@@ -26,11 +26,16 @@ export async function process(inputs, ctx) {
   const treeshakingTask = await ctx.task(treeshakingSetupTask, { projectName, outputDir });
   artifacts.push(...treeshakingTask.artifacts);
 
-  const dependencyTask = await ctx.task(dependencyOptimizationTask, { projectName, analysisTask, outputDir });
-  artifacts.push(...dependencyTask.artifacts);
-
-  await ctx.breakpoint({ question: `Bundle optimization complete for ${projectName}. Estimated ${analysisTask.potentialSavings} reduction. Approve?`, title: 'Bundle Optimization Review', context: { runId: ctx.runId, analysis: analysisTask.analysis } });
-
+  let dependencyTask = await ctx.task(dependencyOptimizationTask, { projectName, analysisTask, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dependencyTask = await ctx.task(dependencyOptimizationTask, { ...{ projectName, analysisTask, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Bundle optimization complete for ${projectName}. Estimated ${analysisTask.potentialSavings} reduction. Approve?`, title: 'Bundle Optimization Review', context: { runId: ctx.runId, analysis: analysisTask.analysis }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, analysisTask, outputDir });
   artifacts.push(...documentation.artifacts);
 

@@ -36,7 +36,6 @@ export async function process(inputs, ctx) {
     const pathfinding = await ctx.task(pathfindingTask, { projectName, outputDir });
     artifacts.push(...pathfinding.artifacts);
   }
-
   // Phase 4: Combat AI
   const combatAI = await ctx.task(combatAITask, { projectName, behaviorTrees, outputDir });
   artifacts.push(...combatAI.artifacts);
@@ -50,17 +49,25 @@ export async function process(inputs, ctx) {
     const adaptation = await ctx.task(difficultyAdaptationTask, { projectName, combatAI, outputDir });
     artifacts.push(...adaptation.artifacts);
   }
-
   // Phase 7: AI Testing
-  const testing = await ctx.task(aiTestingTask, { projectName, behaviorTrees, combatAI, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(aiTestingTask, { projectName, behaviorTrees, combatAI, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(aiTestingTask, { ...{ projectName, behaviorTrees, combatAI, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AI implementation complete for ${projectName}. ${behaviorTrees.treeCount} behavior trees. Test pass: ${testing.passRate}%. Review AI systems?`,
     title: 'AI Implementation Review',
-    context: { runId: ctx.runId, behaviorTrees, combatAI, testing }
-  });
-
+    context: { runId: ctx.runId, behaviorTrees, combatAI, testing },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

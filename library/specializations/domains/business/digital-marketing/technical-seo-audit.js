@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Prioritize Issues
   ctx.log('info', 'Phase 9: Prioritizing issues by impact and effort');
-  const prioritization = await ctx.task(issuePrioritizationTask, {
+  let prioritization = await ctx.task(issuePrioritizationTask, {
     crawlResult,
     architectureAnalysis,
     coreWebVitals,
@@ -104,8 +104,22 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...prioritization.artifacts);
 
-  // Breakpoint: Review audit findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      prioritization = await ctx.task(issuePrioritizationTask, { ...{
+    crawlResult,
+    architectureAnalysis,
+    coreWebVitals,
+    mobileReview,
+    robotsSitemaps,
+    indexationAudit,
+    structuredData,
+    duplicateContent,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Technical SEO audit complete. ${prioritization.criticalIssues} critical issues, ${prioritization.highIssues} high priority issues found. Review findings?`,
     title: 'Technical SEO Audit Review',
     context: {
@@ -118,9 +132,15 @@ export async function process(inputs, ctx) {
         coreWebVitalsScore: coreWebVitals.overallScore,
         indexedPages: indexationAudit.indexedPages
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 10: Create Implementation Roadmap
   ctx.log('info', 'Phase 10: Creating implementation roadmap');
   const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
@@ -163,8 +183,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const websiteCrawlTask = defineTask('website-crawl', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Crawl website to identify technical issues',

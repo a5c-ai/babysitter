@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const documentationCi = await ctx.task(documentationCiTask, { projectName, outputFormats, outputDir });
   artifacts.push(...documentationCi.artifacts);
 
-  const documentationPublishing = await ctx.task(documentationPublishingTask, { projectName, outputDir });
-  artifacts.push(...documentationPublishing.artifacts);
-
-  await ctx.breakpoint({
+  let documentationPublishing = await ctx.task(documentationPublishingTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentationPublishing = await ctx.task(documentationPublishingTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Documentation Generation complete with ${outputFormats.length} output formats. Review and approve?`,
     title: 'Documentation Generation Complete',
-    context: { runId: ctx.runId, summary: { projectName, framework, outputFormats } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, framework, outputFormats } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

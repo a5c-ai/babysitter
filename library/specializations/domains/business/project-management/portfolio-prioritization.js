@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
       prioritizedPortfolio: null
     };
   }
-
   // Phase 2: Strategic Alignment Assessment
   const strategicAlignment = await ctx.task(strategicAlignmentTask, {
     portfolioName,
@@ -79,14 +78,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Resource Capacity Analysis
-  const resourceAnalysis = await ctx.task(resourceCapacityAnalysisTask, {
+  let resourceAnalysis = await ctx.task(resourceCapacityAnalysisTask, {
     portfolioName,
     projects,
     resourceConstraints
   });
 
-  // Breakpoint: Review initial analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      resourceAnalysis = await ctx.task(resourceCapacityAnalysisTask, { ...{
+    portfolioName,
+    projects,
+    resourceConstraints
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Initial portfolio analysis complete for ${portfolioName}. ${projects.length} projects analyzed. Review strategic alignment and financial metrics before prioritization?`,
     title: 'Portfolio Analysis Review',
     context: {
@@ -100,9 +107,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { strategicAlignment, financialAnalysis, riskAssessment, resourceAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Multi-Criteria Scoring
   const multiCriteriaScoring = await ctx.task(multiCriteriaScoringTask, {
     portfolioName,
@@ -131,7 +144,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Scenario Analysis
-  const scenarioAnalysis = await ctx.task(scenarioAnalysisTask, {
+  let scenarioAnalysis = await ctx.task(scenarioAnalysisTask, {
     portfolioName,
     optimizedPortfolio,
     budgetConstraints,
@@ -139,8 +152,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Validate optimization results
-  if (optimizedPortfolio.portfolioScore < 60) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        scenarioAnalysis = await ctx.task(scenarioAnalysisTask, { ...{
+    portfolioName,
+    optimizedPortfolio,
+    budgetConstraints,
+    financialAnalysis
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Portfolio optimization score is ${optimizedPortfolio.portfolioScore}/100 (below threshold of 60). This may indicate suboptimal project mix. Review constraints and project list?`,
       title: 'Portfolio Optimization Warning',
       context: {
@@ -148,9 +170,15 @@ export async function process(inputs, ctx) {
         portfolioScore: optimizedPortfolio.portfolioScore,
         constraintUtilization: optimizedPortfolio.constraintUtilization,
         recommendation: 'Consider relaxing constraints or revisiting project scope'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // Phase 10: Investment Recommendation
   const investmentRecommendation = await ctx.task(investmentRecommendationTask, {
@@ -170,7 +198,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: Portfolio Dashboard Generation
-  const portfolioDashboard = await ctx.task(portfolioDashboardTask, {
+  let portfolioDashboard = await ctx.task(portfolioDashboardTask, {
     portfolioName,
     projects,
     strategicAlignment,
@@ -186,8 +214,26 @@ export async function process(inputs, ctx) {
     currency
   });
 
-  // Final Breakpoint: Portfolio Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      portfolioDashboard = await ctx.task(portfolioDashboardTask, { ...{
+    portfolioName,
+    projects,
+    strategicAlignment,
+    financialAnalysis,
+    riskAssessment,
+    multiCriteriaScoring,
+    optimizedPortfolio,
+    dependencyAnalysis,
+    scenarioAnalysis,
+    investmentRecommendation,
+    resourceAllocationPlan,
+    budgetConstraints,
+    currency
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Portfolio prioritization complete for ${portfolioName}. Recommended investment: ${currency} ${optimizedPortfolio.totalInvestment?.toLocaleString()}. Expected NPV: ${currency} ${optimizedPortfolio.expectedNpv?.toLocaleString()}. Submit for approval?`,
     title: 'Portfolio Approval Review',
     context: {
@@ -199,9 +245,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/portfolio-dashboard.json`, format: 'json', content: portfolioDashboard },
         { path: `artifacts/portfolio-report.md`, format: 'markdown', content: portfolioDashboard.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     portfolioName,
@@ -241,8 +293,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const portfolioDataValidationTask = defineTask('portfolio-data-validation', (args, taskCtx) => ({
   kind: 'agent',

@@ -1,4 +1,4 @@
-description = "Analyze a completed babysitter run — review results, process quality, and generate improvement suggestions."
+description = "Analyze one or more babysitter runs — review results, process quality, cross-run trends, and generate improvement suggestions. Supports single-run, multi-run, and --all analysis modes."
 prompt = """
 You are a babysitter retrospective agent.
 
@@ -8,14 +8,29 @@ Perform a retrospective analysis of a babysitter run. Arguments: {{args}}
 
 ## Retrospect Protocol
 
-### Phase 1: Identify the Run
+### Phase 1: Identify the Run(s)
 
-If a run ID was provided, use it. Otherwise:
+Determine the analysis scope based on the arguments provided:
+
+**`--all` flag:** List all completed and failed runs, then analyze them collectively.
+```bash
+ls -lt .a5c/runs/ 2>/dev/null
+# For each run directory found:
+babysitter run:status .a5c/runs/<runId> --json
+# Filter to runs with status "completed" or "failed" and collect them all for analysis.
+```
+
+**Multiple run IDs provided:** Analyze each specified run individually, then perform cross-run analysis.
+```bash
+# For each provided run ID:
+babysitter run:status .a5c/runs/<runId> --json
+```
+
+**Single run ID or default:** If a single run ID was provided, use it. Otherwise:
 ```bash
 ls -lt .a5c/runs/ 2>/dev/null | head -10
 babysitter run:status .a5c/runs/<runId> --json
 ```
-
 Use `ask_user` to confirm which run to analyze if needed.
 
 ### Phase 2: Gather Run Data
@@ -63,6 +78,15 @@ Analyze and report on:
 - Tooling or skill improvements
 - Whether to contribute improvements back to the process library
 
+**Cross-Run Analysis (when multiple runs are analyzed):**
+
+If more than one run is being analyzed, additionally report on:
+
+- **Common Failure Modes:** Identify task types or phases that fail repeatedly across runs. Highlight systemic issues vs. one-off failures.
+- **Velocity Trends:** Compare run durations, task counts, and iteration counts across runs over time. Are runs getting faster or slower? Are they requiring more or fewer iterations?
+- **Process Evolution:** Track how the process definition has changed between runs. Note which process changes correlated with improved or degraded outcomes.
+- **Repeated Breakpoint Patterns:** Identify breakpoints that recur across runs — are the same approval gates consistently blocking progress? Are certain breakpoints always approved or always rejected?
+
 ### Phase 4: Interactive Refinement
 
 Use `ask_user` to:
@@ -79,6 +103,11 @@ bash "${extensionPath}/scripts/setup-babysitter-run.sh" \
   --gemini-session-id "${GEMINI_SESSION_ID}" \
   "Retrospect improvements for run: <runId>"
 ```
+
+### Phase 6: Cleanup Suggestion
+
+After analysis is complete, suggest:
+> "Consider running `babysitter cleanup` to clean up old run data and reclaim disk space."
 
 ### Contribution Prompt
 

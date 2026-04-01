@@ -62,23 +62,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Simulation Execution
-  const simulationExecution = await ctx.task(simulationExecutionTask, {
+  let simulationExecution = await ctx.task(simulationExecutionTask, {
     projectName,
     simulationEngine,
     iterations
   });
 
-  // Breakpoint: Review simulation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      simulationExecution = await ctx.task(simulationExecutionTask, { ...{
+    projectName,
+    simulationEngine,
+    iterations
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review Monte Carlo simulation results for ${projectName}. Are the distributions reasonable?`,
     title: 'Simulation Results Review',
     context: {
       runId: ctx.runId,
       projectName,
       iterations
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Statistical Analysis
   const statisticalAnalysis = await ctx.task(statisticalAnalysisTask, {
     projectName,
@@ -121,8 +135,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const modelDefinitionTask = defineTask('model-definition', (args, taskCtx) => ({
   kind: 'agent',

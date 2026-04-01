@@ -158,7 +158,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing calendar quality');
-  const qualityAssessment = await ctx.task(calendarQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(calendarQualityAssessmentTask, {
     topicIdeation,
     seoMapping,
     topicClusters,
@@ -174,8 +174,21 @@ export async function process(inputs, ctx) {
   const calendarScore = qualityAssessment.overallScore;
   const qualityMet = calendarScore >= 80;
 
-  // Breakpoint: Review editorial calendar
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(calendarQualityAssessmentTask, { ...{
+    topicIdeation,
+    seoMapping,
+    topicClusters,
+    publicationSchedule,
+    resourceAllocation,
+    productionWorkflow,
+    calendarIntegration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Editorial calendar complete. Quality score: ${calendarScore}/100. ${qualityMet ? 'Calendar meets quality standards!' : 'Calendar may need refinement.'} Review and approve?`,
     title: 'Editorial Calendar Review & Approval',
     context: {
@@ -195,9 +208,15 @@ export async function process(inputs, ctx) {
         clusterCount: topicClusters.clusters?.length || 0,
         scheduledPieces: publicationSchedule.scheduledContent?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -228,8 +247,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

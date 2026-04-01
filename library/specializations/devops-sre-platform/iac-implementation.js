@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing requirements and planning architecture');
 
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     cloudProvider,
     iacTool,
@@ -99,9 +99,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Requirements are clear and complete
   const requirementsGaps = requirementsAnalysis.gaps || [];
   if (requirementsGaps.length > 0) {
-    ctx.log('warn', `Found ${requirementsGaps.length} requirements gaps`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    projectName,
+    cloudProvider,
+    iacTool,
+    requirements,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 1 Quality Gate: Found ${requirementsGaps.length} requirements gaps. Review and clarify before proceeding?`,
       title: 'Requirements Analysis Gate',
       context: {
@@ -113,9 +123,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(requirementsAnalysis, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: ARCHITECTURE DESIGN
@@ -177,8 +193,19 @@ export async function process(inputs, ctx) {
     security: securityDesign
   };
 
-  // Breakpoint: Review architecture design
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    projectName,
+    cloudProvider,
+    iacTool,
+    requirements,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Phase 2 Quality Gate: Review infrastructure architecture design. Approve to proceed with IaC implementation?',
     title: 'Architecture Design Review',
     context: {
@@ -191,9 +218,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/phase2-security-design.json`, format: 'json' },
         { path: `${outputDir}/architecture-diagram.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IaC IMPLEMENTATION WITH QUALITY CONVERGENCE
   // ============================================================================
@@ -298,7 +331,7 @@ export async function process(inputs, ctx) {
     );
 
     // Step 3: Comprehensive quality scoring by agent
-    const qualityAssessment = await ctx.task(assessIaCQualityTask, {
+    let qualityAssessment = await ctx.task(assessIaCQualityTask, {
       projectName,
       iacTool,
       cloudProvider,
@@ -340,9 +373,29 @@ export async function process(inputs, ctx) {
     // Quality Gate: Check for critical security issues
     const criticalSecurityIssues = securityScan.findings?.filter(f => f.severity === 'critical') || [];
     if (criticalSecurityIssues.length > 0) {
-      ctx.log('error', `Found ${criticalSecurityIssues.length} CRITICAL security issues`);
-
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          qualityAssessment = await ctx.task(assessIaCQualityTask, { ...{
+      projectName,
+      iacTool,
+      cloudProvider,
+      architecture: architectureDesign,
+      implementation: iacImplementation,
+      validation: {
+        syntax: syntaxValidation,
+        security: securityScan,
+        cost: costEstimation,
+        compliance: complianceCheck,
+        bestPractices: bestPracticesCheck
+      },
+      requirements,
+      targetQuality,
+      iteration,
+      outputDir
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration} Security Gate: Found ${criticalSecurityIssues.length} CRITICAL security issues. These must be fixed. Review and continue?`,
         title: 'Critical Security Issues Gate',
         context: {
@@ -354,21 +407,46 @@ export async function process(inputs, ctx) {
             format: 'json',
             content: JSON.stringify(securityScan, null, 2)
           }]
-        }
-      });
-
-      // Force another iteration to fix critical issues
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }
+  // Force another iteration to fix critical issues
       continue;
     }
-
-    // Check convergence
+  // Check convergence
     if (qualityScore >= targetQuality) {
       converged = true;
       ctx.log('info', `Quality target achieved: ${qualityScore}/${targetQuality}`);
     } else if (iteration < maxIterations) {
-      ctx.log('info', `Quality not yet achieved: ${qualityScore}/${targetQuality}. Continuing iteration ${iteration + 1}`);
-
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval2) {
+          qualityAssessment = await ctx.task(assessIaCQualityTask, { ...{
+      projectName,
+      iacTool,
+      cloudProvider,
+      architecture: architectureDesign,
+      implementation: iacImplementation,
+      validation: {
+        syntax: syntaxValidation,
+        security: securityScan,
+        cost: costEstimation,
+        compliance: complianceCheck,
+        bestPractices: bestPracticesCheck
+      },
+      requirements,
+      targetQuality,
+      iteration,
+      outputDir
+    }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
+        }
+  const iterationApproval2 = await ctx.breakpoint({
         question: `Iteration ${iteration} complete. Quality: ${qualityScore}/${targetQuality}. Review feedback and continue iteration ${iteration + 1}?`,
         title: `Iteration ${iteration} Review`,
         context: {
@@ -381,13 +459,18 @@ export async function process(inputs, ctx) {
             { path: `${outputDir}/iteration-${iteration}-report.json`, format: 'json' },
             { path: `${outputDir}/iteration-${iteration}-feedback.md`, format: 'markdown' }
           ]
-        }
-      });
-    } else {
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval2.approved) break;
+        lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
+      }   } else {
       ctx.log('warn', `Maximum iterations reached. Quality: ${qualityScore}/${targetQuality}`);
     }
   }
-
   // ============================================================================
   // PHASE 4: IaC TESTING AND VALIDATION
   // ============================================================================
@@ -456,9 +539,29 @@ export async function process(inputs, ctx) {
   ];
 
   if (testFailures.length > 0) {
-    ctx.log('warn', `Found ${testFailures.length} test failures`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        qualityAssessment = await ctx.task(assessIaCQualityTask, { ...{
+      projectName,
+      iacTool,
+      cloudProvider,
+      architecture: architectureDesign,
+      implementation: iacImplementation,
+      validation: {
+        syntax: syntaxValidation,
+        security: securityScan,
+        cost: costEstimation,
+        compliance: complianceCheck,
+        bestPractices: bestPracticesCheck
+      },
+      requirements,
+      targetQuality,
+      iteration,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Phase 4 Quality Gate: Found ${testFailures.length} test failures. Review and fix before deployment?`,
       title: 'IaC Testing Gate',
       context: {
@@ -470,9 +573,15 @@ export async function process(inputs, ctx) {
           { path: `${outputDir}/phase4-module-tests.json`, format: 'json' },
           { path: `${outputDir}/phase4-integration-tests.json`, format: 'json' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: DOCUMENTATION AND DEPLOYMENT PREPARATION
@@ -520,7 +629,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Final review and deployment readiness assessment');
 
-  const finalReview = await ctx.task(finalIaCReviewTask, {
+  let finalReview = await ctx.task(finalIaCReviewTask, {
     projectName,
     iacTool,
     cloudProvider,
@@ -545,8 +654,31 @@ export async function process(inputs, ctx) {
 
   const deploymentReady = finalReview.approved && qualityScore >= targetQuality && converged;
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalReview = await ctx.task(finalIaCReviewTask, { ...{
+    projectName,
+    iacTool,
+    cloudProvider,
+    architecture: architectureDesign,
+    iterations: iterationResults,
+    finalQuality: qualityScore,
+    targetQuality,
+    converged,
+    testing: {
+      plan: planValidation,
+      dryRun: dryRunTest,
+      modules: moduleTests,
+      integration: integrationTests
+    },
+    documentation,
+    deploymentPlan,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Final Review: Quality ${qualityScore}/${targetQuality}. ${finalReview.verdict}. Deployment Ready: ${deploymentReady}. Approve for deployment?`,
     title: 'Final IaC Review and Deployment Approval',
     context: {
@@ -562,9 +694,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/architecture-documentation.md`, format: 'markdown' },
         { path: `${outputDir}/quality-history.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -616,8 +754,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

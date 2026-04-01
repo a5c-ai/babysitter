@@ -112,7 +112,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing documentation structure and information architecture');
 
-  const structureDesign = await ctx.task(documentationStructureDesignTask, {
+  let structureDesign = await ctx.task(documentationStructureDesignTask, {
     apiName,
     apiType,
     endpoints: specAnalysis.endpoints,
@@ -125,8 +125,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...structureDesign.artifacts);
 
-  // Breakpoint: Review documentation structure
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      structureDesign = await ctx.task(documentationStructureDesignTask, { ...{
+    apiName,
+    apiType,
+    endpoints: specAnalysis.endpoints,
+    targetAudience,
+    docPlatform,
+    includeQuickstart,
+    includeSDKGuides,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Documentation structure designed with ${structureDesign.sectionCount} sections. Review structure and navigation?`,
     title: 'Documentation Structure Review',
     context: {
@@ -139,16 +152,22 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Documentation Structure'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: AUTHENTICATION DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Creating authentication and authorization documentation');
 
-  const authDocs = await ctx.task(authenticationDocumentationTask, {
+  let authDocs = await ctx.task(authenticationDocumentationTask, {
     apiName,
     authType,
     apiType,
@@ -164,8 +183,20 @@ export async function process(inputs, ctx) {
   const authExamplesCount = authDocs.codeExamples.length;
   const authCoverage = authExamplesCount / targetLanguages.length;
 
-  if (authCoverage < 0.75 && qualityCriteria.requireAuthenticationExamples) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        authDocs = await ctx.task(authenticationDocumentationTask, { ...{
+    apiName,
+    authType,
+    apiType,
+    targetLanguages,
+    targetAudience,
+    specAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Authentication examples: ${authExamplesCount}/${targetLanguages.length} languages (${(authCoverage * 100).toFixed(0)}% coverage). Below 75% threshold. Review and approve?`,
       title: 'Authentication Documentation Review',
       context: {
@@ -174,9 +205,15 @@ export async function process(inputs, ctx) {
         targetLanguages,
         coverage: authCoverage,
         files: authDocs.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: ENDPOINT REFERENCE DOCUMENTATION (PARALLEL)
@@ -252,8 +289,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Code example coverage
   const avgExamplesPerEndpoint = totalCodeExamples / discoveredEndpointCount;
-  if (avgExamplesPerEndpoint < qualityCriteria.minimumCodeExamplesPerEndpoint) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        authDocs = await ctx.task(authenticationDocumentationTask, { ...{
+    apiName,
+    authType,
+    apiType,
+    targetLanguages,
+    targetAudience,
+    specAnalysis,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Average ${avgExamplesPerEndpoint.toFixed(1)} code examples per endpoint. Below minimum of ${qualityCriteria.minimumCodeExamplesPerEndpoint}. Review coverage?`,
       title: 'Code Example Coverage Review',
       context: {
@@ -263,9 +312,15 @@ export async function process(inputs, ctx) {
         avgExamplesPerEndpoint,
         targetLanguages,
         files: codeExampleResults.flatMap(r => r.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: ERROR REFERENCE DOCUMENTATION
@@ -304,7 +359,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...quickstartGuide.artifacts);
     guides.push(quickstartGuide);
   }
-
   // ============================================================================
   // PHASE 8: ADVANCED GUIDES (PARALLEL)
   // ============================================================================
@@ -368,7 +422,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...sdkGuides.flatMap(g => g.artifacts));
     guides.push(...sdkGuides);
   }
-
   // ============================================================================
   // PHASE 10: INTERACTIVE API EXPLORER (IF ENABLED)
   // ============================================================================
@@ -388,14 +441,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...apiExplorer.artifacts);
   }
-
   // ============================================================================
   // PHASE 11: DOCUMENTATION QUALITY VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating documentation quality and completeness');
 
-  const qualityValidation = await ctx.task(documentationQualityValidationTask, {
+  let qualityValidation = await ctx.task(documentationQualityValidationTask, {
     apiName,
     artifacts,
     endpoints: specAnalysis.endpoints,
@@ -411,8 +463,21 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityValidation.overallScore;
   const qualityMet = qualityScore >= 80;
 
-  // Breakpoint: Quality validation review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(documentationQualityValidationTask, { ...{
+    apiName,
+    artifacts,
+    endpoints: specAnalysis.endpoints,
+    targetLanguages,
+    codeExamples,
+    guides,
+    qualityCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Documentation quality score: ${qualityScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review quality report?`,
     title: 'Documentation Quality Review',
     context: {
@@ -427,9 +492,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Quality Report'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: DOCUMENTATION PACKAGING AND INDEX
   // ============================================================================
@@ -513,8 +584,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

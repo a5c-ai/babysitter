@@ -49,22 +49,30 @@ export async function process(inputs, ctx) {
   ctx.log('info', `QC complete. ${qcResult.totalReads} reads, N50: ${qcResult.n50}, mean quality: ${qcResult.meanQuality}`);
 
   // Phase 2: Basecalling/Processing (if needed)
-  const processingResult = await ctx.task(dataProcessingTask, { projectName, platform, dataFiles, qcResult, outputDir });
-  artifacts.push(...processingResult.artifacts);
-
-  await ctx.breakpoint({
+  let processingResult = await ctx.task(dataProcessingTask, { projectName, platform, dataFiles, qcResult, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      processingResult = await ctx.task(dataProcessingTask, { ...{ projectName, platform, dataFiles, qcResult, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Data processing complete. ${processingResult.processedReads} reads processed, ${processingResult.filteredReads} passed filters. Continue with analysis?`,
     title: 'Data Processing Review',
-    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, processingStats: processingResult.stats, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, processingStats: processingResult.stats, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Read Alignment (if reference provided)
   let alignmentResult = null;
   if (referenceGenome) {
     alignmentResult = await ctx.task(longreadAlignmentTask, { projectName, platform, processedReads: processingResult.outputPath, reference: referenceGenome, outputDir });
     artifacts.push(...alignmentResult.artifacts);
   }
-
   // Phase 4: De Novo Assembly (if assembly type)
   let assemblyResult = null;
   if (analysisType === 'assembly' || analysisType === 'comprehensive') {
@@ -73,14 +81,12 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Assembly complete. Contigs: ${assemblyResult.contigCount}, N50: ${assemblyResult.assemblyN50}`);
   }
-
   // Phase 5: Assembly Polishing
   let polishingResult = null;
   if (assemblyResult) {
     polishingResult = await ctx.task(assemblyPolishingTask, { projectName, platform, assembly: assemblyResult.assemblyPath, reads: processingResult.outputPath, outputDir });
     artifacts.push(...polishingResult.artifacts);
   }
-
   // Phase 6: Structural Variant Detection
   let svResult = null;
   if ((analysisType === 'variant-calling' || analysisType === 'comprehensive') && alignmentResult) {
@@ -89,21 +95,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `SV detection complete. ${svResult.totalSVs} SVs identified`);
   }
-
   // Phase 7: SNV/Indel Calling
   let snvResult = null;
   if ((analysisType === 'variant-calling' || analysisType === 'comprehensive') && alignmentResult) {
     snvResult = await ctx.task(snvIndelCallingTask, { projectName, platform, alignment: alignmentResult.bamPath, reference: referenceGenome, outputDir });
     artifacts.push(...snvResult.artifacts);
   }
-
   // Phase 8: Haplotype Phasing
   let phasingResult = null;
   if (haplotyping && (svResult || snvResult)) {
     phasingResult = await ctx.task(haplotypePhasingTask, { projectName, alignment: alignmentResult?.bamPath, variants: { sv: svResult, snv: snvResult }, reference: referenceGenome, outputDir });
     artifacts.push(...phasingResult.artifacts);
   }
-
   // Phase 9: Methylation Analysis
   let methylationResult = null;
   if ((analysisType === 'methylation' || analysisType === 'comprehensive') && platform === 'nanopore') {
@@ -111,31 +114,48 @@ export async function process(inputs, ctx) {
     artifacts.push(...methylationResult.artifacts);
 
     ctx.log('info', `Methylation analysis complete. ${methylationResult.cpgSites} CpG sites analyzed`);
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      processingResult = await ctx.task(dataProcessingTask, { ...{ projectName, platform, dataFiles, qcResult, outputDir }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Analysis phases complete. Assembly: ${assemblyResult?.assemblyN50 || 'N/A'}, SVs: ${svResult?.totalSVs || 'N/A'}, Methylation sites: ${methylationResult?.cpgSites || 'N/A'}. Review results?`,
     title: 'Long-Read Analysis Review',
-    context: { runId: ctx.runId, summary: { assembly: assemblyResult?.stats, svCount: svResult?.totalSVs, methylation: methylationResult?.summary }, files: [...(assemblyResult?.artifacts || []), ...(svResult?.artifacts || [])].map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, summary: { assembly: assemblyResult?.stats, svCount: svResult?.totalSVs, methylation: methylationResult?.summary }, files: [...(assemblyResult?.artifacts || []), ...(svResult?.artifacts || [])].map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Assembly Quality Assessment
   let assemblyQaResult = null;
   if (assemblyResult) {
     assemblyQaResult = await ctx.task(assemblyQualityTask, { projectName, assembly: polishingResult?.polishedPath || assemblyResult.assemblyPath, reference: referenceGenome, outputDir });
     artifacts.push(...assemblyQaResult.artifacts);
   }
-
   // Phase 11: Report Generation
-  const reportResult = await ctx.task(generateLongreadReportTask, { projectName, platform, qcResult, assemblyResult, polishingResult, svResult, snvResult, phasingResult, methylationResult, assemblyQaResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateLongreadReportTask, { projectName, platform, qcResult, assemblyResult, polishingResult, svResult, snvResult, phasingResult, methylationResult, assemblyQaResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateLongreadReportTask, { ...{ projectName, platform, qcResult, assemblyResult, polishingResult, svResult, snvResult, phasingResult, methylationResult, assemblyQaResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Long-Read Analysis Complete. Platform: ${platform}, Analysis: ${analysisType}. Approve final report?`,
     title: 'Long-Read Analysis Complete',
-    context: { runId: ctx.runId, summary: { platform, analysisType, readsProcessed: processingResult.processedReads, assemblyN50: assemblyResult?.assemblyN50, totalSVs: svResult?.totalSVs }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { platform, analysisType, readsProcessed: processingResult.processedReads, assemblyN50: assemblyResult?.assemblyN50, totalSVs: svResult?.totalSVs }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -162,8 +182,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/long-read-analysis', timestamp: startTime, platform, analysisType }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const longreadQcTask = defineTask('longread-qc', (args, taskCtx) => ({
   kind: 'agent',
   title: `Long-Read QC - ${args.projectName}`,

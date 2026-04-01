@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...containment.artifacts);
 
   // Phase 3: Impact Assessment
-  const assessment = await ctx.task(breachAssessmentTask, {
+  let assessment = await ctx.task(breachAssessmentTask, {
     incidentId,
     incidentDetails,
     containment,
@@ -59,8 +59,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...assessment.artifacts);
 
   // Quality Gate: High severity breach
-  if (assessment.severity === 'high' || assessment.severity === 'critical') {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        assessment = await ctx.task(breachAssessmentTask, { ...{
+    incidentId,
+    incidentDetails,
+    containment,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `High severity breach ${incidentId}. ${assessment.affectedIndividuals} individuals affected. Regulatory notification likely required. Proceed with notification assessment?`,
       title: 'High Severity Breach Alert',
       context: {
@@ -69,9 +78,15 @@ export async function process(inputs, ctx) {
         severity: assessment.severity,
         affectedIndividuals: assessment.affectedIndividuals,
         files: assessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Notification Assessment
   const notificationAssessment = await ctx.task(notificationAssessmentTask, {
@@ -91,7 +106,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...dpaNotification.artifacts);
   }
-
   // Phase 6: Individual Notification (if required)
   let individualNotification = null;
   if (notificationAssessment.individualNotificationRequired) {
@@ -102,7 +116,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...individualNotification.artifacts);
   }
-
   // Phase 7: Remediation
   const remediation = await ctx.task(breachRemediationTask, {
     incidentId,
@@ -113,7 +126,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...remediation.artifacts);
 
   // Phase 8: Post-Incident Review
-  const postIncident = await ctx.task(postIncidentReviewTask, {
+  let postIncident = await ctx.task(postIncidentReviewTask, {
     incidentId,
     detection,
     containment,
@@ -121,9 +134,19 @@ export async function process(inputs, ctx) {
     remediation,
     outputDir
   });
-  artifacts.push(...postIncident.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      postIncident = await ctx.task(postIncidentReviewTask, { ...{
+    incidentId,
+    detection,
+    containment,
+    assessment,
+    remediation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Breach response for ${incidentId} complete. Severity: ${assessment.severity}. DPA notified: ${dpaNotification ? 'Yes' : 'No'}. Review post-incident report?`,
     title: 'Breach Response Review',
     context: {
@@ -132,9 +155,15 @@ export async function process(inputs, ctx) {
       severity: assessment.severity,
       notificationsSent: (dpaNotification ? 1 : 0) + (individualNotification ? 1 : 0),
       files: [{ path: postIncident.reportPath, format: 'markdown', label: 'Post-Incident Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     incidentId,

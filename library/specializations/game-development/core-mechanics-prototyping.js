@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Phase 3: Iteration ${currentIteration} - Playtesting and Analysis`);
 
     // Conduct playtesting
-    const playtestResults = await ctx.task(playtestSessionTask, {
+    let playtestResults = await ctx.task(playtestSessionTask, {
       prototypeName,
       mechanicsToTest,
       playtestGoals,
@@ -106,8 +106,20 @@ export async function process(inputs, ctx) {
     artifacts.push(...playtestResults.artifacts);
     latestPlaytest = playtestResults;
 
-    // Quality Gate: Review playtest results
-    await ctx.breakpoint({
+      let lastFeedback_iterationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_iterationApproval) {
+        playtestResults = await ctx.task(playtestSessionTask, { ...{
+      prototypeName,
+      mechanicsToTest,
+      playtestGoals,
+      playtestersCount,
+      iteration: currentIteration,
+      previousResults: latestPlaytest,
+      outputDir
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+      }
+  const iterationApproval = await ctx.breakpoint({
       question: `Playtest iteration ${currentIteration} complete. Fun factor: ${playtestResults.funFactorScore}/10. Player satisfaction: ${playtestResults.satisfactionScore}/10. Key issues: ${playtestResults.keyIssues.length}. Review results and determine next steps?`,
       title: `Playtest Results - Iteration ${currentIteration}`,
       context: {
@@ -119,17 +131,22 @@ export async function process(inputs, ctx) {
         keyIssues: playtestResults.keyIssues,
         positiveFeedback: playtestResults.positiveFeedback,
         files: playtestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-
-    // Check if mechanics are validated
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_iterationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (iterationApproval.approved) break;
+      lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+    }
+  // Check if mechanics are validated
     if (playtestResults.funFactorScore >= 7 && playtestResults.satisfactionScore >= 7) {
       mechanicsValidated = true;
       ctx.log('info', `Mechanics validated after ${currentIteration} iterations`);
       break;
     }
-
-    // If not validated and more iterations allowed, iterate
+  // If not validated and more iterations allowed, iterate
     if (currentIteration < iterationTarget) {
       ctx.log('info', `Iteration ${currentIteration + 1}: Implementing refinements`);
 
@@ -148,7 +165,6 @@ export async function process(inputs, ctx) {
 
     currentIteration++;
   }
-
   // ============================================================================
   // PHASE 4: FUN FACTOR ASSESSMENT
   // ============================================================================
@@ -171,7 +187,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Pivot or Proceed Decision');
 
-  const pivotDecision = await ctx.task(pivotDecisionTask, {
+  let pivotDecision = await ctx.task(pivotDecisionTask, {
     prototypeName,
     mechanicsToTest,
     mechanicsValidated,
@@ -182,8 +198,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...pivotDecision.artifacts);
 
-  // Final Breakpoint: Decision approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pivotDecision = await ctx.task(pivotDecisionTask, { ...{
+    prototypeName,
+    mechanicsToTest,
+    mechanicsValidated,
+    funAssessment,
+    iterations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Prototyping complete for ${prototypeName}. Mechanics validated: ${mechanicsValidated}. Recommendation: ${pivotDecision.recommendation}. Approve decision and proceed?`,
     title: 'Prototyping Decision Point',
     context: {
@@ -201,9 +228,15 @@ export async function process(inputs, ctx) {
         { path: pivotDecision.decisionDocPath, format: 'markdown', label: 'Decision Document' },
         { path: funAssessment.assessmentPath, format: 'markdown', label: 'Fun Assessment' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: DOCUMENTATION
   // ============================================================================
@@ -252,8 +285,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

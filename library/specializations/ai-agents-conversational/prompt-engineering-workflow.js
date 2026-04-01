@@ -83,7 +83,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...fewShotExamples.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: CHAIN-OF-THOUGHT
   // ============================================================================
@@ -101,7 +100,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...chainOfThought.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: PROMPT TESTING
   // ============================================================================
@@ -142,7 +140,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Setting up version control');
 
-  const versionControl = await ctx.task(promptVersionControlTask, {
+  let versionControl = await ctx.task(promptVersionControlTask, {
     projectName,
     optimizedPrompts: optimization.optimizedPrompts,
     metrics: optimization.metrics,
@@ -151,8 +149,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...versionControl.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      versionControl = await ctx.task(promptVersionControlTask, { ...{
+    projectName,
+    optimizedPrompts: optimization.optimizedPrompts,
+    metrics: optimization.metrics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Prompt engineering for ${projectName} complete. Best performing prompt accuracy: ${optimization.metrics.bestAccuracy}%. Review prompts?`,
     title: 'Prompt Engineering Review',
     context: {
@@ -166,9 +173,15 @@ export async function process(inputs, ctx) {
         enableCoT
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -188,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

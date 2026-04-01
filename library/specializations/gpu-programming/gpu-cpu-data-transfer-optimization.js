@@ -50,7 +50,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...pinnedMemory.artifacts);
   }
-
   // Phase 3: Async Transfer Implementation
   let asyncImpl = null;
   if (asyncTransfers) {
@@ -59,7 +58,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...asyncImpl.artifacts);
   }
-
   // Phase 4: Compute-Transfer Overlap
   const overlapOptimization = await ctx.task(computeTransferOverlapTask, {
     projectName, asyncImpl, transferAnalysis, outputDir
@@ -74,19 +72,29 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...unifiedMemoryEval.artifacts);
   }
-
   // Phase 6: Transfer Benchmarking
-  const benchmarking = await ctx.task(transferBenchmarkingTask, {
+  let benchmarking = await ctx.task(transferBenchmarkingTask, {
     projectName, transferAnalysis, pinnedMemory, asyncImpl, overlapOptimization, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(transferBenchmarkingTask, { ...{
+    projectName, transferAnalysis, pinnedMemory, asyncImpl, overlapOptimization, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Transfer optimization complete for ${projectName}. Throughput improvement: ${benchmarking.improvement}%. Review?`,
     title: 'Transfer Optimization Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.improvement >= 20,
     projectName,

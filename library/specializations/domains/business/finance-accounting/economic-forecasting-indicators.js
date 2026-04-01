@@ -45,18 +45,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'inflation-analysis', result: inflationResult });
 
   // Step 4: Employment and Labor Market Analysis
-  const laborResult = await ctx.task(analyzeLaborMarketTask, {
+  let laborResult = await ctx.task(analyzeLaborMarketTask, {
     indicators: collectionResult,
     businessContext: inputs.businessContext
   });
   results.steps.push({ name: 'labor-analysis', result: laborResult });
 
-  // Breakpoint for economic review
-  await ctx.breakpoint('economic-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      laborResult = await ctx.task(analyzeLaborMarketTask, { ...{
+    indicators: collectionResult,
+    businessContext: inputs.businessContext
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('economic-review', {
     message: 'Review economic indicator analysis before developing forecasts',
-    data: { gdp: gdpResult, inflation: inflationResult, labor: laborResult }
-  });
-
+    data: { gdp: gdpResult, inflation: inflationResult, labor: laborResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 5: Interest Rate and Monetary Policy Analysis
   const monetaryResult = await ctx.task(analyzeMonetaryPolicyTask, {
     indicators: collectionResult,
@@ -72,7 +85,7 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'trade-analysis', result: tradeResult });
 
   // Step 7: Economic Scenario Development
-  const scenarioResult = await ctx.task(developEconomicScenariosTask, {
+  let scenarioResult = await ctx.task(developEconomicScenariosTask, {
     allIndicators: {
       gdp: gdpResult,
       inflation: inflationResult,
@@ -83,12 +96,30 @@ export async function process(inputs, ctx) {
   });
   results.steps.push({ name: 'scenario-development', result: scenarioResult });
 
-  // Breakpoint for scenario review
-  await ctx.breakpoint('scenario-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scenarioResult = await ctx.task(developEconomicScenariosTask, { ...{
+    allIndicators: {
+      gdp: gdpResult,
+      inflation: inflationResult,
+      labor: laborResult,
+      monetary: monetaryResult,
+      trade: tradeResult
+    }
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('scenario-review', {
     message: 'Review economic scenarios before business impact analysis',
-    data: scenarioResult
-  });
-
+    data: scenarioResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 8: Business Impact Assessment
   const impactResult = await ctx.task(assessBusinessImpactTask, {
     economicScenarios: scenarioResult,
@@ -110,8 +141,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const collectEconomicIndicatorsTask = defineTask('collect-economic-indicators', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'economic-analysis' },

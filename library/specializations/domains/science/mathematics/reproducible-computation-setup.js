@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Configure Version Control
-  const versionControlConfig = await ctx.task(versionControlConfigTask, {
+  let versionControlConfig = await ctx.task(versionControlConfigTask, {
     projectName,
     computationType,
     languages
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       environmentConfig: null
     };
   }
-
-  // Breakpoint: Review version control setup
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      versionControlConfig = await ctx.task(versionControlConfigTask, { ...{
+    projectName,
+    computationType,
+    languages
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Version control configured for ${projectName}. Review setup?`,
     title: 'Version Control Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: versionControlConfig
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Document Dependencies
   const dependencyDocumentation = await ctx.task(dependencyDocumentationTask, {
     projectName,
@@ -88,7 +101,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Reproducibility Reports
-  const reproducibilityReport = await ctx.task(reproducibilityReportTask, {
+  let reproducibilityReport = await ctx.task(reproducibilityReportTask, {
     versionControlConfig,
     dependencyDocumentation,
     randomSeedSetup,
@@ -96,8 +109,18 @@ export async function process(inputs, ctx) {
     projectName
   });
 
-  // Final Breakpoint: Setup Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reproducibilityReport = await ctx.task(reproducibilityReportTask, { ...{
+    versionControlConfig,
+    dependencyDocumentation,
+    randomSeedSetup,
+    reproducibleScripts,
+    projectName
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reproducible computation environment setup complete for ${projectName}. Reproducibility score: ${reproducibilityReport.score}/100. Review?`,
     title: 'Reproducibility Setup Complete',
     context: {
@@ -107,9 +130,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/reproducibility-report.json`, format: 'json', content: reproducibilityReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -138,8 +167,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const versionControlConfigTask = defineTask('version-control-config', (args, taskCtx) => ({
   kind: 'agent',

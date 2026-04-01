@@ -50,20 +50,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: OPTIMAL SOURCING DECISION
   ctx.log('info', 'Phase 4: Making optimal sourcing decisions');
-  const sourcingDecision = await ctx.task(optimalSourcingTask, { fulfillmentOptions: fulfillmentOptions.options, inventoryPools, outputDir });
+  let sourcingDecision = await ctx.task(optimalSourcingTask, { fulfillmentOptions: fulfillmentOptions.options, inventoryPools, outputDir });
   artifacts.push(...sourcingDecision.artifacts);
 
-  // Quality Gate: Review fulfillment allocation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      sourcingDecision = await ctx.task(optimalSourcingTask, { ...{ fulfillmentOptions: fulfillmentOptions.options, inventoryPools, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Fulfillment allocation complete. DC fulfillment: ${sourcingDecision.dcFulfillment}%, Store fulfillment: ${sourcingDecision.storeFulfillment}%. Review allocation?`,
     title: 'Fulfillment Allocation Review',
     context: {
       runId: ctx.runId,
       summary: { dcFulfillment: sourcingDecision.dcFulfillment, storeFulfillment: sourcingDecision.storeFulfillment },
       files: sourcingDecision.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: BOPIS ORCHESTRATION
   ctx.log('info', 'Phase 5: Orchestrating BOPIS orders');
   const bopisOrchestration = await ctx.task(bopisOrchestrationTask, { bopisOrders: sourcingDecision.bopisOrders, outputDir });
@@ -86,11 +96,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 9: PERFORMANCE ANALYTICS
   ctx.log('info', 'Phase 9: Generating performance analytics');
-  const performanceAnalytics = await ctx.task(omniChannelAnalyticsTask, { sourcingDecision, channelAnalysis, outputDir });
+  let performanceAnalytics = await ctx.task(omniChannelAnalyticsTask, { sourcingDecision, channelAnalysis, outputDir });
   artifacts.push(...performanceAnalytics.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceAnalytics = await ctx.task(omniChannelAnalyticsTask, { ...{ sourcingDecision, channelAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-channel fulfillment complete. ${orders.length} orders processed. Customer promise met: ${performanceAnalytics.promiseRate}%. Finalize?`,
     title: 'Multi-Channel Fulfillment Complete',
     context: {
@@ -102,9 +116,15 @@ export async function process(inputs, ctx) {
         promiseRate: `${performanceAnalytics.promiseRate}%`
       },
       files: [{ path: performanceAnalytics.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -117,8 +137,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/multi-channel-fulfillment', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const channelAnalysisTask = defineTask('channel-analysis', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze order channels', agent: { name: 'channel-analyst', prompt: { role: 'Channel Analysis Specialist', task: 'Analyze orders by fulfillment channel', context: args, instructions: ['Categorize by channel', 'Identify fulfillment requirements', 'Analyze channel mix', 'Determine priority', 'Calculate channel metrics', 'Generate channel report'] }, outputSchema: { type: 'object', required: ['analysis', 'allocation', 'artifacts'], properties: { analysis: { type: 'object' }, allocation: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'multi-channel', 'channel-analysis']
 }));

@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Judgment Formation
   ctx.log('info', 'Forming moral judgment');
-  const judgmentFormation = await ctx.task(judgmentFormationTask, {
+  let judgmentFormation = await ctx.task(judgmentFormationTask, {
     framework,
     applicationResults: applicationProcess.results,
     question: questionClarification.clarified,
@@ -83,8 +83,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...judgmentFormation.artifacts);
 
-  // Breakpoint: Review reasoning results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      judgmentFormation = await ctx.task(judgmentFormationTask, { ...{
+    framework,
+    applicationResults: applicationProcess.results,
+    question: questionClarification.clarified,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Moral reasoning complete using ${framework}. Judgment: ${judgmentFormation.judgment.verdict}. Review the reasoning process?`,
     title: 'Moral Reasoning Results',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         confidence: judgmentFormation.judgment.confidence,
         principlesApplied: principleIdentification.principles.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Reasoning Report
   ctx.log('info', 'Generating moral reasoning report');
   const reasoningReport = await ctx.task(reasoningReportTask, {
@@ -139,8 +154,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Question Clarification
+  // Task 1: Question Clarification
 export const questionClarificationTask = defineTask('question-clarification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Clarify the moral question',

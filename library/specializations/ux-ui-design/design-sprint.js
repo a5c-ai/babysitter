@@ -66,13 +66,12 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: DAY 1 - UNDERSTAND (Map and Choose Target)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Day 1 - Understand the problem and map the challenge');
-  const day1Understand = await ctx.task(day1UnderstandTask, {
+  let day1Understand = await ctx.task(day1UnderstandTask, {
     projectName,
     sprintGoal: sprintPreparation.refinedSprintGoal,
     challengeStatement: sprintPreparation.refinedChallengeStatement,
@@ -87,8 +86,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...day1Understand.artifacts);
 
-  // Breakpoint: Day 1 Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      day1Understand = await ctx.task(day1UnderstandTask, { ...{
+    projectName,
+    sprintGoal: sprintPreparation.refinedSprintGoal,
+    challengeStatement: sprintPreparation.refinedChallengeStatement,
+    participants: sprintPreparation.confirmedParticipants,
+    stakeholders,
+    existingResearch: sprintPreparation.researchSummary,
+    expertInterviews: sprintPreparation.expertInsights,
+    constraints,
+    format,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Day 1 (Understand) complete. Target chosen: "${day1Understand.sprintTarget}". Review problem map and sprint questions?`,
     title: 'Day 1 Review - Understand',
     context: {
@@ -109,15 +123,21 @@ export async function process(inputs, ctx) {
         longTermGoal: day1Understand.longTermGoal,
         sprintQuestions: day1Understand.sprintQuestions
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: DAY 2 - DIVERGE (Sketch Competing Solutions)
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Day 2 - Diverge and sketch competing solutions');
-  const day2Diverge = await ctx.task(day2DivergeTask, {
+  let day2Diverge = await ctx.task(day2DivergeTask, {
     projectName,
     sprintTarget: day1Understand.sprintTarget,
     userJourneyMap: day1Understand.userJourneyMap,
@@ -131,8 +151,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...day2Diverge.artifacts);
 
-  // Breakpoint: Day 2 Review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      day2Diverge = await ctx.task(day2DivergeTask, { ...{
+    projectName,
+    sprintTarget: day1Understand.sprintTarget,
+    userJourneyMap: day1Understand.userJourneyMap,
+    hmwQuestions: day1Understand.hmwQuestions,
+    inspirationSources: day1Understand.inspirationSources,
+    sprintQuestions: day1Understand.sprintQuestions,
+    participants: sprintPreparation.confirmedParticipants,
+    format,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Day 2 (Diverge) complete. ${day2Diverge.solutionSketches.length} solution sketches created. Review competing solutions?`,
     title: 'Day 2 Review - Diverge',
     context: {
@@ -152,15 +186,21 @@ export async function process(inputs, ctx) {
         notableIdeas: day2Diverge.notableIdeas,
         lightningDemos: day2Diverge.lightningDemos?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DAY 3 - DECIDE (Choose the Best Solution)
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Day 3 - Decide on the best solution to prototype');
-  const day3Decide = await ctx.task(day3DecideTask, {
+  let day3Decide = await ctx.task(day3DecideTask, {
     projectName,
     sprintTarget: day1Understand.sprintTarget,
     sprintQuestions: day1Understand.sprintQuestions,
@@ -173,8 +213,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...day3Decide.artifacts);
 
-  // Breakpoint: Day 3 Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      day3Decide = await ctx.task(day3DecideTask, { ...{
+    projectName,
+    sprintTarget: day1Understand.sprintTarget,
+    sprintQuestions: day1Understand.sprintQuestions,
+    solutionSketches: day2Diverge.solutionSketches,
+    participants: sprintPreparation.confirmedParticipants,
+    decisionMaker: sprintPreparation.decisionMaker,
+    format,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Day 3 (Decide) complete. Winning solution selected. Review storyboard with ${day3Decide.storyboard.frames.length} frames?`,
     title: 'Day 3 Review - Decide',
     context: {
@@ -195,15 +248,21 @@ export async function process(inputs, ctx) {
         rumblesResolved: day3Decide.rumblesResolved,
         conflictingIdeas: day3Decide.conflictingIdeasHandled
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: DAY 4 - PROTOTYPE (Build a Realistic Facade)
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Day 4 - Prototype the winning solution');
-  const day4Prototype = await ctx.task(day4PrototypeTask, {
+  let day4Prototype = await ctx.task(day4PrototypeTask, {
     projectName,
     storyboard: day3Decide.storyboard,
     winningSolution: day3Decide.winningSolution,
@@ -216,8 +275,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...day4Prototype.artifacts);
 
-  // Breakpoint: Day 4 Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review2) {
+      day4Prototype = await ctx.task(day4PrototypeTask, { ...{
+    projectName,
+    storyboard: day3Decide.storyboard,
+    winningSolution: day3Decide.winningSolution,
+    userJourneyMap: day1Understand.userJourneyMap,
+    participants: sprintPreparation.confirmedParticipants,
+    format,
+    prototypeFidelity: 'high-fidelity-facade',
+    outputDir
+  }, feedback: lastFeedback_phase4Review2, attempt: attempt + 1 });
+    }
+  const phase4Review2 = await ctx.breakpoint({
     question: `Day 4 (Prototype) complete. Realistic prototype built with ${day4Prototype.totalScreens} screens. Review prototype before testing?`,
     title: 'Day 4 Review - Prototype',
     context: {
@@ -238,9 +310,15 @@ export async function process(inputs, ctx) {
         testingReadiness: day4Prototype.testingReadiness,
         assetsCaptured: day4Prototype.assetTypes
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review2.approved) break;
+    lastFeedback_phase4Review2 = phase4Review2.response || phase4Review2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: TEST PREPARATION AND PARTICIPANT RECRUITMENT
   // ============================================================================
@@ -265,7 +343,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Day 5 - Test with real users and gather insights');
-  const day5Test = await ctx.task(day5TestTask, {
+  let day5Test = await ctx.task(day5TestTask, {
     projectName,
     prototype: day4Prototype,
     testParticipants: testPreparation.confirmedParticipants,
@@ -279,8 +357,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...day5Test.artifacts);
 
-  // Breakpoint: Day 5 Review
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      day5Test = await ctx.task(day5TestTask, { ...{
+    projectName,
+    prototype: day4Prototype,
+    testParticipants: testPreparation.confirmedParticipants,
+    interviewScript: testPreparation.interviewScript,
+    sprintQuestions: day1Understand.sprintQuestions,
+    storyboard: day3Decide.storyboard,
+    participants: sprintPreparation.confirmedParticipants,
+    format,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Day 5 (Test) complete. ${day5Test.interviewsCompleted} user interviews conducted. Review testing insights and patterns?`,
     title: 'Day 5 Review - Test',
     context: {
@@ -301,9 +393,15 @@ export async function process(inputs, ctx) {
         patternsIdentified: day5Test.patterns.length,
         sprintQuestionsAnswered: day5Test.sprintQuestionsAnswered
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: SYNTHESIS AND INSIGHTS EXTRACTION
   // ============================================================================
@@ -368,7 +466,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Evaluating sprint quality and outcomes');
-  const qualityScoring = await ctx.task(sprintQualityScoringTask, {
+  let qualityScoring = await ctx.task(sprintQualityScoringTask, {
     projectName,
     sprintGoal: sprintPreparation.refinedSprintGoal,
     sprintQuestions: day1Understand.sprintQuestions,
@@ -385,8 +483,23 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScoring.overallScore >= targetQualityScore;
 
-  // Breakpoint: Sprint Completion Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScoring = await ctx.task(sprintQualityScoringTask, { ...{
+    projectName,
+    sprintGoal: sprintPreparation.refinedSprintGoal,
+    sprintQuestions: day1Understand.sprintQuestions,
+    testResults: day5Test,
+    insightsSynthesis,
+    decisionsAndRecommendations,
+    prototypeQuality: day4Prototype.qualityScore,
+    participantEngagement: sprintPreparation.confirmedParticipants.length,
+    targetQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Design Sprint complete. Quality score: ${qualityScoring.overallScore}/100. ${qualityMet ? 'Sprint achieved quality targets!' : 'Sprint may need follow-up activities.'} Review final outcomes?`,
     title: 'Sprint Completion Review',
     context: {
@@ -409,9 +522,15 @@ export async function process(inputs, ctx) {
         decisionsReached: decisionsAndRecommendations.decisions.length,
         recommendedAction: decisionsAndRecommendations.recommendedAction
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: STAKEHOLDER PRESENTATION PREPARATION
   // ============================================================================
@@ -431,7 +550,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...stakeholderPresentation.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -506,8 +624,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

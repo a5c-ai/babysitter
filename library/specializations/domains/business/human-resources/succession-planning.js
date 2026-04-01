@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Succession Planning for ${organizationName}`);
 
   // Phase 1: Critical Role Identification
-  const roleIdentification = await ctx.task(roleIdentificationTask, { organizationName, criticalRoles, planningHorizon, outputDir });
-  artifacts.push(...roleIdentification.artifacts);
-
-  await ctx.breakpoint({
+  let roleIdentification = await ctx.task(roleIdentificationTask, { organizationName, criticalRoles, planningHorizon, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      roleIdentification = await ctx.task(roleIdentificationTask, { ...{ organizationName, criticalRoles, planningHorizon, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `${roleIdentification.criticalRolesCount} critical roles identified. Review critical role criteria and list?`,
     title: 'Critical Roles Review',
-    context: { runId: ctx.runId, criticalRoles: roleIdentification.criticalRoles, criteria: roleIdentification.criteria, files: roleIdentification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, criticalRoles: roleIdentification.criticalRoles, criteria: roleIdentification.criteria, files: roleIdentification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Talent Assessment
   const talentAssessment = await ctx.task(talentAssessmentTask, { organizationName, criticalRoles: roleIdentification.criticalRoles, includeLeadershipAssessment, outputDir });
   artifacts.push(...talentAssessment.artifacts);
@@ -46,15 +55,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...hipoIdentification.artifacts);
 
   // Phase 4: Successor Nomination
-  const successorNomination = await ctx.task(successorNominationTask, { organizationName, criticalRoles: roleIdentification.criticalRoles, talentAssessment, hipoIdentification, outputDir });
-  artifacts.push(...successorNomination.artifacts);
-
-  await ctx.breakpoint({
+  let successorNomination = await ctx.task(successorNominationTask, { organizationName, criticalRoles: roleIdentification.criticalRoles, talentAssessment, hipoIdentification, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      successorNomination = await ctx.task(successorNominationTask, { ...{ organizationName, criticalRoles: roleIdentification.criticalRoles, talentAssessment, hipoIdentification, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Successor nominations complete. ${successorNomination.nominationsCount} successors nominated. Review succession pipeline?`,
     title: 'Succession Pipeline Review',
-    context: { runId: ctx.runId, nominations: successorNomination.nominations, coverage: successorNomination.coverage, files: successorNomination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, nominations: successorNomination.nominations, coverage: successorNomination.coverage, files: successorNomination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Readiness Assessment
   const readinessAssessment = await ctx.task(readinessAssessmentTask, { organizationName, successors: successorNomination.nominations, criticalRoles: roleIdentification.criticalRoles, outputDir });
   artifacts.push(...readinessAssessment.artifacts);
@@ -73,7 +91,6 @@ export async function process(inputs, ctx) {
     hipoProgram = await ctx.task(hipoProgramTask, { organizationName, hipos: hipoIdentification.highPotentials, outputDir });
     artifacts.push(...hipoProgram.artifacts);
   }
-
   // Phase 9: Succession Review Meetings
   const successionReviews = await ctx.task(successionReviewsTask, { organizationName, criticalRoles: roleIdentification.criticalRoles, successorNomination, readinessAssessment, outputDir });
   artifacts.push(...successionReviews.artifacts);

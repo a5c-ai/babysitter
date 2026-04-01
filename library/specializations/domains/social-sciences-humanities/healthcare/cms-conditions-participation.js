@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting CMS Conditions of Participation Compliance for: ${organizationName}`);
 
-  const copAssessment = await ctx.task(copAssessmentTask, { organizationName, facilityType, copScope, currentCompliance, outputDir });
-  artifacts.push(...copAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `CoP assessment complete. Compliance rate: ${copAssessment.complianceRate}%. ${copAssessment.immediateJeopardy.length} immediate jeopardy conditions found. Proceed?`, title: 'CoP Assessment Review', context: { runId: ctx.runId, rate: copAssessment.complianceRate, ij: copAssessment.immediateJeopardy } });
-
+  let copAssessment = await ctx.task(copAssessmentTask, { organizationName, facilityType, copScope, currentCompliance, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      copAssessment = await ctx.task(copAssessmentTask, { ...{ organizationName, facilityType, copScope, currentCompliance, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `CoP assessment complete. Compliance rate: ${copAssessment.complianceRate}%. ${copAssessment.immediateJeopardy.length} immediate jeopardy conditions found. Proceed?`, title: 'CoP Assessment Review', context: { runId: ctx.runId, rate: copAssessment.complianceRate, ij: copAssessment.immediateJeopardy }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const patientRightsCompliance = await ctx.task(copPatientRightsTask, { copAssessment, outputDir });
   artifacts.push(...patientRightsCompliance.artifacts);
 
   const qapipCompliance = await ctx.task(copQAPITask, { copAssessment, outputDir });
   artifacts.push(...qapipCompliance.artifacts);
 
-  const infectionControlCompliance = await ctx.task(copInfectionControlTask, { copAssessment, outputDir });
-  artifacts.push(...infectionControlCompliance.artifacts);
-
-  await ctx.breakpoint({ question: `Core CoPs assessed. Patient Rights: ${patientRightsCompliance.status}, QAPI: ${qapipCompliance.status}, Infection Control: ${infectionControlCompliance.status}. Proceed?`, title: 'Core CoP Review', context: { runId: ctx.runId, patientRights: patientRightsCompliance.status, qapi: qapipCompliance.status, ic: infectionControlCompliance.status } });
-
+  let infectionControlCompliance = await ctx.task(copInfectionControlTask, { copAssessment, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      infectionControlCompliance = await ctx.task(copInfectionControlTask, { ...{ copAssessment, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Core CoPs assessed. Patient Rights: ${patientRightsCompliance.status}, QAPI: ${qapipCompliance.status}, Infection Control: ${infectionControlCompliance.status}. Proceed?`, title: 'Core CoP Review', context: { runId: ctx.runId, patientRights: patientRightsCompliance.status, qapi: qapipCompliance.status, ic: infectionControlCompliance.status }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const nursingServicesCompliance = await ctx.task(copNursingTask, { copAssessment, outputDir });
   artifacts.push(...nursingServicesCompliance.artifacts);
 

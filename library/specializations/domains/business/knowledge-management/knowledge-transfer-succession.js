@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Assessing knowledge transfer needs');
-  const needsAssessment = await ctx.task(needsAssessmentTask, {
+  let needsAssessment = await ctx.task(needsAssessmentTask, {
     transferScenario,
     keyRole,
     departingEmployee,
@@ -52,8 +52,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...needsAssessment.artifacts);
 
-  // Breakpoint: Review needs assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      needsAssessment = await ctx.task(needsAssessmentTask, { ...{
+    transferScenario,
+    keyRole,
+    departingEmployee,
+    successor,
+    criticaLKnowledge,
+    existingDocumentation,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${needsAssessment.knowledgeToTransfer.length} knowledge areas requiring transfer. Review assessment?`,
     title: 'Transfer Needs Assessment Review',
     context: {
@@ -70,9 +82,15 @@ export async function process(inputs, ctx) {
         transferComplexity: needsAssessment.transferComplexity,
         riskLevel: needsAssessment.riskLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SUCCESSOR READINESS ASSESSMENT
   // ============================================================================
@@ -92,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Developing knowledge transfer plan');
-  const transferPlan = await ctx.task(transferPlanDevelopmentTask, {
+  let transferPlan = await ctx.task(transferPlanDevelopmentTask, {
     transferScenario,
     keyRole,
     departingEmployee,
@@ -106,8 +124,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...transferPlan.artifacts);
 
-  // Breakpoint: Review transfer plan
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      transferPlan = await ctx.task(transferPlanDevelopmentTask, { ...{
+    transferScenario,
+    keyRole,
+    departingEmployee,
+    successor,
+    knowledgeToTransfer: needsAssessment.knowledgeToTransfer,
+    successorGaps: successorAssessment.gaps,
+    transferTimeline,
+    transferMethods,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Transfer plan created with ${transferPlan.activities.length} activities over ${transferTimeline}. Review plan?`,
     title: 'Transfer Plan Review',
     context: {
@@ -123,9 +155,15 @@ export async function process(inputs, ctx) {
         transferPhases: transferPlan.phases.length,
         estimatedEffort: transferPlan.estimatedEffort
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DOCUMENTATION REQUIREMENTS
   // ============================================================================
@@ -206,7 +244,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing plan quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     needsAssessment,
     successorAssessment,
     transferPlan,
@@ -235,8 +273,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    needsAssessment,
+    successorAssessment,
+    transferPlan,
+    activityDesign,
+    progressTracking,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize transfer plan?`,
       title: 'Final Approval Gate',
       context: {
@@ -252,9 +301,15 @@ export async function process(inputs, ctx) {
           qualityScore: qualityAssessment.overallScore,
           transferActivities: activityDesign.activities.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -284,8 +339,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

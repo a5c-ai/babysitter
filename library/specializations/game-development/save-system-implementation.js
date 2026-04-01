@@ -40,21 +40,29 @@ export async function process(inputs, ctx) {
     const cloudSave = await ctx.task(cloudSaveTask, { projectName, schema, outputDir });
     artifacts.push(...cloudSave.artifacts);
   }
-
   // Phase 5: Save Migration System
   const migration = await ctx.task(saveMigrationTask, { projectName, schema, outputDir });
   artifacts.push(...migration.artifacts);
 
   // Phase 6: Save System Testing
-  const testing = await ctx.task(saveTestingTask, { projectName, localSave, cloudSaveRequired, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(saveTestingTask, { projectName, localSave, cloudSaveRequired, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(saveTestingTask, { ...{ projectName, localSave, cloudSaveRequired, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Save system implementation complete for ${projectName}. Local saves: OK. Cloud saves: ${cloudSaveRequired ? 'Integrated' : 'N/A'}. Test pass: ${testing.passRate}%. Review?`,
     title: 'Save System Review',
-    context: { runId: ctx.runId, design, testing }
-  });
-
+    context: { runId: ctx.runId, design, testing },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

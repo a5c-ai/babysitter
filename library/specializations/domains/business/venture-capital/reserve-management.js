@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Reserve Optimization
   ctx.log('info', 'Optimizing reserve allocation');
-  const reserveOptimization = await ctx.task(reserveOptimizationTask, {
+  let reserveOptimization = await ctx.task(reserveOptimizationTask, {
     reserveAnalysis,
     followOnAssessment,
     deploymentModeling,
@@ -83,8 +83,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reserveOptimization.artifacts);
 
-  // Breakpoint: Review reserve strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reserveOptimization = await ctx.task(reserveOptimizationTask, { ...{
+    reserveAnalysis,
+    followOnAssessment,
+    deploymentModeling,
+    reservePolicy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reserve analysis complete for ${fundName}. Available reserves: $${reserveAnalysis.availableReserves}M. Follow-on needs: $${followOnAssessment.totalNeeds}M. Review strategy?`,
     title: 'Reserve Management Analysis',
     context: {
@@ -97,9 +107,15 @@ export async function process(inputs, ctx) {
         followOnNeeds: followOnAssessment.totalNeeds,
         coverageRatio: reserveOptimization.coverageRatio
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Follow-On Investment Plan
   ctx.log('info', 'Creating follow-on investment plan');
   const followOnPlan = await ctx.task(followOnPlanTask, {
@@ -169,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Reserve Analysis
+  // Task 1: Reserve Analysis
 export const reserveAnalysisTask = defineTask('reserve-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze current reserves',

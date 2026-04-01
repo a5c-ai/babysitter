@@ -66,15 +66,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...degradationTesting.artifacts);
 
   // Phase 9: Performance Monitoring
-  const monitoring = await ctx.task(fusionMonitoringTask, { robotName, validation, outputDir });
-  artifacts.push(...monitoring.artifacts);
-
-  await ctx.breakpoint({
+  let monitoring = await ctx.task(fusionMonitoringTask, { robotName, validation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      monitoring = await ctx.task(fusionMonitoringTask, { ...{ robotName, validation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sensor Fusion Complete for ${robotName}. Position error: ${validation.positionError}m. Review?`,
     title: 'Sensor Fusion Complete',
-    context: { runId: ctx.runId, positionError: validation.positionError, filter: filterType }
-  });
-
+    context: { runId: ctx.runId, positionError: validation.positionError, filter: filterType },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.meetsRequirements,
     robotName,

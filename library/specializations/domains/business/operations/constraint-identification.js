@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
 
   // Step 1: IDENTIFY the constraint
   ctx.log('info', 'Step 1: IDENTIFY the system constraint');
-  const identification = await ctx.task(identifyConstraintTask, {
+  let identification = await ctx.task(identifyConstraintTask, {
     systemName,
     scope,
     currentThroughput,
@@ -48,8 +48,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...identification.artifacts);
 
-  // Quality Gate: Constraint Identification
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      identification = await ctx.task(identifyConstraintTask, { ...{
+    systemName,
+    scope,
+    currentThroughput,
+    measurementUnit,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Constraint identified: "${identification.constraint.name}" with capacity ${identification.constraint.capacity} ${measurementUnit}. System throughput limited to ${identification.systemThroughput}. Proceed with exploitation?`,
     title: 'Constraint Identification Review',
     context: {
@@ -58,9 +68,15 @@ export async function process(inputs, ctx) {
       constraint: identification.constraint,
       resourceAnalysis: identification.resourceAnalysis,
       files: identification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // Step 2: EXPLOIT the constraint
   ctx.log('info', 'Step 2: EXPLOIT the constraint - maximize utilization');
   const exploitation = await ctx.task(exploitConstraintTask, {
@@ -74,7 +90,7 @@ export async function process(inputs, ctx) {
 
   // Step 3: SUBORDINATE everything else
   ctx.log('info', 'Step 3: SUBORDINATE non-constraints to the constraint');
-  const subordination = await ctx.task(subordinateTask, {
+  let subordination = await ctx.task(subordinateTask, {
     systemName,
     identification,
     exploitation,
@@ -83,8 +99,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...subordination.artifacts);
 
-  // Quality Gate: Exploitation and Subordination Plans
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      subordination = await ctx.task(subordinateTask, { ...{
+    systemName,
+    identification,
+    exploitation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Exploitation plan: ${exploitation.actions.length} actions identified. Expected throughput gain: ${exploitation.expectedGain}%. Subordination plan: ${subordination.subordinationActions.length} actions. Review before implementation?`,
     title: 'Exploitation and Subordination Review',
     context: {
@@ -94,9 +119,15 @@ export async function process(inputs, ctx) {
       expectedGain: exploitation.expectedGain,
       subordinationActions: subordination.subordinationActions,
       files: [...exploitation.artifacts, ...subordination.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 4: ELEVATE the constraint (if needed)
   ctx.log('info', 'Step 4: ELEVATE the constraint - increase capacity');
   const elevation = await ctx.task(elevateConstraintTask, {
@@ -196,8 +227,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Identify Constraint
+  // Task 1: Identify Constraint
 export const identifyConstraintTask = defineTask('toc-identify', (args, taskCtx) => ({
   kind: 'agent',
   title: `TOC Identify Constraint - ${args.systemName}`,

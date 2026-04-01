@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 6: FORECAST GENERATION
   ctx.log('info', 'Phase 6: Generating forecasts');
-  const forecastGeneration = await ctx.task(forecastGenerationTask, {
+  let forecastGeneration = await ctx.task(forecastGenerationTask, {
     trainedModels: modelTraining.models,
     forecastHorizon,
     externalFactors: externalIntegration.integratedFactors,
@@ -86,8 +86,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...forecastGeneration.artifacts);
 
-  // Quality Gate: Review forecast results
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      forecastGeneration = await ctx.task(forecastGenerationTask, { ...{
+    trainedModels: modelTraining.models,
+    forecastHorizon,
+    externalFactors: externalIntegration.integratedFactors,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Forecasts generated for ${forecastGeneration.forecasts.length} products. Average MAPE: ${modelTraining.metrics.averageMAPE}%. Review forecasts?`,
     title: 'Forecast Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         forecastHorizon
       },
       files: forecastGeneration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // PHASE 7: CONFIDENCE INTERVALS AND UNCERTAINTY
   ctx.log('info', 'Phase 7: Calculating confidence intervals');
   const confidenceCalc = await ctx.task(confidenceIntervalTask, {
@@ -130,7 +145,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 10: GENERATE FORECAST REPORT
   ctx.log('info', 'Phase 10: Generating forecast report');
-  const forecastReport = await ctx.task(forecastReportTask, {
+  let forecastReport = await ctx.task(forecastReportTask, {
     forecasts: biasCorrection.correctedForecasts,
     accuracy: accuracyAssessment.metrics,
     confidenceIntervals: confidenceCalc.intervals,
@@ -140,8 +155,19 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...forecastReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      forecastReport = await ctx.task(forecastReportTask, { ...{
+    forecasts: biasCorrection.correctedForecasts,
+    accuracy: accuracyAssessment.metrics,
+    confidenceIntervals: confidenceCalc.intervals,
+    patternAnalysis,
+    seasonalityAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Demand forecasting complete. ${forecastGeneration.forecasts.length} products forecasted with ${accuracyAssessment.metrics.overallMAPE}% MAPE. Approve forecasts?`,
     title: 'Demand Forecasting Complete',
     context: {
@@ -154,9 +180,15 @@ export async function process(inputs, ctx) {
         forecastMethod
       },
       files: [{ path: forecastReport.reportPath, format: 'markdown', label: 'Forecast Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -171,8 +203,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/demand-forecasting', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const forecastDataPrepTask = defineTask('forecast-data-prep', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare and cleanse data',

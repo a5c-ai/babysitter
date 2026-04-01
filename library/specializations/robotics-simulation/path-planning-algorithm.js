@@ -67,15 +67,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...performance.artifacts);
 
   // Phase 9: Optimization
-  const optimization = await ctx.task(pathPlanningOptimizationTask, { robotName, planningAlgorithm, performance, outputDir });
-  artifacts.push(...optimization.artifacts);
-
-  await ctx.breakpoint({
+  let optimization = await ctx.task(pathPlanningOptimizationTask, { robotName, planningAlgorithm, performance, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimization = await ctx.task(pathPlanningOptimizationTask, { ...{ robotName, planningAlgorithm, performance, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Path Planning Complete for ${robotName}. Planning time: ${performance.avgPlanningTime}ms, Success rate: ${testing.successRate}%. Review?`,
     title: 'Path Planning Complete',
-    context: { runId: ctx.runId, planningTime: performance.avgPlanningTime, successRate: testing.successRate }
-  });
-
+    context: { runId: ctx.runId, planningTime: performance.avgPlanningTime, successRate: testing.successRate },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: testing.successRate >= 95,
     robotName,

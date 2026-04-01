@@ -36,16 +36,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(marketAnalysis.artifacts || []));
 
   // Phase 3: Market Prioritization
-  const marketPrioritization = await ctx.task(marketPrioritizationTask, { companyName, marketAnalysis, resources });
+  let marketPrioritization = await ctx.task(marketPrioritizationTask, { companyName, marketAnalysis, resources });
   artifacts.push(...(marketPrioritization.artifacts || []));
 
-  // Breakpoint: Review market prioritization
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      marketPrioritization = await ctx.task(marketPrioritizationTask, { ...{ companyName, marketAnalysis, resources }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review market prioritization for ${companyName}. Priority market: ${marketPrioritization.priorityMarket}. Proceed with entry strategy?`,
     title: 'Market Prioritization Review',
-    context: { runId: ctx.runId, companyName, priorityMarket: marketPrioritization.priorityMarket, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, priorityMarket: marketPrioritization.priorityMarket, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Entry Strategy Development
   const entryStrategy = await ctx.task(entryStrategyTask, { companyName, marketPrioritization, product });
   artifacts.push(...(entryStrategy.artifacts || []));

@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const analysis = await ctx.task(recurrenceAnalysisTask, { design, outputDir });
   artifacts.push(...analysis.artifacts);
 
-  const implementation = await ctx.task(divideConquerImplementationTask, { design, language, outputDir });
-  artifacts.push(...implementation.artifacts);
-
-  await ctx.breakpoint({
+  let implementation = await ctx.task(divideConquerImplementationTask, { design, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementation = await ctx.task(divideConquerImplementationTask, { ...{ design, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Divide and Conquer algorithm designed. Recurrence: ${analysis.recurrence}. Complexity: ${analysis.complexity}. Review?`,
     title: 'Divide and Conquer Complete',
-    context: { runId: ctx.runId, recurrence: analysis.recurrence, complexity: analysis.complexity }
-  });
-
+    context: { runId: ctx.runId, recurrence: analysis.recurrence, complexity: analysis.complexity },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     division: design.divisionStrategy,

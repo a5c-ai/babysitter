@@ -97,6 +97,7 @@ export function registerRunTools(server: McpServer): void {
       inputs: z.string().optional().describe("JSON-encoded inputs for the process"),
       runsDir: z.string().optional().describe("Override runs directory path"),
       prompt: z.string().optional().describe("Prompt or description for the run"),
+      nonInteractive: z.boolean().optional().describe("When true, breakpoints are auto-approved without human interaction"),
     },
     async (args) => {
       try {
@@ -122,6 +123,7 @@ export function registerRunTools(server: McpServer): void {
           },
           prompt: args.prompt,
           inputs,
+          ...(args.nonInteractive ? { metadata: { nonInteractive: true } } : {}),
         });
 
         return toolResult({

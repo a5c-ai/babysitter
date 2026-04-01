@@ -73,7 +73,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-deployment-canary', timestamp: startTime }
     };
   }
-
   // Task 1.2: Environment Readiness Check
   const environmentCheck = await ctx.task(environmentReadinessTask, {
     targetEnvironment,
@@ -90,16 +89,23 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-deployment-canary', timestamp: startTime }
     };
   }
-
   // Task 1.3: Baseline Metrics Capture
-  const baselineMetrics = await ctx.task(baselineMetricsCaptureTask, {
+  let baselineMetrics = await ctx.task(baselineMetricsCaptureTask, {
     targetEnvironment,
     currentModelVersion: environmentCheck.currentModelVersion,
     metricsToCapture: ['latency', 'errorRate', 'throughput', 'accuracy']
   });
 
-  // Breakpoint: Review pre-deployment validation results
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      baselineMetrics = await ctx.task(baselineMetricsCaptureTask, { ...{
+    targetEnvironment,
+    currentModelVersion: environmentCheck.currentModelVersion,
+    metricsToCapture: ['latency', 'errorRate', 'throughput', 'accuracy']
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pre-deployment validation complete for ${modelVersion}. Artifact valid, environment ready, baseline captured. Proceed with canary deployment?`,
     title: 'Pre-Deployment Validation Review',
     context: {
@@ -111,9 +117,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/pre-deployment-validation.json`, format: 'json' },
         { path: `artifacts/baseline-metrics.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CANARY DEPLOYMENT INITIALIZATION
   // ============================================================================
@@ -137,7 +149,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-deployment-canary', timestamp: startTime }
     };
   }
-
   // Task 2.2: Configure Traffic Routing
   const trafficRouting = await ctx.task(trafficRoutingConfigurationTask, {
     targetEnvironment,
@@ -223,7 +234,7 @@ export async function process(inputs, ctx) {
         rollbackTriggered = true;
 
         // Task 3.5: Execute Rollback
-        const rollbackResult = await ctx.task(rollbackExecutionTask, {
+        let rollbackResult = await ctx.task(rollbackExecutionTask, {
           targetEnvironment,
           canaryEndpoint: canaryInfrastructure.canaryEndpoint,
           previousModelVersion: environmentCheck.currentModelVersion,
@@ -231,8 +242,18 @@ export async function process(inputs, ctx) {
           failedAtPercentage: targetPercentage
         });
 
-        // Breakpoint: Rollback Notification
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval) {
+            rollbackResult = await ctx.task(rollbackExecutionTask, { ...{
+          targetEnvironment,
+          canaryEndpoint: canaryInfrastructure.canaryEndpoint,
+          previousModelVersion: environmentCheck.currentModelVersion,
+          reason: healthAnalysis.reason,
+          failedAtPercentage: targetPercentage
+        }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+          }
+  const iterationApproval = await ctx.breakpoint({
           question: `Canary deployment FAILED at ${targetPercentage}% traffic and was automatically rolled back. Review failure details?`,
           title: 'Canary Deployment Failed - Rollback Complete',
           context: {
@@ -246,10 +267,16 @@ export async function process(inputs, ctx) {
               { path: `artifacts/canary-failure-report.json`, format: 'json' },
               { path: `artifacts/health-analysis-${currentStage}.json`, format: 'json' }
             ]
-          }
-        });
-
-        return {
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval.approved) break;
+          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+        }
+  return {
           success: false,
           deploymentStatus: 'rolled-back',
           rollbackTriggered: true,
@@ -266,8 +293,18 @@ export async function process(inputs, ctx) {
           }
         };
       } else {
-        // No rollback, just pause for manual intervention
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval2 = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval2) {
+            rollbackResult = await ctx.task(rollbackExecutionTask, { ...{
+          targetEnvironment,
+          canaryEndpoint: canaryInfrastructure.canaryEndpoint,
+          previousModelVersion: environmentCheck.currentModelVersion,
+          reason: healthAnalysis.reason,
+          failedAtPercentage: targetPercentage
+        }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
+          }
+  const iterationApproval2 = await ctx.breakpoint({
           question: `Health check FAILED at ${targetPercentage}% traffic. Rollback disabled. Manual intervention required. Continue or abort?`,
           title: 'Canary Health Check Failed',
           context: {
@@ -280,12 +317,28 @@ export async function process(inputs, ctx) {
             files: [
               { path: `artifacts/health-analysis-${currentStage}.json`, format: 'json' }
             ]
-          }
-        });
-      }
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval2 || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval2.approved) break;
+          lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
+        }     }
     } else if (healthAnalysis.status === 'warning') {
-      // Warning state - pause for review
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval3 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval3) {
+          rollbackResult = await ctx.task(rollbackExecutionTask, { ...{
+          targetEnvironment,
+          canaryEndpoint: canaryInfrastructure.canaryEndpoint,
+          previousModelVersion: environmentCheck.currentModelVersion,
+          reason: healthAnalysis.reason,
+          failedAtPercentage: targetPercentage
+        }, feedback: lastFeedback_iterationApproval3, attempt: attempt + 1 });
+        }
+  const iterationApproval3 = await ctx.breakpoint({
         question: `Health check shows WARNING at ${targetPercentage}% traffic. Health score: ${healthAnalysis.healthScore}/100. Review metrics and proceed to next stage?`,
         title: `Canary Stage ${currentStage} - Warning State`,
         context: {
@@ -300,15 +353,31 @@ export async function process(inputs, ctx) {
             { path: `artifacts/health-analysis-${currentStage}.json`, format: 'json' },
             { path: `artifacts/canary-metrics-${currentStage}.json`, format: 'json' }
           ]
-        }
-      });
-    } else {
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval3 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval3.approved) break;
+        lastFeedback_iterationApproval3 = iterationApproval3.response || iterationApproval3.feedback || 'Changes requested';
+      }   } else {
       // Success - log and continue
       ctx.log('info', `Health check PASSED at ${targetPercentage}% traffic. Health score: ${healthAnalysis.healthScore}/100`);
 
       // Optional breakpoint for review (can be skipped for full automation)
-      if (targetPercentage < 100 && i < canaryPercentages.length - 1) {
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval4 = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval4) {
+            rollbackResult = await ctx.task(rollbackExecutionTask, { ...{
+          targetEnvironment,
+          canaryEndpoint: canaryInfrastructure.canaryEndpoint,
+          previousModelVersion: environmentCheck.currentModelVersion,
+          reason: healthAnalysis.reason,
+          failedAtPercentage: targetPercentage
+        }, feedback: lastFeedback_iterationApproval4, attempt: attempt + 1 });
+          }
+  const iterationApproval4 = await ctx.breakpoint({
           question: `Stage ${currentStage}/${totalStages} complete. Health check passed at ${targetPercentage}%. Proceed to ${canaryPercentages[i + 1]}%?`,
           title: `Canary Stage ${currentStage} - Success`,
           context: {
@@ -321,12 +390,17 @@ export async function process(inputs, ctx) {
             files: [
               { path: `artifacts/health-analysis-${currentStage}.json`, format: 'json' }
             ]
-          }
-        });
-      }
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval4 || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval4.approved) break;
+          lastFeedback_iterationApproval4 = iterationApproval4.response || iterationApproval4.feedback || 'Changes requested';
+        }     }
     }
   }
-
   // ============================================================================
   // PHASE 4: FULL DEPLOYMENT AND CLEANUP
   // ============================================================================
@@ -358,7 +432,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 4.4: Generate Deployment Report
-  const deploymentReport = await ctx.task(deploymentReportGenerationTask, {
+  let deploymentReport = await ctx.task(deploymentReportGenerationTask, {
     modelVersion,
     targetEnvironment,
     canaryHistory,
@@ -368,8 +442,20 @@ export async function process(inputs, ctx) {
     cleanup
   });
 
-  // Final Breakpoint: Deployment Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      deploymentReport = await ctx.task(deploymentReportGenerationTask, { ...{
+    modelVersion,
+    targetEnvironment,
+    canaryHistory,
+    baselineMetrics: baselineMetrics.metrics,
+    finalMetrics: canaryHistory[canaryHistory.length - 1].metrics,
+    promotionResult,
+    cleanup
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Canary deployment SUCCESSFUL! Model ${modelVersion} is now serving 100% production traffic in ${targetEnvironment}. Review deployment report?`,
     title: 'Canary Deployment Complete',
     context: {
@@ -383,9 +469,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/deployment-report.md`, format: 'markdown' },
         { path: `artifacts/canary-history.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -419,8 +511,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

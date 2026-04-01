@@ -26,15 +26,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Data Collection Planning
   ctx.log('info', 'Phase 1: Planning data collection');
-  const dataCollectionPlan = await ctx.task(dataCollectionPlanningTask, { organizationalScope, networkTypes, dataSources, outputDir });
-  artifacts.push(...dataCollectionPlan.artifacts);
-
-  await ctx.breakpoint({
+  let dataCollectionPlan = await ctx.task(dataCollectionPlanningTask, { organizationalScope, networkTypes, dataSources, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dataCollectionPlan = await ctx.task(dataCollectionPlanningTask, { ...{ organizationalScope, networkTypes, dataSources, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data collection plan ready with ${dataCollectionPlan.methods.length} methods. Proceed?`,
     title: 'Data Collection Plan Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { methods: dataCollectionPlan.methods.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { methods: dataCollectionPlan.methods.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Network Data Gathering
   ctx.log('info', 'Phase 2: Gathering network data');
   const networkData = await ctx.task(networkDataGatheringTask, { dataCollectionPlan: dataCollectionPlan.plan, dataSources, outputDir });
@@ -82,7 +91,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { networkMap: networkVisualization.map, keyConnectors: connectorIdentification.connectors, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -100,8 +108,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/knowledge-network-mapping', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const dataCollectionPlanningTask = defineTask('data-collection-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan data collection',

@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Unperturbed System Analysis
-  const unperturbedAnalysis = await ctx.task(unperturbedAnalysisTask, {
+  let unperturbedAnalysis = await ctx.task(unperturbedAnalysisTask, {
     problemName,
     unperturbedSystem
   });
@@ -46,9 +46,15 @@ export async function process(inputs, ctx) {
       perturbativeResults: null
     };
   }
-
-  // Breakpoint: Review unperturbed system
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      unperturbedAnalysis = await ctx.task(unperturbedAnalysisTask, { ...{
+    problemName,
+    unperturbedSystem
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review unperturbed system for ${problemName}. Are the zeroth-order solutions correctly identified?`,
     title: 'Unperturbed System Review',
     context: {
@@ -60,9 +66,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: unperturbedAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Perturbation Setup
   const perturbationSetup = await ctx.task(perturbationSetupTask, {
     problemName,
@@ -87,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Convergence Analysis
-  const convergenceAnalysis = await ctx.task(convergenceAnalysisTask, {
+  let convergenceAnalysis = await ctx.task(convergenceAnalysisTask, {
     problemName,
     perturbationSetup,
     firstOrderCorrections,
@@ -95,17 +107,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check convergence
-  if (!convergenceAnalysis.isConvergent && convergenceAnalysis.divergenceType !== 'asymptotic') {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        convergenceAnalysis = await ctx.task(convergenceAnalysisTask, { ...{
+    problemName,
+    perturbationSetup,
+    firstOrderCorrections,
+    higherOrderCorrections
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Perturbation series for ${problemName} shows divergence. Review convergence analysis and decide how to proceed.`,
       title: 'Convergence Warning',
       context: {
         runId: ctx.runId,
         convergenceAnalysis,
         recommendation: 'Consider resummation methods or alternative approaches'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Non-Perturbative Comparison (if methods specified)
   let comparisonResults = null;
@@ -117,9 +144,8 @@ export async function process(inputs, ctx) {
       perturbationSetup
     });
   }
-
   // Phase 7: Results Synthesis
-  const synthesis = await ctx.task(synthesisTask, {
+  let synthesis = await ctx.task(synthesisTask, {
     problemName,
     unperturbedAnalysis,
     perturbationSetup,
@@ -129,8 +155,20 @@ export async function process(inputs, ctx) {
     comparisonResults
   });
 
-  // Final Breakpoint: Results Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      synthesis = await ctx.task(synthesisTask, { ...{
+    problemName,
+    unperturbedAnalysis,
+    perturbationSetup,
+    firstOrderCorrections,
+    higherOrderCorrections,
+    convergenceAnalysis,
+    comparisonResults
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Perturbation analysis complete for ${problemName}. Approve results for publication/use?`,
     title: 'Perturbation Analysis Approval',
     context: {
@@ -141,9 +179,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/perturbation-results.json`, format: 'json', content: synthesis.results },
         { path: `artifacts/analysis-report.md`, format: 'markdown', content: synthesis.report }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemName,
@@ -168,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const unperturbedAnalysisTask = defineTask('unperturbed-analysis', (args, taskCtx) => ({
   kind: 'agent',

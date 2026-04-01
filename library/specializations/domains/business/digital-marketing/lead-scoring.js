@@ -88,15 +88,23 @@ export async function process(inputs, ctx) {
 
   // Task 8: Test Scoring Accuracy
   ctx.log('info', 'Phase 8: Testing scoring accuracy with historical data');
-  const scoringTest = await ctx.task(scoringTestingTask, {
+  let scoringTest = await ctx.task(scoringTestingTask, {
     modelConfiguration,
     crmData,
     outputDir
   });
   artifacts.push(...scoringTest.artifacts);
 
-  // Breakpoint: Review scoring model
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scoringTest = await ctx.task(scoringTestingTask, { ...{
+    modelConfiguration,
+    crmData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lead scoring model ready. Accuracy score: ${scoringTest.accuracyScore}%. ${thresholdSetting.mqlThreshold} points for MQL. Review and approve?`,
     title: 'Lead Scoring Model Review',
     context: {
@@ -109,9 +117,15 @@ export async function process(inputs, ctx) {
         sqlThreshold: thresholdSetting.sqlThreshold,
         accuracyScore: scoringTest.accuracyScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Launch and Monitor Performance
   ctx.log('info', 'Phase 9: Creating launch and monitoring plan');
   const launchMonitoring = await ctx.task(launchMonitoringTask, {
@@ -161,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const icpDefinitionTask = defineTask('icp-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define ideal customer profile',

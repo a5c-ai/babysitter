@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Defining buffer stock policies');
 
-  const bufferStockPolicy = await ctx.task(bufferStockPolicyTask, {
+  let bufferStockPolicy = await ctx.task(bufferStockPolicyTask, {
     criticalIdentification,
     businessImpact,
     recoveryTimeObjective,
@@ -90,8 +90,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bufferStockPolicy.artifacts);
 
-  // Breakpoint: Review contingency strategies
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bufferStockPolicy = await ctx.task(bufferStockPolicyTask, { ...{
+    criticalIdentification,
+    businessImpact,
+    recoveryTimeObjective,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Contingency strategies developed for ${criticalIdentification.criticalCount} critical items. Alternative sources identified: ${alternativeSourcing.alternativesCount}. Review strategies?`,
     title: 'Contingency Strategy Review',
     context: {
@@ -102,9 +111,15 @@ export async function process(inputs, ctx) {
         alternativeSources: alternativeSourcing.alternativesCount,
         bufferStockValue: bufferStockPolicy.totalValue
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RECOVERY PROCEDURES
   // ============================================================================
@@ -200,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

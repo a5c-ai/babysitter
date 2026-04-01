@@ -102,7 +102,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Evaluating chunking quality');
 
-  const evaluation = await ctx.task(chunkingEvaluationTask, {
+  let evaluation = await ctx.task(chunkingEvaluationTask, {
     projectName,
     implementation: implementation.implementation,
     optimalParams: parameterTuning.optimalParams,
@@ -111,8 +111,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...evaluation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      evaluation = await ctx.task(chunkingEvaluationTask, { ...{
+    projectName,
+    implementation: implementation.implementation,
+    optimalParams: parameterTuning.optimalParams,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Chunking strategy ${projectName} complete. Avg chunk quality: ${evaluation.metrics.avgQuality}. Review implementation?`,
     title: 'Chunking Strategy Review',
     context: {
@@ -125,9 +134,15 @@ export async function process(inputs, ctx) {
         avgQuality: evaluation.metrics.avgQuality
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -146,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

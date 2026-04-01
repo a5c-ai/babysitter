@@ -37,21 +37,30 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting DFT Design for: ${designName}`);
   ctx.log('info', `Strategy: ${testStrategy}, JTAG: ${jtagSupport}, BIST: ${bistModules.length} modules`);
 
-  const dftPlanning = await ctx.task(dftPlanningTask, { designName, testStrategy, jtagSupport, bistModules, outputDir });
+  let dftPlanning = await ctx.task(dftPlanningTask, { designName, testStrategy, jtagSupport, bistModules, outputDir });
   artifacts.push(...dftPlanning.artifacts);
 
   const jtagImplementation = jtagSupport ? await ctx.task(jtagImplementationTask, { designName, dftPlanning, outputDir }) : null;
   if (jtagImplementation) artifacts.push(...jtagImplementation.artifacts);
 
   const bistImplementation = bistModules.length > 0 ? await ctx.task(bistImplementationTask, { designName, bistModules, outputDir }) : null;
-  if (bistImplementation) artifacts.push(...bistImplementation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dftPlanning = await ctx.task(dftPlanningTask, { ...{ designName, testStrategy, jtagSupport, bistModules, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DFT infrastructure designed for ${designName}. JTAG: ${jtagSupport ? 'Yes' : 'No'}, BIST: ${bistModules.length} modules. Review DFT design?`,
     title: 'DFT Design Review',
-    context: { runId: ctx.runId, designName, jtagSupport, bistCount: bistModules.length }
-  });
-
+    context: { runId: ctx.runId, designName, jtagSupport, bistCount: bistModules.length },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const scanChainDesign = scanChainInsertion ? await ctx.task(scanChainDesignTask, { designName, dftPlanning, outputDir }) : null;
   if (scanChainDesign) artifacts.push(...scanChainDesign.artifacts);
 

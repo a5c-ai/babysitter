@@ -47,15 +47,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...loadingResult.artifacts);
 
   // Phase 2: Quality Control
-  const qcResult = await ctx.task(spatialQualityControlTask, { projectName, adata: loadingResult.adata, minCounts, outputDir });
-  artifacts.push(...qcResult.artifacts);
-
-  await ctx.breakpoint({
+  let qcResult = await ctx.task(spatialQualityControlTask, { projectName, adata: loadingResult.adata, minCounts, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      qcResult = await ctx.task(spatialQualityControlTask, { ...{ projectName, adata: loadingResult.adata, minCounts, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Spatial QC complete. ${qcResult.spotsRetained} spots retained. Review QC metrics?`,
     title: 'Spatial QC Review',
-    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, qcMetrics: qcResult.metrics, files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Normalization
   const normResult = await ctx.task(spatialNormalizationTask, { projectName, adata: qcResult.filteredAdata, outputDir });
   artifacts.push(...normResult.artifacts);
@@ -65,15 +74,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...clusteringResult.artifacts);
 
   // Phase 5: Spatially Variable Gene Detection
-  const svgResult = await ctx.task(spatiallyVariableGenesTask, { projectName, adata: clusteringResult.clusteredAdata, outputDir });
-  artifacts.push(...svgResult.artifacts);
-
-  await ctx.breakpoint({
+  let svgResult = await ctx.task(spatiallyVariableGenesTask, { projectName, adata: clusteringResult.clusteredAdata, outputDir });
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      svgResult = await ctx.task(spatiallyVariableGenesTask, { ...{ projectName, adata: clusteringResult.clusteredAdata, outputDir }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Identified ${svgResult.svgCount} spatially variable genes. Review SVG results?`,
     title: 'SVG Analysis Review',
-    context: { runId: ctx.runId, topSVGs: svgResult.topGenes, files: svgResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, topSVGs: svgResult.topGenes, files: svgResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Cell Type Deconvolution
   const deconvResult = await ctx.task(cellTypeDeconvolutionTask, { projectName, adata: clusteringResult.clusteredAdata, scReferenceData, outputDir });
   artifacts.push(...deconvResult.artifacts);
@@ -87,15 +105,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...histologyResult.artifacts);
 
   // Phase 9: Report Generation
-  const reportResult = await ctx.task(generateSpatialReportTask, { projectName, platform, qcResult, clusteringResult, svgResult, deconvResult, lrResult, histologyResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateSpatialReportTask, { projectName, platform, qcResult, clusteringResult, svgResult, deconvResult, lrResult, histologyResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateSpatialReportTask, { ...{ projectName, platform, qcResult, clusteringResult, svgResult, deconvResult, lrResult, histologyResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Spatial Transcriptomics Analysis Complete. ${clusteringResult.nDomains} spatial domains, ${svgResult.svgCount} SVGs. Approve results?`,
     title: 'Spatial Analysis Complete',
-    context: { runId: ctx.runId, summary: { domains: clusteringResult.nDomains, svgs: svgResult.svgCount, cellTypes: deconvResult.cellTypesDeconvolved }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { domains: clusteringResult.nDomains, svgs: svgResult.svgCount, cellTypes: deconvResult.cellTypesDeconvolved }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -112,8 +139,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/spatial-transcriptomics', timestamp: startTime, platform }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const spatialDataLoadingTask = defineTask('spatial-data-loading', (args, taskCtx) => ({
   kind: 'agent',
   title: `Spatial Data Loading - ${args.projectName}`,

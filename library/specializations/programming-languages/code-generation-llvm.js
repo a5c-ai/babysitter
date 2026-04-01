@@ -58,25 +58,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Type Mapping');
 
-  const typeMapping = await ctx.task(typeMappingTask, {
+  let typeMapping = await ctx.task(typeMappingTask, {
     languageName,
     llvmSetup,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...typeMapping.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      typeMapping = await ctx.task(typeMappingTask, { ...{
+    languageName,
+    llvmSetup,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Type mapping complete. ${typeMapping.typeMappings} types mapped to LLVM. Proceed with expression codegen?`,
     title: 'Type Mapping Review',
     context: {
       runId: ctx.runId,
       typeMappings: typeMapping.typeMappings,
       files: typeMapping.artifacts.map(a => ({ path: a.path, format: a.format || 'cpp' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: EXPRESSION CODE GENERATION
   // ============================================================================
@@ -164,7 +178,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Debug Information');
 
-  const debugInfoGen = await ctx.task(debugInfoTask, {
+  let debugInfoGen = await ctx.task(debugInfoTask, {
     languageName,
     llvmSetup,
     debugInfo,
@@ -172,9 +186,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...debugInfoGen.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      debugInfoGen = await ctx.task(debugInfoTask, { ...{
+    languageName,
+    llvmSetup,
+    debugInfo,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Debug info generation ${debugInfo ? 'enabled' : 'disabled'}. DWARF support: ${debugInfoGen.dwarfSupport}. Continue with testing?`,
     title: 'Debug Info Review',
     context: {
@@ -182,9 +205,15 @@ export async function process(inputs, ctx) {
       debugInfo,
       dwarfSupport: debugInfoGen.dwarfSupport,
       files: debugInfoGen.artifacts.map(a => ({ path: a.path, format: a.format || 'cpp' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: TESTING
   // ============================================================================
@@ -224,7 +253,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Generating Documentation');
 
-  const documentation = await ctx.task(codegenDocumentationTask, {
+  let documentation = await ctx.task(codegenDocumentationTask, {
     languageName,
     llvmSetup,
     typeMapping,
@@ -235,9 +264,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(codegenDocumentationTask, { ...{
+    languageName,
+    llvmSetup,
+    typeMapping,
+    optimizationConfig,
+    debugInfoGen,
+    testSuite,
+    benchmarks,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `LLVM Code Generation Complete for ${languageName}! Test coverage: ${testSuite.coverage}%. Generated code performance: ${benchmarks.performanceRating}. Review deliverables?`,
     title: 'Code Generation Complete',
     context: {
@@ -253,9 +294,15 @@ export async function process(inputs, ctx) {
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' },
         { path: documentation.architecturePath, format: 'markdown', label: 'Architecture Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -300,8 +347,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -140,7 +140,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Integrating frontend with API');
 
-  const apiIntegration = await ctx.task(apiIntegrationTask, {
+  let apiIntegration = await ctx.task(apiIntegrationTask, {
     projectName,
     apiDevelopment,
     outputDir
@@ -148,8 +148,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...apiIntegration.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      apiIntegration = await ctx.task(apiIntegrationTask, { ...{
+    projectName,
+    apiDevelopment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MERN Stack setup complete for ${projectName}. Backend with ${apiDevelopment.endpoints.length} endpoints, React frontend with ${stateManagement}. Approve configuration?`,
     title: 'MERN Stack Review',
     context: {
@@ -158,9 +166,15 @@ export async function process(inputs, ctx) {
       models: databaseSetup.models,
       components: frontendSetup.components,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: TESTING
   // ============================================================================
@@ -240,8 +254,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

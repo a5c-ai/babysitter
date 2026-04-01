@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Employer Branding Strategy for ${companyName}`);
 
   // Phase 1: Brand Audit and Assessment
-  const brandAudit = await ctx.task(brandAuditTask, {
+  let brandAudit = await ctx.task(brandAuditTask, {
     companyName,
     industry,
     currentBrandPerception,
@@ -48,9 +48,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...brandAudit.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      brandAudit = await ctx.task(brandAuditTask, { ...{
+    companyName,
+    industry,
+    currentBrandPerception,
+    competitorBrands,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Brand audit completed for ${companyName}. Current brand strength: ${brandAudit.brandStrengthScore}/100. Review audit findings?`,
     title: 'Brand Audit Review',
     context: {
@@ -60,9 +69,15 @@ export async function process(inputs, ctx) {
       weaknesses: brandAudit.weaknesses,
       competitorAnalysis: brandAudit.competitorAnalysis,
       files: brandAudit.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Employee Research and Insights
   const employeeResearch = await ctx.task(employeeResearchTask, {
     companyName,
@@ -74,7 +89,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...employeeResearch.artifacts);
 
   // Phase 3: EVP Development
-  const evpDevelopment = await ctx.task(evpDevelopmentTask, {
+  let evpDevelopment = await ctx.task(evpDevelopmentTask, {
     companyName,
     industry,
     brandAudit,
@@ -84,9 +99,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...evpDevelopment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      evpDevelopment = await ctx.task(evpDevelopmentTask, { ...{
+    companyName,
+    industry,
+    brandAudit,
+    employeeResearch,
+    cultureAttributes,
+    targetRoles,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Employee Value Proposition developed. Core pillars: ${evpDevelopment.evpPillars.join(', ')}. Review and approve EVP framework?`,
     title: 'EVP Review',
     context: {
@@ -95,9 +121,15 @@ export async function process(inputs, ctx) {
       evpPillars: evpDevelopment.evpPillars,
       targetAudienceMessages: evpDevelopment.targetAudienceMessages,
       files: evpDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Brand Messaging Framework
   const brandMessaging = await ctx.task(brandMessagingTask, {
     companyName,
@@ -165,7 +197,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...advocacyProgram.artifacts);
 
   // Phase 10: Campaign Planning
-  const campaignPlan = await ctx.task(campaignPlanningTask, {
+  let campaignPlan = await ctx.task(campaignPlanningTask, {
     companyName,
     evp: evpDevelopment.evp,
     socialMediaStrategy,
@@ -176,9 +208,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...campaignPlan.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      campaignPlan = await ctx.task(campaignPlanningTask, { ...{
+    companyName,
+    evp: evpDevelopment.evp,
+    socialMediaStrategy,
+    contentStrategy: contentStrategy.strategy,
+    targetRoles,
+    hiringGoals,
+    budget,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Talent attraction campaign plan developed. Target reach: ${campaignPlan.targetReach}. Review campaign plan and budget allocation?`,
     title: 'Campaign Plan Review',
     context: {
@@ -188,9 +232,15 @@ export async function process(inputs, ctx) {
       targetReach: campaignPlan.targetReach,
       expectedResults: campaignPlan.expectedResults,
       files: campaignPlan.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Metrics and Measurement Framework
   const metricsFramework = await ctx.task(metricsFrameworkTask, {
     companyName,
@@ -242,8 +292,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const brandAuditTask = defineTask('brand-audit', (args, taskCtx) => ({
   kind: 'agent',

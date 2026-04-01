@@ -129,7 +129,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing tradeoff analysis');
-  const synthesis = await ctx.task(biasVarianceSynthesisTask, {
+  let synthesis = await ctx.task(biasVarianceSynthesisTask, {
     errorDecomposition,
     biasAnalysis,
     varianceAnalysis,
@@ -145,8 +145,22 @@ export async function process(inputs, ctx) {
 
   const balanceMet = synthesis.balanceScore >= targetBalance;
 
-  // Breakpoint: Review bias-variance analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(biasVarianceSynthesisTask, { ...{
+    errorDecomposition,
+    biasAnalysis,
+    varianceAnalysis,
+    complexityAnalysis,
+    learningCurves,
+    regularizationAnalysis,
+    optimalComplexity,
+    targetBalance,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bias-variance analysis complete. Balance: ${synthesis.balanceScore}/${targetBalance}. ${balanceMet ? 'Balance target met!' : 'Further tuning may be needed.'} Review analysis?`,
     title: 'Bias-Variance Tradeoff Results',
     context: {
@@ -165,9 +179,15 @@ export async function process(inputs, ctx) {
         balanceScore: synthesis.balanceScore,
         balanceMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -194,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

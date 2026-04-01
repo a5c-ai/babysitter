@@ -112,7 +112,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...entityLinking.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: NORMALIZATION RULES
   // ============================================================================
@@ -129,14 +128,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...normalization.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: COMPOSITE ENTITY HANDLING
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Implementing composite entity handling');
 
-  const compositeHandling = await ctx.task(compositeEntityTask, {
+  let compositeHandling = await ctx.task(compositeEntityTask, {
     projectName,
     entityTypes: entityDefinition.entities,
     slotSchema,
@@ -145,8 +143,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...compositeHandling.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compositeHandling = await ctx.task(compositeEntityTask, { ...{
+    projectName,
+    entityTypes: entityDefinition.entities,
+    slotSchema,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Entity extraction system ${projectName} complete. ${entityDefinition.entities.length} entity types. Review implementation?`,
     title: 'Entity Extraction Review',
     context: {
@@ -160,9 +167,15 @@ export async function process(inputs, ctx) {
         enableNormalization
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -183,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

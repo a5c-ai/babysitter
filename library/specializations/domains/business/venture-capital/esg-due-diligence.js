@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: ESG Risk Scoring
   ctx.log('info', 'Calculating ESG risk scores');
-  const esgScoring = await ctx.task(esgScoringTask, {
+  let esgScoring = await ctx.task(esgScoringTask, {
     environmentalAssessment,
     socialAssessment,
     governanceAssessment,
@@ -95,8 +95,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...esgScoring.artifacts);
 
-  // Breakpoint: Review ESG DD findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      esgScoring = await ctx.task(esgScoringTask, { ...{
+    environmentalAssessment,
+    socialAssessment,
+    governanceAssessment,
+    laborPractices,
+    supplyChainAssessment,
+    esgFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ESG DD complete for ${companyName}. Overall ESG score: ${esgScoring.overallScore}/100. Material risks: ${esgScoring.materialRisks.length}. Review findings?`,
     title: 'ESG Due Diligence Results',
     context: {
@@ -109,9 +121,15 @@ export async function process(inputs, ctx) {
         governanceScore: governanceAssessment.score,
         materialRisks: esgScoring.materialRisks.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate ESG DD Report
   ctx.log('info', 'Generating ESG due diligence report');
   const esgReport = await ctx.task(esgReportTask, {
@@ -159,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Environmental Assessment
+  // Task 1: Environmental Assessment
 export const environmentalAssessmentTask = defineTask('environmental-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess environmental factors',

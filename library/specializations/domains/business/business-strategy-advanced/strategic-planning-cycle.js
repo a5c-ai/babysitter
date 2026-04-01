@@ -79,18 +79,30 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Generate Strategic Plan Document
   ctx.log('info', 'Phase 9: Generating comprehensive strategic plan document');
-  const strategicPlanDoc = await ctx.task(strategicPlanDocumentTask, {
+  let strategicPlanDoc = await ctx.task(strategicPlanDocumentTask, {
     organizationName, planningPeriod, preparationPhase, externalAnalysis, internalAnalysis,
     strategyFormulation, strategySelection, implementationPlanning, resourceAllocation, communicationPlan, outputDir
   });
-  artifacts.push(...strategicPlanDoc.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      strategicPlanDoc = await ctx.task(strategicPlanDocumentTask, { ...{
+    organizationName, planningPeriod, preparationPhase, externalAnalysis, internalAnalysis,
+    strategyFormulation, strategySelection, implementationPlanning, resourceAllocation, communicationPlan, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategic planning cycle complete for ${organizationName}. Review the ${planningPeriod} strategic plan?`,
     title: 'Strategic Planning Cycle Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName, planningPeriod,
     strategicPlan: strategicPlanDoc.plan,

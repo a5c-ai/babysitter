@@ -101,7 +101,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing metrics display');
 
-  const metricsDisplay = await ctx.task(metricsDisplayTask, {
+  let metricsDisplay = await ctx.task(metricsDisplayTask, {
     projectName,
     language,
     framework,
@@ -110,8 +110,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsDisplay.artifacts);
 
-  // Quality Gate: Dashboard Widgets Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      metricsDisplay = await ctx.task(metricsDisplayTask, { ...{
+    projectName,
+    language,
+    framework,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Dashboard widgets created: charts, log viewer, metrics. Proceed with interactivity and refresh controls?`,
     title: 'Dashboard Widgets Review',
     context: {
@@ -119,9 +128,15 @@ export async function process(inputs, ctx) {
       projectName,
       widgets,
       files: artifacts.slice(-4).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ALERT INDICATORS
   // ============================================================================
@@ -219,7 +234,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating documentation');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     framework,
     layoutDesign,
@@ -230,8 +245,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    framework,
+    layoutDesign,
+    chartComponents,
+    keyboardShortcuts,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dashboard and Monitoring TUI complete for ${projectName}. Review and approve?`,
     title: 'Dashboard TUI Complete',
     context: {
@@ -247,9 +273,15 @@ export async function process(inputs, ctx) {
         { path: documentation.dashboardDocPath, format: 'markdown', label: 'Dashboard Documentation' },
         { path: layoutDesign.layoutPath, format: 'typescript', label: 'Dashboard Layout' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -275,8 +307,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

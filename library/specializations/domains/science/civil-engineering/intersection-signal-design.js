@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Controller and Cabinet Design
   ctx.log('info', 'Specifying controller and cabinet');
-  const controllerDesign = await ctx.task(controllerDesignTask, {
+  let controllerDesign = await ctx.task(controllerDesignTask, {
     projectId,
     phasingDesign,
     detectionDesign,
@@ -92,8 +92,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...controllerDesign.artifacts);
 
-  // Breakpoint: Review signal design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      controllerDesign = await ctx.task(controllerDesignTask, { ...{
+    projectId,
+    phasingDesign,
+    detectionDesign,
+    coordinationRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Signal design complete for ${projectId}. Cycle length: ${timingDesign.cycleLength}s. Review design?`,
     title: 'Traffic Signal Design Review',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
         detectorCount: detectionDesign.detectorCount,
         controllerType: controllerDesign.type
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Signal Head Layout
   ctx.log('info', 'Designing signal head layout');
   const signalHeadLayout = await ctx.task(signalHeadLayoutTask, {
@@ -194,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Signal Warrant Analysis
+  // Task 1: Signal Warrant Analysis
 export const warrantAnalysisTask = defineTask('warrant-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform signal warrant analysis',

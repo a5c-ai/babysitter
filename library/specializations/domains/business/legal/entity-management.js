@@ -68,14 +68,21 @@ async function formEntity(ctx, entityDetails, parentEntity, outputDir, artifacts
   artifacts.push(...documents.artifacts);
 
   // Phase 3: Filing
-  const filing = await ctx.task(entityFilingTask, {
+  let filing = await ctx.task(entityFilingTask, {
     entityDetails,
     documents,
     outputDir
   });
-  artifacts.push(...filing.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      filing = await ctx.task(entityFilingTask, { ...{
+    entityDetails,
+    documents,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Entity ${entityDetails.name} formation documents prepared. Ready to file in ${entityDetails.jurisdiction}?`,
     title: 'Entity Formation Review',
     context: {
@@ -83,9 +90,15 @@ async function formEntity(ctx, entityDetails, parentEntity, outputDir, artifacts
       entityName: entityDetails.name,
       jurisdiction: entityDetails.jurisdiction,
       files: documents.artifacts.map(a => ({ path: a.path, format: a.format || 'docx' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Post-Formation Setup
   const postFormation = await ctx.task(postFormationSetupTask, {
     entityDetails,
@@ -129,15 +142,24 @@ async function maintainEntity(ctx, entityId, outputDir, artifacts, startTime) {
 }
 
 async function dissolveEntity(ctx, entityId, outputDir, artifacts, startTime) {
-  const dissolution = await ctx.task(entityDissolutionTask, { entityId, outputDir });
-  artifacts.push(...dissolution.artifacts);
-
-  await ctx.breakpoint({
+  let dissolution = await ctx.task(entityDissolutionTask, { entityId, outputDir });
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      dissolution = await ctx.task(entityDissolutionTask, { ...{ entityId, outputDir }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Dissolution documents for ${entityId} prepared. Proceed with dissolution filing?`,
     title: 'Entity Dissolution Review',
-    context: { runId: ctx.runId, entityId }
-  });
-
+    context: { runId: ctx.runId, entityId },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   return {
     success: true,
     action: 'dissolve',

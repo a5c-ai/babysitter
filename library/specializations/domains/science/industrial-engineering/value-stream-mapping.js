@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Current State Map Creation
   ctx.log('info', 'Phase 3: Creating current state value stream map');
-  const currentStateMap = await ctx.task(currentStateMapTask, {
+  let currentStateMap = await ctx.task(currentStateMapTask, {
     currentStateData,
     currentMetrics,
     outputDir
@@ -63,8 +63,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...currentStateMap.artifacts);
 
-  // Breakpoint: Review current state
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      currentStateMap = await ctx.task(currentStateMapTask, { ...{
+    currentStateData,
+    currentMetrics,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Current state map complete. Lead time: ${currentStateMap.totalLeadTime} days, Value-added time: ${currentStateMap.valueAddedTime} hours, PCE: ${currentStateMap.processEfficiency.toFixed(1)}%. Review before future state design?`,
     title: 'Current State VSM Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
         inventoryLevels: currentStateMap.inventoryLevels
       },
       files: currentStateMap.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Waste Identification
   ctx.log('info', 'Phase 4: Identifying waste and improvement opportunities');
   const wasteIdentification = await ctx.task(wasteIdentificationTask, {
@@ -122,7 +136,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Metrics Dashboard
   ctx.log('info', 'Phase 8: Creating metrics tracking dashboard');
-  const metricsDashboard = await ctx.task(metricsDashboardTask, {
+  let metricsDashboard = await ctx.task(metricsDashboardTask, {
     currentStateMap,
     futureStateDesign,
     implementationRoadmap,
@@ -131,8 +145,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsDashboard.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metricsDashboard = await ctx.task(metricsDashboardTask, { ...{
+    currentStateMap,
+    futureStateDesign,
+    implementationRoadmap,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VSM analysis complete. Expected lead time reduction: ${futureStateDesign.expectedLeadTimeReduction}%. ${kaizenPlanning.kaizenEvents.length} kaizen events planned. Review implementation roadmap?`,
     title: 'VSM Analysis Results',
     context: {
@@ -145,9 +168,15 @@ export async function process(inputs, ctx) {
         implementationDuration: implementationRoadmap.totalDuration
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -178,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Product Family Selection
+  // Task 1: Product Family Selection
 export const productFamilyTask = defineTask('product-family-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define product family and value stream boundaries',

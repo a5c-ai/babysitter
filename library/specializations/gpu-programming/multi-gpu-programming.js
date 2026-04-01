@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...ncclIntegration.artifacts);
   }
-
   // Phase 5: Stream Management
   const streamManagement = await ctx.task(multiGpuStreamManagementTask, {
     projectName, numGpus, workloadPartitioning, outputDir
@@ -76,17 +75,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...synchronization.artifacts);
 
   // Phase 7: Scaling Analysis
-  const scalingAnalysis = await ctx.task(scalingAnalysisTask, {
+  let scalingAnalysis = await ctx.task(scalingAnalysisTask, {
     projectName, numGpus, workloadPartitioning, outputDir
   });
-  artifacts.push(...scalingAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scalingAnalysis = await ctx.task(scalingAnalysisTask, { ...{
+    projectName, numGpus, workloadPartitioning, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-GPU implementation complete for ${projectName}. Scaling efficiency: ${scalingAnalysis.efficiency}%. Review?`,
     title: 'Multi-GPU Programming Complete',
-    context: { runId: ctx.runId, scalingAnalysis }
-  });
-
+    context: { runId: ctx.runId, scalingAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: scalingAnalysis.efficiency >= 70,
     projectName,

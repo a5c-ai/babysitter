@@ -59,8 +59,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 3: Initial Review Checkpoint
-  await ctx.breakpoint('case-assignment-review', {
+  let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase3Review = await ctx.breakpoint('case-assignment-review', {
     title: 'Grievance Case Assignment Review',
     description: 'Review case classification and investigation assignment',
     artifacts: {
@@ -71,9 +73,15 @@ export async function process(inputs, ctx) {
       'Is the case properly classified?',
       'Is the assigned investigator appropriate?',
       'Are there any immediate risk mitigation needs?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Investigation Planning
   const investigationPlan = await ctx.task('plan-investigation', {
     caseClassification,
@@ -125,8 +133,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 8: Findings Review
-  await ctx.breakpoint('findings-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('findings-review', {
     title: 'Investigation Findings Review',
     description: 'Review investigation findings before resolution determination',
     artifacts: {
@@ -138,9 +148,15 @@ export async function process(inputs, ctx) {
       'Are the findings well-supported by evidence?',
       'Are there any additional investigation needs?',
       'Is legal consultation required before resolution?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Resolution Determination
   const resolutionDetermination = await ctx.task('determine-resolution', {
     findings,

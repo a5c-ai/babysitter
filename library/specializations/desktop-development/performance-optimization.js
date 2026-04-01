@@ -47,15 +47,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...memoryOpt.artifacts);
 
   // Phase 4: UI Responsiveness
-  const uiOpt = await ctx.task(optimizeUiResponsivenessTask, { projectName, framework, baseline, outputDir });
-  artifacts.push(...uiOpt.artifacts);
-
-  await ctx.breakpoint({
+  let uiOpt = await ctx.task(optimizeUiResponsivenessTask, { projectName, framework, baseline, outputDir });
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      uiOpt = await ctx.task(optimizeUiResponsivenessTask, { ...{ projectName, framework, baseline, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Performance optimizations identified. Startup: ${startupOpt.improvement}%, Memory: ${memoryOpt.improvement}%, UI: ${uiOpt.improvement}%. Apply optimizations?`,
     title: 'Performance Optimization Review',
-    context: { runId: ctx.runId, baseline: baseline.metrics, improvements: { startup: startupOpt.improvement, memory: memoryOpt.improvement, ui: uiOpt.improvement } }
-  });
-
+    context: { runId: ctx.runId, baseline: baseline.metrics, improvements: { startup: startupOpt.improvement, memory: memoryOpt.improvement, ui: uiOpt.improvement } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Bundle Optimization
   const bundleOpt = await ctx.task(optimizeBundleTask, { projectName, framework, outputDir });
   artifacts.push(...bundleOpt.artifacts);
@@ -69,17 +78,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...lazyLoading.artifacts);
 
   // Phase 8: Validation
-  const validation = await ctx.task(validatePerformanceTask, { projectName, framework, performanceTargets, baseline, startupOpt, memoryOpt, uiOpt, outputDir });
+  let validation = await ctx.task(validatePerformanceTask, { projectName, framework, performanceTargets, baseline, startupOpt, memoryOpt, uiOpt, outputDir });
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.validationScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validatePerformanceTask, { ...{ projectName, framework, performanceTargets, baseline, startupOpt, memoryOpt, uiOpt, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance Optimization Complete! Score: ${validation.validationScore}/100. Targets met: ${validation.targetsMet}/${validation.totalTargets}. Approve?`,
     title: 'Performance Optimization Complete',
-    context: { runId: ctx.runId, summary: { validationScore: validation.validationScore, targetsMet: validation.targetsMet } }
-  });
-
+    context: { runId: ctx.runId, summary: { validationScore: validation.validationScore, targetsMet: validation.targetsMet } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validationPassed,
     projectName,

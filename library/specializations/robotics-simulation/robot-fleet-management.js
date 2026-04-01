@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const alertingSystem = await ctx.task(alertingSystemTask, { fleetName, monitoringDashboard, outputDir });
   artifacts.push(...alertingSystem.artifacts);
 
-  const systemTesting = await ctx.task(fleetSystemTestingTask, { fleetName, fleetSize, outputDir });
-  artifacts.push(...systemTesting.artifacts);
-
-  await ctx.breakpoint({
+  let systemTesting = await ctx.task(fleetSystemTestingTask, { fleetName, fleetSize, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systemTesting = await ctx.task(fleetSystemTestingTask, { ...{ fleetName, fleetSize, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fleet Management System Complete for ${fleetName}. Fleet utilization: ${analyticsReporting.utilization}%, System uptime: ${systemTesting.uptime}%. Review?`,
     title: 'Fleet Management Complete',
-    context: { runId: ctx.runId, utilization: analyticsReporting.utilization, uptime: systemTesting.uptime }
-  });
-
+    context: { runId: ctx.runId, utilization: analyticsReporting.utilization, uptime: systemTesting.uptime },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: systemTesting.uptime >= 99 && analyticsReporting.utilization >= 70,
     fleetName,

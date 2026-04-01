@@ -106,7 +106,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Detailing and Development Lengths
   ctx.log('info', 'Developing reinforcement details');
-  const detailing = await ctx.task(detailingTask, {
+  let detailing = await ctx.task(detailingTask, {
     projectId,
     beamDesign,
     columnDesign,
@@ -119,8 +119,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...detailing.artifacts);
 
-  // Breakpoint: Review concrete design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      detailing = await ctx.task(detailingTask, { ...{
+    projectId,
+    beamDesign,
+    columnDesign,
+    slabDesign,
+    shearWallDesign,
+    foundationDesign,
+    designCriteria,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reinforced concrete design complete for ${projectId}. Review design calculations and reinforcement schedules?`,
     title: 'Reinforced Concrete Design Review',
     context: {
@@ -134,9 +147,15 @@ export async function process(inputs, ctx) {
         totalConcreteVolume: beamDesign.concreteVolume + columnDesign.concreteVolume + slabDesign.concreteVolume,
         totalReinforcementWeight: detailing.totalReinforcementWeight
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Reinforcement Schedules
   ctx.log('info', 'Generating reinforcement schedules');
   const reinforcementSchedules = await ctx.task(reinforcementSchedulesTask, {
@@ -197,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Design Criteria and Material Properties
+  // Task 1: Design Criteria and Material Properties
 export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish design criteria and material properties',

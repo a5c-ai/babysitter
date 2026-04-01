@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Synthesis Development
   ctx.log('info', 'Developing synthesis');
-  const synthesisDevelopment = await ctx.task(synthesisDevelopmentTask, {
+  let synthesisDevelopment = await ctx.task(synthesisDevelopmentTask, {
     positions: positionsIdentification.positions,
     debates: debatesMapping.debates,
     history: historicalTracing.development,
@@ -93,8 +93,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...synthesisDevelopment.artifacts);
 
-  // Breakpoint: Review literature review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesisDevelopment = await ctx.task(synthesisDevelopmentTask, { ...{
+    positions: positionsIdentification.positions,
+    debates: debatesMapping.debates,
+    history: historicalTracing.development,
+    gaps: gapIdentification.gaps,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Literature review complete. Identified ${positionsIdentification.positions.length} positions and ${gapIdentification.gaps.length} gaps. Review the synthesis?`,
     title: 'Philosophical Literature Review Results',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
         debatesCount: debatesMapping.debates.length,
         gapsCount: gapIdentification.gaps.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Literature Review Report
   ctx.log('info', 'Generating literature review report');
   const reviewReport = await ctx.task(literatureReportTask, {
@@ -148,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const topicScopingTask = defineTask('topic-scoping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Scope the topic for review',

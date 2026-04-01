@@ -47,17 +47,25 @@ export async function process(inputs, ctx) {
     templateResult = await ctx.task(templateSearchTask, { projectName, sequences, outputDir });
     artifacts.push(...templateResult.artifacts);
   }
-
   // Phase 3: Structure Prediction
-  const predictionResult = await ctx.task(structurePredictionTask, { projectName, sequences, modelingMethod, templates: templateResult?.templates, outputDir });
-  artifacts.push(...predictionResult.artifacts);
-
-  await ctx.breakpoint({
+  let predictionResult = await ctx.task(structurePredictionTask, { projectName, sequences, modelingMethod, templates: templateResult?.templates, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      predictionResult = await ctx.task(structurePredictionTask, { ...{ projectName, sequences, modelingMethod, templates: templateResult?.templates, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Structure prediction complete for ${predictionResult.structuresGenerated} proteins. Average pLDDT: ${predictionResult.averagePLDDT}. Review structures?`,
     title: 'Structure Prediction Review',
-    context: { runId: ctx.runId, structures: predictionResult.structures, qualityScores: predictionResult.qualityScores, files: predictionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, structures: predictionResult.structures, qualityScores: predictionResult.qualityScores, files: predictionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Structure Refinement
   const refinementResult = await ctx.task(structureRefinementTask, { projectName, structures: predictionResult.structures, outputDir });
   artifacts.push(...refinementResult.artifacts);
@@ -75,15 +83,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...annotationResult.artifacts);
 
   // Phase 8: Report Generation
-  const reportResult = await ctx.task(generateStructureReportTask, { projectName, seqAnalysisResult, predictionResult, refinementResult, qualityResult, bindingSiteResult, annotationResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateStructureReportTask, { projectName, seqAnalysisResult, predictionResult, refinementResult, qualityResult, bindingSiteResult, annotationResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateStructureReportTask, { ...{ projectName, seqAnalysisResult, predictionResult, refinementResult, qualityResult, bindingSiteResult, annotationResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Protein Structure Analysis Complete. ${qualityResult.highQualityStructures} high-quality structures, ${bindingSiteResult.totalSites} binding sites identified. Approve results?`,
     title: 'Structure Analysis Complete',
-    context: { runId: ctx.runId, summary: { structures: predictionResult.structuresGenerated, highQuality: qualityResult.highQualityStructures, bindingSites: bindingSiteResult.totalSites }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { structures: predictionResult.structuresGenerated, highQuality: qualityResult.highQualityStructures, bindingSites: bindingSiteResult.totalSites }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -99,8 +116,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/protein-structure-prediction', timestamp: startTime, modelingMethod }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const sequenceAnalysisTask = defineTask('sequence-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Sequence Analysis - ${args.projectName}`,

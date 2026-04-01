@@ -41,23 +41,37 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'design-record', data: designRecordVerification });
 
   // Phase 3: Material and Process Verification (Form 2)
-  const materialProcessVerification = await ctx.task(materialProcessTask, {
+  let materialProcessVerification = await ctx.task(materialProcessTask, {
     manufacturingRecords: inputs.manufacturingRecords,
     drawing: inputs.drawing,
     specifications: faiPlanning.specifications
   });
   artifacts.push({ phase: 'material-process', data: materialProcessVerification });
 
-  // Breakpoint: Material and Process Review
-  await ctx.breakpoint('material-process-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      materialProcessVerification = await ctx.task(materialProcessTask, { ...{
+    manufacturingRecords: inputs.manufacturingRecords,
+    drawing: inputs.drawing,
+    specifications: faiPlanning.specifications
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('material-process-review', {
     question: 'Review material certifications and process records. All conforming?',
     context: {
       materialStatus: materialProcessVerification.materialStatus,
       processStatus: materialProcessVerification.processStatus,
       nonconformances: materialProcessVerification.nonconformances
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Dimensional Inspection Planning
   const inspectionPlanning = await ctx.task(inspectionPlanningTask, {
     balloonDrawing: faiPlanning.balloonDrawing,
@@ -99,25 +113,39 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'special-process', data: specialProcessVerification });
 
   // Phase 9: Nonconformance Disposition
-  const nonconformanceDisposition = await ctx.task(nonconformanceTask, {
+  let nonconformanceDisposition = await ctx.task(nonconformanceTask, {
     dimensionalResults: dimensionalInspection.results,
     materialProcessVerification: materialProcessVerification,
     characteristicAccountability: characteristicAccountability
   });
   artifacts.push({ phase: 'nonconformance', data: nonconformanceDisposition });
 
-  // Breakpoint: FAI Results Review
-  await ctx.breakpoint('fai-results-review', {
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      nonconformanceDisposition = await ctx.task(nonconformanceTask, { ...{
+    dimensionalResults: dimensionalInspection.results,
+    materialProcessVerification: materialProcessVerification,
+    characteristicAccountability: characteristicAccountability
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint('fai-results-review', {
     question: 'Review FAI results. Proceed with FAIR package compilation?',
     context: {
       characteristicsInSpec: characteristicAccountability.inSpecCount,
       characteristicsOutOfSpec: characteristicAccountability.outOfSpecCount,
       nonconformances: nonconformanceDisposition.count
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: FAIR Package Compilation
-  const fairPackage = await ctx.task(fairPackageTask, {
+  let fairPackage = await ctx.task(fairPackageTask, {
     partNumber: inputs.partNumber,
     serialNumber: inputs.serialNumber,
     designRecordVerification: designRecordVerification,
@@ -128,17 +156,35 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'fair-package', data: fairPackage });
 
-  // Final Breakpoint: FAIR Approval
-  await ctx.breakpoint('fair-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      fairPackage = await ctx.task(fairPackageTask, { ...{
+    partNumber: inputs.partNumber,
+    serialNumber: inputs.serialNumber,
+    designRecordVerification: designRecordVerification,
+    materialProcessVerification: materialProcessVerification,
+    characteristicAccountability: characteristicAccountability,
+    specialProcessVerification: specialProcessVerification,
+    nonconformanceDisposition: nonconformanceDisposition
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('fair-approval', {
     question: 'Approve FAIR package for submission?',
     context: {
       partNumber: inputs.partNumber,
       fairNumber: fairPackage.fairNumber,
       status: fairPackage.overallStatus,
       openItems: fairPackage.openItems
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -160,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const faiPlanningTask = defineTask('fai-planning', (args) => ({
+  const faiPlanningTask = defineTask('fai-planning', (args) => ({
   kind: 'agent',
   title: 'FAI Planning and Balloon Drawing',
   agent: {

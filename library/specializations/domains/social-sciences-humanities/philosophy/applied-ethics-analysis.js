@@ -49,7 +49,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...stakeholders.artifacts);
   }
-
   // Task 3: Framework Applications (parallel for each framework)
   const frameworkResults = [];
   for (const framework of frameworks) {
@@ -64,7 +63,6 @@ export async function process(inputs, ctx) {
     frameworkResults.push(frameworkAnalysis);
     artifacts.push(...frameworkAnalysis.artifacts);
   }
-
   // Task 4: Framework Comparison and Synthesis
   ctx.log('info', 'Comparing and synthesizing framework results');
   const frameworkSynthesis = await ctx.task(frameworkSynthesisTask, {
@@ -77,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Ethical Recommendation Development
   ctx.log('info', 'Developing ethical recommendations');
-  const recommendations = await ctx.task(recommendationDevelopmentTask, {
+  let recommendations = await ctx.task(recommendationDevelopmentTask, {
     caseAnalysis,
     frameworkResults,
     synthesis: frameworkSynthesis.synthesis,
@@ -87,8 +85,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendations.artifacts);
 
-  // Breakpoint: Review ethics analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      recommendations = await ctx.task(recommendationDevelopmentTask, { ...{
+    caseAnalysis,
+    frameworkResults,
+    synthesis: frameworkSynthesis.synthesis,
+    stakeholders: stakeholders?.identified,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Applied ethics analysis complete. Analyzed using ${frameworks.length} frameworks. ${frameworkSynthesis.synthesis.consensus ? 'Frameworks reach consensus.' : 'Frameworks diverge.'} Review the analysis?`,
     title: 'Applied Ethics Analysis Results',
     context: {
@@ -101,9 +109,15 @@ export async function process(inputs, ctx) {
         hasConsensus: frameworkSynthesis.synthesis.consensus,
         recommendationCount: recommendations.recommendations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Ethics Analysis Report
   ctx.log('info', 'Generating ethics analysis report');
   const analysisReport = await ctx.task(ethicsReportTask, {
@@ -147,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Case Analysis
+  // Task 1: Case Analysis
 export const caseAnalysisTask = defineTask('case-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze ethical case and identify issues',

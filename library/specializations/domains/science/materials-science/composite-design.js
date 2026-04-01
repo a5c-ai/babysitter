@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Failure Analysis
   ctx.log('info', 'Phase 5: Performing failure analysis');
-  const failureAnalysis = await ctx.task(analyzeFailure, {
+  let failureAnalysis = await ctx.task(analyzeFailure, {
     laminateStresses: cltAnalysis.stresses,
     plyStrengths: micromechanicsAnalysis.plyStrengths,
     failureCriteria: inputs.failureCriteria || ['Tsai-Wu', 'Puck', 'LaRC'],
@@ -101,8 +101,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(failureAnalysis.artifacts || []));
 
-  // Quality Gate: Review initial design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      failureAnalysis = await ctx.task(analyzeFailure, { ...{
+    laminateStresses: cltAnalysis.stresses,
+    plyStrengths: micromechanicsAnalysis.plyStrengths,
+    failureCriteria: inputs.failureCriteria || ['Tsai-Wu', 'Puck', 'LaRC'],
+    designAllowables: inputs.designAllowables
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review the laminate design and failure analysis. Is the design adequate for the load cases?',
     title: 'Laminate Design Review',
     context: {
@@ -114,9 +123,15 @@ export async function process(inputs, ctx) {
         criticalMode: failureAnalysis.criticalMode
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Design Optimization
   ctx.log('info', 'Phase 6: Optimizing laminate design');
   const designOptimization = await ctx.task(optimizeLaminate, {

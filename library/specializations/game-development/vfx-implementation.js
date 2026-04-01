@@ -48,15 +48,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...postProcessing.artifacts);
 
   // Phase 7: VFX Optimization
-  const optimization = await ctx.task(vfxOptimizationTask, { projectName, performanceBudget, combatEffects, envEffects, outputDir });
-  artifacts.push(...optimization.artifacts);
-
-  await ctx.breakpoint({
+  let optimization = await ctx.task(vfxOptimizationTask, { projectName, performanceBudget, combatEffects, envEffects, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimization = await ctx.task(vfxOptimizationTask, { ...{ projectName, performanceBudget, combatEffects, envEffects, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VFX implementation complete for ${projectName}. ${combatEffects.effectCount + envEffects.effectCount} effects created. Performance: ${optimization.withinBudget ? 'Within budget' : 'Needs work'}. Review?`,
     title: 'VFX Implementation Review',
-    context: { runId: ctx.runId, combatEffects, envEffects, optimization }
-  });
-
+    context: { runId: ctx.runId, combatEffects, envEffects, optimization },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

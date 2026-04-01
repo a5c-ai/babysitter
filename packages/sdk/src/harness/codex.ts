@@ -26,6 +26,8 @@ import type {
   HarnessInstallOptions,
   HarnessInstallResult,
 } from "./types";
+import type { PromptContext } from "../prompts/types";
+import { createCodexContext } from "../prompts/context";
 import {
   getInstalledCodexSkillDir,
   installCliViaNpm,
@@ -442,6 +444,10 @@ export function createCodexAdapter(): HarnessAdapter {
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
       return installCodexPlugin(options);
+    },
+
+    getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
+      return createCodexContext(opts);
     },
   };
 }

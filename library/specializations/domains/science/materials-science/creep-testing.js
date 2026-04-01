@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Specimen Preparation
   ctx.log('info', 'Phase 1: Preparing specimens');
-  const specimenPrep = await ctx.task(creepSpecimenPrepTask, {
+  let specimenPrep = await ctx.task(creepSpecimenPrepTask, {
     sampleId,
     testType,
     temperature,
@@ -71,9 +71,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...creepResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        specimenPrep = await ctx.task(creepSpecimenPrepTask, { ...{
+    sampleId,
+    testType,
+    temperature,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Creep testing in progress for ${sampleId}. Minimum creep rate: ${creepResults.minimumCreepRate} %/hr. Continue monitoring or analyze?`,
       title: 'Creep Testing Status',
       context: {
@@ -86,9 +94,15 @@ export async function process(inputs, ctx) {
           timeElapsed: creepResults.timeElapsed
         },
         files: creepResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Stress Rupture Testing
   if (testType === 'stress-rupture' || testType === 'creep-rupture') {
@@ -103,7 +117,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...ruptureResults.artifacts);
   }
-
   // Phase 4: Elevated Temperature Tensile Testing
   if (testType === 'elevated-tensile') {
     ctx.log('info', 'Phase 4: Performing elevated temperature tensile testing');
@@ -117,7 +130,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...elevatedTensileResults.artifacts);
   }
-
   // Phase 5: Thermal Fatigue Testing
   if (testType === 'thermal-fatigue') {
     ctx.log('info', 'Phase 5: Performing thermal fatigue testing');
@@ -131,7 +143,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...thermalFatigueResults.artifacts);
   }
-
   // Phase 6: Life Modeling
   ctx.log('info', 'Phase 6: Performing life modeling');
   const lifeModel = await ctx.task(creepLifeModelingTask, {
@@ -222,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Specimen Preparation
+  // Task 1: Specimen Preparation
 export const creepSpecimenPrepTask = defineTask('creep-specimen-prep', (args, taskCtx) => ({
   kind: 'agent',
   title: `Creep Specimen Preparation - ${args.sampleId}`,

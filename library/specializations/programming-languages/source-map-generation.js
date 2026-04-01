@@ -113,16 +113,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating Documentation');
 
-  const documentation = await ctx.task(sourceMapDocumentationTask, {
+  let documentation = await ctx.task(sourceMapDocumentationTask, {
     languageName,
     sourceMapVersion,
     integration,
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(sourceMapDocumentationTask, { ...{
+    languageName,
+    sourceMapVersion,
+    integration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Source Map Generation Complete for ${languageName}! Version ${sourceMapVersion}, Test coverage: ${testSuite.coverage}%. Review deliverables?`,
     title: 'Source Map Complete',
     context: {
@@ -136,9 +144,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Source Map Generator' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -165,8 +179,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

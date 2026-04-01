@@ -128,7 +128,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating comprehensive VRIO report');
-  const vrioReport = await ctx.task(vrioReportTask, {
+  let vrioReport = await ctx.task(vrioReportTask, {
     organizationName,
     inventoryResult,
     valueAssessment,
@@ -142,8 +142,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...vrioReport.artifacts);
 
-  // Breakpoint: Review VRIO analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      vrioReport = await ctx.task(vrioReportTask, { ...{
+    organizationName,
+    inventoryResult,
+    valueAssessment,
+    rarityAssessment,
+    imitabilityAssessment,
+    organizationAssessment,
+    competitiveClassification,
+    investmentPriorities,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VRIO analysis complete for ${organizationName}. ${competitiveClassification.sustainedAdvantages?.length || 0} sustained competitive advantages identified. Review?`,
     title: 'VRIO Resource Analysis Review',
     context: {
@@ -164,9 +178,15 @@ export async function process(inputs, ctx) {
           competitiveDisadvantage: competitiveClassification.competitiveDisadvantage?.length || 0
         }
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -193,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

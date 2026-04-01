@@ -52,7 +52,6 @@ export async function process(inputs, ctx) {
     textAnalyses.push(textAnalysis);
     artifacts.push(...textAnalysis.artifacts);
   }
-
   // Task 3: Systematic Comparison
   ctx.log('info', 'Conducting systematic comparison');
   const systematicComparison = await ctx.task(systematicComparisonTask, {
@@ -87,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Synthesis and Integration
   ctx.log('info', 'Synthesizing comparative findings');
-  const synthesis = await ctx.task(synthesisTask, {
+  let synthesis = await ctx.task(synthesisTask, {
     textAnalyses,
     comparison: systematicComparison.comparison,
     traditions: traditionIdentification.traditions,
@@ -97,8 +96,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...synthesis.artifacts);
 
-  // Breakpoint: Review comparative analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(synthesisTask, { ...{
+    textAnalyses,
+    comparison: systematicComparison.comparison,
+    traditions: traditionIdentification.traditions,
+    controversies: controversyAnalysis.controversies,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Comparative textual analysis complete. Compared ${texts.length} texts. Found ${traditionIdentification.traditions.length} traditions and ${controversyAnalysis.controversies.length} controversies. Review the analysis?`,
     title: 'Comparative Textual Analysis Results',
     context: {
@@ -110,9 +119,15 @@ export async function process(inputs, ctx) {
         traditionsFound: traditionIdentification.traditions.length,
         controversiesFound: controversyAnalysis.controversies.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Comparative Report
   ctx.log('info', 'Generating comparative analysis report');
   const comparativeReport = await ctx.task(comparativeReportTask, {
@@ -153,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Text Preparation
+  // Task 1: Text Preparation
 export const textPreparationTask = defineTask('text-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare and align texts for comparison',

@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // Phase 4: Evaluate Each Ordering
   ctx.log('info', 'Evaluating alternative orderings');
   for (const ordering of generatedOrderings.orderings) {
-    const evaluation = await ctx.task(evaluateOrderingTask, {
+    let evaluation = await ctx.task(evaluateOrderingTask, {
       processDescription,
       ordering,
       stepAnalysis,
@@ -67,9 +67,18 @@ export async function process(inputs, ctx) {
       evaluation,
       timestamp: ctx.now()
     });
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      evaluation = await ctx.task(evaluateOrderingTask, { ...{
+      processDescription,
+      ordering,
+      stepAnalysis,
+      constraints,
+      domain
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Generated and evaluated ${alternativeOrderings.length} orderings. Review findings?`,
     title: 'Execution Order Scrambling - Orderings Evaluated',
     context: {
@@ -78,9 +87,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/alternative-orderings.json', format: 'json' },
         { path: 'artifacts/constraints.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Identify Order-Sensitive vs Order-Invariant Aspects
   ctx.log('info', 'Identifying order sensitivity');
   const orderSensitivity = await ctx.task(analyzeOrderSensitivityTask, {

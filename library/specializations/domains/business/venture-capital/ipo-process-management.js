@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Pricing and Allocation Strategy
   ctx.log('info', 'Developing pricing strategy');
-  const pricingStrategy = await ctx.task(pricingStrategyTask, {
+  let pricingStrategy = await ctx.task(pricingStrategyTask, {
     companyName,
     companyData,
     marketConditions,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...pricingStrategy.artifacts);
 
-  // Breakpoint: Review IPO preparation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pricingStrategy = await ctx.task(pricingStrategyTask, { ...{
+    companyName,
+    companyData,
+    marketConditions,
+    equityStory,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `IPO preparation complete for ${companyName}. Readiness score: ${ipoReadiness.score}/100. Target valuation: $${pricingStrategy.targetValuation}M. Review preparation?`,
     title: 'IPO Process Management',
     context: {
@@ -108,9 +118,15 @@ export async function process(inputs, ctx) {
         proposedPriceRange: pricingStrategy.priceRange,
         roadshowDuration: roadshowPrep.duration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Post-IPO Planning
   ctx.log('info', 'Planning post-IPO support');
   const postIPOPlanning = await ctx.task(postIPOTask, {
@@ -176,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: IPO Readiness Assessment
+  // Task 1: IPO Readiness Assessment
 export const ipoReadinessTask = defineTask('ipo-readiness', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess IPO readiness',

@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Policy: ${clientCertPolicy}, Revocation Checking: ${revocationChecking}`);
 
   // Phase 1: CA Infrastructure Setup
-  const caSetup = await ctx.task(caSetupTask, { projectName, caConfig, outputDir });
-  artifacts.push(...caSetup.artifacts);
-
-  await ctx.breakpoint({
+  let caSetup = await ctx.task(caSetupTask, { projectName, caConfig, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      caSetup = await ctx.task(caSetupTask, { ...{ projectName, caConfig, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: CA infrastructure configured. Root CA: ${caSetup.rootCA}. Proceed with server certificate configuration?`,
     title: 'CA Setup Review',
-    context: { runId: ctx.runId, caSetup: caSetup.configuration }
-  });
-
+    context: { runId: ctx.runId, caSetup: caSetup.configuration },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Server Certificate Configuration
   const serverCertConfig = await ctx.task(serverCertTask, { projectName, language, caSetup, outputDir });
   artifacts.push(...serverCertConfig.artifacts);
@@ -62,15 +71,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...certValidation.artifacts);
 
   // Phase 5: Revocation Checking (CRL/OCSP)
-  const revocationConfig = await ctx.task(revocationTask, { projectName, language, revocationChecking, caSetup, outputDir });
-  artifacts.push(...revocationConfig.artifacts);
-
-  await ctx.breakpoint({
+  let revocationConfig = await ctx.task(revocationTask, { projectName, language, revocationChecking, caSetup, outputDir });
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      revocationConfig = await ctx.task(revocationTask, { ...{ projectName, language, revocationChecking, caSetup, outputDir }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Phase 5 Complete: Revocation checking configured (${revocationConfig.method}). Proceed with certificate rotation?`,
     title: 'Revocation Checking Review',
-    context: { runId: ctx.runId, revocationMethod: revocationConfig.method }
-  });
-
+    context: { runId: ctx.runId, revocationMethod: revocationConfig.method },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Certificate Rotation
   const certRotation = await ctx.task(certRotationTask, { projectName, language, outputDir });
   artifacts.push(...certRotation.artifacts);
@@ -80,7 +98,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...identityExtraction.artifacts);
 
   // Phase 8: Testing
-  const testSuite = await ctx.task(testSuiteTask, { projectName, language, clientCertPolicy, outputDir });
+  let testSuite = await ctx.task(testSuiteTask, { projectName, language, clientCertPolicy, outputDir });
   artifacts.push(...testSuite.artifacts);
 
   // Phase 9: Documentation and Validation
@@ -88,14 +106,23 @@ export async function process(inputs, ctx) {
     () => ctx.task(documentationTask, { projectName, caSetup, serverCertConfig, clientCertConfig, certValidation, revocationConfig, certRotation, outputDir }),
     () => ctx.task(validationTask, { projectName, testSuite, outputDir })
   ]);
-  artifacts.push(...documentation.artifacts, ...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testSuite = await ctx.task(testSuiteTask, { ...{ projectName, language, clientCertPolicy, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `mTLS Implementation Complete for ${projectName}! Validation: ${validation.overallScore}/100. Tests: ${testSuite.passedTests}/${testSuite.totalTests}. Review?`,
     title: 'mTLS Implementation Complete',
-    context: { runId: ctx.runId, validationScore: validation.overallScore }
-  });
-
+    context: { runId: ctx.runId, validationScore: validation.overallScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.overallScore >= 80,
     projectName,

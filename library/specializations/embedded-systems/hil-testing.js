@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Developing Test Scenarios');
 
-  const scenarioDevelopment = await ctx.task(testScenarioDevelopmentTask, {
+  let scenarioDevelopment = await ctx.task(testScenarioDevelopmentTask, {
     projectName,
     testScenarios,
     plantModel,
@@ -101,18 +101,33 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...scenarioDevelopment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      scenarioDevelopment = await ctx.task(testScenarioDevelopmentTask, { ...{
+    projectName,
+    testScenarios,
+    plantModel,
+    faultInjection,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `HIL test scenarios developed: ${scenarioDevelopment.scenarioCount} scenarios. Review before execution?`,
     title: 'Test Scenario Review',
     context: {
       runId: ctx.runId,
       scenarios: scenarioDevelopment.scenarios,
       files: scenarioDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: TEST EXECUTION
   // ============================================================================
@@ -147,7 +162,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...faultTests.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: TIMING ANALYSIS
   // ============================================================================
@@ -170,7 +184,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Analyzing Results and Generating Report');
 
-  const resultsAnalysis = await ctx.task(hilResultsAnalysisTask, {
+  let resultsAnalysis = await ctx.task(hilResultsAnalysisTask, {
     projectName,
     testExecution,
     faultTests,
@@ -180,8 +194,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...resultsAnalysis.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      resultsAnalysis = await ctx.task(hilResultsAnalysisTask, { ...{
+    projectName,
+    testExecution,
+    faultTests,
+    timingAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HIL Testing Complete for ${projectName}. Pass rate: ${resultsAnalysis.passRate}%. Review results?`,
     title: 'HIL Testing Complete',
     context: {
@@ -195,9 +219,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: resultsAnalysis.reportPath, format: 'markdown', label: 'Test Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -228,8 +258,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

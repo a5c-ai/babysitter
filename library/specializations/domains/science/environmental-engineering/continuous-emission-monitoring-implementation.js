@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Installation Planning');
 
-  const installationPlan = await ctx.task(cemsInstallationTask, {
+  let installationPlan = await ctx.task(cemsInstallationTask, {
     facilityName,
     cemsDesign,
     sourceCharacteristics,
@@ -82,8 +82,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...installationPlan.artifacts);
 
-  // Breakpoint: Design Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      installationPlan = await ctx.task(cemsInstallationTask, { ...{
+    facilityName,
+    cemsDesign,
+    sourceCharacteristics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CEMS design complete for ${facilityName}. Analyzers: ${cemsDesign.analyzers.length}. Review design and installation plan?`,
     title: 'CEMS Design Review',
     context: {
@@ -92,9 +101,15 @@ export async function process(inputs, ctx) {
       sampleSystem: cemsDesign.sampleSystem,
       installationSchedule: installationPlan.schedule,
       files: cemsDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: QA/QC PROCEDURES
   // ============================================================================
@@ -189,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

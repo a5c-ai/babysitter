@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...ioMetrics.artifacts);
 
   // Phase 3: Analyze Read/Write Patterns
-  const patternAnalysis = await ctx.task(analyzeReadWritePatternsTask, { projectName, ioMetrics, outputDir });
-  artifacts.push(...patternAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let patternAnalysis = await ctx.task(analyzeReadWritePatternsTask, { projectName, ioMetrics, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      patternAnalysis = await ctx.task(analyzeReadWritePatternsTask, { ...{ projectName, ioMetrics, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `I/O analysis complete. Pattern: ${patternAnalysis.dominantPattern}. IOPS: ${ioMetrics.iops}. Review bottlenecks?`,
     title: 'Disk I/O Analysis',
-    context: { runId: ctx.runId, patternAnalysis }
-  });
-
+    context: { runId: ctx.runId, patternAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Identify I/O Bottlenecks
   const bottlenecks = await ctx.task(identifyIOBottlenecksTask, { projectName, ioMetrics, patternAnalysis, outputDir });
   artifacts.push(...bottlenecks.artifacts);
@@ -67,15 +76,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...asyncIO.artifacts);
 
   // Phase 8: Benchmark I/O Improvements
-  const benchmarks = await ctx.task(benchmarkIOImprovementsTask, { projectName, bufferOpt, asyncIO, outputDir });
-  artifacts.push(...benchmarks.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarks = await ctx.task(benchmarkIOImprovementsTask, { projectName, bufferOpt, asyncIO, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      benchmarks = await ctx.task(benchmarkIOImprovementsTask, { ...{ projectName, bufferOpt, asyncIO, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `I/O optimization complete. Improvement: ${benchmarks.improvementPercent}%. Accept changes?`,
     title: 'Disk I/O Optimization Results',
-    context: { runId: ctx.runId, benchmarks }
-  });
-
+    context: { runId: ctx.runId, benchmarks },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

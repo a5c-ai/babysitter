@@ -48,17 +48,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...executionResult.artifacts);
 
   // Phase 3: Accuracy Assessment
-  const accuracyResult = await ctx.task(accuracyAssessmentTask, { projectName, pipelineOutput: executionResult.outputs, truthSet: referenceResult.truthSet, outputDir });
+  let accuracyResult = await ctx.task(accuracyAssessmentTask, { projectName, pipelineOutput: executionResult.outputs, truthSet: referenceResult.truthSet, outputDir });
   artifacts.push(...accuracyResult.artifacts);
 
-  ctx.log('info', `Accuracy: Sensitivity ${accuracyResult.sensitivity}, PPV ${accuracyResult.ppv}`);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      accuracyResult = await ctx.task(accuracyAssessmentTask, { ...{ projectName, pipelineOutput: executionResult.outputs, truthSet: referenceResult.truthSet, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Accuracy assessment complete. Sensitivity: ${accuracyResult.sensitivity}, Specificity: ${accuracyResult.specificity}, PPV: ${accuracyResult.ppv}. Meets thresholds: ${accuracyResult.meetsThresholds}. Review results?`,
     title: 'Accuracy Assessment Review',
-    context: { runId: ctx.runId, metrics: accuracyResult.metrics, thresholds: accuracyThresholds, files: accuracyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, metrics: accuracyResult.metrics, thresholds: accuracyThresholds, files: accuracyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Reproducibility Testing
   const reproducibilityResult = await ctx.task(reproducibilityTestingTask, { projectName, pipelineRuns: executionResult.allRuns, outputDir });
   artifacts.push(...reproducibilityResult.artifacts);
@@ -80,15 +89,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...complianceResult.artifacts);
 
   // Phase 9: Validation Report Generation
-  const reportResult = await ctx.task(generateValidationReportTask, { projectName, pipeline, referenceResult, accuracyResult, reproducibilityResult, performanceResult, edgeCaseResult, limitationsResult, complianceResult, validationType, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateValidationReportTask, { projectName, pipeline, referenceResult, accuracyResult, reproducibilityResult, performanceResult, edgeCaseResult, limitationsResult, complianceResult, validationType, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateValidationReportTask, { ...{ projectName, pipeline, referenceResult, accuracyResult, reproducibilityResult, performanceResult, edgeCaseResult, limitationsResult, complianceResult, validationType, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pipeline Validation Complete. Overall: ${reportResult.validationStatus}. Accuracy meets thresholds: ${accuracyResult.meetsThresholds}, Reproducibility: ${reproducibilityResult.concordance}%. Approve validation report?`,
     title: 'Pipeline Validation Complete',
-    context: { runId: ctx.runId, summary: { status: reportResult.validationStatus, sensitivity: accuracyResult.sensitivity, ppv: accuracyResult.ppv, reproducibility: reproducibilityResult.concordance }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Validation Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { status: reportResult.validationStatus, sensitivity: accuracyResult.sensitivity, ppv: accuracyResult.ppv, reproducibility: reproducibilityResult.concordance }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Validation Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -113,8 +131,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/pipeline-validation', timestamp: startTime, validationType }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const referenceSelectionTask = defineTask('reference-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Reference Selection - ${args.projectName}`,

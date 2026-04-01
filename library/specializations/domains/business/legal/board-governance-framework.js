@@ -72,23 +72,36 @@ export async function process(inputs, ctx) {
   artifacts.push(...documentationStandards.artifacts);
 
   // Phase 6: Compliance Framework
-  const complianceFramework = await ctx.task(governanceComplianceTask, {
+  let complianceFramework = await ctx.task(governanceComplianceTask, {
     organizationProfile,
     governanceStructure: structureDesign.structure,
     outputDir
   });
-  artifacts.push(...complianceFramework.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complianceFramework = await ctx.task(governanceComplianceTask, { ...{
+    organizationProfile,
+    governanceStructure: structureDesign.structure,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Board governance framework for ${organizationProfile.name} complete. ${committeeStructure.committees.length} committees defined. Review and approve?`,
     title: 'Board Governance Review',
     context: {
       runId: ctx.runId,
       committeesCount: committeeStructure.committees.length,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     organization: organizationProfile.name,

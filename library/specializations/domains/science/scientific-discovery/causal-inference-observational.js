@@ -36,15 +36,24 @@ export async function process(inputs, ctx) {
   const dagConstruction = await ctx.task(dagConstructionTask, { treatment, outcome, confounders, framework: causalFramework, outputDir });
   artifacts.push(...dagConstruction.artifacts);
 
-  const identificationStrategy = await ctx.task(identificationStrategyTask, { dag: dagConstruction, treatment, outcome, data, outputDir });
-  artifacts.push(...identificationStrategy.artifacts);
-
-  await ctx.breakpoint({
+  let identificationStrategy = await ctx.task(identificationStrategyTask, { dag: dagConstruction, treatment, outcome, data, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      identificationStrategy = await ctx.task(identificationStrategyTask, { ...{ dag: dagConstruction, treatment, outcome, data, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `Causal framework established. Strategy: ${identificationStrategy.strategy || 'N/A'}. ${identificationStrategy.assumptions?.length || 0} key assumptions. Review before estimation?`,
     title: 'Causal Identification Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { strategy: identificationStrategy.strategy || 'N/A', assumptions: identificationStrategy.assumptions?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { strategy: identificationStrategy.strategy || 'N/A', assumptions: identificationStrategy.assumptions?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const propensityScoreAnalysis = await ctx.task(propensityScoreTask, { treatment, confounders, data, identificationStrategy, outputDir });
   artifacts.push(...propensityScoreAnalysis.artifacts);
 
@@ -63,15 +72,24 @@ export async function process(inputs, ctx) {
   const robustnessChecks = await ctx.task(robustnessChecksTask, { estimates: { matching: matchingAnalysis, regression: regressionAnalysis, iv: ivAnalysis }, sensitivityAnalysis, outputDir });
   artifacts.push(...robustnessChecks.artifacts);
 
-  const qualityScore = await ctx.task(causalQualityScoringTask, { identificationStrategy, propensityScoreAnalysis, matchingAnalysis, regressionAnalysis, sensitivityAnalysis, robustnessChecks, minimumRobustnessScore, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(causalQualityScoringTask, { identificationStrategy, propensityScoreAnalysis, matchingAnalysis, regressionAnalysis, sensitivityAnalysis, robustnessChecks, minimumRobustnessScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(causalQualityScoringTask, { ...{ identificationStrategy, propensityScoreAnalysis, matchingAnalysis, regressionAnalysis, sensitivityAnalysis, robustnessChecks, minimumRobustnessScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Causal analysis complete. Estimate: ${matchingAnalysis.estimate?.value || 'N/A'}. Robustness: ${robustnessChecks.overallRobustness || 'N/A'}. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Causal Inference Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { estimate: matchingAnalysis.estimate?.value || 'N/A', robustness: robustnessChecks.overallRobustness || 'N/A', qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { estimate: matchingAnalysis.estimate?.value || 'N/A', robustness: robustnessChecks.overallRobustness || 'N/A', qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, researchQuestion, causalEstimate: { primary: matchingAnalysis.estimate, alternatives: { regression: regressionAnalysis.estimate, iv: ivAnalysis.estimate } },
     robustnessChecks: robustnessChecks.checks, assumptions: identificationStrategy.assumptions,

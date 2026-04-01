@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Data Preparation and Validation');
 
-  const dataPreparation = await ctx.task(dataPreparationTask, {
+  let dataPreparation = await ctx.task(dataPreparationTask, {
     dataPath,
     targetColumn,
     problemType,
@@ -88,8 +88,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dataPreparation.artifacts);
 
-  // Breakpoint: Review data preparation results
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dataPreparation = await ctx.task(dataPreparationTask, { ...{
+    dataPath,
+    targetColumn,
+    problemType,
+    validationStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Data prepared for AutoML. Dataset: ${dataPreparation.rowCount} rows, ${dataPreparation.featureCount} features. Validation strategy: ${validationStrategy}. Proceed with AutoML search?`,
     title: 'Data Preparation Review',
     context: {
@@ -104,9 +114,15 @@ export async function process(inputs, ctx) {
         targetDistribution: dataPreparation.targetDistribution,
         missingValues: dataPreparation.missingValuePercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: ALGORITHM SELECTION AND BASELINE MODELS
   // ============================================================================
@@ -144,7 +160,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...baselineResults.flatMap(r => r.artifacts));
 
   // Evaluate baseline results
-  const baselineEvaluation = await ctx.task(baselineEvaluationTask, {
+  let baselineEvaluation = await ctx.task(baselineEvaluationTask, {
     baselineResults,
     targetMetric,
     targetPerformance,
@@ -162,8 +178,17 @@ export async function process(inputs, ctx) {
   // Select top performing algorithms for HPO
   const topAlgorithms = baselineEvaluation.topAlgorithms.slice(0, 5);
 
-  // Breakpoint: Review baseline results before HPO
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      baselineEvaluation = await ctx.task(baselineEvaluationTask, { ...{
+    baselineResults,
+    targetMetric,
+    targetPerformance,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Baseline models trained. Best baseline score: ${baselineEvaluation.bestScore.toFixed(4)}. Top ${topAlgorithms.length} algorithms selected for HPO. Continue?`,
     title: 'Baseline Models Review',
     context: {
@@ -178,9 +203,15 @@ export async function process(inputs, ctx) {
         bestAlgorithm: baselineEvaluation.bestAlgorithm,
         topAlgorithms: topAlgorithms.map(a => a.name)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Parallel HPO for top algorithms
   ctx.log('info', `Running hyperparameter optimization for ${topAlgorithms.length} algorithms`);
 
@@ -203,7 +234,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...hpoResults.flatMap(r => r.artifacts));
 
   // Evaluate HPO results
-  const hpoEvaluation = await ctx.task(hpoEvaluationTask, {
+  let hpoEvaluation = await ctx.task(hpoEvaluationTask, {
     hpoResults,
     baselineEvaluation,
     targetMetric,
@@ -234,8 +265,18 @@ export async function process(inputs, ctx) {
     artifacts.push(...ensembleResults.artifacts);
 
     // Breakpoint: Review ensemble results
-    if (ensembleResults.ensembles.length > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_phase4Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase4Review) {
+          hpoEvaluation = await ctx.task(hpoEvaluationTask, { ...{
+    hpoResults,
+    baselineEvaluation,
+    targetMetric,
+    targetPerformance,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+        }
+  const phase4Review = await ctx.breakpoint({
         question: `Ensemble models created. Best ensemble score: ${ensembleResults.bestEnsembleScore.toFixed(4)}. Compare with best individual model: ${hpoEvaluation.bestScore.toFixed(4)}. Review ensembles?`,
         title: 'Ensemble Models Review',
         context: {
@@ -250,18 +291,23 @@ export async function process(inputs, ctx) {
             bestIndividualScore: hpoEvaluation.bestScore,
             improvement: ensembleResults.bestEnsembleScore - hpoEvaluation.bestScore
           }
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase4Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase4Review.approved) break;
+        lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 5: FINAL MODEL SELECTION AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Final Model Selection and Validation');
 
-  const finalSelection = await ctx.task(finalModelSelectionTask, {
+  let finalSelection = await ctx.task(finalModelSelectionTask, {
     dataPath: dataPreparation.processedDataPath,
     targetColumn,
     baselineResults,
@@ -376,8 +422,22 @@ export async function process(inputs, ctx) {
     ...deploymentPackage.artifacts
   );
 
-  // Final breakpoint for approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalSelection = await ctx.task(finalModelSelectionTask, { ...{
+    dataPath: dataPreparation.processedDataPath,
+    targetColumn,
+    baselineResults,
+    hpoResults,
+    ensembleResults,
+    targetMetric,
+    targetPerformance,
+    problemType,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AutoML complete. Best model: ${finalSelection.bestModel.algorithm}. Score: ${finalSelection.bestModel.score.toFixed(4)}/${targetPerformance}. ${targetMet ? 'Target met!' : 'Target not met.'} ${testSetValidation.verdict}. Approve for deployment?`,
     title: 'Final AutoML Results Review',
     context: {
@@ -398,9 +458,15 @@ export async function process(inputs, ctx) {
         fairnessApproved: fairnessValidation.approved,
         robustnessApproved: robustnessValidation.approved
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -438,8 +504,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

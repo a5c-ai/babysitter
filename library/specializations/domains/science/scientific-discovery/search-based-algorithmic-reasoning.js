@@ -656,18 +656,32 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Select search algorithm
-  const algorithmSelection = await ctx.task(selectSearchAlgorithmTask, {
+  let algorithmSelection = await ctx.task(selectSearchAlgorithmTask, {
     spaceAnalysis,
     heuristicDesign,
     objectives: inputs.objectives
   });
 
-  // Quality gate: Search configuration review
-  await ctx.breakpoint('search-config-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      algorithmSelection = await ctx.task(selectSearchAlgorithmTask, { ...{
+    spaceAnalysis,
+    heuristicDesign,
+    objectives: inputs.objectives
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('search-config-review', {
     question: 'Is the search configuration (algorithm, heuristic, parameters) appropriate?',
-    context: { spaceAnalysis, heuristicDesign, algorithmSelection }
-  });
-
+    context: { spaceAnalysis, heuristicDesign, algorithmSelection },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Execute search
   const searchExecution = await ctx.task(executeSearchTask, {
     spaceAnalysis,
@@ -683,7 +697,6 @@ export async function process(inputs, ctx) {
       spaceAnalysis
     });
   }
-
   // Phase 6: Analyze performance
   const performanceAnalysis = await ctx.task(analyzeSearchPerformanceTask, {
     searchExecution,
@@ -692,18 +705,32 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Explore alternatives
-  const alternativeExploration = await ctx.task(exploreAlternativeSolutionsTask, {
+  let alternativeExploration = await ctx.task(exploreAlternativeSolutionsTask, {
     searchExecution,
     solutionPath,
     spaceAnalysis
   });
 
-  // Quality gate: Solution review
-  await ctx.breakpoint('solution-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      alternativeExploration = await ctx.task(exploreAlternativeSolutionsTask, { ...{
+    searchExecution,
+    solutionPath,
+    spaceAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('solution-review', {
     question: 'Is the solution path acceptable? Should we explore more alternatives?',
-    context: { solutionPath, alternativeExploration, performanceAnalysis }
-  });
-
+    context: { solutionPath, alternativeExploration, performanceAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Analyze robustness
   const robustnessAnalysis = await ctx.task(analyzeRobustnessTask, {
     solutionPath,

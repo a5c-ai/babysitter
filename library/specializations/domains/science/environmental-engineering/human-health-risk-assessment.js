@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Risk Characterization');
 
-  const riskCharacterization = await ctx.task(riskCharacterizationTask, {
+  let riskCharacterization = await ctx.task(riskCharacterizationTask, {
     siteName,
     hazardIdentification,
     exposureAssessment,
@@ -101,8 +101,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskCharacterization.artifacts);
 
-  // Breakpoint: Risk Characterization Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      riskCharacterization = await ctx.task(riskCharacterizationTask, { ...{
+    siteName,
+    hazardIdentification,
+    exposureAssessment,
+    toxicityAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk characterization complete for ${siteName}. Cancer risk: ${riskCharacterization.totalCancerRisk}, HI: ${riskCharacterization.hazardIndex}. Review results?`,
     title: 'Risk Characterization Review',
     context: {
@@ -111,9 +121,15 @@ export async function process(inputs, ctx) {
       hazardIndex: riskCharacterization.hazardIndex,
       riskDrivers: riskCharacterization.riskDrivers,
       files: riskCharacterization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: UNCERTAINTY ANALYSIS
   // ============================================================================
@@ -197,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

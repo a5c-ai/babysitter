@@ -35,66 +35,79 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Desktop Security Hardening: ${projectName}`);
 
   // Phase 1: Security Audit
-  const audit = await ctx.task(securityAuditTask, { projectName, framework, targetPlatforms, outputDir });
-  artifacts.push(...audit.artifacts);
-
-  await ctx.breakpoint({
+  let audit = await ctx.task(securityAuditTask, { projectName, framework, targetPlatforms, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      audit = await ctx.task(securityAuditTask, { ...{ projectName, framework, targetPlatforms, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Security audit complete. Found ${audit.vulnerabilities.length} vulnerabilities. Risk level: ${audit.riskLevel}. Proceed with hardening?`,
     title: 'Security Audit Review',
-    context: { runId: ctx.runId, vulnerabilities: audit.vulnerabilities, riskLevel: audit.riskLevel }
-  });
-
+    context: { runId: ctx.runId, vulnerabilities: audit.vulnerabilities, riskLevel: audit.riskLevel },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Content Security Policy
   let cspConfig = null;
   if (securityFeatures.includes('csp')) {
     cspConfig = await ctx.task(implementCspTask, { projectName, framework, outputDir });
     artifacts.push(...cspConfig.artifacts);
   }
-
   // Phase 3: Context Isolation
   let contextIsolation = null;
   if (securityFeatures.includes('context-isolation')) {
     contextIsolation = await ctx.task(implementContextIsolationTask, { projectName, framework, outputDir });
     artifacts.push(...contextIsolation.artifacts);
   }
-
   // Phase 4: Sandboxing
   let sandboxing = null;
   if (securityFeatures.includes('sandboxing')) {
     sandboxing = await ctx.task(implementSandboxingTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...sandboxing.artifacts);
   }
-
   // Phase 5: Secure IPC
   let secureIpc = null;
   if (securityFeatures.includes('secure-ipc')) {
     secureIpc = await ctx.task(implementSecureIpcTask, { projectName, framework, outputDir });
     artifacts.push(...secureIpc.artifacts);
   }
-
   // Phase 6: Preload Scripts Security
   let preloadSecurity = null;
   if (securityFeatures.includes('preload-scripts')) {
     preloadSecurity = await ctx.task(implementPreloadSecurityTask, { projectName, framework, outputDir });
     artifacts.push(...preloadSecurity.artifacts);
   }
-
   // Phase 7: Additional Security Measures
   const additionalSecurity = await ctx.task(implementAdditionalSecurityTask, { projectName, framework, targetPlatforms, outputDir });
   artifacts.push(...additionalSecurity.artifacts);
 
   // Phase 8: Security Validation
-  const validation = await ctx.task(validateSecurityTask, { projectName, framework, securityFeatures, audit, cspConfig, contextIsolation, sandboxing, secureIpc, outputDir });
+  let validation = await ctx.task(validateSecurityTask, { projectName, framework, securityFeatures, audit, cspConfig, contextIsolation, sandboxing, secureIpc, outputDir });
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.hardeningScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validateSecurityTask, { ...{ projectName, framework, securityFeatures, audit, cspConfig, contextIsolation, sandboxing, secureIpc, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Security Hardening Complete! Score: ${validation.hardeningScore}/100. Vulnerabilities mitigated: ${validation.mitigatedCount}/${audit.vulnerabilities.length}. Approve?`,
     title: 'Security Hardening Complete',
-    context: { runId: ctx.runId, hardeningScore: validation.hardeningScore, mitigatedCount: validation.mitigatedCount }
-  });
-
+    context: { runId: ctx.runId, hardeningScore: validation.hardeningScore, mitigatedCount: validation.mitigatedCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validationPassed,
     projectName,

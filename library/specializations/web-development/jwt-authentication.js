@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   const middlewareTask = await ctx.task(authMiddlewareSetupTask, { projectName, outputDir });
   artifacts.push(...middlewareTask.artifacts);
 
-  const securityTask = await ctx.task(securitySetupTask, { projectName, outputDir });
-  artifacts.push(...securityTask.artifacts);
-
-  await ctx.breakpoint({
+  let securityTask = await ctx.task(securitySetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityTask = await ctx.task(securitySetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `JWT Authentication setup complete for ${projectName}. Approve configuration?`,
     title: 'JWT Authentication Review',
-    context: { runId: ctx.runId, endpoints: authEndpointsTask.endpoints }
-  });
-
+    context: { runId: ctx.runId, endpoints: authEndpointsTask.endpoints },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, authEndpointsTask, outputDir });
   artifacts.push(...documentation.artifacts);
 

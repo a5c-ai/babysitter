@@ -18,8 +18,10 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Rapid Situation Assessment (First 15 Minutes)
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'CRISIS ALERT: Beginning rapid situation assessment. Evaluate severity and facts?',
     title: 'Phase 1: Rapid Assessment',
     context: {
@@ -27,59 +29,106 @@ export async function process(inputs, ctx) {
       phase: 'rapid-assessment',
       crisis: crisis.type,
       reportedAt: crisis.timestamp
-    }
-  });
-
-  const situationAssessment = await ctx.task(conductRapidAssessmentTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let situationAssessment = await ctx.task(conductRapidAssessmentTask, {
     crisis,
     initialAssessment,
     crisisPlan
   });
 
-  // Phase 2: Team Activation
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      situationAssessment = await ctx.task(conductRapidAssessmentTask, { ...{
+    crisis,
+    initialAssessment,
+    crisisPlan
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Severity: ${situationAssessment.severity}. Activate crisis team per protocol?`,
     title: 'Phase 2: Team Activation',
     context: {
       runId: ctx.runId,
       phase: 'team-activation',
       severity: situationAssessment.severity
-    }
-  });
-
-  const teamActivation = await ctx.task(activateCrisisTeamTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let teamActivation = await ctx.task(activateCrisisTeamTask, {
     situationAssessment,
     crisisPlan,
     availableSpokespersons
   });
 
-  // Phase 3: Stakeholder Prioritization
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      teamActivation = await ctx.task(activateCrisisTeamTask, { ...{
+    situationAssessment,
+    crisisPlan,
+    availableSpokespersons
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Team activated. Prioritize stakeholder notifications?',
     title: 'Phase 3: Stakeholder Prioritization',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-prioritization',
       teamMembers: teamActivation.activatedMembers.length
-    }
-  });
-
-  const stakeholderPrioritization = await ctx.task(prioritizeStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let stakeholderPrioritization = await ctx.task(prioritizeStakeholdersTask, {
     situationAssessment,
     crisisPlan
   });
 
-  // Phase 4: Message Development (First 30 Minutes)
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      stakeholderPrioritization = await ctx.task(prioritizeStakeholdersTask, { ...{
+    situationAssessment,
+    crisisPlan
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Stakeholders prioritized. Develop initial response messages?',
     title: 'Phase 4: Message Development',
     context: {
       runId: ctx.runId,
       phase: 'message-development',
       priorityStakeholders: stakeholderPrioritization.priority1.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   const [coreMessages, channelMessages] = await Promise.all([
     ctx.task(developCoreMessagesTask, {
       situationAssessment,
@@ -93,85 +142,155 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 5: Legal and Compliance Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      stakeholderPrioritization = await ctx.task(prioritizeStakeholdersTask, { ...{
+    situationAssessment,
+    crisisPlan
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Messages drafted. Conduct rapid legal/compliance review?',
     title: 'Phase 5: Legal Review',
     context: {
       runId: ctx.runId,
       phase: 'legal-review',
       messagesCount: coreMessages.messages.length
-    }
-  });
-
-  const legalReview = await ctx.task(conductLegalReviewTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let legalReview = await ctx.task(conductLegalReviewTask, {
     coreMessages,
     channelMessages,
     situationAssessment
   });
 
-  // Phase 6: Message Approval
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      legalReview = await ctx.task(conductLegalReviewTask, { ...{
+    coreMessages,
+    channelMessages,
+    situationAssessment
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Legal review complete. Obtain executive approval for communications?',
     title: 'Phase 6: Message Approval',
     context: {
       runId: ctx.runId,
       phase: 'message-approval',
       legalIssues: legalReview.issues.length
-    }
-  });
-
-  const approvedMessages = await ctx.task(obtainMessageApprovalTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let approvedMessages = await ctx.task(obtainMessageApprovalTask, {
     coreMessages: legalReview.approvedMessages,
     channelMessages: legalReview.approvedChannelMessages,
     teamActivation
   });
 
-  // Phase 7: Multi-Channel Communication Execution (First Hour)
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      approvedMessages = await ctx.task(obtainMessageApprovalTask, { ...{
+    coreMessages: legalReview.approvedMessages,
+    channelMessages: legalReview.approvedChannelMessages,
+    teamActivation
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Messages approved. Execute coordinated multi-channel communications?',
     title: 'Phase 7: Communication Execution',
     context: {
       runId: ctx.runId,
       phase: 'communication-execution',
       approvedMessages: approvedMessages.messages.length
-    }
-  });
-
-  const communicationExecution = await ctx.task(executeMultiChannelCommsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let communicationExecution = await ctx.task(executeMultiChannelCommsTask, {
     approvedMessages,
     stakeholderPrioritization,
     channelMessages: legalReview.approvedChannelMessages
   });
 
-  // Phase 8: Media Response Coordination
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      communicationExecution = await ctx.task(executeMultiChannelCommsTask, { ...{
+    approvedMessages,
+    stakeholderPrioritization,
+    channelMessages: legalReview.approvedChannelMessages
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Initial communications sent. Coordinate media response?',
     title: 'Phase 8: Media Response',
     context: {
       runId: ctx.runId,
       phase: 'media-response',
       communicationsSent: communicationExecution.sent.length
-    }
-  });
-
-  const mediaResponse = await ctx.task(coordinateMediaResponseTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let mediaResponse = await ctx.task(coordinateMediaResponseTask, {
     situationAssessment,
     approvedMessages,
     availableSpokespersons,
     communicationExecution
   });
 
-  // Phase 9: Monitoring and Status Update
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      mediaResponse = await ctx.task(coordinateMediaResponseTask, { ...{
+    situationAssessment,
+    approvedMessages,
+    availableSpokespersons,
+    communicationExecution
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Media response coordinated. Establish monitoring and update protocols?',
     title: 'Phase 9: Monitoring Setup',
     context: {
       runId: ctx.runId,
       phase: 'monitoring-setup'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const [monitoringSetup, statusReport] = await Promise.all([
     ctx.task(setupCrisisMonitoringTask, {
       crisis,
@@ -226,8 +345,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conductRapidAssessmentTask = defineTask('conduct-rapid-assessment', (args, taskCtx) => ({
   kind: 'agent',

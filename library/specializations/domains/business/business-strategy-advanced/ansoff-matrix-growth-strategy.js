@@ -137,7 +137,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating comprehensive Ansoff Matrix report');
-  const ansoffReport = await ctx.task(ansoffReportTask, {
+  let ansoffReport = await ctx.task(ansoffReportTask, {
     organizationName,
     marketPenetration,
     productDevelopment,
@@ -151,8 +151,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...ansoffReport.artifacts);
 
-  // Breakpoint: Review Ansoff Matrix analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      ansoffReport = await ctx.task(ansoffReportTask, { ...{
+    organizationName,
+    marketPenetration,
+    productDevelopment,
+    marketDevelopment,
+    diversification,
+    riskAssessment,
+    growthPrioritization,
+    growthRoadmap,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ansoff Matrix growth strategy complete for ${organizationName}. ${growthPrioritization.prioritizedOptions?.length || 0} growth options identified. Review and approve?`,
     title: 'Ansoff Matrix Growth Strategy Review',
     context: {
@@ -173,9 +187,15 @@ export async function process(inputs, ctx) {
         },
         topGrowthOptions: growthPrioritization.topOptions?.slice(0, 3)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +223,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

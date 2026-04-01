@@ -72,18 +72,30 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Generate OKR Documentation
   ctx.log('info', 'Phase 8: Generating OKR implementation documentation');
-  const okrReport = await ctx.task(okrReportTask, {
+  let okrReport = await ctx.task(okrReportTask, {
     organizationName, companyOKRs, teamOKRs, alignmentValidation, keyResultsRefinement,
     okrCycles, gradingProcess, transparencyPlan, outputDir
   });
-  artifacts.push(...okrReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      okrReport = await ctx.task(okrReportTask, { ...{
+    organizationName, companyOKRs, teamOKRs, alignmentValidation, keyResultsRefinement,
+    okrCycles, gradingProcess, transparencyPlan, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OKR goal setting complete for ${organizationName}. ${companyOKRs.objectives?.length || 0} company objectives defined. Review?`,
     title: 'OKR Goal Setting Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName,
     companyOKRs: companyOKRs.objectives,

@@ -72,8 +72,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Data Source Approval
-  await ctx.breakpoint('data-source-approval', {
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase4Review = await ctx.breakpoint('data-source-approval', {
     title: 'Market Data Source Approval',
     description: 'Review and approve selected market data sources and methodology',
     artifacts: {
@@ -85,9 +87,15 @@ export async function process(inputs, ctx) {
       'Are the selected surveys appropriate for our industry and size?',
       'Is the peer group composition competitive and relevant?',
       'Do we have adequate geographic coverage?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Job Matching Execution
   const jobMatchingResults = await ctx.task('execute-job-matching', {
     jobMatchingPrep,
@@ -168,8 +176,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 11: Leadership Review
-  await ctx.breakpoint('recommendations-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('recommendations-review', {
     title: 'Compensation Recommendations Review',
     description: 'Review market analysis findings and adjustment recommendations',
     artifacts: {
@@ -181,9 +191,15 @@ export async function process(inputs, ctx) {
       'Do the salary ranges align with our compensation philosophy?',
       'Is the adjustment budget appropriate and achievable?',
       'Are the prioritization criteria correct?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 12: Implementation Planning
   const implementationPlan = await ctx.task('create-implementation-plan', {
     adjustmentRecommendations,

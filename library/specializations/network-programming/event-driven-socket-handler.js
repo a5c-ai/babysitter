@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing platform and selecting I/O multiplexing API');
 
-  const platformAnalysis = await ctx.task(platformAnalysisTask, {
+  let platformAnalysis = await ctx.task(platformAnalysisTask, {
     projectName,
     language,
     platform,
@@ -60,9 +60,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...platformAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      platformAnalysis = await ctx.task(platformAnalysisTask, { ...{
+    projectName,
+    language,
+    platform,
+    targetConnections,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Selected ${platformAnalysis.selectedApi} for ${platform}. Expected performance: ${platformAnalysis.expectedPerformance}. Proceed with event loop design?`,
     title: 'Platform Analysis Review',
     context: {
@@ -71,9 +81,15 @@ export async function process(inputs, ctx) {
       apiCapabilities: platformAnalysis.apiCapabilities,
       expectedPerformance: platformAnalysis.expectedPerformance,
       files: platformAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: EVENT LOOP ARCHITECTURE DESIGN
   // ============================================================================
@@ -164,7 +180,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Optimizing for performance');
 
-  const performanceOptimization = await ctx.task(performanceOptimizationTask, {
+  let performanceOptimization = await ctx.task(performanceOptimizationTask, {
     projectName,
     language,
     platformAnalysis,
@@ -173,9 +189,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...performanceOptimization.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      performanceOptimization = await ctx.task(performanceOptimizationTask, { ...{
+    projectName,
+    language,
+    platformAnalysis,
+    eventLoopDesign,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Phase 7 Complete: Performance optimizations applied. Expected latency: ${performanceOptimization.expectedLatency}. Proceed with load testing?`,
     title: 'Performance Optimization Review',
     context: {
@@ -183,16 +209,22 @@ export async function process(inputs, ctx) {
       optimizations: performanceOptimization.optimizations,
       expectedMetrics: performanceOptimization.expectedMetrics,
       files: performanceOptimization.artifacts.map(a => ({ path: a.path, format: a.format || 'c' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: LOAD TESTING AND BENCHMARKING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Running load tests and benchmarks');
 
-  const benchmarks = await ctx.task(benchmarkTask, {
+  let benchmarks = await ctx.task(benchmarkTask, {
     projectName,
     language,
     targetConnections,
@@ -231,9 +263,20 @@ export async function process(inputs, ctx) {
   ]);
 
   artifacts.push(...documentation.artifacts);
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      benchmarks = await ctx.task(benchmarkTask, { ...{
+    projectName,
+    language,
+    targetConnections,
+    requirements,
+    eventLoopDesign,
+    performanceOptimization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Event-Driven Socket Handler Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Benchmark: ${benchmarks.connectionsHandled} connections, ${benchmarks.eventsPerSecond} events/sec. Review deliverables?`,
     title: 'Event-Driven Socket Handler Complete - Final Review',
     context: {
@@ -250,9 +293,15 @@ export async function process(inputs, ctx) {
         { path: documentation.architecturePath, format: 'markdown', label: 'Architecture' },
         { path: benchmarks.reportPath, format: 'json', label: 'Benchmark Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -288,8 +337,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

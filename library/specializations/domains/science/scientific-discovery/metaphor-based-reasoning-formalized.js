@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Analyze Metaphor Domain
   ctx.log('info', 'Analyzing metaphor domain structure');
-  const metaphorAnalysis = await ctx.task(analyzeMetaphorDomainTask, {
+  let metaphorAnalysis = await ctx.task(analyzeMetaphorDomainTask, {
     metaphorDomain,
     domain
   });
@@ -45,9 +45,15 @@ export async function process(inputs, ctx) {
     problemAnalysis,
     metaphorAnalysis,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      metaphorAnalysis = await ctx.task(analyzeMetaphorDomainTask, { ...{
+    metaphorDomain,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Formal mapping constructed. Review before reasoning?',
     title: 'Metaphor-Based Reasoning - Mapping Complete',
     context: {
@@ -57,9 +63,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/metaphor-analysis.json', format: 'json' },
         { path: 'artifacts/formal-mapping.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Reason Within Metaphor Domain
   ctx.log('info', 'Reasoning within metaphor domain');
   const metaphorReasoning = await ctx.task(reasonInMetaphorTask, {

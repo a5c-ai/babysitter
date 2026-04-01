@@ -57,8 +57,14 @@ export class EffectIndex {
     });
   }
 
-  applyEvent(event: JournalEvent, expectedSeq?: number) {
-    this.validateSequence(event, expectedSeq);
+  applyEvent(event: JournalEvent, expectedSeq?: number, options?: { skipSequenceValidation?: boolean }) {
+    if (!options?.skipSequenceValidation) {
+      this.validateSequence(event, expectedSeq);
+    } else {
+      // Still update journalHead for future reference, but don't fail on gaps
+      // caused by non-effect events (e.g. PROCESS_LOG) appended during the iteration.
+      this.journalHead = { seq: event.seq, ulid: event.ulid };
+    }
     const type = event.type as SupportedEventType;
     switch (type) {
       case "RUN_CREATED":

@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Optimize Promising Sequences
   ctx.log('info', 'Optimizing promising sequences');
-  const optimizationResult = await ctx.task(sequenceOptimizationTask, {
+  let optimizationResult = await ctx.task(sequenceOptimizationTask, {
     processName,
     shortlistedSequences: screeningResult.shortlistedSequences,
     components: characterizationResult.components,
@@ -85,8 +85,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimizationResult.artifacts);
 
-  // Breakpoint: Review sequence analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimizationResult = await ctx.task(sequenceOptimizationTask, { ...{
+    processName,
+    shortlistedSequences: screeningResult.shortlistedSequences,
+    components: characterizationResult.components,
+    productRequirements,
+    economicData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Separation sequence analysis complete for ${processName}. ${sequencesResult.sequences.length} alternatives generated, ${screeningResult.shortlistedSequences.length} shortlisted. Best sequence energy: ${optimizationResult.bestSequence.energy} MW. Review analysis?`,
     title: 'Separation Sequence Synthesis Review',
     context: {
@@ -98,9 +109,15 @@ export async function process(inputs, ctx) {
         bestSequenceEnergy: optimizationResult.bestSequence.energy,
         bestSequenceCost: optimizationResult.bestSequence.cost
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Consider Heat Integration Opportunities
   ctx.log('info', 'Analyzing heat integration opportunities');
   const heatIntegrationResult = await ctx.task(heatIntegrationOpportunitiesTask, {
@@ -151,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Mixture Characterization
+  // Task 1: Mixture Characterization
 export const mixtureCharacterizationTask = defineTask('mixture-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize mixture components and properties',

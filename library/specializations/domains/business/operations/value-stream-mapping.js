@@ -42,7 +42,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Preparation and Scoping
   ctx.log('info', 'Phase 1: VSM Preparation and Scoping');
-  const preparation = await ctx.task(vsmPreparationTask, {
+  let preparation = await ctx.task(vsmPreparationTask, {
     processName,
     scope,
     teamMembers,
@@ -53,8 +53,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...preparation.artifacts);
 
-  // Quality Gate: Scope definition
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      preparation = await ctx.task(vsmPreparationTask, { ...{
+    processName,
+    scope,
+    teamMembers,
+    productFamily,
+    customerDemand,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `VSM scope defined for ${processName}. Product family: ${preparation.productFamily}. Boundaries: ${preparation.boundaries.start} to ${preparation.boundaries.end}. Proceed with current state mapping?`,
     title: 'VSM Scope Review',
     context: {
@@ -64,9 +75,15 @@ export async function process(inputs, ctx) {
       boundaries: preparation.boundaries,
       customerDemand: preparation.customerDemand,
       files: preparation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Current State Data Collection
   ctx.log('info', 'Phase 2: Collecting Current State Data');
   const dataCollection = await ctx.task(currentStateDataCollectionTask, {
@@ -91,7 +108,7 @@ export async function process(inputs, ctx) {
 
   // Phase 4: Waste Identification (8 Wastes Analysis)
   ctx.log('info', 'Phase 4: Identifying Waste and Non-Value-Added Activities');
-  const wasteAnalysis = await ctx.task(wasteIdentificationTask, {
+  let wasteAnalysis = await ctx.task(wasteIdentificationTask, {
     processName,
     currentStateMap,
     outputDir
@@ -99,8 +116,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...wasteAnalysis.artifacts);
 
-  // Quality Gate: Current State Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      wasteAnalysis = await ctx.task(wasteIdentificationTask, { ...{
+    processName,
+    currentStateMap,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Current state map complete. Total lead time: ${currentStateMap.totalLeadTime} days. Value-added time: ${currentStateMap.valueAddedTime} hours. ${wasteAnalysis.totalWasteItems} waste items identified. Review before designing future state?`,
     title: 'Current State Map Review',
     context: {
@@ -114,9 +139,15 @@ export async function process(inputs, ctx) {
       },
       wasteByCategory: wasteAnalysis.wasteByCategory,
       files: [...currentStateMap.artifacts, ...wasteAnalysis.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Future State Design
   ctx.log('info', 'Phase 5: Designing Future State Value Stream');
   const futureStateDesign = await ctx.task(futureStateDesignTask, {
@@ -143,7 +174,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Implementation Roadmap
   ctx.log('info', 'Phase 7: Creating Implementation Roadmap');
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     processName,
     gapAnalysis,
     futureStateDesign,
@@ -153,8 +184,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationRoadmap.artifacts);
 
-  // Quality Gate: Future State and Roadmap Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    processName,
+    gapAnalysis,
+    futureStateDesign,
+    wasteAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Future state designed. Target lead time: ${futureStateDesign.targetLeadTime} days (${futureStateDesign.leadTimeReduction}% reduction). ${implementationRoadmap.totalInitiatives} improvement initiatives identified across ${implementationRoadmap.phases.length} phases. Approve implementation roadmap?`,
     title: 'Future State and Roadmap Approval',
     context: {
@@ -170,9 +211,15 @@ export async function process(inputs, ctx) {
         phases: implementationRoadmap.phases.map(p => ({ name: p.name, duration: p.duration, initiatives: p.initiatives.length }))
       },
       files: [...futureStateDesign.artifacts, ...implementationRoadmap.artifacts].map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: VSM Report Generation
   ctx.log('info', 'Phase 8: Generating VSM Report');
   const vsmReport = await ctx.task(vsmReportGenerationTask, {
@@ -226,8 +273,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: VSM Preparation
+  // Task 1: VSM Preparation
 export const vsmPreparationTask = defineTask('vsm-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: `VSM Preparation - ${args.processName}`,

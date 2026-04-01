@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       causalModel: null
     };
   }
-
   // Phase 2: Causal Graph Construction
   const causalGraph = await ctx.task(causalGraphConstructionTask, {
     domain,
@@ -58,7 +57,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Identification Analysis
-  const identificationAnalysis = await ctx.task(identificationAnalysisTask, {
+  let identificationAnalysis = await ctx.task(identificationAnalysisTask, {
     causalGraph,
     researchQuestion,
     variables,
@@ -66,17 +65,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Causal effect must be identifiable
-  if (!identificationAnalysis.isIdentifiable) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        identificationAnalysis = await ctx.task(identificationAnalysisTask, { ...{
+    causalGraph,
+    researchQuestion,
+    variables,
+    framework: frameworkSelection.selectedFramework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Causal effect is not identifiable from observational data. Reasons: ${identificationAnalysis.identificationFailures.join(', ')}. Should we proceed with sensitivity analysis or halt?`,
       title: 'Causal Identification Failure',
       context: {
         runId: ctx.runId,
         identificationAnalysis,
         recommendation: 'Consider instrumental variables, regression discontinuity, or natural experiments'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 4: Confounder Identification
   const confounderAnalysis = await ctx.task(confounderIdentificationTask, {
@@ -121,15 +135,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Validation and Robustness Checks
-  const validationResults = await ctx.task(causalValidationTask, {
+  let validationResults = await ctx.task(causalValidationTask, {
     causalEffectEstimation,
     sensitivityAnalysis,
     causalGraph,
     domain
   });
 
-  // Final Breakpoint: Expert Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationResults = await ctx.task(causalValidationTask, { ...{
+    causalEffectEstimation,
+    sensitivityAnalysis,
+    causalGraph,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Causal inference analysis complete for: "${researchQuestion}". Review causal model and estimated effects?`,
     title: 'Causal Inference Review',
     context: {
@@ -141,9 +164,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/causal-model.json', format: 'json', content: causalGraph },
         { path: 'artifacts/causal-effects.json', format: 'json', content: causalEffectEstimation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -172,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const causalFrameworkSelectionTask = defineTask('causal-framework-selection', (args, taskCtx) => ({
   kind: 'agent',

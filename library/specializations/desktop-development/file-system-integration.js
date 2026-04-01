@@ -105,7 +105,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...watcherSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: DRAG AND DROP IMPLEMENTATION
   // ============================================================================
@@ -123,7 +122,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dragDropImpl.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: PATH MANAGEMENT
   // ============================================================================
@@ -173,7 +171,7 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  const validation = await ctx.task(validateFileSystemIntegrationTask, {
+  let validation = await ctx.task(validateFileSystemIntegrationTask, {
     projectName,
     framework,
     fileOperations,
@@ -186,9 +184,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.validationScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(validateFileSystemIntegrationTask, { ...{
+    projectName,
+    framework,
+    fileOperations,
+    dialogImplementation,
+    fileOperationsImpl,
+    watcherSetup,
+    securityImpl,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `File System Integration Complete for ${projectName}! Validation score: ${validation.validationScore}/100. ${fileOperationsImpl.modules.length} modules created. Approve implementation?`,
     title: 'File System Integration Complete',
     context: {
@@ -202,9 +212,15 @@ export async function process(inputs, ctx) {
         watcherEnabled: !!watcherSetup
       },
       files: documentation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -240,8 +256,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

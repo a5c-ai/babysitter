@@ -132,7 +132,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Compiling Business Case');
-  const businessCase = await ctx.task(businessCaseCompilationTask, {
+  let businessCase = await ctx.task(businessCaseCompilationTask, {
     accountName,
     opportunityName,
     currentStateAnalysis,
@@ -145,8 +145,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(businessCase.artifacts || []));
 
-  // Breakpoint: Review business case
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      businessCase = await ctx.task(businessCaseCompilationTask, { ...{
+    accountName,
+    opportunityName,
+    currentStateAnalysis,
+    benefitQuantification,
+    tcoAnalysis,
+    roiCalculation,
+    riskAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Value Selling ROI analysis complete for ${opportunityName}. ROI: ${roiCalculation.roiPercentage}%. Review business case?`,
     title: 'Value Selling ROI Review',
     context: {
@@ -164,9 +177,15 @@ export async function process(inputs, ctx) {
         paybackPeriod: roiCalculation.paybackPeriod,
         npv: roiCalculation.npv
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -205,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

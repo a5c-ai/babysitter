@@ -11,27 +11,45 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, systemArchitecture, subsystems } = inputs;
 
-  const interfaceIdentification = await ctx.task(interfaceIdentificationTask, { projectName, systemArchitecture, subsystems });
-  const interfaceMatrix = await ctx.task(interfaceMatrixTask, { projectName, interfaces: interfaceIdentification });
-
-  await ctx.breakpoint({
+  let interfaceIdentification = await ctx.task(interfaceIdentificationTask, { projectName, systemArchitecture, subsystems });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      interfaceIdentification = await ctx.task(interfaceIdentificationTask, { ...{ projectName, systemArchitecture, subsystems }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `${interfaceIdentification.totalInterfaces} interfaces identified for ${projectName}. Proceed with ICD development?`,
     title: 'Interface Identification Review',
-    context: { runId: ctx.runId, interfaceMatrix }
-  });
-
+    context: { runId: ctx.runId, interfaceMatrix },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const icdDevelopment = await ctx.task(icdDevelopmentTask, { projectName, interfaces: interfaceIdentification });
   const interfaceRequirements = await ctx.task(interfaceRequirementsTask, { projectName, icdSet: icdDevelopment });
   const verificationPlan = await ctx.task(interfaceVerificationPlanTask, { projectName, icdSet: icdDevelopment, interfaceRequirements });
-  const verificationStatus = await ctx.task(interfaceVerificationStatusTask, { projectName, verificationPlan });
-  const report = await ctx.task(icdReportTask, { projectName, interfaceMatrix, icdDevelopment, verificationStatus });
-
-  await ctx.breakpoint({
+  let verificationStatus = await ctx.task(interfaceVerificationStatusTask, { projectName, verificationPlan });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      verificationStatus = await ctx.task(interfaceVerificationStatusTask, { ...{ projectName, verificationPlan }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ICD set complete for ${projectName}. ${verificationStatus.verified}/${verificationStatus.total} verified. Approve?`,
     title: 'ICD Approval',
-    context: { runId: ctx.runId, summary: { totalICDs: icdDevelopment.count, verified: verificationStatus.verified } }
-  });
-
+    context: { runId: ctx.runId, summary: { totalICDs: icdDevelopment.count, verified: verificationStatus.verified } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, icdSet: icdDevelopment, interfaceMatrix, verificationStatus, report, metadata: { processId: 'interface-control-documentation', timestamp: ctx.now() } };
 }
 

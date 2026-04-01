@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Performing asymptotic analysis');
-  const asymptoticAnalysis = await ctx.task(asymptoticAnalysisTask, {
+  let asymptoticAnalysis = await ctx.task(asymptoticAnalysisTask, {
     model,
     limitingCases: limitingCaseIdentification.limitingCases,
     outputDir
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...asymptoticAnalysis.artifacts);
 
-  // Breakpoint: Review limiting cases
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      asymptoticAnalysis = await ctx.task(asymptoticAnalysisTask, { ...{
+    model,
+    limitingCases: limitingCaseIdentification.limitingCases,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${limitingCaseIdentification.limitingCases.length} limiting cases with ${asymptoticAnalysis.asymptoticBehaviors.length} asymptotic behaviors. Review before physical interpretation?`,
     title: 'Limiting Case Analysis Review',
     context: {
@@ -80,9 +88,15 @@ export async function process(inputs, ctx) {
         limitingCaseCount: limitingCaseIdentification.limitingCases.length,
         asymptoticBehaviorCount: asymptoticAnalysis.asymptoticBehaviors.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PHYSICAL INTERPRETATION
   // ============================================================================
@@ -130,7 +144,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Synthesizing insights from limiting case analysis');
-  const insightSynthesis = await ctx.task(insightSynthesisTask, {
+  let insightSynthesis = await ctx.task(insightSynthesisTask, {
     limitingCases: limitingCaseIdentification.limitingCases,
     asymptoticBehaviors: asymptoticAnalysis.asymptoticBehaviors,
     physicalInterpretations: physicalInterpretation.interpretations,
@@ -141,8 +155,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...insightSynthesis.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      insightSynthesis = await ctx.task(insightSynthesisTask, { ...{
+    limitingCases: limitingCaseIdentification.limitingCases,
+    asymptoticBehaviors: asymptoticAnalysis.asymptoticBehaviors,
+    physicalInterpretations: physicalInterpretation.interpretations,
+    stressTestResults: stressTesting.results,
+    knownSolutionComparisons: knownSolutionComparison.comparisons,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Limiting case analysis complete. ${insightSynthesis.insights.length} insights generated. Model validation score: ${stressTesting.validationScore}%. Review findings?`,
     title: 'Limiting Case Analysis Complete',
     context: {
@@ -159,9 +184,15 @@ export async function process(inputs, ctx) {
         validationScore: stressTesting.validationScore,
         issuesFound: stressTesting.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Conclusion Drafting
   ctx.log('info', 'Drafting conclusion');
-  const conclusionDraft = await ctx.task(conclusionDraftingTask, {
+  let conclusionDraft = await ctx.task(conclusionDraftingTask, {
     thesis: thesisRefinement.refined,
     arguments: argumentDevelopment.arguments,
     bodyContent: bodyDraft.content,
@@ -107,8 +107,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...conclusionDraft.artifacts);
 
-  // Breakpoint: Review paper draft
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      conclusionDraft = await ctx.task(conclusionDraftingTask, { ...{
+    thesis: thesisRefinement.refined,
+    arguments: argumentDevelopment.arguments,
+    bodyContent: bodyDraft.content,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Paper draft complete. ${argumentDevelopment.arguments.length} main arguments developed. Review the draft?`,
     title: 'Philosophical Paper Draft Results',
     context: {
@@ -121,9 +130,15 @@ export async function process(inputs, ctx) {
         argumentCount: argumentDevelopment.arguments.length,
         objectionsAddressed: objectionHandling.objections.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Full Draft Assembly
   ctx.log('info', 'Assembling full draft');
   const fullDraft = await ctx.task(draftAssemblyTask, {
@@ -164,8 +179,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const thesisRefinementTask = defineTask('thesis-refinement', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Refine the philosophical thesis',

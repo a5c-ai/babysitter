@@ -50,9 +50,9 @@ The process library is fetched and bound through the SDK CLI in
 
 After `install --workspace`, the important files are:
 
-- `plugins/babysitter-codex/.codex-plugin/plugin.json`
-- `plugins/babysitter-codex/skills/babysit/SKILL.md`
-- `plugins/babysitter-codex/hooks.json`
+- `plugins/babysitter/.codex-plugin/plugin.json`
+- `plugins/babysitter/skills/babysit/SKILL.md`
+- `plugins/babysitter/hooks.json`
 - `.codex/skills/`
 - `.codex/hooks/`
 - `.codex/hooks.json`
@@ -67,10 +67,10 @@ Verify the installed plugin bundle:
 
 ```bash
 npm ls -g @a5c-ai/babysitter-codex --depth=0
-test -f ~/.codex/plugins/babysitter-codex/.codex-plugin/plugin.json
-test -f ~/.codex/plugins/babysitter-codex/hooks.json
-test -f ~/.codex/plugins/babysitter-codex/hooks/babysitter-stop-hook.sh
-test -f ~/.codex/plugins/babysitter-codex/skills/babysit/SKILL.md
+test -f ~/.codex/plugins/babysitter/.codex-plugin/plugin.json
+test -f ~/.codex/plugins/babysitter/hooks.json
+test -f ~/.codex/plugins/babysitter/hooks/babysitter-stop-hook.sh
+test -f ~/.codex/plugins/babysitter/skills/babysit/SKILL.md
 test -f ~/.codex/hooks.json
 test -f ~/.codex/hooks/babysitter-stop-hook.sh
 test -f ~/.codex/skills/babysit/SKILL.md

@@ -57,7 +57,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...tensorrtOpt.artifacts);
   }
-
   // Phase 4: Batching Strategy
   const batchingStrategy = await ctx.task(batchingStrategyTask, {
     modelName, targetLatency, modelProfiling, outputDir
@@ -71,17 +70,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...kernelFusion.artifacts);
 
   // Phase 6: Inference Benchmarking
-  const benchmarking = await ctx.task(inferenceBenchmarkingTask, {
+  let benchmarking = await ctx.task(inferenceBenchmarkingTask, {
     modelName, targetLatency, quantizationImpl, tensorrtOpt, batchingStrategy, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(inferenceBenchmarkingTask, { ...{
+    modelName, targetLatency, quantizationImpl, tensorrtOpt, batchingStrategy, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Inference optimization complete for ${modelName}. Latency: ${benchmarking.latency}ms (target: ${targetLatency}ms). Review?`,
     title: 'Inference Optimization Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.latency <= targetLatency,
     modelName,

@@ -108,7 +108,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring grounded theory quality');
-  const qualityScore = await ctx.task(gtQualityScoringTask, {
+  let qualityScore = await ctx.task(gtQualityScoringTask, {
     initialCoding,
     focusedCoding,
     theoreticalSampling,
@@ -123,8 +123,20 @@ export async function process(inputs, ctx) {
   const gtScore = qualityScore.overallScore;
   const qualityMet = gtScore >= 80;
 
-  // Breakpoint: Review grounded theory
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(gtQualityScoringTask, { ...{
+    initialCoding,
+    focusedCoding,
+    theoreticalSampling,
+    categoryDevelopment,
+    saturationAssessment,
+    theoryIntegration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Grounded theory development complete. Quality score: ${gtScore}/100. ${qualityMet ? 'Theory meets quality standards!' : 'Theory may need refinement.'} Review and approve?`,
     title: 'Grounded Theory Development Review',
     context: {
@@ -140,9 +152,15 @@ export async function process(inputs, ctx) {
         totalCategories: categoryDevelopment.categories.length,
         saturationAchieved: saturationAssessment.achieved
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -171,8 +189,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Coding
+  // Task 1: Initial Coding
 export const gtInitialCodingTask = defineTask('gt-initial-coding', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct initial/open coding',

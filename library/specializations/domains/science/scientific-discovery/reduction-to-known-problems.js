@@ -120,7 +120,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing reduction analysis');
-  const synthesis = await ctx.task(reductionSynthesisTask, {
+  let synthesis = await ctx.task(reductionSynthesisTask, {
     problemFormalization,
     catalogSearch,
     similarityAnalysis,
@@ -136,8 +136,22 @@ export async function process(inputs, ctx) {
 
   const confidenceMet = synthesis.confidenceScore >= targetConfidence;
 
-  // Breakpoint: Review reduction
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(reductionSynthesisTask, { ...{
+    problemFormalization,
+    catalogSearch,
+    similarityAnalysis,
+    reductionConstruction,
+    correctnessVerification,
+    complexityAnalysis,
+    solutionTransfer,
+    targetConfidence,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reduction analysis complete. Confidence: ${synthesis.confidenceScore}/${targetConfidence}. ${confidenceMet ? 'Confidence target met!' : 'Additional verification may be needed.'} Review reduction?`,
     title: 'Reduction to Known Problems Results',
     context: {
@@ -157,9 +171,15 @@ export async function process(inputs, ctx) {
         confidenceScore: synthesis.confidenceScore,
         confidenceMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -188,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

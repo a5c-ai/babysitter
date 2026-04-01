@@ -72,8 +72,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Plan Design Approval
-  await ctx.breakpoint('plan-design-approval', {
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase4Review = await ctx.breakpoint('plan-design-approval', {
     title: 'Benefits Plan Design Approval',
     description: 'Review and approve benefits plan design and vendor selections',
     artifacts: {
@@ -85,9 +87,15 @@ export async function process(inputs, ctx) {
       'Does the plan design meet employee needs and budget constraints?',
       'Are the vendor selections optimal for our requirements?',
       'Is the cost sharing strategy appropriate?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Contribution Strategy Development
   const contributionStrategy = await ctx.task('develop-contribution-strategy', {
     planDesign,
@@ -156,8 +164,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 10: Results Review
-  await ctx.breakpoint('enrollment-results-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('enrollment-results-review', {
     title: 'Enrollment Results Review',
     description: 'Review open enrollment outcomes and identify improvements',
     artifacts: {
@@ -168,9 +178,15 @@ export async function process(inputs, ctx) {
       'Did enrollment meet participation targets?',
       'Are cost projections in line with expectations?',
       'What improvements should be made for next cycle?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Post-Enrollment Administration
   const postEnrollmentAdmin = await ctx.task('manage-post-enrollment', {
     enrollmentResults,

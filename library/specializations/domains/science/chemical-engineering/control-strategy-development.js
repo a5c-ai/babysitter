@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Address Process Interactions and Constraints
   ctx.log('info', 'Addressing process interactions and constraints');
-  const interactionsResult = await ctx.task(processInteractionsTask, {
+  let interactionsResult = await ctx.task(processInteractionsTask, {
     processName,
     controlLoops: loopDesignResult.loops,
     processDescription,
@@ -85,8 +85,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...interactionsResult.artifacts);
 
-  // Breakpoint: Review control strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      interactionsResult = await ctx.task(processInteractionsTask, { ...{
+    processName,
+    controlLoops: loopDesignResult.loops,
+    processDescription,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Control strategy developed for ${processName}. Control loops: ${loopDesignResult.loops.length}. Cascade loops: ${structureResult.structure.cascadeCount}. Ratio controls: ${structureResult.structure.ratioCount}. Review strategy?`,
     title: 'Control Strategy Development Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         ratioControls: structureResult.structure.ratioCount,
         feedforwardControls: structureResult.structure.feedforwardCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Document Control Philosophy
   ctx.log('info', 'Documenting control philosophy');
   const philosophyResult = await ctx.task(controlPhilosophyTask, {
@@ -144,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Control Objectives Definition
+  // Task 1: Control Objectives Definition
 export const controlObjectivesTask = defineTask('control-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define control objectives',

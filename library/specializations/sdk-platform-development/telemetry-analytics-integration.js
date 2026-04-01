@@ -77,23 +77,36 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Dashboard and Reporting
   ctx.log.info('Phase 5: Creating dashboards and reports');
-  const dashboards = await ctx.task(dashboardCreationTask, {
+  let dashboards = await ctx.task(dashboardCreationTask, {
     sdkName,
     telemetryTypes,
     metricsCollection: metricsCollection.result
   });
 
-  // Quality Gate
-  await ctx.breakpoint('telemetry-analytics-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dashboards = await ctx.task(dashboardCreationTask, { ...{
+    sdkName,
+    telemetryTypes,
+    metricsCollection: metricsCollection.result
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('telemetry-analytics-review', {
     question: 'Review the telemetry and analytics implementation. Are privacy controls adequate and data collection appropriate?',
     context: {
       telemetryArchitecture: telemetryArchitecture.result,
       privacyControls: privacyControls.result,
       analyticsIntegration: analyticsIntegration.result
-    }
-  });
-
-  ctx.log.info('Telemetry and analytics integration completed');
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  ctx.log.info('Telemetry and analytics integration completed');
 
   return {
     telemetryDesign: {

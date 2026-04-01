@@ -54,15 +54,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Analysis Framework Development
-  const analysisFramework = await ctx.task(analysisFrameworkTask, {
+  let analysisFramework = await ctx.task(analysisFrameworkTask, {
     projectName,
     competitors,
     intelligenceRequirements,
     monitoringScope
   });
 
-  // Breakpoint: Review monitoring system design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisFramework = await ctx.task(analysisFrameworkTask, { ...{
+    projectName,
+    competitors,
+    intelligenceRequirements,
+    monitoringScope
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review competitor monitoring system for ${projectName}. Is the scope appropriate?`,
     title: 'Monitoring System Review',
     context: {
@@ -70,9 +79,15 @@ export async function process(inputs, ctx) {
       projectName,
       competitorCount: competitors.length,
       sourceCount: sourcesInventory.sources?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Dissemination Workflow Design
   const disseminationPlan = await ctx.task(disseminationWorkflowTask, {
     projectName,
@@ -126,8 +141,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const intelligenceRequirementsTask = defineTask('intelligence-requirements', (args, taskCtx) => ({
   kind: 'agent',

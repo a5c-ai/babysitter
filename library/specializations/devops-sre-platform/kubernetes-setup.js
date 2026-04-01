@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning Kubernetes cluster architecture');
 
-  const clusterDesign = await ctx.task(clusterDesignTask, {
+  let clusterDesign = await ctx.task(clusterDesignTask, {
     projectName,
     cloudProvider,
     clusterSize,
@@ -101,8 +101,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...clusterDesign.artifacts);
   clusterInfo.design = clusterDesign;
 
-  // Quality Gate: Review cluster design
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      clusterDesign = await ctx.task(clusterDesignTask, { ...{
+    projectName,
+    cloudProvider,
+    clusterSize,
+    environment,
+    requirements,
+    kubernetesVersion,
+    region,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Review: Cluster will use ${clusterDesign.nodeCount} nodes across ${clusterDesign.availabilityZones.length} AZs. Estimated cost: $${clusterDesign.estimatedMonthlyCost}/month. Approve design?`,
     title: 'Cluster Design Approval',
     context: {
@@ -113,16 +126,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(clusterDesign, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CLUSTER PROVISIONING
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Provisioning Kubernetes cluster');
 
-  const clusterProvisioning = await ctx.task(clusterProvisioningTask, {
+  let clusterProvisioning = await ctx.task(clusterProvisioningTask, {
     projectName,
     cloudProvider,
     clusterDesign,
@@ -195,8 +214,19 @@ export async function process(inputs, ctx) {
   manifests.push(...cniConfig.manifests, ...ingressConfig.manifests);
   clusterInfo.networking = { vpcConfig, cniConfig, ingressConfig };
 
-  // Quality Gate: Network configuration review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      clusterProvisioning = await ctx.task(clusterProvisioningTask, { ...{
+    projectName,
+    cloudProvider,
+    clusterDesign,
+    kubernetesVersion,
+    region,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Phase 3 Review: Networking configured with ${cniConfig.cniPlugin} CNI and ${ingressConfig.ingressController} ingress controller. Proceed?`,
     title: 'Networking Configuration Review',
     context: {
@@ -207,16 +237,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify({ vpcConfig, cniConfig, ingressConfig }, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: STORAGE CONFIGURATION
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Configuring storage (CSI drivers, StorageClasses)');
 
-  const storageConfig = await ctx.task(storageSetupTask, {
+  let storageConfig = await ctx.task(storageSetupTask, {
     projectName,
     cloudProvider,
     clusterInfo: clusterProvisioning,
@@ -301,9 +337,18 @@ export async function process(inputs, ctx) {
   security = { rbacConfig, podSecurityConfig, secretsConfig, networkPolicyConfig };
 
   // Quality Gate: Security review
-  const securityScore = (rbacConfig.score + podSecurityConfig.score + secretsConfig.score + networkPolicyConfig.score) / 4;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      storageConfig = await ctx.task(storageSetupTask, { ...{
+    projectName,
+    cloudProvider,
+    clusterInfo: clusterProvisioning,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Phase 5 Review: Security hardening complete with overall score: ${securityScore.toFixed(1)}/100. RBAC, Pod Security, Secrets Encryption, and Network Policies configured. Approve?`,
     title: 'Security Configuration Review',
     context: {
@@ -315,9 +360,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(security, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: MONITORING AND OBSERVABILITY
   // ============================================================================
@@ -447,7 +498,6 @@ export async function process(inputs, ctx) {
     clusterInfo.gitops = gitopsConfig;
     ctx.log('info', `GitOps configured with ${gitopsConfig.tool}`);
   }
-
   // ============================================================================
   // PHASE 10: SERVICE MESH (OPTIONAL)
   // ============================================================================
@@ -471,14 +521,13 @@ export async function process(inputs, ctx) {
       ctx.log('warn', 'Service mesh setup failed, but continuing');
     }
   }
-
   // ============================================================================
   // PHASE 11: CLUSTER VALIDATION AND TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating cluster setup and running tests');
 
-  const clusterValidation = await ctx.task(clusterValidationTask, {
+  let clusterValidation = await ctx.task(clusterValidationTask, {
     projectName,
     clusterInfo: clusterProvisioning,
     requirements,
@@ -486,9 +535,17 @@ export async function process(inputs, ctx) {
   });
 
   if (!clusterValidation.success) {
-    ctx.log('error', 'Cluster validation failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        clusterValidation = await ctx.task(clusterValidationTask, { ...{
+    projectName,
+    clusterInfo: clusterProvisioning,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Phase 11 Alert: Cluster validation failed with ${clusterValidation.failedTests} failed tests. Review issues before proceeding?`,
       title: 'Cluster Validation Failed',
       context: {
@@ -499,9 +556,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(clusterValidation, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   artifacts.push(...clusterValidation.artifacts);
 
@@ -511,7 +574,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating documentation and operational runbooks');
 
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     projectName,
     clusterInfo,
     manifests,
@@ -526,7 +589,6 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentation.artifacts);
   }
-
   // ============================================================================
   // FINAL QUALITY GATE AND HANDOFF
   // ============================================================================
@@ -541,9 +603,20 @@ export async function process(inputs, ctx) {
 
   const qualityThreshold = environment === 'production' ? 85 : 75;
 
-  ctx.log('info', `Overall cluster quality score: ${overallScore.toFixed(1)}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval4) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    projectName,
+    clusterInfo,
+    manifests,
+    monitoring,
+    security,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+    }
+  const finalApproval4 = await ctx.breakpoint({
     question: `Final Review: Kubernetes cluster ${clusterProvisioning.clusterName} is ready. Overall quality score: ${overallScore.toFixed(1)}/100 (threshold: ${qualityThreshold}). Ready to handoff?`,
     title: 'Final Cluster Review and Handoff',
     context: {
@@ -571,9 +644,15 @@ export async function process(inputs, ctx) {
           content: documentation.runbook || 'Runbook generation pending'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval4.approved) break;
+    lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -622,8 +701,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

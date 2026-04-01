@@ -119,7 +119,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing network insights');
-  const synthesis = await ctx.task(networkSynthesisTask, {
+  let synthesis = await ctx.task(networkSynthesisTask, {
     networkConstruction,
     topologyAnalysis,
     moduleDetection,
@@ -135,8 +135,22 @@ export async function process(inputs, ctx) {
 
   const coverageMet = synthesis.coverageScore >= targetCoverage;
 
-  // Breakpoint: Review network analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(networkSynthesisTask, { ...{
+    networkConstruction,
+    topologyAnalysis,
+    moduleDetection,
+    pathwayAnalysis,
+    hubAnalysis,
+    dynamicsAnalysis,
+    robustnessAnalysis,
+    targetCoverage,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Network analysis complete. Coverage: ${synthesis.coverageScore}/${targetCoverage}. ${coverageMet ? 'Coverage target met!' : 'Additional analysis may be needed.'} Review results?`,
     title: 'Network Pathway Reasoning Results',
     context: {
@@ -156,9 +170,15 @@ export async function process(inputs, ctx) {
         coverageScore: synthesis.coverageScore,
         coverageMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -57,7 +57,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: PARTICIPANT RECRUITMENT AND SCREENING
   // ============================================================================
@@ -113,7 +112,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...qualitativeDataCollection.artifacts);
     qualitativeResults.push(qualitativeDataCollection);
   }
-
   // ============================================================================
   // PHASE 5: QUANTITATIVE DATA COLLECTION
   // ============================================================================
@@ -137,7 +135,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...quantitativeDataCollection.artifacts);
     quantitativeResults.push(quantitativeDataCollection);
   }
-
   // ============================================================================
   // PHASE 6: DATA SYNTHESIS AND ANALYSIS
   // ============================================================================
@@ -186,7 +183,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...personaCreation.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: JOURNEY MAPPING (if requested)
   // ============================================================================
@@ -204,7 +200,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...journeyMapping.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: RESEARCH REPORT GENERATION
   // ============================================================================
@@ -230,7 +225,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Evaluating research quality and completeness');
-  const qualityScore = await ctx.task(researchQualityScoringTask, {
+  let qualityScore = await ctx.task(researchQualityScoringTask, {
     projectName,
     researchObjectives: researchPlanning.refinedObjectives,
     participantCount: participantRecruitment.confirmedParticipants.length,
@@ -246,8 +241,22 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= targetInsightQuality;
 
-  // Breakpoint: Review research findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(researchQualityScoringTask, { ...{
+    projectName,
+    researchObjectives: researchPlanning.refinedObjectives,
+    participantCount: participantRecruitment.confirmedParticipants.length,
+    methodsDiversity: researchPlanning.selectedMethods.length,
+    dataSynthesis,
+    insightGeneration,
+    researchReport,
+    targetInsightQuality,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `User research complete. Quality score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Research meets quality standards!' : 'Research may need additional investigation.'} Review findings?`,
     title: 'User Research Review',
     context: {
@@ -269,9 +278,15 @@ export async function process(inputs, ctx) {
         journeyMapsCreated: journeyMapping ? journeyMapping.journeyMaps.length : 0,
         keyThemes: dataSynthesis.themes.slice(0, 5)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: RECOMMENDATIONS AND NEXT STEPS
   // ============================================================================
@@ -290,7 +305,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...recommendations.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -352,8 +366,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

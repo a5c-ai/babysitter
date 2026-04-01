@@ -20,8 +20,10 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Simulation Design
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting crisis simulation design. Define scenario and objectives?',
     title: 'Phase 1: Simulation Design',
     context: {
@@ -29,10 +31,16 @@ export async function process(inputs, ctx) {
       phase: 'simulation-design',
       simulationType,
       participantCount: participants.length
-    }
-  });
-
-  const simulationDesign = await ctx.task(designSimulationTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let simulationDesign = await ctx.task(designSimulationTask, {
     crisisPlan,
     scenario,
     objectives,
@@ -40,16 +48,32 @@ export async function process(inputs, ctx) {
     duration
   });
 
-  // Phase 2: Scenario Development
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      simulationDesign = await ctx.task(designSimulationTask, { ...{
+    crisisPlan,
+    scenario,
+    objectives,
+    simulationType,
+    duration
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Simulation designed. Develop detailed scenario and injects?',
     title: 'Phase 2: Scenario Development',
     context: {
       runId: ctx.runId,
       phase: 'scenario-development'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [scenarioDetails, injects] = await Promise.all([
     ctx.task(developScenarioTask, {
       scenario,
@@ -64,17 +88,33 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 3: Participant Preparation
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      simulationDesign = await ctx.task(designSimulationTask, { ...{
+    crisisPlan,
+    scenario,
+    objectives,
+    simulationType,
+    duration
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Scenario ready. Prepare participants and materials?',
     title: 'Phase 3: Participant Preparation',
     context: {
       runId: ctx.runId,
       phase: 'participant-prep',
       participants: participants.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   const [participantBriefing, materials] = await Promise.all([
     ctx.task(prepareParticipantBriefingTask, {
       participants,
@@ -89,18 +129,34 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 4: Facilitation Guide
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      simulationDesign = await ctx.task(designSimulationTask, { ...{
+    crisisPlan,
+    scenario,
+    objectives,
+    simulationType,
+    duration
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Materials prepared. Create facilitation guide?',
     title: 'Phase 4: Facilitation Guide',
     context: {
       runId: ctx.runId,
       phase: 'facilitation-guide',
       injectCount: injects.injectList.length
-    }
-  });
-
-  const facilitationGuide = await ctx.task(createFacilitationGuideTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let facilitationGuide = await ctx.task(createFacilitationGuideTask, {
     simulationDesign,
     scenarioDetails,
     injects,
@@ -108,66 +164,125 @@ export async function process(inputs, ctx) {
     duration
   });
 
-  // Phase 5: Evaluation Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      facilitationGuide = await ctx.task(createFacilitationGuideTask, { ...{
+    simulationDesign,
+    scenarioDetails,
+    injects,
+    objectives,
+    duration
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Facilitation planned. Define evaluation framework?',
     title: 'Phase 5: Evaluation Framework',
     context: {
       runId: ctx.runId,
       phase: 'evaluation-framework'
-    }
-  });
-
-  const evaluationFramework = await ctx.task(defineEvaluationFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let evaluationFramework = await ctx.task(defineEvaluationFrameworkTask, {
     objectives,
     crisisPlan,
     simulationDesign
   });
 
-  // Phase 6: Simulation Execution Support
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      evaluationFramework = await ctx.task(defineEvaluationFrameworkTask, { ...{
+    objectives,
+    crisisPlan,
+    simulationDesign
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Framework ready. Prepare simulation execution support?',
     title: 'Phase 6: Execution Support',
     context: {
       runId: ctx.runId,
       phase: 'execution-support'
-    }
-  });
-
-  const executionSupport = await ctx.task(prepareExecutionSupportTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let executionSupport = await ctx.task(prepareExecutionSupportTask, {
     facilitationGuide,
     injects,
     evaluationFramework,
     participants
   });
 
-  // Phase 7: Post-Exercise Analysis Design
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      executionSupport = await ctx.task(prepareExecutionSupportTask, { ...{
+    facilitationGuide,
+    injects,
+    evaluationFramework,
+    participants
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Execution support ready. Design post-exercise analysis?',
     title: 'Phase 7: Analysis Design',
     context: {
       runId: ctx.runId,
       phase: 'analysis-design'
-    }
-  });
-
-  const analysisDesign = await ctx.task(designPostExerciseAnalysisTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let analysisDesign = await ctx.task(designPostExerciseAnalysisTask, {
     objectives,
     evaluationFramework,
     crisisPlan
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      analysisDesign = await ctx.task(designPostExerciseAnalysisTask, { ...{
+    objectives,
+    evaluationFramework,
+    crisisPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate simulation design quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateSimulationQualityTask, {
     simulationDesign,
     scenarioDetails,
@@ -222,8 +337,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const designSimulationTask = defineTask('design-simulation', (args, taskCtx) => ({
   kind: 'agent',

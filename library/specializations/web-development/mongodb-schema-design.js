@@ -26,11 +26,16 @@ export async function process(inputs, ctx) {
   const indexesSetup = await ctx.task(indexesSetupTask, { projectName, outputDir });
   artifacts.push(...indexesSetup.artifacts);
 
-  const validationSetup = await ctx.task(validationSetupTask, { projectName, outputDir });
-  artifacts.push(...validationSetup.artifacts);
-
-  await ctx.breakpoint({ question: `MongoDB schema design complete for ${projectName}. ${schemaDesign.schemas.length} schemas. Approve?`, title: 'MongoDB Schema Review', context: { runId: ctx.runId, schemas: schemaDesign.schemas } });
-
+  let validationSetup = await ctx.task(validationSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validationSetup = await ctx.task(validationSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `MongoDB schema design complete for ${projectName}. ${schemaDesign.schemas.length} schemas. Approve?`, title: 'MongoDB Schema Review', context: { runId: ctx.runId, schemas: schemaDesign.schemas }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, schemaDesign, outputDir });
   artifacts.push(...documentation.artifacts);
 

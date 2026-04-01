@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       counterfactualOutcome: null
     };
   }
-
   // Phase 2: Structural Equation Model Setup
   const semSetup = await ctx.task(structuralEquationSetupTask, {
     causalModel,
@@ -58,24 +57,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Abduction - Infer Exogenous Variables
-  const abductionResult = await ctx.task(abductionTask, {
+  let abductionResult = await ctx.task(abductionTask, {
     semSetup,
     factualObservation,
     causalModel
   });
 
   // Quality Gate: Exogenous variables must be identified
-  if (!abductionResult.exogenousIdentified) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        abductionResult = await ctx.task(abductionTask, { ...{
+    semSetup,
+    factualObservation,
+    causalModel
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Cannot uniquely determine exogenous variables for counterfactual. Multiple solutions exist. Proceed with uncertainty analysis?`,
       title: 'Abduction Ambiguity',
       context: {
         runId: ctx.runId,
         possibleSolutions: abductionResult.possibleSolutions,
         recommendation: 'Consider bounds on counterfactual or sensitivity analysis'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 4: Action - Apply Intervention
   const interventionResult = await ctx.task(interventionApplicationTask, {
@@ -117,15 +130,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Robustness Assessment
-  const robustnessAssessment = await ctx.task(robustnessAssessmentTask, {
+  let robustnessAssessment = await ctx.task(robustnessAssessmentTask, {
     counterfactualPrediction,
     boundsAnalysis,
     semSetup,
     abductionResult
   });
 
-  // Final Breakpoint: Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      robustnessAssessment = await ctx.task(robustnessAssessmentTask, { ...{
+    counterfactualPrediction,
+    boundsAnalysis,
+    semSetup,
+    abductionResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Counterfactual analysis complete: "${counterfactualQuery}". Result: ${counterfactualPrediction.outcome}. Review and validate?`,
     title: 'Counterfactual Analysis Review',
     context: {
@@ -137,9 +159,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: 'artifacts/counterfactual-analysis.json', format: 'json', content: counterfactualPrediction }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -175,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const queryFormalizationTask = defineTask('query-formalization', (args, taskCtx) => ({
   kind: 'agent',

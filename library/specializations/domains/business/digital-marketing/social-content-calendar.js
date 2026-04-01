@@ -51,15 +51,23 @@ export async function process(inputs, ctx) {
 
   // Task 4: Review and Approve Content
   ctx.log('info', 'Phase 4: Content review and approval');
-  const contentReview = await ctx.task(contentReviewTask, {
+  let contentReview = await ctx.task(contentReviewTask, {
     contentCreation,
     brandAssets,
     outputDir
   });
   artifacts.push(...contentReview.artifacts);
 
-  // Breakpoint: Approve content for scheduling
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      contentReview = await ctx.task(contentReviewTask, { ...{
+    contentCreation,
+    brandAssets,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${contentReview.approvedCount}/${contentReview.totalContent} content pieces approved. ${contentReview.pendingCount} pending review. Proceed to scheduling?`,
     title: 'Content Approval Review',
     context: {
@@ -70,9 +78,15 @@ export async function process(inputs, ctx) {
         pendingContent: contentReview.pendingCount,
         rejectedContent: contentReview.rejectedCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 5: Schedule Posts Across Platforms
   ctx.log('info', 'Phase 5: Scheduling posts across platforms');
   const scheduling = await ctx.task(contentSchedulingTask, {
@@ -137,8 +151,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const contentThemePlanningTask = defineTask('content-theme-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan monthly/weekly content themes',

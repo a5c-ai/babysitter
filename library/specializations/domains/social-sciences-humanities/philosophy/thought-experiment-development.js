@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Variant Development
   ctx.log('info', 'Developing scenario variants');
-  const variantDevelopment = await ctx.task(variantDevelopmentTask, {
+  let variantDevelopment = await ctx.task(variantDevelopmentTask, {
     originalScenario: scenarioConstruction.scenario,
     objections: objectionsAnalysis.objections,
     outputDir
@@ -92,8 +92,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...variantDevelopment.artifacts);
 
-  // Breakpoint: Review thought experiment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      variantDevelopment = await ctx.task(variantDevelopmentTask, { ...{
+    originalScenario: scenarioConstruction.scenario,
+    objections: objectionsAnalysis.objections,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Thought experiment developed. Scenario: "${scenarioConstruction.scenario.name}". ${variantDevelopment.variants.length} variants created. Review the experiment?`,
     title: 'Thought Experiment Development Results',
     context: {
@@ -105,9 +113,15 @@ export async function process(inputs, ctx) {
         intuitionsElicited: intuitionElicitation.intuitions.length,
         variantsCreated: variantDevelopment.variants.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Thought Experiment Report
   ctx.log('info', 'Generating thought experiment report');
   const experimentReport = await ctx.task(experimentReportTask, {
@@ -156,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Question Analysis
+  // Task 1: Question Analysis
 export const questionAnalysisTask = defineTask('question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze philosophical question for thought experiment',

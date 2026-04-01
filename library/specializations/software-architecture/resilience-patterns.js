@@ -29,7 +29,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Identifying failure points and vulnerabilities');
-  const failureAnalysis = await ctx.task(failurePointAnalysisTask, {
+  let failureAnalysis = await ctx.task(failurePointAnalysisTask, {
     system,
     components,
     slas,
@@ -50,9 +50,17 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
-  // Breakpoint for failure point review
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      failureAnalysis = await ctx.task(failurePointAnalysisTask, { ...{
+    system,
+    components,
+    slas,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Identified ${failureAnalysis.failurePoints.length} failure points. Review and approve pattern strategy?`,
     title: 'Failure Point Analysis Review',
     context: {
@@ -62,15 +70,21 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/failure-points.json`, format: 'json' }
       ],
       summary: `Critical: ${failureAnalysis.criticalCount}, High: ${failureAnalysis.highCount}, Medium: ${failureAnalysis.mediumCount}`
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SELECT RESILIENCE PATTERNS
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Selecting appropriate resilience patterns');
-  const patternSelection = await ctx.task(resiliencePatternSelectionTask, {
+  let patternSelection = await ctx.task(resiliencePatternSelectionTask, {
     failurePoints: failureAnalysis.failurePoints,
     components,
     slas,
@@ -160,8 +174,18 @@ export async function process(inputs, ctx) {
     }
   });
 
-  // Breakpoint for pattern implementation review
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval2) {
+      patternSelection = await ctx.task(resiliencePatternSelectionTask, { ...{
+    failurePoints: failureAnalysis.failurePoints,
+    components,
+    slas,
+    systemConstraints: failureAnalysis.constraints,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+    }
+  const reviewApproval2 = await ctx.breakpoint({
     question: `Implemented ${patternsImplemented.length} resilience patterns. Review implementations before testing?`,
     title: 'Pattern Implementation Review',
     context: {
@@ -171,9 +195,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/pattern-configurations.json`, format: 'json' }
       ],
       summary: `Patterns: ${patternsImplemented.join(', ')}`
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval2.approved) break;
+    lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: INTEGRATION AND TESTING
   // ============================================================================
@@ -194,7 +224,7 @@ export async function process(inputs, ctx) {
 
   if (chaosTestingEnabled) {
     ctx.log('info', 'Phase 5: Running chaos engineering tests');
-    const chaosTests = await ctx.task(chaosEngineeringTestTask, {
+    let chaosTests = await ctx.task(chaosEngineeringTestTask, {
       system,
       components,
       patternsImplemented,
@@ -205,8 +235,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...chaosTests.artifacts);
 
-    // Breakpoint for chaos test review
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        chaosTests = await ctx.task(chaosEngineeringTestTask, { ...{
+      system,
+      components,
+      patternsImplemented,
+      failurePoints: failureAnalysis.failurePoints,
+      testScenarios: patternSelection.chaosScenarios,
+      outputDir
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Chaos tests completed with ${chaosTests.passedTests}/${chaosTests.totalTests} passing. Review results?`,
       title: 'Chaos Testing Results',
       context: {
@@ -216,10 +257,16 @@ export async function process(inputs, ctx) {
           { path: `${outputDir}/chaos-test-results.json`, format: 'json' }
         ],
         summary: `Pass rate: ${Math.round((chaosTests.passedTests / chaosTests.totalTests) * 100)}%`
-      }
-    });
-
-    // If tests failed, run remediation
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If tests failed, run remediation
     if (chaosTests.failedTests > 0 && autoRemediation) {
       ctx.log('info', 'Running auto-remediation for failed chaos tests');
       const remediation = await ctx.task(autoRemediationTask, {
@@ -230,7 +277,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...remediation.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 6: MONITORING AND ALERTING SETUP
   // ============================================================================
@@ -248,7 +294,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...monitoring.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: RESILIENCE SCORING AND VALIDATION
   // ============================================================================
@@ -308,8 +353,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

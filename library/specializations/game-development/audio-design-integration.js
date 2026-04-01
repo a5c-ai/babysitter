@@ -61,7 +61,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...voiceActing.artifacts);
   }
-
   // Phase 5: Audio Integration
   const audioIntegration = await ctx.task(audioIntegrationTask, {
     projectName, soundDesign, musicComposition, voiceActing, audioMiddleware, outputDir
@@ -75,17 +74,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...spatialAudio.artifacts);
 
   // Phase 7: Audio Mixing
-  const audioMixing = await ctx.task(audioMixingTask, {
+  let audioMixing = await ctx.task(audioMixingTask, {
     projectName, soundDesign, musicComposition, voiceActing, outputDir
   });
-  artifacts.push(...audioMixing.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      audioMixing = await ctx.task(audioMixingTask, { ...{
+    projectName, soundDesign, musicComposition, voiceActing, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Audio design and integration complete for ${projectName}. SFX: ${soundDesign.sfxCount}, Music tracks: ${musicComposition.trackCount}. Review audio mix?`,
     title: 'Audio Integration Review',
-    context: { runId: ctx.runId, soundDesign, musicComposition, audioMixing }
-  });
-
+    context: { runId: ctx.runId, soundDesign, musicComposition, audioMixing },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

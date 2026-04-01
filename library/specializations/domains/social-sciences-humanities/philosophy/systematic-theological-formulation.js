@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Systematic Formulation
   ctx.log('info', 'Developing systematic formulation');
-  const systematicFormulation = await ctx.task(systematicFormulationTask, {
+  let systematicFormulation = await ctx.task(systematicFormulationTask, {
     topic: topicDefinition.defined,
     integration: sourceIntegration.integrated,
     tradition,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...systematicFormulation.artifacts);
 
-  // Breakpoint: Review theological formulation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systematicFormulation = await ctx.task(systematicFormulationTask, { ...{
+    topic: topicDefinition.defined,
+    integration: sourceIntegration.integrated,
+    tradition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Systematic theological formulation on "${theologicalTopic}" complete. Review the formulation?`,
     title: 'Systematic Theological Formulation Results',
     context: {
@@ -108,9 +117,15 @@ export async function process(inputs, ctx) {
         sourcesUsed: sources,
         doctrinalClaims: systematicFormulation.formulation.claims?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Theological Report
   ctx.log('info', 'Generating systematic theological report');
   const theologicalReport = await ctx.task(theologicalReportTask, {
@@ -159,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const topicDefinitionTask = defineTask('topic-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define theological topic and scope',

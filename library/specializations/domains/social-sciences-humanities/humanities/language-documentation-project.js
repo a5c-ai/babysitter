@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Language Documentation Report
   ctx.log('info', 'Generating language documentation report');
-  const documentationReport = await ctx.task(documentationReportTask, {
+  let documentationReport = await ctx.task(documentationReportTask, {
     language,
     communityFramework,
     phonologicalDoc,
@@ -109,8 +109,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentationReport.artifacts);
 
-  // Breakpoint: Review language documentation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentationReport = await ctx.task(documentationReportTask, { ...{
+    language,
+    communityFramework,
+    phonologicalDoc,
+    morphologicalAnalysis,
+    syntacticAnalysis,
+    lexicalDocumentation,
+    textCollection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Language documentation complete for ${language.name || 'language'}. Lexical entries: ${lexicalDocumentation.entries?.length || 0}. Review documentation?`,
     title: 'Language Documentation Results',
     context: {
@@ -122,9 +135,15 @@ export async function process(inputs, ctx) {
         lexicalEntries: lexicalDocumentation.entries?.length || 0,
         textsCollected: textCollection.texts?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -156,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Community Collaboration Framework
+  // Task 1: Community Collaboration Framework
 export const communityCollaborationTask = defineTask('community-collaboration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish community collaboration framework',

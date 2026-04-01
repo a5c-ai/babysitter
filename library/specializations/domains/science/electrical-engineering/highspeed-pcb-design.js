@@ -39,14 +39,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Design PCB Stack-Up for Impedance Control
-  const stackupDesign = await ctx.task(stackupDesignTask, {
+  let stackupDesign = await ctx.task(stackupDesignTask, {
     boardName,
     requirements: requirementsDefinition.requirements,
     constraints
   });
 
-  // Breakpoint: Review stack-up design
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      stackupDesign = await ctx.task(stackupDesignTask, { ...{
+    boardName,
+    requirements: requirementsDefinition.requirements,
+    constraints
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review stack-up design for ${boardName}. ${stackupDesign.layerCount} layers. Controlled impedance: ${stackupDesign.impedanceControlled}. Proceed?`,
     title: 'Stack-Up Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: stackupDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Plan Critical Signal Routing and Layer Assignment
   const routingPlanning = await ctx.task(routingPlanningTask, {
     boardName,
@@ -76,14 +90,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Design Power Distribution Network (PDN)
-  const pdnDesign = await ctx.task(pdnDesignTask, {
+  let pdnDesign = await ctx.task(pdnDesignTask, {
     boardName,
     stackup: stackupDesign,
     powerRequirements: requirementsDefinition.requirements.power
   });
 
-  // Breakpoint: Review PDN design
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      pdnDesign = await ctx.task(pdnDesignTask, { ...{
+    boardName,
+    stackup: stackupDesign,
+    powerRequirements: requirementsDefinition.requirements.power
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review PDN design for ${boardName}. Target impedance: ${pdnDesign.targetImpedance}. Decoupling strategy defined. Proceed with EMI analysis?`,
     title: 'PDN Review',
     context: {
@@ -94,9 +116,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: pdnDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Apply EMI Mitigation Techniques
   const emiMitigation = await ctx.task(emiMitigationTask, {
     boardName,
@@ -106,7 +134,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Run Signal Integrity Simulations
-  const siSimulation = await ctx.task(siSimulationTask, {
+  let siSimulation = await ctx.task(siSimulationTask, {
     boardName,
     stackup: stackupDesign,
     routingPlan: routingPlanning.plan,
@@ -115,20 +143,36 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: SI must meet requirements
-  if (!siSimulation.allChannelsPass) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        siSimulation = await ctx.task(siSimulationTask, { ...{
+    boardName,
+    stackup: stackupDesign,
+    routingPlan: routingPlanning.plan,
+    lengthMatching: lengthMatching,
+    signalRequirements: requirementsDefinition.requirements.signals
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `SI simulation shows ${siSimulation.failingChannels.length} channels not meeting eye mask. Review and optimize?`,
       title: 'SI Issues',
       context: {
         runId: ctx.runId,
         failingChannels: siSimulation.failingChannels,
         recommendations: siSimulation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 8: Generate Manufacturing Outputs and Documentation
-  const manufacturingOutputs = await ctx.task(manufacturingOutputsTask, {
+  let manufacturingOutputs = await ctx.task(manufacturingOutputsTask, {
     boardName,
     stackup: stackupDesign,
     routingPlanning,
@@ -137,8 +181,19 @@ export async function process(inputs, ctx) {
     requirements: requirementsDefinition.requirements
   });
 
-  // Final Breakpoint: Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      manufacturingOutputs = await ctx.task(manufacturingOutputsTask, { ...{
+    boardName,
+    stackup: stackupDesign,
+    routingPlanning,
+    pdnDesign,
+    siSimulation,
+    requirements: requirementsDefinition.requirements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `High-speed PCB design complete for ${boardName}. SI: ${siSimulation.allChannelsPass ? 'PASS' : 'NEEDS REVIEW'}. PI: ${pdnDesign.meetsRequirements ? 'PASS' : 'NEEDS REVIEW'}. Approve for fabrication?`,
     title: 'Design Approval',
     context: {
@@ -149,9 +204,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/design-rules.json`, format: 'json', content: manufacturingOutputs.designRules },
         { path: `artifacts/pcb-report.md`, format: 'markdown', content: manufacturingOutputs.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     boardName,
@@ -171,8 +232,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

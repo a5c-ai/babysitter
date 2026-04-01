@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Plan Ambassador Program
   ctx.log('info', 'Phase 8: Planning ambassador program activities');
-  const ambassadorProgram = await ctx.task(ambassadorProgramTask, {
+  let ambassadorProgram = await ctx.task(ambassadorProgramTask, {
     influencerDatabase,
     partnershipHistory,
     recognition,
@@ -93,8 +93,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...ambassadorProgram.artifacts);
 
-  // Breakpoint: Review relationship health
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      ambassadorProgram = await ctx.task(ambassadorProgramTask, { ...{
+    influencerDatabase,
+    partnershipHistory,
+    recognition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Influencer relationship management update complete. ${databaseMaintenance.activePartners} active partners tracked. Ambassador program activities planned. Review?`,
     title: 'Influencer Relationship Review',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
         topPerformers: recognition.topPerformerCount,
         pendingRenewals: historyTracking.pendingRenewals
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Monitor Compliance
   ctx.log('info', 'Phase 9: Monitoring compliance and disclosure');
   const complianceMonitoring = await ctx.task(complianceMonitoringTask, {
@@ -149,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const databaseMaintenanceTask = defineTask('database-maintenance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Maintain influencer database and profiles',

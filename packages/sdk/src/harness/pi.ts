@@ -18,6 +18,8 @@ import type {
   SessionBindOptions,
   SessionBindResult,
 } from "./types";
+import type { PromptContext } from "../prompts/types";
+import { createPiContext } from "../prompts/context";
 import {
   installCliViaNpm,
   runPackageBinaryViaNpx,
@@ -217,6 +219,10 @@ export function createPiAdapter(): HarnessAdapter {
         harness: "pi",
         options,
       });
+    },
+
+    getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
+      return createPiContext(opts);
     },
   };
 }

@@ -130,7 +130,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Creating stakeholder register');
-  const stakeholderRegister = await ctx.task(stakeholderRegisterTask, {
+  let stakeholderRegister = await ctx.task(stakeholderRegisterTask, {
     projectName,
     stakeholders: stakeholderCategorization.categorizedStakeholders,
     powerInterestAnalysis,
@@ -142,8 +142,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...stakeholderRegister.artifacts);
 
-  // Breakpoint: Review stakeholder analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      stakeholderRegister = await ctx.task(stakeholderRegisterTask, { ...{
+    projectName,
+    stakeholders: stakeholderCategorization.categorizedStakeholders,
+    powerInterestAnalysis,
+    salienceAnalysis,
+    needsAnalysis,
+    engagementStrategy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stakeholder analysis complete for ${projectName}. ${stakeholderIdentification.stakeholders?.length || 0} stakeholders identified. Review and approve?`,
     title: 'Stakeholder Analysis Review',
     context: {
@@ -160,9 +172,15 @@ export async function process(inputs, ctx) {
         keyPlayers: powerInterestAnalysis.keyPlayers?.length || 0,
         highPriorityStakeholders: salienceAnalysis.definitiveStakeholders?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

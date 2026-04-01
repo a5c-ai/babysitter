@@ -63,7 +63,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Establishing ISMS scope and organizational context (ISO 27001 Clause 4)');
 
-  const contextEstablishment = await ctx.task(establishOrganizationalContextTask, {
+  let contextEstablishment = await ctx.task(establishOrganizationalContextTask, {
     organization,
     scope,
     industry,
@@ -76,8 +76,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Context established - ${contextEstablishment.stakeholders.length} stakeholders, ${contextEstablishment.internalIssues.length} internal issues, ${contextEstablishment.externalIssues.length} external issues`);
 
-  // Quality Gate: Context review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      contextEstablishment = await ctx.task(establishOrganizationalContextTask, { ...{
+    organization,
+    scope,
+    industry,
+    implementationDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `ISMS context established for ${organization}. Scope: "${contextEstablishment.ismsScope}". Identified ${contextEstablishment.stakeholders.length} stakeholders. Review context?`,
     title: 'ISMS Context Establishment Review',
     context: {
@@ -88,16 +98,22 @@ export async function process(inputs, ctx) {
       internalIssues: contextEstablishment.internalIssues.length,
       externalIssues: contextEstablishment.externalIssues.length,
       files: contextEstablishment.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: LEADERSHIP COMMITMENT AND POLICY (Clause 5)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Establishing leadership commitment and information security policy (ISO 27001 Clause 5)');
 
-  const leadershipPolicy = await ctx.task(establishLeadershipPolicyTask, {
+  let leadershipPolicy = await ctx.task(establishLeadershipPolicyTask, {
     organization,
     scope,
     contextEstablishment,
@@ -131,8 +147,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Gap analysis complete - ${gapAnalysis.totalGaps} gaps identified, ${gapAnalysis.criticalGaps} critical`);
 
-    // Quality Gate: Gap analysis review
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        leadershipPolicy = await ctx.task(establishLeadershipPolicyTask, { ...{
+    organization,
+    scope,
+    contextEstablishment,
+    generatePoliciesTemplates,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Gap analysis complete. ${gapAnalysis.totalGaps} gaps identified (${gapAnalysis.criticalGaps} critical). Compliance: ${gapAnalysis.currentComplianceLevel}%. Review gaps?`,
       title: 'Gap Analysis Review',
       context: {
@@ -142,9 +168,15 @@ export async function process(inputs, ctx) {
         highGaps: gapAnalysis.highGaps,
         currentCompliance: gapAnalysis.currentComplianceLevel,
         files: gapAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: RISK ASSESSMENT AND TREATMENT (Clause 6)
@@ -152,7 +184,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Conducting information security risk assessment (ISO 27001 Clause 6.1)');
 
-  const riskAssessment = await ctx.task(conductRiskAssessmentTask, {
+  let riskAssessment = await ctx.task(conductRiskAssessmentTask, {
     organization,
     scope,
     contextEstablishment,
@@ -167,8 +199,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Risk assessment complete - ${riskAssessment.totalRisks} risks identified, ${riskAssessment.criticalRisks} critical, ${riskAssessment.highRisks} high`);
 
-  // Quality Gate: Risk assessment review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      riskAssessment = await ctx.task(conductRiskAssessmentTask, { ...{
+    organization,
+    scope,
+    contextEstablishment,
+    gapAnalysis,
+    industry,
+    implementationDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Risk assessment complete. ${riskAssessment.totalRisks} risks identified. Critical: ${riskAssessment.criticalRisks}, High: ${riskAssessment.highRisks}. Overall risk score: ${riskAssessment.overallRiskScore}/100. Review risks?`,
     title: 'Risk Assessment Review',
     context: {
@@ -178,9 +222,15 @@ export async function process(inputs, ctx) {
       highRisks: riskAssessment.highRisks,
       overallRiskScore: riskAssessment.overallRiskScore,
       files: riskAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RISK TREATMENT PLAN (Clause 6.1.3)
   // ============================================================================
@@ -205,7 +255,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating Statement of Applicability (SOA) - Annex A controls selection (ISO 27001 Clause 6.1.3d)');
 
-  const statementOfApplicability = await ctx.task(createStatementOfApplicabilityTask, {
+  let statementOfApplicability = await ctx.task(createStatementOfApplicabilityTask, {
     organization,
     scope,
     riskAssessment,
@@ -221,8 +271,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SOA created - ${statementOfApplicability.applicableControls} applicable controls, ${statementOfApplicability.notApplicableControls} not applicable`);
 
-  // Quality Gate: SOA review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval3) {
+      statementOfApplicability = await ctx.task(createStatementOfApplicabilityTask, { ...{
+    organization,
+    scope,
+    riskAssessment,
+    riskTreatmentPlan,
+    existingControls,
+    industry,
+    implementationDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+    }
+  const qualityGateApproval3 = await ctx.breakpoint({
     question: `Statement of Applicability (SOA) created. ${statementOfApplicability.applicableControls} applicable controls, ${statementOfApplicability.notApplicableControls} not applicable. Control coverage: ${statementOfApplicability.controlCoverage}%. Review SOA?`,
     title: 'Statement of Applicability Review',
     context: {
@@ -233,9 +296,15 @@ export async function process(inputs, ctx) {
       plannedControls: statementOfApplicability.plannedControls,
       controlCoverage: statementOfApplicability.controlCoverage,
       files: statementOfApplicability.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval3.approved) break;
+    lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: ISMS DOCUMENTATION (Clause 7.5)
   // ============================================================================
@@ -266,7 +335,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Creating Annex A controls implementation plan');
 
-  const controlsImplementationPlan = await ctx.task(createControlsImplementationPlanTask, {
+  let controlsImplementationPlan = await ctx.task(createControlsImplementationPlanTask, {
     organization,
     statementOfApplicability,
     riskTreatmentPlan,
@@ -279,8 +348,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Controls implementation plan created - ${controlsImplementationPlan.phases.length} implementation phases over ${certificationTimeline}`);
 
-  // Quality Gate: Implementation plan review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval4) {
+      controlsImplementationPlan = await ctx.task(createControlsImplementationPlanTask, { ...{
+    organization,
+    statementOfApplicability,
+    riskTreatmentPlan,
+    certificationTimeline,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+    }
+  const qualityGateApproval4 = await ctx.breakpoint({
     question: `Controls implementation plan created. ${controlsImplementationPlan.totalActions} actions across ${controlsImplementationPlan.phases.length} phases. Timeline: ${certificationTimeline}. Review plan?`,
     title: 'Controls Implementation Plan Review',
     context: {
@@ -290,9 +369,15 @@ export async function process(inputs, ctx) {
       estimatedEffort: controlsImplementationPlan.estimatedEffort,
       timeline: certificationTimeline,
       files: controlsImplementationPlan.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval4.approved) break;
+    lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: COMPETENCE AND AWARENESS (Clause 7.2 & 7.3)
   // ============================================================================
@@ -392,7 +477,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Establishing continual improvement process (ISO 27001 Clause 10)');
 
-  const continualImprovement = await ctx.task(establishContinualImprovementTask, {
+  let continualImprovement = await ctx.task(establishContinualImprovementTask, {
     organization,
     scope,
     riskAssessment,
@@ -433,8 +518,17 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Certification preparation complete - Readiness score: ${certificationReadiness}/100`);
 
-    // Quality Gate: Certification readiness
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        continualImprovement = await ctx.task(establishContinualImprovementTask, { ...{
+    organization,
+    scope,
+    riskAssessment,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Certification audit preparation complete. Readiness score: ${certificationReadiness}/100. Status: ${certificationPreparation.readinessLevel}. ${certificationPreparation.remainingActions} remaining actions. Proceed with certification?`,
       title: 'Certification Readiness Review',
       context: {
@@ -445,9 +539,15 @@ export async function process(inputs, ctx) {
         criticalGaps: certificationPreparation.criticalGaps,
         recommendation: certificationPreparation.recommendation,
         files: certificationPreparation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 16: ISMS IMPLEMENTATION ROADMAP AND FINAL REPORT
@@ -455,7 +555,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Creating ISMS implementation roadmap and final report');
 
-  const implementationRoadmap = await ctx.task(createImplementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(createImplementationRoadmapTask, {
     organization,
     scope,
     contextEstablishment,
@@ -474,8 +574,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `ISMS implementation roadmap created - ${implementationRoadmap.milestones.length} milestones, ${implementationRoadmap.totalActions} actions`);
 
-  // Final Breakpoint: ISO 27001 Implementation complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationRoadmap = await ctx.task(createImplementationRoadmapTask, { ...{
+    organization,
+    scope,
+    contextEstablishment,
+    gapAnalysis,
+    riskAssessment,
+    statementOfApplicability,
+    controlsImplementationPlan,
+    certificationPreparation,
+    certificationTimeline,
+    phases,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ISO 27001 Implementation planning complete for ${organization}. Certification readiness: ${certificationReadiness}/100. ${statementOfApplicability.applicableControls} controls to implement. Timeline: ${certificationTimeline}. Approve implementation plan?`,
     title: 'Final ISO 27001 Implementation Review',
     context: {
@@ -499,9 +615,15 @@ export async function process(inputs, ctx) {
         { path: ismsDocumentation.ismsManualPath, format: 'markdown', label: 'ISMS Manual' },
         ...(certificationPreparation ? [{ path: certificationPreparation.auditPreparationPath, format: 'markdown', label: 'Certification Audit Preparation' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -569,8 +691,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

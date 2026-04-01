@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Board Performance Evaluation
   ctx.log('info', 'Creating board performance evaluation framework');
-  const performanceEvaluation = await ctx.task(boardPerformanceTask, {
+  let performanceEvaluation = await ctx.task(boardPerformanceTask, {
     organizationName,
     committeeStructure: committeeStructure.committees,
     fiduciaryFramework: fiduciaryFramework.responsibilities,
@@ -98,8 +98,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...performanceEvaluation.artifacts);
 
-  // Breakpoint: Review governance framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performanceEvaluation = await ctx.task(boardPerformanceTask, { ...{
+    organizationName,
+    committeeStructure: committeeStructure.committees,
+    fiduciaryFramework: fiduciaryFramework.responsibilities,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Board governance framework for ${organizationName} complete. ${committeeStructure.committees.length} committees defined. Review and approve governance structure?`,
     title: 'Board Governance Framework Review',
     context: {
@@ -111,9 +120,15 @@ export async function process(inputs, ctx) {
         committeeCount: committeeStructure.committees.length,
         fiduciaryDuties: fiduciaryFramework.responsibilities.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Governance Documentation Package
   ctx.log('info', 'Generating governance documentation package');
   const governanceDocs = await ctx.task(governanceDocumentationTask, {
@@ -161,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Governance Structure Assessment
+  // Task 1: Governance Structure Assessment
 export const governanceAssessmentTask = defineTask('governance-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess governance structure',

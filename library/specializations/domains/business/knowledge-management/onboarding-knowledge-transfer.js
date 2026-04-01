@@ -29,15 +29,24 @@ export async function process(inputs, ctx) {
   const needsAssessment = await ctx.task(needsAssessmentTask, { roleContext, competencyRequirements, existingResources, outputDir });
   artifacts.push(...needsAssessment.artifacts);
 
-  const learningPathDesign = await ctx.task(learningPathDesignTask, { needsAssessment, competencyRequirements, onboardingTimeline, outputDir });
-  artifacts.push(...learningPathDesign.artifacts);
-
-  await ctx.breakpoint({
+  let learningPathDesign = await ctx.task(learningPathDesignTask, { needsAssessment, competencyRequirements, onboardingTimeline, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      learningPathDesign = await ctx.task(learningPathDesignTask, { ...{ needsAssessment, competencyRequirements, onboardingTimeline, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Learning path designed with ${learningPathDesign.milestones.length} milestones over ${onboardingTimeline}. Review?`,
     title: 'Learning Path Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { milestones: learningPathDesign.milestones.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { milestones: learningPathDesign.milestones.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const contentDevelopment = await ctx.task(contentDevelopmentTask, { learningPath: learningPathDesign.path, existingResources, outputDir });
   artifacts.push(...contentDevelopment.artifacts);
 
@@ -61,7 +70,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { onboardingProgram: programCompilation.program, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,

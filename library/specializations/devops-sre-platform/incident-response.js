@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Declaring incident and mobilizing response team');
 
-  const incidentDeclaration = await ctx.task(incidentDeclarationTask, {
+  let incidentDeclaration = await ctx.task(incidentDeclarationTask, {
     incidentId,
     incidentType,
     severity: actualSeverity,
@@ -99,8 +99,23 @@ export async function process(inputs, ctx) {
   artifacts.push(...incidentDeclaration.artifacts);
 
   // Quality Gate: Team mobilization
-  if (!incidentDeclaration.teamMobilized) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        incidentDeclaration = await ctx.task(incidentDeclarationTask, { ...{
+    incidentId,
+    incidentType,
+    severity: actualSeverity,
+    affectedServices,
+    description,
+    incidentDetection,
+    onCallTeam,
+    incidentManagementTool,
+    communicationChannel,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Incident ${incidentId} declared but team mobilization incomplete. Missing roles: ${incidentDeclaration.missingRoles.join(', ')}. Manually assign roles and continue?`,
       title: 'Incident Team Mobilization',
       context: {
@@ -112,9 +127,15 @@ export async function process(inputs, ctx) {
         warRoomUrl: incidentDeclaration.warRoomUrl,
         recommendation: 'Ensure all critical roles are filled before proceeding',
         files: incidentDeclaration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: INITIAL ASSESSMENT AND IMPACT ANALYSIS
@@ -122,7 +143,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Conducting initial assessment and impact analysis');
 
-  const impactAssessment = await ctx.task(impactAssessmentTask, {
+  let impactAssessment = await ctx.task(impactAssessmentTask, {
     incidentId,
     severity: actualSeverity,
     affectedServices,
@@ -136,8 +157,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Impact Assessment - Customers Affected: ${impactAssessment.customersAffected}, Business Impact: ${impactAssessment.businessImpact}`);
 
   // Quality Gate: High severity impact verification
-  if ((actualSeverity === 'SEV-1' || actualSeverity === 'SEV-2') && impactAssessment.customersAffected > 1000) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        impactAssessment = await ctx.task(impactAssessmentTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    affectedServices,
+    incidentDetection,
+    customerFacing,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `High severity incident ${incidentId} affecting ${impactAssessment.customersAffected} customers. Verify impact assessment and escalation? Consider invoking emergency procedures.`,
       title: 'High Severity Impact Verification',
       context: {
@@ -149,9 +181,15 @@ export async function process(inputs, ctx) {
         revenueImpact: impactAssessment.estimatedRevenueImpact,
         recommendation: 'Verify executive notification and customer communications are initiated',
         files: impactAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: PARALLEL INVESTIGATION AND DIAGNOSTICS
@@ -197,7 +235,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Conducting root cause investigation');
 
-  const rootCauseInvestigation = await ctx.task(rootCauseInvestigationTask, {
+  let rootCauseInvestigation = await ctx.task(rootCauseInvestigationTask, {
     incidentId,
     incidentType,
     affectedServices,
@@ -216,8 +254,22 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Root Cause Investigation - Identified: ${rootCauseIdentified}, Confidence: ${rootCauseInvestigation.rootCauseConfidence}`);
 
   // Quality Gate: Root cause confidence
-  if (!rootCauseIdentified && (actualSeverity === 'SEV-1' || actualSeverity === 'SEV-2')) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        rootCauseInvestigation = await ctx.task(rootCauseInvestigationTask, { ...{
+    incidentId,
+    incidentType,
+    affectedServices,
+    logAnalysis,
+    metricsAnalysis,
+    traceAnalysis,
+    impactAssessment,
+    runbookUrl,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Root cause for ${incidentId} not clearly identified (confidence: ${rootCauseInvestigation.rootCauseConfidence}). Review investigation findings and hypotheses before proceeding with mitigation?`,
       title: 'Root Cause Investigation Review',
       context: {
@@ -228,9 +280,15 @@ export async function process(inputs, ctx) {
         investigationFindings: rootCauseInvestigation.findings,
         recommendation: 'Consider additional investigation or proceed with mitigation based on strongest hypothesis',
         files: rootCauseInvestigation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: MITIGATION STRATEGY DEVELOPMENT
@@ -238,7 +296,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Developing mitigation strategy');
 
-  const mitigationStrategy = await ctx.task(mitigationStrategyTask, {
+  let mitigationStrategy = await ctx.task(mitigationStrategyTask, {
     incidentId,
     severity: actualSeverity,
     rootCauseInvestigation,
@@ -251,8 +309,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...mitigationStrategy.artifacts);
 
   // Quality Gate: Mitigation strategy approval (for high severity or risky mitigations)
-  if (mitigationStrategy.requiresApproval) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        mitigationStrategy = await ctx.task(mitigationStrategyTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    rootCauseInvestigation,
+    affectedServices,
+    impactAssessment,
+    automatedMitigation,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Mitigation strategy for ${incidentId} requires approval. Strategy: ${mitigationStrategy.primaryStrategy}. Risk: ${mitigationStrategy.riskLevel}. Approve mitigation?`,
       title: 'Mitigation Strategy Approval',
       context: {
@@ -265,9 +335,15 @@ export async function process(inputs, ctx) {
         riskLevel: mitigationStrategy.riskLevel,
         rollbackPlan: mitigationStrategy.rollbackPlan,
         files: mitigationStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: MITIGATION EXECUTION
@@ -275,7 +351,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Executing mitigation plan');
 
-  const mitigationExecution = await ctx.task(mitigationExecutionTask, {
+  let mitigationExecution = await ctx.task(mitigationExecutionTask, {
     incidentId,
     severity: actualSeverity,
     mitigationStrategy,
@@ -291,8 +367,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Mitigation Execution - Success: ${incidentResolved}, Time: ${mitigationExecution.executionTime}s`);
 
   // Quality Gate: Mitigation verification
-  if (!incidentResolved) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        mitigationExecution = await ctx.task(mitigationExecutionTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    mitigationStrategy,
+    affectedServices,
+    automatedMitigation,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Mitigation for ${incidentId} not successful. Status: ${mitigationExecution.status}. Issues: ${mitigationExecution.issues.join(', ')}. Execute fallback strategy or rollback?`,
       title: 'Mitigation Failed - Decision Required',
       context: {
@@ -305,9 +392,15 @@ export async function process(inputs, ctx) {
         rollbackAvailable: mitigationExecution.rollbackAvailable,
         recommendation: 'Review mitigation results and choose next action',
         files: mitigationExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: VERIFICATION AND MONITORING
@@ -315,7 +408,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Verifying mitigation and monitoring recovery');
 
-  const verificationMonitoring = await ctx.task(verificationMonitoringTask, {
+  let verificationMonitoring = await ctx.task(verificationMonitoringTask, {
     incidentId,
     affectedServices,
     mitigationExecution,
@@ -330,8 +423,18 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Verification Complete - System Stable: ${systemStable}, Health Score: ${verificationMonitoring.healthScore}`);
 
   // Quality Gate: System stability verification
-  if (!systemStable) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        verificationMonitoring = await ctx.task(verificationMonitoringTask, { ...{
+    incidentId,
+    affectedServices,
+    mitigationExecution,
+    impactAssessment,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `System not stable after mitigation for ${incidentId}. Health Score: ${verificationMonitoring.healthScore}/100. Unstable services: ${verificationMonitoring.unstableServices.join(', ')}. Continue monitoring or re-investigate?`,
       title: 'System Stability Verification',
       context: {
@@ -342,9 +445,15 @@ export async function process(inputs, ctx) {
         stabilityIssues: verificationMonitoring.stabilityIssues,
         recommendation: 'Monitor for additional time or re-investigate if degradation continues',
         files: verificationMonitoring.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: CUSTOMER COMMUNICATION
@@ -396,7 +505,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Identifying action items and follow-ups');
 
-  const actionItems = await ctx.task(actionItemsTask, {
+  let actionItems = await ctx.task(actionItemsTask, {
     incidentId,
     severity: actualSeverity,
     rootCauseInvestigation,
@@ -441,8 +550,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...postmortem.artifacts);
 
-    // Quality Gate: Postmortem review
-    await ctx.breakpoint({
+      let lastFeedback_phase12Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase12Review) {
+        actionItems = await ctx.task(actionItemsTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    rootCauseInvestigation,
+    mitigationStrategy,
+    verificationMonitoring,
+    incidentResolution,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+      }
+  const phase12Review = await ctx.breakpoint({
       question: `Postmortem for ${incidentId} generated. Review postmortem document, validate timeline, root cause, and action items before sharing with stakeholders?`,
       title: 'Postmortem Review',
       context: {
@@ -459,9 +580,15 @@ export async function process(inputs, ctx) {
           { path: incidentResolution.timelinePath, format: 'json', label: 'Incident Timeline' },
           { path: actionItems.actionItemsPath, format: 'markdown', label: 'Action Items' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase12Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase12Review.approved) break;
+      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: METRICS AND REPORTING
@@ -469,7 +596,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Computing incident metrics and generating report');
 
-  const metricsReporting = await ctx.task(metricsReportingTask, {
+  let metricsReporting = await ctx.task(metricsReportingTask, {
     incidentId,
     severity: actualSeverity,
     incidentType,
@@ -487,8 +614,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsReporting.artifacts);
 
-  // Final Breakpoint: Incident Response Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metricsReporting = await ctx.task(metricsReportingTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    incidentType,
+    affectedServices,
+    startTime,
+    mttr,
+    incidentDetection,
+    impactAssessment,
+    rootCauseInvestigation,
+    mitigationExecution,
+    verificationMonitoring,
+    actionItems,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Incident Response Complete for ${incidentId}. MTTR: ${(mttr / 60).toFixed(1)} minutes. Incident resolved: ${incidentResolved}. System stable: ${systemStable}. Close incident?`,
     title: 'Final Incident Response Review',
     context: {
@@ -515,9 +660,15 @@ export async function process(inputs, ctx) {
         { path: actionItems.actionItemsPath, format: 'markdown', label: 'Action Items' },
         ...(postmortem ? [{ path: postmortem.postmortemPath, format: 'markdown', label: 'Postmortem' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const totalDuration = endTime - startTime;
 
@@ -593,8 +744,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

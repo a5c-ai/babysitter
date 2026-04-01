@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting CDS Implementation for: ${organizationName}`);
 
-  const needsAssessment = await ctx.task(cdsNeedsAssessmentTask, { organizationName, cdsScope, targetAreas, outputDir });
-  artifacts.push(...needsAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Needs assessment complete. ${needsAssessment.opportunities.length} CDS opportunities identified. Proceed with design?`, title: 'CDS Needs Assessment Review', context: { runId: ctx.runId, opportunities: needsAssessment.opportunities } });
-
+  let needsAssessment = await ctx.task(cdsNeedsAssessmentTask, { organizationName, cdsScope, targetAreas, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      needsAssessment = await ctx.task(cdsNeedsAssessmentTask, { ...{ organizationName, cdsScope, targetAreas, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Needs assessment complete. ${needsAssessment.opportunities.length} CDS opportunities identified. Proceed with design?`, title: 'CDS Needs Assessment Review', context: { runId: ctx.runId, opportunities: needsAssessment.opportunities }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const contentDesign = await ctx.task(cdsContentDesignTask, { needsAssessment, targetAreas, outputDir });
   artifacts.push(...contentDesign.artifacts);
 
   const knowledgeManagement = await ctx.task(cdsKnowledgeManagementTask, { contentDesign, outputDir });
   artifacts.push(...knowledgeManagement.artifacts);
 
-  const technicalDesign = await ctx.task(cdsTechnicalDesignTask, { contentDesign, ehrPlatform, outputDir });
-  artifacts.push(...technicalDesign.artifacts);
-
-  await ctx.breakpoint({ question: `${contentDesign.alerts.length} alerts and ${contentDesign.orderSets.length} order sets designed. Proceed with workflow integration?`, title: 'CDS Content Design Review', context: { runId: ctx.runId, content: contentDesign.summary } });
-
+  let technicalDesign = await ctx.task(cdsTechnicalDesignTask, { contentDesign, ehrPlatform, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      technicalDesign = await ctx.task(cdsTechnicalDesignTask, { ...{ contentDesign, ehrPlatform, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `${contentDesign.alerts.length} alerts and ${contentDesign.orderSets.length} order sets designed. Proceed with workflow integration?`, title: 'CDS Content Design Review', context: { runId: ctx.runId, content: contentDesign.summary }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const workflowIntegration = await ctx.task(cdsWorkflowIntegrationTask, { contentDesign, technicalDesign, outputDir });
   artifacts.push(...workflowIntegration.artifacts);
 

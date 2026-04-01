@@ -35,16 +35,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(hypothesisGeneration.artifacts || []));
 
   // Phase 3: Hypothesis Prioritization
-  const hypothesisPrioritization = await ctx.task(hypothesisPrioritizationTask, { companyName, hypothesisGeneration, budget });
+  let hypothesisPrioritization = await ctx.task(hypothesisPrioritizationTask, { companyName, hypothesisGeneration, budget });
   artifacts.push(...(hypothesisPrioritization.artifacts || []));
 
-  // Breakpoint: Review prioritized hypotheses
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      hypothesisPrioritization = await ctx.task(hypothesisPrioritizationTask, { ...{ companyName, hypothesisGeneration, budget }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review prioritized hypotheses for ${companyName}. Top hypothesis: ${hypothesisPrioritization.topHypothesis}. Proceed with experiment design?`,
     title: 'Hypothesis Prioritization Review',
-    context: { runId: ctx.runId, companyName, topHypothesis: hypothesisPrioritization.topHypothesis, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, topHypothesis: hypothesisPrioritization.topHypothesis, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Experiment Design
   const experimentDesign = await ctx.task(experimentDesignTask, { companyName, hypothesisPrioritization });
   artifacts.push(...(experimentDesign.artifacts || []));

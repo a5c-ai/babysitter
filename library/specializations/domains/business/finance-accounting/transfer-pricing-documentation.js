@@ -32,19 +32,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'transaction-analysis', result: transactionResult });
 
   // Step 2: Functional Analysis
-  const functionalResult = await ctx.task(performFunctionalAnalysisTask, {
+  let functionalResult = await ctx.task(performFunctionalAnalysisTask, {
     transactions: transactionResult,
     functionalAnalysis: inputs.functionalAnalysis,
     entityStructure: inputs.entityStructure
   });
   results.steps.push({ name: 'functional-analysis', result: functionalResult });
 
-  // Breakpoint for functional analysis review
-  await ctx.breakpoint('functional-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      functionalResult = await ctx.task(performFunctionalAnalysisTask, { ...{
+    transactions: transactionResult,
+    functionalAnalysis: inputs.functionalAnalysis,
+    entityStructure: inputs.entityStructure
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('functional-review', {
     message: 'Review functional analysis before selecting transfer pricing methods',
-    data: functionalResult
-  });
-
+    data: functionalResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Economic Analysis and Method Selection
   const methodResult = await ctx.task(selectTransferPricingMethodsTask, {
     functionalAnalysis: functionalResult,
@@ -53,19 +67,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'method-selection', result: methodResult });
 
   // Step 4: Benchmarking Study
-  const benchmarkResult = await ctx.task(conductBenchmarkingStudyTask, {
+  let benchmarkResult = await ctx.task(conductBenchmarkingStudyTask, {
     transactions: transactionResult,
     methods: methodResult,
     fiscalYear: inputs.fiscalYear
   });
   results.steps.push({ name: 'benchmarking-study', result: benchmarkResult });
 
-  // Breakpoint for benchmarking review
-  await ctx.breakpoint('benchmarking-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      benchmarkResult = await ctx.task(conductBenchmarkingStudyTask, { ...{
+    transactions: transactionResult,
+    methods: methodResult,
+    fiscalYear: inputs.fiscalYear
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('benchmarking-review', {
     message: 'Review benchmarking results before arm\'s length analysis',
-    data: benchmarkResult
-  });
-
+    data: benchmarkResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 5: Arm's Length Analysis
   const armsLengthResult = await ctx.task(performArmsLengthAnalysisTask, {
     actualResults: transactionResult,
@@ -110,8 +138,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const analyzeIntercompanyTransactionsTask = defineTask('analyze-ic-transactions', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'transfer-pricing' },

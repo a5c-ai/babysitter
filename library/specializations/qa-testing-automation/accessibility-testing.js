@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Setting up accessibility testing framework');
-  const frameworkSetup = await ctx.task(accessibilityFrameworkSetupTask, {
+  let frameworkSetup = await ctx.task(accessibilityFrameworkSetupTask, {
     projectName,
     framework,
     wcagLevel,
@@ -106,8 +106,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...frameworkSetup.artifacts);
 
-  // Breakpoint: Review framework setup
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      frameworkSetup = await ctx.task(accessibilityFrameworkSetupTask, { ...{
+    projectName,
+    framework,
+    wcagLevel,
+    reportingFormat,
+    baseUrl,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Accessibility testing framework configured with ${frameworkSetup.toolsInstalled.join(', ')}. Review setup and approve to proceed with automated scanning?`,
     title: 'Framework Setup Review',
     context: {
@@ -115,9 +126,15 @@ export async function process(inputs, ctx) {
       framework: frameworkSetup,
       wcagLevel,
       files: frameworkSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: AUTOMATED ACCESSIBILITY SCANNING
   // ============================================================================
@@ -130,7 +147,7 @@ export async function process(inputs, ctx) {
   for (const page of pages) {
     ctx.log('info', `Scanning page: ${page}`);
 
-    const pageScan = await ctx.task(automatedAccessibilityScanTask, {
+    let pageScan = await ctx.task(automatedAccessibilityScanTask, {
       projectName,
       page,
       baseUrl,
@@ -157,10 +174,20 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Page ${page}: No critical violations`);
     }
   }
-
   // Quality Gate: Critical violations check
-  if (criticalViolationsFound && breakOnCritical) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        pageScan = await ctx.task(automatedAccessibilityScanTask, { ...{
+      projectName,
+      page,
+      baseUrl,
+      wcagLevel,
+      framework: frameworkSetup.frameworkConfig,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Critical accessibility violations detected across ${scanResults.length} pages. Review violations and decide: Fix now, continue scanning, or abort?`,
       title: 'Critical Accessibility Violations Detected',
       context: {
@@ -175,9 +202,15 @@ export async function process(inputs, ctx) {
           .filter(v => v.impact === 'critical' || v.impact === 'serious')
           .slice(0, 10),
         files: scanResults.map(s => ({ path: s.result.reportPath, format: 'html', label: `Scan: ${s.page}` }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: COMPONENT-LEVEL ACCESSIBILITY TESTING
@@ -208,7 +241,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...componentTest.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 5: KEYBOARD NAVIGATION TESTING
   // ============================================================================
@@ -231,7 +263,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Keyboard navigation: ${keyboardResults.passed} passed, ${keyboardResults.failed} failed`);
   }
-
   // ============================================================================
   // PHASE 6: COLOR CONTRAST ANALYSIS
   // ============================================================================
@@ -255,7 +286,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Color contrast: ${colorContrastResults.passing} elements pass, ${colorContrastResults.failing} fail`);
   }
-
   // ============================================================================
   // PHASE 7: SCREEN READER COMPATIBILITY TESTING
   // ============================================================================
@@ -277,7 +307,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Screen reader compatibility: ${screenReaderResults.compatible ? 'PASS' : 'FAIL'}`);
   }
-
   // ============================================================================
   // PHASE 8: MANUAL TESTING GUIDE GENERATION
   // ============================================================================
@@ -298,13 +327,12 @@ export async function process(inputs, ctx) {
     artifacts.push(...manualTestingGuide.artifacts);
     recommendations.push(...manualTestingGuide.recommendations);
   }
-
   // ============================================================================
   // PHASE 9: VIOLATION ANALYSIS AND PRIORITIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Analyzing and prioritizing accessibility violations');
-  const violationAnalysis = await ctx.task(violationAnalysisTask, {
+  let violationAnalysis = await ctx.task(violationAnalysisTask, {
     projectName,
     violations,
     wcagLevel,
@@ -329,8 +357,22 @@ export async function process(inputs, ctx) {
     (wcagLevel === 'AA' && complianceLevel === 'AAA') ||
     (wcagLevel === 'A' && ['AA', 'AAA'].includes(complianceLevel));
 
-  if (!meetsCompliance) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        violationAnalysis = await ctx.task(violationAnalysisTask, { ...{
+    projectName,
+    violations,
+    wcagLevel,
+    scanResults,
+    componentResults,
+    keyboardResults,
+    colorContrastResults,
+    screenReaderResults,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Application does not meet WCAG ${wcagLevel} compliance. Current level: ${complianceLevel}, Score: ${complianceScore}/100. ${prioritizedViolations.length} violations found. Review and approve remediation plan?`,
       title: 'WCAG Compliance Gap Detected',
       context: {
@@ -347,16 +389,22 @@ export async function process(inputs, ctx) {
           { path: violationAnalysis.reportPath, format: 'html', label: 'Violation Analysis Report' },
           { path: violationAnalysis.summaryPath, format: 'json', label: 'Violation Summary' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: COMPREHENSIVE ACCESSIBILITY REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating comprehensive accessibility report');
-  const accessibilityReport = await ctx.task(comprehensiveReportTask, {
+  let accessibilityReport = await ctx.task(comprehensiveReportTask, {
     projectName,
     wcagLevel,
     complianceScore,
@@ -397,8 +445,27 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
 
-    // Breakpoint: Review remediation plan
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        accessibilityReport = await ctx.task(comprehensiveReportTask, { ...{
+    projectName,
+    wcagLevel,
+    complianceScore,
+    complianceLevel,
+    scanResults,
+    componentResults,
+    keyboardResults,
+    colorContrastResults,
+    screenReaderResults,
+    violations,
+    recommendations,
+    violationAnalysis,
+    reportingFormat,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Remediation plan created with ${remediationPlan.tasks.length} tasks (${remediationPlan.estimatedEffort} hours estimated). Review plan and approve for implementation?`,
       title: 'Remediation Plan Review',
       context: {
@@ -415,9 +482,15 @@ export async function process(inputs, ctx) {
           { path: remediationPlan.planPath, format: 'markdown', label: 'Remediation Plan' },
           { path: remediationPlan.taskListPath, format: 'json', label: 'Task List' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: CI/CD INTEGRATION SETUP
@@ -461,7 +534,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Conducting final accessibility review');
-  const finalReview = await ctx.task(finalAccessibilityReviewTask, {
+  let finalReview = await ctx.task(finalAccessibilityReviewTask, {
     projectName,
     wcagLevel,
     complianceScore,
@@ -476,8 +549,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-  // Final Breakpoint: Deployment approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReview = await ctx.task(finalAccessibilityReviewTask, { ...{
+    projectName,
+    wcagLevel,
+    complianceScore,
+    complianceLevel,
+    meetsCompliance,
+    violations,
+    recommendations,
+    remediationPlan,
+    accessibilityReport,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Accessibility testing complete. WCAG ${wcagLevel} compliance: ${meetsCompliance ? 'ACHIEVED' : 'NOT MET'} (Score: ${complianceScore}/100). ${violations.length} total violations found. ${finalReview.verdict}. Approve for deployment?`,
     title: 'Final Accessibility Approval',
     context: {
@@ -503,9 +591,15 @@ export async function process(inputs, ctx) {
         { path: finalReview.reportPath, format: 'markdown', label: 'Final Review' },
         ...(remediationPlan ? [{ path: remediationPlan.planPath, format: 'markdown', label: 'Remediation Plan' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -566,8 +660,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

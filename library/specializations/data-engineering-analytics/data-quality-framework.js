@@ -107,7 +107,6 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Data profiling detected ${profilingReport.anomaliesDetected.length} anomalies`);
     }
   }
-
   // ============================================================================
   // PHASE 3: PARALLEL QUALITY DIMENSION VALIDATION
   // ============================================================================
@@ -127,7 +126,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.accuracy = dimensionTasks.length - 1;
   }
-
   // Completeness validation
   if (qualityDimensions.includes('completeness')) {
     dimensionTasks.push(() => ctx.task(completenessValidationTask, {
@@ -137,7 +135,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.completeness = dimensionTasks.length - 1;
   }
-
   // Consistency validation
   if (qualityDimensions.includes('consistency')) {
     dimensionTasks.push(() => ctx.task(consistencyValidationTask, {
@@ -147,7 +144,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.consistency = dimensionTasks.length - 1;
   }
-
   // Validity validation
   if (qualityDimensions.includes('validity')) {
     dimensionTasks.push(() => ctx.task(validityValidationTask, {
@@ -157,7 +153,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.validity = dimensionTasks.length - 1;
   }
-
   // Timeliness validation
   if (qualityDimensions.includes('timeliness')) {
     dimensionTasks.push(() => ctx.task(timelinessValidationTask, {
@@ -167,7 +162,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.timeliness = dimensionTasks.length - 1;
   }
-
   // Uniqueness validation
   if (qualityDimensions.includes('uniqueness')) {
     dimensionTasks.push(() => ctx.task(uniquenessValidationTask, {
@@ -177,7 +171,6 @@ export async function process(inputs, ctx) {
     }));
     dimensionTaskMap.uniqueness = dimensionTasks.length - 1;
   }
-
   const dimensionResults = await ctx.parallel.all(dimensionTasks);
 
   // Map results back to dimension names
@@ -199,7 +192,6 @@ export async function process(inputs, ctx) {
       });
     }
   }
-
   // ============================================================================
   // PHASE 4: GREAT EXPECTATIONS INTEGRATION (if configured)
   // ============================================================================
@@ -232,7 +224,6 @@ export async function process(inputs, ctx) {
       }
     }
   }
-
   // ============================================================================
   // PHASE 5: DBT TESTS INTEGRATION (if configured)
   // ============================================================================
@@ -260,7 +251,6 @@ export async function process(inputs, ctx) {
       });
     }
   }
-
   // ============================================================================
   // PHASE 6: ANOMALY DETECTION
   // ============================================================================
@@ -288,14 +278,13 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
-
   // ============================================================================
   // PHASE 7: OVERALL QUALITY SCORING
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Computing overall quality score');
 
-  const qualityScoring = await ctx.task(qualityScoringTask, {
+  let qualityScoring = await ctx.task(qualityScoringTask, {
     dimensionScores,
     validationResults,
     greatExpectationsResults,
@@ -314,8 +303,20 @@ export async function process(inputs, ctx) {
                         overallQualityScore >= thresholds.minimum ? 'acceptable' : 'poor';
 
   // Quality Gate: Check if minimum threshold is met
-  if (overallQualityScore < thresholds.minimum) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        qualityScoring = await ctx.task(qualityScoringTask, { ...{
+    dimensionScores,
+    validationResults,
+    greatExpectationsResults,
+    dbtTestResults,
+    anomalyDetection,
+    thresholds,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Overall quality score: ${overallQualityScore}/${thresholds.minimum}. Minimum quality threshold not met. ${alerts.length} alerts generated. Review and approve to continue?`,
       title: 'Quality Threshold Not Met',
       context: {
@@ -326,9 +327,15 @@ export async function process(inputs, ctx) {
         dimensionScores,
         criticalAlerts: alerts.filter(a => a.severity === 'critical'),
         files: qualityScoring.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: MONITORING DASHBOARD SETUP (if enabled)
@@ -348,7 +355,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...monitoringSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: ALERTING AND NOTIFICATIONS (if configured)
   // ============================================================================
@@ -372,14 +378,13 @@ export async function process(inputs, ctx) {
       artifacts.push(...notificationResults.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 10: COMPREHENSIVE QUALITY REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating comprehensive quality report');
 
-  const qualityReport = await ctx.task(qualityReportGenerationTask, {
+  let qualityReport = await ctx.task(qualityReportGenerationTask, {
     dataSources,
     sourceDiscovery,
     profilingReport,
@@ -416,12 +421,28 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
   }
-
   // ============================================================================
   // FINAL BREAKPOINT: REVIEW AND APPROVAL
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityReport = await ctx.task(qualityReportGenerationTask, { ...{
+    dataSources,
+    sourceDiscovery,
+    profilingReport,
+    dimensionScores,
+    validationResults,
+    greatExpectationsResults,
+    dbtTestResults,
+    anomalyDetection,
+    qualityScoring,
+    monitoringSetup,
+    alerts,
+    thresholds,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data Quality Framework execution complete. Overall Score: ${overallQualityScore}/100 (${qualityStatus}). ${alerts.length} alerts generated. ${anomaliesDetected.length} anomalies detected. Review quality report and approve?`,
     title: 'Data Quality Framework Completion',
     context: {
@@ -440,9 +461,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/quality-dashboard.html`, format: 'html' },
         ...artifacts.slice(0, 5).map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -508,8 +535,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

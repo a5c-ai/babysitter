@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Dialectical Assessment
   ctx.log('info', 'Assessing the dialectical situation');
-  const dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, {
+  let dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, {
     challenge: challengeClassification.classified,
     argument: argumentReconstruction.argument,
     responses: responseStrategies.strategies,
@@ -91,8 +91,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dialecticalAssessment.artifacts);
 
-  // Breakpoint: Review skepticism analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, { ...{
+    challenge: challengeClassification.classified,
+    argument: argumentReconstruction.argument,
+    responses: responseStrategies.strategies,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Skeptical challenge analysis complete. Challenge classified as ${challengeClassification.classified.type}. ${responseStrategies.strategies.length} response strategies developed. Review the analysis?`,
     title: 'Skeptical Challenge Analysis Results',
     context: {
@@ -104,9 +113,15 @@ export async function process(inputs, ctx) {
         strategiesCount: responseStrategies.strategies.length,
         dialecticalStatus: dialecticalAssessment.status
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Skepticism Report
   ctx.log('info', 'Generating skeptical challenge analysis report');
   const skepticismReport = await ctx.task(skepticismReportTask, {
@@ -155,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Challenge Classification
+  // Task 1: Challenge Classification
 export const challengeClassificationTask = defineTask('challenge-classification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Classify the skeptical challenge',

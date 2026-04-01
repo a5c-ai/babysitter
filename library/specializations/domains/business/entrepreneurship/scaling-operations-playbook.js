@@ -40,16 +40,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(processMapping.artifacts || []));
 
   // Phase 4: Process Optimization
-  const processOptimization = await ctx.task(processOptimizationTask, { companyName, processMapping });
+  let processOptimization = await ctx.task(processOptimizationTask, { companyName, processMapping });
   artifacts.push(...(processOptimization.artifacts || []));
 
-  // Breakpoint: Review optimized processes
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      processOptimization = await ctx.task(processOptimizationTask, { ...{ companyName, processMapping }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review process optimization for ${companyName}. ${processOptimization.optimizationsCount || 0} optimizations identified. Proceed with org design?`,
     title: 'Process Optimization Review',
-    context: { runId: ctx.runId, companyName, optimizations: processOptimization.optimizationsCount, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, optimizations: processOptimization.optimizationsCount, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Organization Design
   const organizationDesign = await ctx.task(organizationDesignTask, { companyName, scalingRequirements, teamSize });
   artifacts.push(...(organizationDesign.artifacts || []));

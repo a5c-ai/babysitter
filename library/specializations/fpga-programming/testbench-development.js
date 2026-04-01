@@ -64,7 +64,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Testbench Architecture Design');
 
-  const tbArchitecture = await ctx.task(testbenchArchitectureTask, {
+  let tbArchitecture = await ctx.task(testbenchArchitectureTask, {
     dutName,
     dutInterfaces,
     language,
@@ -75,8 +75,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...tbArchitecture.artifacts);
 
-  // Quality Gate: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      tbArchitecture = await ctx.task(testbenchArchitectureTask, { ...{
+    dutName,
+    dutInterfaces,
+    language,
+    verificationLevel,
+    verificationPlan,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Testbench architecture defined for ${dutName}. Components: ${tbArchitecture.componentCount}. Review testbench structure?`,
     title: 'Testbench Architecture Review',
     context: {
@@ -84,9 +95,15 @@ export async function process(inputs, ctx) {
       dutName,
       components: tbArchitecture.components,
       files: tbArchitecture.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STIMULUS GENERATION
   // ============================================================================
@@ -216,7 +233,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Self-Checking Mechanism Implementation');
 
-  const selfChecking = await ctx.task(selfCheckingTask, {
+  let selfChecking = await ctx.task(selfCheckingTask, {
     dutName,
     language,
     scoreboard,
@@ -226,8 +243,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...selfChecking.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      selfChecking = await ctx.task(selfCheckingTask, { ...{
+    dutName,
+    language,
+    scoreboard,
+    integration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Testbench Development Complete for ${dutName}. ${testCases.testCount} tests, Coverage targets: Func ${coverageGoals.functional}%, Code ${coverageGoals.code}%. Review testbench package?`,
     title: 'Testbench Development Complete',
     context: {
@@ -244,9 +271,15 @@ export async function process(inputs, ctx) {
         { path: integration.topFilePath, format: 'sv', label: 'Testbench Top' },
         { path: verificationPlan.planPath, format: 'markdown', label: 'Verification Plan' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -282,8 +315,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Global Stability Check
   ctx.log('info', 'Checking global stability');
-  const globalStability = await ctx.task(globalStabilityTask, {
+  let globalStability = await ctx.task(globalStabilityTask, {
     projectId,
     wallGeometry,
     soilProperties,
@@ -95,8 +95,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...globalStability.artifacts);
 
-  // Breakpoint: Review wall design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      globalStability = await ctx.task(globalStabilityTask, { ...{
+    projectId,
+    wallGeometry,
+    soilProperties,
+    earthPressures,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Retaining wall design complete for ${projectId}. Wall type: ${wallType}, Height: ${retainedHeight}ft. Review design?`,
     title: 'Retaining Wall Design Review',
     context: {
@@ -110,9 +120,15 @@ export async function process(inputs, ctx) {
         bearingFOS: externalStability.bearingFOS,
         globalFOS: globalStability.factorOfSafety
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Drainage Design
   ctx.log('info', 'Designing drainage system');
   const drainageDesign = await ctx.task(drainageDesignTask, {
@@ -182,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Wall Geometry
+  // Task 1: Wall Geometry
 export const wallGeometryTask = defineTask('wall-geometry', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine wall geometry',

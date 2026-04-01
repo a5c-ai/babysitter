@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Assessing organizational needs and scoping program');
-  const needsAssessment = await ctx.task(needsAssessmentTask, {
+  let needsAssessment = await ctx.task(needsAssessmentTask, {
     programName,
     organizationalContext,
     targetKnowledgeAreas,
@@ -60,9 +60,21 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
-  // Breakpoint: Review needs assessment
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      needsAssessment = await ctx.task(needsAssessmentTask, { ...{
+    programName,
+    organizationalContext,
+    targetKnowledgeAreas,
+    programGoals,
+    learningObjectives,
+    mentorPool,
+    menteePool,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Needs assessment complete. ${needsAssessment.recommendedProgramType} mentoring program recommended. Review assessment?`,
     title: 'Needs Assessment Review',
     context: {
@@ -79,9 +91,15 @@ export async function process(inputs, ctx) {
         menteesToSupport: needsAssessment.menteeCount,
         knowledgeAreas: targetKnowledgeAreas.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROGRAM STRUCTURE DESIGN
   // ============================================================================
@@ -119,7 +137,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Matching mentors with mentees');
-  const matchingResult = await ctx.task(matchingTask, {
+  let matchingResult = await ctx.task(matchingTask, {
     programName,
     mentorProfiles: participantProfiles.mentorProfiles,
     menteeProfiles: participantProfiles.menteeProfiles,
@@ -130,8 +148,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...matchingResult.artifacts);
 
-  // Breakpoint: Review matching results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      matchingResult = await ctx.task(matchingTask, { ...{
+    programName,
+    mentorProfiles: participantProfiles.mentorProfiles,
+    menteeProfiles: participantProfiles.menteeProfiles,
+    targetKnowledgeAreas,
+    programStructure: programStructure.structure,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `${matchingResult.matchCount} mentor-mentee pairs created with ${matchingResult.averageCompatibility}% average compatibility. Review matching?`,
     title: 'Mentor-Mentee Matching Review',
     context: {
@@ -148,9 +177,15 @@ export async function process(inputs, ctx) {
         unmatchedMentees: matchingResult.unmatchedMentees.length,
         groupMentoringGroups: matchingResult.groupMentoringGroups?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CURRICULUM AND LEARNING PATH DESIGN
   // ============================================================================
@@ -269,7 +304,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Assessing program design quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     programName,
     programStructure: programStructure.structure,
     matchingResult,
@@ -282,8 +317,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityAssessment.overallScore >= 80;
 
-  // Breakpoint: Review quality assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    programName,
+    programStructure: programStructure.structure,
+    matchingResult,
+    curriculumDesign,
+    measurementSystem,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `Program design quality score: ${qualityAssessment.overallScore}/100. ${qualityMet ? 'Quality standards met!' : 'May need improvements.'} Review results?`,
     title: 'Quality Assessment Review',
     context: {
@@ -301,15 +347,21 @@ export async function process(inputs, ctx) {
         matchingScore: qualityAssessment.componentScores.matching,
         issues: qualityAssessment.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: IMPLEMENTATION PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Creating implementation plan');
-  const implementationPlan = await ctx.task(implementationPlanningTask, {
+  let implementationPlan = await ctx.task(implementationPlanningTask, {
     programName,
     programStructure: programStructure.structure,
     matchingResult,
@@ -340,8 +392,21 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        implementationPlan = await ctx.task(implementationPlanningTask, { ...{
+    programName,
+    programStructure: programStructure.structure,
+    matchingResult,
+    mentorTraining,
+    menteeOnboarding,
+    supportInfrastructure,
+    programDuration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Proceed with program launch?`,
       title: 'Final Approval Gate',
       context: {
@@ -358,9 +423,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -407,8 +478,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

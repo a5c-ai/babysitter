@@ -55,15 +55,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Analysis Methodology
-  const analysisMethodology = await ctx.task(analysisMethodologyTask, {
+  let analysisMethodology = await ctx.task(analysisMethodologyTask, {
     projectName,
     interviewFramework,
     dataCollectionProcess,
     analysisScope
   });
 
-  // Breakpoint: Review program design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisMethodology = await ctx.task(analysisMethodologyTask, { ...{
+    projectName,
+    interviewFramework,
+    dataCollectionProcess,
+    analysisScope
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review win/loss program design for ${projectName}. Is the methodology comprehensive?`,
     title: 'Win/Loss Program Review',
     context: {
@@ -71,9 +80,15 @@ export async function process(inputs, ctx) {
       projectName,
       interviewQuestions: interviewFramework.questions?.length || 0,
       analysisDimensions: analysisMethodology.dimensions?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Insights Dissemination
   const insightsDissemination = await ctx.task(insightsDisseminationTask, {
     projectName,
@@ -123,8 +138,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const programDesignTask = defineTask('program-design', (args, taskCtx) => ({
   kind: 'agent',

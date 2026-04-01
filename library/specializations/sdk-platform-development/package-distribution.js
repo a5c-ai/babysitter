@@ -84,7 +84,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...packageSigning.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: CDN DISTRIBUTION
   // ============================================================================
@@ -92,7 +91,7 @@ export async function process(inputs, ctx) {
   if (cdnDistribution) {
     ctx.log('info', 'Phase 4: Setting up CDN distribution');
 
-    const cdnSetup = await ctx.task(cdnDistributionTask, {
+    let cdnSetup = await ctx.task(cdnDistributionTask, {
       projectName,
       distributionStrategy,
       outputDir
@@ -100,9 +99,16 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...cdnSetup.artifacts);
   }
-
-  // Quality Gate: Distribution Review
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      cdnSetup = await ctx.task(cdnDistributionTask, { ...{
+      projectName,
+      distributionStrategy,
+      outputDir
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Package distribution configured for ${projectName}. Registries: ${targetRegistries.length}, Signing: ${signing}. Approve distribution configuration?`,
     title: 'Distribution Configuration Review',
     context: {
@@ -111,9 +117,15 @@ export async function process(inputs, ctx) {
       targetRegistries,
       signing,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: VERIFICATION TESTS
   // ============================================================================
@@ -199,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

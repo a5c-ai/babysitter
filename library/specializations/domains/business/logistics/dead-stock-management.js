@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: EXCESS INVENTORY CALCULATION
   ctx.log('info', 'Phase 4: Calculating excess inventory');
-  const excessCalculation = await ctx.task(excessInventoryTask, {
+  let excessCalculation = await ctx.task(excessInventoryTask, {
     inventory,
     salesHistory,
     thresholds,
@@ -69,8 +69,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...excessCalculation.artifacts);
 
   // Quality Gate: Review dead stock summary
-  const totalDeadStockValue = slowMovingIdentification.value + obsoleteIdentification.value + excessCalculation.value;
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      excessCalculation = await ctx.task(excessInventoryTask, { ...{
+    inventory,
+    salesHistory,
+    thresholds,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Dead stock analysis complete. Total value: $${totalDeadStockValue}. Slow: $${slowMovingIdentification.value}, Obsolete: $${obsoleteIdentification.value}, Excess: $${excessCalculation.value}. Review?`,
     title: 'Dead Stock Summary Review',
     context: {
@@ -82,9 +91,15 @@ export async function process(inputs, ctx) {
         totalValue: totalDeadStockValue
       },
       files: ageAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: ROOT CAUSE ANALYSIS
   ctx.log('info', 'Phase 5: Analyzing root causes');
   const rootCauseAnalysis = await ctx.task(deadStockRootCauseTask, {
@@ -137,7 +152,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 10: GENERATE MANAGEMENT REPORT
   ctx.log('info', 'Phase 10: Generating management report');
-  const managementReport = await ctx.task(deadStockReportTask, {
+  let managementReport = await ctx.task(deadStockReportTask, {
     summary: {
       slowMoving: slowMovingIdentification,
       obsolete: obsoleteIdentification,
@@ -151,8 +166,23 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...managementReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      managementReport = await ctx.task(deadStockReportTask, { ...{
+    summary: {
+      slowMoving: slowMovingIdentification,
+      obsolete: obsoleteIdentification,
+      excess: excessCalculation
+    },
+    dispositionPlan: dispositionStrategy.plan,
+    recoveryEstimation,
+    workingCapitalAnalysis,
+    preventionRecommendations: preventionRecommendations.recommendations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dead stock management complete. Total at-risk: $${totalDeadStockValue}. Estimated recovery: $${recoveryEstimation.totalRecovery}. Approve disposition plan?`,
     title: 'Dead Stock Management Complete',
     context: {
@@ -164,9 +194,15 @@ export async function process(inputs, ctx) {
         workingCapitalFreed: `$${workingCapitalAnalysis.capitalFreed}`
       },
       files: [{ path: managementReport.reportPath, format: 'markdown', label: 'Management Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -180,8 +216,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/dead-stock-management', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const inventoryAgeAnalysisTask = defineTask('inventory-age-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze inventory age',

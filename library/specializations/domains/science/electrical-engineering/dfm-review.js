@@ -38,14 +38,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: PCB Fabrication Review
-  const fabricationReview = await ctx.task(fabricationReviewTask, {
+  let fabricationReview = await ctx.task(fabricationReviewTask, {
     projectName,
     designFiles,
     manufacturingTarget
   });
 
-  // Breakpoint: Review component and fabrication findings
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      fabricationReview = await ctx.task(fabricationReviewTask, { ...{
+    projectName,
+    designFiles,
+    manufacturingTarget
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `DFM review for ${projectName}. Component issues: ${componentReview.issues.length}. Fabrication issues: ${fabricationReview.issues.length}. Proceed with assembly review?`,
     title: 'DFM Initial Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { component: componentReview, fabrication: fabricationReview }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Assembly Process Review (DFA)
   const assemblyReview = await ctx.task(assemblyReviewTask, {
     projectName,
@@ -77,14 +91,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Test Coverage Analysis
-  const testCoverageAnalysis = await ctx.task(testCoverageAnalysisTask, {
+  let testCoverageAnalysis = await ctx.task(testCoverageAnalysisTask, {
     projectName,
     designFiles,
     manufacturingTarget
   });
 
-  // Breakpoint: Review assembly and test findings
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      testCoverageAnalysis = await ctx.task(testCoverageAnalysisTask, { ...{
+    projectName,
+    designFiles,
+    manufacturingTarget
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Assembly issues: ${assemblyReview.issues.length}. Test coverage: ${testCoverageAnalysis.coverage}%. Proceed with cost analysis?`,
     title: 'DFA and Test Review',
     context: {
@@ -95,9 +117,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase3-assembly.json`, format: 'json', content: assemblyReview },
         { path: `artifacts/phase5-testcoverage.json`, format: 'json', content: testCoverageAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Cost Optimization Analysis
   const costOptimization = await ctx.task(costOptimizationTask, {
     projectName,
@@ -108,7 +136,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Risk Assessment
-  const riskAssessment = await ctx.task(riskAssessmentTask, {
+  let riskAssessment = await ctx.task(riskAssessmentTask, {
     projectName,
     componentReview,
     fabricationReview,
@@ -124,20 +152,37 @@ export async function process(inputs, ctx) {
     ...assemblyReview.issues.filter(i => i.severity === 'critical')
   ];
 
-  if (criticalIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        riskAssessment = await ctx.task(riskAssessmentTask, { ...{
+    projectName,
+    componentReview,
+    fabricationReview,
+    assemblyReview,
+    testCoverageAnalysis,
+    manufacturingTarget
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `${criticalIssues.length} critical DFM issues found. Design changes required before manufacturing. Review critical issues?`,
       title: 'Critical DFM Issues',
       context: {
         runId: ctx.runId,
         criticalIssues,
         recommendations: riskAssessment.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 8: Generate DFM Report
-  const dfmReport = await ctx.task(dfmReportTask, {
+  let dfmReport = await ctx.task(dfmReportTask, {
     projectName,
     dfmAnalysis: {
       component: componentReview,
@@ -152,8 +197,25 @@ export async function process(inputs, ctx) {
     riskAssessment
   });
 
-  // Final Breakpoint: DFM Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dfmReport = await ctx.task(dfmReportTask, { ...{
+    projectName,
+    dfmAnalysis: {
+      component: componentReview,
+      fabrication: fabricationReview
+    },
+    dfaAnalysis: {
+      assembly: assemblyReview,
+      solderThermal: solderThermalReview
+    },
+    testCoverage: testCoverageAnalysis,
+    costOptimization,
+    riskAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DFM review complete for ${projectName}. Manufacturing readiness: ${dfmReport.readinessLevel}. Approve design for manufacturing?`,
     title: 'DFM Approval',
     context: {
@@ -164,9 +226,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/dfm-analysis.json`, format: 'json', content: { dfm: componentReview, dfa: assemblyReview } },
         { path: `artifacts/dfm-report.md`, format: 'markdown', content: dfmReport.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -191,8 +259,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const componentReviewTask = defineTask('component-review', (args, taskCtx) => ({
   kind: 'agent',

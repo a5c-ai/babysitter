@@ -64,7 +64,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing map layout');
-  const mapLayout = await ctx.task(mapLayoutTask, {
+  let mapLayout = await ctx.task(mapLayoutTask, {
     categorizedObjectives: objectiveCategorization.categorized,
     causalRelationships: causalRelationships.relationships,
     strategicThemes: strategicThemes.themes,
@@ -74,8 +74,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...mapLayout.artifacts);
 
-  // Breakpoint: Review strategy map structure
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      mapLayout = await ctx.task(mapLayoutTask, { ...{
+    categorizedObjectives: objectiveCategorization.categorized,
+    causalRelationships: causalRelationships.relationships,
+    strategicThemes: strategicThemes.themes,
+    perspectives,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategy map structure complete. ${objectiveCategorization.totalObjectives} objectives, ${causalRelationships.relationships.length} causal links, ${strategicThemes.themes.length} strategic themes. Review layout?`,
     title: 'Strategy Map Structure Review',
     context: {
@@ -90,9 +100,15 @@ export async function process(inputs, ctx) {
         themes: strategicThemes.themes.length,
         perspectives: perspectives.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: HYPOTHESIS DOCUMENTATION
   // ============================================================================
@@ -175,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

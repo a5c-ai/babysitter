@@ -53,14 +53,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: System Testing
-  const systemTesting = await ctx.task(systemTestTask, {
+  let systemTesting = await ctx.task(systemTestTask, {
     softwareName,
     softwareRequirements,
     vvPlanning
   });
 
-  // Breakpoint: Review system test results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      systemTesting = await ctx.task(systemTestTask, { ...{
+    softwareName,
+    softwareRequirements,
+    vvPlanning
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review system test results for ${softwareName}. Are all requirements verified?`,
     title: 'System Test Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: systemTesting
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Validation Planning
   const validationPlanning = await ctx.task(validationPlanningTask, {
     softwareName,
@@ -99,7 +113,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: V&V Report Compilation
-  const vvReports = await ctx.task(vvReportTask, {
+  let vvReports = await ctx.task(vvReportTask, {
     softwareName,
     safetyClass,
     vvPlanning,
@@ -111,8 +125,22 @@ export async function process(inputs, ctx) {
     traceabilityMatrix
   });
 
-  // Final Breakpoint: V&V Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      vvReports = await ctx.task(vvReportTask, { ...{
+    softwareName,
+    safetyClass,
+    vvPlanning,
+    unitTestDevelopment,
+    integrationTesting,
+    systemTesting,
+    validationPlanning,
+    userAcceptanceTesting,
+    traceabilityMatrix
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Software V&V complete for ${softwareName}. Traceability coverage: ${traceabilityMatrix.coverage}%. Approve V&V?`,
     title: 'V&V Approval',
     context: {
@@ -122,9 +150,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/vv-reports.json`, format: 'json', content: vvReports }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     softwareName,
@@ -143,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const vvPlanningTask = defineTask('vv-planning', (args, taskCtx) => ({
   kind: 'agent',

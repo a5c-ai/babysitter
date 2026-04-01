@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Analyzing market dynamics');
-  const marketDynamics = await ctx.task(marketDynamicsTask, {
+  let marketDynamics = await ctx.task(marketDynamicsTask, {
     industry,
     competitorProfiles: competitorProfiles.profiles,
     outputDir
@@ -92,8 +92,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...marketDynamics.artifacts);
 
-  // Breakpoint: Review intelligence gathering
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      marketDynamics = await ctx.task(marketDynamicsTask, { ...{
+    industry,
+    competitorProfiles: competitorProfiles.profiles,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Competitive intelligence gathered. Analyzed ${competitorProfiles.profiles.length} competitors. Review detailed findings?`,
     title: 'Competitive Intelligence Review',
     context: {
@@ -108,9 +116,15 @@ export async function process(inputs, ctx) {
         indirectCompetitors: competitorMapping.indirectCompetitors.length,
         marketTrends: marketDynamics.trends.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: COMPETITOR STRATEGY INFERENCE
   // ============================================================================
@@ -202,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -117,7 +117,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Optimizing error handling');
 
-  const errorOptimization = await ctx.task(errorOptimizationTask, {
+  let errorOptimization = await ctx.task(errorOptimizationTask, {
     projectName,
     baselineProfile,
     outputDir
@@ -125,8 +125,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...errorOptimization.artifacts);
 
-  // Quality Gate: Optimization Review
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      errorOptimization = await ctx.task(errorOptimizationTask, { ...{
+    projectName,
+    baselineProfile,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Gas optimization analysis complete. Identified ${storageAnalysis.opportunities.length + calldataOptimization.opportunities.length + loopOptimization.opportunities.length} optimization opportunities. Proceed with implementation?`,
     title: 'Gas Optimization Review',
     context: {
@@ -137,9 +145,15 @@ export async function process(inputs, ctx) {
       loopOptimizations: loopOptimization.opportunities.length,
       estimatedSavings: storageAnalysis.estimatedSavings + calldataOptimization.estimatedSavings,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: IMPLEMENT OPTIMIZATIONS
   // ============================================================================
@@ -180,7 +194,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating final gas comparison report');
 
-  const finalReport = await ctx.task(finalGasReportTask, {
+  let finalReport = await ctx.task(finalGasReportTask, {
     projectName,
     baselineProfile,
     implementation,
@@ -191,8 +205,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReport = await ctx.task(finalGasReportTask, { ...{
+    projectName,
+    baselineProfile,
+    implementation,
+    postOptimizationTests,
+    targetGasReduction,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gas Optimization Complete. Overall reduction: ${finalReport.overallReduction}%. Target was ${targetGasReduction}%. All tests passing: ${postOptimizationTests.allPassing}. Accept optimizations?`,
     title: 'Gas Optimization Complete',
     context: {
@@ -208,9 +233,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: finalReport.reportPath, format: 'markdown', label: 'Gas Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -242,8 +273,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

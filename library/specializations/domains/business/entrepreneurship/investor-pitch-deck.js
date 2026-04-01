@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(competitiveSlide.artifacts || []));
 
   // Phase 9: Financials and Ask Slide
-  const askSlide = await ctx.task(askSlideTask, {
+  let askSlide = await ctx.task(askSlideTask, {
     companyName,
     fundingAsk,
     businessModel
@@ -118,8 +118,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(askSlide.artifacts || []));
 
-  // Breakpoint: Review deck structure
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      askSlide = await ctx.task(askSlideTask, { ...{
+    companyName,
+    fundingAsk,
+    businessModel
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Review pitch deck structure for ${companyName}. Slides complete: Problem, Solution, Market, Business Model, Traction, Team, Competition, Ask. Proceed with assembly?`,
     title: 'Pitch Deck Structure Review',
     context: {
@@ -127,9 +135,15 @@ export async function process(inputs, ctx) {
       companyName,
       slideCount: 10,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Deck Assembly and Flow
   const deckAssembly = await ctx.task(deckAssemblyTask, {
     companyName,
@@ -155,7 +169,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(presenterNotes.artifacts || []));
 
   // Phase 12: Appendix Slides
-  const appendixSlides = await ctx.task(appendixSlidesTask, {
+  let appendixSlides = await ctx.task(appendixSlidesTask, {
     companyName,
     marketData,
     traction,
@@ -164,8 +178,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(appendixSlides.artifacts || []));
 
-  // Final Breakpoint: Deck approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      appendixSlides = await ctx.task(appendixSlidesTask, { ...{
+    companyName,
+    marketData,
+    traction,
+    businessModel
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pitch deck complete for ${companyName}. Total slides: ${deckAssembly.slideCount}. Ready for practice and feedback?`,
     title: 'Pitch Deck Approval',
     context: {
@@ -174,9 +197,15 @@ export async function process(inputs, ctx) {
       slideCount: deckAssembly.slideCount,
       appendixCount: appendixSlides.slides?.length || 0,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -200,8 +229,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const narrativeArcTask = defineTask('narrative-arc', (args, taskCtx) => ({
   kind: 'agent',

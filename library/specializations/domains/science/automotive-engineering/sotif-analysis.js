@@ -46,16 +46,23 @@ export async function process(inputs, ctx) {
       sotifAnalysis: null
     };
   }
-
   // Phase 2: Known Unsafe Scenario Identification
-  const knownUnsafeScenarios = await ctx.task(knownUnsafeScenariosTask, {
+  let knownUnsafeScenarios = await ctx.task(knownUnsafeScenariosTask, {
     systemName,
     specificationAnalysis,
     knownLimitations
   });
 
-  // Breakpoint: Known scenarios review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      knownUnsafeScenarios = await ctx.task(knownUnsafeScenariosTask, { ...{
+    systemName,
+    specificationAnalysis,
+    knownLimitations
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review known unsafe scenarios for ${systemName}. ${knownUnsafeScenarios.scenarios?.length || 0} scenarios identified. Approve scenario list?`,
     title: 'Known Unsafe Scenarios Review',
     context: {
@@ -67,9 +74,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: knownUnsafeScenarios
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Unknown Unsafe Scenario Identification
   const unknownUnsafeScenarios = await ctx.task(unknownUnsafeScenariosTask, {
     systemName,
@@ -94,7 +107,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Mitigation Strategy Development
-  const mitigationStrategies = await ctx.task(mitigationStrategiesTask, {
+  let mitigationStrategies = await ctx.task(mitigationStrategiesTask, {
     systemName,
     knownUnsafeScenarios,
     unknownUnsafeScenarios,
@@ -102,8 +115,18 @@ export async function process(inputs, ctx) {
     functionalInsufficiency
   });
 
-  // Breakpoint: Mitigation review
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      mitigationStrategies = await ctx.task(mitigationStrategiesTask, { ...{
+    systemName,
+    knownUnsafeScenarios,
+    unknownUnsafeScenarios,
+    triggeringConditions,
+    functionalInsufficiency
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Review mitigation strategies for ${systemName}. ${mitigationStrategies.strategies?.length || 0} strategies developed. Approve mitigations?`,
     title: 'Mitigation Strategies Review',
     context: {
@@ -115,9 +138,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: mitigationStrategies
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Validation Strategy
   const validationStrategy = await ctx.task(validationStrategyTask, {
     systemName,
@@ -127,7 +156,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: SOTIF Argument Documentation
-  const sotifArgument = await ctx.task(sotifArgumentTask, {
+  let sotifArgument = await ctx.task(sotifArgumentTask, {
     systemName,
     specificationAnalysis,
     knownUnsafeScenarios,
@@ -138,8 +167,21 @@ export async function process(inputs, ctx) {
     validationStrategy
   });
 
-  // Final Breakpoint: SOTIF approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sotifArgument = await ctx.task(sotifArgumentTask, { ...{
+    systemName,
+    specificationAnalysis,
+    knownUnsafeScenarios,
+    unknownUnsafeScenarios,
+    triggeringConditions,
+    functionalInsufficiency,
+    mitigationStrategies,
+    validationStrategy
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SOTIF Analysis complete for ${systemName}. Residual risk acceptable: ${sotifArgument.residualRiskAcceptable}. Approve SOTIF argument?`,
     title: 'SOTIF Argument Approval',
     context: {
@@ -150,9 +192,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/sotif-analysis.json`, format: 'json', content: sotifArgument },
         { path: `artifacts/scenario-catalog.json`, format: 'json', content: { known: knownUnsafeScenarios, unknown: unknownUnsafeScenarios } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -173,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const specificationAnalysisTask = defineTask('specification-analysis', (args, taskCtx) => ({
   kind: 'agent',

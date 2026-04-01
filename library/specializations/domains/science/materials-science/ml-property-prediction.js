@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Feature Engineering
   ctx.log('info', 'Phase 2: Engineering features/descriptors');
-  const featureEngineering = await ctx.task(featureEngineeringTask, {
+  let featureEngineering = await ctx.task(featureEngineeringTask, {
     dataset: dataCollection.dataset,
     targetProperty,
     descriptorType,
@@ -59,9 +59,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...featureEngineering.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      featureEngineering = await ctx.task(featureEngineeringTask, { ...{
+    dataset: dataCollection.dataset,
+    targetProperty,
+    descriptorType,
+    modelType,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Feature engineering complete. ${featureEngineering.featureCount} features generated. ${featureEngineering.sampleCount} samples available. Proceed with model training?`,
     title: 'Feature Engineering Review',
     context: {
@@ -72,9 +81,15 @@ export async function process(inputs, ctx) {
         descriptorType
       },
       files: featureEngineering.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Data Splitting
   ctx.log('info', 'Phase 3: Splitting data');
   const dataSplitting = await ctx.task(dataSplittingTask, {
@@ -102,16 +117,24 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Model Evaluation
   ctx.log('info', 'Phase 5: Evaluating model');
-  const modelEvaluation = await ctx.task(modelEvaluationTask, {
+  let modelEvaluation = await ctx.task(modelEvaluationTask, {
     model: modelTraining.model,
     testData: dataSplitting.testData,
     modelType,
     outputDir
   });
 
-  artifacts.push(...modelEvaluation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      modelEvaluation = await ctx.task(modelEvaluationTask, { ...{
+    model: modelTraining.model,
+    testData: dataSplitting.testData,
+    modelType,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Model evaluation complete. Test MAE: ${modelEvaluation.mae.toFixed(4)}, Test R2: ${modelEvaluation.r2.toFixed(4)}. Review performance?`,
     title: 'Model Evaluation Review',
     context: {
@@ -123,9 +146,15 @@ export async function process(inputs, ctx) {
         modelType
       },
       files: modelEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Feature Importance Analysis
   ctx.log('info', 'Phase 6: Analyzing feature importance');
   const featureImportance = await ctx.task(featureImportanceTask, {
@@ -213,8 +242,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Collection
+  // Task 1: Data Collection
 export const dataCollectionTask = defineTask('ml-data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Data Collection - ${args.targetProperty}`,

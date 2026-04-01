@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Audit Preparation
   ctx.log('info', 'Phase 2: Audit Preparation');
-  const preparation = await ctx.task(auditPreparationTask, {
+  let preparation = await ctx.task(auditPreparationTask, {
     auditId,
     planning,
     outputDir
@@ -61,8 +61,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...preparation.artifacts);
 
-  // Quality Gate: Audit Plan Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      preparation = await ctx.task(auditPreparationTask, { ...{
+    auditId,
+    planning,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Audit plan prepared. Scope: ${auditScope}. Criteria: ${auditCriteria}. Auditors assigned: ${planning.auditTeam.length}. Checklist items: ${preparation.checklistItems}. Approve audit plan?`,
     title: 'Audit Plan Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
       schedule: planning.schedule,
       checklist: preparation.checklist,
       files: [...planning.artifacts, ...preparation.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Opening Meeting
   ctx.log('info', 'Phase 3: Opening Meeting');
   const openingMeeting = await ctx.task(openingMeetingTask, {
@@ -98,7 +112,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Finding Classification
   ctx.log('info', 'Phase 5: Finding Classification');
-  const classification = await ctx.task(findingClassificationTask, {
+  let classification = await ctx.task(findingClassificationTask, {
     auditId,
     execution,
     auditCriteria,
@@ -107,8 +121,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...classification.artifacts);
 
-  // Quality Gate: Findings Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      classification = await ctx.task(findingClassificationTask, { ...{
+    auditId,
+    execution,
+    auditCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Audit findings classified. Total findings: ${classification.totalFindings}. Major NCs: ${classification.majorNCs}. Minor NCs: ${classification.minorNCs}. Observations: ${classification.observations}. Review before closing meeting?`,
     title: 'Audit Findings Review',
     context: {
@@ -117,9 +140,15 @@ export async function process(inputs, ctx) {
       findings: classification.findings,
       nonconformities: classification.nonconformities,
       files: classification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Closing Meeting
   ctx.log('info', 'Phase 6: Closing Meeting');
   const closingMeeting = await ctx.task(closingMeetingTask, {
@@ -207,8 +236,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Audit Planning
+  // Task 1: Audit Planning
 export const auditPlanningTask = defineTask('audit-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Audit Planning - ${args.auditId}`,

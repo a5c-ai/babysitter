@@ -82,7 +82,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...longTermMemory.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: SEMANTIC MEMORY
   // ============================================================================
@@ -98,7 +97,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...semanticMemory.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: MEMORY RETRIEVAL
   // ============================================================================
@@ -122,7 +120,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Integrating memory system');
 
-  const integration = await ctx.task(memoryIntegrationTask, {
+  let integration = await ctx.task(memoryIntegrationTask, {
     systemName,
     shortTermMemory: shortTermMemory.memory,
     longTermMemory: longTermMemory ? longTermMemory.memory : null,
@@ -133,8 +131,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...integration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integration = await ctx.task(memoryIntegrationTask, { ...{
+    systemName,
+    shortTermMemory: shortTermMemory.memory,
+    longTermMemory: longTermMemory ? longTermMemory.memory : null,
+    semanticMemory: semanticMemory ? semanticMemory.memory : null,
+    retrievalLogic: memoryRetrieval.logic,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory system ${systemName} complete. Memory types: ${memoryTypes.join(', ')}. Review implementation?`,
     title: 'Memory System Review',
     context: {
@@ -147,9 +156,15 @@ export async function process(inputs, ctx) {
         enableSummarization
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -172,8 +187,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Superelevation Design
   ctx.log('info', 'Designing superelevation');
-  const superelevation = await ctx.task(superelevationTask, {
+  let superelevation = await ctx.task(superelevationTask, {
     projectId,
     horizontalAlignment,
     designCriteria,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...superelevation.artifacts);
 
-  // Breakpoint: Review geometric design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      superelevation = await ctx.task(superelevationTask, { ...{
+    projectId,
+    horizontalAlignment,
+    designCriteria,
+    designCode,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Highway geometric design complete for ${projectId}. Design speed: ${designSpeed} mph. Review alignment and cross-sections?`,
     title: 'Highway Geometric Design Review',
     context: {
@@ -109,9 +119,15 @@ export async function process(inputs, ctx) {
         laneWidth: crossSectionDesign.laneWidth,
         maxSuperelevation: superelevation.maxRate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Sight Distance Analysis
   ctx.log('info', 'Analyzing sight distances');
   const sightDistance = await ctx.task(sightDistanceTask, {
@@ -191,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Design Criteria
+  // Task 1: Design Criteria
 export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish design criteria',

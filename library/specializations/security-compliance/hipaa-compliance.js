@@ -149,7 +149,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...riskAnalysisResults.artifacts);
     complianceGaps.push(...riskAnalysisResults.identifiedRisks);
   }
-
   // Task 7: Business Associate Agreement (BAA) Assessment
   let baaAssessment = null;
   if (includeBAA || entities.includes('business-associate')) {
@@ -164,7 +163,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...baaAssessment.artifacts);
     complianceGaps.push(...baaAssessment.gaps);
   }
-
   // Task 8: Privacy Rule Compliance Assessment
   ctx.log('info', 'Task 8: Assessing HIPAA Privacy Rule compliance');
   const privacyRuleAssessment = await ctx.task(privacyRuleTask, {
@@ -192,7 +190,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...breachNotificationAssessment.artifacts);
     complianceGaps.push(...breachNotificationAssessment.gaps);
   }
-
   // Task 10: HITECH Act Compliance Assessment
   if (complianceFrameworks.includes('HITECH')) {
     ctx.log('info', 'Task 10: Assessing HITECH Act compliance');
@@ -207,7 +204,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...hitechAssessment.artifacts);
     complianceGaps.push(...hitechAssessment.gaps);
   }
-
   // Task 11: Policies and Procedures Review
   ctx.log('info', 'Task 11: Reviewing HIPAA policies and procedures');
   const policiesReview = await ctx.task(policiesProceduresTask, {
@@ -291,7 +287,7 @@ export async function process(inputs, ctx) {
 
   // Task 17: Comprehensive Compliance Report
   ctx.log('info', 'Task 17: Generating comprehensive HIPAA compliance report');
-  const complianceReport = await ctx.task(complianceReportTask, {
+  let complianceReport = await ctx.task(complianceReportTask, {
     organizationName,
     scope,
     entities,
@@ -314,8 +310,31 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...complianceReport.artifacts);
 
-  // Breakpoint: Review compliance findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complianceReport = await ctx.task(complianceReportTask, { ...{
+    organizationName,
+    scope,
+    entities,
+    complianceScore,
+    phiInventory,
+    administrativeSafeguards,
+    physicalSafeguards,
+    technicalSafeguards,
+    riskAnalysisResults,
+    baaAssessment,
+    privacyRuleAssessment,
+    policiesReview,
+    trainingAssessment,
+    incidentResponseAssessment,
+    gapAnalysis,
+    remediationPlan,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HIPAA Compliance Assessment complete for ${organizationName}. Compliance Score: ${complianceScore}/100. ${complianceGaps.length} gaps identified. Review findings and remediation plan?`,
     title: 'HIPAA Compliance Assessment Results',
     context: {
@@ -334,9 +353,15 @@ export async function process(inputs, ctx) {
         baaCompliance: baaAssessment ? baaAssessment.compliant : 'N/A',
         privacyRuleCompliance: privacyRuleAssessment.compliant
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -431,8 +456,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scope and Requirements Analysis
+  // Task 1: Scope and Requirements Analysis
 export const scopeRequirementsTask = defineTask('scope-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze HIPAA compliance scope and requirements',

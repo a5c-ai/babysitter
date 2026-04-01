@@ -37,22 +37,33 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Mathematical Foundations Documentation');
 
-  const mathResult = await ctx.task(mathematicalFoundationsTask, {
+  let mathResult = await ctx.task(mathematicalFoundationsTask, {
     algorithm
   });
 
-  artifacts.push(...(mathResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      mathResult = await ctx.task(mathematicalFoundationsTask, { ...{
+    algorithm
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Mathematical foundations documented. Sections: ${mathResult.sections.length}. Proceed with circuit documentation?`,
     title: 'Mathematical Foundations Review',
     context: {
       runId: ctx.runId,
       math: mathResult,
       files: (mathResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CIRCUIT DIAGRAMS
   // ============================================================================
@@ -84,23 +95,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Implementation Guide');
 
-  const implGuideResult = await ctx.task(implementationGuideTask, {
+  let implGuideResult = await ctx.task(implementationGuideTask, {
     algorithm,
     codebase
   });
 
-  artifacts.push(...(implGuideResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      implGuideResult = await ctx.task(implementationGuideTask, { ...{
+    algorithm,
+    codebase
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Implementation guide created. Code examples: ${implGuideResult.codeExamples.length}. Proceed with API documentation?`,
     title: 'Implementation Guide Review',
     context: {
       runId: ctx.runId,
       implGuide: implGuideResult,
       files: (implGuideResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: API DOCUMENTATION
   // ============================================================================
@@ -130,7 +153,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(tutorialResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 7: VISUAL CIRCUIT GUIDES
   // ============================================================================
@@ -146,14 +168,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(visualGuideResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 8: DOCUMENTATION COMPILATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Documentation Compilation');
 
-  const compilationResult = await ctx.task(documentationCompilationTask, {
+  let compilationResult = await ctx.task(documentationCompilationTask, {
     algorithm,
     mathResult,
     circuitDocsResult,
@@ -165,9 +186,22 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(compilationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      compilationResult = await ctx.task(documentationCompilationTask, { ...{
+    algorithm,
+    mathResult,
+    circuitDocsResult,
+    complexityResult,
+    implGuideResult,
+    apiDocsResult,
+    tutorialResult,
+    visualGuideResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Documentation complete for ${algorithm.name}. Pages: ${compilationResult.pageCount}, Tutorials: ${tutorialResult?.notebookCount || 0}. Approve documentation?`,
     title: 'Algorithm Documentation Complete',
     context: {
@@ -179,9 +213,15 @@ export async function process(inputs, ctx) {
         visualizations: visualGuideResult?.visualCount || 0
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -207,8 +247,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

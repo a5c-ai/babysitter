@@ -33,18 +33,18 @@ function getPluginRoot(args) {
   const pluginsDir = args.harness === 'oh-my-pi'
     ? path.join(base, '.omp', 'plugins')
     : path.join(base, '.pi', 'plugins');
-  return path.join(pluginsDir, 'babysitter-pi');
+  return path.join(pluginsDir, 'babysitter');
 }
 
 function main() {
   const args = parseArgs(process.argv);
   const pluginRoot = getPluginRoot(args);
   if (!fs.existsSync(pluginRoot)) {
-    console.log('[babysitter-pi] Nothing to uninstall.');
+    console.log('[babysitter] Nothing to uninstall.');
     return;
   }
   fs.rmSync(pluginRoot, { recursive: true, force: true });
-  console.log(`[babysitter-pi] Removed ${pluginRoot}`);
+  console.log(`[babysitter] Removed ${pluginRoot}`);
 }
 
 main();

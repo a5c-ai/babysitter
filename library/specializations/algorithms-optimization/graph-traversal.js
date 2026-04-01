@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(traversalImplementationTask, { selection, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const analysis = await ctx.task(traversalAnalysisTask, { graph, implementation, application, outputDir });
-  artifacts.push(...analysis.artifacts);
-
-  await ctx.breakpoint({
+  let analysis = await ctx.task(traversalAnalysisTask, { graph, implementation, application, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysis = await ctx.task(traversalAnalysisTask, { ...{ graph, implementation, application, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Graph traversal complete. Method: ${selection.method}. Application: ${application}. Review results?`,
     title: 'Graph Traversal Complete',
-    context: { runId: ctx.runId, method: selection.method, result: analysis.summary }
-  });
-
+    context: { runId: ctx.runId, method: selection.method, result: analysis.summary },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     traversalMethod: selection.method,

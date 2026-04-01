@@ -71,7 +71,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...wcetResults.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: INTERRUPT LATENCY MEASUREMENT
   // ============================================================================
@@ -118,7 +117,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...jitterResults.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: DEADLINE COMPLIANCE CHECK
   // ============================================================================
@@ -143,7 +141,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Performance Report');
 
-  const report = await ctx.task(performanceReportTask, {
+  let report = await ctx.task(performanceReportTask, {
     projectName,
     wcetResults,
     interruptLatency,
@@ -155,8 +153,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(performanceReportTask, { ...{
+    projectName,
+    wcetResults,
+    interruptLatency,
+    contextSwitchOverhead,
+    jitterResults,
+    deadlineCheck,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance Validation Complete for ${projectName}. Deadline compliance: ${deadlineCheck.allDeadlinesMet}. Review results?`,
     title: 'Performance Validation Complete',
     context: {
@@ -169,9 +179,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: report.reportPath, format: 'markdown', label: 'Performance Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -197,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -69,23 +69,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Weighted Aggregation
-  const weightedAggregation = await ctx.task(weightedAggregationTask, {
+  let weightedAggregation = await ctx.task(weightedAggregationTask, {
     normalizedScores,
     criteriaWeighting,
     alternatives: problemStructuring.alternatives
   });
 
-  // Breakpoint: Review initial ranking
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      weightedAggregation = await ctx.task(weightedAggregationTask, { ...{
+    normalizedScores,
+    criteriaWeighting,
+    alternatives: problemStructuring.alternatives
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Initial MCDA ranking complete. Top alternative: ${weightedAggregation.ranking[0].alternative}. Review criteria weights and scores?`,
     title: 'MCDA Ranking Review',
     context: {
       runId: ctx.runId,
       domain,
       topThree: weightedAggregation.ranking.slice(0, 3)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Pareto Analysis
   const paretoAnalysis = await ctx.task(paretoAnalysisTask, {
     alternatives: problemStructuring.alternatives,
@@ -117,7 +131,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Recommendation Synthesis
-  const recommendation = await ctx.task(mcdaRecommendationTask, {
+  let recommendation = await ctx.task(mcdaRecommendationTask, {
     weightedAggregation,
     paretoAnalysis,
     sensitivityAnalysis,
@@ -126,8 +140,19 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendation = await ctx.task(mcdaRecommendationTask, { ...{
+    weightedAggregation,
+    paretoAnalysis,
+    sensitivityAnalysis,
+    outrankingAnalysis,
+    stakeholderAnalysis,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCDA complete. Recommendation: ${recommendation.recommendedAlternative}. Confidence: ${recommendation.confidence}. Accept?`,
     title: 'Final MCDA Review',
     context: {
@@ -137,9 +162,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/mcda-ranking.json', format: 'json', content: weightedAggregation },
         { path: 'artifacts/pareto-analysis.json', format: 'json', content: paretoAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -161,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const mcdaProblemStructuringTask = defineTask('mcda-problem-structuring', (args, taskCtx) => ({
   kind: 'agent',

@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Identifying and analyzing critical user journeys');
 
-  const journeyAnalysis = await ctx.task(journeyIdentificationTask, {
+  let journeyAnalysis = await ctx.task(journeyIdentificationTask, {
     projectName,
     applicationUrl,
     userJourneys,
@@ -83,8 +83,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...journeyAnalysis.artifacts);
 
   // Quality Gate: Minimum journey coverage
-  if (journeyAnalysis.identifiedJourneys.length < 5) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        journeyAnalysis = await ctx.task(journeyIdentificationTask, { ...{
+    projectName,
+    applicationUrl,
+    userJourneys,
+    testDataRequirements,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Only ${journeyAnalysis.identifiedJourneys.length} critical journeys identified. Minimum recommended is 5. Review and approve to continue?`,
       title: 'Journey Coverage Review',
       context: {
@@ -92,9 +102,15 @@ export async function process(inputs, ctx) {
         identifiedJourneys: journeyAnalysis.identifiedJourneys,
         recommendation: 'Consider adding more critical user journeys for comprehensive coverage',
         files: journeyAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: TEST DESIGN AND SCENARIO CREATION
@@ -102,7 +118,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing test scenarios and test cases');
 
-  const testDesign = await ctx.task(testDesignTask, {
+  let testDesign = await ctx.task(testDesignTask, {
     projectName,
     applicationUrl,
     identifiedJourneys: journeyAnalysis.identifiedJourneys,
@@ -115,8 +131,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Test scenario completeness
   const totalScenarios = testDesign.testScenarios.length;
-  if (totalScenarios < 10) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        testDesign = await ctx.task(testDesignTask, { ...{
+    projectName,
+    applicationUrl,
+    identifiedJourneys: journeyAnalysis.identifiedJourneys,
+    acceptanceCriteria,
+    frameworkType,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `${totalScenarios} test scenarios created. Best practice recommends 10-20 scenarios for critical paths. Continue?`,
       title: 'Test Scenario Review',
       context: {
@@ -124,9 +151,15 @@ export async function process(inputs, ctx) {
         scenarioCount: totalScenarios,
         scenarios: testDesign.testScenarios.map(s => ({ journey: s.journey, title: s.title })),
         files: testDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: PAGE OBJECT MODEL DEVELOPMENT
@@ -134,7 +167,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Building Page Objects for all application screens');
 
-  const pageObjectDevelopment = await ctx.task(pageObjectDevelopmentTask, {
+  let pageObjectDevelopment = await ctx.task(pageObjectDevelopmentTask, {
     projectName,
     applicationUrl,
     identifiedJourneys: journeyAnalysis.identifiedJourneys,
@@ -147,8 +180,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Page Object coverage
   const screensCovered = pageObjectDevelopment.pageObjects.length;
-  if (screensCovered < journeyAnalysis.estimatedScreenCount * 0.8) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        pageObjectDevelopment = await ctx.task(pageObjectDevelopmentTask, { ...{
+    projectName,
+    applicationUrl,
+    identifiedJourneys: journeyAnalysis.identifiedJourneys,
+    testScenarios: testDesign.testScenarios,
+    frameworkType,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Page Objects created for ${screensCovered}/${journeyAnalysis.estimatedScreenCount} screens. Coverage at ${((screensCovered / journeyAnalysis.estimatedScreenCount) * 100).toFixed(0)}%. Approve to proceed?`,
       title: 'Page Object Coverage Warning',
       context: {
@@ -158,9 +202,15 @@ export async function process(inputs, ctx) {
         pageObjects: pageObjectDevelopment.pageObjects.map(po => po.name),
         recommendation: 'Consider adding Page Objects for remaining critical screens',
         files: pageObjectDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: TEST DATA SETUP
@@ -168,7 +218,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Creating test data and fixtures');
 
-  const testDataSetup = await ctx.task(testDataSetupTask, {
+  let testDataSetup = await ctx.task(testDataSetupTask, {
     projectName,
     testDataRequirements,
     testScenarios: testDesign.testScenarios,
@@ -179,8 +229,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...testDataSetup.artifacts);
 
   // Quality Gate: Test data availability
-  if (!testDataSetup.dataReady || testDataSetup.dataGaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        testDataSetup = await ctx.task(testDataSetupTask, { ...{
+    projectName,
+    testDataRequirements,
+    testScenarios: testDesign.testScenarios,
+    environmentType,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Test data setup completed with ${testDataSetup.dataGaps.length} gaps identified. Review data gaps and approve to continue?`,
       title: 'Test Data Review',
       context: {
@@ -189,9 +249,15 @@ export async function process(inputs, ctx) {
         dataGaps: testDataSetup.dataGaps,
         availableData: testDataSetup.availableData,
         files: testDataSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: PARALLEL TEST IMPLEMENTATION
@@ -250,7 +316,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Running tests and debugging failures');
 
-  const initialExecution = await ctx.task(testExecutionTask, {
+  let initialExecution = await ctx.task(testExecutionTask, {
     projectName,
     applicationUrl,
     frameworkType,
@@ -263,8 +329,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Initial test pass rate
   const initialPassRate = initialExecution.passRate;
-  if (initialPassRate < 50) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        initialExecution = await ctx.task(testExecutionTask, { ...{
+    projectName,
+    applicationUrl,
+    frameworkType,
+    parallelExecutionEnabled,
+    outputDir,
+    executionType: 'initial'
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Initial test execution pass rate: ${initialPassRate}%. Below 50% threshold. This is expected for initial run. Review failures and continue debugging?`,
       title: 'Initial Execution Results',
       context: {
@@ -275,9 +352,15 @@ export async function process(inputs, ctx) {
         failed: initialExecution.failed,
         failureReasons: initialExecution.topFailureReasons,
         files: initialExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: DEBUGGING AND FIXES
@@ -318,7 +401,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Running final test execution to validate stability');
 
-  const finalExecution = await ctx.task(testExecutionTask, {
+  let finalExecution = await ctx.task(testExecutionTask, {
     projectName,
     applicationUrl,
     frameworkType,
@@ -333,8 +416,19 @@ export async function process(inputs, ctx) {
   const flakinessRate = finalExecution.flakinessRate;
 
   // Quality Gate: Final test pass rate
-  if (finalPassRate < acceptanceCriteria.passRate) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        finalExecution = await ctx.task(testExecutionTask, { ...{
+    projectName,
+    applicationUrl,
+    frameworkType,
+    parallelExecutionEnabled,
+    outputDir,
+    executionType: 'final'
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Final test pass rate: ${finalPassRate}%. Target: ${acceptanceCriteria.passRate}%. Below acceptance criteria. Review and decide to proceed or iterate?`,
       title: 'Pass Rate Quality Gate',
       context: {
@@ -346,13 +440,30 @@ export async function process(inputs, ctx) {
         failed: finalExecution.failed,
         recommendation: 'Consider additional debugging iteration or adjust acceptance criteria',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // Quality Gate: Flakiness rate
-  if (flakinessRate > acceptanceCriteria.flakiness) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        finalExecution = await ctx.task(testExecutionTask, { ...{
+    projectName,
+    applicationUrl,
+    frameworkType,
+    parallelExecutionEnabled,
+    outputDir,
+    executionType: 'final'
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Flakiness rate: ${flakinessRate}%. Target: <${acceptanceCriteria.flakiness}%. Above threshold. Continue or stabilize further?`,
       title: 'Flakiness Quality Gate',
       context: {
@@ -362,9 +473,15 @@ export async function process(inputs, ctx) {
         flakyTests: finalExecution.flakyTests,
         recommendation: 'Apply additional stability improvements or use test quarantine',
         files: stabilityImprovements.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: CODE REVIEW AND REFINEMENT
@@ -372,7 +489,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Conducting code review and test refinement');
 
-  const codeReview = await ctx.task(codeReviewTask, {
+  let codeReview = await ctx.task(codeReviewTask, {
     projectName,
     pageObjects: pageObjectDevelopment.pageObjects,
     testFiles: [
@@ -388,8 +505,23 @@ export async function process(inputs, ctx) {
   artifacts.push(...codeReview.artifacts);
 
   // Quality Gate: Code review approval
-  if (codeReview.criticalIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        codeReview = await ctx.task(codeReviewTask, { ...{
+    projectName,
+    pageObjects: pageObjectDevelopment.pageObjects,
+    testFiles: [
+      ...authenticationTests.testFiles,
+      ...coreWorkflowTests.testFiles,
+      ...dataManagementTests.testFiles
+    ],
+    frameworkType,
+    executionResults: finalExecution,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `Code review identified ${codeReview.criticalIssues.length} critical issues. Review issues and approve fixes?`,
       title: 'Code Review Critical Issues',
       context: {
@@ -398,9 +530,15 @@ export async function process(inputs, ctx) {
         suggestions: codeReview.suggestions,
         bestPractices: codeReview.bestPracticeViolations,
         files: codeReview.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: VISUAL REGRESSION SETUP (if enabled)
@@ -420,7 +558,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...visualRegression.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: DOCUMENTATION GENERATION
   // ============================================================================
@@ -465,7 +602,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Computing final test suite metrics and assessment');
 
-  const finalAssessment = await ctx.task(finalAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAssessmentTask, {
     projectName,
     journeyAnalysis,
     testDesign,
@@ -490,8 +627,28 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Test suite stability score: ${stabilityScore}/100`);
   ctx.log('info', `Total tests: ${testSuiteStats.totalTests}, Pass rate: ${testSuiteStats.passRate}%`);
 
-  // Final Breakpoint: E2E Test Suite Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
+    projectName,
+    journeyAnalysis,
+    testDesign,
+    pageObjectDevelopment,
+    testDataSetup,
+    authenticationTests,
+    coreWorkflowTests,
+    dataManagementTests,
+    finalExecution,
+    stabilityImprovements,
+    codeReview,
+    visualRegression,
+    cicdIntegration,
+    acceptanceCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `E2E Test Suite Development Complete for ${projectName}. Stability Score: ${stabilityScore}/100, Pass Rate: ${testSuiteStats.passRate}%. Approve test suite for production use?`,
     title: 'Final E2E Test Suite Review',
     context: {
@@ -516,9 +673,15 @@ export async function process(inputs, ctx) {
         { path: finalExecution.reportPath, format: 'html', label: 'Test Execution Report' },
         { path: codeReview.reviewReportPath, format: 'markdown', label: 'Code Review Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -589,8 +752,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

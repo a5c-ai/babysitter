@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const deploymentPipeline = await ctx.task(deploymentPipelineTask, { projectName, deployTarget, outputDir });
   artifacts.push(...deploymentPipeline.artifacts);
 
-  const securityScanning = await ctx.task(securityScanningTask, { projectName, outputDir });
-  artifacts.push(...securityScanning.artifacts);
-
-  await ctx.breakpoint({ question: `CI/CD pipelines complete for ${projectName}. Approve?`, title: 'CI/CD Review', context: { runId: ctx.runId, workflows: workflowSetup.workflows } });
-
+  let securityScanning = await ctx.task(securityScanningTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityScanning = await ctx.task(securityScanningTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `CI/CD pipelines complete for ${projectName}. Approve?`, title: 'CI/CD Review', context: { runId: ctx.runId, workflows: workflowSetup.workflows }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

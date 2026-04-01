@@ -69,7 +69,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...timeline.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: IMPACT ASSESSMENT
   // ============================================================================
@@ -138,7 +137,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Generating action items and remediation plan');
-  const actionItems = await ctx.task(actionItemsGenerationTask, {
+  let actionItems = await ctx.task(actionItemsGenerationTask, {
     incidentId,
     rootCauses: rootCauseAnalysis.rootCauses,
     contributingFactors: contributingFactors.factors,
@@ -149,8 +148,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...actionItems.artifacts);
 
-  // Breakpoint: Review action items
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      actionItems = await ctx.task(actionItemsGenerationTask, { ...{
+    incidentId,
+    rootCauses: rootCauseAnalysis.rootCauses,
+    contributingFactors: contributingFactors.factors,
+    responseEvaluation: responseEvaluation.evaluation,
+    impactAssessment: impactAssessment.assessment,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Action items generated for incident ${incidentId}. Found ${actionItems.actionItems.length} action items (${actionItems.criticalCount} critical). Review action items and priorities?`,
     title: 'Action Items Review',
     context: {
@@ -169,9 +179,15 @@ export async function process(inputs, ctx) {
         criticalActions: actionItems.criticalCount,
         highPriorityActions: actionItems.highPriorityCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: LESSONS LEARNED DOCUMENTATION
   // ============================================================================
@@ -194,7 +210,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assembling blameless post-mortem document');
-  const postMortemAssembly = await ctx.task(postMortemAssemblyTask, {
+  let postMortemAssembly = await ctx.task(postMortemAssemblyTask, {
     incidentId,
     incidentTitle,
     severity,
@@ -212,8 +228,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...postMortemAssembly.artifacts);
 
-  // Breakpoint: Review assembled post-mortem
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      postMortemAssembly = await ctx.task(postMortemAssemblyTask, { ...{
+    incidentId,
+    incidentTitle,
+    severity,
+    incidentData: dataCollection.incidentData,
+    timeline: timeline ? timeline.events : [],
+    impactAssessment: impactAssessment.assessment,
+    rootCauses: rootCauseAnalysis.rootCauses,
+    contributingFactors: contributingFactors.factors,
+    responseEvaluation: responseEvaluation.evaluation,
+    actionItems: actionItems.actionItems,
+    lessonsLearned: lessonsLearned.lessons,
+    includeBlameless,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Post-mortem document for incident ${incidentId} assembled. Document has ${postMortemAssembly.sections.length} sections. Review post-mortem structure and content?`,
     title: 'Post-Mortem Assembly Review',
     context: {
@@ -233,15 +267,21 @@ export async function process(inputs, ctx) {
         actionItemsCount: actionItems.actionItems.length,
         rootCausesCount: rootCauseAnalysis.rootCauses.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: QUALITY VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating post-mortem quality and completeness');
-  const qualityValidation = await ctx.task(postMortemQualityValidationTask, {
+  let qualityValidation = await ctx.task(postMortemQualityValidationTask, {
     incidentId,
     postMortemDocument: postMortemAssembly.postMortemDocument,
     sections: postMortemAssembly.sections,
@@ -273,8 +313,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Review approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityValidation = await ctx.task(postMortemQualityValidationTask, { ...{
+    incidentId,
+    postMortemDocument: postMortemAssembly.postMortemDocument,
+    sections: postMortemAssembly.sections,
+    rootCauses: rootCauseAnalysis.rootCauses,
+    actionItems: actionItems.actionItems,
+    includeBlameless,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Post-mortem review complete. ${reviewResult.approved ? 'Approved by team!' : 'Requires revisions.'} Finalize and publish?`,
       title: 'Post-Mortem Review Approval',
       context: {
@@ -291,9 +343,15 @@ export async function process(inputs, ctx) {
           feedbackItems: reviewResult.feedback.length,
           blamelessViolations: reviewResult.blamelessViolations || 0
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: FINALIZE AND PUBLISH POST-MORTEM
@@ -371,8 +429,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

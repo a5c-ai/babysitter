@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'rope-logic', output: ropeLogic });
 
   // Phase 5: DBR System Integration Design
-  const integrationDesign = await ctx.task(designSystemIntegration, {
+  let integrationDesign = await ctx.task(designSystemIntegration, {
     drumDesign,
     bufferDesign,
     ropeLogic,
@@ -77,13 +77,28 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'integration-design', output: integrationDesign });
 
-  // Quality Gate: DBR Design Review
-  await ctx.breakpoint('dbr-design-review', {
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      integrationDesign = await ctx.task(designSystemIntegration, { ...{
+    drumDesign,
+    bufferDesign,
+    ropeLogic,
+    implementationScope
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint('dbr-design-review', {
     title: 'DBR System Design Review',
     description: 'Review and approve the complete DBR scheduling system design',
-    artifacts: [drumDesign, bufferDesign, ropeLogic, integrationDesign]
-  });
-
+    artifacts: [drumDesign, bufferDesign, ropeLogic, integrationDesign],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Buffer Management System
   const bufferManagementSystem = await ctx.task(developBufferManagement, {
     bufferDesign,
@@ -119,20 +134,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'pilot-execution', output: pilotExecution });
 
   // Phase 10: Performance Measurement and Optimization
-  const performanceAnalysis = await ctx.task(analyzePerformance, {
+  let performanceAnalysis = await ctx.task(analyzePerformance, {
     pilotExecution,
     constraintInfo,
     productionData
   });
   artifacts.push({ phase: 'performance-analysis', output: performanceAnalysis });
 
-  // Final Quality Gate: DBR System Approval
-  await ctx.breakpoint('dbr-system-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceAnalysis = await ctx.task(analyzePerformance, { ...{
+    pilotExecution,
+    constraintInfo,
+    productionData
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('dbr-system-approval', {
     title: 'DBR System Full Approval',
     description: 'Final approval for DBR system rollout based on pilot results',
-    artifacts: [pilotExecution, performanceAnalysis]
-  });
-
+    artifacts: [pilotExecution, performanceAnalysis],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     dbrDesign: {

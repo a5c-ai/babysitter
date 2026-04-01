@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring ethnographic fieldwork plan quality');
-  const qualityScore = await ctx.task(ethnographicQualityScoringTask, {
+  let qualityScore = await ctx.task(ethnographicQualityScoringTask, {
     siteAccessPlan,
     observationDesign,
     fieldNotesProtocol,
@@ -126,8 +126,20 @@ export async function process(inputs, ctx) {
   const fieldworkScore = qualityScore.overallScore;
   const qualityMet = fieldworkScore >= 80;
 
-  // Breakpoint: Review ethnographic fieldwork plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(ethnographicQualityScoringTask, { ...{
+    siteAccessPlan,
+    observationDesign,
+    fieldNotesProtocol,
+    immersionStrategy,
+    dataCollectionMethods,
+    ethicsReflexivity,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ethnographic fieldwork plan complete. Quality score: ${fieldworkScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Ethnographic Fieldwork Plan Review',
     context: {
@@ -143,9 +155,15 @@ export async function process(inputs, ctx) {
         observationRole: observationDesign.observerRole,
         dataCollectionMethods: dataCollectionMethods.methods
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Site Access Planning
+  // Task 1: Site Access Planning
 export const siteAccessPlanningTask = defineTask('site-access-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan site access and entry',

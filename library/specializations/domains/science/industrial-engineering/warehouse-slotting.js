@@ -45,24 +45,37 @@ export async function process(inputs, ctx) {
 
   // Task 2: Product Velocity Classification
   ctx.log('info', 'Phase 2: Classifying products by velocity');
-  const velocityClassification = await ctx.task(velocityClassificationTask, {
+  let velocityClassification = await ctx.task(velocityClassificationTask, {
     orderAnalysis,
     outputDir
   });
 
   artifacts.push(...velocityClassification.artifacts);
 
-  // Breakpoint: Review classification
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      velocityClassification = await ctx.task(velocityClassificationTask, { ...{
+    orderAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Product velocity analysis complete. A-movers: ${velocityClassification.aMoversCount}. ${velocityClassification.paretoRatio}% of picks from ${velocityClassification.fastMoversPercent}% of SKUs. Proceed with layout design?`,
     title: 'Velocity Classification Review',
     context: {
       runId: ctx.runId,
       classification: velocityClassification.summary,
       files: velocityClassification.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Zone Layout Design
   ctx.log('info', 'Phase 3: Designing warehouse zone layout');
   const zoneLayout = await ctx.task(zoneLayoutTask, {
@@ -116,7 +129,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Implementation Plan
   ctx.log('info', 'Phase 8: Creating slotting implementation plan');
-  const implementationPlan = await ctx.task(slottingImplementationTask, {
+  let implementationPlan = await ctx.task(slottingImplementationTask, {
     slotAssignment,
     performanceMeasurement,
     outputDir
@@ -124,8 +137,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationPlan.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationPlan = await ctx.task(slottingImplementationTask, { ...{
+    slotAssignment,
+    performanceMeasurement,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Warehouse slotting optimization complete. Expected travel reduction: ${performanceMeasurement.travelReduction}%. Productivity improvement: ${performanceMeasurement.productivityImprovement}%. Review implementation plan?`,
     title: 'Warehouse Slotting Results',
     context: {
@@ -137,9 +158,15 @@ export async function process(inputs, ctx) {
         spaceUtilization: performanceMeasurement.spaceUtilization
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -167,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions follow the same pattern as other processes...
+  // Task definitions follow the same pattern as other processes...
 export const orderProfileTask = defineTask('order-profile-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze order and pick profiles',

@@ -485,6 +485,54 @@ Approve breakpoints before resuming, or resume and check the breakpoints UI.
 
 ---
 
+### Can I route breakpoints to specific team members?
+
+Yes. Use the `expert` field to route a breakpoint to specific reviewers:
+
+```javascript
+await ctx.breakpoint({
+  question: 'Approve the security changes?',
+  expert: ['security-lead', 'tech-lead'],  // Route to specific experts
+  strategy: 'quorum',                       // Require majority approval
+  tags: ['security'],
+});
+```
+
+Supported strategies: `single` (default), `first-response-wins`, `collect-all`, `quorum`. The result includes `respondedBy` (who responded) and `allResponses` (for multi-reviewer strategies).
+
+See: [Breakpoints](../features/breakpoints.md)
+
+---
+
+### What happens when a breakpoint is rejected?
+
+Breakpoints should never fail a process. The recommended pattern is to loop and retry with the reviewer's feedback:
+
+```javascript
+let approved = false;
+let previousFeedback;
+let attempt = 0;
+
+while (!approved) {
+  attempt++;
+  const review = await ctx.breakpoint({
+    question: 'Approve the plan?',
+    previousFeedback,
+    attempt,
+  });
+  if (review.approved) {
+    approved = true;
+  } else {
+    previousFeedback = review.feedback;
+    // Refine work based on feedback before retrying
+  }
+}
+```
+
+See: [Breakpoints - Robust Rejection Pattern](../features/breakpoints.md)
+
+---
+
 ## Process Definitions
 
 ### What is a process definition?
@@ -499,11 +547,14 @@ A process definition is a JavaScript function that orchestrates workflow logic. 
 ```javascript
 export async function process(inputs, ctx) {
   const plan = await ctx.task(planTask, { feature: inputs.feature });
-  await ctx.breakpoint({ question: 'Approve plan?' });
+  const review = await ctx.breakpoint({ question: 'Approve plan?' });
+  if (!review.approved) return { success: false, feedback: review.feedback };
   const result = await ctx.task(implementTask, { plan });
   return result;
 }
 ```
+
+> **Note:** `ctx.breakpoint()` returns a `BreakpointResult` with `{ approved, response?, feedback?, option? }`. Existing code that ignores the return value continues to work.
 
 See: [Process Definitions](../features/process-definitions.md)
 

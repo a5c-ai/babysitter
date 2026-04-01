@@ -61,23 +61,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Regulatory and Compliance Analysis
-  const regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, {
+  let regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, {
     projectName,
     candidateMarkets: marketScreening.shortlistedMarkets,
     productContext
   });
 
-  // Breakpoint: Review market assessments
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      regulatoryAnalysis = await ctx.task(regulatoryAnalysisTask, { ...{
+    projectName,
+    candidateMarkets: marketScreening.shortlistedMarkets,
+    productContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review geographic market assessments for ${projectName}. Are the analyses comprehensive?`,
     title: 'Market Assessment Review',
     context: {
       runId: ctx.runId,
       projectName,
       marketCount: marketScreening.shortlistedMarkets?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Market Attractiveness Scoring
   const attractivenessScoring = await ctx.task(attractivenessScoringTask, {
     projectName,
@@ -124,8 +138,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const marketScreeningTask = defineTask('market-screening', (args, taskCtx) => ({
   kind: 'agent',

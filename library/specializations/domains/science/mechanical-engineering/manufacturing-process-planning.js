@@ -50,22 +50,36 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'tooling-requirements', data: toolingRequirements });
 
   // Phase 4: PFMEA Development
-  const pfmea = await ctx.task(pfmeaTask, {
+  let pfmea = await ctx.task(pfmeaTask, {
     operations: processSelection.operations,
     qualityRequirements: inputs.qualityRequirements,
     tooling: toolingRequirements
   });
   artifacts.push({ phase: 'pfmea', data: pfmea });
 
-  // Breakpoint: PFMEA Review
-  await ctx.breakpoint('pfmea-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      pfmea = await ctx.task(pfmeaTask, { ...{
+    operations: processSelection.operations,
+    qualityRequirements: inputs.qualityRequirements,
+    tooling: toolingRequirements
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('pfmea-review', {
     question: 'Review PFMEA for high-risk operations. Are additional controls needed?',
     context: {
       highRpnItems: pfmea.highRiskItems,
       proposedControls: pfmea.recommendedControls
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Cycle Time Estimation
   const cycleTimeEstimation = await ctx.task(cycleTimeTask, {
     operations: processSelection.operations,
@@ -92,7 +106,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'control-plan', data: controlPlan });
 
   // Phase 8: Process Routing Finalization
-  const processRouting = await ctx.task(processRoutingTask, {
+  let processRouting = await ctx.task(processRoutingTask, {
     operations: processSelection.operations,
     cycleTimes: cycleTimeEstimation,
     workInstructions: workInstructions,
@@ -100,17 +114,32 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'process-routing', data: processRouting });
 
-  // Final Breakpoint: Process Plan Approval
-  await ctx.breakpoint('process-plan-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      processRouting = await ctx.task(processRoutingTask, { ...{
+    operations: processSelection.operations,
+    cycleTimes: cycleTimeEstimation,
+    workInstructions: workInstructions,
+    controlPlan: controlPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('process-plan-approval', {
     question: 'Approve complete manufacturing process plan for release?',
     context: {
       partNumber: inputs.partNumber,
       totalCycleTime: cycleTimeEstimation.totalCycleTime,
       operationCount: processRouting.operations.length,
       toolingCost: toolingRequirements.totalCost
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -130,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const partAnalysisTask = defineTask('part-analysis', (args) => ({
+  const partAnalysisTask = defineTask('part-analysis', (args) => ({
   kind: 'agent',
   title: 'Part Analysis and Feature Recognition',
   agent: {

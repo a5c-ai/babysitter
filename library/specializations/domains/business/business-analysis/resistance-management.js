@@ -542,19 +542,33 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Escalation Procedures
   ctx.log('Phase 7: Defining escalation procedures');
-  const escalationResult = await ctx.task(escalationProceduresTask, {
+  let escalationResult = await ctx.task(escalationProceduresTask, {
     resistanceAnalysis: artifacts.resistanceAnalysis,
     mitigationStrategies: artifacts.mitigationStrategies,
     monitoringPlan: artifacts.monitoringPlan
   });
   artifacts.escalationProcedures = escalationResult;
 
-  // Breakpoint for plan review
-  await ctx.breakpoint('resistance-plan-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      escalationResult = await ctx.task(escalationProceduresTask, { ...{
+    resistanceAnalysis: artifacts.resistanceAnalysis,
+    mitigationStrategies: artifacts.mitigationStrategies,
+    monitoringPlan: artifacts.monitoringPlan
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('resistance-plan-review', {
     question: 'Review the resistance management plan components. Is the approach comprehensive?',
-    artifacts: artifacts
-  });
-
+    artifacts: artifacts,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Plan Integration
   ctx.log('Phase 8: Integrating resistance management plan');
   const integrationResult = await ctx.task(resistancePlanIntegrationTask, {

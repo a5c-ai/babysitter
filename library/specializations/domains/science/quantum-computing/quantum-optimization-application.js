@@ -40,23 +40,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: QUBO/Ising Problem Formulation');
 
-  const formulationResult = await ctx.task(quboIsingFormulationTask, {
+  let formulationResult = await ctx.task(quboIsingFormulationTask, {
     problemType,
     problemData
   });
 
-  artifacts.push(...(formulationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      formulationResult = await ctx.task(quboIsingFormulationTask, { ...{
+    problemType,
+    problemData
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Problem formulated. Variables: ${formulationResult.numVariables}, QUBO terms: ${formulationResult.numTerms}. Proceed with encoding?`,
     title: 'Problem Formulation Review',
     context: {
       runId: ctx.runId,
       formulation: formulationResult,
       files: (formulationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROBLEM ENCODING
   // ============================================================================
@@ -108,7 +120,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Quantum Execution');
 
-  const executionResult = await ctx.task(quantumOptimizationExecutionTask, {
+  let executionResult = await ctx.task(quantumOptimizationExecutionTask, {
     circuit: circuitResult,
     postProcessing: postProcessResult,
     optimizer,
@@ -116,18 +128,33 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(executionResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      executionResult = await ctx.task(quantumOptimizationExecutionTask, { ...{
+    circuit: circuitResult,
+    postProcessing: postProcessResult,
+    optimizer,
+    numLayers,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Quantum optimization complete. Best solution cost: ${executionResult.bestCost}. Iterations: ${executionResult.iterations}. Review results?`,
     title: 'Quantum Execution Review',
     context: {
       runId: ctx.runId,
       execution: executionResult,
       files: (executionResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SOLUTION DECODING
   // ============================================================================
@@ -149,32 +176,46 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Classical Solver Benchmark');
 
-  const benchmarkResult = await ctx.task(classicalSolverBenchmarkTask, {
+  let benchmarkResult = await ctx.task(classicalSolverBenchmarkTask, {
     problemType,
     formulation: formulationResult,
     quantumSolution: decodingResult,
     problemData
   });
 
-  artifacts.push(...(benchmarkResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      benchmarkResult = await ctx.task(classicalSolverBenchmarkTask, { ...{
+    problemType,
+    formulation: formulationResult,
+    quantumSolution: decodingResult,
+    problemData
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Benchmark complete. Quantum: ${executionResult.bestCost}, Classical: ${benchmarkResult.classicalBest}. Gap: ${benchmarkResult.approximationRatio}. Review comparison?`,
     title: 'Benchmark Review',
     context: {
       runId: ctx.runId,
       benchmark: benchmarkResult,
       files: (benchmarkResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: APPLICATION PACKAGING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Application Packaging');
 
-  const packageResult = await ctx.task(applicationPackagingTask, {
+  let packageResult = await ctx.task(applicationPackagingTask, {
     problemType,
     formulation: formulationResult,
     circuit: circuitResult,
@@ -184,9 +225,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(packageResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      packageResult = await ctx.task(applicationPackagingTask, { ...{
+    problemType,
+    formulation: formulationResult,
+    circuit: circuitResult,
+    postProcessing: postProcessResult,
+    solution: decodingResult,
+    benchmark: benchmarkResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Optimization application complete for ${problemType}. Solution quality: ${benchmarkResult.approximationRatio}. Approve application?`,
     title: 'Optimization Application Complete',
     context: {
@@ -199,9 +251,15 @@ export async function process(inputs, ctx) {
         approximationRatio: benchmarkResult.approximationRatio
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -238,8 +296,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

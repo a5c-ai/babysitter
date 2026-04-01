@@ -1,0 +1,19 @@
+{
+  "name": "a5c-ai",
+  "owner": {
+    "name": "a5c.ai",
+    "email": "support@a5c.ai"
+  },
+  "metadata": {
+    "description": "Babysitter plugins for Cursor",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "babysitter",
+      "description": "Babysitter orchestration plugin for Cursor IDE and headless CLI mode",
+      "version": "0.1.0",
+      "source": "babysitter-cursor"
+    }
+  ]
+}

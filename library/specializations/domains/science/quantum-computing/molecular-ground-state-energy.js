@@ -45,25 +45,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Molecular Structure Setup');
 
-  const moleculeResult = await ctx.task(moleculeSetupTask, {
+  let moleculeResult = await ctx.task(moleculeSetupTask, {
     molecule,
     basis,
     freezeCore,
     activeSpace
   });
 
-  artifacts.push(...(moleculeResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      moleculeResult = await ctx.task(moleculeSetupTask, { ...{
+    molecule,
+    basis,
+    freezeCore,
+    activeSpace
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Molecule setup complete. Atoms: ${moleculeResult.atomCount}, Electrons: ${moleculeResult.electronCount}, Orbitals: ${moleculeResult.orbitalCount}. Proceed with Hamiltonian construction?`,
     title: 'Molecule Setup Review',
     context: {
       runId: ctx.runId,
       molecule: moleculeResult,
       files: (moleculeResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MOLECULAR HAMILTONIAN CONSTRUCTION
   // ============================================================================
@@ -86,23 +100,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Classical Reference Calculation');
 
-  const classicalResult = await ctx.task(classicalReferenceCalculationTask, {
+  let classicalResult = await ctx.task(classicalReferenceCalculationTask, {
     moleculeData: moleculeResult,
     methods: ['HF', 'CCSD', 'FCI']
   });
 
-  artifacts.push(...(classicalResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      classicalResult = await ctx.task(classicalReferenceCalculationTask, { ...{
+    moleculeData: moleculeResult,
+    methods: ['HF', 'CCSD', 'FCI']
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Classical references computed. HF: ${classicalResult.hfEnergy}, CCSD: ${classicalResult.ccsdEnergy}, FCI: ${classicalResult.fciEnergy || 'N/A'}. Proceed with quantum calculation?`,
     title: 'Classical Reference Review',
     context: {
       runId: ctx.runId,
       classical: classicalResult,
       files: (classicalResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: ANSATZ DESIGN FOR CHEMISTRY
   // ============================================================================
@@ -126,7 +152,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 5: ${algorithm} Execution`);
 
-  const quantumResult = await ctx.task(quantumChemistryExecutionTask, {
+  let quantumResult = await ctx.task(quantumChemistryExecutionTask, {
     algorithm,
     hamiltonian: hamiltonianResult.hamiltonian,
     ansatz: ansatzResult.ansatzCircuit,
@@ -137,18 +163,36 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(quantumResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      quantumResult = await ctx.task(quantumChemistryExecutionTask, { ...{
+    algorithm,
+    hamiltonian: hamiltonianResult.hamiltonian,
+    ansatz: ansatzResult.ansatzCircuit,
+    initialParameters: ansatzResult.initialParameters,
+    optimizer,
+    maxIterations,
+    referenceEnergy: classicalResult.hfEnergy,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `${algorithm} complete. Energy: ${quantumResult.energy} Ha, Iterations: ${quantumResult.iterations}. Review optimization trajectory?`,
     title: 'Quantum Calculation Review',
     context: {
       runId: ctx.runId,
       quantum: quantumResult,
       files: (quantumResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CHEMICAL ACCURACY ASSESSMENT
   // ============================================================================
@@ -183,7 +227,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Documentation and Reporting');
 
-  const reportResult = await ctx.task(molecularEnergyReportTask, {
+  let reportResult = await ctx.task(molecularEnergyReportTask, {
     molecule,
     basis,
     algorithm,
@@ -197,9 +241,24 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(molecularEnergyReportTask, { ...{
+    molecule,
+    basis,
+    algorithm,
+    moleculeResult,
+    hamiltonianResult,
+    classicalResult,
+    ansatzResult,
+    quantumResult,
+    accuracyResult,
+    propertiesResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Molecular calculation complete. Ground state energy: ${quantumResult.energy} Ha, Chemical accuracy: ${accuracyResult.achievedAccuracy ? 'Yes' : 'No'}. Approve results?`,
     title: 'Molecular Calculation Complete',
     context: {
@@ -211,9 +270,15 @@ export async function process(inputs, ctx) {
         errorFromFCI: accuracyResult.errorFromFCI
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -254,8 +319,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

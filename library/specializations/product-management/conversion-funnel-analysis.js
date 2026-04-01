@@ -71,13 +71,12 @@ export async function process(inputs, ctx) {
       recommendation: 'Define at least 2 steps for funnel analysis (e.g., start and goal)'
     };
   }
-
   // ============================================================================
   // PHASE 2: DATA COLLECTION AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Collecting and validating funnel data');
-  const dataCollection = await ctx.task(dataCollectionTask, {
+  let dataCollection = await ctx.task(dataCollectionTask, {
     productName,
     funnelName,
     funnelDefinition,
@@ -91,8 +90,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataCollection.artifacts);
 
   // Quality Gate: Ensure sufficient sample size
-  if (dataCollection.totalUsers < minimumSampleSize) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        dataCollection = await ctx.task(dataCollectionTask, { ...{
+    productName,
+    funnelName,
+    funnelDefinition,
+    segment,
+    timeframe,
+    analyticsDataSource,
+    minimumSampleSize,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Sample size (${dataCollection.totalUsers}) is below minimum (${minimumSampleSize}). This may affect analysis reliability. Continue with analysis or adjust parameters?`,
       title: 'Low Sample Size Warning',
       context: {
@@ -102,16 +114,22 @@ export async function process(inputs, ctx) {
         actualSampleSize: dataCollection.totalUsers,
         minimumRequired: minimumSampleSize,
         recommendation: 'Consider expanding timeframe or broadening segment'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: BASELINE CONVERSION ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Analyzing baseline conversion metrics');
-  const baselineAnalysis = await ctx.task(baselineAnalysisTask, {
+  let baselineAnalysis = await ctx.task(baselineAnalysisTask, {
     productName,
     funnelName,
     funnelDefinition,
@@ -123,8 +141,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...baselineAnalysis.artifacts);
 
-  // Breakpoint: Review baseline metrics
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      baselineAnalysis = await ctx.task(baselineAnalysisTask, { ...{
+    productName,
+    funnelName,
+    funnelDefinition,
+    dataCollection,
+    targetMetrics,
+    segment,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Baseline analysis complete for ${funnelName}. Overall conversion rate: ${(baselineAnalysis.overallConversionRate * 100).toFixed(2)}%. Target: ${targetMetrics.conversionRate ? (targetMetrics.conversionRate * 100).toFixed(2) + '%' : 'Not specified'}. Review baseline?`,
     title: 'Baseline Metrics Review',
     context: {
@@ -143,9 +173,15 @@ export async function process(inputs, ctx) {
         completedUsers: baselineAnalysis.completedUsers,
         meetsTarget: baselineAnalysis.meetsTarget
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: STEP-BY-STEP DROP-OFF ANALYSIS
   // ============================================================================
@@ -201,7 +237,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Identifying friction points and user pain areas');
-  const frictionIdentification = await ctx.task(frictionIdentificationTask, {
+  let frictionIdentification = await ctx.task(frictionIdentificationTask, {
     productName,
     funnelName,
     funnelDefinition,
@@ -213,8 +249,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...frictionIdentification.artifacts);
 
-  // Breakpoint: Review friction points
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      frictionIdentification = await ctx.task(frictionIdentificationTask, { ...{
+    productName,
+    funnelName,
+    funnelDefinition,
+    dropOffAnalysis,
+    segmentComparison,
+    timeAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Friction analysis complete. Found ${frictionIdentification.frictionPoints.length} friction areas. Highest impact: ${frictionIdentification.topFrictionPoint.step} (${(frictionIdentification.topFrictionPoint.dropOffRate * 100).toFixed(1)}% drop-off). Review friction points?`,
     title: 'Friction Points Review',
     context: {
@@ -232,9 +280,15 @@ export async function process(inputs, ctx) {
         topFrictionPoint: frictionIdentification.topFrictionPoint.step,
         topDropOffRate: frictionIdentification.topFrictionPoint.dropOffRate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: USER BEHAVIOR ANALYSIS
   // ============================================================================
@@ -326,13 +380,12 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 12: Skipping A/B test design (disabled or no hypotheses)');
   }
-
   // ============================================================================
   // PHASE 13: OPTIMIZATION RECOMMENDATIONS
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Creating prioritized optimization recommendations');
-  const optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, {
+  let optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, {
     productName,
     funnelName,
     funnelDefinition,
@@ -345,8 +398,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimizationRecommendations.artifacts);
 
-  // Breakpoint: Review optimization plan
-  await ctx.breakpoint({
+    let lastFeedback_phase13Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase13Review) {
+      optimizationRecommendations = await ctx.task(optimizationRecommendationsTask, { ...{
+    productName,
+    funnelName,
+    funnelDefinition,
+    baselineAnalysis,
+    rootCauseAnalysis,
+    hypothesisGeneration,
+    abTestDesign,
+    outputDir
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+    }
+  const phase13Review = await ctx.breakpoint({
     question: `Optimization recommendations ready. ${optimizationRecommendations.recommendations.length} recommendations prioritized. Estimated potential improvement: ${(optimizationRecommendations.estimatedImpact.conversionLift * 100).toFixed(1)}%. Review optimization plan?`,
     title: 'Optimization Plan Review',
     context: {
@@ -364,9 +430,15 @@ export async function process(inputs, ctx) {
         highPriorityCount: optimizationRecommendations.highPriorityCount,
         estimatedConversionLift: optimizationRecommendations.estimatedImpact.conversionLift
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase13Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase13Review.approved) break;
+    lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 14: IMPLEMENTATION ROADMAP
   // ============================================================================
@@ -425,7 +497,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 17: Validating analysis quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     funnelName,
     funnelDefinition,
@@ -444,8 +516,24 @@ export async function process(inputs, ctx) {
   const analysisScore = qualityValidation.overallScore;
   const qualityMet = analysisScore >= 80;
 
-  // Final Breakpoint: Approve analysis and recommendations
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    productName,
+    funnelName,
+    funnelDefinition,
+    dataCollection,
+    baselineAnalysis,
+    dropOffAnalysis,
+    frictionIdentification,
+    rootCauseAnalysis,
+    optimizationRecommendations,
+    minimumSampleSize,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Conversion Funnel Analysis complete for ${funnelName}. Quality score: ${analysisScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Current conversion: ${(baselineAnalysis.overallConversionRate * 100).toFixed(2)}%. Potential improvement: ${(optimizationRecommendations.estimatedImpact.conversionLift * 100).toFixed(1)}%. Approve and proceed with optimizations?`,
     title: 'Final Analysis Approval',
     context: {
@@ -467,9 +555,15 @@ export async function process(inputs, ctx) {
         implementationPhases: implementationRoadmap.phases.length,
         duration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -585,8 +679,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

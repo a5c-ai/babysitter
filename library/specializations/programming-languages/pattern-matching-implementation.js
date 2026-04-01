@@ -54,25 +54,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Pattern Types');
 
-  const patternTypes = await ctx.task(patternTypesTask, {
+  let patternTypes = await ctx.task(patternTypesTask, {
     languageName,
     patternStyle,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...patternTypes.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      patternTypes = await ctx.task(patternTypesTask, { ...{
+    languageName,
+    patternStyle,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Pattern types implemented: ${patternTypes.types.join(', ')}. Proceed with matching algorithm?`,
     title: 'Pattern Types Review',
     context: {
       runId: ctx.runId,
       types: patternTypes.types,
       files: patternTypes.artifacts.map(a => ({ path: a.path, format: a.format || 'rust' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: MATCHING ALGORITHM
   // ============================================================================
@@ -173,7 +187,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Documentation');
 
-  const documentation = await ctx.task(patternMatchingDocumentationTask, {
+  let documentation = await ctx.task(patternMatchingDocumentationTask, {
     languageName,
     patternStyle,
     integration,
@@ -181,9 +195,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(patternMatchingDocumentationTask, { ...{
+    languageName,
+    patternStyle,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pattern Matching Complete for ${languageName}! ${patternTypes.types.length} pattern types, exhaustiveness: ${exhaustiveness.enabled}. Review deliverables?`,
     title: 'Pattern Matching Complete',
     context: {
@@ -199,9 +222,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Pattern Matching' },
         { path: documentation.guidePath, format: 'markdown', label: 'Pattern Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -231,8 +260,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

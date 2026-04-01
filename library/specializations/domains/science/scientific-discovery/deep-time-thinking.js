@@ -126,7 +126,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing deep time analysis');
-  const synthesis = await ctx.task(deepTimeSynthesisTask, {
+  let synthesis = await ctx.task(deepTimeSynthesisTask, {
     temporalComprehension,
     rateAnalysis,
     cumulativeProjection,
@@ -142,8 +142,22 @@ export async function process(inputs, ctx) {
 
   const rigorMet = synthesis.rigorScore >= targetRigor;
 
-  // Breakpoint: Review deep time analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(deepTimeSynthesisTask, { ...{
+    temporalComprehension,
+    rateAnalysis,
+    cumulativeProjection,
+    nonLinearAssessment,
+    constraintIntegration,
+    secularTrends,
+    uncertaintyAnalysis,
+    targetRigor,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deep time analysis complete. Rigor: ${synthesis.rigorScore}/${targetRigor}. ${rigorMet ? 'Rigor target met!' : 'Additional constraints may be needed.'} Review analysis?`,
     title: 'Deep Time Thinking Results',
     context: {
@@ -162,9 +176,15 @@ export async function process(inputs, ctx) {
         rigorScore: synthesis.rigorScore,
         rigorMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -191,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

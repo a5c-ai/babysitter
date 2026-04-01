@@ -161,7 +161,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing production quality');
-  const qualityAssessment = await ctx.task(productionQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(productionQualityAssessmentTask, {
     briefAnalysis,
     contentDraft,
     editorialReview,
@@ -177,8 +177,21 @@ export async function process(inputs, ctx) {
   const productionScore = qualityAssessment.overallScore;
   const qualityMet = productionScore >= 80;
 
-  // Breakpoint: Review content production
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(productionQualityAssessmentTask, { ...{
+    briefAnalysis,
+    contentDraft,
+    editorialReview,
+    seoOptimization,
+    finalEdit,
+    approvalWorkflow,
+    publishingPrep,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Content production complete. Quality score: ${productionScore}/100. ${qualityMet ? 'Content meets quality standards!' : 'Content may need refinement.'} Review and approve?`,
     title: 'Content Production Review & Approval',
     context: {
@@ -198,9 +211,15 @@ export async function process(inputs, ctx) {
         seoScore: seoOptimization.score || 0,
         approvalStatus: approvalWorkflow.status || 'pending'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -242,8 +261,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

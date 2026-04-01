@@ -31,18 +31,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'risk-identification', result: identificationResult });
 
   // Step 2: Fraud Risk Assessment
-  const assessmentResult = await ctx.task(assessFraudRisksTask, {
+  let assessmentResult = await ctx.task(assessFraudRisksTask, {
     identifiedRisks: identificationResult,
     controlEnvironment: inputs.controlEnvironment
   });
   results.steps.push({ name: 'risk-assessment', result: assessmentResult });
 
-  // Breakpoint for risk assessment review
-  await ctx.breakpoint('assessment-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      assessmentResult = await ctx.task(assessFraudRisksTask, { ...{
+    identifiedRisks: identificationResult,
+    controlEnvironment: inputs.controlEnvironment
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('assessment-review', {
     message: 'Review fraud risk assessment before developing anti-fraud controls',
-    data: assessmentResult
-  });
-
+    data: assessmentResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Anti-Fraud Control Evaluation
   const controlEvalResult = await ctx.task(evaluateAntiFraudControlsTask, {
     fraudRisks: assessmentResult,
@@ -60,19 +73,32 @@ export async function process(inputs, ctx) {
   // Check if investigation is needed
   if (inputs.fraudIndicators && Object.keys(inputs.fraudIndicators).length > 0) {
     // Step 5: Investigation Planning
-    const investigationPlanResult = await ctx.task(planInvestigationTask, {
+    let investigationPlanResult = await ctx.task(planInvestigationTask, {
       fraudIndicators: inputs.fraudIndicators,
       organizationProfile: inputs.organizationProfile
     });
     results.steps.push({ name: 'investigation-planning', result: investigationPlanResult });
 
-    // Breakpoint for investigation approval
-    await ctx.breakpoint('investigation-approval', {
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        investigationPlanResult = await ctx.task(planInvestigationTask, { ...{
+      fraudIndicators: inputs.fraudIndicators,
+      organizationProfile: inputs.organizationProfile
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint('investigation-approval', {
       message: 'Review investigation plan and obtain authorization before proceeding',
-      data: investigationPlanResult
-    });
-
-    // Step 6: Investigation Execution
+      data: investigationPlanResult,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // Step 6: Investigation Execution
     const investigationResult = await ctx.task(executeInvestigationTask, {
       investigationPlan: investigationPlanResult,
       fraudIndicators: inputs.fraudIndicators
@@ -88,7 +114,6 @@ export async function process(inputs, ctx) {
 
     results.outputs.investigationReport = reportResult;
   }
-
   // Step 8: Monitoring and Continuous Improvement
   const monitoringResult = await ctx.task(establishMonitoringTask, {
     fraudRisks: assessmentResult,
@@ -105,8 +130,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const identifyFraudRisksTask = defineTask('identify-fraud-risks', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'fraud-examination' },

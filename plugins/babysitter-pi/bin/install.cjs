@@ -50,7 +50,7 @@ function getPluginRoot(args) {
   const pluginsDir = args.harness === 'oh-my-pi'
     ? path.join(base, '.omp', 'plugins')
     : path.join(base, '.pi', 'plugins');
-  return path.join(pluginsDir, 'babysitter-pi');
+  return path.join(pluginsDir, 'babysitter');
 }
 
 function copyRecursive(src, dest) {
@@ -117,7 +117,7 @@ function ensureGlobalProcessLibrary() {
       ['process-library:active', '--state-dir', getGlobalStateDir(), '--json'],
     ),
   );
-  console.log(`[babysitter-pi]   process library: ${active.binding?.dir}`);
+  console.log(`[babysitter]   process library: ${active.binding?.dir}`);
 }
 
 function installEntry(pluginRoot, entry) {
@@ -128,13 +128,13 @@ function installEntry(pluginRoot, entry) {
     return;
   }
   copyRecursive(src, dest);
-  console.log(`[babysitter-pi]   ${entry.source}${fs.statSync(src).isDirectory() ? '/' : ''}`);
+  console.log(`[babysitter]   ${entry.source}${fs.statSync(src).isDirectory() ? '/' : ''}`);
 }
 
 function main() {
   const args = parseArgs(process.argv);
   const pluginRoot = getPluginRoot(args);
-  console.log(`[babysitter-pi] Installing ${args.harness} plugin to ${pluginRoot}`);
+  console.log(`[babysitter] Installing ${args.harness} plugin to ${pluginRoot}`);
 
   try {
     fs.rmSync(pluginRoot, { recursive: true, force: true });
@@ -144,9 +144,9 @@ function main() {
     }
     fs.mkdirSync(path.join(pluginRoot, 'state'), { recursive: true });
     ensureGlobalProcessLibrary();
-    console.log('[babysitter-pi] Installation complete!');
+    console.log('[babysitter] Installation complete!');
   } catch (err) {
-    console.error(`[babysitter-pi] Failed to install plugin files: ${err.message}`);
+    console.error(`[babysitter] Failed to install plugin files: ${err.message}`);
     process.exitCode = 1;
   }
 }

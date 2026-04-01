@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const edgeFunctions = await ctx.task(edgeFunctionsTask, { projectName, outputDir });
   artifacts.push(...edgeFunctions.artifacts);
 
-  const domainSetup = await ctx.task(domainSetupTask, { projectName, outputDir });
-  artifacts.push(...domainSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Vercel deployment complete for ${projectName}. Approve?`, title: 'Vercel Review', context: { runId: ctx.runId, config: vercelSetup.config } });
-
+  let domainSetup = await ctx.task(domainSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      domainSetup = await ctx.task(domainSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Vercel deployment complete for ${projectName}. Approve?`, title: 'Vercel Review', context: { runId: ctx.runId, config: vercelSetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

@@ -46,17 +46,25 @@ export async function process(inputs, ctx) {
       issues: plantModeling.validationIssues
     };
   }
-
   // Phase 2: Define Control Objectives and Performance Specifications
-  const objectivesDefinition = await ctx.task(objectivesDefinitionTask, {
+  let objectivesDefinition = await ctx.task(objectivesDefinitionTask, {
     systemName,
     plantModel: plantModeling.model,
     controlObjectives,
     constraints
   });
 
-  // Breakpoint: Review objectives
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      objectivesDefinition = await ctx.task(objectivesDefinitionTask, { ...{
+    systemName,
+    plantModel: plantModeling.model,
+    controlObjectives,
+    constraints
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review control objectives for ${systemName}. Performance specs defined. Proceed with open-loop analysis?`,
     title: 'Objectives Review',
     context: {
@@ -68,9 +76,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: objectivesDefinition
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Analyze Open-Loop System Characteristics
   const openLoopAnalysis = await ctx.task(openLoopAnalysisTask, {
     systemName,
@@ -78,7 +92,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Design Controller Structure and Parameters
-  const controllerDesign = await ctx.task(controllerDesignTask, {
+  let controllerDesign = await ctx.task(controllerDesignTask, {
     systemName,
     plantModel: plantModeling.model,
     openLoopAnalysis,
@@ -86,8 +100,18 @@ export async function process(inputs, ctx) {
     constraints
   });
 
-  // Breakpoint: Review controller design
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      controllerDesign = await ctx.task(controllerDesignTask, { ...{
+    systemName,
+    plantModel: plantModeling.model,
+    openLoopAnalysis,
+    objectives: objectivesDefinition.specifications,
+    constraints
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review controller design for ${systemName}. Type: ${controllerDesign.controllerType}. Proceed with simulation?`,
     title: 'Controller Design Review',
     context: {
@@ -98,9 +122,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: controllerDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Simulate Closed-Loop Performance
   const closedLoopSimulation = await ctx.task(closedLoopSimulationTask, {
     systemName,
@@ -110,7 +140,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Analyze Stability Margins
-  const stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
+  let stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
     systemName,
     plantModel: plantModeling.model,
     controller: controllerDesign.controller,
@@ -118,17 +148,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: System must be stable with adequate margins
-  if (!stabilityAnalysis.stable || stabilityAnalysis.marginsInadequate) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        stabilityAnalysis = await ctx.task(stabilityAnalysisTask, { ...{
+    systemName,
+    plantModel: plantModeling.model,
+    controller: controllerDesign.controller,
+    closedLoopResults: closedLoopSimulation.results
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Stability analysis: GM=${stabilityAnalysis.gainMargin}, PM=${stabilityAnalysis.phaseMargin}. ${stabilityAnalysis.stable ? 'Stable but' : 'Unstable!'} margins ${stabilityAnalysis.marginsInadequate ? 'inadequate' : 'adequate'}. Redesign?`,
       title: 'Stability Concern',
       context: {
         runId: ctx.runId,
         stability: stabilityAnalysis,
         recommendations: stabilityAnalysis.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Tune Controller Parameters
   const controllerTuning = await ctx.task(controllerTuningTask, {
@@ -140,15 +185,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validate with Hardware-in-the-Loop Testing
-  const hilValidation = await ctx.task(hilValidationTask, {
+  let hilValidation = await ctx.task(hilValidationTask, {
     systemName,
     tunedController: controllerTuning.tunedController,
     plantModel: plantModeling.model,
     objectives: objectivesDefinition.specifications
   });
 
-  // Final Breakpoint: Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      hilValidation = await ctx.task(hilValidationTask, { ...{
+    systemName,
+    tunedController: controllerTuning.tunedController,
+    plantModel: plantModeling.model,
+    objectives: objectivesDefinition.specifications
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Control system design complete for ${systemName}. Performance meets specs: ${hilValidation.meetsSpecs}. Approve for deployment?`,
     title: 'Design Approval',
     context: {
@@ -160,9 +214,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/controller-params.json`, format: 'json', content: controllerTuning.tunedController },
         { path: `artifacts/control-report.md`, format: 'markdown', content: hilValidation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -182,8 +242,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const plantModelingTask = defineTask('plant-modeling', (args, taskCtx) => ({
   kind: 'agent',

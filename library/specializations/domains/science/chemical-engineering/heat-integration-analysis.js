@@ -105,7 +105,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Evaluate Heat Integration vs. Operability Trade-offs
   ctx.log('info', 'Evaluating operability trade-offs');
-  const operabilityResult = await ctx.task(operabilityAnalysisTask, {
+  let operabilityResult = await ctx.task(operabilityAnalysisTask, {
     processName,
     henAbovePinch: henAbovePinchResult.henDesign,
     henBelowPinch: henBelowPinchResult.henDesign,
@@ -115,8 +115,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...operabilityResult.artifacts);
 
-  // Breakpoint: Review pinch analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      operabilityResult = await ctx.task(operabilityAnalysisTask, { ...{
+    processName,
+    henAbovePinch: henAbovePinchResult.henDesign,
+    henBelowPinch: henBelowPinchResult.henDesign,
+    pinchTemperature: pinchAnalysisResult.pinchTemperature,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pinch analysis complete for ${processName}. Pinch temperature: ${pinchAnalysisResult.pinchTemperature}C. Minimum hot utility: ${pinchAnalysisResult.minimumHotUtility} kW. Minimum cold utility: ${pinchAnalysisResult.minimumColdUtility} kW. Review HEN design?`,
     title: 'Heat Integration Analysis Results',
     context: {
@@ -129,9 +139,15 @@ export async function process(inputs, ctx) {
         exchangerCount: henAbovePinchResult.exchangerCount + henBelowPinchResult.exchangerCount,
         utilityReduction: pinchAnalysisResult.utilityReductionPercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Process Modification Opportunities
   ctx.log('info', 'Identifying process modification opportunities');
   const processModificationResult = await ctx.task(processModificationTask, {
@@ -186,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Stream Data Extraction
+  // Task 1: Stream Data Extraction
 export const streamDataExtractionTask = defineTask('stream-data-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Extract and validate stream data for pinch analysis',

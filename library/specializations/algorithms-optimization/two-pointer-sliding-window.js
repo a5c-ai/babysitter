@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const solution = await ctx.task(techniqueSolutionTask, { analysis, language, outputDir });
   artifacts.push(...solution.artifacts);
 
-  const testing = await ctx.task(techniqueTestingTask, { solution, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(techniqueTestingTask, { solution, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(techniqueTestingTask, { ...{ solution, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Solution using ${analysis.technique} technique complete. Complexity: O(${solution.complexity}). Review?`,
     title: 'Two-Pointer/Sliding Window Complete',
-    context: { runId: ctx.runId, technique: analysis.technique, complexity: solution.complexity }
-  });
-
+    context: { runId: ctx.runId, technique: analysis.technique, complexity: solution.complexity },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     technique: analysis.technique,

@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Implementing post-generation processing');
 
-  const postProcessConfig = await ctx.task(postProcessingTask, {
+  let postProcessConfig = await ctx.task(postProcessingTask, {
     projectName,
     targetLanguages,
     postProcessing,
@@ -106,8 +106,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...postProcessConfig.artifacts);
 
-  // Quality Gate: Pipeline Configuration Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      postProcessConfig = await ctx.task(postProcessingTask, { ...{
+    projectName,
+    targetLanguages,
+    postProcessing,
+    templates,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Code generation pipeline configured for ${projectName}. Languages: ${targetLanguages.length}, Generator: ${generatorTool}. Approve configuration?`,
     title: 'Code Generation Pipeline Review',
     context: {
@@ -116,9 +126,15 @@ export async function process(inputs, ctx) {
       generatorTool,
       targetLanguages,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CI/CD INTEGRATION
   // ============================================================================
@@ -219,8 +235,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

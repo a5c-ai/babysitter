@@ -32,6 +32,8 @@ const pluginManifests = [
 ];
 const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
 const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
+const githubPackageManifestPath = "plugins/babysitter-github/package.json";
+const cursorPackageManifestPath = "plugins/babysitter-cursor/package.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -46,6 +48,18 @@ const codexPackageManifest = existsSync(codexPackageManifestPath)
   ? {
       path: codexPackageManifestPath,
       data: JSON.parse(readFileSync(codexPackageManifestPath, "utf8")),
+    }
+  : null;
+const githubPackageManifest = existsSync(githubPackageManifestPath)
+  ? {
+      path: githubPackageManifestPath,
+      data: JSON.parse(readFileSync(githubPackageManifestPath, "utf8")),
+    }
+  : null;
+const cursorPackageManifest = existsSync(cursorPackageManifestPath)
+  ? {
+      path: cursorPackageManifestPath,
+      data: JSON.parse(readFileSync(cursorPackageManifestPath, "utf8")),
     }
   : null;
 
@@ -101,14 +115,44 @@ if (codexPackageManifest) {
   }
 }
 
+// Update GitHub package manifest - keep its own version stream, bumped by policy.
+if (githubPackageManifest) {
+  const currentGithubVersion = githubPackageManifest.data.version;
+  const newGithubVersion = bumpVersion(currentGithubVersion, bumpTarget);
+  githubPackageManifest.data.version = newGithubVersion;
+  writeFileSync(
+    githubPackageManifest.path,
+    `${JSON.stringify(githubPackageManifest.data, null, 2)}\n`,
+  );
+}
+
+// Update Cursor package manifest - keep its own version stream, bumped by policy.
+if (cursorPackageManifest) {
+  const currentCursorVersion = cursorPackageManifest.data.version;
+  const newCursorVersion = bumpVersion(currentCursorVersion, bumpTarget);
+  cursorPackageManifest.data.version = newCursorVersion;
+  writeFileSync(
+    cursorPackageManifest.path,
+    `${JSON.stringify(cursorPackageManifest.data, null, 2)}\n`,
+  );
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
-const versionsPath = "plugins/babysitter/versions.json";
-const versionsData = existsSync(versionsPath)
-  ? JSON.parse(readFileSync(versionsPath, "utf8"))
-  : {};
-versionsData.sdkVersion = newVersion;
-writeFileSync(versionsPath, `${JSON.stringify(versionsData, null, 2)}\n`);
+for (const versionsPath of [
+  "plugins/babysitter/versions.json",
+  "plugins/babysitter-codex/versions.json",
+  "plugins/babysitter-gemini/versions.json",
+  "plugins/babysitter-pi/versions.json",
+  "plugins/babysitter-github/versions.json",
+  "plugins/babysitter-cursor/versions.json",
+]) {
+  const versionsData = existsSync(versionsPath)
+    ? JSON.parse(readFileSync(versionsPath, "utf8"))
+    : {};
+  versionsData.sdkVersion = newVersion;
+  writeFileSync(versionsPath, `${JSON.stringify(versionsData, null, 2)}\n`);
+}
 
 // Update marketplace.json plugin entry - bump from its current version
 const marketplacePath = ".claude-plugin/marketplace.json";

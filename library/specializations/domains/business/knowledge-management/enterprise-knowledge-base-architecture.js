@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing knowledge base requirements');
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     organizationalContext,
     contentTypes,
     userPersonas,
@@ -47,8 +47,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...requirementsAnalysis.artifacts);
 
-  // Breakpoint: Review requirements
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    organizationalContext,
+    contentTypes,
+    userPersonas,
+    existingSystems,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Analyzed requirements for ${userPersonas.length} user personas and ${contentTypes.length} content types. Review?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -64,9 +75,15 @@ export async function process(inputs, ctx) {
         contentTypes: contentTypes.length,
         keyRequirements: requirementsAnalysis.keyRequirements.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: INFORMATION ARCHITECTURE DESIGN
   // ============================================================================
@@ -86,7 +103,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Developing taxonomy and classification');
-  const taxonomyDevelopment = await ctx.task(taxonomyDevelopmentTask, {
+  let taxonomyDevelopment = await ctx.task(taxonomyDevelopmentTask, {
     informationArchitecture: informationArchitecture.architecture,
     contentTypes,
     organizationalContext,
@@ -95,8 +112,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...taxonomyDevelopment.artifacts);
 
-  // Breakpoint: Review taxonomy
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      taxonomyDevelopment = await ctx.task(taxonomyDevelopmentTask, { ...{
+    informationArchitecture: informationArchitecture.architecture,
+    contentTypes,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Developed taxonomy with ${taxonomyDevelopment.topLevelCategories.length} top-level categories. Review?`,
     title: 'Taxonomy Review',
     context: {
@@ -112,9 +138,15 @@ export async function process(inputs, ctx) {
         totalCategories: taxonomyDevelopment.totalCategories,
         taxonomyDepth: taxonomyDevelopment.maxDepth
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: METADATA SCHEMA DESIGN
   // ============================================================================
@@ -192,7 +224,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing architecture quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     requirementsAnalysis,
     informationArchitecture,
     taxonomyDevelopment,
@@ -221,8 +253,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    requirementsAnalysis,
+    informationArchitecture,
+    taxonomyDevelopment,
+    navigationDesign,
+    searchStrategy,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize architecture?`,
       title: 'Final Approval Gate',
       context: {
@@ -237,9 +280,15 @@ export async function process(inputs, ctx) {
           approved: reviewResult.approved,
           qualityScore: qualityAssessment.overallScore
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -270,8 +319,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

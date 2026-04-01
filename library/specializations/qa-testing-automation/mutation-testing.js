@@ -208,7 +208,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 6: Skipped (no auto-fix recommendations)');
   }
-
   // ============================================================================
   // PHASE 7: MUTATION SCORE THRESHOLD CONFIGURATION
   // ============================================================================
@@ -266,7 +265,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 8: CI/CD Integration skipped (integrateCICD=false)');
   }
-
   // ============================================================================
   // PHASE 9: MUTATION SCORE DASHBOARD CREATION (OPTIONAL)
   // ============================================================================
@@ -299,7 +297,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 9: Dashboard creation skipped (generateDashboard=false)');
   }
-
   // ============================================================================
   // PHASE 10: FINAL VALIDATION AND DOCUMENTATION
   // ============================================================================
@@ -358,8 +355,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

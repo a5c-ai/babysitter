@@ -62,16 +62,24 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Non-Destructive Examination
   ctx.log('info', 'Phase 3: Performing non-destructive examination');
-  const ndeExamination = await ctx.task(ndeExaminationTask, {
+  let ndeExamination = await ctx.task(ndeExaminationTask, {
     caseId,
     component,
     visualExamination,
     outputDir
   });
 
-  artifacts.push(...ndeExamination.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      ndeExamination = await ctx.task(ndeExaminationTask, { ...{
+    caseId,
+    component,
+    visualExamination,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Initial examination complete for ${caseId}. Preliminary failure type: ${visualExamination.preliminaryFailureType}. Proceed with destructive analysis?`,
     title: 'Initial Examination Review',
     context: {
@@ -82,9 +90,15 @@ export async function process(inputs, ctx) {
         ndeFindings: ndeExamination.findings
       },
       files: visualExamination.artifacts.map(a => ({ path: a.path, format: a.format || 'image' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Fractographic Examination
   ctx.log('info', 'Phase 4: Conducting fractographic examination');
   const fractography = await ctx.task(faFractographyTask, {
@@ -143,7 +157,7 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Root Cause Determination
   ctx.log('info', 'Phase 9: Determining root cause');
-  const rootCauseDetermination = await ctx.task(rootCauseDeterminationTask, {
+  let rootCauseDetermination = await ctx.task(rootCauseDeterminationTask, {
     caseId,
     visualExamination,
     fractography,
@@ -154,9 +168,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...rootCauseDetermination.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      rootCauseDetermination = await ctx.task(rootCauseDeterminationTask, { ...{
+    caseId,
+    visualExamination,
+    fractography,
+    metallography,
+    chemicalAnalysis,
+    mechanicalVerification,
+    serviceHistoryReview,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Root cause analysis complete for ${caseId}. Root cause: ${rootCauseDetermination.rootCause}. Confidence: ${rootCauseDetermination.confidence}. Review findings?`,
     title: 'Root Cause Determination Review',
     context: {
@@ -168,9 +194,15 @@ export async function process(inputs, ctx) {
         confidence: rootCauseDetermination.confidence
       },
       files: rootCauseDetermination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Recommendations Development
   ctx.log('info', 'Phase 10: Developing recommendations');
   const recommendations = await ctx.task(faRecommendationsTask, {
@@ -236,8 +268,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Evidence Collection
+  // Task 1: Evidence Collection
 export const evidenceCollectionTask = defineTask('fa-evidence-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Evidence Collection - ${args.caseId}`,

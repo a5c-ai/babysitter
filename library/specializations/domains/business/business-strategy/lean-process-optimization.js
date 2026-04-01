@@ -104,8 +104,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const currentStateMapTask = defineTask('current-state-map', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Map current state value stream',

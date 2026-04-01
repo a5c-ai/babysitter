@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const scriptDocumentation = await ctx.task(scriptDocumentationTask, { projectName, shellType, outputDir });
   artifacts.push(...scriptDocumentation.artifacts);
 
-  const installationScripts = await ctx.task(installationScriptsTask, { projectName, targetPlatforms, outputDir });
-  artifacts.push(...installationScripts.artifacts);
-
-  await ctx.breakpoint({
+  let installationScripts = await ctx.task(installationScriptsTask, { projectName, targetPlatforms, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      installationScripts = await ctx.task(installationScriptsTask, { ...{ projectName, targetPlatforms, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Shell Script Development complete for ${targetPlatforms.length} platforms. Review and approve?`,
     title: 'Shell Script Development Complete',
-    context: { runId: ctx.runId, summary: { projectName, shellType, targetPlatforms } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, shellType, targetPlatforms } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

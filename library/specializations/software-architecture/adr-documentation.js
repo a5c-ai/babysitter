@@ -51,7 +51,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: RESEARCH ALTERNATIVES
   // ============================================================================
@@ -105,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Evaluating ADR quality');
-  const qualityScore = await ctx.task(adrQualityScoringTask, {
+  let qualityScore = await ctx.task(adrQualityScoringTask, {
     adrNumber: assignedAdrNumber,
     adrDocument: adrDraft.adrDocument,
     decision: decisionAnalysis.refinedDecision,
@@ -117,8 +116,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 80;
 
-  // Breakpoint: Review draft ADR
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      qualityScore = await ctx.task(adrQualityScoringTask, { ...{
+    adrNumber: assignedAdrNumber,
+    adrDocument: adrDraft.adrDocument,
+    decision: decisionAnalysis.refinedDecision,
+    alternatives: alternativesResearch.alternatives,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `ADR ${assignedAdrNumber} draft complete. Quality score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review draft?`,
     title: 'ADR Draft Review',
     context: {
@@ -137,9 +146,15 @@ export async function process(inputs, ctx) {
         alternativesConsidered: alternativesResearch.alternatives.length,
         consequencesDocumented: alternativesResearch.consequences.positive.length + alternativesResearch.consequences.negative.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: REVIEW AND APPROVAL
   // ============================================================================
@@ -159,8 +174,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityScore = await ctx.task(adrQualityScoringTask, { ...{
+    adrNumber: assignedAdrNumber,
+    adrDocument: adrDraft.adrDocument,
+    decision: decisionAnalysis.refinedDecision,
+    alternatives: alternativesResearch.alternatives,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `ADR ${assignedAdrNumber} review complete. ${reviewResult.approved ? 'Approved by reviewers!' : 'Requires revisions.'} Proceed with publication?`,
       title: 'ADR Approval Gate',
       context: {
@@ -178,10 +203,16 @@ export async function process(inputs, ctx) {
           feedbackItems: reviewResult.feedback.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-
-    // If revisions needed, incorporate feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If revisions needed, incorporate feedback
     if (reviewResult.revisionsNeeded && reviewResult.approved) {
       ctx.log('info', 'Incorporating review feedback');
       const revision = await ctx.task(adrRevisionTask, {
@@ -194,7 +225,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...revision.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 7: PUBLISH ADR
   // ============================================================================
@@ -256,8 +286,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

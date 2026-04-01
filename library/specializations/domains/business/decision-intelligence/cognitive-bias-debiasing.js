@@ -50,24 +50,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Specific Bias Identification
-  const biasIdentification = await ctx.task(biasIdentificationTask, {
+  let biasIdentification = await ctx.task(biasIdentificationTask, {
     projectName,
     biasVulnerability,
     historicalPatterns,
     decisionContext
   });
 
-  // Breakpoint: Review bias assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      biasIdentification = await ctx.task(biasIdentificationTask, { ...{
+    projectName,
+    biasVulnerability,
+    historicalPatterns,
+    decisionContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review cognitive bias assessment for ${projectName}. Are the identified biases accurate?`,
     title: 'Bias Assessment Review',
     context: {
       runId: ctx.runId,
       projectName,
       biasCount: biasIdentification.identifiedBiases?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Mitigation Strategy Development
   const mitigationStrategies = await ctx.task(mitigationStrategiesTask, {
     projectName,
@@ -119,8 +134,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const environmentAssessmentTask = defineTask('environment-assessment', (args, taskCtx) => ({
   kind: 'agent',

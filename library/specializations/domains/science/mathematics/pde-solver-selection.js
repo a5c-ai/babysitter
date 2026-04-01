@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Classify PDE Type and Characteristics
-  const pdeClassification = await ctx.task(pdeClassificationTask, {
+  let pdeClassification = await ctx.task(pdeClassificationTask, {
     pdeDescription,
     pdeEquation,
     boundaryConditions
@@ -48,9 +48,16 @@ export async function process(inputs, ctx) {
       recommendedMethods: null
     };
   }
-
-  // Breakpoint: Review PDE classification
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      pdeClassification = await ctx.task(pdeClassificationTask, { ...{
+    pdeDescription,
+    pdeEquation,
+    boundaryConditions
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `PDE classified as ${pdeClassification.type}. Is this correct?`,
     title: 'PDE Classification Review',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: pdeClassification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Assess Boundary Condition Types
   const boundaryAnalysis = await ctx.task(boundaryAnalysisTask, {
     pdeClassification,
@@ -89,7 +102,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Estimate Computational Requirements
-  const computationalEstimate = await ctx.task(computationalEstimateTask, {
+  let computationalEstimate = await ctx.task(computationalEstimateTask, {
     pdeClassification,
     discretizationRecommendation,
     solverSelection,
@@ -97,8 +110,18 @@ export async function process(inputs, ctx) {
     accuracyRequirements
   });
 
-  // Final Breakpoint: Selection Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      computationalEstimate = await ctx.task(computationalEstimateTask, { ...{
+    pdeClassification,
+    discretizationRecommendation,
+    solverSelection,
+    domain,
+    accuracyRequirements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PDE solver selection complete. Primary recommendation: ${solverSelection.primaryRecommendation}. Review?`,
     title: 'Solver Selection Complete',
     context: {
@@ -110,9 +133,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/solver-selection.json`, format: 'json', content: { discretizationRecommendation, solverSelection } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     pdeDescription,
@@ -139,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const pdeClassificationTask = defineTask('pde-classification', (args, taskCtx) => ({
   kind: 'agent',

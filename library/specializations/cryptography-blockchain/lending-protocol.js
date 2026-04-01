@@ -69,7 +69,6 @@ export async function process(inputs, ctx) {
     const flashLoans = await ctx.task(flashLoanTask, { projectName, outputDir });
     artifacts.push(...flashLoans.artifacts);
   }
-
   // Phase 9: Testing
   const testingSuite = await ctx.task(testingSuiteTask, { projectName, framework, outputDir });
   artifacts.push(...testingSuite.artifacts);

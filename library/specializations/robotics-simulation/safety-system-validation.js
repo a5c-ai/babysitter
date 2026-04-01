@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const safetyPLCalculation = await ctx.task(safetyPLCalculationTask, { robotName, hardwareSafetyTesting, softwareSafetyTesting, certificationLevel, outputDir });
   artifacts.push(...safetyPLCalculation.artifacts);
 
-  const certificationDocumentation = await ctx.task(certificationDocumentationTask, { robotName, safetyPLCalculation, safetyStandard, outputDir });
-  artifacts.push(...certificationDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let certificationDocumentation = await ctx.task(certificationDocumentationTask, { robotName, safetyPLCalculation, safetyStandard, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      certificationDocumentation = await ctx.task(certificationDocumentationTask, { ...{ robotName, safetyPLCalculation, safetyStandard, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Safety Validation Complete for ${robotName}. Achieved PL: ${safetyPLCalculation.achievedPL}, Target: ${certificationLevel}. Ready for certification?`,
     title: 'Safety Validation Complete',
-    context: { runId: ctx.runId, achievedPL: safetyPLCalculation.achievedPL, targetPL: certificationLevel }
-  });
-
+    context: { runId: ctx.runId, achievedPL: safetyPLCalculation.achievedPL, targetPL: certificationLevel },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: safetyPLCalculation.achievedPL >= certificationLevel,
     robotName,

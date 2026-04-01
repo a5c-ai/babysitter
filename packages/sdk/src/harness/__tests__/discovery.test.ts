@@ -103,6 +103,8 @@ const CALLER_ENV_KEYS = [
   "GEMINI_SESSION_ID",
   "GEMINI_PROJECT_DIR",
   "GEMINI_CWD",
+  "CURSOR_PROJECT_DIR",
+  "CURSOR_VERSION",
 ];
 
 let savedEnv: Record<string, string | undefined>;
@@ -131,8 +133,8 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("KNOWN_HARNESSES", () => {
-  it("contains exactly 7 harness specs", () => {
-    expect(KNOWN_HARNESSES).toHaveLength(7);
+  it("contains exactly 8 harness specs", () => {
+    expect(KNOWN_HARNESSES).toHaveLength(8);
   });
 
   it("includes all expected harness names", () => {
@@ -144,6 +146,7 @@ describe("KNOWN_HARNESSES", () => {
     expect(names).toContain("gemini-cli");
     expect(names).toContain("cursor");
     expect(names).toContain("opencode");
+    expect(names).toContain("github-copilot");
   });
 });
 
@@ -237,12 +240,12 @@ describe("checkCliAvailable", () => {
 // ---------------------------------------------------------------------------
 
 describe("discoverHarnesses", () => {
-  it("returns results for all 7 known harnesses", async () => {
+  it("returns results for all 8 known harnesses", async () => {
     stubExecFile({});
 
     const results = await discoverHarnesses();
 
-    expect(results).toHaveLength(7);
+    expect(results).toHaveLength(8);
     const names = results.map((r) => r.name);
     expect(names).toContain("claude-code");
     expect(names).toContain("codex");
@@ -473,8 +476,29 @@ describe("detectCallerHarness", () => {
     expect(caller!.capabilities).toContain("headless-prompt");
   });
 
-  it("cursor is never detected as caller (no env vars)", () => {
-    // Set unrelated env var to confirm it doesn't accidentally match
+  it("detects cursor via CURSOR_PROJECT_DIR", () => {
+    process.env.CURSOR_PROJECT_DIR = "/home/user/project";
+
+    const caller = detectCallerHarness();
+
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("cursor");
+    expect(caller!.matchedEnvVars).toContain("CURSOR_PROJECT_DIR");
+  });
+
+  it("detects cursor via CURSOR_VERSION", () => {
+    process.env.CURSOR_VERSION = "1.7.0";
+
+    const caller = detectCallerHarness();
+
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("cursor");
+    expect(caller!.matchedEnvVars).toContain("CURSOR_VERSION");
+  });
+
+  it("does not detect cursor from unrelated CURSOR_SESSION_ID env var", () => {
+    // CURSOR_SESSION_ID is not in callerEnvVars — only CURSOR_PROJECT_DIR
+    // and CURSOR_VERSION are used for detection
     process.env.CURSOR_SESSION_ID = "cursor-123";
 
     const caller = detectCallerHarness();

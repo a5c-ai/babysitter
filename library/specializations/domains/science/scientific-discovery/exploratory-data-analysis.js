@@ -33,15 +33,24 @@ export async function process(inputs, ctx) {
   const univariateAnalysis = await ctx.task(univariateAnalysisTask, { dataset, variables, dataOverview, outputDir });
   artifacts.push(...univariateAnalysis.artifacts);
 
-  const bivariateAnalysis = await ctx.task(bivariateAnalysisTask, { dataset, variables, univariateAnalysis, outputDir });
-  artifacts.push(...bivariateAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let bivariateAnalysis = await ctx.task(bivariateAnalysisTask, { dataset, variables, univariateAnalysis, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      bivariateAnalysis = await ctx.task(bivariateAnalysisTask, { ...{ dataset, variables, univariateAnalysis, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Univariate and bivariate analysis complete. ${univariateAnalysis.distributions?.length || 0} distributions, ${bivariateAnalysis.relationships?.length || 0} relationships. Continue to pattern discovery?`,
     title: 'EDA Progress Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { distributions: univariateAnalysis.distributions?.length || 0, relationships: bivariateAnalysis.relationships?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { distributions: univariateAnalysis.distributions?.length || 0, relationships: bivariateAnalysis.relationships?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const multivariateAnalysis = await ctx.task(multivariateAnalysisTask, { dataset, variables, bivariateAnalysis, outputDir });
   artifacts.push(...multivariateAnalysis.artifacts);
 
@@ -57,15 +66,24 @@ export async function process(inputs, ctx) {
   const visualizationSuite = await ctx.task(visualizationSuiteTask, { univariateAnalysis, bivariateAnalysis, multivariateAnalysis, patterns: patternDiscovery.patterns, outputDir });
   artifacts.push(...visualizationSuite.artifacts);
 
-  const qualityScore = await ctx.task(edaQualityScoringTask, { dataOverview, univariateAnalysis, bivariateAnalysis, patternDiscovery, hypothesisGeneration, minimumCoverageScore, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(edaQualityScoringTask, { dataOverview, univariateAnalysis, bivariateAnalysis, patternDiscovery, hypothesisGeneration, minimumCoverageScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(edaQualityScoringTask, { ...{ dataOverview, univariateAnalysis, bivariateAnalysis, patternDiscovery, hypothesisGeneration, minimumCoverageScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `EDA complete. ${patternDiscovery.patterns?.length || 0} patterns, ${hypothesisGeneration.hypotheses?.length || 0} hypotheses. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'EDA Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { patterns: patternDiscovery.patterns?.length || 0, hypotheses: hypothesisGeneration.hypotheses?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { patterns: patternDiscovery.patterns?.length || 0, hypotheses: hypothesisGeneration.hypotheses?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, dataset: dataset.path, summary: dataOverview, patterns: patternDiscovery.patterns,
     visualizations: visualizationSuite.visualizations, hypotheses: hypothesisGeneration.hypotheses,

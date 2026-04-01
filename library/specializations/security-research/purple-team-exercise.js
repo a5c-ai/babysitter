@@ -135,7 +135,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating purple team report');
 
-  const report = await ctx.task(purpleTeamReportTask, {
+  let report = await ctx.task(purpleTeamReportTask, {
     projectName,
     attackSimulation,
     detectionValidation,
@@ -144,9 +144,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(purpleTeamReportTask, { ...{
+    projectName,
+    attackSimulation,
+    detectionValidation,
+    responseTesting,
+    improvements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Purple team exercise complete. Detection rate: ${detectionValidation.detectionRate}%. ${controlGaps.length} gaps identified. Review findings?`,
     title: 'Purple Team Exercise Complete',
     context: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
         controlGaps: controlGaps.length
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -185,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

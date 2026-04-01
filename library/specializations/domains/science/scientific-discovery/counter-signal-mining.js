@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Identify Failures and Unexpected Results
   ctx.log('info', 'Identifying failures and unexpected results');
-  const failureDetection = await ctx.task(detectFailuresTask, {
+  let failureDetection = await ctx.task(detectFailuresTask, {
     dataset,
     baseline,
     domain
@@ -60,9 +60,16 @@ export async function process(inputs, ctx) {
   counterSignals.push(...failureDetection.failures.map(f => ({
     ...f,
     type: 'failure'
-  })));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      failureDetection = await ctx.task(detectFailuresTask, { ...{
+    dataset,
+    baseline,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Identified ${counterSignals.length} counter-signals. Review before mining?`,
     title: 'Counter-Signal Mining - Detection Complete',
     context: {
@@ -71,9 +78,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/baseline.json', format: 'json' },
         { path: 'artifacts/counter-signals.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Classify Counter-Signals
   ctx.log('info', 'Classifying counter-signals');
   const classification = await ctx.task(classifyCounterSignalsTask, {

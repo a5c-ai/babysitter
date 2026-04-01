@@ -67,20 +67,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'internal-failure-costs', output: internalFailureAnalysis });
 
   // Phase 5: External Failure Cost Analysis
-  const externalFailureAnalysis = await ctx.task(analyzeExternalFailureCosts, {
+  let externalFailureAnalysis = await ctx.task(analyzeExternalFailureCosts, {
     frameworkSetup,
     processData,
     financialData
   });
   artifacts.push({ phase: 'external-failure-costs', output: externalFailureAnalysis });
 
-  // Quality Gate: COQ Data Validation
-  await ctx.breakpoint('coq-data-validation', {
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      externalFailureAnalysis = await ctx.task(analyzeExternalFailureCosts, { ...{
+    frameworkSetup,
+    processData,
+    financialData
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint('coq-data-validation', {
     title: 'COQ Data Validation',
     description: 'Review and validate COQ category analyses before aggregation',
-    artifacts: [preventionAnalysis, appraisalAnalysis, internalFailureAnalysis, externalFailureAnalysis]
-  });
-
+    artifacts: [preventionAnalysis, appraisalAnalysis, internalFailureAnalysis, externalFailureAnalysis],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Hidden Quality Costs Identification
   const hiddenCosts = await ctx.task(identifyHiddenCosts, {
     processData,
@@ -142,20 +156,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'tracking-system', output: trackingSystem });
 
   // Phase 13: Reporting Framework
-  const reportingFramework = await ctx.task(createReportingFramework, {
+  let reportingFramework = await ctx.task(createReportingFramework, {
     trackingSystem,
     coqAggregation,
     organizationContext
   });
   artifacts.push({ phase: 'reporting-framework', output: reportingFramework });
 
-  // Final Quality Gate: COQ Analysis Approval
-  await ctx.breakpoint('coq-analysis-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportingFramework = await ctx.task(createReportingFramework, { ...{
+    trackingSystem,
+    coqAggregation,
+    organizationContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('coq-analysis-approval', {
     title: 'COQ Analysis Approval',
     description: 'Final approval of COQ analysis and optimization recommendations',
-    artifacts: [coqAggregation, investmentPriorities, trackingSystem]
-  });
-
+    artifacts: [coqAggregation, investmentPriorities, trackingSystem],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     coqAnalysis: {

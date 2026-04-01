@@ -76,18 +76,31 @@ export async function process(inputs, ctx) {
     justiceAnalysis
   ];
 
-  const convergenceAnalysis = await ctx.task(analyzeConvergenceTask, {
+  let convergenceAnalysis = await ctx.task(analyzeConvergenceTask, {
     frameworkResults: frameworkResults,
     options: dilemmaAnalysis.availableOptions
   });
 
-  if (convergenceAnalysis.significantConflict) {
-    await ctx.breakpoint('ethical-conflict-resolution', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        convergenceAnalysis = await ctx.task(analyzeConvergenceTask, { ...{
+    frameworkResults: frameworkResults,
+    options: dilemmaAnalysis.availableOptions
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint('ethical-conflict-resolution', {
       message: 'Significant conflict between ethical frameworks',
       conflicts: convergenceAnalysis.conflicts,
-      possibleResolutions: convergenceAnalysis.resolutionStrategies
-    });
-  }
+      possibleResolutions: convergenceAnalysis.resolutionStrategies,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Moral Intuition Check
   const intuitionCheck = await ctx.task(checkMoralIntuitionsTask, {

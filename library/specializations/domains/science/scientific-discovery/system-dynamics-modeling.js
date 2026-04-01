@@ -33,15 +33,24 @@ export async function process(inputs, ctx) {
   const stockFlowStructure = await ctx.task(stockFlowStructureTask, { conceptualization: modelConceptualization, system, outputDir });
   artifacts.push(...stockFlowStructure.artifacts);
 
-  const equationFormulation = await ctx.task(equationFormulationTask, { stockFlowStructure, parameters, outputDir });
-  artifacts.push(...equationFormulation.artifacts);
-
-  await ctx.breakpoint({
+  let equationFormulation = await ctx.task(equationFormulationTask, { stockFlowStructure, parameters, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      equationFormulation = await ctx.task(equationFormulationTask, { ...{ stockFlowStructure, parameters, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `Model structure: ${stockFlowStructure.stocks?.length || 0} stocks, ${stockFlowStructure.flows?.length || 0} flows. ${equationFormulation.equations?.length || 0} equations. Review before simulation?`,
     title: 'SD Model Structure Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { stocks: stockFlowStructure.stocks?.length || 0, flows: stockFlowStructure.flows?.length || 0, equations: equationFormulation.equations?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { stocks: stockFlowStructure.stocks?.length || 0, flows: stockFlowStructure.flows?.length || 0, equations: equationFormulation.equations?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const parameterEstimation = await ctx.task(parameterEstimationTask, { model: equationFormulation, parameters, outputDir });
   artifacts.push(...parameterEstimation.artifacts);
 
@@ -57,15 +66,24 @@ export async function process(inputs, ctx) {
   const policyAnalysis = await ctx.task(policyAnalysisTask, { model: equationFormulation, baselineSimulation, system, outputDir });
   artifacts.push(...policyAnalysis.artifacts);
 
-  const qualityScore = await ctx.task(sdModelQualityScoringTask, { modelConceptualization, stockFlowStructure, modelValidation, policyAnalysis, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(sdModelQualityScoringTask, { modelConceptualization, stockFlowStructure, modelValidation, policyAnalysis, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(sdModelQualityScoringTask, { ...{ modelConceptualization, stockFlowStructure, modelValidation, policyAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SD Model complete. Validation score: ${modelValidation.validationScore}/100. ${policyAnalysis.policies?.length || 0} policies analyzed. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'SD Model Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { validationScore: modelValidation.validationScore, policies: policyAnalysis.policies?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { validationScore: modelValidation.validationScore, policies: policyAnalysis.policies?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, system, model: { stocks: stockFlowStructure.stocks, flows: stockFlowStructure.flows, equations: equationFormulation.equations },
     simulations: [baselineSimulation.results, ...sensitivityAnalysis.simulations], insights: policyAnalysis.insights, policy: policyAnalysis,

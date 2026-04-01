@@ -160,3 +160,182 @@ describe("resolveInputPath", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Bug: task:post --value path doubling via resolveMaybeRunRelative
+//
+// The private resolveMaybeRunRelative() inside handleTaskPost does
+//   path.join(runDir, candidate)
+// without calling collapseDoubledA5cRuns(). When candidate already contains
+// an .a5c/runs prefix (e.g. ".a5c/runs/RUNID/tasks/EFFECTID/output.json"),
+// the joined path produces two .a5c/runs segments separated by a runId,
+// which collapseDoubledA5cRuns cannot fix (it only handles adjacent
+// duplications). The correct fix must detect that the candidate already
+// contains an .a5c/runs prefix and avoid blindly prepending runDir.
+//
+// These tests document the expected CORRECT behavior for the fix.
+// ---------------------------------------------------------------------------
+
+describe("task:post resolveMaybeRunRelative path-doubling bug", () => {
+  /**
+   * Simulate the BUGGY resolveMaybeRunRelative logic from handleTaskPost
+   * (path.join without any dedup).
+   */
+  function buggyResolveMaybeRunRelative(
+    runDir: string,
+    candidate?: string,
+  ): string | undefined {
+    if (!candidate) return undefined;
+    if (candidate === "-") return candidate;
+    if (path.isAbsolute(candidate) || /^[A-Za-z]:[\\/]/.test(candidate)) {
+      return candidate;
+    }
+    return path.join(runDir, candidate);
+  }
+
+  /**
+   * The CORRECT resolveMaybeRunRelative: when candidate starts with a
+   * .a5c/runs segment and runDir already contains .a5c/runs, resolve from
+   * the project root (parent of .a5c/) instead of naively joining.
+   * collapseDoubledA5cRuns is applied as a final safety net.
+   */
+  function correctResolveMaybeRunRelative(
+    runDir: string,
+    candidate?: string,
+  ): string | undefined {
+    if (!candidate) return undefined;
+    if (candidate === "-") return candidate;
+    if (path.isAbsolute(candidate) || /^[A-Za-z]:[\\/]/.test(candidate)) {
+      return collapseDoubledA5cRuns(candidate);
+    }
+    const candidateNorm = candidate.replace(/\\/g, "/");
+    const runDirNorm = runDir.replace(/\\/g, "/");
+    // If candidate itself starts with .a5c/runs and runDir already contains
+    // .a5c/runs, resolve relative to the project root (the directory
+    // containing .a5c/) to avoid doubling.
+    if (candidateNorm.startsWith(".a5c/runs") && runDirNorm.includes(".a5c/runs")) {
+      const idx = runDirNorm.indexOf(".a5c/runs");
+      const projectRoot = runDir.substring(0, idx === 0 ? 0 : idx).replace(/[/\\]+$/, "");
+      if (projectRoot.length > 0) {
+        return collapseDoubledA5cRuns(path.join(projectRoot, candidate));
+      }
+    }
+    return collapseDoubledA5cRuns(path.join(runDir, candidate));
+  }
+
+  it("relative path containing .a5c/runs does NOT get doubled when resolved (bug scenario)", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+    // User passes --value .a5c/runs/01RUNID/tasks/01EFFECTID/output.json
+    const candidate = ".a5c/runs/01RUNID/tasks/01EFFECTID/output.json";
+
+    // The buggy version produces a path with two .a5c/runs segments
+    const buggy = buggyResolveMaybeRunRelative(runDir, candidate)!;
+    const buggyNorm = buggy.replace(/\\/g, "/");
+    const buggySegmentCount = buggyNorm.split(".a5c/runs").length - 1;
+    expect(buggySegmentCount).toBeGreaterThan(1);
+
+    // The correct version resolves from project root, avoiding doubling
+    const correct = correctResolveMaybeRunRelative(runDir, candidate)!;
+    const correctNorm = correct.replace(/\\/g, "/");
+    const correctSegmentCount = correctNorm.split(".a5c/runs").length - 1;
+    expect(correctSegmentCount).toBe(1);
+    expect(correctNorm).toBe(
+      "/project/.a5c/runs/01RUNID/tasks/01EFFECTID/output.json",
+    );
+  });
+
+  it("absolute path passes through unchanged", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+    const candidate = "/other/project/.a5c/runs/01RUNID/tasks/01EFFECTID/output.json";
+
+    const buggy = buggyResolveMaybeRunRelative(runDir, candidate);
+    const correct = correctResolveMaybeRunRelative(runDir, candidate);
+
+    // Both versions should return the absolute path unchanged
+    expect(buggy).toBe(candidate);
+    expect(correct).toBe(candidate);
+  });
+
+  it("run-relative path (tasks/EFFECTID/output.json) gets properly joined with runDir", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+    // A simple run-relative path (no .a5c/runs prefix) — no doubling risk
+    const candidate = "tasks/01EFFECTID/output.json";
+
+    const buggy = buggyResolveMaybeRunRelative(runDir, candidate)!;
+    const correct = correctResolveMaybeRunRelative(runDir, candidate)!;
+
+    // Both should produce the same correct path (no doubling to collapse)
+    expect(path.normalize(buggy)).toBe(path.normalize(correct));
+    expect(correct.replace(/\\/g, "/")).toBe(
+      "/project/.a5c/runs/01RUNID/tasks/01EFFECTID/output.json",
+    );
+  });
+
+  it("stdin sentinel '-' passes through unchanged", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+
+    expect(buggyResolveMaybeRunRelative(runDir, "-")).toBe("-");
+    expect(correctResolveMaybeRunRelative(runDir, "-")).toBe("-");
+  });
+
+  it("undefined candidate returns undefined", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+
+    expect(buggyResolveMaybeRunRelative(runDir, undefined)).toBeUndefined();
+    expect(correctResolveMaybeRunRelative(runDir, undefined)).toBeUndefined();
+  });
+
+  it("Windows absolute path passes through unchanged", () => {
+    const runDir = "/project/.a5c/runs/01RUNID";
+    const candidate = "C:\\Users\\user\\.a5c\\runs\\01RUNID\\tasks\\01EFF\\output.json";
+
+    const correct = correctResolveMaybeRunRelative(runDir, candidate);
+    // Detected as absolute by the regex, returned as-is (after normalize)
+    expect(correct).toBe(collapseDoubledA5cRuns(candidate));
+  });
+
+  it("relative path with tasks/ prefix and already-doubled runDir still resolves correctly", () => {
+    // When runDir itself was constructed from a doubled base, even tasks/...
+    // joins produce doubled paths
+    const doubledRunDir = "/project/.a5c/runs/.a5c/runs/01RUNID";
+    const candidate = "tasks/01EFFECTID/result.json";
+
+    // Buggy version preserves the doubled runDir in the result
+    const buggy = buggyResolveMaybeRunRelative(doubledRunDir, candidate)!;
+    const buggyNorm = buggy.replace(/\\/g, "/");
+    expect(buggyNorm).toContain(".a5c/runs/.a5c/runs");
+
+    // Correct version collapses the doubled runDir
+    const correct = correctResolveMaybeRunRelative(doubledRunDir, candidate)!;
+    const correctNorm = correct.replace(/\\/g, "/");
+    expect(correctNorm).not.toContain(".a5c/runs/.a5c/runs");
+    expect(correctNorm).toBe(
+      "/project/.a5c/runs/01RUNID/tasks/01EFFECTID/result.json",
+    );
+  });
+
+  it("collapseDoubledA5cRuns alone is insufficient for non-adjacent doubling", () => {
+    // This documents that the bug cannot be fixed by simply wrapping
+    // path.join(runDir, candidate) with collapseDoubledA5cRuns.
+    // The two .a5c/runs segments are separated by the runId, so the
+    // adjacent-only collapse regex does not match.
+    const runDir = "/project/.a5c/runs/01RUNID";
+    const candidate = ".a5c/runs/01RUNID/tasks/01EFFECTID/output.json";
+
+    const joined = path.join(runDir, candidate);
+    const collapsed = collapseDoubledA5cRuns(joined);
+    const collapsedNorm = collapsed.replace(/\\/g, "/");
+
+    // collapseDoubledA5cRuns does NOT fix this because the pattern is
+    // .a5c/runs/01RUNID/.a5c/runs (not .a5c/runs/.a5c/runs)
+    const segmentCount = collapsedNorm.split(".a5c/runs").length - 1;
+    expect(segmentCount).toBeGreaterThan(1);
+
+    // The correct fix must detect the .a5c/runs prefix in candidate
+    // and resolve from project root instead
+    const correct = correctResolveMaybeRunRelative(runDir, candidate)!;
+    const correctNorm = correct.replace(/\\/g, "/");
+    const correctSegments = correctNorm.split(".a5c/runs").length - 1;
+    expect(correctSegments).toBe(1);
+  });
+});

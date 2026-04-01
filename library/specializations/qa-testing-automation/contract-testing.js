@@ -63,7 +63,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing service dependencies and mapping contracts');
 
-  const serviceMappingAnalysis = await ctx.task(serviceMappingTask, {
+  let serviceMappingAnalysis = await ctx.task(serviceMappingTask, {
     projectName,
     services,
     architecture,
@@ -87,8 +87,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Identified ${serviceMappingAnalysis.contractPairs.length} contract pairs`);
 
   // Quality Gate: Minimum contract coverage
-  if (serviceMappingAnalysis.coveragePercentage < 80) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        serviceMappingAnalysis = await ctx.task(serviceMappingTask, { ...{
+    projectName,
+    services,
+    architecture,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Contract coverage at ${serviceMappingAnalysis.coveragePercentage}%. Recommended: 90%+. Review service dependencies and approve to continue?`,
       title: 'Contract Coverage Review',
       context: {
@@ -97,9 +106,15 @@ export async function process(inputs, ctx) {
         uncoveredDependencies: serviceMappingAnalysis.uncoveredDependencies,
         recommendation: 'Add contract definitions for all critical service interactions',
         files: serviceMappingAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: CONTRACT TOOL SETUP AND CONFIGURATION
@@ -107,7 +122,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Setting up contract testing tool and configuration');
 
-  const toolSetup = await ctx.task(contractToolSetupTask, {
+  let toolSetup = await ctx.task(contractToolSetupTask, {
     projectName,
     contractTool,
     services,
@@ -119,8 +134,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...toolSetup.artifacts);
 
   // Quality Gate: Tool setup verification
-  if (!toolSetup.toolConfigured || toolSetup.configurationIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        toolSetup = await ctx.task(contractToolSetupTask, { ...{
+    projectName,
+    contractTool,
+    services,
+    architecture,
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Contract tool setup completed with ${toolSetup.configurationIssues.length} issues. Review and approve to continue?`,
       title: 'Tool Setup Review',
       context: {
@@ -129,9 +155,15 @@ export async function process(inputs, ctx) {
         toolConfigured: toolSetup.toolConfigured,
         configurationIssues: toolSetup.configurationIssues,
         files: toolSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: CONSUMER CONTRACT DEFINITIONS
@@ -139,7 +171,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Creating consumer contract definitions');
 
-  const consumerContracts = await ctx.task(consumerContractDefinitionTask, {
+  let consumerContracts = await ctx.task(consumerContractDefinitionTask, {
     projectName,
     contractTool,
     contractPairs: serviceMappingAnalysis.contractPairs,
@@ -154,8 +186,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Created ${contractsCreated} consumer contracts`);
 
   // Quality Gate: Consumer contract completeness
-  if (contractsCreated < serviceMappingAnalysis.contractPairs.length) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        consumerContracts = await ctx.task(consumerContractDefinitionTask, { ...{
+    projectName,
+    contractTool,
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    services: services.filter(s => s.type === 'consumer' || !s.type),
+    toolConfig: toolSetup.configuration,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `${contractsCreated}/${serviceMappingAnalysis.contractPairs.length} consumer contracts created. Review missing contracts and approve?`,
       title: 'Consumer Contract Completeness',
       context: {
@@ -165,9 +208,15 @@ export async function process(inputs, ctx) {
         missingContracts: consumerContracts.missingContracts,
         recommendation: 'Complete all critical consumer contracts before provider verification',
         files: consumerContracts.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: CONSUMER TESTS EXECUTION
@@ -175,7 +224,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Running consumer contract tests');
 
-  const consumerTestExecution = await ctx.task(consumerContractTestsTask, {
+  let consumerTestExecution = await ctx.task(consumerContractTestsTask, {
     projectName,
     contractTool,
     consumerContracts: consumerContracts.contracts,
@@ -187,8 +236,18 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Consumer tests passing
   const consumerPassRate = consumerTestExecution.passRate;
-  if (consumerPassRate < 100) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        consumerTestExecution = await ctx.task(consumerContractTestsTask, { ...{
+    projectName,
+    contractTool,
+    consumerContracts: consumerContracts.contracts,
+    toolConfig: toolSetup.configuration,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Consumer contract tests pass rate: ${consumerPassRate}%. Target: 100%. Review failures and continue?`,
       title: 'Consumer Tests Pass Rate',
       context: {
@@ -199,9 +258,15 @@ export async function process(inputs, ctx) {
         failed: consumerTestExecution.failed,
         failureDetails: consumerTestExecution.failures,
         files: consumerTestExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: CONTRACT BROKER SETUP
@@ -209,7 +274,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Setting up contract broker for contract sharing');
 
-  const brokerSetupResult = await ctx.task(contractBrokerSetupTask, {
+  let brokerSetupResult = await ctx.task(contractBrokerSetupTask, {
     projectName,
     contractTool,
     brokerUrl,
@@ -223,8 +288,20 @@ export async function process(inputs, ctx) {
   brokerSetup = brokerSetupResult.brokerReady;
 
   // Quality Gate: Broker setup verification
-  if (!brokerSetup) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        brokerSetupResult = await ctx.task(contractBrokerSetupTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl,
+    services,
+    contracts: consumerContracts.contracts,
+    versioningStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Contract broker setup encountered issues. Broker ready: ${brokerSetup}. Review and approve to continue?`,
       title: 'Contract Broker Setup Review',
       context: {
@@ -234,9 +311,15 @@ export async function process(inputs, ctx) {
         setupIssues: brokerSetupResult.setupIssues,
         recommendation: 'Ensure broker is accessible and properly configured',
         files: brokerSetupResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: CONTRACT PUBLISHING
@@ -244,7 +327,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Publishing consumer contracts to broker');
 
-  const contractPublishing = await ctx.task(contractPublishingTask, {
+  let contractPublishing = await ctx.task(contractPublishingTask, {
     projectName,
     contractTool,
     brokerUrl: brokerSetupResult.brokerUrl,
@@ -257,8 +340,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...contractPublishing.artifacts);
 
   // Quality Gate: Publishing success
-  if (!contractPublishing.allPublished || contractPublishing.failedPublications.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        contractPublishing = await ctx.task(contractPublishingTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    contracts: consumerContracts.contracts,
+    consumerTestResults: consumerTestExecution,
+    versioningStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `${contractPublishing.publishedCount}/${contractPublishing.totalContracts} contracts published. Review failures and continue?`,
       title: 'Contract Publishing Review',
       context: {
@@ -267,9 +362,15 @@ export async function process(inputs, ctx) {
         totalContracts: contractPublishing.totalContracts,
         failedPublications: contractPublishing.failedPublications,
         files: contractPublishing.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: PROVIDER VERIFICATION TESTS
@@ -277,7 +378,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Implementing provider verification tests');
 
-  const providerVerification = await ctx.task(providerVerificationTask, {
+  let providerVerification = await ctx.task(providerVerificationTask, {
     projectName,
     contractTool,
     brokerUrl: brokerSetupResult.brokerUrl,
@@ -293,8 +394,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Provider verification tests created for ${providerVerification.providersConfigured} providers`);
 
   // Quality Gate: Provider verification setup
-  if (providerVerification.providersConfigured < serviceMappingAnalysis.providerCount) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        providerVerification = await ctx.task(providerVerificationTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    services: services.filter(s => s.type === 'provider' || !s.type),
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    publishedContracts: contractPublishing.publishedContracts,
+    toolConfig: toolSetup.configuration,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Provider verification configured for ${providerVerification.providersConfigured}/${serviceMappingAnalysis.providerCount} providers. Continue?`,
       title: 'Provider Verification Setup Review',
       context: {
@@ -303,9 +417,15 @@ export async function process(inputs, ctx) {
         expectedProviders: serviceMappingAnalysis.providerCount,
         missingProviders: providerVerification.missingProviders,
         files: providerVerification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: PROVIDER VERIFICATION EXECUTION
@@ -313,7 +433,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Running provider verification tests');
 
-  const providerTestExecution = await ctx.task(providerVerificationTestsTask, {
+  let providerTestExecution = await ctx.task(providerVerificationTestsTask, {
     projectName,
     contractTool,
     brokerUrl: brokerSetupResult.brokerUrl,
@@ -327,8 +447,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Provider verification passing
   const providerPassRate = providerTestExecution.passRate;
-  if (providerPassRate < acceptanceCriteria.providerVerificationRate) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        providerTestExecution = await ctx.task(providerVerificationTestsTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    providerTests: providerVerification.providerTests,
+    services: services.filter(s => s.type === 'provider' || !s.type),
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Provider verification pass rate: ${providerPassRate}%. Target: ${acceptanceCriteria.providerVerificationRate}%. Review failures and continue?`,
       title: 'Provider Verification Pass Rate',
       context: {
@@ -341,9 +472,15 @@ export async function process(inputs, ctx) {
         failureDetails: providerTestExecution.failures,
         recommendation: 'Fix provider contract violations before enabling independent deployment',
         files: providerTestExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: VERIFICATION RESULTS PUBLISHING
@@ -368,7 +505,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Configuring breaking change detection');
 
-  const breakingChangeDetection = await ctx.task(breakingChangeDetectionTask, {
+  let breakingChangeDetection = await ctx.task(breakingChangeDetectionTask, {
     projectName,
     contractTool,
     brokerUrl: brokerSetupResult.brokerUrl,
@@ -381,8 +518,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...breakingChangeDetection.artifacts);
 
   // Quality Gate: Breaking change detection functional
-  if (!breakingChangeDetection.detectionConfigured) {
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        breakingChangeDetection = await ctx.task(breakingChangeDetectionTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    services,
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    versioningStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `Breaking change detection setup completed with status: ${breakingChangeDetection.detectionConfigured}. Review configuration and approve?`,
       title: 'Breaking Change Detection Review',
       context: {
@@ -391,9 +540,15 @@ export async function process(inputs, ctx) {
         configurationDetails: breakingChangeDetection.configuration,
         testResults: breakingChangeDetection.testResults,
         files: breakingChangeDetection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: CAN-I-DEPLOY VERIFICATION (if enabled)
@@ -414,7 +569,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...canDeploySetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: PARALLEL CI/CD INTEGRATION
   // ============================================================================
@@ -456,8 +610,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `CI/CD integration: Consumer=${consumerPipelineIntegration.integrated}, Provider=${providerPipelineIntegration.integrated}`);
 
   // Quality Gate: CI/CD integration verification
-  if (!cicdIntegrated) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        breakingChangeDetection = await ctx.task(breakingChangeDetectionTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    services,
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    versioningStrategy,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `CI/CD integration: Consumer=${consumerPipelineIntegration.integrated}, Provider=${providerPipelineIntegration.integrated}. Review and approve?`,
       title: 'CI/CD Integration Review',
       context: {
@@ -469,9 +635,15 @@ export async function process(inputs, ctx) {
           ...consumerPipelineIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml', label: 'Consumer Pipeline' })),
           ...providerPipelineIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml', label: 'Provider Pipeline' }))
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: CONTRACT VERSIONING DOCUMENTATION
@@ -498,7 +670,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Verifying independent deployment capability');
 
-  const independentDeploymentVerification = await ctx.task(independentDeploymentVerificationTask, {
+  let independentDeploymentVerification = await ctx.task(independentDeploymentVerificationTask, {
     projectName,
     contractTool,
     brokerUrl: brokerSetupResult.brokerUrl,
@@ -515,8 +687,22 @@ export async function process(inputs, ctx) {
   const independentDeploymentVerified = independentDeploymentVerification.verified;
 
   // Quality Gate: Independent deployment verified
-  if (!independentDeploymentVerified) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval6 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval6) {
+        independentDeploymentVerification = await ctx.task(independentDeploymentVerificationTask, { ...{
+    projectName,
+    contractTool,
+    brokerUrl: brokerSetupResult.brokerUrl,
+    services,
+    contractPairs: serviceMappingAnalysis.contractPairs,
+    consumerTestResults: consumerTestExecution,
+    providerTestResults: providerTestExecution,
+    canDeploySetup,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+      }
+  const qualityGateApproval6 = await ctx.breakpoint({
       question: `Independent deployment verification: ${independentDeploymentVerified}. Review test results and approve?`,
       title: 'Independent Deployment Verification',
       context: {
@@ -526,9 +712,15 @@ export async function process(inputs, ctx) {
         blockers: independentDeploymentVerification.blockers,
         recommendation: 'Resolve all contract violations before enabling independent deployment',
         files: independentDeploymentVerification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval6.approved) break;
+      lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 15: COMPREHENSIVE DOCUMENTATION
@@ -561,7 +753,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Computing final assessment and contract testing metrics');
 
-  const finalAssessment = await ctx.task(finalAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAssessmentTask, {
     projectName,
     serviceMappingAnalysis,
     consumerContracts,
@@ -585,8 +777,27 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Contract coverage: ${contractCoverageScore}%, Production ready: ${productionReady}`);
 
-  // Final Breakpoint: Contract Testing Implementation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
+    projectName,
+    serviceMappingAnalysis,
+    consumerContracts,
+    consumerTestExecution,
+    providerVerification,
+    providerTestExecution,
+    brokerSetupResult,
+    breakingChangeDetection,
+    canDeploySetup,
+    consumerPipelineIntegration,
+    providerPipelineIntegration,
+    independentDeploymentVerification,
+    acceptanceCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Contract Testing Implementation Complete for ${projectName}. Contract Coverage: ${contractCoverageScore}%, Provider Verification: ${providerPassRate}%, Production Ready: ${productionReady}. Approve for production use?`,
     title: 'Final Contract Testing Review',
     context: {
@@ -612,9 +823,15 @@ export async function process(inputs, ctx) {
         { path: versioningDocumentation.versioningGuidePath, format: 'markdown', label: 'Versioning Guide' },
         { path: independentDeploymentVerification.reportPath, format: 'markdown', label: 'Deployment Verification Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -703,8 +920,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

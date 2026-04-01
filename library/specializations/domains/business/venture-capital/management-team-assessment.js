@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Team Dynamics Analysis
   ctx.log('info', 'Analyzing team dynamics');
-  const teamDynamics = await ctx.task(teamDynamicsTask, {
+  let teamDynamics = await ctx.task(teamDynamicsTask, {
     companyName,
     teamMembers,
     leadershipAssessment: leadershipAssessment.assessment,
@@ -100,8 +100,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...teamDynamics.artifacts);
 
-  // Breakpoint: Review team assessment findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      teamDynamics = await ctx.task(teamDynamicsTask, { ...{
+    companyName,
+    teamMembers,
+    leadershipAssessment: leadershipAssessment.assessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Team assessment complete for ${companyName}. Founder-market fit: ${founderMarketFit.score}/100. Key gaps: ${skillsGapAnalysis.criticalGaps.length}. Review findings?`,
     title: 'Management Team Assessment Results',
     context: {
@@ -115,9 +124,15 @@ export async function process(inputs, ctx) {
         leadershipScore: leadershipAssessment.score,
         cultureRating: cultureAssessment.rating
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Team Assessment Report
   ctx.log('info', 'Generating team assessment report');
   const assessmentReport = await ctx.task(teamAssessmentReportTask, {
@@ -169,8 +184,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Background Verification
+  // Task 1: Background Verification
 export const backgroundVerificationTask = defineTask('background-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct background verification',

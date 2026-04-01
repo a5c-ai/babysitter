@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Watch List Management
   ctx.log('info', 'Managing watch list');
-  const watchList = await ctx.task(watchListTask, {
+  let watchList = await ctx.task(watchListTask, {
     ratingAssignment,
     earlyWarning,
     priorRatings,
@@ -81,8 +81,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...watchList.artifacts);
 
-  // Breakpoint: Review risk ratings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      watchList = await ctx.task(watchListTask, { ...{
+    ratingAssignment,
+    earlyWarning,
+    priorRatings,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk ratings complete for ${portfolioCompanies.length} companies. ${watchList.companies.length} on watch list. ${earlyWarning.alerts.length} early warnings. Review ratings?`,
     title: 'Portfolio Risk Rating Results',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         watchListCount: watchList.companies.length,
         earlyWarnings: earlyWarning.alerts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Intervention Planning
   ctx.log('info', 'Planning interventions');
   const interventionPlanning = await ctx.task(interventionTask, {
@@ -160,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Risk Factor Assessment
+  // Task 1: Risk Factor Assessment
 export const riskFactorTask = defineTask('risk-factor-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess risk factors',

@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Integrating multi-level understanding');
-  const synthesis = await ctx.task(multiLevelSynthesisTask, {
+  let synthesis = await ctx.task(multiLevelSynthesisTask, {
     phenomenon,
     levelCharacterization,
     bottomUpAnalysis,
@@ -137,8 +137,22 @@ export async function process(inputs, ctx) {
 
   const completenessMet = synthesis.completenessScore >= targetCompleteness;
 
-  // Breakpoint: Review multi-level analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(multiLevelSynthesisTask, { ...{
+    phenomenon,
+    levelCharacterization,
+    bottomUpAnalysis,
+    topDownAnalysis,
+    emergentProperties: emergentProperties.properties,
+    crossLevelAnalysis,
+    causalMapping,
+    targetCompleteness,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-level analysis complete. Completeness: ${synthesis.completenessScore}/${targetCompleteness}. ${completenessMet ? 'Completeness target met!' : 'Additional analysis may be needed.'} Review analysis?`,
     title: 'Levels of Organization Analysis Results',
     context: {
@@ -159,9 +173,15 @@ export async function process(inputs, ctx) {
         completenessScore: synthesis.completenessScore,
         completenessMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

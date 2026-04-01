@@ -45,7 +45,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Full-Cycle Recruiting Process for ${requisitionId}: ${jobTitle}`);
 
   // Phase 1: Requisition Intake and Job Analysis
-  const requisitionIntake = await ctx.task(requisitionIntakeTask, {
+  let requisitionIntake = await ctx.task(requisitionIntakeTask, {
     requisitionId,
     jobTitle,
     department,
@@ -66,9 +66,21 @@ export async function process(inputs, ctx) {
       phase: 'requisition-intake',
       requisitionId
     };
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requisitionIntake = await ctx.task(requisitionIntakeTask, { ...{
+    requisitionId,
+    jobTitle,
+    department,
+    hiringManager,
+    salaryRange,
+    requirements,
+    targetHireDate,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Requisition ${requisitionId} for ${jobTitle} approved. Review job description and requirements before proceeding to sourcing?`,
     title: 'Requisition Approval Review',
     context: {
@@ -80,9 +92,15 @@ export async function process(inputs, ctx) {
       jobDescription: requisitionIntake.jobDescription,
       requirements: requisitionIntake.requirements,
       files: requisitionIntake.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Sourcing Strategy Development
   const sourcingStrategy = await ctx.task(sourcingStrategyTask, {
     requisitionId,
@@ -111,7 +129,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Sourced ${candidateSourcing.candidatesSourced} candidates for ${requisitionId}`);
 
   // Phase 4: Resume Screening and Initial Assessment
-  const resumeScreening = await ctx.task(resumeScreeningTask, {
+  let resumeScreening = await ctx.task(resumeScreeningTask, {
     requisitionId,
     jobTitle,
     candidates: candidateSourcing.candidates,
@@ -119,9 +137,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...resumeScreening.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      resumeScreening = await ctx.task(resumeScreeningTask, { ...{
+    requisitionId,
+    jobTitle,
+    candidates: candidateSourcing.candidates,
+    requirements: requisitionIntake.requirements,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Screened ${resumeScreening.candidatesScreened} candidates. ${resumeScreening.candidatesShortlisted} meet requirements. Review shortlist before phone screens?`,
     title: 'Resume Screening Review',
     context: {
@@ -132,9 +159,15 @@ export async function process(inputs, ctx) {
       shortlistedCandidates: resumeScreening.shortlistedCandidates,
       screeningCriteria: resumeScreening.screeningCriteria,
       files: resumeScreening.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Phone Screening
   const phoneScreening = await ctx.task(phoneScreeningTask, {
     requisitionId,
@@ -172,7 +205,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...technicalAssessment.artifacts);
 
   // Phase 8: Onsite/Final Round Interviews
-  const onsiteInterviews = await ctx.task(onsiteInterviewsTask, {
+  let onsiteInterviews = await ctx.task(onsiteInterviewsTask, {
     requisitionId,
     jobTitle,
     candidates: technicalAssessment.advancingCandidates,
@@ -181,9 +214,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...onsiteInterviews.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      onsiteInterviews = await ctx.task(onsiteInterviewsTask, { ...{
+    requisitionId,
+    jobTitle,
+    candidates: technicalAssessment.advancingCandidates,
+    hiringManager,
+    interviewPanel: interviewCoordination.interviewPanel,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Final interviews completed for ${onsiteInterviews.candidatesInterviewed} candidates. Review interview feedback and scorecards before selection decision?`,
     title: 'Interview Debrief Review',
     context: {
@@ -194,9 +237,15 @@ export async function process(inputs, ctx) {
       scorecards: onsiteInterviews.scorecards,
       recommendations: onsiteInterviews.recommendations,
       files: onsiteInterviews.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: Selection and Hiring Decision
   const selectionDecision = await ctx.task(selectionDecisionTask, {
     requisitionId,
@@ -211,7 +260,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...selectionDecision.artifacts);
 
   // Phase 10: Reference and Background Checks
-  const backgroundChecks = await ctx.task(backgroundChecksTask, {
+  let backgroundChecks = await ctx.task(backgroundChecksTask, {
     requisitionId,
     selectedCandidate: selectionDecision.selectedCandidate,
     outputDir
@@ -220,8 +269,16 @@ export async function process(inputs, ctx) {
   artifacts.push(...backgroundChecks.artifacts);
 
   // Quality Gate: Background check must pass
-  if (!backgroundChecks.passed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        backgroundChecks = await ctx.task(backgroundChecksTask, { ...{
+    requisitionId,
+    selectedCandidate: selectionDecision.selectedCandidate,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `Background check issues found for selected candidate. Review findings and decide on next steps?`,
       title: 'Background Check Review',
       context: {
@@ -231,12 +288,18 @@ export async function process(inputs, ctx) {
         issues: backgroundChecks.issues,
         recommendation: backgroundChecks.recommendation,
         files: backgroundChecks.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // Phase 11: Offer Creation and Negotiation
-  const offerNegotiation = await ctx.task(offerNegotiationTask, {
+  let offerNegotiation = await ctx.task(offerNegotiationTask, {
     requisitionId,
     jobTitle,
     selectedCandidate: selectionDecision.selectedCandidate,
@@ -245,9 +308,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...offerNegotiation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      offerNegotiation = await ctx.task(offerNegotiationTask, { ...{
+    requisitionId,
+    jobTitle,
+    selectedCandidate: selectionDecision.selectedCandidate,
+    salaryRange,
+    approvedCompensation: selectionDecision.approvedCompensation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Offer prepared for ${selectionDecision.selectedCandidate.name}. Compensation: ${offerNegotiation.offerDetails.salary}. Approve and extend offer?`,
     title: 'Offer Approval',
     context: {
@@ -257,9 +330,15 @@ export async function process(inputs, ctx) {
       offerDetails: offerNegotiation.offerDetails,
       negotiationHistory: offerNegotiation.negotiationHistory,
       files: offerNegotiation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 12: Offer Acceptance and Pre-boarding
   const offerAcceptance = await ctx.task(offerAcceptanceTask, {
     requisitionId,
@@ -317,8 +396,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const requisitionIntakeTask = defineTask('requisition-intake', (args, taskCtx) => ({
   kind: 'agent',

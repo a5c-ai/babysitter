@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Geometry Analysis and Feature Extraction');
 
-  const geometryResult = await ctx.task(geometryAnalysisTask, {
+  let geometryResult = await ctx.task(geometryAnalysisTask, {
     projectName,
     partNumber,
     cadFiles,
@@ -65,8 +65,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Geometry analysis complete - ${geometryResult.featureCount} features identified`);
 
-  // Breakpoint: Review geometry complexity
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      geometryResult = await ctx.task(geometryAnalysisTask, { ...{
+    projectName,
+    partNumber,
+    cadFiles,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Geometry analysis complete. Features: ${geometryResult.featureCount}, Complexity Score: ${geometryResult.complexityScore}/10. Critical features identified: ${geometryResult.criticalFeatures.length}. Review geometry analysis?`,
     title: 'Geometry Analysis Review',
     context: {
@@ -75,9 +84,15 @@ export async function process(inputs, ctx) {
       geometryMetrics: geometryResult.metrics,
       criticalFeatures: geometryResult.criticalFeatures,
       files: geometryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MANUFACTURING PROCESS SELECTION
   // ============================================================================
@@ -105,7 +120,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Process-Specific DFM Analysis');
 
-  const processAnalysisResult = await ctx.task(processSpecificDFMTask, {
+  let processAnalysisResult = await ctx.task(processSpecificDFMTask, {
     projectName,
     partNumber,
     geometryResult,
@@ -121,8 +136,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Process DFM analysis complete - ${processAnalysisResult.issues.length} issues identified`);
 
   // Quality Gate: Critical DFM issues
-  if (processAnalysisResult.criticalIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        processAnalysisResult = await ctx.task(processSpecificDFMTask, { ...{
+    projectName,
+    partNumber,
+    geometryResult,
+    selectedProcess: processSelectionResult.recommendedProcess,
+    material,
+    manufacturingVolume,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `${processAnalysisResult.criticalIssues.length} critical DFM issues identified that may prevent manufacturing. Issues: ${processAnalysisResult.criticalIssues.map(i => i.description).join('; ')}. Address before proceeding?`,
       title: 'Critical DFM Issues',
       context: {
@@ -131,9 +158,15 @@ export async function process(inputs, ctx) {
         criticalIssues: processAnalysisResult.criticalIssues,
         allIssues: processAnalysisResult.issues,
         files: processAnalysisResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: TOLERANCE AND GD&T ANALYSIS
@@ -182,7 +215,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Assembly and Integration Analysis');
 
-  const assemblyResult = await ctx.task(assemblyAnalysisTask, {
+  let assemblyResult = await ctx.task(assemblyAnalysisTask, {
     projectName,
     partNumber,
     geometryResult,
@@ -195,8 +228,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assembly analysis complete - DFA Score: ${assemblyResult.dfaScore}/100`);
 
-  // Breakpoint: Review assembly complexity
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      assemblyResult = await ctx.task(assemblyAnalysisTask, { ...{
+    projectName,
+    partNumber,
+    geometryResult,
+    assemblyComponents,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Assembly analysis complete. DFA Score: ${assemblyResult.dfaScore}/100. Assembly time estimate: ${assemblyResult.assemblyTimeEstimate} min. Review assembly recommendations?`,
     title: 'Assembly Analysis Review',
     context: {
@@ -206,16 +249,22 @@ export async function process(inputs, ctx) {
       assemblyIssues: assemblyResult.issues,
       recommendations: assemblyResult.recommendations,
       files: assemblyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: COST ESTIMATION AND ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Cost Estimation and Analysis');
 
-  const costResult = await ctx.task(costEstimationTask, {
+  let costResult = await ctx.task(costEstimationTask, {
     projectName,
     partNumber,
     geometryResult,
@@ -234,8 +283,23 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cost estimation complete - Estimated cost: $${costResult.estimatedCost.toFixed(2)}`);
 
   // Quality Gate: Cost exceeds target
-  if (targetCost && costResult.estimatedCost > targetCost) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        costResult = await ctx.task(costEstimationTask, { ...{
+    projectName,
+    partNumber,
+    geometryResult,
+    selectedProcess: processSelectionResult.recommendedProcess,
+    material,
+    manufacturingVolume,
+    toleranceResult,
+    assemblyResult,
+    targetCost,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Estimated cost $${costResult.estimatedCost.toFixed(2)} exceeds target $${targetCost.toFixed(2)} by ${((costResult.estimatedCost - targetCost) / targetCost * 100).toFixed(1)}%. Cost reduction opportunities identified. Review cost breakdown?`,
       title: 'Cost Target Warning',
       context: {
@@ -246,9 +310,15 @@ export async function process(inputs, ctx) {
         costBreakdown: costResult.costBreakdown,
         costReductionOpportunities: costResult.costReductionOpportunities,
         files: costResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: DFM SCORECARD AND PRIORITIZATION
@@ -279,7 +349,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating DFM Report');
 
-  const reportResult = await ctx.task(generateDFMReportTask, {
+  let reportResult = await ctx.task(generateDFMReportTask, {
     projectName,
     partNumber,
     manufacturingVolume,
@@ -297,8 +367,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint: DFM Review complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateDFMReportTask, { ...{
+    projectName,
+    partNumber,
+    manufacturingVolume,
+    targetCost,
+    geometryResult,
+    processSelectionResult,
+    processAnalysisResult,
+    toleranceResult,
+    materialAnalysisResult,
+    assemblyResult,
+    costResult,
+    scorecardResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DFM Review Complete for ${partNumber}. Overall DFM Score: ${scorecardResult.overallScore}/100. ${scorecardResult.prioritizedRecommendations.length} recommendations. Estimated cost: $${costResult.estimatedCost.toFixed(2)}. Approve DFM assessment?`,
     title: 'DFM Review Complete',
     context: {
@@ -317,9 +405,15 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'DFM Report' },
         { path: scorecardResult.scorecardPath, format: 'json', label: 'DFM Scorecard' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -360,8 +454,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

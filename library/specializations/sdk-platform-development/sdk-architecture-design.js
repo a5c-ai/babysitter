@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Establishing extension and plugin architecture');
 
-  const extensionDesign = await ctx.task(extensionArchitectureTask, {
+  let extensionDesign = await ctx.task(extensionArchitectureTask, {
     projectName,
     extensibility,
     componentHierarchy,
@@ -120,8 +120,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...extensionDesign.artifacts);
 
-  // Quality Gate: Architecture Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      extensionDesign = await ctx.task(extensionArchitectureTask, { ...{
+    projectName,
+    extensibility,
+    componentHierarchy,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `SDK Architecture design complete for ${projectName}. Component layers: ${componentHierarchy.layers.length}, Auth patterns: ${authPatterns.length}, Extension points: ${extensionDesign.extensionPoints.length}. Approve architecture design?`,
     title: 'SDK Architecture Review',
     context: {
@@ -131,9 +140,15 @@ export async function process(inputs, ctx) {
       authPatterns,
       extensionPoints: extensionDesign.extensionPoints,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ERROR HANDLING STRATEGY
   // ============================================================================
@@ -171,7 +186,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating architecture documentation');
 
-  const documentation = await ctx.task(architectureDocumentationTask, {
+  let documentation = await ctx.task(architectureDocumentationTask, {
     projectName,
     requirementsAnalysis,
     componentHierarchy,
@@ -185,8 +200,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(architectureDocumentationTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    componentHierarchy,
+    authDesign,
+    transportDesign,
+    extensionDesign,
+    errorStrategy,
+    configDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SDK Architecture Design complete for ${projectName}. Review all design artifacts and approve?`,
     title: 'Architecture Design Complete',
     context: {
@@ -204,9 +233,15 @@ export async function process(inputs, ctx) {
         { path: documentation.componentDiagramPath, format: 'markdown', label: 'Component Diagrams' },
         { path: documentation.designDecisionsPath, format: 'markdown', label: 'Design Decisions' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -246,8 +281,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -14,6 +14,7 @@
 import { getAdapterByName, listSupportedHarnesses } from "../../harness";
 import { loadCompressionConfig } from "../../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../../compression/density-filter";
+import { appendRunLog } from "../../logging/runLogger";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -156,6 +157,25 @@ async function handlePreToolUse(): Promise<number> {
 // Main dispatcher
 // ---------------------------------------------------------------------------
 
+/** Fire-and-forget log to the structured run log facility. */
+function logHookEvent(
+  hookType: string,
+  message: string,
+  context?: Record<string, unknown>,
+): void {
+  void appendRunLog({
+    timestamp: new Date().toISOString(),
+    level: "info",
+    type: "hook",
+    label: `hook:${hookType}`,
+    message,
+    source: "hook:run",
+    context,
+  }).catch(() => {
+    // Never let logging break hook execution.
+  });
+}
+
 export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
   const { hookType, harness, json } = args;
 
@@ -172,12 +192,18 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
     return 1;
   }
 
+  logHookEvent(hookType, "Hook invoked", { harness });
+
   // harness-agnostic hook types — handle before adapter lookup
   if (hookType === "user-prompt-submit") {
-    return await handleUserPromptSubmit();
+    const code = await handleUserPromptSubmit();
+    logHookEvent(hookType, `Hook completed with code=${code}`);
+    return code;
   }
   if (hookType === "pre-tool-use") {
-    return await handlePreToolUse();
+    const code = await handlePreToolUse();
+    logHookEvent(hookType, `Hook completed with code=${code}`);
+    return code;
   }
 
   const adapter = getAdapterByName(harness);
@@ -187,6 +213,7 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
       error: "UNSUPPORTED_HARNESS",
       message: `Unsupported harness: "${harness}". Supported: ${supported.join(", ")}`,
     };
+    logHookEvent(hookType, `Unsupported harness: ${harness}`, { error: error.error });
     if (json) {
       process.stderr.write(JSON.stringify(error, null, 2) + "\n");
     } else {
@@ -203,6 +230,7 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
       error: "UNSUPPORTED_HOOK_TYPE",
       message,
     };
+    logHookEvent(hookType, message, { error: error.error });
     if (json) {
       process.stderr.write(JSON.stringify(error, null, 2) + "\n");
     } else {
@@ -211,16 +239,20 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
     return 1;
   }
 
+  let exitCode: number;
   switch (hookType) {
     case "stop":
-      return await adapter.handleStopHook(args);
+      exitCode = await adapter.handleStopHook(args);
+      break;
     case "session-start":
-      return await adapter.handleSessionStartHook(args);
+      exitCode = await adapter.handleSessionStartHook(args);
+      break;
     default: {
       const error = {
         error: "UNKNOWN_HOOK_TYPE",
         message: `Unknown hook type: ${hookType}. Supported: stop, session-start, user-prompt-submit`,
       };
+      logHookEvent(hookType, error.message, { error: error.error });
       if (json) {
         process.stderr.write(JSON.stringify(error, null, 2) + "\n");
       } else {
@@ -231,4 +263,7 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
       return 1;
     }
   }
+
+  logHookEvent(hookType, `Hook completed with code=${exitCode}`, { harness });
+  return exitCode;
 }

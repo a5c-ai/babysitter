@@ -44,7 +44,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing Type Representation');
 
-  const typeRepresentation = await ctx.task(typeRepresentationTask, {
+  let typeRepresentation = await ctx.task(typeRepresentationTask, {
     languageName,
     typeSystemStyle,
     subtypingStyle,
@@ -52,9 +52,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...typeRepresentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      typeRepresentation = await ctx.task(typeRepresentationTask, { ...{
+    languageName,
+    typeSystemStyle,
+    subtypingStyle,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Type representation designed with ${typeRepresentation.typeCount} type kinds. Primitives: ${typeRepresentation.primitives.length}, Compound: ${typeRepresentation.compounds.length}. Proceed with environment?`,
     title: 'Type Representation Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
       primitives: typeRepresentation.primitives,
       compounds: typeRepresentation.compounds,
       files: typeRepresentation.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: TYPE ENVIRONMENT
   // ============================================================================
@@ -121,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing Subtyping');
 
-  const subtyping = await ctx.task(subtypingTask, {
+  let subtyping = await ctx.task(subtypingTask, {
     languageName,
     subtypingStyle,
     typeRepresentation,
@@ -129,9 +144,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...subtyping.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      subtyping = await ctx.task(subtypingTask, { ...{
+    languageName,
+    subtypingStyle,
+    typeRepresentation,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Subtyping implemented: ${subtypingStyle} style. Variance support: ${subtyping.varianceSupport}. Continue with error reporting?`,
     title: 'Subtyping Review',
     context: {
@@ -140,9 +164,15 @@ export async function process(inputs, ctx) {
       varianceSupport: subtyping.varianceSupport,
       rules: subtyping.rules,
       files: subtyping.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ERROR REPORTING
   // ============================================================================
@@ -203,7 +233,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Documentation');
 
-  const documentation = await ctx.task(typeSystemDocumentationTask, {
+  let documentation = await ctx.task(typeSystemDocumentationTask, {
     languageName,
     typeSystemStyle,
     inferenceLevel,
@@ -213,9 +243,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(typeSystemDocumentationTask, { ...{
+    languageName,
+    typeSystemStyle,
+    inferenceLevel,
+    typeRepresentation,
+    typeCheckerIntegration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Type System Implementation Complete for ${languageName}! Test coverage: ${testSuite.coverage}%, Type kinds: ${typeRepresentation.typeCount}. Review deliverables?`,
     title: 'Type System Complete',
     context: {
@@ -231,9 +272,15 @@ export async function process(inputs, ctx) {
         { path: typeCheckerIntegration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Type Checker' },
         { path: documentation.specPath, format: 'markdown', label: 'Type System Specification' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -281,8 +328,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

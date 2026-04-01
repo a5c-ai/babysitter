@@ -103,7 +103,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Testing Protocol
   ctx.log('info', 'Phase 6: Developing testing and verification protocol');
-  const testingProtocol = await ctx.task(developTestingProtocol, {
+  let testingProtocol = await ctx.task(developTestingProtocol, {
     propertyRequirements: propertySpec.requirements,
     compositionLimits: compositionSpec.limits,
     industryStandards,
@@ -112,8 +112,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(testingProtocol.artifacts || []));
 
-  // Quality Gate: Review specification draft
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingProtocol = await ctx.task(developTestingProtocol, { ...{
+    propertyRequirements: propertySpec.requirements,
+    compositionLimits: compositionSpec.limits,
+    industryStandards,
+    samplingRequirements: inputs.samplingRequirements,
+    statisticalBasis: inputs.statisticalBasis
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review the draft material specification. Are all requirements properly captured and test methods appropriate?',
     title: 'Material Specification Review',
     context: {
@@ -125,9 +135,15 @@ export async function process(inputs, ctx) {
         testMethods: testingProtocol.methods
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Quality Assurance Requirements
   ctx.log('info', 'Phase 7: Establishing quality assurance requirements');
   const qualityRequirements = await ctx.task(establishQualityRequirements, {

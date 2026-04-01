@@ -53,7 +53,6 @@ export async function process(inputs, ctx) {
       benefitsFramework: null
     };
   }
-
   // Phase 2: Benefits Mapping and Dependencies
   const benefitsMapping = await ctx.task(benefitsMappingTask, {
     programName,
@@ -62,15 +61,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Benefit Owner Assignment
-  const ownerAssignment = await ctx.task(benefitOwnerAssignmentTask, {
+  let ownerAssignment = await ctx.task(benefitOwnerAssignmentTask, {
     programName,
     benefits: benefitsDefinition.definedBenefits,
     stakeholders,
     benefitsMapping
   });
 
-  // Breakpoint: Review benefit ownership
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      ownerAssignment = await ctx.task(benefitOwnerAssignmentTask, { ...{
+    programName,
+    benefits: benefitsDefinition.definedBenefits,
+    stakeholders,
+    benefitsMapping
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review benefit ownership assignments for ${programName}. ${ownerAssignment.assignedBenefits} of ${benefitsDefinition.validBenefits} benefits have owners. Confirm assignments?`,
     title: 'Benefit Ownership Review',
     context: {
@@ -83,9 +91,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: ownerAssignment
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Baseline Establishment
   const baselineEstablishment = await ctx.task(baselineEstablishmentTask, {
     programName,
@@ -129,7 +143,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Risk and Dis-benefit Analysis
-  const riskAnalysis = await ctx.task(benefitsRiskAnalysisTask, {
+  let riskAnalysis = await ctx.task(benefitsRiskAnalysisTask, {
     programName,
     benefits: benefitsDefinition.definedBenefits,
     realizationPlan,
@@ -137,8 +151,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check for critical benefit risks
-  if (riskAnalysis.criticalRisks && riskAnalysis.criticalRisks.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        riskAnalysis = await ctx.task(benefitsRiskAnalysisTask, { ...{
+    programName,
+    benefits: benefitsDefinition.definedBenefits,
+    realizationPlan,
+    investmentAmount
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `${riskAnalysis.criticalRisks.length} critical risks identified that may prevent benefit realization. Review risk mitigation strategies?`,
       title: 'Critical Benefit Risk Alert',
       context: {
@@ -146,9 +169,15 @@ export async function process(inputs, ctx) {
         criticalRisks: riskAnalysis.criticalRisks,
         disBenefits: riskAnalysis.disBenefits,
         recommendation: 'Address critical risks before proceeding with benefit commitments'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // Phase 10: Governance Framework
   const governanceFramework = await ctx.task(benefitsGovernanceTask, {
@@ -176,7 +205,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: Implementation Readiness Assessment
-  const readinessAssessment = await ctx.task(implementationReadinessTask, {
+  let readinessAssessment = await ctx.task(implementationReadinessTask, {
     programName,
     benefitsCase,
     ownerAssignment,
@@ -186,9 +215,18 @@ export async function process(inputs, ctx) {
 
   // Final Breakpoint: Benefits Framework Approval
   const readinessScore = readinessAssessment.readinessScore || 0;
-  const ready = readinessScore >= 75;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      readinessAssessment = await ctx.task(implementationReadinessTask, { ...{
+    programName,
+    benefitsCase,
+    ownerAssignment,
+    governanceFramework,
+    measurementApproach
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benefits realization framework complete for ${programName}. Expected total benefits: ${currency} ${benefitsDefinition.totalBenefitValue?.toLocaleString()}. Readiness score: ${readinessScore}/100. Approve framework?`,
     title: 'Benefits Framework Approval',
     context: {
@@ -202,9 +240,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/benefits-case.json`, format: 'json', content: benefitsCase },
         { path: `artifacts/benefits-case.md`, format: 'markdown', content: benefitsCase.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     programName,
@@ -255,8 +299,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const benefitsDefinitionTask = defineTask('benefits-definition', (args, taskCtx) => ({
   kind: 'agent',

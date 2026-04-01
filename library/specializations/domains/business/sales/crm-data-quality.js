@@ -65,18 +65,30 @@ export async function process(inputs, ctx) {
   artifacts.push(...(automationRecs.artifacts || []));
 
   // Phase 8: Quality Report Generation
-  const qualityReport = await ctx.task(qualityReportTask, {
+  let qualityReport = await ctx.task(qualityReportTask, {
     dataProfiling, completenessAnalysis, accuracyValidation, duplicateDetection,
     stalenessAnalysis, issuePrioritization, qualityThresholds, outputDir
   });
-  artifacts.push(...(qualityReport.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityReport = await ctx.task(qualityReportTask, { ...{
+    dataProfiling, completenessAnalysis, accuracyValidation, duplicateDetection,
+    stalenessAnalysis, issuePrioritization, qualityThresholds, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CRM data quality analysis complete. Score: ${qualityReport.overallScore}. Review findings?`,
     title: 'CRM Data Quality Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     qualityReport: qualityReport.report,

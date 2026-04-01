@@ -59,20 +59,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'constraint-analysis', output: constraintAnalysis });
 
   // Phase 4: Throughput per Constraint Unit Ranking
-  const tCuRanking = await ctx.task(calculateTCURanking, {
+  let tCuRanking = await ctx.task(calculateTCURanking, {
     productThroughput,
     constraintAnalysis,
     productData
   });
   artifacts.push({ phase: 'tcu-ranking', output: tCuRanking });
 
-  // Quality Gate: Throughput Analysis Review
-  await ctx.breakpoint('throughput-analysis-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      tCuRanking = await ctx.task(calculateTCURanking, { ...{
+    productThroughput,
+    constraintAnalysis,
+    productData
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('throughput-analysis-review', {
     title: 'Throughput Analysis Review',
     description: 'Review product throughput and T/CU ranking before decision analysis',
-    artifacts: [productThroughput, constraintAnalysis, tCuRanking]
-  });
-
+    artifacts: [productThroughput, constraintAnalysis, tCuRanking],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Product Mix Optimization
   const productMixOptimization = await ctx.task(optimizeProductMix, {
     tCuRanking,
@@ -127,7 +141,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'performance-metrics', output: performanceMetrics });
 
   // Phase 11: Decision Recommendations
-  const decisionRecommendations = await ctx.task(generateDecisionRecommendations, {
+  let decisionRecommendations = await ctx.task(generateDecisionRecommendations, {
     productMixOptimization,
     pricingAnalysis,
     makeVsBuyAnalysis,
@@ -136,13 +150,29 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'decision-recommendations', output: decisionRecommendations });
 
-  // Final Quality Gate: TA Decision Support Approval
-  await ctx.breakpoint('ta-decision-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      decisionRecommendations = await ctx.task(generateDecisionRecommendations, { ...{
+    productMixOptimization,
+    pricingAnalysis,
+    makeVsBuyAnalysis,
+    investmentEvaluation,
+    performanceMetrics
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('ta-decision-approval', {
     title: 'Throughput Accounting Decision Support Approval',
     description: 'Final approval of TA-based decision recommendations',
-    artifacts: [decisionRecommendations, performanceMetrics]
-  });
-
+    artifacts: [decisionRecommendations, performanceMetrics],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     throughputAnalysis: {

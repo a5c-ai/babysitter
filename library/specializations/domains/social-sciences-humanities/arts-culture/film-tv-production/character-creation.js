@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Compile Character Bible
   ctx.log('info', 'Compiling character bible');
-  const bibleResult = await ctx.task(compileCharacterBible, {
+  let bibleResult = await ctx.task(compileCharacterBible, {
     allCharacters: {
       protagonist: protagonistResult,
       antagonist: supportingResult.antagonist,
@@ -96,8 +96,22 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(bibleResult.artifacts || []));
 
-  // Breakpoint: Character Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bibleResult = await ctx.task(compileCharacterBible, { ...{
+    allCharacters: {
+      protagonist: protagonistResult,
+      antagonist: supportingResult.antagonist,
+      supporting: supportingResult.supportingCharacters
+    },
+    relationships: relationshipResult,
+    visualDesigns: visualResult.characterDesigns,
+    format,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Character bible complete with ${identificationResult.characters.length} characters. Protagonist, antagonist, and supporting characters profiled with visual designs. Review and approve?`,
     title: 'Character Bible Review',
     context: {
@@ -109,9 +123,15 @@ export async function process(inputs, ctx) {
         supportingCount: supportingResult.supportingCharacters?.length || 0,
         keyRelationships: relationshipResult.dynamics?.centralRelationship
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -132,8 +152,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const characterIdentification = defineTask('character-identification', (args, taskCtx) => ({
   kind: 'agent',

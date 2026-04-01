@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: State Transition Logic Design');
 
-  const transitionDesign = await ctx.task(stateTransitionTask, {
+  let transitionDesign = await ctx.task(stateTransitionTask, {
     fsmName,
     stateList,
     specification,
@@ -80,8 +80,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...transitionDesign.artifacts);
 
-  // Quality Gate: Transition review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      transitionDesign = await ctx.task(stateTransitionTask, { ...{
+    fsmName,
+    stateList,
+    specification,
+    outputType,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `State transitions defined for ${fsmName}. ${transitionDesign.transitionCount} transitions across ${stateList.length} states. Review transition table?`,
     title: 'State Transition Review',
     context: {
@@ -91,9 +101,15 @@ export async function process(inputs, ctx) {
       transitionCount: transitionDesign.transitionCount,
       transitionTable: transitionDesign.transitionTable,
       files: transitionDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: OUTPUT LOGIC DESIGN
   // ============================================================================
@@ -229,7 +245,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Quality and Coverage Analysis');
 
-  const qualityAnalysis = await ctx.task(fsmQualityAnalysisTask, {
+  let qualityAnalysis = await ctx.task(fsmQualityAnalysisTask, {
     fsmName,
     rtlImplementation,
     testbench,
@@ -241,8 +257,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityAnalysis.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityAnalysis = await ctx.task(fsmQualityAnalysisTask, { ...{
+    fsmName,
+    rtlImplementation,
+    testbench,
+    formalProperties,
+    encoding,
+    safeStateMachine,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FSM Design Complete for ${fsmName}. ${stateList.length} states, ${transitionDesign.transitionCount} transitions. Quality score: ${qualityAnalysis.score}/100. Review FSM package?`,
     title: 'FSM Design Complete',
     context: {
@@ -261,9 +289,15 @@ export async function process(inputs, ctx) {
         { path: stateDiagram.diagramPath, format: 'svg', label: 'State Diagram' },
         { path: testbench.testbenchPath, format: 'sv', label: 'Testbench' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -306,8 +340,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

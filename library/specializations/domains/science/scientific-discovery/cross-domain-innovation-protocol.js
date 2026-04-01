@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
 
   // STAGE 2: ANALYZE TARGET DOMAIN - Deep analysis of target domain
   ctx.log('info', 'Stage 2: Analyzing target domain');
-  const targetAnalysis = await ctx.task(analyzeTargetDomainTask, {
+  let targetAnalysis = await ctx.task(analyzeTargetDomainTask, {
     targetDomain,
     innovationGoal,
     domain
@@ -51,9 +51,16 @@ export async function process(inputs, ctx) {
     targetAnalysis,
     innovationGoal,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      targetAnalysis = await ctx.task(analyzeTargetDomainTask, { ...{
+    targetDomain,
+    innovationGoal,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Latent space constructed. Review before scale-invariant analysis?',
     title: 'Cross-Domain Innovation - Stage 3 Complete',
     context: {
@@ -63,9 +70,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/target-analysis.json', format: 'json' },
         { path: 'artifacts/latent-space.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // STAGE 4: FIND SCALE-INVARIANT STRUCTURES - Identify structures that transfer
   ctx.log('info', 'Stage 4: Finding scale-invariant structures');
   const scaleInvariantStructures = await ctx.task(findScaleInvariantStructuresTask, {

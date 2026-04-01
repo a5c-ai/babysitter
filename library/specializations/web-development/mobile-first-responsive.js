@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const responsiveComponents = await ctx.task(responsiveComponentsTask, { projectName, framework, outputDir });
   artifacts.push(...responsiveComponents.artifacts);
 
-  const touchOptimization = await ctx.task(touchOptimizationTask, { projectName, outputDir });
-  artifacts.push(...touchOptimization.artifacts);
-
-  await ctx.breakpoint({ question: `Mobile-first design complete for ${projectName}. Approve?`, title: 'Responsive Design Review', context: { runId: ctx.runId, breakpoints: breakpointsSetup.breakpoints } });
-
+  let touchOptimization = await ctx.task(touchOptimizationTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      touchOptimization = await ctx.task(touchOptimizationTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Mobile-first design complete for ${projectName}. Approve?`, title: 'Responsive Design Review', context: { runId: ctx.runId, breakpoints: breakpointsSetup.breakpoints }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

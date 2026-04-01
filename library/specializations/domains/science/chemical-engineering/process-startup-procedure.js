@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Plan Staffing and Training
   ctx.log('info', 'Planning staffing and training');
-  const staffingResult = await ctx.task(staffingTrainingTask, {
+  let staffingResult = await ctx.task(staffingTrainingTask, {
     processName,
     startupProcedure: procedureResult.procedure,
     equipmentList,
@@ -87,8 +87,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...staffingResult.artifacts);
 
-  // Breakpoint: Review startup procedure
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      staffingResult = await ctx.task(staffingTrainingTask, { ...{
+    processName,
+    startupProcedure: procedureResult.procedure,
+    equipmentList,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Startup procedure developed for ${processName}. Steps: ${sequenceResult.sequence.steps.length}. PSSR items: ${pssrResult.checklist.items.length}. Estimated duration: ${sequenceResult.sequence.estimatedDuration} hours. Review procedure?`,
     title: 'Process Startup Procedure Review',
     context: {
@@ -100,9 +109,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: sequenceResult.sequence.estimatedDuration,
         criticalSteps: sequenceResult.sequence.criticalSteps
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Prepare Startup Troubleshooting Guide
   ctx.log('info', 'Preparing troubleshooting guide');
   const troubleshootingResult = await ctx.task(troubleshootingGuideTask, {
@@ -146,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Startup Sequence Definition
+  // Task 1: Startup Sequence Definition
 export const startupSequenceTask = defineTask('startup-sequence', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define startup sequence and milestones',

@@ -59,14 +59,21 @@ export async function process(inputs, ctx) {
       appName, platforms, releaseStrategy, rolloutPercentage, outputDir
     });
     artifacts.push(...result.artifacts);
-  }
-
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint({
     question: `Release management configured for ${appName}. Ready to execute first release?`,
     title: 'Release Management Review',
-    context: { runId: ctx.runId, appName, releaseStrategy, rolloutPercentage }
-  });
-
+    context: { runId: ctx.runId, appName, releaseStrategy, rolloutPercentage },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,

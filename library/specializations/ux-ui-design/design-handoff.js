@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing design readiness for handoff');
 
-  const readinessAssessment = await ctx.task(designReadinessAssessmentTask, {
+  let readinessAssessment = await ctx.task(designReadinessAssessmentTask, {
     projectName,
     designFiles,
     platform,
@@ -71,8 +71,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...readinessAssessment.artifacts);
 
   // Quality Gate: Design readiness check
-  if (readinessAssessment.readinessScore < 70) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        readinessAssessment = await ctx.task(designReadinessAssessmentTask, { ...{
+    projectName,
+    designFiles,
+    platform,
+    technology,
+    includePrototype,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Design readiness score: ${readinessAssessment.readinessScore}/100. Below recommended threshold of 70. ${readinessAssessment.blockers.length} blocking issues found. Review and resolve issues before proceeding?`,
       title: 'Design Readiness Gate',
       context: {
@@ -86,9 +97,15 @@ export async function process(inputs, ctx) {
           format: a.format || 'markdown',
           label: a.label
         }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: DESIGN ANNOTATION AND DOCUMENTATION
@@ -190,7 +207,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Exporting and optimizing design assets');
 
-  const assetExport = await ctx.task(assetExportTask, {
+  let assetExport = await ctx.task(assetExportTask, {
     projectName,
     designFiles,
     platform,
@@ -204,8 +221,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assets exported: ${assetExport.totalAssets} assets (${assetExport.iconsCount} icons, ${assetExport.imagesCount} images)`);
 
-  // Breakpoint: Review exported assets
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      assetExport = await ctx.task(assetExportTask, { ...{
+    projectName,
+    designFiles,
+    platform,
+    technology,
+    componentSpecs,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Asset export complete. ${assetExport.totalAssets} assets exported and optimized. Total size: ${assetExport.totalSize}. Review asset quality and optimization?`,
     title: 'Asset Export Review',
     context: {
@@ -223,9 +251,15 @@ export async function process(inputs, ctx) {
         format: a.format,
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: ACCESSIBILITY SPECIFICATIONS
   // ============================================================================
@@ -246,7 +280,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Accessibility specs documented: ${accessibilitySpecs.componentsWithA11y} components with a11y requirements`);
   }
-
   // ============================================================================
   // PHASE 9: DEVELOPER DOCUMENTATION GENERATION
   // ============================================================================
@@ -307,7 +340,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...prototypeDemo.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: QA CRITERIA AND ACCEPTANCE TESTS
   // ============================================================================
@@ -359,7 +391,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Preparing handoff meeting materials');
 
-  const meetingPrep = await ctx.task(handoffMeetingPreparationTask, {
+  let meetingPrep = await ctx.task(handoffMeetingPreparationTask, {
     projectName,
     handoffPackage,
     targetDevelopers,
@@ -371,8 +403,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...meetingPrep.artifacts);
 
-  // Breakpoint: Review handoff materials before meeting
-  await ctx.breakpoint({
+    let lastFeedback_phase14Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase14Review) {
+      meetingPrep = await ctx.task(handoffMeetingPreparationTask, { ...{
+    projectName,
+    handoffPackage,
+    targetDevelopers,
+    componentSpecs,
+    interactionSpecs,
+    qaCriteria,
+    outputDir
+  }, feedback: lastFeedback_phase14Review, attempt: attempt + 1 });
+    }
+  const phase14Review = await ctx.breakpoint({
     question: `Handoff package assembled. ${componentSpecs.componentCount} components, ${interactionSpecs.interactionCount} interactions, ${assetExport.totalAssets} assets, ${qaCriteria.testCaseCount} test cases. Ready for handoff meeting?`,
     title: 'Handoff Package Review',
     context: {
@@ -400,9 +444,15 @@ export async function process(inputs, ctx) {
         { path: meetingPrep.presentationPath, format: 'link', label: 'Handoff Presentation' },
         { path: qaCriteria.testPlanPath, format: 'markdown', label: 'QA Test Plan' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase14Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase14Review.approved) break;
+    lastFeedback_phase14Review = phase14Review.response || phase14Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 15: HANDOFF EXECUTION AND Q&A
   // ============================================================================
@@ -443,7 +493,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 17: Validating handoff completeness and quality');
 
-  const qualityValidation = await ctx.task(handoffQualityValidationTask, {
+  let qualityValidation = await ctx.task(handoffQualityValidationTask, {
     projectName,
     handoffPackage,
     componentSpecs,
@@ -462,8 +512,24 @@ export async function process(inputs, ctx) {
   const validationScore = qualityValidation.validationScore;
   const handoffReady = qualityValidation.handoffReady;
 
-  // Final Breakpoint: Handoff approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(handoffQualityValidationTask, { ...{
+    projectName,
+    handoffPackage,
+    componentSpecs,
+    interactionSpecs,
+    designTokens,
+    assetExport,
+    accessibilitySpecs,
+    developerDocs,
+    qaCriteria,
+    handoffExecution,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Design Handoff Complete! ${projectName}: ${componentSpecs.componentCount} components, ${interactionSpecs.interactionCount} interactions, validation score: ${validationScore}/100. Handoff ready: ${handoffReady}. Approve and close handoff?`,
     title: 'Design Handoff Complete',
     context: {
@@ -496,9 +562,15 @@ export async function process(inputs, ctx) {
         { path: supportPlan.supportPlanPath, format: 'markdown', label: 'Implementation Support Plan' },
         { path: qualityValidation.reportPath, format: 'markdown', label: 'Handoff Validation Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -604,8 +676,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

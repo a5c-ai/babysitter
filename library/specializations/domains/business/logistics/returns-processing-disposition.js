@@ -50,20 +50,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: CONDITION GRADING
   ctx.log('info', 'Phase 4: Grading condition');
-  const conditionGrading = await ctx.task(conditionGradingTask, { inspectedItems: physicalInspection.inspected, outputDir });
+  let conditionGrading = await ctx.task(conditionGradingTask, { inspectedItems: physicalInspection.inspected, outputDir });
   artifacts.push(...conditionGrading.artifacts);
 
-  // Quality Gate: Review inspection results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      conditionGrading = await ctx.task(conditionGradingTask, { ...{ inspectedItems: physicalInspection.inspected, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `${conditionGrading.gradedItems.length} items graded. ${conditionGrading.gradeA}% Grade A, ${conditionGrading.gradeB}% Grade B, ${conditionGrading.gradeC}% Grade C, ${conditionGrading.scrap}% Scrap. Review grading?`,
     title: 'Returns Inspection Review',
     context: {
       runId: ctx.runId,
       summary: { gradeA: conditionGrading.gradeA, gradeB: conditionGrading.gradeB, gradeC: conditionGrading.gradeC, scrap: conditionGrading.scrap },
       files: conditionGrading.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: DISPOSITION ASSIGNMENT
   ctx.log('info', 'Phase 5: Assigning disposition');
   const dispositionAssignment = await ctx.task(dispositionAssignmentTask, { gradedItems: conditionGrading.gradedItems, dispositionPolicies, outputDir });
@@ -91,11 +101,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 10: QUALITY METRICS REPORTING
   ctx.log('info', 'Phase 10: Generating quality metrics');
-  const qualityMetrics = await ctx.task(returnsQualityMetricsTask, { conditionGrading, dispositionAssignment, restocking, outputDir });
+  let qualityMetrics = await ctx.task(returnsQualityMetricsTask, { conditionGrading, dispositionAssignment, restocking, outputDir });
   artifacts.push(...qualityMetrics.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityMetrics = await ctx.task(returnsQualityMetricsTask, { ...{ conditionGrading, dispositionAssignment, restocking, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Returns processing complete. ${returns.length} returns processed. Restock rate: ${dispositionAssignment.restockRate}%. Avg processing time: ${qualityMetrics.avgProcessingTime} minutes. Approve results?`,
     title: 'Returns Processing Complete',
     context: {
@@ -107,9 +121,15 @@ export async function process(inputs, ctx) {
         avgProcessingTime: `${qualityMetrics.avgProcessingTime} min`
       },
       files: [{ path: qualityMetrics.reportPath, format: 'markdown', label: 'Quality Metrics Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -122,8 +142,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/returns-processing-disposition', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const returnsReceivingTask = defineTask('returns-receiving', (args, taskCtx) => ({
   kind: 'agent', title: 'Receive returns', agent: { name: 'returns-receiving-specialist', prompt: { role: 'Returns Receiving Specialist', task: 'Receive and check-in returned items', context: args, instructions: ['Scan RMA numbers', 'Verify shipment contents', 'Log receipt time', 'Assign bin locations', 'Note visible damage', 'Generate receiving log'] }, outputSchema: { type: 'object', required: ['checkedIn', 'artifacts'], properties: { checkedIn: { type: 'array' }, discrepancies: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'returns', 'receiving']
 }));

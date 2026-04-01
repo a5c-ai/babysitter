@@ -27,8 +27,12 @@ mkdir -p "$LOG_DIR" 2>/dev/null
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-user-prompt-submit-$$.json")
 cat > "$INPUT_FILE"
 
+babysitter log --type hook --label "hook:user-prompt-submit" --message "Hook invoked" --source shell-hook 2>/dev/null || true
+
 RESULT=$(babysitter hook:run --hook-type user-prompt-submit --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-user-prompt-submit-hook-stderr.log")
 EXIT_CODE=$?
+
+babysitter log --type hook --label "hook:user-prompt-submit" --message "CLI exit code=$EXIT_CODE" --source shell-hook 2>/dev/null || true
 
 rm -f "$INPUT_FILE" 2>/dev/null
 

@@ -129,7 +129,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...domainRandomizationSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: SCENARIO CREATION
   // ============================================================================
@@ -152,16 +151,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: GPU Performance Optimization');
 
-  const gpuOptimization = await ctx.task(gpuOptimizationTask, {
+  let gpuOptimization = await ctx.task(gpuOptimizationTask, {
     projectName,
     rayTracingEnabled,
     environmentDesign,
     outputDir
   });
 
-  artifacts.push(...gpuOptimization.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      gpuOptimization = await ctx.task(gpuOptimizationTask, { ...{
+    projectName,
+    rayTracingEnabled,
+    environmentDesign,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `GPU optimization complete for ${projectName}. Achieved FPS: ${gpuOptimization.achievedFPS}. Continue with dataset export?`,
     title: 'GPU Performance Review',
     context: {
@@ -169,16 +176,22 @@ export async function process(inputs, ctx) {
       achievedFPS: gpuOptimization.achievedFPS,
       gpuUtilization: gpuOptimization.gpuUtilization,
       files: gpuOptimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DATASET EXPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Synthetic Dataset Export');
 
-  const datasetExport = await ctx.task(datasetExportTask, {
+  let datasetExport = await ctx.task(datasetExportTask, {
     projectName,
     syntheticDataTypes,
     syntheticDataSetup,
@@ -188,8 +201,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...datasetExport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      datasetExport = await ctx.task(datasetExportTask, { ...{
+    projectName,
+    syntheticDataTypes,
+    syntheticDataSetup,
+    scenarioCreation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Isaac Sim Project Complete for ${projectName}. Generated ${datasetExport.totalImages} synthetic images. Review project?`,
     title: 'Isaac Sim Project Complete',
     context: {
@@ -205,9 +228,15 @@ export async function process(inputs, ctx) {
         { path: environmentSetup.projectPath, format: 'usd', label: 'USD Scene' },
         { path: datasetExport.datasetPath, format: 'folder', label: 'Dataset' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -231,8 +260,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

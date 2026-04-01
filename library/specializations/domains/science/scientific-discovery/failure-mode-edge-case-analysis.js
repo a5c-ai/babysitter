@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Discovering edge cases');
-  const edgeCaseDiscovery = await ctx.task(edgeCaseDiscoveryTask, {
+  let edgeCaseDiscovery = await ctx.task(edgeCaseDiscoveryTask, {
     components: subjectDecomposition.components,
     assumptions: assumptionEnumeration.assumptions,
     failureModes: failureModeIdentification.failureModes,
@@ -77,8 +77,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...edgeCaseDiscovery.artifacts);
 
-  // Breakpoint: Review failure modes and edge cases
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      edgeCaseDiscovery = await ctx.task(edgeCaseDiscoveryTask, { ...{
+    components: subjectDecomposition.components,
+    assumptions: assumptionEnumeration.assumptions,
+    failureModes: failureModeIdentification.failureModes,
+    subjectType,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Identified ${failureModeIdentification.failureModes.length} failure modes and ${edgeCaseDiscovery.edgeCases.length} edge cases. Review before impact analysis?`,
     title: 'Failure Mode and Edge Case Review',
     context: {
@@ -95,9 +105,15 @@ export async function process(inputs, ctx) {
         failureModeCount: failureModeIdentification.failureModes.length,
         edgeCaseCount: edgeCaseDiscovery.edgeCases.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: IMPACT AND SEVERITY ANALYSIS
   // ============================================================================
@@ -161,7 +177,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing overall robustness');
-  const robustnessAssessment = await ctx.task(robustnessAssessmentTask, {
+  let robustnessAssessment = await ctx.task(robustnessAssessmentTask, {
     failureModes: failureModeIdentification.failureModes,
     edgeCases: edgeCaseDiscovery.edgeCases,
     mitigations: mitigationDevelopment.mitigations,
@@ -171,8 +187,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...robustnessAssessment.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      robustnessAssessment = await ctx.task(robustnessAssessmentTask, { ...{
+    failureModes: failureModeIdentification.failureModes,
+    edgeCases: edgeCaseDiscovery.edgeCases,
+    mitigations: mitigationDevelopment.mitigations,
+    prioritizedRisks: riskPrioritization.prioritizedRisks,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Failure analysis complete. Robustness score: ${robustnessAssessment.robustnessScore}%. ${mitigationDevelopment.mitigations.length} mitigations proposed. Review final assessment?`,
     title: 'Failure Analysis Complete',
     context: {
@@ -188,9 +214,15 @@ export async function process(inputs, ctx) {
         criticalRisks: riskPrioritization.criticalRisks.length,
         mitigationCount: mitigationDevelopment.mitigations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -218,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

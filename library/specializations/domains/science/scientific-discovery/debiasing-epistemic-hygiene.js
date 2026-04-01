@@ -64,7 +64,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Group Thinking Check
-  const groupThinkCheck = await ctx.task(checkGroupThinkTask, {
+  let groupThinkCheck = await ctx.task(checkGroupThinkTask, {
     reasoning: inputs.reasoning,
     groupContext: inputs.context?.groupContext,
     dissent: inputs.context?.dissentingViews
@@ -82,13 +82,27 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Significant Biases
   const significantBiases = biasFindings.filter(b => b.findings.severity >= 0.6);
-  if (significantBiases.length > 0) {
-    await ctx.breakpoint('significant-biases-detected', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        groupThinkCheck = await ctx.task(checkGroupThinkTask, { ...{
+    reasoning: inputs.reasoning,
+    groupContext: inputs.context?.groupContext,
+    dissent: inputs.context?.dissentingViews
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint('significant-biases-detected', {
       message: 'Significant cognitive biases detected in reasoning',
       biases: significantBiases,
-      urgentCorrections: significantBiases.map(b => b.findings.correction)
-    });
-  }
+      urgentCorrections: significantBiases.map(b => b.findings.correction),
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 9: Correction Strategy Development
   const correctionStrategies = await ctx.task(developCorrectionStrategiesTask, {

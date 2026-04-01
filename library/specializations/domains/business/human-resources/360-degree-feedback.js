@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting 360-Degree Feedback Implementation for ${organizationName}`);
 
   // Phase 1: Program Design
-  const programDesign = await ctx.task(programDesignTask, {
+  let programDesign = await ctx.task(programDesignTask, {
     organizationName,
     targetPopulation,
     feedbackPurpose,
@@ -49,9 +49,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...programDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      programDesign = await ctx.task(programDesignTask, { ...{
+    organizationName,
+    targetPopulation,
+    feedbackPurpose,
+    raterGroups,
+    competencyModel,
+    anonymityThreshold,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `360 feedback program designed for ${targetPopulation}. ${programDesign.competencies.length} competencies selected. Review program design?`,
     title: '360 Program Design Review',
     context: {
@@ -60,9 +71,15 @@ export async function process(inputs, ctx) {
       raterGroups: programDesign.raterGroups,
       timeline: programDesign.timeline,
       files: programDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Survey Instrument Development
   const surveyDevelopment = await ctx.task(surveyDevelopmentTask, {
     organizationName,
@@ -84,7 +101,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...participantSelection.artifacts);
 
   // Phase 4: Rater Nomination
-  const raterNomination = await ctx.task(raterNominationTask, {
+  let raterNomination = await ctx.task(raterNominationTask, {
     organizationName,
     participants: participantSelection.participants,
     raterGroups: programDesign.raterGroups,
@@ -92,9 +109,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...raterNomination.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      raterNomination = await ctx.task(raterNominationTask, { ...{
+    organizationName,
+    participants: participantSelection.participants,
+    raterGroups: programDesign.raterGroups,
+    anonymityThreshold,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Rater nominations complete. ${raterNomination.totalRaters} raters nominated for ${participantSelection.participants.length} participants. Review and approve rater lists?`,
     title: 'Rater Nomination Review',
     context: {
@@ -103,9 +129,15 @@ export async function process(inputs, ctx) {
       averageRatersPerParticipant: raterNomination.averageRatersPerParticipant,
       raterDistribution: raterNomination.raterDistribution,
       files: raterNomination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Communication and Launch
   const launchCommunication = await ctx.task(launchCommunicationTask, {
     organizationName,
@@ -145,16 +177,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...reportGeneration.artifacts);
 
   // Phase 8: Report Review and Quality Check
-  const reportQualityCheck = await ctx.task(reportQualityCheckTask, {
+  let reportQualityCheck = await ctx.task(reportQualityCheckTask, {
     organizationName,
     reports: reportGeneration.reports,
     anonymityThreshold,
     outputDir
   });
 
-  artifacts.push(...reportQualityCheck.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportQualityCheck = await ctx.task(reportQualityCheckTask, { ...{
+    organizationName,
+    reports: reportGeneration.reports,
+    anonymityThreshold,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${reportQualityCheck.reportsReady} feedback reports ready for delivery. ${reportQualityCheck.flaggedReports} reports flagged for review. Approve reports for delivery?`,
     title: 'Report Quality Review',
     context: {
@@ -163,9 +203,15 @@ export async function process(inputs, ctx) {
       flaggedReports: reportQualityCheck.flaggedReports,
       qualityIssues: reportQualityCheck.qualityIssues,
       files: reportQualityCheck.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Feedback Debrief Preparation
   let coachingPrep = null;
   if (includeCoaching) {
@@ -178,7 +224,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...coachingPrep.artifacts);
   }
-
   // Phase 10: Report Delivery and Debrief Sessions
   const reportDelivery = await ctx.task(reportDeliveryTask, {
     organizationName,
@@ -240,8 +285,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const programDesignTask = defineTask('program-design', (args, taskCtx) => ({
   kind: 'agent',

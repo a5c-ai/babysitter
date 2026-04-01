@@ -44,7 +44,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Validating Parsing Strategy');
 
-  const strategyAnalysis = await ctx.task(parsingStrategyTask, {
+  let strategyAnalysis = await ctx.task(parsingStrategyTask, {
     languageName,
     parsingStrategy,
     grammarSpec,
@@ -52,9 +52,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...strategyAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      strategyAnalysis = await ctx.task(parsingStrategyTask, { ...{
+    languageName,
+    parsingStrategy,
+    grammarSpec,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Parsing strategy analyzed: ${parsingStrategy}. Lookahead: ${strategyAnalysis.lookahead}, Grammar class: ${strategyAnalysis.grammarClass}. Proceed with architecture design?`,
     title: 'Parsing Strategy Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
       grammarClass: strategyAnalysis.grammarClass,
       tradeoffs: strategyAnalysis.tradeoffs,
       files: strategyAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PARSER ARCHITECTURE DESIGN
   // ============================================================================
@@ -158,7 +173,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Implementing Error Recovery');
 
-  const errorRecovery = await ctx.task(parserErrorRecoveryTask, {
+  let errorRecovery = await ctx.task(parserErrorRecoveryTask, {
     languageName,
     errorRecoveryMode,
     parserArchitecture,
@@ -166,9 +181,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...errorRecovery.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      errorRecovery = await ctx.task(parserErrorRecoveryTask, { ...{
+    languageName,
+    errorRecoveryMode,
+    parserArchitecture,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Error recovery implemented with ${errorRecovery.strategies.length} strategies. Synchronization points: ${errorRecovery.syncPoints.length}. Continue with diagnostics?`,
     title: 'Error Recovery Review',
     context: {
@@ -176,9 +200,15 @@ export async function process(inputs, ctx) {
       strategies: errorRecovery.strategies,
       syncPoints: errorRecovery.syncPoints,
       files: errorRecovery.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DIAGNOSTIC MESSAGES
   // ============================================================================
@@ -237,7 +267,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Generating Documentation');
 
-  const documentation = await ctx.task(parserDocumentationTask, {
+  let documentation = await ctx.task(parserDocumentationTask, {
     languageName,
     parsingStrategy,
     parserArchitecture,
@@ -247,9 +277,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(parserDocumentationTask, { ...{
+    languageName,
+    parsingStrategy,
+    parserArchitecture,
+    astNodes,
+    errorRecovery,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Parser Development Complete for ${languageName}! Test coverage: ${testSuite.coverage}%, AST nodes: ${astNodes.nodeCount}. Review deliverables?`,
     title: 'Parser Development Complete',
     context: {
@@ -265,9 +306,15 @@ export async function process(inputs, ctx) {
         { path: parserIntegration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Parser Implementation' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -313,8 +360,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

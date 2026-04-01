@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: System Definition
   ctx.log('info', 'Phase 2: Defining thermodynamic system');
-  const systemDefinition = await ctx.task(systemDefinitionTask, {
+  let systemDefinition = await ctx.task(systemDefinitionTask, {
     systemComponents,
     compositionRange,
     temperatureRange,
@@ -80,9 +80,19 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...phaseDiagramResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        systemDefinition = await ctx.task(systemDefinitionTask, { ...{
+    systemComponents,
+    compositionRange,
+    temperatureRange,
+    pressure,
+    database,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Phase diagram calculated for ${systemComponents.join('-')} system. ${phaseDiagramResults.phaseRegions.length} phase regions identified. Review diagram?`,
       title: 'Phase Diagram Review',
       context: {
@@ -93,9 +103,15 @@ export async function process(inputs, ctx) {
           invariantPoints: phaseDiagramResults.invariantPoints.length
         },
         files: phaseDiagramResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Equilibrium Calculations
   if (calculationType === 'equilibrium' || calculationType === 'all') {
@@ -110,7 +126,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...equilibriumResults.artifacts);
   }
-
   // Phase 5: Scheil Solidification
   if (calculationType === 'scheil' || calculationType === 'all') {
     ctx.log('info', 'Phase 5: Calculating Scheil solidification');
@@ -124,7 +139,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...scheilResults.artifacts);
   }
-
   // Phase 6: Diffusion Simulation (DICTRA)
   if (calculationType === 'diffusion') {
     ctx.log('info', 'Phase 6: Simulating diffusion');
@@ -138,7 +152,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...diffusionResults.artifacts);
   }
-
   // Phase 7: Property Extraction
   ctx.log('info', 'Phase 7: Extracting thermodynamic properties');
   const propertyExtraction = await ctx.task(propertyExtractionTask, {
@@ -211,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Database Validation
+  // Task 1: Database Validation
 export const databaseValidationTask = defineTask('calphad-database-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Database Validation - ${args.systemComponents.join('-')}`,

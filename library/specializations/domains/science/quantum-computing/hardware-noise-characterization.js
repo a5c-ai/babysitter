@@ -43,31 +43,44 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Hardware Calibration Data Retrieval');
 
-  const calibrationResult = await ctx.task(calibrationDataRetrievalTask, {
+  let calibrationResult = await ctx.task(calibrationDataRetrievalTask, {
     hardware,
     qubits,
     framework
   });
 
-  artifacts.push(...(calibrationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      calibrationResult = await ctx.task(calibrationDataRetrievalTask, { ...{
+    hardware,
+    qubits,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Calibration data retrieved. Total qubits: ${calibrationResult.totalQubits}, Last calibration: ${calibrationResult.lastCalibration}. Proceed with coherence measurements?`,
     title: 'Calibration Data Review',
     context: {
       runId: ctx.runId,
       calibration: calibrationResult,
       files: (calibrationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: COHERENCE TIME MEASUREMENTS (T1, T2)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Coherence Time Measurements');
 
-  const coherenceResult = await ctx.task(coherenceMeasurementTask, {
+  let coherenceResult = await ctx.task(coherenceMeasurementTask, {
     hardware,
     qubits: calibrationResult.availableQubits,
     shots,
@@ -93,18 +106,32 @@ export async function process(inputs, ctx) {
       framework
     });
 
-    artifacts.push(...(rbResult.artifacts || []));
-
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        coherenceResult = await ctx.task(coherenceMeasurementTask, { ...{
+    hardware,
+    qubits: calibrationResult.availableQubits,
+    shots,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Randomized benchmarking complete. Average single-qubit error: ${rbResult.averageSingleQubitError}, Average two-qubit error: ${rbResult.averageTwoQubitError}. Review RB results?`,
       title: 'Randomized Benchmarking Review',
       context: {
         runId: ctx.runId,
         rbResults: rbResult,
         files: (rbResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: READOUT ERROR CHARACTERIZATION
@@ -129,7 +156,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Crosstalk Characterization');
 
-  const crosstalkResult = await ctx.task(crosstalkCharacterizationTask, {
+  let crosstalkResult = await ctx.task(crosstalkCharacterizationTask, {
     hardware,
     qubits: calibrationResult.availableQubits,
     connectivity: calibrationResult.connectivity,
@@ -137,18 +164,33 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(crosstalkResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      crosstalkResult = await ctx.task(crosstalkCharacterizationTask, { ...{
+    hardware,
+    qubits: calibrationResult.availableQubits,
+    connectivity: calibrationResult.connectivity,
+    shots,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Crosstalk characterized. Significant crosstalk pairs: ${crosstalkResult.significantPairs}. Review crosstalk analysis?`,
     title: 'Crosstalk Analysis Review',
     context: {
       runId: ctx.runId,
       crosstalk: crosstalkResult,
       files: (crosstalkResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: GATE SET TOMOGRAPHY (if selected)
   // ============================================================================
@@ -168,7 +210,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', 'Gate set tomography complete');
   }
-
   // ============================================================================
   // PHASE 7: NOISE MODEL CONSTRUCTION
   // ============================================================================
@@ -211,7 +252,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Report Generation');
 
-  const reportResult = await ctx.task(noiseCharacterizationReportTask, {
+  let reportResult = await ctx.task(noiseCharacterizationReportTask, {
     hardware,
     calibrationResult,
     coherenceResult,
@@ -224,9 +265,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(noiseCharacterizationReportTask, { ...{
+    hardware,
+    calibrationResult,
+    coherenceResult,
+    rbResult,
+    readoutResult,
+    crosstalkResult,
+    gstResult,
+    noiseModelResult,
+    recommendationsResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Noise characterization complete for ${hardware}. Best qubit: ${recommendationsResult.bestQubit}, Worst qubit: ${recommendationsResult.worstQubit}. Approve results?`,
     title: 'Noise Characterization Complete',
     context: {
@@ -240,9 +295,15 @@ export async function process(inputs, ctx) {
         worstQubit: recommendationsResult.worstQubit
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -279,8 +340,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

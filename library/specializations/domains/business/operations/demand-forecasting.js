@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'statistical-baseline', output: statisticalBaseline });
 
   // Phase 5: ML/AI Forecast Enhancement
-  const mlEnhancement = await ctx.task(enhanceWithML, {
+  let mlEnhancement = await ctx.task(enhanceWithML, {
     statisticalBaseline,
     causalFactors,
     historicalData,
@@ -76,13 +76,28 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'ml-enhancement', output: mlEnhancement });
 
-  // Quality Gate: Statistical Forecast Review
-  await ctx.breakpoint('statistical-forecast-review', {
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      mlEnhancement = await ctx.task(enhanceWithML, { ...{
+    statisticalBaseline,
+    causalFactors,
+    historicalData,
+    forecastingPolicy
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint('statistical-forecast-review', {
     title: 'Statistical Forecast Review',
     description: 'Review statistical and ML-enhanced forecasts before market adjustments',
-    artifacts: [statisticalBaseline, mlEnhancement, patternAnalysis]
-  });
-
+    artifacts: [statisticalBaseline, mlEnhancement, patternAnalysis],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Market Intelligence Integration
   const marketIntegration = await ctx.task(integrateMarketIntelligence, {
     mlEnhancement,
@@ -135,7 +150,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'accuracy-measurement', output: accuracyMeasurement });
 
   // Phase 12: Demand Insights Generation
-  const demandInsights = await ctx.task(generateDemandInsights, {
+  let demandInsights = await ctx.task(generateDemandInsights, {
     patternAnalysis,
     causalFactors,
     forecastReconciliation,
@@ -143,13 +158,28 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'demand-insights', output: demandInsights });
 
-  // Final Quality Gate: Forecast Approval
-  await ctx.breakpoint('forecast-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      demandInsights = await ctx.task(generateDemandInsights, { ...{
+    patternAnalysis,
+    causalFactors,
+    forecastReconciliation,
+    accuracyMeasurement
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('forecast-approval', {
     title: 'Demand Forecast Approval',
     description: 'Final approval of demand forecasts for planning use',
-    artifacts: [forecastReconciliation, confidenceAnalysis, demandInsights]
-  });
-
+    artifacts: [forecastReconciliation, confidenceAnalysis, demandInsights],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     forecasts: {

@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Entity Declaration Development');
 
-  const entityDeclaration = await ctx.task(entityDeclarationTask, {
+  let entityDeclaration = await ctx.task(entityDeclarationTask, {
     moduleName,
     interfaces,
     generics,
@@ -83,8 +83,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...entityDeclaration.artifacts);
 
-  // Quality Gate: Entity review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      entityDeclaration = await ctx.task(entityDeclarationTask, { ...{
+    moduleName,
+    interfaces,
+    generics,
+    clockDomain,
+    resetType,
+    resetPolarity,
+    specification,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Entity declaration complete for ${moduleName}. ${entityDeclaration.portCount} ports, ${entityDeclaration.genericCount} generics defined. Review entity specification?`,
     title: 'Entity Declaration Review',
     context: {
@@ -93,9 +106,15 @@ export async function process(inputs, ctx) {
       ports: entityDeclaration.ports,
       generics: entityDeclaration.genericsDetails,
       files: entityDeclaration.artifacts.map(a => ({ path: a.path, format: a.format || 'vhdl' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: ARCHITECTURE IMPLEMENTATION
   // ============================================================================
@@ -186,7 +205,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Code Quality and Synthesis Guidelines Check');
 
-  const codeQuality = await ctx.task(vhdlCodeQualityTask, {
+  let codeQuality = await ctx.task(vhdlCodeQualityTask, {
     moduleName,
     entityDeclaration,
     architecture,
@@ -197,8 +216,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...codeQuality.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      codeQuality = await ctx.task(vhdlCodeQualityTask, { ...{
+    moduleName,
+    entityDeclaration,
+    architecture,
+    codingStandard,
+    synthesizable,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VHDL Module Development Complete for ${moduleName}. Quality score: ${codeQuality.score}/100. ${codeQuality.warningCount} warnings. Review VHDL package?`,
     title: 'VHDL Development Complete',
     context: {
@@ -217,9 +247,15 @@ export async function process(inputs, ctx) {
         { path: architecture.architectureFilePath, format: 'vhdl', label: 'Architecture File' },
         { path: testbench.testbenchPath, format: 'vhdl', label: 'Testbench' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -255,8 +291,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -108,7 +108,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...routingSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: COMPONENT LIBRARY DEVELOPMENT
   // ============================================================================
@@ -145,7 +144,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Setting up testing infrastructure');
 
-  const testingInfra = await ctx.task(testingInfrastructureTask, {
+  let testingInfra = await ctx.task(testingInfrastructureTask, {
     projectName,
     testing,
     componentLibrary,
@@ -154,8 +153,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingInfra.artifacts);
 
-  // Quality Gate: Review architecture and components
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingInfra = await ctx.task(testingInfrastructureTask, { ...{
+    projectName,
+    testing,
+    componentLibrary,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 7 Complete: React app architecture designed with ${componentLibrary.components.length} components and ${testingInfra.testSuites.length} test suites. Proceed with performance optimization?`,
     title: 'Architecture and Components Review',
     context: {
@@ -164,9 +172,15 @@ export async function process(inputs, ctx) {
       components: componentLibrary.components,
       testCoverage: testingInfra.coverageTargets,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: PERFORMANCE OPTIMIZATION
   // ============================================================================
@@ -249,8 +263,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

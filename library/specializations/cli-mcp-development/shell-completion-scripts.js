@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const completionCi = await ctx.task(completionCiTask, { projectName, shells, outputDir });
   artifacts.push(...completionCi.artifacts);
 
-  const completionDistribution = await ctx.task(completionDistributionTask, { projectName, shells, outputDir });
-  artifacts.push(...completionDistribution.artifacts);
-
-  await ctx.breakpoint({
+  let completionDistribution = await ctx.task(completionDistributionTask, { projectName, shells, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      completionDistribution = await ctx.task(completionDistributionTask, { ...{ projectName, shells, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Shell Completion Scripts complete for ${shells.length} shells. Review and approve?`,
     title: 'Shell Completion Complete',
-    context: { runId: ctx.runId, summary: { projectName, shells, commands } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, shells, commands } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

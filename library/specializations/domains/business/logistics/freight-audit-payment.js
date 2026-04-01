@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Aggregating and classifying discrepancies');
 
-  const discrepancyAggregation = await ctx.task(discrepancyAggregationTask, {
+  let discrepancyAggregation = await ctx.task(discrepancyAggregationTask, {
     rateDiscrepancies: rateValidation.discrepancies,
     weightDiscrepancies: weightVerification.discrepancies,
     accessorialDiscrepancies: accessorialAudit.discrepancies,
@@ -126,8 +126,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...discrepancyAggregation.artifacts);
 
   // Quality Gate: Review major discrepancies
-  if (discrepancyAggregation.majorDiscrepancies.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        discrepancyAggregation = await ctx.task(discrepancyAggregationTask, { ...{
+    rateDiscrepancies: rateValidation.discrepancies,
+    weightDiscrepancies: weightVerification.discrepancies,
+    accessorialDiscrepancies: accessorialAudit.discrepancies,
+    duplicates: duplicateDetection.duplicates,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Found ${discrepancyAggregation.majorDiscrepancies.length} major discrepancies totaling $${discrepancyAggregation.totalDiscrepancyAmount}. Review before proceeding?`,
       title: 'Major Discrepancy Review',
       context: {
@@ -135,9 +145,15 @@ export async function process(inputs, ctx) {
         majorDiscrepancies: discrepancyAggregation.majorDiscrepancies,
         totalDiscrepancyAmount: discrepancyAggregation.totalDiscrepancyAmount,
         files: discrepancyAggregation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: CLAIM GENERATION FOR OVERCHARGES
@@ -159,7 +175,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Processing payment approvals');
 
-  const paymentApproval = await ctx.task(paymentApprovalTask, {
+  let paymentApproval = await ctx.task(paymentApprovalTask, {
     normalizedBills: dataIngestion.normalizedBills,
     discrepancies: discrepancyAggregation.allDiscrepancies,
     autoApproveThreshold,
@@ -169,8 +185,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...paymentApproval.artifacts);
 
   // Quality Gate: Manual approval for high-value bills
-  if (paymentApproval.pendingManualApproval.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        paymentApproval = await ctx.task(paymentApprovalTask, { ...{
+    normalizedBills: dataIngestion.normalizedBills,
+    discrepancies: discrepancyAggregation.allDiscrepancies,
+    autoApproveThreshold,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `${paymentApproval.pendingManualApproval.length} bills require manual approval (total: $${paymentApproval.pendingApprovalTotal}). Review and approve?`,
       title: 'Manual Payment Approval Required',
       context: {
@@ -178,9 +203,15 @@ export async function process(inputs, ctx) {
         pendingBills: paymentApproval.pendingManualApproval,
         pendingTotal: paymentApproval.pendingApprovalTotal,
         files: paymentApproval.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: PAYMENT PROCESSING
@@ -202,7 +233,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating audit report and analytics');
 
-  const auditReporting = await ctx.task(auditReportingTask, {
+  let auditReporting = await ctx.task(auditReportingTask, {
     auditSummary: {
       totalBills: freightBills.length,
       discrepancies: discrepancyAggregation.allDiscrepancies,
@@ -214,8 +245,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...auditReporting.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      auditReporting = await ctx.task(auditReportingTask, { ...{
+    auditSummary: {
+      totalBills: freightBills.length,
+      discrepancies: discrepancyAggregation.allDiscrepancies,
+      recoveredAmount: claimGeneration.totalRecoveryAmount,
+      paymentsProcessed: paymentProcessing.paymentsProcessed
+    },
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Freight audit complete. ${freightBills.length} bills audited, ${discrepancyAggregation.allDiscrepancies.length} discrepancies found, $${claimGeneration.totalRecoveryAmount} recovered. Finalize audit?`,
     title: 'Freight Audit Complete',
     context: {
@@ -230,9 +273,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: auditReporting.reportPath, format: 'markdown', label: 'Audit Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -257,8 +306,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

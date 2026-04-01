@@ -47,17 +47,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...qcResult.artifacts);
 
   // Phase 2: ASV/OTU Generation
-  const asvResult = await ctx.task(asvGenerationTask, { projectName, filteredReads: qcResult.filteredReads, denoiseMethod, outputDir });
+  let asvResult = await ctx.task(asvGenerationTask, { projectName, filteredReads: qcResult.filteredReads, denoiseMethod, outputDir });
   artifacts.push(...asvResult.artifacts);
 
-  ctx.log('info', `Generated ${asvResult.totalASVs} ASVs from ${asvResult.samplesProcessed} samples`);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      asvResult = await ctx.task(asvGenerationTask, { ...{ projectName, filteredReads: qcResult.filteredReads, denoiseMethod, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `ASV generation complete. ${asvResult.totalASVs} ASVs, ${asvResult.readsRetained}% reads retained. Review denoising results?`,
     title: 'ASV Generation Review',
-    context: { runId: ctx.runId, asvStats: asvResult.statistics, files: asvResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, asvStats: asvResult.statistics, files: asvResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Taxonomic Classification
   const taxonomyResult = await ctx.task(taxonomicClassificationTask, { projectName, asvTable: asvResult.asvTable, repSeqs: asvResult.repSeqs, database, outputDir });
   artifacts.push(...taxonomyResult.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...alphaResult.artifacts);
 
   // Phase 6: Beta Diversity Analysis
-  const betaResult = await ctx.task(betaDiversityTask, { projectName, asvTable: asvResult.asvTable, phylogeny: phylogenyResult.tree, metadata, betaMetrics, outputDir });
-  artifacts.push(...betaResult.artifacts);
-
-  await ctx.breakpoint({
+  let betaResult = await ctx.task(betaDiversityTask, { projectName, asvTable: asvResult.asvTable, phylogeny: phylogenyResult.tree, metadata, betaMetrics, outputDir });
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      betaResult = await ctx.task(betaDiversityTask, { ...{ projectName, asvTable: asvResult.asvTable, phylogeny: phylogenyResult.tree, metadata, betaMetrics, outputDir }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Diversity analysis complete. Significant group differences: ${betaResult.significantComparisons}. Review diversity results?`,
     title: 'Diversity Analysis Review',
-    context: { runId: ctx.runId, alphaSummary: alphaResult.summary, betaSummary: betaResult.summary, files: [...alphaResult.artifacts, ...betaResult.artifacts].map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, alphaSummary: alphaResult.summary, betaSummary: betaResult.summary, files: [...alphaResult.artifacts, ...betaResult.artifacts].map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Differential Abundance Testing
   const daResult = await ctx.task(differentialAbundanceTask, { projectName, asvTable: asvResult.asvTable, taxonomy: taxonomyResult.taxonomy, metadata, outputDir });
   artifacts.push(...daResult.artifacts);
@@ -89,15 +107,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...functionalResult.artifacts);
 
   // Phase 9: Visualization and Reporting
-  const reportResult = await ctx.task(generateMicrobiomeReportTask, { projectName, qcResult, asvResult, taxonomyResult, alphaResult, betaResult, daResult, functionalResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateMicrobiomeReportTask, { projectName, qcResult, asvResult, taxonomyResult, alphaResult, betaResult, daResult, functionalResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateMicrobiomeReportTask, { ...{ projectName, qcResult, asvResult, taxonomyResult, alphaResult, betaResult, daResult, functionalResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Microbiome Analysis Complete. ${asvResult.totalASVs} ASVs, ${daResult.significantTaxa} differentially abundant taxa. Approve results?`,
     title: 'Microbiome Analysis Complete',
-    context: { runId: ctx.runId, summary: { asvs: asvResult.totalASVs, daTaxa: daResult.significantTaxa, pathways: functionalResult.predictedPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { asvs: asvResult.totalASVs, daTaxa: daResult.significantTaxa, pathways: functionalResult.predictedPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -114,8 +141,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/16s-microbiome-analysis', timestamp: startTime, region, database }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const qualityFilteringTask = defineTask('quality-filtering', (args, taskCtx) => ({
   kind: 'agent',
   title: `Quality Filtering - ${args.projectName}`,

@@ -21,8 +21,10 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Interview Context Analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting media interview preparation. Analyze interview context and journalist?',
     title: 'Phase 1: Context Analysis',
     context: {
@@ -30,9 +32,15 @@ export async function process(inputs, ctx) {
       phase: 'context-analysis',
       interview,
       outlet
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [contextAnalysis, journalistProfile] = await Promise.all([
     ctx.task(analyzeInterviewContextTask, {
       interview,
@@ -45,8 +53,10 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Key Messages Development
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Context analyzed. Develop key messages and proof points?',
     title: 'Phase 2: Key Messages Development',
     context: {
@@ -54,10 +64,16 @@ export async function process(inputs, ctx) {
       phase: 'key-messages',
       topic,
       inputMessages: keyMessages.length
-    }
-  });
-
-  const messageFramework = await ctx.task(developKeyMessagesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let messageFramework = await ctx.task(developKeyMessagesTask, {
     topic,
     keyMessages,
     contextAnalysis,
@@ -65,18 +81,34 @@ export async function process(inputs, ctx) {
     spokesperson
   });
 
-  // Phase 3: Question Anticipation
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      messageFramework = await ctx.task(developKeyMessagesTask, { ...{
+    topic,
+    keyMessages,
+    contextAnalysis,
+    journalistProfile,
+    spokesperson
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Messages developed. Anticipate likely questions and prepare responses?',
     title: 'Phase 3: Question Anticipation',
     context: {
       runId: ctx.runId,
       phase: 'question-anticipation',
       sensitiveTopics
-    }
-  });
-
-  const anticipatedQuestions = await ctx.task(anticipateQuestionsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let anticipatedQuestions = await ctx.task(anticipateQuestionsTask, {
     topic,
     contextAnalysis,
     journalistProfile,
@@ -84,17 +116,33 @@ export async function process(inputs, ctx) {
     outlet
   });
 
-  // Phase 4: Response Preparation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      anticipatedQuestions = await ctx.task(anticipateQuestionsTask, { ...{
+    topic,
+    contextAnalysis,
+    journalistProfile,
+    sensitiveTopics,
+    outlet
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Questions anticipated. Prepare responses and bridging techniques?',
     title: 'Phase 4: Response Preparation',
     context: {
       runId: ctx.runId,
       phase: 'response-preparation',
       questionCount: anticipatedQuestions.questions.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   const [preparedResponses, bridgingTechniques] = await Promise.all([
     ctx.task(prepareResponsesTask, {
       anticipatedQuestions,
@@ -108,17 +156,33 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 5: Briefing Package Assembly
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      anticipatedQuestions = await ctx.task(anticipateQuestionsTask, { ...{
+    topic,
+    contextAnalysis,
+    journalistProfile,
+    sensitiveTopics,
+    outlet
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Responses prepared. Assemble comprehensive briefing package?',
     title: 'Phase 5: Briefing Package',
     context: {
       runId: ctx.runId,
       phase: 'briefing-package'
-    }
-  });
-
-  const briefingPackage = await ctx.task(assembleBriefingPackageTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let briefingPackage = await ctx.task(assembleBriefingPackageTask, {
     contextAnalysis,
     journalistProfile,
     messageFramework,
@@ -129,35 +193,69 @@ export async function process(inputs, ctx) {
     interviewFormat
   });
 
-  // Phase 6: Practice Session Design
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      briefingPackage = await ctx.task(assembleBriefingPackageTask, { ...{
+    contextAnalysis,
+    journalistProfile,
+    messageFramework,
+    anticipatedQuestions,
+    preparedResponses,
+    bridgingTechniques,
+    interview,
+    interviewFormat
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Briefing package ready. Design practice session?',
     title: 'Phase 6: Practice Session Design',
     context: {
       runId: ctx.runId,
       phase: 'practice-session',
       interviewFormat
-    }
-  });
-
-  const practiceSession = await ctx.task(designPracticeSessionTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let practiceSession = await ctx.task(designPracticeSessionTask, {
     briefingPackage,
     spokesperson,
     interviewFormat,
     anticipatedQuestions
   });
 
-  // Phase 7: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      practiceSession = await ctx.task(designPracticeSessionTask, { ...{
+    briefingPackage,
+    spokesperson,
+    interviewFormat,
+    anticipatedQuestions
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate preparation quality and readiness?',
     title: 'Phase 7: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validatePreparationQualityTask, {
     briefingPackage,
     practiceSession,
@@ -212,8 +310,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzeInterviewContextTask = defineTask('analyze-interview-context', (args, taskCtx) => ({
   kind: 'agent',

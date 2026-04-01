@@ -71,7 +71,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...counterexampleAnalysis.artifacts);
   }
-
   // Task 5: Conceptual Boundary Mapping
   ctx.log('info', 'Mapping conceptual boundaries');
   const boundaryMapping = await ctx.task(boundaryMappingTask, {
@@ -86,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Definition Formulation
   ctx.log('info', 'Formulating definitions');
-  const definitionFormulation = await ctx.task(definitionFormulationTask, {
+  let definitionFormulation = await ctx.task(definitionFormulationTask, {
     concept,
     necessaryConditions: necessaryConditions.conditions,
     sufficientConditions: sufficientConditions.conditions,
@@ -96,8 +95,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...definitionFormulation.artifacts);
 
-  // Breakpoint: Review conceptual analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      definitionFormulation = await ctx.task(definitionFormulationTask, { ...{
+    concept,
+    necessaryConditions: necessaryConditions.conditions,
+    sufficientConditions: sufficientConditions.conditions,
+    boundaries: boundaryMapping.boundaries,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Conceptual analysis of "${concept}" complete. Found ${necessaryConditions.conditions.length} necessary conditions. Review the analysis?`,
     title: 'Conceptual Analysis Results',
     context: {
@@ -109,9 +118,15 @@ export async function process(inputs, ctx) {
         sufficientConditionsFound: sufficientConditions.conditions.length > 0,
         counterexamplesTested: testCounterexamples
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Conceptual Analysis Report
   ctx.log('info', 'Generating conceptual analysis report');
   const analysisReport = await ctx.task(conceptualReportTask, {
@@ -159,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Usage Survey
+  // Task 1: Usage Survey
 export const usageSurveyTask = defineTask('usage-survey', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Survey concept usage',

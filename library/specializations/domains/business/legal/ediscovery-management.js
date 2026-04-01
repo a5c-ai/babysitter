@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
   if (phase === 'collection') {
     return { success: true, phase, collection, artifacts, metadata: { processId: 'specializations/domains/business/legal/ediscovery-management', timestamp: startTime } };
   }
-
   // Phase 3: Processing
   const processing = await ctx.task(dataProcessingTask, {
     matterId,
@@ -70,7 +69,6 @@ export async function process(inputs, ctx) {
   if (phase === 'processing') {
     return { success: true, phase, collection, processing, artifacts, metadata: { processId: 'specializations/domains/business/legal/ediscovery-management', timestamp: startTime } };
   }
-
   // Phase 4: Review Setup
   const reviewSetup = await ctx.task(reviewSetupTask, {
     matterId,
@@ -80,14 +78,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...reviewSetup.artifacts);
 
   // Phase 5: Review Execution
-  const reviewStatus = await ctx.task(documentReviewTask, {
+  let reviewStatus = await ctx.task(documentReviewTask, {
     matterId,
     reviewSetup,
     outputDir
   });
-  artifacts.push(...reviewStatus.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reviewStatus = await ctx.task(documentReviewTask, { ...{
+    matterId,
+    reviewSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Document review for ${matterId}. ${reviewStatus.reviewedCount}/${reviewStatus.totalCount} reviewed, ${reviewStatus.responsiveCount} responsive. Proceed to production?`,
     title: 'Document Review Status',
     context: {
@@ -96,13 +101,17 @@ export async function process(inputs, ctx) {
       reviewedCount: reviewStatus.reviewedCount,
       responsiveCount: reviewStatus.responsiveCount,
       files: reviewStatus.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
-  if (phase === 'review') {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  if (phase === 'review') {
     return { success: true, phase, collection, processing, reviewStatus, artifacts, metadata: { processId: 'specializations/domains/business/legal/ediscovery-management', timestamp: startTime } };
   }
-
   // Phase 6: Production
   const production = await ctx.task(productionTask, {
     matterId,

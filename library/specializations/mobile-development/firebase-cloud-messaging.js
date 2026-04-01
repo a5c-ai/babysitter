@@ -134,7 +134,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dataMessageHandling.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: TOPIC SUBSCRIPTIONS
   // ============================================================================
@@ -150,22 +149,28 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...topicSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: BACKGROUND HANDLING
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Handling background/killed state notifications');
 
-  const backgroundHandling = await ctx.task(backgroundHandlingTask, {
+  let backgroundHandling = await ctx.task(backgroundHandlingTask, {
     appName,
     outputDir
   });
 
   artifacts.push(...backgroundHandling.artifacts);
 
-  // Quality Gate: FCM Configuration Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      backgroundHandling = await ctx.task(backgroundHandlingTask, { ...{
+    appName,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FCM configured for ${appName}. Notification types: ${notificationTypes.join(', ')}. Topics: ${topicSubscriptions.length}. Review configuration?`,
     title: 'FCM Configuration Review',
     context: {
@@ -175,9 +180,15 @@ export async function process(inputs, ctx) {
       topicSubscriptions,
       dataMessages,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'kotlin' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: DEEP LINKING
   // ============================================================================
@@ -264,8 +275,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

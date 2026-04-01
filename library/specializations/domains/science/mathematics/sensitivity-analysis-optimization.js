@@ -28,7 +28,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Compute Dual Variables
-  const dualAnalysis = await ctx.task(dualAnalysisTask, {
+  let dualAnalysis = await ctx.task(dualAnalysisTask, {
     optimizationProblem,
     solution
   });
@@ -42,9 +42,15 @@ export async function process(inputs, ctx) {
       sensitivityResults: null
     };
   }
-
-  // Breakpoint: Review dual analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dualAnalysis = await ctx.task(dualAnalysisTask, { ...{
+    optimizationProblem,
+    solution
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Dual analysis complete. ${dualAnalysis.bindingConstraints.length} binding constraints identified. Review?`,
     title: 'Dual Analysis Review',
     context: {
@@ -56,9 +62,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dualAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Analyze Binding Constraints
   const bindingAnalysis = await ctx.task(bindingAnalysisTask, {
     optimizationProblem,
@@ -82,7 +94,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Sensitivity Reports
-  const sensitivityReport = await ctx.task(sensitivityReportTask, {
+  let sensitivityReport = await ctx.task(sensitivityReportTask, {
     dualAnalysis,
     bindingAnalysis,
     parametricAnalysis,
@@ -91,8 +103,19 @@ export async function process(inputs, ctx) {
     solution
   });
 
-  // Final Breakpoint: Analysis Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sensitivityReport = await ctx.task(sensitivityReportTask, { ...{
+    dualAnalysis,
+    bindingAnalysis,
+    parametricAnalysis,
+    criticalParameters,
+    optimizationProblem,
+    solution
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sensitivity analysis complete. ${criticalParameters.criticalParams.length} critical parameters identified. Review report?`,
     title: 'Sensitivity Analysis Complete',
     context: {
@@ -102,9 +125,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/sensitivity-report.json`, format: 'json', content: sensitivityReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     optimizationProblem: optimizationProblem.type,
@@ -133,8 +162,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dualAnalysisTask = defineTask('dual-analysis', (args, taskCtx) => ({
   kind: 'agent',

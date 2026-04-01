@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Constraint Analysis
   ctx.log('info', 'Phase 3: Constraint Analysis');
-  const constraintAnalysis = await ctx.task(constraintAnalysisTask, {
+  let constraintAnalysis = await ctx.task(constraintAnalysisTask, {
     orderAnalysis,
     resourceAssessment,
     constraints,
@@ -68,8 +68,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...constraintAnalysis.artifacts);
 
-  // Quality Gate: Scheduling Inputs Review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      constraintAnalysis = await ctx.task(constraintAnalysisTask, { ...{
+    orderAnalysis,
+    resourceAssessment,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Scheduling inputs: ${orderAnalysis.totalOrders} orders, ${resourceAssessment.totalResources} resources. Total load: ${orderAnalysis.totalHours}h, Available capacity: ${resourceAssessment.totalAvailableHours}h. ${constraintAnalysis.constraints.length} constraints identified. Proceed with scheduling?`,
     title: 'Scheduling Inputs Review',
     context: {
@@ -78,9 +87,15 @@ export async function process(inputs, ctx) {
       resourceSummary: resourceAssessment.summary,
       constraints: constraintAnalysis.constraints,
       files: [...orderAnalysis.artifacts, ...resourceAssessment.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Changeover Analysis
   ctx.log('info', 'Phase 4: Changeover/Setup Analysis');
   const changeoverAnalysis = await ctx.task(changeoverAnalysisTask, {
@@ -106,7 +121,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Schedule Optimization
   ctx.log('info', 'Phase 6: Schedule Optimization');
-  const optimization = await ctx.task(scheduleOptimizationTask, {
+  let optimization = await ctx.task(scheduleOptimizationTask, {
     initialSchedule,
     objectives,
     constraintAnalysis,
@@ -115,8 +130,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimization.artifacts);
 
-  // Quality Gate: Optimized Schedule Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      optimization = await ctx.task(scheduleOptimizationTask, { ...{
+    initialSchedule,
+    objectives,
+    constraintAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Schedule optimized. On-time delivery: ${optimization.kpis.onTimeDelivery}%. Utilization: ${optimization.kpis.utilization}%. Changeovers: ${optimization.kpis.totalChangeovers}. Review before finalization?`,
     title: 'Optimized Schedule Review',
     context: {
@@ -124,9 +148,15 @@ export async function process(inputs, ctx) {
       kpis: optimization.kpis,
       improvements: optimization.improvements,
       files: optimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Bottleneck Analysis
   ctx.log('info', 'Phase 7: Bottleneck Analysis');
   const bottleneckAnalysis = await ctx.task(bottleneckAnalysisTask, {
@@ -220,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Order Analysis
+  // Task 1: Order Analysis
 export const orderAnalysisTask = defineTask('scheduling-orders', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Production Scheduling - Order Analysis',

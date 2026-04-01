@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing organizational knowledge landscape');
-  const landscapeAnalysis = await ctx.task(landscapeAnalysisTask, {
+  let landscapeAnalysis = await ctx.task(landscapeAnalysisTask, {
     organizationalContext,
     strategicObjectives,
     assessmentScope,
@@ -49,8 +49,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...landscapeAnalysis.artifacts);
 
-  // Breakpoint: Review landscape analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      landscapeAnalysis = await ctx.task(landscapeAnalysisTask, { ...{
+    organizationalContext,
+    strategicObjectives,
+    assessmentScope,
+    existingKnowledgeAssets,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${landscapeAnalysis.knowledgeDomains.length} knowledge domains across the organization. Review landscape analysis?`,
     title: 'Knowledge Landscape Review',
     context: {
@@ -66,9 +76,15 @@ export async function process(inputs, ctx) {
         keyProcesses: landscapeAnalysis.keyProcesses.length,
         criticalRoles: landscapeAnalysis.criticalRoles.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: KNOWLEDGE CRITICALITY ASSESSMENT
   // ============================================================================
@@ -88,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Analyzing knowledge holders and distribution');
-  const holderAnalysis = await ctx.task(knowledgeHolderAnalysisTask, {
+  let holderAnalysis = await ctx.task(knowledgeHolderAnalysisTask, {
     knowledgeDomains: landscapeAnalysis.knowledgeDomains,
     criticalKnowledge: criticalityAssessment.criticalKnowledge,
     workforceData,
@@ -98,8 +114,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...holderAnalysis.artifacts);
 
-  // Breakpoint: Review knowledge holder analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      holderAnalysis = await ctx.task(knowledgeHolderAnalysisTask, { ...{
+    knowledgeDomains: landscapeAnalysis.knowledgeDomains,
+    criticalKnowledge: criticalityAssessment.criticalKnowledge,
+    workforceData,
+    criticalRoles: landscapeAnalysis.criticalRoles,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${holderAnalysis.singlePointsOfFailure.length} single points of failure. Review knowledge holder analysis?`,
     title: 'Knowledge Holder Analysis Review',
     context: {
@@ -115,9 +141,15 @@ export async function process(inputs, ctx) {
         keyKnowledgeHolders: holderAnalysis.keyHolders.length,
         knowledgeConcentration: holderAnalysis.concentrationScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: KNOWLEDGE LOSS RISK ASSESSMENT
   // ============================================================================
@@ -152,7 +184,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Prioritizing knowledge capture efforts');
-  const capturePrioritization = await ctx.task(capturePrioritizationTask, {
+  let capturePrioritization = await ctx.task(capturePrioritizationTask, {
     criticalKnowledge: criticalityAssessment.criticalKnowledge,
     riskAssessment: riskAssessment.riskProfile,
     dependencyMapping: dependencyMapping.dependencies,
@@ -162,8 +194,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...capturePrioritization.artifacts);
 
-  // Breakpoint: Review capture prioritization
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      capturePrioritization = await ctx.task(capturePrioritizationTask, { ...{
+    criticalKnowledge: criticalityAssessment.criticalKnowledge,
+    riskAssessment: riskAssessment.riskProfile,
+    dependencyMapping: dependencyMapping.dependencies,
+    strategicObjectives,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Prioritized ${capturePrioritization.prioritizedCapture.length} knowledge areas for capture. Review prioritization?`,
     title: 'Capture Prioritization Review',
     context: {
@@ -179,9 +221,15 @@ export async function process(inputs, ctx) {
         highPriority: capturePrioritization.prioritizedCapture.filter(p => p.priority === 'high').length,
         mediumPriority: capturePrioritization.prioritizedCapture.filter(p => p.priority === 'medium').length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: CAPTURE STRATEGY DEVELOPMENT
   // ============================================================================
@@ -216,7 +264,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing overall assessment quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     landscapeAnalysis,
     criticalityAssessment,
     holderAnalysis,
@@ -246,8 +294,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    landscapeAnalysis,
+    criticalityAssessment,
+    holderAnalysis,
+    riskAssessment,
+    capturePrioritization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize assessment?`,
       title: 'Final Approval Gate',
       context: {
@@ -264,9 +323,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           criticalKnowledgeAreas: criticalityAssessment.criticalKnowledge.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -304,8 +369,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

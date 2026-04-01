@@ -56,10 +56,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...complexity.artifacts);
 
   // PHASE 6: Optimization
-  const optimization = await ctx.task(optimizationTask, { algorithmName, implementation, complexity, language, outputDir });
-  artifacts.push(...optimization.artifacts);
-
-  await ctx.breakpoint({
+  let optimization = await ctx.task(optimizationTask, { algorithmName, implementation, complexity, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimization = await ctx.task(optimizationTask, { ...{ algorithmName, implementation, complexity, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Algorithm ${algorithmName} implemented. Tests: ${testing.passedCount}/${testing.totalCount}. Complexity: O(${complexity.timeComplexity}). Review?`,
     title: 'Algorithm Implementation Complete',
     context: {
@@ -71,9 +74,15 @@ export async function process(inputs, ctx) {
         { path: implementation.codePath, format: language, label: 'Implementation' },
         { path: complexity.analysisPath, format: 'markdown', label: 'Complexity Analysis' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithmName,

@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(shortestPathImplementationTask, { selection, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const verification = await ctx.task(shortestPathVerificationTask, { selection, implementation, outputDir });
-  artifacts.push(...verification.artifacts);
-
-  await ctx.breakpoint({
+  let verification = await ctx.task(shortestPathVerificationTask, { selection, implementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      verification = await ctx.task(shortestPathVerificationTask, { ...{ selection, implementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Shortest path algorithm selected: ${selection.algorithm}. Complexity: O(${selection.complexity}). Review?`,
     title: 'Shortest Path Algorithm Complete',
-    context: { runId: ctx.runId, algorithm: selection.algorithm, complexity: selection.complexity }
-  });
-
+    context: { runId: ctx.runId, algorithm: selection.algorithm, complexity: selection.complexity },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithm: selection.algorithm,

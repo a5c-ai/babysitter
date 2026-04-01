@@ -35,17 +35,28 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Systems: ${systemsToImplement.join(', ')}`);
 
   // Phase 1: Architecture Design
-  const architectureDesign = await ctx.task(systemArchitectureTask, {
+  let architectureDesign = await ctx.task(systemArchitectureTask, {
     projectName, systemsToImplement, engine, architectureStyle, outputDir
   });
-  artifacts.push(...architectureDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      architectureDesign = await ctx.task(systemArchitectureTask, { ...{
+    projectName, systemsToImplement, engine, architectureStyle, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `System architecture designed for ${projectName}. ${architectureDesign.componentCount} components across ${systemsToImplement.length} systems. Review architecture before implementation?`,
     title: 'Architecture Review',
-    context: { runId: ctx.runId, components: architectureDesign.components }
-  });
-
+    context: { runId: ctx.runId, components: architectureDesign.components },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Implement systems in parallel where possible
   const implementedSystems = [];
 
@@ -56,7 +67,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...systemImpl.artifacts);
     implementedSystems.push({ system, ...systemImpl });
   }
-
   // Phase 3: System Integration
   const systemIntegration = await ctx.task(systemIntegrationTask, {
     projectName, implementedSystems, outputDir

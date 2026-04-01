@@ -61,7 +61,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...bankConflictOpt.artifacts);
   }
-
   // Phase 5: Synchronization Design
   const syncDesign = await ctx.task(sharedMemSyncDesignTask, {
     projectName, tilingDesign, sharedMemAllocation, outputDir
@@ -75,17 +74,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...implementation.artifacts);
 
   // Phase 7: Performance Validation
-  const perfValidation = await ctx.task(sharedMemPerformanceTask, {
+  let perfValidation = await ctx.task(sharedMemPerformanceTask, {
     projectName, targetKernels, implementation, outputDir
   });
-  artifacts.push(...perfValidation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      perfValidation = await ctx.task(sharedMemPerformanceTask, { ...{
+    projectName, targetKernels, implementation, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Shared memory optimization complete for ${projectName}. Speedup: ${perfValidation.speedup}x. Review?`,
     title: 'Shared Memory Optimization Complete',
-    context: { runId: ctx.runId, perfValidation }
-  });
-
+    context: { runId: ctx.runId, perfValidation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: perfValidation.speedup >= 1.2,
     projectName,

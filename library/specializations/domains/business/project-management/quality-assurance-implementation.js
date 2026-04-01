@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Quality Plan Development
-  const qualityPlan = await ctx.task(qualityPlanTask, {
+  let qualityPlan = await ctx.task(qualityPlanTask, {
     projectName,
     standards: standardsDefinition,
     metrics: metricsDevlopment,
     deliverables
   });
 
-  // Breakpoint: Review quality plan
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      qualityPlan = await ctx.task(qualityPlanTask, { ...{
+    projectName,
+    standards: standardsDefinition,
+    metrics: metricsDevlopment,
+    deliverables
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Quality plan developed for ${projectName} with ${metricsDevlopment.metrics?.length || 0} metrics. Review and approve?`,
     title: 'Quality Plan Review',
     context: {
@@ -64,9 +73,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: qualityPlan
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Quality Control Processes
   const controlProcesses = await ctx.task(qualityControlTask, {
     projectName,
@@ -106,7 +121,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Quality Documentation
-  const qualityDocumentation = await ctx.task(qualityDocumentationTask, {
+  let qualityDocumentation = await ctx.task(qualityDocumentationTask, {
     projectName,
     qualityPlan,
     controlProcesses,
@@ -116,8 +131,20 @@ export async function process(inputs, ctx) {
     improvementFramework
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityDocumentation = await ctx.task(qualityDocumentationTask, { ...{
+    projectName,
+    qualityPlan,
+    controlProcesses,
+    testingFramework,
+    auditPlan,
+    defectManagement,
+    improvementFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quality assurance implementation complete for ${projectName}. ${controlProcesses.processes?.length || 0} control processes defined. Approve implementation?`,
     title: 'QA Implementation Approval',
     context: {
@@ -127,9 +154,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/qa-implementation.json`, format: 'json', content: qualityDocumentation },
         { path: `artifacts/qa-implementation.md`, format: 'markdown', content: qualityDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -148,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const qualityStandardsTask = defineTask('quality-standards', (args, taskCtx) => ({
   kind: 'agent',

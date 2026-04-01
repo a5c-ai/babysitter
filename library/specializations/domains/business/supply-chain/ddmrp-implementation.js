@@ -71,7 +71,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Calculating buffer zones');
 
-  const bufferSizing = await ctx.task(bufferSizingTask, {
+  let bufferSizing = await ctx.task(bufferSizingTask, {
     inventoryPositioning,
     bufferProfiles,
     demandData,
@@ -81,8 +81,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bufferSizing.artifacts);
 
-  // Breakpoint: Review buffer design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bufferSizing = await ctx.task(bufferSizingTask, { ...{
+    inventoryPositioning,
+    bufferProfiles,
+    demandData,
+    leadTimes,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Buffer design complete. ${bufferSizing.bufferCount} buffers sized. Total buffer investment: $${bufferSizing.totalInvestment}. Review buffer design?`,
     title: 'DDMRP Buffer Design Review',
     context: {
@@ -93,9 +103,15 @@ export async function process(inputs, ctx) {
         totalInvestment: bufferSizing.totalInvestment,
         avgLeadTimeReduction: bufferSizing.avgLeadTimeReduction
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DYNAMIC ADJUSTMENT FACTORS
   // ============================================================================
@@ -191,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

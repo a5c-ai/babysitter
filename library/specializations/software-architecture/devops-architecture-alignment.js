@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing current CI/CD and deployment architecture');
 
-  const currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
+  let currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
     projectName,
     currentCICD,
     existingInfrastructure,
@@ -102,8 +102,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Critical pain points and gaps identified
   const criticalGaps = currentStateAssessment.gaps.filter(g => g.severity === 'critical');
 
-  if (criticalGaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        currentStateAssessment = await ctx.task(currentStateAssessmentTask, { ...{
+    projectName,
+    currentCICD,
+    existingInfrastructure,
+    teamSize,
+    deploymentTarget,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Current state assessment found ${criticalGaps.length} critical gaps: ${criticalGaps.map(g => g.area).join(', ')}. Review assessment and continue?`,
       title: 'Current State Assessment - Critical Gaps Identified',
       context: {
@@ -113,9 +124,15 @@ export async function process(inputs, ctx) {
         painPoints: currentStateAssessment.painPoints,
         recommendation: 'Review identified gaps and prioritize fixes in upcoming architecture design',
         files: currentStateAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: CI/CD PIPELINE ARCHITECTURE DESIGN
@@ -123,7 +140,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing CI/CD pipeline architecture');
 
-  const pipelineDesign = await ctx.task(cicdPipelineDesignTask, {
+  let pipelineDesign = await ctx.task(cicdPipelineDesignTask, {
     projectName,
     deploymentTarget,
     releaseFrequency,
@@ -143,8 +160,21 @@ export async function process(inputs, ctx) {
     !pipelineDesign.architecture.stages.some(s => s.type === stage)
   );
 
-  if (missingStages.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        pipelineDesign = await ctx.task(cicdPipelineDesignTask, { ...{
+    projectName,
+    deploymentTarget,
+    releaseFrequency,
+    currentStateAssessment,
+    scalabilityRequirements,
+    constraints,
+    teamSize,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `CI/CD pipeline missing critical stages: ${missingStages.join(', ')}. Review pipeline design?`,
       title: 'CI/CD Pipeline Completeness Check',
       context: {
@@ -157,12 +187,31 @@ export async function process(inputs, ctx) {
           format: 'markdown',
           label: 'Pipeline Architecture Diagram'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
-  // Breakpoint: Review CI/CD architecture
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      pipelineDesign = await ctx.task(cicdPipelineDesignTask, { ...{
+    projectName,
+    deploymentTarget,
+    releaseFrequency,
+    currentStateAssessment,
+    scalabilityRequirements,
+    constraints,
+    teamSize,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Review CI/CD pipeline architecture for ${projectName}. Pipeline includes ${pipelineDesign.architecture.stages.length} stages with ${pipelineDesign.automation.level}% automation. Approve to proceed with deployment strategy?`,
     title: 'CI/CD Pipeline Architecture Review',
     context: {
@@ -181,16 +230,22 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Architecture Documentation'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: DEPLOYMENT STRATEGY DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Designing deployment strategy and release patterns');
 
-  const deploymentStrategyDesign = await ctx.task(deploymentStrategyDesignTask, {
+  let deploymentStrategyDesign = await ctx.task(deploymentStrategyDesignTask, {
     projectName,
     deploymentTarget,
     releaseFrequency,
@@ -204,8 +259,20 @@ export async function process(inputs, ctx) {
   deploymentStrategy = deploymentStrategyDesign.strategy;
 
   // Quality Gate: Deployment strategy supports zero-downtime if required
-  if (constraints.downtime === 'zero' && !deploymentStrategyDesign.strategy.supportsZeroDowntime) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        deploymentStrategyDesign = await ctx.task(deploymentStrategyDesignTask, { ...{
+    projectName,
+    deploymentTarget,
+    releaseFrequency,
+    scalabilityRequirements,
+    constraints,
+    cicdArchitecture: pipelineDesign.architecture,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Deployment strategy does not support zero-downtime requirement. Current strategy: ${deploymentStrategyDesign.strategy.pattern}. Revise strategy?`,
       title: 'Zero-Downtime Requirement Not Met',
       context: {
@@ -214,9 +281,15 @@ export async function process(inputs, ctx) {
         currentStrategy: deploymentStrategyDesign.strategy,
         recommendation: 'Consider blue-green, canary, or rolling deployment patterns',
         files: deploymentStrategyDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: PARALLEL EXECUTION - FEATURE FLAGS & INFRASTRUCTURE AS CODE
@@ -249,7 +322,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Designing rollback procedures and disaster recovery');
 
-  const rollbackDesign = await ctx.task(rollbackProceduresDesignTask, {
+  let rollbackDesign = await ctx.task(rollbackProceduresDesignTask, {
     projectName,
     deploymentStrategy: deploymentStrategyDesign.strategy,
     constraints,
@@ -262,8 +335,19 @@ export async function process(inputs, ctx) {
   rollbackProcedures = rollbackDesign.procedures;
 
   // Quality Gate: Rollback procedures meet time constraint
-  if (rollbackDesign.estimatedRollbackTime > constraints.rollbackTime) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        rollbackDesign = await ctx.task(rollbackProceduresDesignTask, { ...{
+    projectName,
+    deploymentStrategy: deploymentStrategyDesign.strategy,
+    constraints,
+    deploymentTarget,
+    featureFlagsDesign,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Estimated rollback time (${rollbackDesign.estimatedRollbackTime}) exceeds constraint (${constraints.rollbackTime}). Review procedures?`,
       title: 'Rollback Time Constraint',
       context: {
@@ -273,9 +357,15 @@ export async function process(inputs, ctx) {
         procedures: rollbackDesign.procedures,
         recommendation: 'Optimize rollback procedures or adjust automation level',
         files: rollbackDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: DEPLOYMENT MONITORING AND OBSERVABILITY
@@ -283,7 +373,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Designing deployment monitoring and observability');
 
-  const monitoringDesign = await ctx.task(deploymentMonitoringDesignTask, {
+  let monitoringDesign = await ctx.task(deploymentMonitoringDesignTask, {
     projectName,
     deploymentTarget,
     deploymentStrategy: deploymentStrategyDesign.strategy,
@@ -300,8 +390,18 @@ export async function process(inputs, ctx) {
     !monitoringDesign.plan.slis.some(s => s.type === sli)
   );
 
-  if (missingSLIs.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        monitoringDesign = await ctx.task(deploymentMonitoringDesignTask, { ...{
+    projectName,
+    deploymentTarget,
+    deploymentStrategy: deploymentStrategyDesign.strategy,
+    scalabilityRequirements,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Monitoring plan missing critical SLIs: ${missingSLIs.join(', ')}. Review monitoring design?`,
       title: 'Monitoring Completeness Check',
       context: {
@@ -310,9 +410,15 @@ export async function process(inputs, ctx) {
         definedSLIs: monitoringDesign.plan.slis.map(s => s.type),
         recommendation: 'Add missing SLIs to ensure comprehensive monitoring',
         files: monitoringDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: RELEASE CHECKLIST AND RUNBOOKS
@@ -339,7 +445,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Creating implementation roadmap and comprehensive documentation');
 
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     projectName,
     currentStateAssessment,
     cicdArchitecture: pipelineDesign.architecture,
@@ -355,8 +461,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationRoadmap.artifacts);
 
-  // Final Breakpoint: Review complete DevOps architecture
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    projectName,
+    currentStateAssessment,
+    cicdArchitecture: pipelineDesign.architecture,
+    deploymentStrategy: deploymentStrategyDesign.strategy,
+    featureFlagsDesign,
+    iacDesign,
+    rollbackProcedures,
+    monitoringPlan,
+    releaseChecklist,
+    teamSize,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DevOps Architecture Alignment complete for ${projectName}. Review comprehensive architecture including CI/CD pipeline, deployment strategy (${deploymentStrategyDesign.strategy.pattern}), rollback procedures, and monitoring plan. Approve for implementation?`,
     title: 'Final DevOps Architecture Review',
     context: {
@@ -382,9 +504,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Implementation Roadmap'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // FINAL OUTPUT
   // ============================================================================
@@ -434,8 +562,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Continuous Feedback and Check-ins Program for ${organizationName}`);
 
   // Phase 1: Program Design and Framework
-  const programDesign = await ctx.task(programDesignTask, {
+  let programDesign = await ctx.task(programDesignTask, {
     organizationName,
     checkInCadence,
     feedbackCulture,
@@ -49,9 +49,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...programDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      programDesign = await ctx.task(programDesignTask, { ...{
+    organizationName,
+    checkInCadence,
+    feedbackCulture,
+    includePeerFeedback,
+    includeRecognition,
+    integrateWithGoals,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Continuous feedback program designed with ${checkInCadence} check-ins. Review program framework before implementation?`,
     title: 'Program Design Review',
     context: {
@@ -60,9 +71,15 @@ export async function process(inputs, ctx) {
       checkInStructure: programDesign.checkInStructure,
       feedbackTypes: programDesign.feedbackTypes,
       files: programDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: One-on-One Meeting Framework
   const oneOnOneFramework = await ctx.task(oneOnOneFrameworkTask, {
     organizationName,
@@ -95,18 +112,25 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...recognitionProgram.artifacts);
   }
-
   // Phase 5: Manager Training Program
-  const managerTraining = await ctx.task(managerTrainingTask, {
+  let managerTraining = await ctx.task(managerTrainingTask, {
     organizationName,
     oneOnOneFramework: oneOnOneFramework.framework,
     feedbackSystem: feedbackSystem.system,
     outputDir
   });
 
-  artifacts.push(...managerTraining.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      managerTraining = await ctx.task(managerTrainingTask, { ...{
+    organizationName,
+    oneOnOneFramework: oneOnOneFramework.framework,
+    feedbackSystem: feedbackSystem.system,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Manager training program developed with ${managerTraining.modules.length} modules. Review and approve training content?`,
     title: 'Manager Training Review',
     context: {
@@ -115,9 +139,15 @@ export async function process(inputs, ctx) {
       skillsTargeted: managerTraining.skillsTargeted,
       deliveryFormat: managerTraining.deliveryFormat,
       files: managerTraining.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Technology Platform Setup
   const platformSetup = await ctx.task(platformSetupTask, {
     organizationName,
@@ -141,7 +171,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...launchPlan.artifacts);
 
   // Phase 8: Pilot Program Execution
-  const pilotProgram = await ctx.task(pilotProgramTask, {
+  let pilotProgram = await ctx.task(pilotProgramTask, {
     organizationName,
     departments,
     programDesign: programDesign.framework,
@@ -149,9 +179,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...pilotProgram.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pilotProgram = await ctx.task(pilotProgramTask, { ...{
+    organizationName,
+    departments,
+    programDesign: programDesign.framework,
+    oneOnOneFramework: oneOnOneFramework.framework,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pilot program completed with ${pilotProgram.participants} participants. Adoption rate: ${pilotProgram.adoptionRate}%. Review pilot results before full rollout?`,
     title: 'Pilot Program Review',
     context: {
@@ -160,9 +199,15 @@ export async function process(inputs, ctx) {
       feedbackReceived: pilotProgram.feedbackReceived,
       improvements: pilotProgram.improvements,
       files: pilotProgram.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Full Rollout
   const fullRollout = await ctx.task(fullRolloutTask, {
     organizationName,
@@ -230,8 +275,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const programDesignTask = defineTask('program-design', (args, taskCtx) => ({
   kind: 'agent',

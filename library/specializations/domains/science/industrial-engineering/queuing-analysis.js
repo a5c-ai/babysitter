@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Model Selection
   ctx.log('info', 'Phase 3: Selecting appropriate queuing model');
-  const modelSelection = await ctx.task(modelSelectionTask, {
+  let modelSelection = await ctx.task(modelSelectionTask, {
     systemCharacterization,
     dataAnalysis,
     queueModel,
@@ -71,8 +71,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modelSelection.artifacts);
 
-  // Breakpoint: Review model selection
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      modelSelection = await ctx.task(modelSelectionTask, { ...{
+    systemCharacterization,
+    dataAnalysis,
+    queueModel,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Queuing model selected: ${modelSelection.selectedModel}. Traffic intensity: ${modelSelection.trafficIntensity.toFixed(2)}. Review before analysis?`,
     title: 'Queuing Model Review',
     context: {
@@ -81,9 +90,15 @@ export async function process(inputs, ctx) {
       trafficIntensity: modelSelection.trafficIntensity,
       systemStable: modelSelection.systemStable,
       files: modelSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Performance Calculation
   ctx.log('info', 'Phase 4: Calculating performance metrics');
   const performanceCalculation = await ctx.task(performanceCalculationTask, {
@@ -105,7 +120,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...simulationResults.artifacts);
   }
-
   // Task 6: Staffing Analysis
   ctx.log('info', 'Phase 6: Analyzing staffing scenarios');
   const staffingAnalysis = await ctx.task(staffingAnalysisTask, {
@@ -121,7 +135,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Recommendations
   ctx.log('info', 'Phase 7: Generating recommendations');
-  const recommendations = await ctx.task(recommendationsTask, {
+  let recommendations = await ctx.task(recommendationsTask, {
     systemCharacterization,
     performanceCalculation,
     staffingAnalysis,
@@ -130,8 +144,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendations.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendations = await ctx.task(recommendationsTask, { ...{
+    systemCharacterization,
+    performanceCalculation,
+    staffingAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Queuing analysis complete. Recommended servers: ${staffingAnalysis.recommendedServers}. Expected wait time: ${performanceCalculation.avgWaitTime.toFixed(1)} min. Review recommendations?`,
     title: 'Queuing Analysis Results',
     context: {
@@ -145,9 +168,15 @@ export async function process(inputs, ctx) {
         serviceLevel: staffingAnalysis.achievedServiceLevel
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -178,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: System Characterization
+  // Task 1: System Characterization
 export const systemCharacterizationTask = defineTask('system-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize queuing system',

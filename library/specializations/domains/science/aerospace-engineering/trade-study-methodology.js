@@ -11,37 +11,65 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, tradeStudyScope, alternatives, stakeholders = [] } = inputs;
 
-  const problemDefinition = await ctx.task(problemDefinitionTask, { projectName, tradeStudyScope, stakeholders });
-  const criteriaDefinition = await ctx.task(criteriaDefinitionTask, { projectName, problemDefinition, stakeholders });
-
-  await ctx.breakpoint({
+  let problemDefinition = await ctx.task(problemDefinitionTask, { projectName, tradeStudyScope, stakeholders });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      problemDefinition = await ctx.task(problemDefinitionTask, { ...{ projectName, tradeStudyScope, stakeholders }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `${criteriaDefinition.criteria.length} evaluation criteria defined for ${projectName}. Proceed with weighting?`,
     title: 'Criteria Definition Review',
-    context: { runId: ctx.runId, criteriaDefinition }
-  });
-
+    context: { runId: ctx.runId, criteriaDefinition },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const criteriaWeighting = await ctx.task(criteriaWeightingTask, { projectName, criteria: criteriaDefinition, stakeholders });
   const alternativesAnalysis = await ctx.task(alternativesAnalysisTask, { projectName, alternatives, criteria: criteriaDefinition });
-  const scoringMatrix = await ctx.task(scoringMatrixTask, { projectName, alternatives: alternativesAnalysis, weights: criteriaWeighting });
+  let scoringMatrix = await ctx.task(scoringMatrixTask, { projectName, alternatives: alternativesAnalysis, weights: criteriaWeighting });
 
-  if (scoringMatrix.topAlternatives.length > 1 && scoringMatrix.scoreDifferential < 0.1) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        scoringMatrix = await ctx.task(scoringMatrixTask, { ...{ projectName, alternatives: alternativesAnalysis, weights: criteriaWeighting }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `Top alternatives within 10% score differential. Conduct sensitivity analysis?`,
       title: 'Close Decision Warning',
-      context: { runId: ctx.runId, topAlternatives: scoringMatrix.topAlternatives }
-    });
-  }
+      context: { runId: ctx.runId, topAlternatives: scoringMatrix.topAlternatives },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
   const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, { projectName, scoringMatrix, criteriaWeighting });
-  const recommendation = await ctx.task(recommendationTask, { projectName, scoringMatrix, sensitivityAnalysis });
-  const report = await ctx.task(tradeStudyReportTask, { projectName, problemDefinition, criteriaDefinition, scoringMatrix, sensitivityAnalysis, recommendation });
-
-  await ctx.breakpoint({
+  let recommendation = await ctx.task(recommendationTask, { projectName, scoringMatrix, sensitivityAnalysis });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendation = await ctx.task(recommendationTask, { ...{ projectName, scoringMatrix, sensitivityAnalysis }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Trade study complete for ${projectName}. Recommended: ${recommendation.selected}. Approve?`,
     title: 'Trade Study Approval',
-    context: { runId: ctx.runId, summary: { selected: recommendation.selected, score: recommendation.score, confidence: recommendation.confidence } }
-  });
-
+    context: { runId: ctx.runId, summary: { selected: recommendation.selected, score: recommendation.score, confidence: recommendation.confidence } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, tradeMatrix: scoringMatrix, recommendation, sensitivityAnalysis, report, metadata: { processId: 'trade-study-methodology', timestamp: ctx.now() } };
 }
 

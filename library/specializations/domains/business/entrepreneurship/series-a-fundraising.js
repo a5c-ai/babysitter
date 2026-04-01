@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Series A Fundraising Process for ${companyName}`);
 
   // Phase 1: Series A Readiness Validation
-  const readinessValidation = await ctx.task(seriesAReadinessTask, {
+  let readinessValidation = await ctx.task(seriesAReadinessTask, {
     companyName,
     metrics,
     previousRounds,
@@ -45,17 +45,32 @@ export async function process(inputs, ctx) {
   artifacts.push(...(readinessValidation.artifacts || []));
 
   // Quality Gate: Check readiness
-  if (!readinessValidation.ready) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        readinessValidation = await ctx.task(seriesAReadinessTask, { ...{
+    companyName,
+    metrics,
+    previousRounds,
+    team
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Series A readiness concerns identified. Score: ${readinessValidation.readinessScore}/100. Address gaps or continue?`,
       title: 'Series A Readiness Check',
       context: {
         runId: ctx.runId,
         concerns: readinessValidation.concerns,
         recommendations: readinessValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // Phase 2: Institutional-Grade Pitch Deck
   const institutionalDeck = await ctx.task(institutionalDeckTask, {
@@ -77,7 +92,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(financialModel.artifacts || []));
 
   // Phase 4: Comprehensive Data Room
-  const dataRoom = await ctx.task(seriesADataRoomTask, {
+  let dataRoom = await ctx.task(seriesADataRoomTask, {
     companyName,
     metrics,
     previousRounds,
@@ -87,17 +102,33 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(dataRoom.artifacts || []));
 
-  // Breakpoint: Review materials
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      dataRoom = await ctx.task(seriesADataRoomTask, { ...{
+    companyName,
+    metrics,
+    previousRounds,
+    team,
+    boardComposition
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review Series A materials for ${companyName}. Deck, model, and data room prepared. Ready to build investor list?`,
     title: 'Series A Materials Review',
     context: {
       runId: ctx.runId,
       companyName,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Tiered Investor List
   const tieredInvestorList = await ctx.task(tieredInvestorListTask, {
     companyName,
@@ -146,7 +177,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(termSheetNegotiation.artifacts || []));
 
   // Phase 10: Legal and Closing
-  const legalClosing = await ctx.task(seriesAClosingTask, {
+  let legalClosing = await ctx.task(seriesAClosingTask, {
     companyName,
     fundingTarget,
     boardComposition
@@ -154,8 +185,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(legalClosing.artifacts || []));
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      legalClosing = await ctx.task(seriesAClosingTask, { ...{
+    companyName,
+    fundingTarget,
+    boardComposition
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Series A framework complete for ${companyName}. Target: $${(fundingTarget/1000000).toFixed(1)}M. Ready to execute fundraise?`,
     title: 'Series A Process Ready',
     context: {
@@ -164,9 +203,15 @@ export async function process(inputs, ctx) {
       fundingTarget,
       investorCount: tieredInvestorList.totalInvestors,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -193,8 +238,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const seriesAReadinessTask = defineTask('series-a-readiness', (args, taskCtx) => ({
   kind: 'agent',

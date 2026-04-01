@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
 
   // STAGE 2: METAPHORIC SIMULATION - Build metaphoric model and simulate
   ctx.log('info', 'Stage 2: Metaphoric simulation');
-  const metaphorSelection = await ctx.task(selectMetaphorTask, {
+  let metaphorSelection = await ctx.task(selectMetaphorTask, {
     phenomenon,
     networkMapping,
     domain
@@ -47,9 +47,16 @@ export async function process(inputs, ctx) {
     networkMapping,
     metaphor: metaphorSelection.selectedMetaphor,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      metaphorSelection = await ctx.task(selectMetaphorTask, { ...{
+    phenomenon,
+    networkMapping,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Network mapping and metaphoric simulation complete. Review before mechanism mining?',
     title: 'Mechanism Discovery - Stage 2 Complete',
     context: {
@@ -58,9 +65,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/network-mapping.json', format: 'json' },
         { path: 'artifacts/metaphoric-simulation.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // STAGE 3: DEGENERATE MINING - Search for multiple mechanisms producing same behavior
   ctx.log('info', 'Stage 3: Degenerate mechanism mining');
   const degenerateMining = await ctx.task(mineDegenerateMechanismsTask, {

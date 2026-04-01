@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Protocol Development
-  const protocolDevelopment = await ctx.task(protocolDevelopmentTask, {
+  let protocolDevelopment = await ctx.task(protocolDevelopmentTask, {
     studyName,
     deviceName,
     studyDesign,
@@ -60,8 +60,18 @@ export async function process(inputs, ctx) {
     studyObjectives
   });
 
-  // Breakpoint: Review protocol
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      protocolDevelopment = await ctx.task(protocolDevelopmentTask, { ...{
+    studyName,
+    deviceName,
+    studyDesign,
+    sampleSize,
+    studyObjectives
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review clinical protocol for ${studyName}. Is the study design scientifically sound?`,
     title: 'Protocol Review',
     context: {
@@ -73,9 +83,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: protocolDevelopment
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: IRB/EC Submission
   const irbSubmission = await ctx.task(irbSubmissionTask, {
     studyName,
@@ -95,15 +111,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Statistical Analysis and Reporting
-  const statisticalAnalysis = await ctx.task(statisticalAnalysisTask, {
+  let statisticalAnalysis = await ctx.task(statisticalAnalysisTask, {
     studyName,
     protocolDevelopment,
     studyObjectives,
     sampleSize
   });
 
-  // Final Breakpoint: Study Report Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      statisticalAnalysis = await ctx.task(statisticalAnalysisTask, { ...{
+    studyName,
+    protocolDevelopment,
+    studyObjectives,
+    sampleSize
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clinical study complete for ${studyName}. Approve clinical study report for regulatory submission?`,
     title: 'CSR Approval',
     context: {
@@ -112,9 +137,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/clinical-study-report.json`, format: 'json', content: statisticalAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     studyName,
@@ -128,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const studyObjectivesTask = defineTask('study-objectives', (args, taskCtx) => ({
   kind: 'agent',

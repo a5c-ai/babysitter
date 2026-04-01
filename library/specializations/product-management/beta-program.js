@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning beta program strategy and objectives');
 
-  const planningResult = await ctx.task(betaProgramPlanningTask, {
+  let planningResult = await ctx.task(betaProgramPlanningTask, {
     featureName,
     betaObjectives,
     targetParticipants,
@@ -83,8 +83,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Beta program plan complete - ${planningResult.phases.length} phases, ${planningResult.milestones.length} milestones`);
 
-  // Quality Gate: Program plan review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      planningResult = await ctx.task(betaProgramPlanningTask, { ...{
+    featureName,
+    betaObjectives,
+    targetParticipants,
+    duration,
+    targetSegments,
+    successCriteria,
+    betaType,
+    feedbackChannels,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Beta program plan created for ${featureName}. ${planningResult.phases.length} phases over ${duration} days. ${targetParticipants} participants targeted. Review program plan and objectives?`,
     title: 'Beta Program Plan Review',
     context: {
@@ -99,9 +113,15 @@ export async function process(inputs, ctx) {
         phases: planningResult.phases.map(p => p.name)
       },
       files: planningResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PARTICIPANT SELECTION CRITERIA
   // ============================================================================
@@ -170,7 +190,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Creating beta documentation and onboarding materials');
 
-  const documentationResult = await ctx.task(createBetaDocumentationTask, {
+  let documentationResult = await ctx.task(createBetaDocumentationTask, {
     featureName,
     betaObjectives,
     planningResult,
@@ -184,8 +204,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Beta documentation complete - ${documentationResult.documents.length} documents, ${documentationResult.guides.length} guides`);
 
-  // Quality Gate: Documentation review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      documentationResult = await ctx.task(createBetaDocumentationTask, { ...{
+    featureName,
+    betaObjectives,
+    planningResult,
+    criteriaResult,
+    includeNDA,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Beta documentation and onboarding materials created. ${documentationResult.documents.length} documents including guides, FAQs, and NDA. Review beta materials?`,
     title: 'Beta Documentation Review',
     context: {
@@ -197,9 +228,15 @@ export async function process(inputs, ctx) {
         onboardingSteps: documentationResult.onboardingSteps.length
       },
       files: documentationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: FEEDBACK COLLECTION FRAMEWORK
   // ============================================================================
@@ -266,7 +303,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Planning beta program kickoff and launch');
 
-  const kickoffResult = await ctx.task(planBetaKickoffTask, {
+  let kickoffResult = await ctx.task(planBetaKickoffTask, {
     featureName,
     planningResult,
     documentationResult,
@@ -280,8 +317,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Kickoff plan created - ${kickoffResult.activities.length} activities, ${kickoffResult.checklistItems.length} checklist items`);
 
-  // Quality Gate: Pre-launch readiness
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      kickoffResult = await ctx.task(planBetaKickoffTask, { ...{
+    featureName,
+    planningResult,
+    documentationResult,
+    communicationResult,
+    environmentResult,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Beta program ready for kickoff. ${kickoffResult.checklistItems.length} checklist items. Environment, documentation, and communication plans complete. Proceed with beta launch?`,
     title: 'Beta Launch Readiness Review',
     context: {
@@ -297,9 +345,15 @@ export async function process(inputs, ctx) {
         { path: kickoffResult.checklistPath, format: 'markdown', label: 'Launch Checklist' },
         { path: planningResult.planPath, format: 'json', label: 'Beta Program Plan' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: ONGOING MONITORING PLAN
   // ============================================================================
@@ -405,7 +459,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Creating launch readiness assessment framework');
 
-  const readinessResult = await ctx.task(createReadinessFrameworkTask, {
+  let readinessResult = await ctx.task(createReadinessFrameworkTask, {
     featureName,
     betaObjectives,
     successCriteria,
@@ -423,8 +477,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Launch readiness framework created - ${readinessResult.criteria.length} readiness criteria`);
 
-  // Final Breakpoint: Beta Program Plan Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      readinessResult = await ctx.task(createReadinessFrameworkTask, { ...{
+    featureName,
+    betaObjectives,
+    successCriteria,
+    analysisResult,
+    prioritizationResult,
+    phaseResults,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Beta Program Plan Complete for ${featureName}. All ${phaseResults.length} phases planned. Target: ${targetParticipants} participants over ${duration} days. Review complete beta program plan?`,
     title: 'Final Beta Program Review',
     context: {
@@ -457,9 +523,15 @@ export async function process(inputs, ctx) {
         { path: kickoffResult.checklistPath, format: 'markdown', label: 'Launch Checklist' },
         { path: readinessResult.frameworkPath, format: 'json', label: 'Launch Readiness Framework' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_ms = endTime - startTime;
 
@@ -549,8 +621,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

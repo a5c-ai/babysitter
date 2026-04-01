@@ -98,7 +98,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...injectionDefense.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: OUTPUT VALIDATION
   // ============================================================================
@@ -116,14 +115,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...outputValidation.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: SYSTEM PROMPT ASSEMBLY
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Assembling system prompt');
 
-  const systemPrompt = await ctx.task(systemPromptAssemblyTask, {
+  let systemPrompt = await ctx.task(systemPromptAssemblyTask, {
     agentName,
     roleDefinition: roleDefinition.definition,
     taskBoundaries: taskBoundaries.boundaries,
@@ -134,8 +132,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...systemPrompt.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systemPrompt = await ctx.task(systemPromptAssemblyTask, { ...{
+    agentName,
+    roleDefinition: roleDefinition.definition,
+    taskBoundaries: taskBoundaries.boundaries,
+    safetyGuidelines: safetyGuidelines.guidelines,
+    injectionDefense: injectionDefense ? injectionDefense.defense : null,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `System prompt for ${agentName} complete. Safety level: ${safetyLevel}. Review prompt and guardrails?`,
     title: 'System Prompt Review',
     context: {
@@ -149,9 +158,15 @@ export async function process(inputs, ctx) {
         enableOutputValidation
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -171,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

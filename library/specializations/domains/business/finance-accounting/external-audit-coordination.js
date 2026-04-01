@@ -31,18 +31,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'audit-planning', result: planningResult });
 
   // Step 2: PBC List Development
-  const pbcResult = await ctx.task(developPBCListTask, {
+  let pbcResult = await ctx.task(developPBCListTask, {
     auditYear: inputs.auditYear,
     auditPlan: planningResult
   });
   results.steps.push({ name: 'pbc-list', result: pbcResult });
 
-  // Breakpoint for PBC review
-  await ctx.breakpoint('pbc-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      pbcResult = await ctx.task(developPBCListTask, { ...{
+    auditYear: inputs.auditYear,
+    auditPlan: planningResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('pbc-review', {
     message: 'Review PBC list and prepare for interim audit',
-    data: pbcResult
-  });
-
+    data: pbcResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Interim Audit Support
   const interimResult = await ctx.task(supportInterimAuditTask, {
     pbcList: pbcResult,
@@ -51,19 +64,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'interim-audit', result: interimResult });
 
   // Step 4: Year-End Audit Support
-  const yearEndResult = await ctx.task(supportYearEndAuditTask, {
+  let yearEndResult = await ctx.task(supportYearEndAuditTask, {
     financialStatements: inputs.financialStatements,
     pbcList: pbcResult,
     interimResults: interimResult
   });
   results.steps.push({ name: 'year-end-audit', result: yearEndResult });
 
-  // Breakpoint for audit issues review
-  await ctx.breakpoint('audit-issues-review', {
+    let lastFeedback_reviewApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval2) {
+      yearEndResult = await ctx.task(supportYearEndAuditTask, { ...{
+    financialStatements: inputs.financialStatements,
+    pbcList: pbcResult,
+    interimResults: interimResult
+  }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+    }
+  const reviewApproval2 = await ctx.breakpoint('audit-issues-review', {
     message: 'Review audit findings and proposed adjustments',
-    data: yearEndResult
-  });
-
+    data: yearEndResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval2.approved) break;
+    lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+  }
   // Step 5: Audit Adjustment Processing
   const adjustmentsResult = await ctx.task(processAuditAdjustmentsTask, {
     auditFindings: yearEndResult,
@@ -80,20 +107,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'representation-letter', result: repLetterResult });
 
   // Step 7: Audit Committee Preparation
-  const auditCommitteeResult = await ctx.task(prepareAuditCommitteeMaterialsTask, {
+  let auditCommitteeResult = await ctx.task(prepareAuditCommitteeMaterialsTask, {
     auditYear: inputs.auditYear,
     auditResults: yearEndResult,
     adjustments: adjustmentsResult
   });
   results.steps.push({ name: 'audit-committee-prep', result: auditCommitteeResult });
 
-  // Breakpoint for final sign-off
-  await ctx.breakpoint('final-signoff', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      auditCommitteeResult = await ctx.task(prepareAuditCommitteeMaterialsTask, { ...{
+    auditYear: inputs.auditYear,
+    auditResults: yearEndResult,
+    adjustments: adjustmentsResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('final-signoff', {
     message: 'Review final audit materials before audit committee presentation',
-    data: { repLetter: repLetterResult, auditCommittee: auditCommitteeResult }
-  });
-
-  results.outputs = {
+    data: { repLetter: repLetterResult, auditCommittee: auditCommitteeResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  results.outputs = {
     auditCoordination: yearEndResult,
     adjustments: adjustmentsResult,
     auditCommitteeMaterials: auditCommitteeResult,
@@ -102,8 +142,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const coordinateAuditPlanningTask = defineTask('coordinate-audit-planning', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'external-audit-coordination' },

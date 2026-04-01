@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Detecting code smells');
-  const smellDetection = await ctx.task(smellDetectionTask, {
+  let smellDetection = await ctx.task(smellDetectionTask, {
     projectName,
     codeAnalysis,
     outputDir
@@ -63,8 +63,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...smellDetection.artifacts);
 
-  // Breakpoint: Code smell review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      smellDetection = await ctx.task(smellDetectionTask, { ...{
+    projectName,
+    codeAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Code analysis complete for ${projectName}. Smells detected: ${smellDetection.totalSmells}. Hotspots: ${smellDetection.hotspots.length}. Review findings before planning?`,
     title: 'Code Smell Analysis Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
       projectName,
       smellDetection,
       recommendation: 'Prioritize high-impact refactoring targets'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: REFACTORING PLANNING
   // ============================================================================
@@ -124,7 +138,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Validating changes');
-  const validation = await ctx.task(refactoringValidationTask, {
+  let validation = await ctx.task(refactoringValidationTask, {
     projectName,
     refactoringExecution,
     qualityTargets,
@@ -134,8 +148,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...validation.artifacts);
 
   // Quality Gate: Validation results
-  if (!validation.allTestsPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        validation = await ctx.task(refactoringValidationTask, { ...{
+    projectName,
+    refactoringExecution,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Validation failed for ${projectName}. Failed tests: ${validation.failedCount}. Review and fix regressions?`,
       title: 'Refactoring Validation Failed',
       context: {
@@ -143,16 +166,22 @@ export async function process(inputs, ctx) {
         projectName,
         failures: validation.failures,
         recommendation: 'Fix failing tests before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: QUALITY METRICS COMPARISON
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Comparing quality metrics');
-  const metricsComparison = await ctx.task(metricsComparisonTask, {
+  let metricsComparison = await ctx.task(metricsComparisonTask, {
     projectName,
     codeAnalysis,
     refactoringExecution,
@@ -162,8 +191,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsComparison.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metricsComparison = await ctx.task(metricsComparisonTask, { ...{
+    projectName,
+    codeAnalysis,
+    refactoringExecution,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Code refactoring complete for ${projectName}. Complexity reduction: ${metricsComparison.complexityReduction}%. Coverage increase: ${metricsComparison.coverageIncrease}%. Quality targets met: ${metricsComparison.targetsMet}. Approve?`,
     title: 'Code Refactoring Complete',
     context: {
@@ -175,9 +214,15 @@ export async function process(inputs, ctx) {
         coverageIncrease: metricsComparison.coverageIncrease,
         targetsMet: metricsComparison.targetsMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -215,8 +260,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

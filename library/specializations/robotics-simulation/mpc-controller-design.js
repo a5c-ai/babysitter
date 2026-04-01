@@ -67,15 +67,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...realTimeOptimization.artifacts);
 
   // Phase 9: Baseline Comparison
-  const comparison = await ctx.task(mpcBaselineComparisonTask, { robotName, trackingPerformance, outputDir });
-  artifacts.push(...comparison.artifacts);
-
-  await ctx.breakpoint({
+  let comparison = await ctx.task(mpcBaselineComparisonTask, { robotName, trackingPerformance, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      comparison = await ctx.task(mpcBaselineComparisonTask, { ...{ robotName, trackingPerformance, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MPC Controller Complete for ${robotName}. Tracking error: ${trackingPerformance.trackingError}m, Solver time: ${realTimeOptimization.solverTime}ms. Review?`,
     title: 'MPC Controller Complete',
-    context: { runId: ctx.runId, trackingError: trackingPerformance.trackingError, solverTime: realTimeOptimization.solverTime }
-  });
-
+    context: { runId: ctx.runId, trackingError: trackingPerformance.trackingError, solverTime: realTimeOptimization.solverTime },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: trackingPerformance.trackingError < 0.1 && realTimeOptimization.realTimeCapable,
     robotName,

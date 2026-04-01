@@ -35,16 +35,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(channelRanking.artifacts || []));
 
   // Phase 3: Top 3 Selection
-  const top3Selection = await ctx.task(top3SelectionTask, { companyName, channelRanking });
+  let top3Selection = await ctx.task(top3SelectionTask, { companyName, channelRanking });
   artifacts.push(...(top3Selection.artifacts || []));
 
-  // Breakpoint: Review channel selection
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      top3Selection = await ctx.task(top3SelectionTask, { ...{ companyName, channelRanking }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review top 3 channels for ${companyName}: ${top3Selection.channels?.join(', ')}. Proceed with test design?`,
     title: 'Channel Selection Review',
-    context: { runId: ctx.runId, companyName, channels: top3Selection.channels, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, channels: top3Selection.channels, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Test Design
   const testDesign = await ctx.task(testDesignTask, { companyName, top3Selection, budget });
   artifacts.push(...(testDesign.artifacts || []));

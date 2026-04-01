@@ -48,17 +48,26 @@ export async function process(inputs, ctx) {
   const implementationPlan = await ctx.task(attributionImplementationTask, { modelComparison, existingAttribution, outputDir });
   artifacts.push(...implementationPlan.artifacts);
 
-  const qualityAssessment = await ctx.task(attributionQualityTask, { dataAssessment, modelComparison, implementationPlan, outputDir });
+  let qualityAssessment = await ctx.task(attributionQualityTask, { dataAssessment, modelComparison, implementationPlan, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const attributionScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(attributionQualityTask, { ...{ dataAssessment, modelComparison, implementationPlan, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Attribution setup complete. Quality score: ${attributionScore}/100. Review and approve?`,
     title: 'Attribution Modeling Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     attributionScore,

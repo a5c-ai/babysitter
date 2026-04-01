@@ -40,16 +40,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(runwayAnalysis.artifacts || []));
 
   // Phase 4: Pivot Options Generation
-  const pivotOptions = await ctx.task(pivotOptionsTask, { companyName, currentStrategy, evidenceCompilation, teamCapabilities });
+  let pivotOptions = await ctx.task(pivotOptionsTask, { companyName, currentStrategy, evidenceCompilation, teamCapabilities });
   artifacts.push(...(pivotOptions.artifacts || []));
 
-  // Breakpoint: Review options
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      pivotOptions = await ctx.task(pivotOptionsTask, { ...{ companyName, currentStrategy, evidenceCompilation, teamCapabilities }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review pivot options for ${companyName}. ${pivotOptions.options?.length || 0} options identified. Continue with analysis?`,
     title: 'Pivot Options Review',
-    context: { runId: ctx.runId, companyName, optionCount: pivotOptions.options?.length || 0, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, optionCount: pivotOptions.options?.length || 0, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Options Analysis
   const optionsAnalysis = await ctx.task(optionsAnalysisTask, { companyName, pivotOptions, teamCapabilities, runwayAnalysis });
   artifacts.push(...(optionsAnalysis.artifacts || []));
@@ -63,15 +73,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...(communicationPlan.artifacts || []));
 
   // Phase 8: New Direction Plan
-  const newDirectionPlan = await ctx.task(newDirectionPlanTask, { companyName, decisionFramework, optionsAnalysis });
-  artifacts.push(...(newDirectionPlan.artifacts || []));
-
-  await ctx.breakpoint({
+  let newDirectionPlan = await ctx.task(newDirectionPlanTask, { companyName, decisionFramework, optionsAnalysis });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      newDirectionPlan = await ctx.task(newDirectionPlanTask, { ...{ companyName, decisionFramework, optionsAnalysis }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pivot decision for ${companyName}: ${decisionFramework.decision}. Confidence: ${decisionFramework.confidence}. Approve?`,
     title: 'Pivot Decision Complete',
-    context: { runId: ctx.runId, decision: decisionFramework.decision, confidence: decisionFramework.confidence, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, decision: decisionFramework.decision, confidence: decisionFramework.confidence, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {

@@ -133,7 +133,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating comprehensive Five Forces report');
-  const fiveForcesReport = await ctx.task(fiveForcesReportTask, {
+  let fiveForcesReport = await ctx.task(fiveForcesReportTask, {
     industryName,
     companyContext,
     newEntrantsAnalysis,
@@ -148,8 +148,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fiveForcesReport.artifacts);
 
-  // Breakpoint: Review Five Forces analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      fiveForcesReport = await ctx.task(fiveForcesReportTask, { ...{
+    industryName,
+    companyContext,
+    newEntrantsAnalysis,
+    suppliersAnalysis,
+    buyersAnalysis,
+    substitutesAnalysis,
+    rivalryAnalysis,
+    industryAttractivenessResult,
+    strategicRecommendations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Five Forces analysis complete for ${industryName}. Industry attractiveness: ${industryAttractivenessResult.overallScore}/100. Review findings and recommendations?`,
     title: 'Porter\'s Five Forces Analysis Review',
     context: {
@@ -172,9 +187,15 @@ export async function process(inputs, ctx) {
         },
         topRecommendations: strategicRecommendations.topRecommendations?.slice(0, 3)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -225,8 +246,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

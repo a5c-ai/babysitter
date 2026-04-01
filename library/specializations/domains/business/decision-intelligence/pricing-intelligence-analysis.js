@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Price Elasticity Analysis
-  const elasticityAnalysis = await ctx.task(elasticityAnalysisTask, {
+  let elasticityAnalysis = await ctx.task(elasticityAnalysisTask, {
     projectName,
     productContext,
     marketContext,
     competitorPricingAnalysis
   });
 
-  // Breakpoint: Review pricing intelligence
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      elasticityAnalysis = await ctx.task(elasticityAnalysisTask, { ...{
+    projectName,
+    productContext,
+    marketContext,
+    competitorPricingAnalysis
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review pricing intelligence analysis for ${projectName}. Are the competitive insights accurate?`,
     title: 'Pricing Intelligence Review',
     context: {
@@ -78,9 +87,15 @@ export async function process(inputs, ctx) {
       projectName,
       competitorCount: competitors.length,
       pricingModels: pricingModelAnalysis.models?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Pricing Opportunity Identification
   const opportunityAnalysis = await ctx.task(pricingOpportunityTask, {
     projectName,
@@ -127,8 +142,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const pricingDataCollectionTask = defineTask('pricing-data-collection', (args, taskCtx) => ({
   kind: 'agent',

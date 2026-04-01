@@ -158,7 +158,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Documentation');
 
-  const documentation = await ctx.task(replDocumentationTask, {
+  let documentation = await ctx.task(replDocumentationTask, {
     languageName,
     replCommands,
     tabCompletion,
@@ -166,9 +166,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(replDocumentationTask, { ...{
+    languageName,
+    replCommands,
+    tabCompletion,
+    integration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `REPL Development Complete for ${languageName}! Commands: ${replCommands.commandCount}, Tab completion: ${tabCompletion.completionTypes.length} types. Review deliverables?`,
     title: 'REPL Complete',
     context: {
@@ -183,9 +192,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'REPL Implementation' },
         { path: documentation.userGuidePath, format: 'markdown', label: 'User Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -220,8 +235,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

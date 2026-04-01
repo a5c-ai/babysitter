@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Software Requirements Specification
-  const requirementsSpecification = await ctx.task(requirementsSpecificationTask, {
+  let requirementsSpecification = await ctx.task(requirementsSpecificationTask, {
     softwareName,
     safetyClass,
     intendedUse,
     developmentPlanning
   });
 
-  // Breakpoint: Review software requirements
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      requirementsSpecification = await ctx.task(requirementsSpecificationTask, { ...{
+    softwareName,
+    safetyClass,
+    intendedUse,
+    developmentPlanning
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review software requirements for ${softwareName}. Are all requirements traceable to system needs?`,
     title: 'Software Requirements Review',
     context: {
@@ -65,9 +74,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: requirementsSpecification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Software Architecture Design
   const architectureDesign = await ctx.task(architectureDesignTask, {
     softwareName,
@@ -100,15 +115,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Software Release and Maintenance
-  const releaseMaintenace = await ctx.task(releaseMaintenanceTask, {
+  let releaseMaintenace = await ctx.task(releaseMaintenanceTask, {
     softwareName,
     safetyClass,
     softwareVerification,
     developmentPlanning
   });
 
-  // Final Breakpoint: SDLC Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      releaseMaintenace = await ctx.task(releaseMaintenanceTask, { ...{
+    softwareName,
+    safetyClass,
+    softwareVerification,
+    developmentPlanning
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Software lifecycle documentation complete for ${softwareName}. Approve for release?`,
     title: 'SDLC Approval',
     context: {
@@ -118,9 +142,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/sdlc-documentation.json`, format: 'json', content: releaseMaintenace }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     softwareName,
@@ -138,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const safetyClassificationTask = defineTask('safety-classification', (args, taskCtx) => ({
   kind: 'agent',

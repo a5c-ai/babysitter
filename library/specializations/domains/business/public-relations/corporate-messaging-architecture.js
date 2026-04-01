@@ -19,17 +19,25 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Organizational Context Analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting messaging architecture development. Analyze organizational context?',
     title: 'Phase 1: Context Analysis',
     context: {
       runId: ctx.runId,
       phase: 'context-analysis',
       organization: organization.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [contextAnalysis, competitorAnalysis] = await Promise.all([
     ctx.task(analyzeOrganizationalContextTask, {
       organization,
@@ -42,33 +50,56 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Core Narrative Development
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Context analyzed. Develop core narrative and positioning?',
     title: 'Phase 2: Core Narrative',
     context: {
       runId: ctx.runId,
       phase: 'core-narrative'
-    }
-  });
-
-  const coreNarrative = await ctx.task(developCoreNarrativeTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let coreNarrative = await ctx.task(developCoreNarrativeTask, {
     contextAnalysis,
     competitorAnalysis,
     brandStrategy,
     organization
   });
 
-  // Phase 3: Key Messages Development
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      coreNarrative = await ctx.task(developCoreNarrativeTask, { ...{
+    contextAnalysis,
+    competitorAnalysis,
+    brandStrategy,
+    organization
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Core narrative defined. Develop key messages and proof points?',
     title: 'Phase 3: Key Messages',
     context: {
       runId: ctx.runId,
       phase: 'key-messages'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   const [keyMessages, proofPoints] = await Promise.all([
     ctx.task(developKeyMessagesTask, {
       coreNarrative,
@@ -81,84 +112,157 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 4: Audience Adaptation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      coreNarrative = await ctx.task(developCoreNarrativeTask, { ...{
+    contextAnalysis,
+    competitorAnalysis,
+    brandStrategy,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Key messages developed. Create audience-specific adaptations?',
     title: 'Phase 4: Audience Adaptation',
     context: {
       runId: ctx.runId,
       phase: 'audience-adaptation',
       audienceCount: targetAudiences.length
-    }
-  });
-
-  const audienceAdaptations = await ctx.task(createAudienceAdaptationsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let audienceAdaptations = await ctx.task(createAudienceAdaptationsTask, {
     coreNarrative,
     keyMessages,
     proofPoints,
     targetAudiences
   });
 
-  // Phase 5: Channel Optimization Guidelines
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      audienceAdaptations = await ctx.task(createAudienceAdaptationsTask, { ...{
+    coreNarrative,
+    keyMessages,
+    proofPoints,
+    targetAudiences
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Audience adaptations created. Develop channel optimization guidelines?',
     title: 'Phase 5: Channel Guidelines',
     context: {
       runId: ctx.runId,
       phase: 'channel-guidelines'
-    }
-  });
-
-  const channelGuidelines = await ctx.task(developChannelGuidelinesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let channelGuidelines = await ctx.task(developChannelGuidelinesTask, {
     coreNarrative,
     keyMessages,
     audienceAdaptations
   });
 
-  // Phase 6: Message Hierarchy and Structure
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      channelGuidelines = await ctx.task(developChannelGuidelinesTask, { ...{
+    coreNarrative,
+    keyMessages,
+    audienceAdaptations
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Channel guidelines developed. Create message hierarchy and structure?',
     title: 'Phase 6: Message Hierarchy',
     context: {
       runId: ctx.runId,
       phase: 'message-hierarchy'
-    }
-  });
-
-  const messageHierarchy = await ctx.task(createMessageHierarchyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let messageHierarchy = await ctx.task(createMessageHierarchyTask, {
     coreNarrative,
     keyMessages,
     proofPoints,
     audienceAdaptations
   });
 
-  // Phase 7: Usage Guidelines and Governance
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      messageHierarchy = await ctx.task(createMessageHierarchyTask, { ...{
+    coreNarrative,
+    keyMessages,
+    proofPoints,
+    audienceAdaptations
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Hierarchy created. Develop usage guidelines and governance?',
     title: 'Phase 7: Usage Guidelines',
     context: {
       runId: ctx.runId,
       phase: 'usage-guidelines'
-    }
-  });
-
-  const usageGuidelines = await ctx.task(developUsageGuidelinesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let usageGuidelines = await ctx.task(developUsageGuidelinesTask, {
     messageHierarchy,
     channelGuidelines,
     organization
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      usageGuidelines = await ctx.task(developUsageGuidelinesTask, { ...{
+    messageHierarchy,
+    channelGuidelines,
+    organization
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate messaging architecture quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateMessagingQualityTask, {
     coreNarrative,
     keyMessages,
@@ -209,8 +313,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzeOrganizationalContextTask = defineTask('analyze-org-context', (args, taskCtx) => ({
   kind: 'agent',

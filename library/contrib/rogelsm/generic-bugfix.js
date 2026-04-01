@@ -1,6 +1,6 @@
 /**
  * @process generic-bugfix
- * @description Root-cause-first bugfix template. Enforces deep diagnosis before
+ * @description Root-cause-first bugfix template with Phase 0 git-diff analysis. Enforces deep diagnosis before
  * implementation and verifies edge cases beyond the reported case. Replaces all
  * ad-hoc bugfix processes that vary in diagnostic depth.
  *
@@ -50,7 +50,8 @@ export async function process(args) {
           `You are diagnosing a bug in the trip-planner project.\n\n` +
           `Issue description: ${issueDescription}\n\n` +
           `Project directory: ${projectDir}\n\n` +
-          `Answer ALL five diagnostic questions in order before drawing any conclusions:\n\n` +
+          `Answer ALL diagnostic questions in order before drawing any conclusions:\n\n` +
+          `0. GIT HISTORY: Run \`git diff\` and \`git log --oneline -20\` to identify the specific commit(s) that introduced this regression. Document the breaking change.\n\n` +
           `1. REPRODUCE: What is the exact error message or incorrect behavior (copy verbatim, ` +
           `   not a paraphrase)? Which file(s) and line number(s) does the error originate from?\n\n` +
           `2. ISOLATE: What is the smallest reproduction case? Which component, function, or ` +
@@ -64,6 +65,8 @@ export async function process(args) {
           `   count — it must be independently confirmatory.\n\n` +
           `5. EDGE CASES: What alternative causes did you consider and rule out? Why were they ` +
           `   ruled out? What edge cases might be affected by the root cause?\n\n` +
+          `NO CODE CHANGES: This diagnostic phase is for investigation only. You must NOT modify any ` +
+          `code files during this phase. Only read, analyze, and document.\n\n` +
           `GUARD: You must document WHY the identified root cause is correct before any fix ` +
           `is attempted. Do not proceed to a fix plan until you have 2+ independent evidence signals.\n\n` +
           `Output schema:\n` +

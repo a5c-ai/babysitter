@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Identifying bottlenecks');
-  const bottleneckIdentification = await ctx.task(bottleneckIdentificationTask, {
+  let bottleneckIdentification = await ctx.task(bottleneckIdentificationTask, {
     projectName,
     performanceProfiling,
     performanceRequirements,
@@ -64,8 +64,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bottleneckIdentification.artifacts);
 
-  // Breakpoint: Bottleneck review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      bottleneckIdentification = await ctx.task(bottleneckIdentificationTask, { ...{
+    projectName,
+    performanceProfiling,
+    performanceRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Bottleneck analysis complete for ${projectName}. Critical bottlenecks: ${bottleneckIdentification.criticalCount}. Top issue: ${bottleneckIdentification.topIssue}. Approve optimization plan?`,
     title: 'Bottleneck Analysis Review',
     context: {
@@ -73,9 +82,15 @@ export async function process(inputs, ctx) {
       projectName,
       bottleneckIdentification,
       recommendation: 'Review bottlenecks and prioritize optimizations'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: OPTIMIZATION PLANNING
   // ============================================================================
@@ -123,7 +138,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Setting up regression prevention');
-  const regressionPrevention = await ctx.task(regressionPreventionTask, {
+  let regressionPrevention = await ctx.task(regressionPreventionTask, {
     projectName,
     benchmarking,
     performanceRequirements,
@@ -132,8 +147,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...regressionPrevention.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      regressionPrevention = await ctx.task(regressionPreventionTask, { ...{
+    projectName,
+    benchmarking,
+    performanceRequirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance optimization complete for ${projectName}. Requirements met: ${benchmarking.requirementsMet}. Improvement: ${benchmarking.improvement}. Regression tests: ${regressionPrevention.testsConfigured}. Approve?`,
     title: 'Performance Optimization Complete',
     context: {
@@ -145,9 +169,15 @@ export async function process(inputs, ctx) {
         improvement: benchmarking.improvement,
         regressionTests: regressionPrevention.testsConfigured
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -170,8 +200,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirements.artifacts);
 
   // Phase 2: Single Instance Lock
-  const singleInstance = await ctx.task(implementSingleInstanceTask, { projectName, framework, targetPlatforms, outputDir });
+  let singleInstance = await ctx.task(implementSingleInstanceTask, { projectName, framework, targetPlatforms, outputDir });
   artifacts.push(...singleInstance.artifacts);
 
   // Phase 3: Protocol Handler
@@ -48,34 +48,40 @@ export async function process(inputs, ctx) {
     protocolHandler = await ctx.task(implementProtocolHandlerTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...protocolHandler.artifacts);
   }
-
   // Phase 4: Named Pipes
   let namedPipes = null;
   if (ipcMethods.includes('named-pipe')) {
     namedPipes = await ctx.task(implementNamedPipesTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...namedPipes.artifacts);
   }
-
   // Phase 5: WebSocket Server
   let websocket = null;
   if (ipcMethods.includes('websocket')) {
     websocket = await ctx.task(implementWebSocketTask, { projectName, framework, outputDir });
     artifacts.push(...websocket.artifacts);
   }
-
   // Phase 6: Shared Memory
   let sharedMemory = null;
   if (ipcMethods.includes('shared-memory')) {
     sharedMemory = await ctx.task(implementSharedMemoryTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...sharedMemory.artifacts);
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      singleInstance = await ctx.task(implementSingleInstanceTask, { ...{ projectName, framework, targetPlatforms, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `IPC methods implemented: ${ipcMethods.join(', ')}. Single instance: ${singleInstance.enabled}. Review implementation?`,
     title: 'IPC Implementation Review',
-    context: { runId: ctx.runId, ipcMethods, singleInstance: singleInstance.enabled }
-  });
-
+    context: { runId: ctx.runId, ipcMethods, singleInstance: singleInstance.enabled },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Message Protocol
   const messageProtocol = await ctx.task(implementMessageProtocolTask, { projectName, framework, ipcMethods, outputDir });
   artifacts.push(...messageProtocol.artifacts);

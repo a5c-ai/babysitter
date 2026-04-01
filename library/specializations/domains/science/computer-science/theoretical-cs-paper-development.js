@@ -68,21 +68,35 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Technical verification
-  const verification = await ctx.task(technicalVerifier, {
+  let verification = await ctx.task(technicalVerifier, {
     paperDraft,
     theorems: theoremDevelopment.theorems,
     proofs: proofConstruction.proofs
   });
 
-  // Phase 8: Review breakpoint
-  await ctx.breakpoint('paper-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      verification = await ctx.task(technicalVerifier, { ...{
+    paperDraft,
+    theorems: theoremDevelopment.theorems,
+    proofs: proofConstruction.proofs
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('paper-review', {
     message: 'Review theoretical CS paper draft',
     paperDraft,
     theorems: theoremDevelopment,
     proofs: proofConstruction,
-    verification
-  });
-
+    verification,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Presentation preparation
   const presentationMaterials = await ctx.task(presentationPreparer, {
     paperDraft,

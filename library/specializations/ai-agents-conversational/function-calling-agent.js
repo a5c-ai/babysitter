@@ -117,7 +117,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating integration tests');
 
-  const integrationTests = await ctx.task(integrationTestsTask, {
+  let integrationTests = await ctx.task(integrationTestsTask, {
     agentName,
     toolDefinitions: toolSpecification.definitions,
     outputDir
@@ -125,8 +125,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...integrationTests.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integrationTests = await ctx.task(integrationTestsTask, { ...{
+    agentName,
+    toolDefinitions: toolSpecification.definitions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Function calling agent ${agentName} complete. ${toolSpecification.definitions.length} tools configured. Review implementation?`,
     title: 'Function Calling Agent Review',
     context: {
@@ -139,9 +147,15 @@ export async function process(inputs, ctx) {
         testCount: integrationTests.tests.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -161,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

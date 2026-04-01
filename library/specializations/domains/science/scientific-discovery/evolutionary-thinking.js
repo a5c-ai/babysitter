@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Synthesizing evolutionary explanation');
-  const explanationSynthesis = await ctx.task(explanationSynthesisTask, {
+  let explanationSynthesis = await ctx.task(explanationSynthesisTask, {
     feature,
     organism,
     featureAnalysis,
@@ -116,8 +116,22 @@ export async function process(inputs, ctx) {
 
   const confidenceMet = explanationSynthesis.confidenceScore >= targetConfidence;
 
-  // Breakpoint: Review evolutionary explanation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      explanationSynthesis = await ctx.task(explanationSynthesisTask, { ...{
+    feature,
+    organism,
+    featureAnalysis,
+    ancestralReconstruction,
+    selectionPressures: selectionPressures.pressures,
+    adaptiveAssessment,
+    alternativeHypotheses,
+    targetConfidence,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Evolutionary explanation complete. Confidence: ${explanationSynthesis.confidenceScore}/${targetConfidence}. ${confidenceMet ? 'Confidence target met!' : 'Additional evidence may be needed.'} Review explanation?`,
     title: 'Evolutionary Thinking Results',
     context: {
@@ -137,9 +151,15 @@ export async function process(inputs, ctx) {
         alternativeHypothesesConsidered: alternativeHypotheses.hypotheses.length,
         primaryExplanationType: explanationSynthesis.primaryExplanationType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: TESTABLE PREDICTIONS GENERATION
   // ============================================================================
@@ -179,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

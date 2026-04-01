@@ -45,17 +45,26 @@ export async function process(inputs, ctx) {
   const reportingDashboard = await ctx.task(vocReportingDashboardTask, { analysisFramework, businessGoals, outputDir });
   artifacts.push(...reportingDashboard.artifacts);
 
-  const qualityAssessment = await ctx.task(vocProgramQualityTask, { programDesign, feedbackChannels, analysisFramework, actionFramework, outputDir });
+  let qualityAssessment = await ctx.task(vocProgramQualityTask, { programDesign, feedbackChannels, analysisFramework, actionFramework, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const programScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(vocProgramQualityTask, { ...{ programDesign, feedbackChannels, analysisFramework, actionFramework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `VoC program complete. Quality score: ${programScore}/100. Review and approve?`,
     title: 'VoC Program Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     programScore,

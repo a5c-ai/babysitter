@@ -215,8 +215,11 @@ export async function process(inputs, ctx) {
   // Execute a task
   const result = await ctx.task(myTask, { action: 'build' });
 
-  // Request human approval
-  await ctx.breakpoint({ question: 'Approve?' });
+  // Request human approval (returns BreakpointResult)
+  const approval = await ctx.breakpoint({ question: 'Approve?' });
+  if (!approval.approved) {
+    return { success: false, reason: approval.feedback };
+  }
 
   // Sleep until a specific time
   await ctx.sleepUntil('2026-01-26T09:00:00.000Z');
@@ -303,13 +306,16 @@ defineTask<TArgs, TResult>(id: string, impl: TaskImpl<TArgs>): DefinedTask<TArgs
 | `io.inputJsonPath` | string | No | Path for input JSON |
 | `io.outputJsonPath` | string | No | Path for output JSON |
 | `labels` | string[] | No | Labels for categorization |
+| `execution.harness` | string | No | Preferred harness CLI for task execution (internal-only) |
+| `execution.model` | string | No | Preferred model for agent tasks |
+| `execution.permissions` | string[] | No | Permission list for task execution (internal-only) |
 
 ### Process Context Intrinsics
 
 | Method | Description |
 |--------|-------------|
 | `ctx.task(taskDef, args, options?)` | Execute a task |
-| `ctx.breakpoint(payload)` | Request human approval |
+| `ctx.breakpoint(payload)` | Request human approval, returns `BreakpointResult`. Supports routing via `expert`, `tags`, `strategy`, `previousFeedback`, and `attempt` fields. |
 | `ctx.sleepUntil(timestamp)` | Sleep until a specific time |
 | `ctx.parallel.all(thunks)` | Execute tasks in parallel |
 | `ctx.parallel.map(items, fn)` | Map items to parallel tasks |
@@ -388,11 +394,37 @@ export const codeReviewAgentTask = defineTask('code-review', (args, taskCtx) => 
       }
     }
   },
+  execution: {
+    model: 'claude-sonnet-4-20250514',  // Preferred model for this task
+  },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
     outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
   },
   labels: ['agent', 'code-review']
+}));
+```
+
+### Execution Hints
+
+Task definitions support optional `execution` hints that influence how the orchestrator runs the task:
+
+| Field | Type | Visibility | Description |
+|-------|------|------------|-------------|
+| `execution.model` | string | Universal | Preferred model for agent tasks (e.g., `'claude-sonnet-4-20250514'`) |
+| `execution.harness` | string | Internal-only | Preferred harness CLI for task execution |
+| `execution.permissions` | string[] | Internal-only | Permission list for the task execution environment |
+
+```javascript
+const heavyAnalysisTask = defineTask('heavy-analysis', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Deep code analysis',
+  agent: { /* ... */ },
+  execution: {
+    model: 'claude-opus-4-20250514',         // Use a more capable model
+    harness: 'claude',                       // Internal: prefer Claude Code harness
+    permissions: ['read', 'write', 'shell'], // Internal: required permissions
+  },
 }));
 ```
 

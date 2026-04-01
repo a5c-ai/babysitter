@@ -39,18 +39,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'revenue-projections', result: revenueResult });
 
   // Step 3: Cost Structure and Margin Projections
-  const costResult = await ctx.task(projectCostsTask, {
+  let costResult = await ctx.task(projectCostsTask, {
     revenueProjections: revenueResult,
     historicalAnalysis: historicalResult
   });
   results.steps.push({ name: 'cost-projections', result: costResult });
 
-  // Breakpoint for projection review
-  await ctx.breakpoint('projection-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      costResult = await ctx.task(projectCostsTask, { ...{
+    revenueProjections: revenueResult,
+    historicalAnalysis: historicalResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('projection-review', {
     message: 'Review revenue and cost projections before building free cash flow',
-    data: { revenue: revenueResult, costs: costResult }
-  });
-
+    data: { revenue: revenueResult, costs: costResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Free Cash Flow Projections
   const fcfResult = await ctx.task(projectFreeCashFlowTask, {
     revenueProjections: revenueResult,
@@ -68,19 +81,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'wacc-calculation', result: waccResult });
 
   // Step 6: Terminal Value Estimation
-  const terminalValueResult = await ctx.task(estimateTerminalValueTask, {
+  let terminalValueResult = await ctx.task(estimateTerminalValueTask, {
     fcfProjections: fcfResult,
     wacc: waccResult,
     targetCompany: inputs.targetCompany
   });
   results.steps.push({ name: 'terminal-value', result: terminalValueResult });
 
-  // Breakpoint for WACC and terminal value review
-  await ctx.breakpoint('valuation-inputs-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      terminalValueResult = await ctx.task(estimateTerminalValueTask, { ...{
+    fcfProjections: fcfResult,
+    wacc: waccResult,
+    targetCompany: inputs.targetCompany
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('valuation-inputs-review', {
     message: 'Review WACC and terminal value assumptions before calculating enterprise value',
-    data: { wacc: waccResult, terminalValue: terminalValueResult }
-  });
-
+    data: { wacc: waccResult, terminalValue: terminalValueResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Enterprise Value Calculation
   const enterpriseValueResult = await ctx.task(calculateEnterpriseValueTask, {
     fcfProjections: fcfResult,
@@ -117,8 +144,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const analyzeHistoricalFinancialsTask = defineTask('analyze-historical-financials', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'financial-analysis' },

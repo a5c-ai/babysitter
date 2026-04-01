@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...temporalBlocking.artifacts);
 
   // Phase 6: Performance Benchmarking
-  const benchmarking = await ctx.task(stencilBenchmarkingTask, {
+  let benchmarking = await ctx.task(stencilBenchmarkingTask, {
     projectName, sharedMemImpl, temporalBlocking, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(stencilBenchmarkingTask, { ...{
+    projectName, sharedMemImpl, temporalBlocking, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stencil optimization complete for ${projectName}. Speedup: ${benchmarking.speedup}x. Bandwidth: ${benchmarking.bandwidthEfficiency}%. Review?`,
     title: 'Stencil Optimization Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.speedup >= 2.0,
     projectName,

@@ -50,15 +50,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityGates.artifacts);
 
   // Phase 6: Optimization Guidelines
-  const optimizationGuidelines = await ctx.task(artOptimizationTask, { projectName, targetPlatforms, outputDir });
-  artifacts.push(...optimizationGuidelines.artifacts);
-
-  await ctx.breakpoint({
+  let optimizationGuidelines = await ctx.task(artOptimizationTask, { projectName, targetPlatforms, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimizationGuidelines = await ctx.task(artOptimizationTask, { ...{ projectName, targetPlatforms, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Art pipeline established for ${projectName}. Style guide complete. Quality gates defined. Review pipeline documentation?`,
     title: 'Art Pipeline Review',
-    context: { runId: ctx.runId, styleGuide, qualityGates }
-  });
-
+    context: { runId: ctx.runId, styleGuide, qualityGates },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

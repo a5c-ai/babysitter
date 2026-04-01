@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Backlog Health Assessment
-  const backlogHealth = await ctx.task(backlogHealthAssessmentTask, {
+  let backlogHealth = await ctx.task(backlogHealthAssessmentTask, {
     projectName,
     productBacklog,
     definitionOfReady
@@ -41,8 +41,16 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Sufficient ready items
   const readyItems = backlogHealth.readyItems || [];
-  if (readyItems.length < 5) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        backlogHealth = await ctx.task(backlogHealthAssessmentTask, { ...{
+    projectName,
+    productBacklog,
+    definitionOfReady
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Only ${readyItems.length} backlog items meet Definition of Ready. Proceed with refinement or pause planning?`,
       title: 'Backlog Readiness Warning',
       context: {
@@ -50,12 +58,26 @@ export async function process(inputs, ctx) {
         readyCount: readyItems.length,
         notReadyCount: backlogHealth.notReadyItems?.length || 0,
         recommendation: 'Conduct backlog refinement before sprint planning'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
-  // Breakpoint: Review backlog health
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      backlogHealth = await ctx.task(backlogHealthAssessmentTask, { ...{
+    projectName,
+    productBacklog,
+    definitionOfReady
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Backlog health assessed for ${projectName}. Ready items: ${readyItems.length}. Health score: ${backlogHealth.healthScore}/100. Proceed with refinement?`,
     title: 'Backlog Health Review',
     context: {
@@ -68,9 +90,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: backlogHealth
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Backlog Refinement
   const refinedBacklog = await ctx.task(backlogRefinementTask, {
     projectName,
@@ -103,7 +131,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Sprint Backlog Selection
-  const sprintBacklogSelection = await ctx.task(sprintBacklogSelectionTask, {
+  let sprintBacklogSelection = await ctx.task(sprintBacklogSelectionTask, {
     projectName,
     estimatedBacklog: estimatedBacklog.items,
     sprintGoal,
@@ -114,8 +142,18 @@ export async function process(inputs, ctx) {
   // Quality Gate: Sprint commitment within capacity
   const commitmentPoints = sprintBacklogSelection.totalPoints || 0;
   const targetVelocity = velocityAnalysis.targetVelocity || 0;
-  if (commitmentPoints > targetVelocity * 1.1) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        sprintBacklogSelection = await ctx.task(sprintBacklogSelectionTask, { ...{
+    projectName,
+    estimatedBacklog: estimatedBacklog.items,
+    sprintGoal,
+    velocityAnalysis,
+    teamCapacity
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Sprint commitment (${commitmentPoints} points) exceeds target velocity (${targetVelocity}) by more than 10%. Reduce scope?`,
       title: 'Over-Commitment Warning',
       context: {
@@ -123,9 +161,15 @@ export async function process(inputs, ctx) {
         commitment: commitmentPoints,
         targetVelocity,
         recommendation: 'Remove lower priority items or split stories'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Task Breakdown
   const taskBreakdown = await ctx.task(taskBreakdownTask, {
@@ -151,7 +195,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Sprint Plan Finalization
-  const sprintPlan = await ctx.task(sprintPlanFinalizationTask, {
+  let sprintPlan = await ctx.task(sprintPlanFinalizationTask, {
     projectName,
     sprintNumber,
     sprintDuration,
@@ -167,8 +211,22 @@ export async function process(inputs, ctx) {
   const planReadinessScore = sprintPlan.readinessScore || 0;
   const ready = planReadinessScore >= 80;
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sprintPlan = await ctx.task(sprintPlanFinalizationTask, { ...{
+    projectName,
+    sprintNumber,
+    sprintDuration,
+    sprintGoal,
+    sprintBacklogSelection,
+    taskBreakdown,
+    capacityAllocation,
+    sprintRiskAnalysis,
+    definitionOfDone
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sprint ${sprintNumber} planning complete for ${projectName}. Goal: "${sprintGoal.goal}". Commitment: ${commitmentPoints} points. Readiness: ${planReadinessScore}/100. Start sprint?`,
     title: 'Sprint Plan Approval',
     context: {
@@ -183,9 +241,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/sprint-${sprintNumber}-plan.json`, format: 'json', content: sprintPlan },
         { path: `artifacts/sprint-${sprintNumber}-plan.md`, format: 'markdown', content: sprintPlan.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -219,8 +283,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const backlogHealthAssessmentTask = defineTask('backlog-health-assessment', (args, taskCtx) => ({
   kind: 'agent',

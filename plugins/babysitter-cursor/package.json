@@ -1,0 +1,48 @@
+{
+  "name": "@a5c-ai/babysitter-cursor",
+  "version": "0.1.0",
+  "description": "Babysitter orchestration plugin for Cursor IDE with SDK-managed process-library bootstrapping and in-turn iteration model",
+  "scripts": {
+    "test": "echo \"No tests yet\"",
+    "postinstall": "node bin/install.js",
+    "preuninstall": "node bin/uninstall.js",
+    "team:install": "node scripts/team-install.js",
+    "deploy": "npm publish --access public",
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "bin": {
+    "babysitter-cursor": "bin/cli.js"
+  },
+  "files": [
+    ".cursor-plugin/",
+    ".cursorrules",
+    "bin/",
+    "commands/",
+    "hooks/",
+    "hooks.json",
+    "plugin.json",
+    "scripts/",
+    "skills/",
+    "versions.json"
+  ],
+  "keywords": [
+    "babysitter",
+    "cursor",
+    "orchestration",
+    "ai-agent",
+    "sdk-integration"
+  ],
+  "author": "a5c.ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-cursor#readme",
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.183"
+  }
+}

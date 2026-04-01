@@ -45,11 +45,11 @@ beforeEach(() => {
 
 describe("HARNESS_CLI_MAP", () => {
   it("has entries for all 7 supported harnesses", () => {
-    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode"];
+    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot"];
     for (const name of expectedNames) {
       expect(HARNESS_CLI_MAP[name]).toBeDefined();
     }
-    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(7);
+    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(8);
   });
 });
 
@@ -89,9 +89,9 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["--prompt", "Hello world"]);
   });
 
-  it("builds args for cursor (--prompt only)", () => {
+  it("builds args for cursor (agent base args + positional prompt)", () => {
     const args = buildHarnessArgs("cursor", baseOptions);
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["agent", "Hello world"]);
   });
 
   it("builds args for opencode (--prompt only)", () => {
@@ -122,9 +122,9 @@ describe("buildHarnessArgs", () => {
     ]);
   });
 
-  it("does not include --model for cursor (unsupported)", () => {
+  it("includes --model for cursor (now supported)", () => {
     const args = buildHarnessArgs("cursor", { ...baseOptions, model: "some-model" });
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["agent", "Hello world", "--model", "some-model"]);
   });
 
   it("does not include --model for opencode (unsupported)", () => {

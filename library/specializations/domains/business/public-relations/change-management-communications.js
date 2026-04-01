@@ -18,132 +18,240 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Change Impact Assessment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting change management communications. Assess change impact?',
     title: 'Phase 1: Impact Assessment',
     context: {
       runId: ctx.runId,
       phase: 'impact-assessment',
       changeType: change.type
-    }
-  });
-
-  const impactAssessment = await ctx.task(assessChangeImpactTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let impactAssessment = await ctx.task(assessChangeImpactTask, {
     change,
     organization,
     stakeholders
   });
 
-  // Phase 2: Stakeholder Analysis (Change)
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      impactAssessment = await ctx.task(assessChangeImpactTask, { ...{
+    change,
+    organization,
+    stakeholders
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Impact assessed. Analyze stakeholder change readiness?',
     title: 'Phase 2: Stakeholder Analysis',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-analysis'
-    }
-  });
-
-  const stakeholderAnalysis = await ctx.task(analyzeChangeStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let stakeholderAnalysis = await ctx.task(analyzeChangeStakeholdersTask, {
     stakeholders,
     impactAssessment,
     change
   });
 
-  // Phase 3: Communications Strategy Development
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      stakeholderAnalysis = await ctx.task(analyzeChangeStakeholdersTask, { ...{
+    stakeholders,
+    impactAssessment,
+    change
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Stakeholders analyzed. Develop communications strategy?',
     title: 'Phase 3: Communications Strategy',
     context: {
       runId: ctx.runId,
       phase: 'communications-strategy'
-    }
-  });
-
-  const commsStrategy = await ctx.task(developChangeCommsStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let commsStrategy = await ctx.task(developChangeCommsStrategyTask, {
     change,
     impactAssessment,
     stakeholderAnalysis,
     timeline
   });
 
-  // Phase 4: Message Development
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      commsStrategy = await ctx.task(developChangeCommsStrategyTask, { ...{
+    change,
+    impactAssessment,
+    stakeholderAnalysis,
+    timeline
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Strategy developed. Develop change messages?',
     title: 'Phase 4: Message Development',
     context: {
       runId: ctx.runId,
       phase: 'message-development'
-    }
-  });
-
-  const messageFramework = await ctx.task(developChangeMessagesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let messageFramework = await ctx.task(developChangeMessagesTask, {
     change,
     commsStrategy,
     stakeholderAnalysis
   });
 
-  // Phase 5: Leader Preparation
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      messageFramework = await ctx.task(developChangeMessagesTask, { ...{
+    change,
+    commsStrategy,
+    stakeholderAnalysis
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Messages developed. Prepare leaders for change communication?',
     title: 'Phase 5: Leader Preparation',
     context: {
       runId: ctx.runId,
       phase: 'leader-preparation'
-    }
-  });
-
-  const leaderToolkit = await ctx.task(prepareLeadersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let leaderToolkit = await ctx.task(prepareLeadersTask, {
     messageFramework,
     change,
     commsStrategy
   });
 
-  // Phase 6: Communications Timeline
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      leaderToolkit = await ctx.task(prepareLeadersTask, { ...{
+    messageFramework,
+    change,
+    commsStrategy
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Leaders prepared. Create detailed communications timeline?',
     title: 'Phase 6: Communications Timeline',
     context: {
       runId: ctx.runId,
       phase: 'communications-timeline'
-    }
-  });
-
-  const commsTimeline = await ctx.task(createCommsTimelineTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let commsTimeline = await ctx.task(createCommsTimelineTask, {
     change,
     timeline,
     commsStrategy,
     messageFramework
   });
 
-  // Phase 7: Feedback Mechanisms
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      commsTimeline = await ctx.task(createCommsTimelineTask, { ...{
+    change,
+    timeline,
+    commsStrategy,
+    messageFramework
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Timeline created. Design feedback mechanisms?',
     title: 'Phase 7: Feedback Mechanisms',
     context: {
       runId: ctx.runId,
       phase: 'feedback-mechanisms'
-    }
-  });
-
-  const feedbackSystem = await ctx.task(designFeedbackSystemTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let feedbackSystem = await ctx.task(designFeedbackSystemTask, {
     change,
     stakeholderAnalysis,
     commsStrategy
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      feedbackSystem = await ctx.task(designFeedbackSystemTask, { ...{
+    change,
+    stakeholderAnalysis,
+    commsStrategy
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate change management communications quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateChangeCommsTask, {
     impactAssessment,
     stakeholderAnalysis,
@@ -192,8 +300,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessChangeImpactTask = defineTask('assess-change-impact', (args, taskCtx) => ({
   kind: 'agent',

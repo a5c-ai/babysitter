@@ -63,14 +63,25 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "cursor",
     cli: "cursor",
-    callerEnvVars: [],
-    capabilities: [Cap.HeadlessPrompt],
+    // CURSOR_PROJECT_DIR and CURSOR_VERSION are set by Cursor in hook execution
+    // contexts only (not in child processes spawned by hooks).
+    callerEnvVars: ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
+    capabilities: [Cap.HeadlessPrompt, Cap.StopHook, Cap.SessionBinding, Cap.Mcp],
   },
   {
     name: "gemini-cli",
     cli: "gemini",
     callerEnvVars: ["GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD"],
     capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt],
+  },
+  {
+    name: "github-copilot",
+    cli: "copilot",
+    // Note: official Copilot docs do not confirm these env vars are injected
+    // into hooks. They are used as best-effort discriminators for caller detection.
+    callerEnvVars: ["COPILOT_HOME", "COPILOT_GITHUB_TOKEN"],
+    // No StopHook — Copilot CLI uses in-turn orchestration model
+    capabilities: [Cap.HeadlessPrompt, Cap.SessionBinding, Cap.Mcp],
   },
   {
     name: "opencode",
@@ -103,6 +114,7 @@ const CONFIG_PATHS: Record<string, string[]> = {
   pi: [".pi"],
   "oh-my-pi": [".pi"],
   "gemini-cli": [".gemini"],
+  "github-copilot": [".copilot", ".github"],
   cursor: [".cursor", ".cursorrules"],
   opencode: [".opencode"],
 };

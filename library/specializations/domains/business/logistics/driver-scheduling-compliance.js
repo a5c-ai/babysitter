@@ -50,17 +50,27 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: COMPLIANCE VALIDATION
   ctx.log('info', 'Phase 4: Validating compliance');
-  const complianceValidation = await ctx.task(complianceValidationTask, { schedule: routeMatching.schedule, hosRules, outputDir });
+  let complianceValidation = await ctx.task(complianceValidationTask, { schedule: routeMatching.schedule, hosRules, outputDir });
   artifacts.push(...complianceValidation.artifacts);
 
   // Quality Gate: Review compliance issues
-  if (complianceValidation.violations.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        complianceValidation = await ctx.task(complianceValidationTask, { ...{ schedule: routeMatching.schedule, hosRules, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `${complianceValidation.violations.length} potential HOS violations detected. Review and adjust schedule?`,
       title: 'HOS Compliance Review',
-      context: { runId: ctx.runId, violations: complianceValidation.violations, files: complianceValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-    });
-  }
+      context: { runId: ctx.runId, violations: complianceValidation.violations, files: complianceValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // PHASE 5: BREAK AND REST PLANNING
   ctx.log('info', 'Phase 5: Planning breaks and rest periods');
@@ -79,20 +89,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: COMPLIANCE REPORTING
   ctx.log('info', 'Phase 8: Generating compliance report');
-  const complianceReport = await ctx.task(complianceReportTask, { scheduleOptimization, complianceValidation, hosCalculation, outputDir });
+  let complianceReport = await ctx.task(complianceReportTask, { scheduleOptimization, complianceValidation, hosCalculation, outputDir });
   artifacts.push(...complianceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceReport = await ctx.task(complianceReportTask, { ...{ scheduleOptimization, complianceValidation, hosCalculation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Driver scheduling complete. ${scheduleOptimization.optimizedSchedule.length} assignments made. Compliance rate: ${complianceValidation.complianceRate}%. Approve schedule?`,
     title: 'Driver Scheduling Complete',
     context: {
       runId: ctx.runId,
       summary: { driversScheduled: scheduleOptimization.driversAssigned, routesCovered: scheduleOptimization.routesCovered, complianceRate: `${complianceValidation.complianceRate}%`, utilizationRate: `${scheduleOptimization.utilizationRate}%` },
       files: [{ path: complianceReport.reportPath, format: 'markdown', label: 'Compliance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -105,8 +125,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/driver-scheduling-compliance', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const driverAvailabilityTask = defineTask('driver-availability', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze driver availability', agent: { name: 'driver-availability-analyst', prompt: { role: 'Driver Availability Analyst', task: 'Analyze driver availability and constraints', context: args, instructions: ['Check driver status', 'Review home time requirements', 'Check certifications', 'Identify restrictions', 'Calculate available hours', 'Generate availability report'] }, outputSchema: { type: 'object', required: ['availability', 'artifacts'], properties: { availability: { type: 'array' }, restrictions: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'driver-scheduling', 'availability']
 }));

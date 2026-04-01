@@ -71,7 +71,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Quality Control and Cell Filtering');
 
-  const qcResult = await ctx.task(cellQualityControlTask, {
+  let qcResult = await ctx.task(cellQualityControlTask, {
     projectName,
     adata: loadingResult.adata,
     minGenes,
@@ -84,8 +84,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `QC complete - ${qcResult.cellsRetained}/${loadingResult.totalCells} cells retained (${qcResult.doubletRate}% doublets removed)`);
 
-  // Breakpoint: Review QC metrics
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      qcResult = await ctx.task(cellQualityControlTask, { ...{
+    projectName,
+    adata: loadingResult.adata,
+    minGenes,
+    maxGenes,
+    maxMitoPercent,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Cell quality control complete. Retained ${qcResult.cellsRetained} cells (${qcResult.percentRetained}%). Doublets removed: ${qcResult.doubletsRemoved}. Review QC metrics?`,
     title: 'Single-Cell QC Review',
     context: {
@@ -99,9 +110,15 @@ export async function process(inputs, ctx) {
         medianMitoPercent: qcResult.medianMitoPercent
       },
       files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: NORMALIZATION AND FEATURE SELECTION
   // ============================================================================
@@ -141,7 +158,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Clustering and Marker Gene Identification');
 
-  const clusteringResult = await ctx.task(clusteringMarkerGenesTask, {
+  let clusteringResult = await ctx.task(clusteringMarkerGenesTask, {
     projectName,
     adata: dimReductionResult.reducedAdata,
     resolution,
@@ -153,8 +170,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Clustering complete - ${clusteringResult.nClusters} clusters identified`);
 
-  // Breakpoint: Review clustering
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      clusteringResult = await ctx.task(clusteringMarkerGenesTask, { ...{
+    projectName,
+    adata: dimReductionResult.reducedAdata,
+    resolution,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Clustering identified ${clusteringResult.nClusters} clusters. Top markers per cluster available. Review clustering results and marker genes?`,
     title: 'Clustering Review',
     context: {
@@ -163,16 +189,22 @@ export async function process(inputs, ctx) {
       clusterSizes: clusteringResult.clusterSizes,
       topMarkers: clusteringResult.topMarkersByCluster,
       files: clusteringResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: AUTOMATED CELL TYPE ANNOTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Automated Cell Type Annotation');
 
-  const annotationResult = await ctx.task(cellTypeAnnotationTask, {
+  let annotationResult = await ctx.task(cellTypeAnnotationTask, {
     projectName,
     adata: clusteringResult.clusteredAdata,
     annotationReference,
@@ -184,8 +216,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Cell type annotation complete - ${annotationResult.cellTypesIdentified} cell types identified`);
 
-  // Breakpoint: Review cell type annotation
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      annotationResult = await ctx.task(cellTypeAnnotationTask, { ...{
+    projectName,
+    adata: clusteringResult.clusteredAdata,
+    annotationReference,
+    expectedCellTypes,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Cell type annotation complete. ${annotationResult.cellTypesIdentified} cell types identified. Review annotations and approve?`,
     title: 'Cell Type Annotation Review',
     context: {
@@ -194,9 +236,15 @@ export async function process(inputs, ctx) {
       cellTypeCounts: annotationResult.cellTypeCounts,
       annotationConfidence: annotationResult.confidenceScores,
       files: annotationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: TRAJECTORY AND PSEUDOTIME ANALYSIS (OPTIONAL)
   // ============================================================================
@@ -215,7 +263,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Trajectory analysis complete - ${trajectoryResult.trajectoriesIdentified} lineages identified`);
   }
-
   // ============================================================================
   // PHASE 8: CELL-CELL COMMUNICATION ANALYSIS (OPTIONAL)
   // ============================================================================
@@ -234,7 +281,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cell communication analysis complete - ${cellChatResult.significantInteractions} significant interactions`);
   }
-
   // ============================================================================
   // PHASE 9: DIFFERENTIAL EXPRESSION BETWEEN CLUSTERS
   // ============================================================================
@@ -257,7 +303,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Analysis Report');
 
-  const reportResult = await ctx.task(generateScRNAseqReportTask, {
+  let reportResult = await ctx.task(generateScRNAseqReportTask, {
     projectName,
     technology,
     loadingResult,
@@ -274,8 +320,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint: Analysis complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateScRNAseqReportTask, { ...{
+    projectName,
+    technology,
+    loadingResult,
+    qcResult,
+    normalizationResult,
+    dimReductionResult,
+    clusteringResult,
+    annotationResult,
+    trajectoryResult,
+    cellChatResult,
+    deResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Single-Cell RNA-seq Analysis Complete for ${projectName}. ${qcResult.cellsRetained} cells, ${clusteringResult.nClusters} clusters, ${annotationResult.cellTypesIdentified} cell types. Approve final results?`,
     title: 'scRNA-seq Analysis Complete',
     context: {
@@ -291,9 +354,15 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' },
         { path: annotationResult.adataPath, format: 'h5ad', label: 'Annotated Data' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -346,8 +415,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

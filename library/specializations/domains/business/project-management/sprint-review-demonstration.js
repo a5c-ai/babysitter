@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Acceptance Criteria Verification
-  const acceptanceVerification = await ctx.task(acceptanceVerificationTask, {
+  let acceptanceVerification = await ctx.task(acceptanceVerificationTask, {
     projectName,
     completedStories,
     acceptanceCriteria: reviewPreparation.acceptanceCriteria
@@ -55,8 +55,16 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Check if stories meet definition of done
   const unacceptedStories = acceptanceVerification.results?.filter(r => !r.accepted) || [];
-  if (unacceptedStories.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        acceptanceVerification = await ctx.task(acceptanceVerificationTask, { ...{
+    projectName,
+    completedStories,
+    acceptanceCriteria: reviewPreparation.acceptanceCriteria
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `${unacceptedStories.length} stories do not meet acceptance criteria for ${projectName}. Review and decide on inclusion?`,
       title: 'Acceptance Criteria Review',
       context: {
@@ -67,9 +75,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: unacceptedStories
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Sprint Metrics Compilation
   const sprintMetrics = await ctx.task(sprintMetricsTask, {
@@ -104,7 +118,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Outcome Documentation
-  const outcomeDocumentation = await ctx.task(outcomeDocumentationTask, {
+  let outcomeDocumentation = await ctx.task(outcomeDocumentationTask, {
     projectName,
     sprintNumber,
     sprintGoal,
@@ -114,8 +128,20 @@ export async function process(inputs, ctx) {
     backlogRefinement
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      outcomeDocumentation = await ctx.task(outcomeDocumentationTask, { ...{
+    projectName,
+    sprintNumber,
+    sprintGoal,
+    reviewExecution,
+    feedbackCollection,
+    sprintMetrics,
+    backlogRefinement
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sprint ${sprintNumber} review complete for ${projectName}. ${completedStories.length} stories demonstrated, ${feedbackCollection.feedbackItems?.length || 0} feedback items collected. Approve review outcomes?`,
     title: 'Sprint Review Approval',
     context: {
@@ -125,9 +151,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/sprint-review.json`, format: 'json', content: outcomeDocumentation },
         { path: `artifacts/sprint-review.md`, format: 'markdown', content: outcomeDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -148,8 +180,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const reviewPreparationTask = defineTask('review-preparation', (args, taskCtx) => ({
   kind: 'agent',

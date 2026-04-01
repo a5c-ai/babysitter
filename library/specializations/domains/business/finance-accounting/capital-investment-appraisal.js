@@ -37,18 +37,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'cash-flow-analysis', result: cashFlowResult });
 
   // Step 3: Financial Metrics Calculation
-  const metricsResult = await ctx.task(calculateFinancialMetricsTask, {
+  let metricsResult = await ctx.task(calculateFinancialMetricsTask, {
     cashFlows: cashFlowResult,
     hurdleRates: inputs.corporateHurdleRates
   });
   results.steps.push({ name: 'financial-metrics', result: metricsResult });
 
-  // Breakpoint for metrics review
-  await ctx.breakpoint('metrics-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      metricsResult = await ctx.task(calculateFinancialMetricsTask, { ...{
+    cashFlows: cashFlowResult,
+    hurdleRates: inputs.corporateHurdleRates
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('metrics-review', {
     message: 'Review financial metrics before risk and strategic analysis',
-    data: metricsResult
-  });
-
+    data: metricsResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Risk Analysis
   const riskResult = await ctx.task(analyzeInvestmentRiskTask, {
     cashFlows: cashFlowResult,
@@ -66,7 +79,7 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'strategic-assessment', result: strategicResult });
 
   // Step 6: Comparative Analysis
-  const comparativeResult = await ctx.task(performComparativeAnalysisTask, {
+  let comparativeResult = await ctx.task(performComparativeAnalysisTask, {
     currentProposal: {
       metrics: metricsResult,
       risk: riskResult,
@@ -76,17 +89,34 @@ export async function process(inputs, ctx) {
   });
   results.steps.push({ name: 'comparative-analysis', result: comparativeResult });
 
-  // Breakpoint for comprehensive review
-  await ctx.breakpoint('comprehensive-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      comparativeResult = await ctx.task(performComparativeAnalysisTask, { ...{
+    currentProposal: {
+      metrics: metricsResult,
+      risk: riskResult,
+      strategic: strategicResult
+    },
+    hurdleRates: inputs.corporateHurdleRates
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('comprehensive-review', {
     message: 'Review complete investment analysis before final recommendation',
     data: {
       metrics: metricsResult,
       risk: riskResult,
       strategic: strategicResult,
       comparative: comparativeResult
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Investment Recommendation
   const recommendationResult = await ctx.task(prepareInvestmentRecommendationTask, {
     allAnalysis: {
@@ -110,8 +140,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const defineInvestmentScopeTask = defineTask('define-investment-scope', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'capital-planning' },

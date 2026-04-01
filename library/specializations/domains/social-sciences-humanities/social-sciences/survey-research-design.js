@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring survey design quality');
-  const qualityScore = await ctx.task(surveyQualityScoringTask, {
+  let qualityScore = await ctx.task(surveyQualityScoringTask, {
     objectivesAnalysis,
     questionnaireDesign,
     samplingStrategy,
@@ -126,8 +126,20 @@ export async function process(inputs, ctx) {
   const surveyScore = qualityScore.overallScore;
   const qualityMet = surveyScore >= 80;
 
-  // Breakpoint: Review survey design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(surveyQualityScoringTask, { ...{
+    objectivesAnalysis,
+    questionnaireDesign,
+    samplingStrategy,
+    modeSelection,
+    responseOptimization,
+    pilotPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Survey design complete. Quality score: ${surveyScore}/100. ${qualityMet ? 'Design meets quality standards!' : 'Design may need refinement.'} Review and approve?`,
     title: 'Survey Research Design Review',
     context: {
@@ -144,9 +156,15 @@ export async function process(inputs, ctx) {
         requiredSampleSize: samplingStrategy.requiredSampleSize,
         surveyMode: modeSelection.selectedMode
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -184,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Research Objectives Analysis
+  // Task 1: Research Objectives Analysis
 export const objectivesAnalysisTask = defineTask('objectives-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze research objectives for survey design',

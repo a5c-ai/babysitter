@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const pathAliases = await ctx.task(pathAliasesTask, { projectName, outputDir });
   artifacts.push(...pathAliases.artifacts);
 
-  const buildOptimization = await ctx.task(buildOptimizationTask, { projectName, outputDir });
-  artifacts.push(...buildOptimization.artifacts);
-
-  await ctx.breakpoint({ question: `TypeScript configuration complete for ${projectName}. Approve?`, title: 'TypeScript Review', context: { runId: ctx.runId, config: tsConfigSetup.config } });
-
+  let buildOptimization = await ctx.task(buildOptimizationTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      buildOptimization = await ctx.task(buildOptimizationTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `TypeScript configuration complete for ${projectName}. Approve?`, title: 'TypeScript Review', context: { runId: ctx.runId, config: tsConfigSetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

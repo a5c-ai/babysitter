@@ -159,7 +159,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing optimization quality');
-  const qualityAssessment = await ctx.task(optimizationQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(optimizationQualityAssessmentTask, {
     dataCollection,
     contentScoring,
     engagementAnalysis,
@@ -175,8 +175,21 @@ export async function process(inputs, ctx) {
   const optimizationScore = qualityAssessment.overallScore;
   const qualityMet = optimizationScore >= 80;
 
-  // Breakpoint: Review optimization plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(optimizationQualityAssessmentTask, { ...{
+    dataCollection,
+    contentScoring,
+    engagementAnalysis,
+    seoAnalysis,
+    conversionAnalysis,
+    refreshPrioritization,
+    optimizationRecommendations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Content optimization complete. Quality score: ${optimizationScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Content Optimization Review & Approval',
     context: {
@@ -195,9 +208,15 @@ export async function process(inputs, ctx) {
         underperformers: underperformerAnalysis.underperformers?.length || 0,
         refreshCandidates: refreshPrioritization.prioritizedList?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,8 +251,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: User Needs Elicitation and Documentation
-  const userNeedsAnalysis = await ctx.task(userNeedsElicitationTask, {
+  let userNeedsAnalysis = await ctx.task(userNeedsElicitationTask, {
     deviceName,
     deviceClass,
     intendedUse,
@@ -49,9 +49,17 @@ export async function process(inputs, ctx) {
       designControlPlan: null
     };
   }
-
-  // Breakpoint: Review user needs documentation
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      userNeedsAnalysis = await ctx.task(userNeedsElicitationTask, { ...{
+    deviceName,
+    deviceClass,
+    intendedUse,
+    initialUserNeeds: userNeeds
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review user needs for ${deviceName}. Are all stakeholder needs captured and prioritized?`,
     title: 'User Needs Review',
     context: {
@@ -64,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: userNeedsAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Design Input Specification Development
   const designInputs = await ctx.task(designInputSpecificationTask, {
     deviceName,
@@ -93,7 +107,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Design Validation Planning
-  const validationPlan = await ctx.task(designValidationTask, {
+  let validationPlan = await ctx.task(designValidationTask, {
     deviceName,
     userNeeds: userNeedsAnalysis.documentedNeeds,
     intendedUse,
@@ -101,8 +115,18 @@ export async function process(inputs, ctx) {
     deviceClass
   });
 
-  // Breakpoint: Review V&V plans
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      validationPlan = await ctx.task(designValidationTask, { ...{
+    deviceName,
+    userNeeds: userNeedsAnalysis.documentedNeeds,
+    intendedUse,
+    designOutputs: designOutputs.outputs,
+    deviceClass
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review verification and validation plans for ${deviceName}. Are test methods and acceptance criteria appropriate?`,
     title: 'V&V Plan Review',
     context: {
@@ -113,9 +137,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase4-verification-plan.json`, format: 'json', content: verificationPlan },
         { path: `artifacts/phase5-validation-plan.json`, format: 'json', content: validationPlan }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Design Transfer Planning
   const designTransfer = await ctx.task(designTransferTask, {
     deviceName,
@@ -125,7 +155,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Traceability Matrix Development
-  const traceabilityMatrix = await ctx.task(traceabilityMatrixTask, {
+  let traceabilityMatrix = await ctx.task(traceabilityMatrixTask, {
     deviceName,
     userNeeds: userNeedsAnalysis.documentedNeeds,
     designInputs: designInputs.specifications,
@@ -136,8 +166,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Traceability must be complete
   const traceabilityCoverage = traceabilityMatrix.coverageScore || 0;
-  if (traceabilityCoverage < 100) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        traceabilityMatrix = await ctx.task(traceabilityMatrixTask, { ...{
+    deviceName,
+    userNeeds: userNeedsAnalysis.documentedNeeds,
+    designInputs: designInputs.specifications,
+    designOutputs: designOutputs.outputs,
+    verificationPlan: verificationPlan.testPlan,
+    validationPlan: validationPlan.testPlan
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Traceability coverage is ${traceabilityCoverage}% (should be 100%). Review and address gaps before proceeding?`,
       title: 'Traceability Gap Warning',
       context: {
@@ -145,12 +186,18 @@ export async function process(inputs, ctx) {
         coverage: traceabilityCoverage,
         gaps: traceabilityMatrix.gaps,
         recommendation: 'Address traceability gaps to ensure complete requirements coverage'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Design History File Compilation
-  const designHistoryFile = await ctx.task(designHistoryFileTask, {
+  let designHistoryFile = await ctx.task(designHistoryFileTask, {
     deviceName,
     deviceClass,
     intendedUse,
@@ -164,8 +211,24 @@ export async function process(inputs, ctx) {
     traceabilityMatrix
   });
 
-  // Final Breakpoint: Design Control Completion
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      designHistoryFile = await ctx.task(designHistoryFileTask, { ...{
+    deviceName,
+    deviceClass,
+    intendedUse,
+    regulatoryPathway,
+    userNeedsAnalysis,
+    designInputs,
+    designOutputs,
+    verificationPlan,
+    validationPlan,
+    designTransfer,
+    traceabilityMatrix
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Design Control Process complete for ${deviceName}. Approve Design History File and proceed to manufacturing?`,
     title: 'Design Control Approval',
     context: {
@@ -176,9 +239,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/design-history-file.json`, format: 'json', content: designHistoryFile },
         { path: `artifacts/traceability-matrix.json`, format: 'json', content: traceabilityMatrix }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -206,8 +275,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const userNeedsElicitationTask = defineTask('user-needs-elicitation', (args, taskCtx) => ({
   kind: 'agent',

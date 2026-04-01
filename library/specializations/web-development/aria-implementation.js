@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const patternsImplementation = await ctx.task(patternsImplementationTask, { projectName, outputDir });
   artifacts.push(...patternsImplementation.artifacts);
 
-  const liveRegions = await ctx.task(liveRegionsTask, { projectName, outputDir });
-  artifacts.push(...liveRegions.artifacts);
-
-  await ctx.breakpoint({ question: `ARIA implementation complete for ${projectName}. Approve?`, title: 'ARIA Review', context: { runId: ctx.runId, patterns: patternsImplementation.patterns } });
-
+  let liveRegions = await ctx.task(liveRegionsTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      liveRegions = await ctx.task(liveRegionsTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `ARIA implementation complete for ${projectName}. Approve?`, title: 'ARIA Review', context: { runId: ctx.runId, patterns: patternsImplementation.patterns }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

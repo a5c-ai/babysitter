@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Quality Reporting Program Compliance for: ${organizationName}`);
 
-  const programAssessment = await ctx.task(qrpAssessmentTask, { organizationName, reportingPrograms, providerType, currentPerformance, outputDir });
-  artifacts.push(...programAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Program assessment complete. Overall compliance: ${programAssessment.overallCompliance}%. ${programAssessment.atRiskMeasures.length} measures at risk. Proceed?`, title: 'QRP Assessment Review', context: { runId: ctx.runId, compliance: programAssessment.overallCompliance, atRisk: programAssessment.atRiskMeasures } });
-
+  let programAssessment = await ctx.task(qrpAssessmentTask, { organizationName, reportingPrograms, providerType, currentPerformance, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      programAssessment = await ctx.task(qrpAssessmentTask, { ...{ organizationName, reportingPrograms, providerType, currentPerformance, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Program assessment complete. Overall compliance: ${programAssessment.overallCompliance}%. ${programAssessment.atRiskMeasures.length} measures at risk. Proceed?`, title: 'QRP Assessment Review', context: { runId: ctx.runId, compliance: programAssessment.overallCompliance, atRisk: programAssessment.atRiskMeasures }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const measureSelection = await ctx.task(qrpMeasureSelectionTask, { programAssessment, reportingPrograms, outputDir });
   artifacts.push(...measureSelection.artifacts);
 
   const dataInfrastructure = await ctx.task(qrpDataInfrastructureTask, { measureSelection, outputDir });
   artifacts.push(...dataInfrastructure.artifacts);
 
-  const ecqmCompliance = await ctx.task(qrpECQMTask, { measureSelection, outputDir });
-  artifacts.push(...ecqmCompliance.artifacts);
-
-  await ctx.breakpoint({ question: `${measureSelection.selectedMeasures.length} measures selected. Data infrastructure ${dataInfrastructure.readinessScore}% ready. Proceed with improvement planning?`, title: 'Measure and Data Review', context: { runId: ctx.runId, measures: measureSelection.selectedMeasures, readiness: dataInfrastructure.readinessScore } });
-
+  let ecqmCompliance = await ctx.task(qrpECQMTask, { measureSelection, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      ecqmCompliance = await ctx.task(qrpECQMTask, { ...{ measureSelection, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `${measureSelection.selectedMeasures.length} measures selected. Data infrastructure ${dataInfrastructure.readinessScore}% ready. Proceed with improvement planning?`, title: 'Measure and Data Review', context: { runId: ctx.runId, measures: measureSelection.selectedMeasures, readiness: dataInfrastructure.readinessScore }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const performanceImprovement = await ctx.task(qrpPerformanceImprovementTask, { programAssessment, measureSelection, outputDir });
   artifacts.push(...performanceImprovement.artifacts);
 

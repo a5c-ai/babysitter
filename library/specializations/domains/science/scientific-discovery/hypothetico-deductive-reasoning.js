@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing rigorous tests for predictions');
-  const testDesign = await ctx.task(testDesignTask, {
+  let testDesign = await ctx.task(testDesignTask, {
     hypothesis: hypothesisFormulation.hypothesis,
     predictions: predictionDeduction.predictions,
     outputDir
@@ -78,8 +78,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testDesign.artifacts);
 
-  // Breakpoint: Review test design before execution
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      testDesign = await ctx.task(testDesignTask, { ...{
+    hypothesis: hypothesisFormulation.hypothesis,
+    predictions: predictionDeduction.predictions,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Test design complete for hypothesis: "${hypothesisFormulation.hypothesis.statement}". ${testDesign.tests.length} tests designed. Proceed with test execution?`,
     title: 'Hypothetico-Deductive Test Design Review',
     context: {
@@ -95,9 +103,15 @@ export async function process(inputs, ctx) {
         predictionCount: predictionDeduction.predictions.length,
         testCount: testDesign.tests.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: TEST EXECUTION AND RESULT COLLECTION
   // ============================================================================
@@ -132,7 +146,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Rendering verdict and generating recommendations');
-  const verdictGeneration = await ctx.task(verdictGenerationTask, {
+  let verdictGeneration = await ctx.task(verdictGenerationTask, {
     hypothesis: hypothesisFormulation.hypothesis,
     resultAnalysis,
     existingTheories,
@@ -141,8 +155,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...verdictGeneration.artifacts);
 
-  // Final breakpoint: Review complete analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      verdictGeneration = await ctx.task(verdictGenerationTask, { ...{
+    hypothesis: hypothesisFormulation.hypothesis,
+    resultAnalysis,
+    existingTheories,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hypothetico-deductive analysis complete. Verdict: ${verdictGeneration.verdict}. Confidence: ${resultAnalysis.overallConfidence}. Review findings?`,
     title: 'Hypothetico-Deductive Analysis Complete',
     context: {
@@ -160,9 +183,15 @@ export async function process(inputs, ctx) {
         predictionsConfirmed: resultAnalysis.confirmedPredictions,
         predictionsRefuted: resultAnalysis.refutedPredictions
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

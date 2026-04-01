@@ -58,20 +58,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'tqm-vision', output: tqmVision });
 
   // Phase 4: TQM Framework Design
-  const tqmFramework = await ctx.task(designTQMFramework, {
+  let tqmFramework = await ctx.task(designTQMFramework, {
     tqmVision,
     gapAnalysis,
     organizationContext
   });
   artifacts.push({ phase: 'tqm-framework', output: tqmFramework });
 
-  // Quality Gate: Framework Review
-  await ctx.breakpoint('tqm-framework-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      tqmFramework = await ctx.task(designTQMFramework, { ...{
+    tqmVision,
+    gapAnalysis,
+    organizationContext
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('tqm-framework-review', {
     title: 'TQM Framework Review',
     description: 'Review and approve TQM framework before implementation planning',
-    artifacts: [tqmVision, tqmFramework, gapAnalysis]
-  });
-
+    artifacts: [tqmVision, tqmFramework, gapAnalysis],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Governance Structure Design
   const governanceStructure = await ctx.task(designGovernance, {
     tqmFramework,
@@ -139,20 +153,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'implementation-roadmap', output: implementationRoadmap });
 
   // Phase 13: Communication Strategy
-  const communicationStrategy = await ctx.task(developCommunicationStrategy, {
+  let communicationStrategy = await ctx.task(developCommunicationStrategy, {
     tqmFramework,
     stakeholders,
     implementationRoadmap
   });
   artifacts.push({ phase: 'communication-strategy', output: communicationStrategy });
 
-  // Final Quality Gate: TQM Program Approval
-  await ctx.breakpoint('tqm-program-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      communicationStrategy = await ctx.task(developCommunicationStrategy, { ...{
+    tqmFramework,
+    stakeholders,
+    implementationRoadmap
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('tqm-program-approval', {
     title: 'TQM Program Approval',
     description: 'Final approval of complete TQM program before launch',
-    artifacts: [implementationRoadmap, trainingProgram, measurementSystem]
-  });
-
+    artifacts: [implementationRoadmap, trainingProgram, measurementSystem],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     tqmFramework: {

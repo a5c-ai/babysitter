@@ -39,15 +39,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Part Decomposition and Planning
-  const partDecomposition = await ctx.task(partDecompositionTask, {
+  let partDecomposition = await ctx.task(partDecompositionTask, {
     projectName,
     componentDescription,
     designIntentAnalysis: designIntentAnalysis.analysis,
     existingModels
   });
 
-  // Breakpoint: Review part decomposition
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      partDecomposition = await ctx.task(partDecompositionTask, { ...{
+    projectName,
+    componentDescription,
+    designIntentAnalysis: designIntentAnalysis.analysis,
+    existingModels
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review part decomposition for ${projectName}. Are all components identified and properly structured?`,
     title: 'Part Decomposition Review',
     context: {
@@ -59,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: partDecomposition
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Parametric Strategy Definition
   const parametricStrategy = await ctx.task(parametricStrategyTask, {
     projectName,
@@ -119,7 +134,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: CAD Model Specification Document
-  const cadModelSpec = await ctx.task(cadModelSpecTask, {
+  let cadModelSpec = await ctx.task(cadModelSpecTask, {
     projectName,
     componentDescription,
     cadPlatform,
@@ -134,8 +149,25 @@ export async function process(inputs, ctx) {
     bomStructure
   });
 
-  // Final Breakpoint: CAD Specification Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      cadModelSpec = await ctx.task(cadModelSpecTask, { ...{
+    projectName,
+    componentDescription,
+    cadPlatform,
+    designIntentAnalysis,
+    partDecomposition,
+    parametricStrategy,
+    sketchPlanning,
+    featureTree,
+    assemblyStrategy,
+    configurationPlan,
+    standardsSetup,
+    bomStructure
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CAD Model Specification Complete for ${projectName}. Approve specification to proceed with modeling?`,
     title: 'CAD Specification Approval',
     context: {
@@ -145,9 +177,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/cad-model-spec.json`, format: 'json', content: cadModelSpec },
         { path: `artifacts/cad-model-spec.md`, format: 'markdown', content: cadModelSpec.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -165,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const designIntentAnalysisTask = defineTask('design-intent-analysis', (args, taskCtx) => ({
   kind: 'agent',

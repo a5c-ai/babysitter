@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing pipeline requirements');
 
-  const requirementsAnalysis = await ctx.task(pipelineRequirementsTask, {
+  let requirementsAnalysis = await ctx.task(pipelineRequirementsTask, {
     projectName,
     cicdPlatform,
     targetPlatforms,
@@ -55,9 +55,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirementsAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(pipelineRequirementsTask, { ...{
+    projectName,
+    cicdPlatform,
+    targetPlatforms,
+    framework,
+    testingStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Pipeline requirements analyzed. Build matrix: ${requirementsAnalysis.buildMatrix.length} configurations. Proceed with pipeline design?`,
     title: 'Pipeline Requirements Review',
     context: {
@@ -66,9 +76,15 @@ export async function process(inputs, ctx) {
       buildMatrix: requirementsAnalysis.buildMatrix,
       estimatedBuildTime: requirementsAnalysis.estimatedBuildTime,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: BUILD MATRIX CONFIGURATION
   // ============================================================================
@@ -163,7 +179,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating pipeline configuration files');
 
-  const pipelineGeneration = await ctx.task(generatePipelineFilesTask, {
+  let pipelineGeneration = await ctx.task(generatePipelineFilesTask, {
     projectName,
     cicdPlatform,
     targetPlatforms,
@@ -176,9 +192,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...pipelineGeneration.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      pipelineGeneration = await ctx.task(generatePipelineFilesTask, { ...{
+    projectName,
+    cicdPlatform,
+    targetPlatforms,
+    framework,
+    buildMatrixConfig,
+    testStageConfig,
+    buildStageConfigs,
+    artifactManagement,
+    cachingConfig,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Phase 7 Complete: Pipeline files generated. Main config: ${pipelineGeneration.mainConfigPath}. Review pipeline configuration?`,
     title: 'Pipeline Generation Review',
     context: {
@@ -186,9 +216,15 @@ export async function process(inputs, ctx) {
       mainConfigPath: pipelineGeneration.mainConfigPath,
       stages: pipelineGeneration.stages,
       files: pipelineGeneration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DOCUMENTATION AND VALIDATION
   // ============================================================================
@@ -206,7 +242,7 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  const validation = await ctx.task(validatePipelineTask, {
+  let validation = await ctx.task(validatePipelineTask, {
     projectName,
     cicdPlatform,
     pipelineGeneration,
@@ -215,9 +251,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.validationScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validatePipelineTask, { ...{
+    projectName,
+    cicdPlatform,
+    pipelineGeneration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Desktop Build Pipeline Setup Complete for ${projectName}! Validation score: ${validation.validationScore}/100. ${validationPassed ? 'Pipeline is ready!' : 'Some issues need attention.'} Approve pipeline?`,
     title: 'Pipeline Setup Complete',
     context: {
@@ -236,9 +280,15 @@ export async function process(inputs, ctx) {
         { path: pipelineGeneration.mainConfigPath, format: 'yaml', label: 'Pipeline Configuration' },
         { path: documentation.readmePath, format: 'markdown', label: 'Pipeline Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -280,8 +330,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

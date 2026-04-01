@@ -41,16 +41,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(jobDescription.artifacts || []));
 
   // Phase 4: Sourcing Strategy
-  const sourcingStrategy = await ctx.task(sourcingStrategyTask, { companyName, role, candidateProfile });
+  let sourcingStrategy = await ctx.task(sourcingStrategyTask, { companyName, role, candidateProfile });
   artifacts.push(...(sourcingStrategy.artifacts || []));
 
-  // Breakpoint: Review job description and sourcing strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sourcingStrategy = await ctx.task(sourcingStrategyTask, { ...{ companyName, role, candidateProfile }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review job description for ${role} at ${companyName}. Sourcing channels: ${sourcingStrategy.channels?.slice(0, 3).join(', ')}. Proceed with interview design?`,
     title: 'Job Description Review',
-    context: { runId: ctx.runId, companyName, role, channels: sourcingStrategy.channels, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, role, channels: sourcingStrategy.channels, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Interview Process Design
   const interviewProcess = await ctx.task(interviewProcessTask, { companyName, role, candidateProfile, level });
   artifacts.push(...(interviewProcess.artifacts || []));

@@ -127,7 +127,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating comprehensive BCG Portfolio report');
-  const bcgReport = await ctx.task(bcgReportTask, {
+  let bcgReport = await ctx.task(bcgReportTask, {
     organizationName,
     marketGrowthAnalysis,
     marketShareAnalysis,
@@ -141,8 +141,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...bcgReport.artifacts);
 
-  // Breakpoint: Review BCG Portfolio analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bcgReport = await ctx.task(bcgReportTask, { ...{
+    organizationName,
+    marketGrowthAnalysis,
+    marketShareAnalysis,
+    bcgClassification,
+    cashFlowAnalysis,
+    portfolioBalance,
+    strategicRecommendations,
+    resourceAllocation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `BCG Portfolio analysis complete for ${organizationName}. Portfolio balance: ${portfolioBalance.balanceScore}/100. Review and approve?`,
     title: 'BCG Portfolio Analysis Review',
     context: {
@@ -163,9 +177,15 @@ export async function process(inputs, ctx) {
         },
         portfolioBalanceScore: portfolioBalance.balanceScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -192,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

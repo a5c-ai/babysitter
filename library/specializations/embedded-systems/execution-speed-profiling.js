@@ -136,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Profiling Report');
 
-  const report = await ctx.task(profilingReportTask, {
+  let report = await ctx.task(profilingReportTask, {
     projectName,
     profilingExecution,
     hotspotAnalysis,
@@ -147,8 +147,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(profilingReportTask, { ...{
+    projectName,
+    profilingExecution,
+    hotspotAnalysis,
+    callGraphAnalysis,
+    optimizationRecommendations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Execution Speed Profiling Complete for ${projectName}. ${hotspotAnalysis.hotspots.length} hotspots identified. Review results?`,
     title: 'Profiling Complete',
     context: {
@@ -162,9 +173,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: report.reportPath, format: 'markdown', label: 'Profiling Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -191,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

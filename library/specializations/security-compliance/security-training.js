@@ -58,7 +58,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'security-compliance/security-training', timestamp: ctx.now() }
     };
   }
-
   const startTime = ctx.now();
   const artifacts = [];
   const trainingMaterials = [];
@@ -92,7 +91,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing comprehensive training program structure');
 
-  const programDesign = await ctx.task(programDesignTask, {
+  let programDesign = await ctx.task(programDesignTask, {
     needsAssessment,
     targetAudience,
     complianceStandards,
@@ -109,8 +108,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Program Design Complete - ${programDesign.trainingModules.length} modules, ${programDesign.totalDuration} estimated duration`);
 
-  // Quality Gate: Program design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      programDesign = await ctx.task(programDesignTask, { ...{
+    needsAssessment,
+    targetAudience,
+    complianceStandards,
+    trainingType,
+    deliveryMode,
+    duration,
+    gamification,
+    accessibilityCompliant,
+    languageSupport,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Security training program designed with ${programDesign.trainingModules.length} modules covering ${programDesign.topicsCovered.length} topics. Compliance requirements: ${complianceStandards.join(', ')}. Approve program design?`,
     title: 'Training Program Design Review',
     context: {
@@ -123,9 +137,15 @@ export async function process(inputs, ctx) {
       complianceAlignment: programDesign.complianceAlignment,
       recommendation: 'Review program structure and topics before content development',
       files: programDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TRAINING CONTENT DEVELOPMENT
   // ============================================================================
@@ -191,7 +211,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 5: Phishing simulation not requested, skipping');
   }
-
   // ============================================================================
   // PHASE 6: ASSESSMENT AND QUIZ DEVELOPMENT
   // ============================================================================
@@ -238,7 +257,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 7: Certification not required, skipping');
   }
-
   // ============================================================================
   // PHASE 8: LEARNING MANAGEMENT SYSTEM (LMS) INTEGRATION
   // ============================================================================
@@ -266,7 +284,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Developing delivery strategy and rollout plan');
 
-  const deliveryStrategy = await ctx.task(deliveryStrategyTask, {
+  let deliveryStrategy = await ctx.task(deliveryStrategyTask, {
     programDesign,
     targetAudience,
     deliveryMode,
@@ -280,8 +298,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Delivery Strategy Complete - Rollout phases: ${deliveryStrategy.rolloutPhases.length}, pilot group size: ${deliveryStrategy.pilotGroupSize}`);
 
-  // Quality Gate: Pre-launch review
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      deliveryStrategy = await ctx.task(deliveryStrategyTask, { ...{
+    programDesign,
+    targetAudience,
+    deliveryMode,
+    duration,
+    phishingCampaign,
+    certificationProgram,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Training program ready for deployment. Total materials: ${trainingMaterials.length}, Assessments: ${assessments.length}, ${includePhishing ? 'Phishing campaigns: ' + phishingCampaign.campaigns.length : 'No phishing'}. Approve for launch?`,
     title: 'Training Program Pre-Launch Review',
     context: {
@@ -295,9 +325,15 @@ export async function process(inputs, ctx) {
       estimatedParticipants: deliveryStrategy.estimatedParticipants,
       recommendation: 'Review all materials and plan before program launch',
       files: artifacts.filter(a => a.type === 'summary').map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: COMMUNICATION AND CHANGE MANAGEMENT
   // ============================================================================
@@ -340,7 +376,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 11: Metrics reporting not requested, skipping');
   }
-
   // ============================================================================
   // PHASE 12: TRAINING EFFECTIVENESS MEASUREMENT PLAN
   // ============================================================================
@@ -385,7 +420,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Generating comprehensive program documentation');
 
-  const programDocumentation = await ctx.task(programDocumentationTask, {
+  let programDocumentation = await ctx.task(programDocumentationTask, {
     programDesign,
     contentDevelopment,
     roleBasedContent,
@@ -402,8 +437,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...programDocumentation.artifacts);
 
-  // Final Breakpoint: Program review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      programDocumentation = await ctx.task(programDocumentationTask, { ...{
+    programDesign,
+    contentDevelopment,
+    roleBasedContent,
+    assessmentDevelopment,
+    phishingCampaign,
+    certificationProgram,
+    lmsIntegration,
+    deliveryStrategy,
+    communicationPlan,
+    effectivenessPlan,
+    continuousImprovement,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Security Awareness Training Program complete. ${programDesign.trainingModules.length} modules, ${trainingMaterials.length} materials, ${assessments.length} assessments. ${includePhishing ? phishingCampaign.campaigns.length + ' phishing campaigns' : 'No phishing'}. Ready for deployment?`,
     title: 'Security Training Program Final Review',
     context: {
@@ -437,9 +489,15 @@ export async function process(inputs, ctx) {
         ...(phishingCampaign ? [{ path: phishingCampaign.campaignGuidePath, format: 'markdown', label: 'Phishing Campaign Guide' }] : []),
         ...(certificationProgram ? [{ path: certificationProgram.certificationGuidePath, format: 'markdown', label: 'Certification Guide' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_seconds = endTime - startTime;
 
@@ -527,8 +585,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

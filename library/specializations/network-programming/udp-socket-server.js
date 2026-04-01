@@ -48,7 +48,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing UDP server requirements');
 
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     language,
     features,
@@ -57,9 +57,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirementsAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    projectName,
+    language,
+    features,
+    packetSize,
+    rateLimit,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: UDP server requirements analyzed. Features: ${Object.keys(features).filter(k => features[k]).join(', ') || 'basic'}. Proceed with design?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -67,9 +77,15 @@ export async function process(inputs, ctx) {
       requirements: requirementsAnalysis.requirements,
       featureAnalysis: requirementsAnalysis.featureAnalysis,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SOCKET IMPLEMENTATION
   // ============================================================================
@@ -187,16 +203,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  const validation = await ctx.task(validationTask, {
+  let validation = await ctx.task(validationTask, {
     projectName,
     requirementsAnalysis,
     testSuite,
     outputDir
   });
 
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validationTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `UDP Socket Server Implementation Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Review deliverables?`,
     title: 'UDP Socket Server Complete - Final Review',
     context: {
@@ -212,9 +236,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'README' },
         { path: validation.reportPath, format: 'json', label: 'Validation Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -249,8 +279,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

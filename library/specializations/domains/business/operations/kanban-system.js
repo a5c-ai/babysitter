@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Demand Analysis
   ctx.log('info', 'Phase 2: Demand Analysis and Takt Time Calculation');
-  const demandAnalysis = await ctx.task(demandAnalysisTask, {
+  let demandAnalysis = await ctx.task(demandAnalysisTask, {
     processName,
     assessment,
     outputDir
@@ -57,8 +57,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...demandAnalysis.artifacts);
 
-  // Quality Gate: Demand Analysis Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      demandAnalysis = await ctx.task(demandAnalysisTask, { ...{
+    processName,
+    assessment,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Demand analysis complete. Average daily demand: ${demandAnalysis.averageDemand}. Takt time: ${demandAnalysis.taktTime}s. Demand variability: ${demandAnalysis.variability}%. Proceed with kanban sizing?`,
     title: 'Demand Analysis Review',
     context: {
@@ -66,9 +74,15 @@ export async function process(inputs, ctx) {
       processName,
       demand: demandAnalysis,
       files: demandAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Kanban Sizing
   ctx.log('info', 'Phase 3: Kanban Sizing and Calculation');
   const kanbanSizing = await ctx.task(kanbanSizingTask, {
@@ -95,7 +109,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Card and Visual Design
   ctx.log('info', 'Phase 5: Kanban Card and Visual Management Design');
-  const cardDesign = await ctx.task(cardDesignTask, {
+  let cardDesign = await ctx.task(cardDesignTask, {
     processName,
     systemDesign,
     outputDir
@@ -103,8 +117,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...cardDesign.artifacts);
 
-  // Quality Gate: Design Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      cardDesign = await ctx.task(cardDesignTask, { ...{
+    processName,
+    systemDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Kanban system designed. Total kanban cards: ${kanbanSizing.totalKanbans}. WIP limit: ${kanbanSizing.totalWipLimit}. Supermarket locations: ${systemDesign.supermarkets.length}. Review design before implementation planning?`,
     title: 'Kanban System Design Review',
     context: {
@@ -114,9 +136,15 @@ export async function process(inputs, ctx) {
       design: systemDesign,
       cardDesign: cardDesign.cardInfo,
       files: [...systemDesign.artifacts, ...cardDesign.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Implementation Planning
   ctx.log('info', 'Phase 6: Implementation Planning');
   const implementation = await ctx.task(implementationPlanningTask, {
@@ -201,8 +229,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Current State Assessment
+  // Task 1: Current State Assessment
 export const currentStateAssessmentTask = defineTask('kanban-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Kanban Current State Assessment - ${args.processName}`,

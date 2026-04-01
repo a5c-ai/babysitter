@@ -35,15 +35,24 @@ export async function process(inputs, ctx) {
   const versionControl = await ctx.task(versionControlTask, { project, projectStructure, outputDir });
   artifacts.push(...versionControl.artifacts);
 
-  const environmentManagement = await ctx.task(environmentManagementTask, { project, dependencies: projectStructure.dependencies, outputDir });
-  artifacts.push(...environmentManagement.artifacts);
-
-  await ctx.breakpoint({
+  let environmentManagement = await ctx.task(environmentManagementTask, { project, dependencies: projectStructure.dependencies, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      environmentManagement = await ctx.task(environmentManagementTask, { ...{ project, dependencies: projectStructure.dependencies, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `Project structure defined. ${projectStructure.files?.length || 0} files, ${environmentManagement.dependencies?.length || 0} dependencies. Review before data pipeline?`,
     title: 'Project Structure Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { files: projectStructure.files?.length || 0, dependencies: environmentManagement.dependencies?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { files: projectStructure.files?.length || 0, dependencies: environmentManagement.dependencies?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const dataPipeline = await ctx.task(dataPipelineTask, { data, projectStructure, outputDir });
   artifacts.push(...dataPipeline.artifacts);
 
@@ -65,15 +74,24 @@ export async function process(inputs, ctx) {
   const documentationGeneration = await ctx.task(pipelineDocumentationTask, { project, projectStructure, dataPipeline, analysisPipeline, environmentManagement, outputDir });
   artifacts.push(...documentationGeneration.artifacts);
 
-  const reproducibilityAudit = await ctx.task(reproducibilityAuditTask, { project, versionControl, environmentManagement, dataPipeline, analysisPipeline, workflowAutomation, documentationGeneration, minimumReproducibilityScore, outputDir });
-  artifacts.push(...reproducibilityAudit.artifacts);
-
-  await ctx.breakpoint({
+  let reproducibilityAudit = await ctx.task(reproducibilityAuditTask, { project, versionControl, environmentManagement, dataPipeline, analysisPipeline, workflowAutomation, documentationGeneration, minimumReproducibilityScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reproducibilityAudit = await ctx.task(reproducibilityAuditTask, { ...{ project, versionControl, environmentManagement, dataPipeline, analysisPipeline, workflowAutomation, documentationGeneration, minimumReproducibilityScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pipeline complete. Reproducibility score: ${reproducibilityAudit.reproducibilityScore}/100. ${reproducibilityAudit.recommendations?.length || 0} recommendations. Approve?`,
     title: 'Reproducible Pipeline Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { reproducibilityScore: reproducibilityAudit.reproducibilityScore, recommendations: reproducibilityAudit.recommendations?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { reproducibilityScore: reproducibilityAudit.reproducibilityScore, recommendations: reproducibilityAudit.recommendations?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, project: project.name, pipeline: { data: dataPipeline, analysis: analysisPipeline, workflow: workflowAutomation },
     documentation: documentationGeneration, reproducibilityScore: reproducibilityAudit.reproducibilityScore,

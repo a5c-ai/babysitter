@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Stakeholder Needs Identification
-  const stakeholderNeeds = await ctx.task(stakeholderNeedsTask, {
+  let stakeholderNeeds = await ctx.task(stakeholderNeedsTask, {
     projectName,
     systemDescription,
     stakeholders
@@ -48,9 +48,16 @@ export async function process(inputs, ctx) {
       requirementsDocument: null
     };
   }
-
-  // Breakpoint: Review stakeholder needs
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      stakeholderNeeds = await ctx.task(stakeholderNeedsTask, { ...{
+    projectName,
+    systemDescription,
+    stakeholders
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review captured stakeholder needs for ${projectName}. Are all key stakeholders represented?`,
     title: 'Stakeholder Needs Review',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: stakeholderNeeds
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Functional Requirements Derivation
   const functionalRequirements = await ctx.task(functionalRequirementsTask, {
     projectName,
@@ -131,7 +144,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Requirements Document Generation
-  const requirementsDocument = await ctx.task(requirementsDocumentTask, {
+  let requirementsDocument = await ctx.task(requirementsDocumentTask, {
     projectName,
     systemDescription,
     stakeholderNeeds,
@@ -146,8 +159,25 @@ export async function process(inputs, ctx) {
     stakeholders
   });
 
-  // Final Breakpoint: Requirements Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      requirementsDocument = await ctx.task(requirementsDocumentTask, { ...{
+    projectName,
+    systemDescription,
+    stakeholderNeeds,
+    functionalRequirements,
+    performanceRequirements,
+    standardsAnalysis,
+    environmentalRequirements,
+    constraintRequirements,
+    requirementsFlowDown,
+    traceabilityMatrix,
+    verificationRequirements,
+    stakeholders
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Requirements Analysis Complete for ${projectName}. Review and approve the requirements document?`,
     title: 'Requirements Approval',
     context: {
@@ -158,9 +188,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/requirements-document.json`, format: 'json', content: requirementsDocument },
         { path: `artifacts/requirements-document.md`, format: 'markdown', content: requirementsDocument.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -183,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const stakeholderNeedsTask = defineTask('stakeholder-needs', (args, taskCtx) => ({
   kind: 'agent',

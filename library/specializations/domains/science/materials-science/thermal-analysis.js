@@ -68,7 +68,6 @@ export async function process(inputs, ctx) {
     thermalResults.dsc = dscResult;
     artifacts.push(...dscResult.artifacts);
   }
-
   // Phase 3: TGA Analysis (if requested)
   if (techniques.includes('TGA')) {
     ctx.log('info', 'Phase 2b: Performing TGA analysis');
@@ -84,7 +83,6 @@ export async function process(inputs, ctx) {
     thermalResults.tga = tgaResult;
     artifacts.push(...tgaResult.artifacts);
   }
-
   // Phase 4: DTA Analysis (if requested)
   if (techniques.includes('DTA')) {
     ctx.log('info', 'Phase 2c: Performing DTA analysis');
@@ -99,7 +97,6 @@ export async function process(inputs, ctx) {
     thermalResults.dta = dtaResult;
     artifacts.push(...dtaResult.artifacts);
   }
-
   // Phase 5: TMA Analysis (if requested)
   if (techniques.includes('TMA')) {
     ctx.log('info', 'Phase 2d: Performing TMA analysis');
@@ -113,7 +110,6 @@ export async function process(inputs, ctx) {
     thermalResults.tma = tmaResult;
     artifacts.push(...tmaResult.artifacts);
   }
-
   // Phase 6: DMA Analysis (if requested)
   if (techniques.includes('DMA')) {
     ctx.log('info', 'Phase 2e: Performing DMA analysis');
@@ -127,10 +123,9 @@ export async function process(inputs, ctx) {
     thermalResults.dma = dmaResult;
     artifacts.push(...dmaResult.artifacts);
   }
-
   // Phase 7: Thermal Event Analysis
   ctx.log('info', 'Phase 3: Analyzing thermal events');
-  const thermalEvents = await ctx.task(thermalEventAnalysisTask, {
+  let thermalEvents = await ctx.task(thermalEventAnalysisTask, {
     sampleId,
     thermalResults,
     outputDir
@@ -138,8 +133,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...thermalEvents.artifacts);
 
-  // Breakpoint: Review thermal analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      thermalEvents = await ctx.task(thermalEventAnalysisTask, { ...{
+    sampleId,
+    thermalResults,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Thermal analysis complete for ${sampleId}. Found ${thermalEvents.events.length} thermal events. Review results?`,
     title: 'Thermal Analysis Review',
     context: {
@@ -152,9 +155,15 @@ export async function process(inputs, ctx) {
         decompositionSteps: thermalResults.tga?.decompositionSteps
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Report Generation
   ctx.log('info', 'Phase 4: Generating thermal analysis report');
   const report = await ctx.task(thermalReportTask, {
@@ -204,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Sample Preparation
+  // Task 1: Sample Preparation
 export const thermalSamplePrepTask = defineTask('thermal-sample-prep', (args, taskCtx) => ({
   kind: 'agent',
   title: `Thermal Sample Preparation - ${args.sampleId}`,

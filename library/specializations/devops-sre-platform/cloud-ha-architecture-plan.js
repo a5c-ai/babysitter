@@ -107,7 +107,7 @@ export async function process(inputs, ctx) {
   if (runAudit) {
     ctx.log('Phase 1: Auditing current infrastructure for HA gaps...');
 
-    const auditResult = await ctx.task(auditCurrentInfraTask, {
+    let auditResult = await ctx.task(auditCurrentInfraTask, {
       projectIdentifier,
       cloudProvider,
       providerLabel,
@@ -116,9 +116,19 @@ export async function process(inputs, ctx) {
       currentArchitecture
     });
     output.audit = auditResult;
-    output.phasesExecuted.push('audit');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        auditResult = await ctx.task(auditCurrentInfraTask, { ...{
+      projectIdentifier,
+      cloudProvider,
+      providerLabel,
+      targetRegion,
+      slaTarget,
+      currentArchitecture
+    }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Found ${auditResult.gapCount || 'N'} HA gaps across ` +
         `${auditResult.serviceCount || 'N'} services. Review audit before designing target architecture?`,
       title: 'Infrastructure Audit Review',
@@ -126,9 +136,15 @@ export async function process(inputs, ctx) {
         runId: ctx.runId,
         gapCount: auditResult.gapCount,
         summary: auditResult.summary
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 2: HA Architecture Design (Compute, Data, Network)
@@ -158,7 +174,7 @@ export async function process(inputs, ctx) {
     });
 
     ctx.log('Phase 2c: Designing network & observability HA...');
-    const networkHA = await ctx.task(designNetworkHATask, {
+    let networkHA = await ctx.task(designNetworkHATask, {
       projectIdentifier,
       cloudProvider,
       providerLabel,
@@ -169,17 +185,34 @@ export async function process(inputs, ctx) {
     });
 
     output.design = { compute: computeHA, data: dataHA, network: networkHA };
-    output.phasesExecuted.push('design');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        networkHA = await ctx.task(designNetworkHATask, { ...{
+      projectIdentifier,
+      cloudProvider,
+      providerLabel,
+      targetRegion,
+      slaTarget,
+      budgetCeiling,
+      audit: output.audit
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: 'Review the 3 HA design tracks (Compute, Data, Network). Approve before cost analysis?',
       title: 'HA Architecture Design Review',
       context: {
         runId: ctx.runId,
         summary: `Compute: ${computeHA.summary || 'done'}\nData: ${dataHA.summary || 'done'}\nNetwork: ${networkHA.summary || 'done'}`
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 3: Cost Estimation & Optimization
@@ -200,7 +233,6 @@ export async function process(inputs, ctx) {
     output.costEstimate = costResult;
     output.phasesExecuted.push('cost-estimation');
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 4: Migration Plan
   // ═══════════════════════════════════════════════════════════════════════════
@@ -221,7 +253,6 @@ export async function process(inputs, ctx) {
     output.migrationPlan = migrationResult;
     output.phasesExecuted.push('migration-plan');
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 5: IaC Script Generation
   // ═══════════════════════════════════════════════════════════════════════════
@@ -241,7 +272,6 @@ export async function process(inputs, ctx) {
     output.iacScripts = iacResult;
     output.phasesExecuted.push('iac-generation');
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 6: Architecture Diagram Generation
   // ═══════════════════════════════════════════════════════════════════════════
@@ -280,7 +310,6 @@ export async function process(inputs, ctx) {
     }
     output.phasesExecuted.push('diagrams');
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 7: Architecture Document Compilation
   // ═══════════════════════════════════════════════════════════════════════════
@@ -305,7 +334,6 @@ export async function process(inputs, ctx) {
     output.architectureDoc = docResult;
     output.phasesExecuted.push('architecture-doc');
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 8: Quality Review
   // ═══════════════════════════════════════════════════════════════════════════
@@ -313,7 +341,7 @@ export async function process(inputs, ctx) {
   if (runQuality) {
     ctx.log('Phase 8: Quality review...');
 
-    const qualityResult = await ctx.task(qualityReviewTask, {
+    let qualityResult = await ctx.task(qualityReviewTask, {
       projectIdentifier,
       cloudProvider,
       providerLabel,
@@ -329,18 +357,40 @@ export async function process(inputs, ctx) {
     });
     output.qualityReview = qualityResult;
     output.qualityScore = qualityResult.score || 0;
-    output.phasesExecuted.push('quality-review');
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityResult = await ctx.task(qualityReviewTask, { ...{
+      projectIdentifier,
+      cloudProvider,
+      providerLabel,
+      slaTarget,
+      budgetCeiling,
+      audit: output.audit,
+      design: output.design,
+      costEstimate: output.costEstimate,
+      migrationPlan: output.migrationPlan,
+      iacScripts: output.iacScripts,
+      architectureDoc: output.architectureDoc,
+      phasesExecuted: output.phasesExecuted
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Architecture plan scored ${qualityResult.score || 'N/A'}/100. Approve final deliverables?`,
       title: 'Final Architecture Plan Approval',
       context: {
         runId: ctx.runId,
         score: qualityResult.score,
         summary: qualityResult.summary
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FINALIZE
@@ -350,8 +400,7 @@ export async function process(inputs, ctx) {
   output.metadata.timestamp = ctx.now();
   return output;
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════════════════
 // TASK DEFINITIONS
 // ═══════════════════════════════════════════════════════════════════════════════
 

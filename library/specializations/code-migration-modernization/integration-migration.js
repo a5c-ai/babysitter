@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing target integration patterns');
-  const targetDesign = await ctx.task(targetPatternDesignTask, {
+  let targetDesign = await ctx.task(targetPatternDesignTask, {
     projectName,
     integrationInventory,
     targetPatterns,
@@ -64,8 +64,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetDesign.artifacts);
 
-  // Breakpoint: Design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      targetDesign = await ctx.task(targetPatternDesignTask, { ...{
+    projectName,
+    integrationInventory,
+    targetPatterns,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Integration design complete for ${projectName}. Integrations: ${integrationInventory.totalCount}. Target pattern: ${targetDesign.primaryPattern}. Approve design?`,
     title: 'Integration Design Review',
     context: {
@@ -73,9 +82,15 @@ export async function process(inputs, ctx) {
       projectName,
       targetDesign,
       recommendation: 'Review with external system owners'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: API/MESSAGE DESIGN
   // ============================================================================
@@ -136,7 +151,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Cutting over to new integrations');
-  const cutover = await ctx.task(integrationCutoverTask, {
+  let cutover = await ctx.task(integrationCutoverTask, {
     projectName,
     implementation,
     testing,
@@ -145,8 +160,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...cutover.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      cutover = await ctx.task(integrationCutoverTask, { ...{
+    projectName,
+    implementation,
+    testing,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Integration migration complete for ${projectName}. Migrated: ${implementation.migratedCount}/${integrationInventory.totalCount}. Tests passing: ${testing.allPassed}. Approve?`,
     title: 'Integration Migration Complete',
     context: {
@@ -157,9 +181,15 @@ export async function process(inputs, ctx) {
         migrated: implementation.migratedCount,
         testsPass: testing.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -181,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

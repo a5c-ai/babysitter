@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Nanocarrier Selection and Design
-  const carrierDesign = await ctx.task(carrierDesignTask, {
+  let carrierDesign = await ctx.task(carrierDesignTask, {
     therapeuticCargo,
     targetSite,
     deliveryRequirements,
@@ -51,9 +51,17 @@ export async function process(inputs, ctx) {
       recommendations: carrierDesign.recommendations
     };
   }
-
-  // Breakpoint: Review carrier design
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      carrierDesign = await ctx.task(carrierDesignTask, { ...{
+    therapeuticCargo,
+    targetSite,
+    deliveryRequirements,
+    nanocarrierType
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review nanocarrier design: ${carrierDesign.carrierType}. Target size: ${carrierDesign.targetSize}nm. Surface: ${carrierDesign.surfaceFunctionalization}. Approve?`,
     title: 'Nanocarrier Design Review',
     context: {
@@ -65,9 +73,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: carrierDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Formulation Development (Iterative)
   let iteration = 0;
   let encapsulationEfficiency = 0;
@@ -87,7 +101,7 @@ export async function process(inputs, ctx) {
     });
 
     // Encapsulation characterization
-    const encapsulationResults = await ctx.task(encapsulationCharacterizationTask, {
+    let encapsulationResults = await ctx.task(encapsulationCharacterizationTask, {
       formulation: formulationOptimization.optimizedFormulation,
       therapeuticCargo,
       carrierDesign
@@ -103,8 +117,16 @@ export async function process(inputs, ctx) {
       particleCharacteristics: encapsulationResults.particleCharacteristics
     });
 
-    if (encapsulationEfficiency < encapsulationTarget && iteration < maxIterations) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          encapsulationResults = await ctx.task(encapsulationCharacterizationTask, { ...{
+      formulation: formulationOptimization.optimizedFormulation,
+      therapeuticCargo,
+      carrierDesign
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration}: Encapsulation ${encapsulationEfficiency.toFixed(1)}% (target: ${encapsulationTarget}%). Continue optimization?`,
         title: 'Encapsulation Optimization Progress',
         context: {
@@ -112,30 +134,49 @@ export async function process(inputs, ctx) {
           iteration,
           encapsulationEfficiency,
           particleSize: encapsulationResults.particleCharacteristics.size
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 3: Release Kinetics Characterization
-  const releaseKinetics = await ctx.task(releaseKineticsTask, {
+  let releaseKinetics = await ctx.task(releaseKineticsTask, {
     currentFormulation,
     therapeuticCargo,
     deliveryRequirements
   });
 
   // Quality Gate: Release profile must meet requirements
-  if (!releaseKinetics.meetsRequirements) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        releaseKinetics = await ctx.task(releaseKineticsTask, { ...{
+    currentFormulation,
+    therapeuticCargo,
+    deliveryRequirements
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Release profile does not meet requirements. T50: ${releaseKinetics.t50}h, Target: ${deliveryRequirements.releaseProfile}. Adjust formulation?`,
       title: 'Release Profile Warning',
       context: {
         runId: ctx.runId,
         releaseKinetics,
         recommendations: releaseKinetics.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Surface Functionalization for Targeting
   const surfaceFunctionalization = await ctx.task(surfaceFunctionalizationTask, {
@@ -145,27 +186,41 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Targeting Validation
-  const targetingValidation = await ctx.task(targetingValidationTask, {
+  let targetingValidation = await ctx.task(targetingValidationTask, {
     surfaceFunctionalization,
     targetSite,
     deliveryRequirements
   });
 
   // Quality Gate: Targeting must meet efficiency requirements
-  if (targetingValidation.efficiency < deliveryRequirements.targetingEfficiency) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        targetingValidation = await ctx.task(targetingValidationTask, { ...{
+    surfaceFunctionalization,
+    targetSite,
+    deliveryRequirements
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Targeting efficiency ${targetingValidation.efficiency.toFixed(1)}% below target ${deliveryRequirements.targetingEfficiency}%. Review and proceed?`,
       title: 'Targeting Efficiency Warning',
       context: {
         runId: ctx.runId,
         targetingValidation,
         recommendations: targetingValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Cytotoxicity Assessment
-  const cytotoxicityAssessment = await ctx.task(cytotoxicityAssessmentTask, {
+  let cytotoxicityAssessment = await ctx.task(cytotoxicityAssessmentTask, {
     currentFormulation,
     carrierDesign,
     therapeuticCargo,
@@ -173,17 +228,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Must pass cytotoxicity threshold
-  if (cytotoxicityAssessment.emptyCarrierToxicity > cytotoxicityThreshold) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        cytotoxicityAssessment = await ctx.task(cytotoxicityAssessmentTask, { ...{
+    currentFormulation,
+    carrierDesign,
+    therapeuticCargo,
+    targetSite
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Empty carrier cytotoxicity ${cytotoxicityAssessment.emptyCarrierToxicity.toFixed(1)}% exceeds threshold ${cytotoxicityThreshold}%. Critical safety concern!`,
       title: 'Cytotoxicity Warning',
       context: {
         runId: ctx.runId,
         cytotoxicityAssessment,
         recommendations: cytotoxicityAssessment.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Stability Assessment
   const stabilityAssessment = await ctx.task(stabilityAssessmentTask, {
@@ -210,7 +280,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Documentation and Reporting
-  const systemReport = await ctx.task(reportGenerationTask, {
+  let systemReport = await ctx.task(reportGenerationTask, {
     carrierDesign,
     formulationHistory,
     releaseKinetics,
@@ -224,8 +294,24 @@ export async function process(inputs, ctx) {
     targetSite
   });
 
-  // Final Breakpoint: System approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      systemReport = await ctx.task(reportGenerationTask, { ...{
+    carrierDesign,
+    formulationHistory,
+    releaseKinetics,
+    surfaceFunctionalization,
+    targetingValidation,
+    cytotoxicityAssessment,
+    stabilityAssessment,
+    pkModeling,
+    regulatoryAnalysis,
+    therapeuticCargo,
+    targetSite
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Drug delivery system development complete. Encapsulation: ${encapsulationEfficiency.toFixed(1)}%. Targeting: ${targetingValidation.efficiency.toFixed(1)}%. Safety: ${cytotoxicityAssessment.overallAssessment}. Approve?`,
     title: 'Drug Delivery System Approval',
     context: {
@@ -237,9 +323,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/dds-report.md', format: 'markdown', content: systemReport.markdown },
         { path: 'artifacts/formulation.json', format: 'json', content: currentFormulation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     formulation: {
@@ -264,8 +356,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const carrierDesignTask = defineTask('carrier-design', (args, taskCtx) => ({
   kind: 'agent',

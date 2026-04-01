@@ -12,28 +12,47 @@ export async function process(inputs, ctx) {
   const { projectName, orbitDefinition, spacecraftConfig, missionDuration = 5 } = inputs;
 
   const riskAssessment = await ctx.task(debrisRiskAssessmentTask, { projectName, orbitDefinition, missionDuration });
-  const collisionAnalysis = await ctx.task(collisionAnalysisTask, { projectName, orbitDefinition, spacecraftConfig });
+  let collisionAnalysis = await ctx.task(collisionAnalysisTask, { projectName, orbitDefinition, spacecraftConfig });
 
-  if (collisionAnalysis.probability > 1e-4) {
-    await ctx.breakpoint({
+      let lastFeedback_assessmentApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_assessmentApproval) {
+        collisionAnalysis = await ctx.task(collisionAnalysisTask, { ...{ projectName, orbitDefinition, spacecraftConfig }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+      }
+  const assessmentApproval = await ctx.breakpoint({
       question: `Collision probability ${collisionAnalysis.probability.toExponential(2)} exceeds 1e-4. Review mitigation options?`,
       title: 'Collision Risk Warning',
-      context: { runId: ctx.runId, collisionAnalysis }
-    });
-  }
+      context: { runId: ctx.runId, collisionAnalysis },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_assessmentApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (assessmentApproval.approved) break;
+      lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+    } }
 
   const shieldingAnalysis = await ctx.task(shieldingAnalysisTask, { projectName, spacecraftConfig, riskAssessment });
   const deorbitPlan = await ctx.task(deorbitPlanTask, { projectName, orbitDefinition, spacecraftConfig, missionDuration });
   const mitigationPlan = await ctx.task(mitigationPlanTask, { projectName, riskAssessment, shieldingAnalysis, deorbitPlan });
-  const complianceStatus = await ctx.task(debrisComplianceTask, { projectName, mitigationPlan, deorbitPlan });
-  const report = await ctx.task(debrisReportTask, { projectName, riskAssessment, collisionAnalysis, mitigationPlan, complianceStatus });
-
-  await ctx.breakpoint({
+  let complianceStatus = await ctx.task(debrisComplianceTask, { projectName, mitigationPlan, deorbitPlan });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceStatus = await ctx.task(debrisComplianceTask, { ...{ projectName, mitigationPlan, deorbitPlan }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Debris assessment complete for ${projectName}. Compliance: ${complianceStatus.compliant ? 'Yes' : 'No'}. Approve?`,
     title: 'Debris Assessment Approval',
-    context: { runId: ctx.runId, summary: { probability: collisionAnalysis.probability, deorbitTime: deorbitPlan.deorbitTime, compliant: complianceStatus.compliant } }
-  });
-
+    context: { runId: ctx.runId, summary: { probability: collisionAnalysis.probability, deorbitTime: deorbitPlan.deorbitTime, compliant: complianceStatus.compliant } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, collisionRisk: collisionAnalysis, mitigationPlan, complianceStatus, report, metadata: { processId: 'orbital-debris-assessment', timestamp: ctx.now() } };
 }
 

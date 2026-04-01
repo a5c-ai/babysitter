@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Problem Solving');
 
-  const problemSolving = await ctx.task(problemSolvingTask, {
+  let problemSolving = await ctx.task(problemSolvingTask, {
     contestId,
     contestType,
     preparation,
@@ -71,8 +71,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...problemSolving.artifacts);
 
-  // Quality Gate: Mid-contest review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      problemSolving = await ctx.task(problemSolvingTask, { ...{
+    contestId,
+    contestType,
+    preparation,
+    language,
+    practiceMode,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Contest progress: ${problemSolving.solvedCount} problems solved. Continue or take strategic break?`,
     title: 'Contest Progress Review',
     context: {
@@ -81,9 +92,15 @@ export async function process(inputs, ctx) {
       attemptedCount: problemSolving.attemptedCount,
       remainingTime: problemSolving.remainingTime,
       files: problemSolving.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: POST-CONTEST ANALYSIS
   // ============================================================================
@@ -120,7 +137,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Rating and Progress Tracking');
 
-  const progressTracking = await ctx.task(progressTrackingTask, {
+  let progressTracking = await ctx.task(progressTrackingTask, {
     contestId,
     targetRating,
     problemSolving,
@@ -130,8 +147,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...progressTracking.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      progressTracking = await ctx.task(progressTrackingTask, { ...{
+    contestId,
+    targetRating,
+    problemSolving,
+    upsolving,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Contest analysis complete. Problems solved: ${problemSolving.solvedCount}. Upsolving complete: ${upsolving.upsolvingComplete}. Review results?`,
     title: 'Contest Session Complete',
     context: {
@@ -147,9 +174,15 @@ export async function process(inputs, ctx) {
         { path: postAnalysis.analysisPath, format: 'markdown', label: 'Contest Analysis' },
         { path: progressTracking.progressPath, format: 'json', label: 'Progress Tracking' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -170,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

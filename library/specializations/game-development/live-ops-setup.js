@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...community.artifacts);
 
   // Phase 6: Support Systems
-  const support = await ctx.task(supportSystemsTask, { projectName, outputDir });
-  artifacts.push(...support.artifacts);
-
-  await ctx.breakpoint({
+  let support = await ctx.task(supportSystemsTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      support = await ctx.task(supportSystemsTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Live Ops setup complete for ${projectName}. Analytics configured. Content pipeline ready. Review documentation?`,
     title: 'Live Ops Setup Review',
-    context: { runId: ctx.runId, strategy, analytics, contentPipeline }
-  });
-
+    context: { runId: ctx.runId, strategy, analytics, contentPipeline },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

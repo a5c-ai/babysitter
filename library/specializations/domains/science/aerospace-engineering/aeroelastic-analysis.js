@@ -45,24 +45,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Ground Vibration Test Correlation
-  const gvtCorrelation = await ctx.task(gvtCorrelationTask, {
+  let gvtCorrelation = await ctx.task(gvtCorrelationTask, {
     projectName,
     structuralModel: modelPrep,
     gvtData: inputs.gvtData
   });
 
-  // Breakpoint: Model correlation review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      gvtCorrelation = await ctx.task(gvtCorrelationTask, { ...{
+    projectName,
+    structuralModel: modelPrep,
+    gvtData: inputs.gvtData
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `GVT correlation complete for ${projectName}. MAC > 0.9: ${gvtCorrelation.correlatedModes}/${gvtCorrelation.totalModes}. Proceed?`,
     title: 'GVT Correlation Review',
     context: {
       runId: ctx.runId,
       correlation: gvtCorrelation
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Flutter Analysis
-  const flutterAnalysis = await ctx.task(flutterAnalysisTask, {
+  let flutterAnalysis = await ctx.task(flutterAnalysisTask, {
     projectName,
     structuralModel: gvtCorrelation.updatedModel,
     aeroModel,
@@ -70,17 +84,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Flutter margin
-  if (flutterAnalysis.lowestFlutterSpeed < flightEnvelope.vd * 1.15) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        flutterAnalysis = await ctx.task(flutterAnalysisTask, { ...{
+    projectName,
+    structuralModel: gvtCorrelation.updatedModel,
+    aeroModel,
+    flightEnvelope
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Flutter speed ${flutterAnalysis.lowestFlutterSpeed} KEAS below 1.15 VD. Critical review required.`,
       title: 'Flutter Margin Warning',
       context: {
         runId: ctx.runId,
         flutterAnalysis,
         recommendation: 'Consider structural modifications or mass balance'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Divergence Analysis
   const divergenceAnalysis = await ctx.task(divergenceAnalysisTask, {
@@ -121,7 +150,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Certification Report
-  const certificationReport = await ctx.task(aeroelasticCertificationTask, {
+  let certificationReport = await ctx.task(aeroelasticCertificationTask, {
     projectName,
     flutterAnalysis,
     divergenceAnalysis,
@@ -131,8 +160,20 @@ export async function process(inputs, ctx) {
     certificationBasis: inputs.certificationBasis
   });
 
-  // Final Breakpoint: Clearance Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      certificationReport = await ctx.task(aeroelasticCertificationTask, { ...{
+    projectName,
+    flutterAnalysis,
+    divergenceAnalysis,
+    controlReversalAnalysis,
+    storeAnalysis,
+    fftPlan,
+    certificationBasis: inputs.certificationBasis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Aeroelastic analysis complete for ${projectName}. Flutter margin: ${flutterAnalysis.margin}%. Approve clearance?`,
     title: 'Aeroelastic Clearance Approval',
     context: {
@@ -147,9 +188,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/aeroelastic-report.json', format: 'json', content: certificationReport },
         { path: 'artifacts/aeroelastic-report.md', format: 'markdown', content: certificationReport.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -171,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const aeroelasticModelPrepTask = defineTask('aeroelastic-model-prep', (args, taskCtx) => ({
   kind: 'agent',

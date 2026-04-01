@@ -61,15 +61,24 @@ export async function process(inputs, ctx) {
   const monitoringTesting = await ctx.task(monitoringTestingTask, { projectName, language, outputDir });
   artifacts.push(...monitoringTesting.artifacts);
 
-  const monitoringDocumentation = await ctx.task(monitoringDocumentationTask, { projectName, features, environments, outputDir });
-  artifacts.push(...monitoringDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let monitoringDocumentation = await ctx.task(monitoringDocumentationTask, { projectName, features, environments, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      monitoringDocumentation = await ctx.task(monitoringDocumentationTask, { ...{ projectName, features, environments, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Server Monitoring and Debugging complete with ${features.length} features. Review and approve?`,
     title: 'MCP Monitoring Complete',
-    context: { runId: ctx.runId, summary: { projectName, features, environments } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, features, environments } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

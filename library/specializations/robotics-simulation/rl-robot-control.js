@@ -49,30 +49,48 @@ export async function process(inputs, ctx) {
   const rewardDesign = await ctx.task(rewardDesignTask, { projectName, taskType, outputDir });
   artifacts.push(...rewardDesign.artifacts);
 
-  const training = await ctx.task(rlTrainingTask, { projectName, rlAlgorithm, environmentSetup, rewardDesign, outputDir });
-  artifacts.push(...training.artifacts);
-
-  await ctx.breakpoint({
+  let training = await ctx.task(rlTrainingTask, { projectName, rlAlgorithm, environmentSetup, rewardDesign, outputDir });
+    let lastFeedback_designApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_designApproval) {
+      training = await ctx.task(rlTrainingTask, { ...{ projectName, rlAlgorithm, environmentSetup, rewardDesign, outputDir }, feedback: lastFeedback_designApproval, attempt: attempt + 1 });
+    }
+  const designApproval = await ctx.breakpoint({
     question: `RL training for ${projectName} complete. Reward: ${training.finalReward}. Continue with validation?`,
     title: 'RL Training Complete',
-    context: { runId: ctx.runId, finalReward: training.finalReward, episodes: training.totalEpisodes }
-  });
-
+    context: { runId: ctx.runId, finalReward: training.finalReward, episodes: training.totalEpisodes },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_designApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (designApproval.approved) break;
+    lastFeedback_designApproval = designApproval.response || designApproval.feedback || 'Changes requested';
+  }
   const policyValidation = await ctx.task(policyValidationTask, { projectName, training, outputDir });
   artifacts.push(...policyValidation.artifacts);
 
   const simToRealTransfer = await ctx.task(simToRealTransferTask, { projectName, training, outputDir });
   artifacts.push(...simToRealTransfer.artifacts);
 
-  const hardwareTesting = await ctx.task(rlHardwareTestingTask, { projectName, simToRealTransfer, outputDir });
-  artifacts.push(...hardwareTesting.artifacts);
-
-  await ctx.breakpoint({
+  let hardwareTesting = await ctx.task(rlHardwareTestingTask, { projectName, simToRealTransfer, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      hardwareTesting = await ctx.task(rlHardwareTestingTask, { ...{ projectName, simToRealTransfer, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RL Robot Control Complete for ${projectName}. Sim success: ${policyValidation.successRate}%, Real success: ${hardwareTesting.successRate}%. Review?`,
     title: 'RL Robot Control Complete',
-    context: { runId: ctx.runId, simSuccess: policyValidation.successRate, realSuccess: hardwareTesting.successRate }
-  });
-
+    context: { runId: ctx.runId, simSuccess: policyValidation.successRate, realSuccess: hardwareTesting.successRate },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: policyValidation.successRate >= 90,
     projectName,

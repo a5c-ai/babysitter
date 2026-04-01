@@ -94,7 +94,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Designing request/response schemas');
 
-  const schemaDesign = await ctx.task(schemaDesignTask, {
+  let schemaDesign = await ctx.task(schemaDesignTask, {
     projectName,
     apiType,
     resourceDesign,
@@ -104,8 +104,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...schemaDesign.artifacts);
 
-  // Quality Gate: Schema Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      schemaDesign = await ctx.task(schemaDesignTask, { ...{
+    projectName,
+    apiType,
+    resourceDesign,
+    pagination,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `API schema design complete for ${projectName}. Resources: ${resourceDesign.resources.length}, Schemas: ${schemaDesign.schemas.length}. Approve schema design?`,
     title: 'API Schema Design Review',
     context: {
@@ -114,9 +124,15 @@ export async function process(inputs, ctx) {
       resources: resourceDesign.resources,
       schemaCount: schemaDesign.schemas.length,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ERROR HANDLING PATTERNS
   // ============================================================================
@@ -204,7 +220,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating API design guidelines');
 
-  const guidelines = await ctx.task(guidelinesTask, {
+  let guidelines = await ctx.task(guidelinesTask, {
     projectName,
     apiType,
     urlConventions,
@@ -218,8 +234,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...guidelines.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      guidelines = await ctx.task(guidelinesTask, { ...{
+    projectName,
+    apiType,
+    urlConventions,
+    schemaDesign,
+    errorPatterns,
+    authDesign,
+    paginationDesign,
+    versioningDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `API Design Specification complete for ${projectName}. Review all artifacts and approve?`,
     title: 'API Design Complete',
     context: {
@@ -236,9 +266,15 @@ export async function process(inputs, ctx) {
         { path: specGeneration.specPath, format: 'yaml', label: 'API Specification' },
         { path: guidelines.guidelinesPath, format: 'markdown', label: 'API Guidelines' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -271,8 +307,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -55,15 +55,22 @@ export async function process(inputs, ctx) {
 
   // Task 3: RULA/REBA Assessment
   ctx.log('info', 'Phase 3: Applying RULA/REBA posture assessment');
-  const postureAssessment = await ctx.task(postureAssessmentTask, {
+  let postureAssessment = await ctx.task(postureAssessmentTask, {
     taskScreening,
     outputDir
   });
 
   artifacts.push(...postureAssessment.artifacts);
 
-  // Breakpoint: Review assessments
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      postureAssessment = await ctx.task(postureAssessmentTask, { ...{
+    taskScreening,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Ergonomic assessments complete. NIOSH LI: ${nioshAnalysis.liftingIndex.toFixed(2)}. RULA Score: ${postureAssessment.rulaScore}. ${postureAssessment.highRiskPostures.length} high-risk postures identified. Review before recommendations?`,
     title: 'Ergonomic Assessment Review',
     context: {
@@ -72,9 +79,15 @@ export async function process(inputs, ctx) {
       rulaScore: postureAssessment.rulaScore,
       highRiskPostures: postureAssessment.highRiskPostures,
       files: postureAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Repetition and Force Analysis
   ctx.log('info', 'Phase 4: Evaluating repetition, force, and duration factors');
   const repetitionForceAnalysis = await ctx.task(repetitionForceTask, {
@@ -116,7 +129,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Implementation Plan
   ctx.log('info', 'Phase 8: Creating implementation and reassessment plan');
-  const implementationPlan = await ctx.task(implementationPlanTask, {
+  let implementationPlan = await ctx.task(implementationPlanTask, {
     engineeringControls,
     adminControls,
     riskSummary,
@@ -125,8 +138,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationPlan.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationPlan = await ctx.task(implementationPlanTask, { ...{
+    engineeringControls,
+    adminControls,
+    riskSummary,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ergonomic assessment complete. Overall risk level: ${riskSummary.overallRiskLevel}. ${engineeringControls.recommendations.length} engineering and ${adminControls.recommendations.length} administrative controls recommended. Review implementation plan?`,
     title: 'Ergonomic Assessment Results',
     context: {
@@ -139,9 +161,15 @@ export async function process(inputs, ctx) {
         estimatedCost: implementationPlan.totalCostEstimate
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -174,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Task Screening
+  // Task 1: Task Screening
 export const taskScreeningTask = defineTask('task-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Screen and prioritize tasks',

@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(geometryImplementationTask, { analysis, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const verification = await ctx.task(geometryVerificationTask, { implementation, points, outputDir });
-  artifacts.push(...verification.artifacts);
-
-  await ctx.breakpoint({
+  let verification = await ctx.task(geometryVerificationTask, { implementation, points, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      verification = await ctx.task(geometryVerificationTask, { ...{ implementation, points, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Geometry solution for ${problemType} complete. Verified: ${verification.correct}. Review?`,
     title: 'Computational Geometry Complete',
-    context: { runId: ctx.runId, problemType, verified: verification.correct }
-  });
-
+    context: { runId: ctx.runId, problemType, verified: verification.correct },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemType,

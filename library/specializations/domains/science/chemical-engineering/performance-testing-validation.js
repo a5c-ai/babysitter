@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Analyze Results vs. Specifications
   ctx.log('info', 'Analyzing results vs. specifications');
-  const analysisResult = await ctx.task(resultsAnalysisTask, {
+  let analysisResult = await ctx.task(resultsAnalysisTask, {
     processName,
     testResults: executionResult.results,
     designSpecifications,
@@ -84,8 +84,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...analysisResult.artifacts);
 
-  // Breakpoint: Review performance test results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisResult = await ctx.task(resultsAnalysisTask, { ...{
+    processName,
+    testResults: executionResult.results,
+    designSpecifications,
+    performanceGuarantees,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance testing complete for ${processName}. Tests passed: ${analysisResult.analysis.passedCount}/${analysisResult.analysis.totalTests}. All guarantees met: ${analysisResult.analysis.allGuaranteesMet}. Review results?`,
     title: 'Performance Testing Results Review',
     context: {
@@ -97,9 +107,15 @@ export async function process(inputs, ctx) {
         failedTests: analysisResult.analysis.failedCount,
         allGuaranteesMet: analysisResult.analysis.allGuaranteesMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Document Performance Guarantees
   ctx.log('info', 'Documenting performance guarantees');
   const certificateResult = await ctx.task(performanceCertificateTask, {
@@ -143,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Test Objectives Definition
+  // Task 1: Test Objectives Definition
 export const testObjectivesTask = defineTask('test-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define performance test objectives',

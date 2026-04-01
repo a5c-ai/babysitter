@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...monitoring.artifacts);
 
   // Phase 3: Run Incremental Load Tests
-  const incrementalTests = await ctx.task(runIncrementalLoadTestsTask, { projectName, maxLoad, outputDir });
-  artifacts.push(...incrementalTests.artifacts);
-
-  await ctx.breakpoint({
+  let incrementalTests = await ctx.task(runIncrementalLoadTestsTask, { projectName, maxLoad, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      incrementalTests = await ctx.task(runIncrementalLoadTestsTask, { ...{ projectName, maxLoad, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Incremental tests complete. Max sustained: ${incrementalTests.maxSustainedLoad} users. Continue to breaking point?`,
     title: 'Incremental Load Testing',
-    context: { runId: ctx.runId, incrementalTests }
-  });
-
+    context: { runId: ctx.runId, incrementalTests },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Identify System Breaking Point
   const breakingPoint = await ctx.task(identifyBreakingPointTask, { projectName, incrementalTests, outputDir });
   artifacts.push(...breakingPoint.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...resourceLimits.artifacts);
 
   // Phase 8: Provide Capacity Recommendations
-  const recommendations = await ctx.task(provideCapacityRecommendationsTask, { projectName, breakingPoint, degradation, resourceLimits, outputDir });
-  artifacts.push(...recommendations.artifacts);
-
-  await ctx.breakpoint({
+  let recommendations = await ctx.task(provideCapacityRecommendationsTask, { projectName, breakingPoint, degradation, resourceLimits, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendations = await ctx.task(provideCapacityRecommendationsTask, { ...{ projectName, breakingPoint, degradation, resourceLimits, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stress testing complete. Breaking point: ${breakingPoint.load} users. Recovery time: ${recovery.recoveryTime}s. Accept results?`,
     title: 'Stress Testing Results',
-    context: { runId: ctx.runId, breakingPoint, recovery }
-  });
-
+    context: { runId: ctx.runId, breakingPoint, recovery },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

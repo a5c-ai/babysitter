@@ -134,7 +134,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Signal Integrity Report');
 
-  const report = await ctx.task(signalIntegrityReportTask, {
+  let report = await ctx.task(signalIntegrityReportTask, {
     projectName,
     voltageLevels,
     timingAnalysis,
@@ -154,8 +154,20 @@ export async function process(inputs, ctx) {
     ...(noiseAnalysis.issues || [])
   ];
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(signalIntegrityReportTask, { ...{
+    projectName,
+    voltageLevels,
+    timingAnalysis,
+    signalQuality,
+    protocolCompliance,
+    noiseAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Signal Integrity Testing Complete for ${projectName}. ${allIssues.length} issues found. Review results?`,
     title: 'Signal Integrity Complete',
     context: {
@@ -168,9 +180,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: report.reportPath, format: 'markdown', label: 'SI Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -199,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

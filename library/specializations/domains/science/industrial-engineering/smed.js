@@ -47,15 +47,22 @@ export async function process(inputs, ctx) {
 
   // Task 2: Video Analysis
   ctx.log('info', 'Phase 2: Analyzing current changeover video');
-  const videoAnalysis = await ctx.task(videoAnalysisTask, {
+  let videoAnalysis = await ctx.task(videoAnalysisTask, {
     baselineDoc,
     outputDir
   });
 
   artifacts.push(...videoAnalysis.artifacts);
 
-  // Breakpoint: Review current state
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      videoAnalysis = await ctx.task(videoAnalysisTask, { ...{
+    baselineDoc,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Baseline changeover: ${baselineDoc.totalTime} minutes. ${videoAnalysis.elementCount} elements identified. ${videoAnalysis.internalCount} internal, ${videoAnalysis.externalCount} external. Proceed with SMED analysis?`,
     title: 'SMED Baseline Review',
     context: {
@@ -67,9 +74,15 @@ export async function process(inputs, ctx) {
         external: videoAnalysis.externalCount
       },
       files: baselineDoc.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Internal/External Separation
   ctx.log('info', 'Phase 3: Separating internal and external activities');
   const separationAnalysis = await ctx.task(separationTask, {
@@ -120,7 +133,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Results Comparison
   ctx.log('info', 'Phase 8: Comparing before/after times');
-  const resultsComparison = await ctx.task(resultsComparisonTask, {
+  let resultsComparison = await ctx.task(resultsComparisonTask, {
     baselineDoc,
     newProcedure,
     outputDir
@@ -128,8 +141,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...resultsComparison.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      resultsComparison = await ctx.task(resultsComparisonTask, { ...{
+    baselineDoc,
+    newProcedure,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SMED analysis complete. Before: ${baselineDoc.totalTime} min, After: ${newProcedure.projectedTime} min. Reduction: ${resultsComparison.reductionPercentage}%. ${improvementActions.actionCount} actions identified. Review results?`,
     title: 'SMED Results',
     context: {
@@ -141,9 +162,15 @@ export async function process(inputs, ctx) {
         actionsIdentified: improvementActions.actionCount
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -172,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const baselineDocTask = defineTask('baseline-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document baseline changeover',

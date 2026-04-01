@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "babysitter-codex",
+      "name": "babysitter",
       "source": {
         "source": "local",
         "path": "./plugins/babysitter-codex"

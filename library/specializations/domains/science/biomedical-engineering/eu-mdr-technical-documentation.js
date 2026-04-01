@@ -51,14 +51,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Risk Management File
-  const riskManagementFile = await ctx.task(riskManagementFileTask, {
+  let riskManagementFile = await ctx.task(riskManagementFileTask, {
     deviceName,
     gsprMapping,
     deviceSpecification
   });
 
-  // Breakpoint: Review GSPR compliance
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      riskManagementFile = await ctx.task(riskManagementFileTask, { ...{
+    deviceName,
+    gsprMapping,
+    deviceSpecification
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review GSPR compliance for ${deviceName}. Are all applicable requirements addressed?`,
     title: 'GSPR Compliance Review',
     context: {
@@ -70,9 +78,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: gsprMapping
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Clinical Evaluation Report
   const clinicalEvaluationReport = await ctx.task(clinicalEvaluationTask, {
     deviceName,
@@ -97,7 +111,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Technical Documentation Compilation
-  const technicalDocumentation = await ctx.task(technicalDocumentationTask, {
+  let technicalDocumentation = await ctx.task(technicalDocumentationTask, {
     deviceName,
     riskClass,
     intendedPurpose,
@@ -111,8 +125,24 @@ export async function process(inputs, ctx) {
     sscp
   });
 
-  // Final Breakpoint: Technical Documentation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      technicalDocumentation = await ctx.task(technicalDocumentationTask, { ...{
+    deviceName,
+    riskClass,
+    intendedPurpose,
+    notifiedBody,
+    gsprMapping,
+    deviceSpecification,
+    designManufacturing,
+    riskManagementFile,
+    clinicalEvaluationReport,
+    pmsPlan,
+    sscp
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `EU MDR Technical Documentation complete for ${deviceName}. Approve for Notified Body submission?`,
     title: 'Technical Documentation Approval',
     context: {
@@ -122,9 +152,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/technical-documentation.json`, format: 'json', content: technicalDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -138,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const gsprMappingTask = defineTask('gspr-mapping', (args, taskCtx) => ({
   kind: 'agent',

@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Scale-Up Feasibility Assessment
-  const feasibilityAssessment = await ctx.task(scaleUpFeasibilityTask, {
+  let feasibilityAssessment = await ctx.task(scaleUpFeasibilityTask, {
     labProtocol,
     targetScale,
     productionRequirements
@@ -44,9 +44,16 @@ export async function process(inputs, ctx) {
       barriers: feasibilityAssessment.barriers,
       recommendations: feasibilityAssessment.recommendations
     };
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      feasibilityAssessment = await ctx.task(scaleUpFeasibilityTask, { ...{
+    labProtocol,
+    targetScale,
+    productionRequirements
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Scale-up feasibility confirmed for ${labProtocol.name}. Scale factor: ${feasibilityAssessment.scaleFactor}x. Proceed?`,
     title: 'Scale-Up Feasibility Review',
     context: {
@@ -54,11 +61,17 @@ export async function process(inputs, ctx) {
       labProtocol,
       targetScale,
       feasibilityAssessment
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Heat and Mass Transfer Analysis
-  const transferAnalysis = await ctx.task(heatMassTransferTask, {
+  let transferAnalysis = await ctx.task(heatMassTransferTask, {
     labProtocol,
     targetScale,
     feasibilityAssessment
@@ -70,18 +83,31 @@ export async function process(inputs, ctx) {
     targetScale,
     transferAnalysis,
     productionRequirements
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      transferAnalysis = await ctx.task(heatMassTransferTask, { ...{
+    labProtocol,
+    targetScale,
+    feasibilityAssessment
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Reactor design complete: ${reactorDesign.reactorType}. Review and approve for pilot trials?`,
     title: 'Reactor Design Review',
     context: {
       runId: ctx.runId,
       reactorDesign,
       scaleFactor: feasibilityAssessment.scaleFactor
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Scale-Up Protocol Development with Iteration
   let iteration = 0;
   let consistencyScore = 0;
@@ -101,7 +127,7 @@ export async function process(inputs, ctx) {
     });
 
     // Batch consistency validation
-    const consistencyValidation = await ctx.task(batchConsistencyTask, {
+    let consistencyValidation = await ctx.task(batchConsistencyTask, {
       scaleUpProtocol: protocolDevelopment,
       labProtocol,
       targetScale
@@ -117,15 +143,28 @@ export async function process(inputs, ctx) {
       consistencyScore
     });
 
-    if (consistencyScore < consistencyTarget && iteration < maxIterations) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          consistencyValidation = await ctx.task(batchConsistencyTask, { ...{
+      scaleUpProtocol: protocolDevelopment,
+      labProtocol,
+      targetScale
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration}: Consistency=${consistencyScore}% (target: ${consistencyTarget}%). Continue optimization?`,
         title: 'Scale-Up Optimization Progress',
-        context: { runId: ctx.runId, iteration, consistencyScore, consistencyTarget }
-      });
-    }
+        context: { runId: ctx.runId, iteration, consistencyScore, consistencyTarget },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 5: Quality Control Checkpoint Implementation
   const qcCheckpoints = await ctx.task(qcCheckpointImplementationTask, {
     scaleUpProtocol,
@@ -141,7 +180,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Manufacturing Documentation
-  const manufacturingDocs = await ctx.task(manufacturingDocumentationTask, {
+  let manufacturingDocs = await ctx.task(manufacturingDocumentationTask, {
     labProtocol,
     scaleUpProtocol,
     reactorDesign,
@@ -156,9 +195,20 @@ export async function process(inputs, ctx) {
     scaleUpProtocol,
     reactorDesign,
     targetScale
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      manufacturingDocs = await ctx.task(manufacturingDocumentationTask, { ...{
+    labProtocol,
+    scaleUpProtocol,
+    reactorDesign,
+    qcCheckpoints,
+    patIntegration,
+    productionRequirements,
+    optimizationHistory
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scale-up complete. Consistency: ${consistencyScore}%. Risk level: ${riskAssessment.overallRiskLevel}. Approve for production transfer?`,
     title: 'Scale-Up Approval',
     context: {
@@ -166,9 +216,15 @@ export async function process(inputs, ctx) {
       consistencyScore,
       riskAssessment,
       files: [{ path: 'artifacts/manufacturing-documentation.md', format: 'markdown' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     scaleUpProtocol,
@@ -185,8 +241,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const scaleUpFeasibilityTask = defineTask('scale-up-feasibility', (args, taskCtx) => ({
   kind: 'agent',

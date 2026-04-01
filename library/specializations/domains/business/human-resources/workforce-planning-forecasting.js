@@ -73,8 +73,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Analysis Review
-  await ctx.breakpoint('analysis-review', {
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase4Review = await ctx.breakpoint('analysis-review', {
     title: 'Workforce Analysis Review',
     description: 'Review current state analysis and external environment findings',
     artifacts: {
@@ -86,9 +88,15 @@ export async function process(inputs, ctx) {
       'Is the business strategy interpretation accurate?',
       'Are there any gaps in workforce data?',
       'Are the external factors comprehensive?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Demand Forecasting
   const demandForecast = await ctx.task('forecast-workforce-demand', {
     strategyAlignment,
@@ -145,8 +153,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 9: Gap and Scenario Review
-  await ctx.breakpoint('forecast-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('forecast-review', {
     title: 'Workforce Forecast Review',
     description: 'Review demand/supply forecasts and gap analysis',
     artifacts: {
@@ -159,9 +169,15 @@ export async function process(inputs, ctx) {
       'Are the forecast assumptions reasonable?',
       'Are the gap calculations accurate?',
       'Do the scenarios cover key uncertainties?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Strategy Development
   const strategyDevelopment = await ctx.task('develop-workforce-strategies', {
     gapAnalysis,

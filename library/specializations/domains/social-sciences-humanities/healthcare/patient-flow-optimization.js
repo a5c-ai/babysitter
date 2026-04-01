@@ -42,16 +42,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Current State Assessment
   ctx.log('info', 'Phase 1: Current State Assessment');
-  const currentState = await ctx.task(currentStateAssessmentTask, {
+  let currentState = await ctx.task(currentStateAssessmentTask, {
     facilityName,
     targetArea,
     currentMetrics,
     outputDir
   });
 
-  artifacts.push(...currentState.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      currentState = await ctx.task(currentStateAssessmentTask, { ...{
+    facilityName,
+    targetArea,
+    currentMetrics,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Current state mapped. Avg door-to-door time: ${currentState.doorToDoorTime} min. Key bottlenecks identified: ${currentState.bottlenecks.length}. Proceed with demand analysis?`,
     title: 'Current State Assessment Review',
     context: {
@@ -60,9 +68,15 @@ export async function process(inputs, ctx) {
       flowMap: currentState.flowMap,
       bottlenecks: currentState.bottlenecks,
       files: currentState.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Demand and Capacity Analysis
   ctx.log('info', 'Phase 2: Demand and Capacity Analysis');
   const demandAnalysis = await ctx.task(demandCapacityAnalysisTask, {
@@ -75,15 +89,22 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Value Stream Mapping
   ctx.log('info', 'Phase 3: Value Stream Mapping');
-  const valueStream = await ctx.task(valueStreamMappingTask, {
+  let valueStream = await ctx.task(valueStreamMappingTask, {
     currentState,
     demandAnalysis,
     outputDir
   });
 
-  artifacts.push(...valueStream.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      valueStream = await ctx.task(valueStreamMappingTask, { ...{
+    currentState,
+    demandAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Value stream mapped. Value-add ratio: ${valueStream.valueAddRatio}%. ${valueStream.wasteAreas.length} waste areas identified. Proceed with improvement design?`,
     title: 'Value Stream Analysis Review',
     context: {
@@ -91,9 +112,15 @@ export async function process(inputs, ctx) {
       valueStreamMap: valueStream.vsm,
       wasteAreas: valueStream.wasteAreas,
       files: valueStream.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Bottleneck Analysis
   ctx.log('info', 'Phase 4: Bottleneck Analysis');
   const bottleneckAnalysis = await ctx.task(bottleneckAnalysisTask, {
@@ -107,7 +134,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Future State Design
   ctx.log('info', 'Phase 5: Future State Design');
-  const futureState = await ctx.task(futureStateDesignTask, {
+  let futureState = await ctx.task(futureStateDesignTask, {
     currentState,
     valueStream,
     bottleneckAnalysis,
@@ -115,9 +142,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...futureState.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      futureState = await ctx.task(futureStateDesignTask, { ...{
+    currentState,
+    valueStream,
+    bottleneckAnalysis,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Future state designed. Projected wait time reduction: ${futureState.projectedImprovement}%. ${futureState.interventions.length} interventions proposed. Approve implementation planning?`,
     title: 'Future State Design Review',
     context: {
@@ -126,9 +162,15 @@ export async function process(inputs, ctx) {
       interventions: futureState.interventions,
       projectedMetrics: futureState.projectedMetrics,
       files: futureState.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Implementation Planning
   ctx.log('info', 'Phase 6: Implementation Planning');
   const implementationPlan = await ctx.task(implementationPlanningTask, {
@@ -197,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Current State Assessment
+  // Task 1: Current State Assessment
 // Uses: SK-HC-001 (clinical-workflow-analysis)
 export const currentStateAssessmentTask = defineTask('pfo-current-state', (args, taskCtx) => ({
   kind: 'agent',

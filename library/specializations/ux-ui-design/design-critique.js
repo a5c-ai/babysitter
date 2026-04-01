@@ -59,7 +59,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: PARTICIPANT SELECTION AND ROLE ASSIGNMENT
   // ============================================================================
@@ -172,7 +171,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Reviewing accessibility and inclusive design considerations');
-  const accessibilityReview = await ctx.task(accessibilityReviewTask, {
+  let accessibilityReview = await ctx.task(accessibilityReviewTask, {
     projectName,
     designFiles,
     designPhase,
@@ -186,8 +185,19 @@ export async function process(inputs, ctx) {
   const accessibilityScore = accessibilityReview.accessibilityScore;
   ctx.log('info', `Accessibility score: ${accessibilityScore}/100`);
 
-  // Breakpoint: Review initial findings
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      accessibilityReview = await ctx.task(accessibilityReviewTask, { ...{
+    projectName,
+    designFiles,
+    designPhase,
+    usabilityAssessment,
+    evaluationCriteria,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Initial critique complete. Principles: ${principlesScore}/100, Usability: ${usabilityAssessment.usabilityScore}/100, Accessibility: ${accessibilityScore}/100. Review findings before proceeding to structured feedback?`,
     title: 'Initial Critique Review',
     context: {
@@ -211,9 +221,15 @@ export async function process(inputs, ctx) {
         strengths: initialReview.strengths.slice(0, 3),
         concerns: initialReview.concerns.slice(0, 3)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: STRUCTURED FEEDBACK COLLECTION
   // ============================================================================
@@ -278,7 +294,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Assessing critical issues and design blockers');
-  const criticalIssuesAssessment = await ctx.task(criticalIssuesAssessmentTask, {
+  let criticalIssuesAssessment = await ctx.task(criticalIssuesAssessmentTask, {
     projectName,
     feedbackSynthesis,
     usabilityAssessment,
@@ -295,8 +311,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Critical issues: ${criticalIssueCount}, Blockers: ${blockerCount}`);
 
   // Quality Gate: Critical issues check
-  if (blockerCount > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        criticalIssuesAssessment = await ctx.task(criticalIssuesAssessmentTask, { ...{
+    projectName,
+    feedbackSynthesis,
+    usabilityAssessment,
+    accessibilityReview,
+    designPhase,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `${blockerCount} design blocker(s) identified that prevent progression to next phase. Review blockers and determine resolution approach?`,
       title: 'Critical Blockers Identified',
       context: {
@@ -309,9 +336,15 @@ export async function process(inputs, ctx) {
           { path: criticalIssuesAssessment.blockersReportPath, format: 'markdown', label: 'Blockers Report' },
           { path: criticalIssuesAssessment.resolutionPlanPath, format: 'markdown', label: 'Resolution Plan' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: ACTIONABLE RECOMMENDATIONS GENERATION
@@ -454,7 +487,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 20: Generating comprehensive critique report');
-  const critiqueReport = await ctx.task(critiqueReportGenerationTask, {
+  let critiqueReport = await ctx.task(critiqueReportGenerationTask, {
     projectName,
     designPhase,
     critiqueType,
@@ -476,8 +509,30 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...critiqueReport.artifacts);
 
-  // Final Breakpoint: Review complete critique
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      critiqueReport = await ctx.task(critiqueReportGenerationTask, { ...{
+    projectName,
+    designPhase,
+    critiqueType,
+    critiquePreparation,
+    participantSelection,
+    contextPresentation,
+    feedbackSynthesis,
+    strengthsOpportunities,
+    criticalIssuesAssessment,
+    recommendations,
+    prioritization,
+    iterationPlanning,
+    consistencyCheck,
+    crossFunctionalImpact,
+    qualityScoring,
+    documentation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Design critique complete for ${projectName}. Quality score: ${overallQualityScore}/100 (${qualityMet ? 'Meets' : 'Below'} target). ${criticalIssueCount} critical issues, ${recommendations.recommendations.length} recommendations. ${iterationPlanning.iterationCount} iteration(s) planned. Review complete critique report?`,
     title: 'Design Critique Complete',
     context: {
@@ -507,9 +562,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: iterationPlanning.estimatedDuration,
         verdict: qualityScoring.verdict
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -583,8 +644,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -27,11 +27,16 @@ export async function process(inputs, ctx) {
   const mockingSetup = await ctx.task(mockingSetupTask, { projectName, outputDir });
   artifacts.push(...mockingSetup.artifacts);
 
-  const coverageSetup = await ctx.task(coverageSetupTask, { projectName, outputDir });
-  artifacts.push(...coverageSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Unit testing setup complete for ${projectName}. Approve?`, title: 'Testing Review', context: { runId: ctx.runId, patterns: componentTests.patterns } });
-
+  let coverageSetup = await ctx.task(coverageSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coverageSetup = await ctx.task(coverageSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Unit testing setup complete for ${projectName}. Approve?`, title: 'Testing Review', context: { runId: ctx.runId, patterns: componentTests.patterns }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

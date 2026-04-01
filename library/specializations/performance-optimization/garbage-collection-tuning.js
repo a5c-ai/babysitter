@@ -39,15 +39,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...gcAnalysis.artifacts);
 
   // Phase 2: Collect GC Logs and Metrics
-  const gcLogs = await ctx.task(collectGCLogsTask, { projectName, targetApplication, outputDir });
-  artifacts.push(...gcLogs.artifacts);
-
-  await ctx.breakpoint({
+  let gcLogs = await ctx.task(collectGCLogsTask, { projectName, targetApplication, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      gcLogs = await ctx.task(collectGCLogsTask, { ...{ projectName, targetApplication, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Collected GC logs. Average pause: ${gcLogs.averagePause}ms. Analyze GC issues?`,
     title: 'GC Log Collection',
-    context: { runId: ctx.runId, gcLogs }
-  });
-
+    context: { runId: ctx.runId, gcLogs },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Identify GC Pause Issues
   const pauseIssues = await ctx.task(identifyGCPauseIssuesTask, { projectName, gcLogs, targetPauseTime, outputDir });
   artifacts.push(...pauseIssues.artifacts);
@@ -61,15 +70,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...heapTuning.artifacts);
 
   // Phase 6: Configure GC-Specific Settings
-  const gcConfig = await ctx.task(configureGCSettingsTask, { projectName, algorithmEvaluation, heapTuning, targetPauseTime, outputDir });
-  artifacts.push(...gcConfig.artifacts);
-
-  await ctx.breakpoint({
+  let gcConfig = await ctx.task(configureGCSettingsTask, { projectName, algorithmEvaluation, heapTuning, targetPauseTime, outputDir });
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      gcConfig = await ctx.task(configureGCSettingsTask, { ...{ projectName, algorithmEvaluation, heapTuning, targetPauseTime, outputDir }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `GC configuration prepared. Algorithm: ${gcConfig.algorithm}. Apply and test?`,
     title: 'GC Configuration Review',
-    context: { runId: ctx.runId, gcConfig }
-  });
-
+    context: { runId: ctx.runId, gcConfig },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Test Under Production-Like Load
   const loadTest = await ctx.task(testGCUnderLoadTask, { projectName, gcConfig, outputDir });
   artifacts.push(...loadTest.artifacts);
@@ -79,15 +97,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...monitoring.artifacts);
 
   // Phase 9: Document Configuration Changes
-  const documentation = await ctx.task(documentGCConfigurationTask, { projectName, gcConfig, monitoring, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentGCConfigurationTask, { projectName, gcConfig, monitoring, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentGCConfigurationTask, { ...{ projectName, gcConfig, monitoring, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `GC tuning complete. Pause reduction: ${monitoring.pauseReduction}%. Accept configuration?`,
     title: 'GC Tuning Results',
-    context: { runId: ctx.runId, monitoring }
-  });
-
+    context: { runId: ctx.runId, monitoring },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

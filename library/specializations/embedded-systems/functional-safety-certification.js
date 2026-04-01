@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Hazard Analysis and Risk Assessment');
 
-  const hazardAnalysis = await ctx.task(hazardAnalysisTask, {
+  let hazardAnalysis = await ctx.task(hazardAnalysisTask, {
     projectName,
     safetyStandard,
     existingHazards,
@@ -67,18 +67,33 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...hazardAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      hazardAnalysis = await ctx.task(hazardAnalysisTask, { ...{
+    projectName,
+    safetyStandard,
+    existingHazards,
+    safetyPlanning,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Hazard analysis identified ${hazardAnalysis.hazards.length} hazards. ${hazardAnalysis.criticalHazards} are critical. Review before proceeding?`,
     title: 'Hazard Analysis Review',
     context: {
       runId: ctx.runId,
       hazards: hazardAnalysis.hazards,
       files: hazardAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: SAFETY REQUIREMENTS
   // ============================================================================
@@ -169,7 +184,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Preparing Certification Package');
 
-  const certificationPackage = await ctx.task(certificationPackageTask, {
+  let certificationPackage = await ctx.task(certificationPackageTask, {
     projectName,
     safetyStandard,
     targetSil,
@@ -180,8 +195,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...certificationPackage.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      certificationPackage = await ctx.task(certificationPackageTask, { ...{
+    projectName,
+    safetyStandard,
+    targetSil,
+    safetyCase,
+    safetyVerification,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Functional Safety Certification Package Complete for ${projectName}. Certification readiness: ${certificationPackage.readinessLevel}. Review?`,
     title: 'Safety Certification Complete',
     context: {
@@ -196,9 +222,15 @@ export async function process(inputs, ctx) {
         { path: safetyCase.casePath, format: 'markdown', label: 'Safety Case' },
         { path: certificationPackage.packagePath, format: 'zip', label: 'Certification Package' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -231,8 +263,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

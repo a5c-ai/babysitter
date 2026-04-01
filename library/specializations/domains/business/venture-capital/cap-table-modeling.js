@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Dilution Analysis
   ctx.log('info', 'Analyzing dilution');
-  const dilutionAnalysis = await ctx.task(dilutionAnalysisTask, {
+  let dilutionAnalysis = await ctx.task(dilutionAnalysisTask, {
     currentAnalysis,
     proFormaCapTable,
     proposedTerms,
@@ -102,8 +102,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dilutionAnalysis.artifacts);
 
-  // Breakpoint: Review cap table modeling
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dilutionAnalysis = await ctx.task(dilutionAnalysisTask, { ...{
+    currentAnalysis,
+    proFormaCapTable,
+    proposedTerms,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cap table modeling complete for ${companyName}. Founder dilution: ${dilutionAnalysis.founderDilution}%. Review model?`,
     title: 'Cap Table Modeling Results',
     context: {
@@ -116,9 +125,15 @@ export async function process(inputs, ctx) {
         founderDilution: dilutionAnalysis.founderDilution,
         optionPoolSize: optionPoolModeling.poolSize
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Cap Table Report
   ctx.log('info', 'Generating cap table report');
   const capTableReport = await ctx.task(capTableReportTask, {
@@ -170,8 +185,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Current Cap Table Analysis
+  // Task 1: Current Cap Table Analysis
 export const currentCapTableTask = defineTask('current-cap-table', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze current cap table',

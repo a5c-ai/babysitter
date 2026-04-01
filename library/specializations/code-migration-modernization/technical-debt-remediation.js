@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Analyzing impact');
-  const impactAnalysis = await ctx.task(debtImpactAnalysisTask, {
+  let impactAnalysis = await ctx.task(debtImpactAnalysisTask, {
     projectName,
     debtInventory,
     debtCategorization,
@@ -77,8 +77,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...impactAnalysis.artifacts);
 
-  // Breakpoint: Debt analysis review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      impactAnalysis = await ctx.task(debtImpactAnalysisTask, { ...{
+    projectName,
+    debtInventory,
+    debtCategorization,
+    businessPriorities,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Debt analysis complete for ${projectName}. Total items: ${debtInventory.totalItems}. High impact: ${impactAnalysis.highImpactCount}. Review before prioritization?`,
     title: 'Technical Debt Analysis Review',
     context: {
@@ -87,9 +97,15 @@ export async function process(inputs, ctx) {
       debtInventory,
       impactAnalysis,
       recommendation: 'Review high-impact items with stakeholders'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PRIORITIZATION
   // ============================================================================
@@ -167,7 +183,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Setting up debt prevention');
-  const debtPrevention = await ctx.task(debtPreventionTask, {
+  let debtPrevention = await ctx.task(debtPreventionTask, {
     projectName,
     debtCategorization,
     verification,
@@ -176,8 +192,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...debtPrevention.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      debtPrevention = await ctx.task(debtPreventionTask, { ...{
+    projectName,
+    debtCategorization,
+    verification,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Technical debt remediation complete for ${projectName}. Items addressed: ${remediationExecution.completedCount}/${debtInventory.totalItems}. Debt reduction: ${verification.debtReduction}%. Approve?`,
     title: 'Technical Debt Remediation Complete',
     context: {
@@ -189,9 +214,15 @@ export async function process(inputs, ctx) {
         debtReduction: verification.debtReduction,
         preventionMeasures: debtPrevention.measuresImplemented
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -227,8 +258,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

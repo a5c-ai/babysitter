@@ -45,14 +45,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Analytical Method Development
-  const analyticalMethods = await ctx.task(analyticalMethodTask, {
+  let analyticalMethods = await ctx.task(analyticalMethodTask, {
     deviceName,
     materials,
     extractionConditionSelection
   });
 
-  // Breakpoint: Review analytical methods
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      analyticalMethods = await ctx.task(analyticalMethodTask, { ...{
+    deviceName,
+    materials,
+    extractionConditionSelection
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review analytical methods for ${deviceName} E&L study. Are methods appropriate for expected extractables?`,
     title: 'Analytical Method Review',
     context: {
@@ -64,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: analyticalMethods
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Extractables Profiling
   const extractablesProfiling = await ctx.task(extractablesProfilingTask, {
     deviceName,
@@ -90,7 +104,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Toxicological Risk Assessment
-  const toxRiskAssessment = await ctx.task(toxRiskAssessmentTask, {
+  let toxRiskAssessment = await ctx.task(toxRiskAssessmentTask, {
     deviceName,
     extractablesProfiling,
     leachablesStudy,
@@ -98,8 +112,18 @@ export async function process(inputs, ctx) {
     contactType
   });
 
-  // Final Breakpoint: E&L Study Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      toxRiskAssessment = await ctx.task(toxRiskAssessmentTask, { ...{
+    deviceName,
+    extractablesProfiling,
+    leachablesStudy,
+    aetApplication,
+    contactType
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `E&L analysis complete for ${deviceName}. Toxicological risk: ${toxRiskAssessment.overallRisk}. Approve study conclusions?`,
     title: 'E&L Study Approval',
     context: {
@@ -110,9 +134,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/el-study-report.json`, format: 'json', content: toxRiskAssessment }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -134,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const extractionStudyDesignTask = defineTask('extraction-study-design', (args, taskCtx) => ({
   kind: 'agent',

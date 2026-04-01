@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...patternImplementation.artifacts);
 
   // Phase 6: Complexity Analysis
-  const complexityAnalysis = await ctx.task(complexityAnalysisTask, {
+  let complexityAnalysis = await ctx.task(complexityAnalysisTask, {
     algorithmName, workDecomposition, patternImplementation, outputDir
   });
-  artifacts.push(...complexityAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complexityAnalysis = await ctx.task(complexityAnalysisTask, { ...{
+    algorithmName, workDecomposition, patternImplementation, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Parallel algorithm design complete for ${algorithmName}. Work efficiency: ${complexityAnalysis.workEfficiency}. Proceed with documentation?`,
     title: 'Algorithm Design Complete',
-    context: { runId: ctx.runId, complexityAnalysis }
-  });
-
+    context: { runId: ctx.runId, complexityAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithmName,

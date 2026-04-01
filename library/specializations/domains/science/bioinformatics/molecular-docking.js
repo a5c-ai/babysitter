@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...proteinPrepResult.artifacts);
 
   // Phase 2: Binding Site Definition
-  const bindingSiteResult = await ctx.task(bindingSiteDefinitionTask, { projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite, outputDir });
-  artifacts.push(...bindingSiteResult.artifacts);
-
-  await ctx.breakpoint({
+  let bindingSiteResult = await ctx.task(bindingSiteDefinitionTask, { projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      bindingSiteResult = await ctx.task(bindingSiteDefinitionTask, { ...{ projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Binding site defined. Grid center: ${JSON.stringify(bindingSiteResult.gridCenter)}. Box size: ${JSON.stringify(bindingSiteResult.boxSize)}. Proceed with ligand preparation?`,
     title: 'Binding Site Review',
-    context: { runId: ctx.runId, bindingSite: bindingSiteResult, files: bindingSiteResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, bindingSite: bindingSiteResult, files: bindingSiteResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Ligand Preparation
   const ligandPrepResult = await ctx.task(ligandPreparationTask, { projectName, ligands, outputDir });
   artifacts.push(...ligandPrepResult.artifacts);
@@ -61,15 +70,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Prepared ${ligandPrepResult.ligandsReady} ligands for docking`);
 
   // Phase 4: Molecular Docking
-  const dockingResult = await ctx.task(molecularDockingTask, { projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite: bindingSiteResult, preparedLigands: ligandPrepResult.preparedLigands, dockingMethod, exhaustiveness, outputDir });
-  artifacts.push(...dockingResult.artifacts);
-
-  await ctx.breakpoint({
+  let dockingResult = await ctx.task(molecularDockingTask, { projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite: bindingSiteResult, preparedLigands: ligandPrepResult.preparedLigands, dockingMethod, exhaustiveness, outputDir });
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      dockingResult = await ctx.task(molecularDockingTask, { ...{ projectName, preparedProtein: proteinPrepResult.preparedProtein, bindingSite: bindingSiteResult, preparedLigands: ligandPrepResult.preparedLigands, dockingMethod, exhaustiveness, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Docking complete. ${dockingResult.compoundsDocked} compounds docked. Top score: ${dockingResult.topScore}. Review docking results?`,
     title: 'Docking Results Review',
-    context: { runId: ctx.runId, topCompounds: dockingResult.topCompounds.slice(0, 20), scoreDistribution: dockingResult.scoreDistribution, files: dockingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, topCompounds: dockingResult.topCompounds.slice(0, 20), scoreDistribution: dockingResult.scoreDistribution, files: dockingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Pose Analysis
   const poseAnalysisResult = await ctx.task(poseAnalysisTask, { projectName, dockingResults: dockingResult.results, proteinStructure: proteinPrepResult.preparedProtein, topCompoundsCount, outputDir });
   artifacts.push(...poseAnalysisResult.artifacts);
@@ -87,15 +105,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...prioritizationResult.artifacts);
 
   // Phase 9: Report Generation
-  const reportResult = await ctx.task(generateDockingReportTask, { projectName, proteinPrepResult, bindingSiteResult, dockingResult, poseAnalysisResult, affinityResult, admetResult, prioritizationResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateDockingReportTask, { projectName, proteinPrepResult, bindingSiteResult, dockingResult, poseAnalysisResult, affinityResult, admetResult, prioritizationResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateDockingReportTask, { ...{ projectName, proteinPrepResult, bindingSiteResult, dockingResult, poseAnalysisResult, affinityResult, admetResult, prioritizationResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Virtual Screening Complete. ${prioritizationResult.leadCandidates.length} lead candidates identified. Approve results?`,
     title: 'Virtual Screening Complete',
-    context: { runId: ctx.runId, summary: { compoundsDocked: dockingResult.compoundsDocked, leadCandidates: prioritizationResult.leadCandidates.length, topScore: dockingResult.topScore }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { compoundsDocked: dockingResult.compoundsDocked, leadCandidates: prioritizationResult.leadCandidates.length, topScore: dockingResult.topScore }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -111,8 +138,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/molecular-docking', timestamp: startTime, dockingMethod }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const proteinPreparationTask = defineTask('protein-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Protein Preparation - ${args.projectName}`,

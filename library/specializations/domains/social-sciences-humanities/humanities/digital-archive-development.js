@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Archive Development Plan
   ctx.log('info', 'Generating archive development plan');
-  const developmentPlan = await ctx.task(archiveDevelopmentPlanTask, {
+  let developmentPlan = await ctx.task(archiveDevelopmentPlanTask, {
     collectionAssessment,
     metadataSchema,
     digitizationStandards,
@@ -108,8 +108,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...developmentPlan.artifacts);
 
-  // Breakpoint: Review archive development plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      developmentPlan = await ctx.task(archiveDevelopmentPlanTask, { ...{
+    collectionAssessment,
+    metadataSchema,
+    digitizationStandards,
+    iiifPlanning,
+    preservationStrategy,
+    accessFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Digital archive plan complete for ${collectionScope.name || 'collection'}. Metadata standard: ${metadataStandard}. Review plan?`,
     title: 'Digital Archive Development Results',
     context: {
@@ -121,9 +133,15 @@ export async function process(inputs, ctx) {
         materialTypes,
         estimatedItems: collectionAssessment.estimate?.items || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -155,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Collection Assessment and Planning
+  // Task 1: Collection Assessment and Planning
 export const collectionAssessmentTask = defineTask('collection-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess collection and plan archive',

@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const mutationsSetup = await ctx.task(mutationsSetupTask, { projectName, outputDir });
   artifacts.push(...mutationsSetup.artifacts);
 
-  const cachingStrategy = await ctx.task(cachingStrategyTask, { projectName, outputDir });
-  artifacts.push(...cachingStrategy.artifacts);
-
-  await ctx.breakpoint({ question: `React Query setup complete for ${projectName}. Approve?`, title: 'React Query Review', context: { runId: ctx.runId, queries: queriesImplementation.queries } });
-
+  let cachingStrategy = await ctx.task(cachingStrategyTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      cachingStrategy = await ctx.task(cachingStrategyTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `React Query setup complete for ${projectName}. Approve?`, title: 'React Query Review', context: { runId: ctx.runId, queries: queriesImplementation.queries }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

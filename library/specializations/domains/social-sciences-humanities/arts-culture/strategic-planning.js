@@ -90,7 +90,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Balanced Scorecard Development
   ctx.log('info', 'Developing balanced scorecard metrics');
-  const balancedScorecard = await ctx.task(balancedScorecardTask, {
+  let balancedScorecard = await ctx.task(balancedScorecardTask, {
     strategicGoals: strategicGoals.goals,
     culturalVitality: culturalVitality.framework,
     planningHorizon,
@@ -99,8 +99,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...balancedScorecard.artifacts);
 
-  // Breakpoint: Review strategic framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      balancedScorecard = await ctx.task(balancedScorecardTask, { ...{
+    strategicGoals: strategicGoals.goals,
+    culturalVitality: culturalVitality.framework,
+    planningHorizon,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategic framework for ${organizationName} complete. ${strategicGoals.goals.length} strategic goals defined. Review and approve strategic direction?`,
     title: 'Strategic Planning Framework Review',
     context: {
@@ -113,9 +122,15 @@ export async function process(inputs, ctx) {
         goalCount: strategicGoals.goals.length,
         scorecardPerspectives: balancedScorecard.perspectives.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Implementation Roadmap
   ctx.log('info', 'Creating implementation roadmap');
   const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
@@ -183,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Environmental Scan
+  // Task 1: Environmental Scan
 export const environmentalScanTask = defineTask('environmental-scan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct environmental scan',

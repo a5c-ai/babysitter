@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Documentation Protocol Report
   ctx.log('info', 'Generating documentation protocol report');
-  const protocolReport = await ctx.task(protocolReportTask, {
+  let protocolReport = await ctx.task(protocolReportTask, {
     documentationPlan,
     permissionProtocols,
     technicalStandards,
@@ -110,8 +110,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...protocolReport.artifacts);
 
-  // Breakpoint: Review visual documentation protocols
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      protocolReport = await ctx.task(protocolReportTask, { ...{
+    documentationPlan,
+    permissionProtocols,
+    technicalStandards,
+    metadataFramework,
+    executionProtocol,
+    archivalStandards,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visual ethnography protocols complete for ${documentationFocus}. Media types: ${mediaTypes.join(', ')}. Review protocols?`,
     title: 'Visual Ethnography Documentation Results',
     context: {
@@ -123,9 +135,15 @@ export async function process(inputs, ctx) {
         metadataStandard,
         permissionTypes: permissionProtocols.types
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -158,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Visual Documentation Planning
+  // Task 1: Visual Documentation Planning
 export const documentationPlanningTask = defineTask('documentation-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan visual documentation strategy',

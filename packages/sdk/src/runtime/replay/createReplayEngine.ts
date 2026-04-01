@@ -1,5 +1,8 @@
 import { readRunMetadata, readRunInputs } from "../../storage/runFiles";
-import { RunMetadata } from "../../storage/types";
+import { RunMetadata, JournalEvent } from "../../storage/types";
+import { loadJournal } from "../../storage/journal";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
 import { buildEffectIndex, EffectIndex } from "./effectIndex";
 import { ReplayCursor } from "./replayCursor";
 import { ProcessContext } from "../types";
@@ -32,11 +35,35 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
   const metadata = await readRunMetadata(options.runDir);
   ensureCompatibleLayout(metadata.layoutVersion, options.runDir);
   const inputs = await readRunInputs(options.runDir);
-  const effectIndex = await buildEffectIndex({ runDir: options.runDir });
+
+  // Load journal once — shared by effect index builder and log seq scanner.
+  // Wraps parse errors into RunFailedError for consistency with the old
+  // code-path where buildEffectIndex loaded the journal internally.
+  let journal: JournalEvent[];
+  try {
+    journal = await loadJournal(options.runDir);
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err?.code === "JOURNAL_PARSE_FAILED") {
+      throw new RunFailedError("Failed to parse journal event", {
+        path: err.path,
+        runDir: options.runDir,
+        error: err.message,
+      });
+    }
+    throw error;
+  }
+
+  const effectIndex = await buildEffectIndex({ runDir: options.runDir, events: journal });
   const { snapshot: stateCacheSnapshot, rebuildMeta: stateRebuild } = await resolveStateCacheSnapshot({
     runDir: options.runDir,
     effectIndex,
   });
+
+  // Build set of already-recorded log seqs for replay deduplication.
+  // Read from state/logSeqs.txt (not journal) to avoid race conditions.
+  const recordedLogSeqs = await readRecordedLogSeqs(options.runDir);
+
   const replayCursor = new ReplayCursor();
   const processId = metadata.processId ?? metadata.request ?? metadata.runId;
   const { context, internalContext } = createProcessContext({
@@ -47,6 +74,8 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     replayCursor,
     now: options.now,
     logger: options.logger,
+    recordedLogSeqs,
+    nonInteractive: Boolean(metadata.nonInteractive),
   });
 
   return {
@@ -97,6 +126,28 @@ async function resolveStateCacheSnapshot({
   }
 
   return { snapshot: existingSnapshot, rebuildMeta: null };
+}
+
+/**
+ * Read recorded log sequence numbers from the state/logSeqs.txt file.
+ * Each line contains one seq number. Written by ctx.log in processContext.
+ * Uses a separate file (not journal) to avoid race conditions between
+ * fire-and-forget log writes and awaited effect writes.
+ */
+async function readRecordedLogSeqs(runDir: string): Promise<Set<number>> {
+  const seqs = new Set<number>();
+  try {
+    const content = await fs.readFile(path.join(runDir, "state", "logSeqs.txt"), "utf8");
+    for (const line of content.split("\n")) {
+      const n = Number(line.trim());
+      if (Number.isFinite(n) && n > 0) {
+        seqs.add(n);
+      }
+    }
+  } catch {
+    // File doesn't exist yet — no log seqs recorded.
+  }
+  return seqs;
 }
 
 function ensureCompatibleLayout(layoutVersion: string | undefined, runDir: string) {

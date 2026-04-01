@@ -95,7 +95,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...llmJudge.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: BENCHMARK INTEGRATION
   // ============================================================================
@@ -116,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Setting up metrics dashboard');
 
-  const dashboard = await ctx.task(metricsDashboardTask, {
+  let dashboard = await ctx.task(metricsDashboardTask, {
     agentName,
     metrics: metricsImplementation.metrics,
     llmJudge: llmJudge ? llmJudge.judge : null,
@@ -125,8 +124,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dashboard.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dashboard = await ctx.task(metricsDashboardTask, { ...{
+    agentName,
+    metrics: metricsImplementation.metrics,
+    llmJudge: llmJudge ? llmJudge.judge : null,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Agent evaluation framework for ${agentName} complete. ${testSuites.suites.length} test suites, ${metricsImplementation.metrics.length} metrics. Review framework?`,
     title: 'Agent Evaluation Review',
     context: {
@@ -139,9 +147,15 @@ export async function process(inputs, ctx) {
         enableLLMJudge
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -161,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

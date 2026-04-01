@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const simulationTesting = await ctx.task(multiRobotSimulationTestingTask, { fleetName, robotCount, outputDir });
   artifacts.push(...simulationTesting.artifacts);
 
-  const scalabilityTesting = await ctx.task(scalabilityTestingTask, { fleetName, robotCount, simulationTesting, outputDir });
-  artifacts.push(...scalabilityTesting.artifacts);
-
-  await ctx.breakpoint({
+  let scalabilityTesting = await ctx.task(scalabilityTestingTask, { fleetName, robotCount, simulationTesting, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scalabilityTesting = await ctx.task(scalabilityTestingTask, { ...{ fleetName, robotCount, simulationTesting, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-Robot Coordination Complete for ${fleetName}. Task completion: ${simulationTesting.taskCompletionRate}%, Collision-free: ${collisionAvoidance.collisionFree}. Review?`,
     title: 'Multi-Robot Coordination Complete',
-    context: { runId: ctx.runId, taskCompletionRate: simulationTesting.taskCompletionRate, collisionFree: collisionAvoidance.collisionFree }
-  });
-
+    context: { runId: ctx.runId, taskCompletionRate: simulationTesting.taskCompletionRate, collisionFree: collisionAvoidance.collisionFree },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: simulationTesting.taskCompletionRate >= 95 && collisionAvoidance.collisionFree,
     fleetName,

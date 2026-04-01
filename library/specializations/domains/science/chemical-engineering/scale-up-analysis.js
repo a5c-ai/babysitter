@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Address Mixing, Heat Transfer, and Mass Transfer Changes
   ctx.log('info', 'Analyzing transport phenomena changes');
-  const transportResult = await ctx.task(transportPhenomenaTask, {
+  let transportResult = await ctx.task(transportPhenomenaTask, {
     processName,
     labScaleData,
     targetScale,
@@ -90,8 +90,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...transportResult.artifacts);
 
-  // Breakpoint: Review scale-up analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      transportResult = await ctx.task(transportPhenomenaTask, { ...{
+    processName,
+    labScaleData,
+    targetScale,
+    scaleDependentPhenomena: phenomenaResult.phenomena,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scale-up analysis in progress for ${processName}. Scale factor: ${criteriaResult.scaleFactor}x. Critical phenomena: ${phenomenaResult.phenomena.length}. Key risk: ${transportResult.primaryRisk}. Review analysis?`,
     title: 'Scale-Up Analysis Review',
     context: {
@@ -103,9 +113,15 @@ export async function process(inputs, ctx) {
         scaleUpBasis: criteriaResult.primaryCriterion,
         pilotScaleVolume: pilotDesignResult.design.volume
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Manage Scale-Up Risks
   ctx.log('info', 'Assessing and managing scale-up risks');
   const riskAssessmentResult = await ctx.task(scaleUpRiskAssessmentTask, {
@@ -158,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scale-Dependent Phenomena Identification
+  // Task 1: Scale-Dependent Phenomena Identification
 export const scaleDependentPhenomenaTask = defineTask('scale-dependent-phenomena', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify scale-dependent phenomena',

@@ -66,17 +66,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...largeArrayHandling.artifacts);
 
   // Phase 6: Performance Benchmarking
-  const benchmarking = await ctx.task(reductionBenchmarkingTask, {
+  let benchmarking = await ctx.task(reductionBenchmarkingTask, {
     projectName, basicReduction, warpReduction, scanImpl, largeArrayHandling, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(reductionBenchmarkingTask, { ...{
+    projectName, basicReduction, warpReduction, scanImpl, largeArrayHandling, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reduction/Scan implementation complete for ${projectName}. Bandwidth efficiency: ${benchmarking.bandwidthEfficiency}%. Review?`,
     title: 'Reduction/Scan Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: benchmarking.bandwidthEfficiency >= 70,
     projectName,

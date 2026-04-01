@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Analyze Threshold
   ctx.log('info', 'Analyzing threshold and overhead requirements');
-  const thresholdAnalysis = await ctx.task(thresholdAnalysisTask, {
+  let thresholdAnalysis = await ctx.task(thresholdAnalysisTask, {
     performanceResults: performanceSimulation.results,
     codeSpec: codeSelection.codeSpec,
     errorModel,
@@ -96,8 +96,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...thresholdAnalysis.artifacts);
 
-  // Breakpoint: Review QEC implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      thresholdAnalysis = await ctx.task(thresholdAnalysisTask, { ...{
+    performanceResults: performanceSimulation.results,
+    codeSpec: codeSelection.codeSpec,
+    errorModel,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QEC implementation complete. Code: ${codeType}, Distance: ${codeDistance}. Threshold: ${thresholdAnalysis.threshold}. Overhead: ${thresholdAnalysis.overhead.physicalQubits} physical qubits per logical. Review?`,
     title: 'Quantum Error Correction Results',
     context: {
@@ -110,9 +119,15 @@ export async function process(inputs, ctx) {
         physicalQubitOverhead: thresholdAnalysis.overhead.physicalQubits,
         logicalErrorRate: performanceSimulation.logicalErrorRate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Resource Overhead Estimation
   ctx.log('info', 'Estimating resource overhead');
   const resourceEstimation = await ctx.task(qecResourceEstimationTask, {
@@ -173,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: QEC Code Selection
+  // Task 1: QEC Code Selection
 export const codeSelectionTask = defineTask('code-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select appropriate QEC code for application',

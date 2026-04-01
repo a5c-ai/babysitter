@@ -127,7 +127,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Integrating multi-agent system');
 
-  const systemIntegration = await ctx.task(systemIntegrationTask, {
+  let systemIntegration = await ctx.task(systemIntegrationTask, {
     systemName,
     agents: agentImplementation.agents,
     coordinationLogic: coordinationLogic.logic,
@@ -138,8 +138,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...systemIntegration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systemIntegration = await ctx.task(systemIntegrationTask, { ...{
+    systemName,
+    agents: agentImplementation.agents,
+    coordinationLogic: coordinationLogic.logic,
+    communicationProtocol: communicationImpl.protocol,
+    framework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-Agent System ${systemName} complete. ${agents.length} agents with ${coordinationPattern} coordination. Review system?`,
     title: 'Multi-Agent System Review',
     context: {
@@ -152,9 +163,15 @@ export async function process(inputs, ctx) {
         framework
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -174,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

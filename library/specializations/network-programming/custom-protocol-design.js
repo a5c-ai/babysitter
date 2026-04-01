@@ -47,16 +47,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Gathering and analyzing protocol requirements');
 
-  const requirementsGathering = await ctx.task(requirementsGatheringTask, {
+  let requirementsGathering = await ctx.task(requirementsGatheringTask, {
     projectName,
     requirements,
     transportLayer,
     outputDir
   });
 
-  artifacts.push(...requirementsGathering.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsGathering = await ctx.task(requirementsGatheringTask, { ...{
+    projectName,
+    requirements,
+    transportLayer,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Protocol requirements defined. Transport: ${transportLayer}, Features: ${requirementsGathering.features.join(', ')}. Proceed with message format design?`,
     title: 'Requirements Review',
     context: {
@@ -64,9 +72,15 @@ export async function process(inputs, ctx) {
       requirements: requirementsGathering.formalRequirements,
       features: requirementsGathering.features,
       files: requirementsGathering.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MESSAGE FORMAT DESIGN
   // ============================================================================
@@ -134,16 +148,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Implementing error handling and recovery');
 
-  const errorHandling = await ctx.task(errorHandlingTask, {
+  let errorHandling = await ctx.task(errorHandlingTask, {
     projectName,
     messageFormatDesign,
     handshakeDesign,
     outputDir
   });
 
-  artifacts.push(...errorHandling.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      errorHandling = await ctx.task(errorHandlingTask, { ...{
+    projectName,
+    messageFormatDesign,
+    handshakeDesign,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Phase 6 Complete: Protocol design complete. Message types: ${messageFormatDesign.messageTypes.length}, Error handling strategies: ${errorHandling.strategies.length}. Proceed with implementation?`,
     title: 'Protocol Design Review',
     context: {
@@ -152,9 +174,15 @@ export async function process(inputs, ctx) {
       framingStrategy: framingDesign.strategy,
       handshake: handshakeDesign.steps,
       files: messageFormatDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: SERIALIZATION IMPLEMENTATION
   // ============================================================================
@@ -213,7 +241,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Validating protocol design and implementation');
 
-  const validation = await ctx.task(validationTask, {
+  let validation = await ctx.task(validationTask, {
     projectName,
     requirements: requirementsGathering.formalRequirements,
     protocolSpec,
@@ -221,9 +249,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validationTask, { ...{
+    projectName,
+    requirements: requirementsGathering.formalRequirements,
+    protocolSpec,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Custom Protocol Design Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Tests: ${testSuite.passedTests}/${testSuite.totalTests} passed. Review deliverables?`,
     title: 'Custom Protocol Design Complete - Final Review',
     context: {
@@ -238,9 +275,15 @@ export async function process(inputs, ctx) {
         { path: protocolSpec.specDocumentPath, format: 'markdown', label: 'Protocol Specification' },
         { path: protocolSpec.diagramPath, format: 'png', label: 'Protocol Diagram' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -279,8 +322,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

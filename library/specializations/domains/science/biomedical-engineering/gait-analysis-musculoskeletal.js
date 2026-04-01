@@ -50,14 +50,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Inverse Kinematics Analysis
-  const inverseKinematics = await ctx.task(inverseKinematicsTask, {
+  let inverseKinematics = await ctx.task(inverseKinematicsTask, {
     studyName,
     motionCaptureProtocol,
     markerProtocol
   });
 
-  // Breakpoint: Review kinematic results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      inverseKinematics = await ctx.task(inverseKinematicsTask, { ...{
+    studyName,
+    motionCaptureProtocol,
+    markerProtocol
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review inverse kinematics results for ${studyName}. Are marker errors acceptable?`,
     title: 'Kinematics Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: inverseKinematics
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Inverse Dynamics Analysis
   const inverseDynamics = await ctx.task(inverseDynamicsTask, {
     studyName,
@@ -95,7 +109,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Clinical Outcome Correlation
-  const clinicalCorrelation = await ctx.task(clinicalCorrelationTask, {
+  let clinicalCorrelation = await ctx.task(clinicalCorrelationTask, {
     studyName,
     deviceType,
     analysisGoals,
@@ -104,8 +118,19 @@ export async function process(inputs, ctx) {
     muscleForceEstimation
   });
 
-  // Final Breakpoint: Gait Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      clinicalCorrelation = await ctx.task(clinicalCorrelationTask, { ...{
+    studyName,
+    deviceType,
+    analysisGoals,
+    inverseKinematics,
+    inverseDynamics,
+    muscleForceEstimation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gait analysis complete for ${studyName}. Approve results and clinical correlations?`,
     title: 'Gait Analysis Approval',
     context: {
@@ -114,9 +139,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/gait-analysis-report.json`, format: 'json', content: clinicalCorrelation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     studyName,
@@ -134,8 +165,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const motionCaptureTask = defineTask('motion-capture-protocol', (args, taskCtx) => ({
   kind: 'agent',

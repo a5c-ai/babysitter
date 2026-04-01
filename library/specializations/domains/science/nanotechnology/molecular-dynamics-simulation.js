@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Simulation Setup
-  const simulationSetup = await ctx.task(simulationSetupTask, {
+  let simulationSetup = await ctx.task(simulationSetupTask, {
     system,
     simulationGoals,
     forceFieldPreference,
@@ -50,9 +50,17 @@ export async function process(inputs, ctx) {
       recommendations: simulationSetup.recommendations
     };
   }
-
-  // Breakpoint: Review simulation setup
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      simulationSetup = await ctx.task(simulationSetupTask, { ...{
+    system,
+    simulationGoals,
+    forceFieldPreference,
+    computationalResources
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review MD setup for ${system.type}. Force field: ${simulationSetup.forceField}. System size: ${simulationSetup.atomCount} atoms. Estimated time: ${simulationSetup.estimatedTime}. Approve?`,
     title: 'MD Simulation Setup Review',
     context: {
@@ -64,28 +72,48 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: simulationSetup
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Force Field Selection and Validation
-  const forceFieldValidation = await ctx.task(forceFieldValidationTask, {
+  let forceFieldValidation = await ctx.task(forceFieldValidationTask, {
     system,
     simulationSetup,
     forceFieldPreference
   });
 
   // Quality Gate: Force field must be validated
-  if (!forceFieldValidation.validated) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        forceFieldValidation = await ctx.task(forceFieldValidationTask, { ...{
+    system,
+    simulationSetup,
+    forceFieldPreference
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Force field validation concerns: ${forceFieldValidation.concerns.join(', ')}. Proceed with caution?`,
       title: 'Force Field Validation Warning',
       context: {
         runId: ctx.runId,
         forceFieldValidation,
         recommendations: forceFieldValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: System Construction
   const systemConstruction = await ctx.task(systemConstructionTask, {
@@ -110,7 +138,7 @@ export async function process(inputs, ctx) {
     equilibrationCycle++;
 
     // NVT Equilibration
-    const nvtEquilibration = await ctx.task(nvtEquilibrationTask, {
+    let nvtEquilibration = await ctx.task(nvtEquilibrationTask, {
       systemConstruction,
       energyMinimization,
       simulationSetup,
@@ -127,8 +155,7 @@ export async function process(inputs, ctx) {
         cycle: equilibrationCycle
       });
     }
-
-    // Equilibration Assessment
+  // Equilibration Assessment
     equilibrationMetrics = await ctx.task(equilibrationAssessmentTask, {
       nvtEquilibration,
       nptEquilibration,
@@ -145,51 +172,95 @@ export async function process(inputs, ctx) {
       metrics: equilibrationMetrics
     });
 
-    if (!equilibrated && equilibrationCycle < maxEquilibrationCycles) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          nvtEquilibration = await ctx.task(nvtEquilibrationTask, { ...{
+      systemConstruction,
+      energyMinimization,
+      simulationSetup,
+      cycle: equilibrationCycle
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Equilibration cycle ${equilibrationCycle}: Not equilibrated. ${equilibrationMetrics.issues.join(', ')}. Continue?`,
         title: 'Equilibration Progress',
         context: {
           runId: ctx.runId,
           cycle: equilibrationCycle,
           metrics: equilibrationMetrics
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // Quality Gate: System must be equilibrated
-  if (!equilibrated) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        nvtEquilibration = await ctx.task(nvtEquilibrationTask, { ...{
+      systemConstruction,
+      energyMinimization,
+      simulationSetup,
+      cycle: equilibrationCycle
+    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `System not equilibrated after ${equilibrationCycle} cycles. Proceed with production run anyway?`,
       title: 'Equilibration Warning',
       context: {
         runId: ctx.runId,
         equilibrationHistory,
         recommendations: equilibrationMetrics.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Production Run
-  const productionRun = await ctx.task(productionRunTask, {
+  let productionRun = await ctx.task(productionRunTask, {
     systemConstruction,
     equilibrationHistory,
     simulationSetup,
     simulationGoals
   });
 
-  // Breakpoint: Production run complete
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      productionRun = await ctx.task(productionRunTask, { ...{
+    systemConstruction,
+    equilibrationHistory,
+    simulationSetup,
+    simulationGoals
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Production run complete. ${productionRun.trajectoryFrames} frames collected over ${productionRun.simulationTime}. Proceed with analysis?`,
     title: 'Production Run Review',
     context: {
       runId: ctx.runId,
       productionRun,
       trajectoryInfo: productionRun.trajectoryInfo
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Trajectory Analysis
   const trajectoryAnalysis = await ctx.task(trajectoryAnalysisTask, {
     productionRun,
@@ -221,9 +292,8 @@ export async function process(inputs, ctx) {
       statisticalAnalysis
     });
   }
-
   // Phase 11: Report Generation
-  const simulationReport = await ctx.task(reportGenerationTask, {
+  let simulationReport = await ctx.task(reportGenerationTask, {
     system,
     simulationSetup,
     equilibrationHistory,
@@ -234,8 +304,21 @@ export async function process(inputs, ctx) {
     validation
   });
 
-  // Final Breakpoint: Results approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      simulationReport = await ctx.task(reportGenerationTask, { ...{
+    system,
+    simulationSetup,
+    equilibrationHistory,
+    productionRun,
+    trajectoryAnalysis,
+    propertyExtraction,
+    statisticalAnalysis,
+    validation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MD simulation complete for ${system.type}. ${Object.keys(propertyExtraction.properties).length} properties extracted. Approve results?`,
     title: 'MD Simulation Results Approval',
     context: {
@@ -246,9 +329,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/md-report.md', format: 'markdown', content: simulationReport.markdown },
         { path: 'artifacts/properties.json', format: 'json', content: propertyExtraction }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     trajectoryAnalysis,
@@ -264,8 +353,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const simulationSetupTask = defineTask('simulation-setup', (args, taskCtx) => ({
   kind: 'agent',

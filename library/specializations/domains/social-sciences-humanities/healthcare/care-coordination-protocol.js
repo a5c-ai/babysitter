@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Current State Analysis
   ctx.log('info', 'Phase 1: Current State Analysis');
-  const currentState = await ctx.task(currentStateAnalysisTask, {
+  let currentState = await ctx.task(currentStateAnalysisTask, {
     patientPopulation,
     careSettings,
     currentChallenges,
@@ -49,9 +49,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...currentState.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      currentState = await ctx.task(currentStateAnalysisTask, { ...{
+    patientPopulation,
+    careSettings,
+    currentChallenges,
+    existingProtocols,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Current state analyzed. ${currentState.gaps.length} care coordination gaps identified. ${currentState.transitions.length} transition points mapped. Proceed with protocol design?`,
     title: 'Current State Analysis Review',
     context: {
@@ -60,9 +69,15 @@ export async function process(inputs, ctx) {
       gaps: currentState.gaps,
       transitions: currentState.transitions,
       files: currentState.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Stakeholder and Role Definition
   ctx.log('info', 'Phase 2: Stakeholder and Role Definition');
   const roleDefinition = await ctx.task(stakeholderRoleDefinitionTask, {
@@ -76,15 +91,22 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Communication Framework Design
   ctx.log('info', 'Phase 3: Communication Framework Design');
-  const communicationFramework = await ctx.task(communicationFrameworkTask, {
+  let communicationFramework = await ctx.task(communicationFrameworkTask, {
     currentState,
     roleDefinition,
     outputDir
   });
 
-  artifacts.push(...communicationFramework.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      communicationFramework = await ctx.task(communicationFrameworkTask, { ...{
+    currentState,
+    roleDefinition,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Communication framework designed. ${communicationFramework.channels.length} channels defined. SBAR templates created. Proceed with handoff protocol design?`,
     title: 'Communication Framework Review',
     context: {
@@ -92,9 +114,15 @@ export async function process(inputs, ctx) {
       channels: communicationFramework.channels,
       standards: communicationFramework.standards,
       files: communicationFramework.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Care Transition Protocols
   ctx.log('info', 'Phase 4: Care Transition Protocol Design');
   const transitionProtocols = await ctx.task(transitionProtocolsTask, {
@@ -108,15 +136,22 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Handoff Tools Development
   ctx.log('info', 'Phase 5: Handoff Tools Development');
-  const handoffTools = await ctx.task(handoffToolsDevelopmentTask, {
+  let handoffTools = await ctx.task(handoffToolsDevelopmentTask, {
     transitionProtocols,
     communicationFramework,
     outputDir
   });
 
-  artifacts.push(...handoffTools.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      handoffTools = await ctx.task(handoffToolsDevelopmentTask, { ...{
+    transitionProtocols,
+    communicationFramework,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${transitionProtocols.protocols.length} transition protocols and ${handoffTools.tools.length} handoff tools developed. Proceed with technology integration planning?`,
     title: 'Transition Protocols and Tools Review',
     context: {
@@ -124,9 +159,15 @@ export async function process(inputs, ctx) {
       protocols: transitionProtocols.protocols,
       tools: handoffTools.tools,
       files: [...transitionProtocols.artifacts, ...handoffTools.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Technology Integration
   ctx.log('info', 'Phase 6: Technology Integration Planning');
   const techIntegration = await ctx.task(technologyIntegrationTask, {
@@ -220,8 +261,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Current State Analysis
+  // Task 1: Current State Analysis
 export const currentStateAnalysisTask = defineTask('ccp-current-state', (args, taskCtx) => ({
   kind: 'agent',
   title: `Care Coordination Current State - ${args.patientPopulation}`,

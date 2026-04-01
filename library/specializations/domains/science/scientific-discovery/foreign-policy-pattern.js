@@ -27,7 +27,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Identify Subsystems as Nations
   ctx.log('info', 'Identifying subsystems as nation-like entities');
-  const nationMapping = await ctx.task(mapSubsystemsToNationsTask, {
+  let nationMapping = await ctx.task(mapSubsystemsToNationsTask, {
     system,
     subsystems,
     domain
@@ -51,9 +51,16 @@ export async function process(inputs, ctx) {
     nations: nationMapping.nations,
     internalPolicies,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      nationMapping = await ctx.task(mapSubsystemsToNationsTask, { ...{
+    system,
+    subsystems,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Policy and relations analysis complete. Review before treaty design?',
     title: 'Foreign Policy Pattern - Analysis Complete',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/nation-mapping.json', format: 'json' },
         { path: 'artifacts/foreign-relations.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Identify Conflicts and Negotiations
   ctx.log('info', 'Identifying conflicts and negotiation opportunities');
   const conflictsAndNegotiations = await ctx.task(identifyConflictsTask, {

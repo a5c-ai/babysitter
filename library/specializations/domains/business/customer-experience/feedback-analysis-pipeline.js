@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating analysis report');
-  const analysisReport = await ctx.task(analysisReportTask, {
+  let analysisReport = await ctx.task(analysisReportTask, {
     feedbackAggregation,
     sentimentAnalysis,
     themeExtraction,
@@ -134,9 +134,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...analysisReport.artifacts);
 
   const feedbackCount = feedbackAggregation.totalFeedback;
-  const overallSentiment = sentimentAnalysis.overallSentiment;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisReport = await ctx.task(analysisReportTask, { ...{
+    feedbackAggregation,
+    sentimentAnalysis,
+    themeExtraction,
+    categorization,
+    impactAssessment,
+    prioritization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Feedback analysis complete. Total feedback: ${feedbackCount}. Overall sentiment: ${overallSentiment}. Themes identified: ${themeExtraction.themes?.length || 0}. Priority improvements: ${prioritization.topPriorities?.length || 0}. Review and distribute?`,
     title: 'Feedback Analysis Review',
     context: {
@@ -155,9 +166,15 @@ export async function process(inputs, ctx) {
         categoriesFound: Object.keys(categorization.categories || {}).length,
         priorityImprovements: prioritization.topPriorities?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -190,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

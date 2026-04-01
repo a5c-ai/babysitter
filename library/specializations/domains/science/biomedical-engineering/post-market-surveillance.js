@@ -52,14 +52,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: PMCF Planning
-  const pmcfPlanning = await ctx.task(pmcfPlanningTask, {
+  let pmcfPlanning = await ctx.task(pmcfPlanningTask, {
     deviceName,
     deviceClass,
     riskProfile
   });
 
-  // Breakpoint: Review PMS system design
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      pmcfPlanning = await ctx.task(pmcfPlanningTask, { ...{
+    deviceName,
+    deviceClass,
+    riskProfile
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review PMS system design for ${deviceName}. Are all regulatory requirements addressed?`,
     title: 'PMS System Review',
     context: {
@@ -71,9 +79,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { complaintHandling, adverseEventMonitoring }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Trend Analysis and Signal Detection
   const trendAnalysis = await ctx.task(trendAnalysisTask, {
     deviceName,
@@ -96,7 +110,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: PMS System Documentation
-  const pmsDocumentation = await ctx.task(pmsDocumentationTask, {
+  let pmsDocumentation = await ctx.task(pmsDocumentationTask, {
     deviceName,
     deviceClass,
     markets,
@@ -109,8 +123,23 @@ export async function process(inputs, ctx) {
     vigilanceReporting
   });
 
-  // Final Breakpoint: PMS System Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pmsDocumentation = await ctx.task(pmsDocumentationTask, { ...{
+    deviceName,
+    deviceClass,
+    markets,
+    complaintHandling,
+    adverseEventMonitoring,
+    psurDevelopment,
+    pmcfPlanning,
+    trendAnalysis,
+    capaIntegration,
+    vigilanceReporting
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PMS System implementation complete for ${deviceName}. Approve system for deployment?`,
     title: 'PMS System Approval',
     context: {
@@ -119,9 +148,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/pms-documentation.json`, format: 'json', content: pmsDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -135,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const complaintHandlingTask = defineTask('complaint-handling', (args, taskCtx) => ({
   kind: 'agent',

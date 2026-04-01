@@ -33,15 +33,24 @@ export async function process(inputs, ctx) {
   const evidenceListing = await ctx.task(achEvidenceListingTask, { question, evidence, outputDir });
   artifacts.push(...evidenceListing.artifacts);
 
-  const matrixConstruction = await ctx.task(achMatrixConstructionTask, { hypotheses: hypothesisGeneration.hypotheses, evidence: evidenceListing.evidence, outputDir });
-  artifacts.push(...matrixConstruction.artifacts);
-
-  await ctx.breakpoint({
+  let matrixConstruction = await ctx.task(achMatrixConstructionTask, { hypotheses: hypothesisGeneration.hypotheses, evidence: evidenceListing.evidence, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      matrixConstruction = await ctx.task(achMatrixConstructionTask, { ...{ hypotheses: hypothesisGeneration.hypotheses, evidence: evidenceListing.evidence, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `ACH matrix: ${hypothesisGeneration.hypotheses?.length || 0} hypotheses, ${evidenceListing.evidence?.length || 0} evidence items. Review before analysis?`,
     title: 'ACH Matrix Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { hypotheses: hypothesisGeneration.hypotheses?.length || 0, evidence: evidenceListing.evidence?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { hypotheses: hypothesisGeneration.hypotheses?.length || 0, evidence: evidenceListing.evidence?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const consistencyRating = await ctx.task(achConsistencyRatingTask, { matrix: matrixConstruction.matrix, hypotheses: hypothesisGeneration.hypotheses, evidence: evidenceListing.evidence, outputDir });
   artifacts.push(...consistencyRating.artifacts);
 
@@ -57,15 +66,24 @@ export async function process(inputs, ctx) {
   const conclusionGeneration = await ctx.task(achConclusionTask, { rankings: hypothesisRanking.rankings, diagnostics: diagnosticAnalysis, sensitivityAnalysis, minimumConfidence, outputDir });
   artifacts.push(...conclusionGeneration.artifacts);
 
-  const qualityScore = await ctx.task(achQualityScoringTask, { hypothesisGeneration, evidenceListing, consistencyRating, diagnosticAnalysis, conclusionGeneration, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(achQualityScoringTask, { hypothesisGeneration, evidenceListing, consistencyRating, diagnosticAnalysis, conclusionGeneration, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(achQualityScoringTask, { ...{ hypothesisGeneration, evidenceListing, consistencyRating, diagnosticAnalysis, conclusionGeneration, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ACH complete. Top hypothesis: "${hypothesisRanking.topHypothesis?.hypothesis || 'N/A'}". Confidence: ${conclusionGeneration.confidence}%. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'ACH Analysis Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { topHypothesis: hypothesisRanking.topHypothesis?.hypothesis || 'N/A', confidence: conclusionGeneration.confidence, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { topHypothesis: hypothesisRanking.topHypothesis?.hypothesis || 'N/A', confidence: conclusionGeneration.confidence, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, question, matrix: matrixConstruction.matrix, rankings: hypothesisRanking.rankings,
     diagnosticEvidence: diagnosticAnalysis.diagnosticEvidence, conclusion: conclusionGeneration,

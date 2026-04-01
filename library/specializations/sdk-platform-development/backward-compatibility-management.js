@@ -79,14 +79,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...migrationPaths.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: COMPATIBILITY VERIFICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Building compatibility verification tests');
 
-  const compatibilityVerification = await ctx.task(compatibilityVerificationTask, {
+  let compatibilityVerification = await ctx.task(compatibilityVerificationTask, {
     projectName,
     compatibilityPolicy,
     outputDir
@@ -94,8 +93,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...compatibilityVerification.artifacts);
 
-  // Quality Gate: Compatibility Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compatibilityVerification = await ctx.task(compatibilityVerificationTask, { ...{
+    projectName,
+    compatibilityPolicy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compatibility management configured for ${projectName}. Level: ${compatibilityLevel}, Deprecation period: ${deprecationPolicy.warningPeriod}. Approve compatibility policy?`,
     title: 'Compatibility Policy Review',
     context: {
@@ -104,9 +111,15 @@ export async function process(inputs, ctx) {
       compatibilityLevel,
       deprecationPolicy,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: BREAKING CHANGE PROCESS
   // ============================================================================
@@ -151,7 +164,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...migrationTools.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: DOCUMENTATION
   // ============================================================================
@@ -190,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

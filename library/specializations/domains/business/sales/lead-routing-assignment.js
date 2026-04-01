@@ -64,17 +64,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...(routingMetrics.artifacts || []));
 
   // Phase 8: Assignment Report Generation
-  const assignmentReport = await ctx.task(assignmentReportTask, {
+  let assignmentReport = await ctx.task(assignmentReportTask, {
     assignmentOptimization, exceptionHandling, routingMetrics, outputDir
   });
-  artifacts.push(...(assignmentReport.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      assignmentReport = await ctx.task(assignmentReportTask, { ...{
+    assignmentOptimization, exceptionHandling, routingMetrics, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lead routing complete. ${assignmentOptimization.assignments?.length || 0} leads assigned. ${exceptionHandling.exceptions?.length || 0} exceptions. Review?`,
     title: 'Lead Routing Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     leadsProcessed: leads.length,

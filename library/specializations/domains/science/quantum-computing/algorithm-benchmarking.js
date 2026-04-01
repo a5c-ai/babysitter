@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Analyze Scaling Behavior
   ctx.log('info', 'Analyzing scaling behavior with problem size');
-  const scalingAnalysis = await ctx.task(scalingAnalysisTask, {
+  let scalingAnalysis = await ctx.task(scalingAnalysisTask, {
     performanceMetrics: performanceMetrics.metrics,
     problemSuite: problemDefinition.problems,
     outputDir
@@ -90,8 +90,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scalingAnalysis.artifacts);
 
-  // Breakpoint: Review benchmark results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scalingAnalysis = await ctx.task(scalingAnalysisTask, { ...{
+    performanceMetrics: performanceMetrics.metrics,
+    problemSuite: problemDefinition.problems,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benchmarking complete. Quantum advantage observed: ${scalingAnalysis.quantumAdvantageObserved}. Review detailed results?`,
     title: 'Algorithm Benchmarking Results',
     context: {
@@ -103,9 +111,15 @@ export async function process(inputs, ctx) {
         quantumAdvantageObserved: scalingAnalysis.quantumAdvantageObserved,
         bestPerformingAlgorithm: performanceMetrics.bestAlgorithm
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Document Quantum Advantage Conditions
   ctx.log('info', 'Documenting quantum advantage conditions');
   const advantageDocumentation = await ctx.task(quantumAdvantageDocumentationTask, {
@@ -160,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Problem Suite Definition
+  // Task 1: Problem Suite Definition
 export const problemSuiteDefinitionTask = defineTask('problem-suite-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define benchmark problem suite and metrics',

@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Scanning codebase compatibility');
-  const compatibilityScan = await ctx.task(codebaseCompatibilityScanTask, {
+  let compatibilityScan = await ctx.task(codebaseCompatibilityScanTask, {
     projectName,
     currentLanguage,
     targetVersion,
@@ -65,8 +65,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...compatibilityScan.artifacts);
 
-  // Breakpoint: Compatibility review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      compatibilityScan = await ctx.task(codebaseCompatibilityScanTask, { ...{
+    projectName,
+    currentLanguage,
+    targetVersion,
+    versionGapAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Compatibility scan complete for ${projectName}. Issues found: ${compatibilityScan.issueCount}. Estimated migration effort: ${compatibilityScan.estimatedEffort}. Proceed with migration?`,
     title: 'Language Compatibility Review',
     context: {
@@ -74,9 +84,15 @@ export async function process(inputs, ctx) {
       projectName,
       compatibilityScan,
       recommendation: 'Review compatibility issues before proceeding'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: MIGRATION TOOL SETUP
   // ============================================================================
@@ -126,7 +142,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing and validating');
-  const testingValidation = await ctx.task(languageTestingValidationTask, {
+  let testingValidation = await ctx.task(languageTestingValidationTask, {
     projectName,
     targetVersion,
     manualFixes,
@@ -136,8 +152,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...testingValidation.artifacts);
 
   // Quality Gate: Test results
-  if (!testingValidation.allPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        testingValidation = await ctx.task(languageTestingValidationTask, { ...{
+    projectName,
+    targetVersion,
+    manualFixes,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Tests failed after migration for ${projectName}. Failed: ${testingValidation.failedCount}. Review and fix failures?`,
       title: 'Language Migration Test Failures',
       context: {
@@ -145,16 +170,22 @@ export async function process(inputs, ctx) {
         projectName,
         failures: testingValidation.failures,
         recommendation: 'Fix failing tests before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: RUNTIME ENVIRONMENT UPDATE
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Updating runtime environment');
-  const environmentUpdate = await ctx.task(runtimeEnvironmentUpdateTask, {
+  let environmentUpdate = await ctx.task(runtimeEnvironmentUpdateTask, {
     projectName,
     targetVersion,
     testingValidation,
@@ -163,8 +194,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...environmentUpdate.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      environmentUpdate = await ctx.task(runtimeEnvironmentUpdateTask, { ...{
+    projectName,
+    targetVersion,
+    testingValidation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Language version migration complete for ${projectName}. From ${currentLanguage.name} ${currentLanguage.version} to ${targetVersion}. Tests passing: ${testingValidation.allPassed}. Approve?`,
     title: 'Language Migration Complete',
     context: {
@@ -177,9 +217,15 @@ export async function process(inputs, ctx) {
         manualChanges: manualFixes.fixesApplied,
         testsPass: testingValidation.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -212,8 +258,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

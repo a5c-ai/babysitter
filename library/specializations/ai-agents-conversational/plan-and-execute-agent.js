@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Integrating and testing agent');
 
-  const integration = await ctx.task(integrationTestingTask, {
+  let integration = await ctx.task(integrationTestingTask, {
     agentName,
     plannerModule: plannerModule.module,
     executorModule: executorModule.module,
@@ -134,8 +134,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...integration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integration = await ctx.task(integrationTestingTask, { ...{
+    agentName,
+    plannerModule: plannerModule.module,
+    executorModule: executorModule.module,
+    replanningLogic: replanningLogic.logic,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Plan-and-Execute Agent ${agentName} complete. Test pass rate: ${integration.testResults.passRate}%. Review final implementation?`,
     title: 'Plan-and-Execute Agent Review',
     context: {
@@ -148,9 +158,15 @@ export async function process(inputs, ctx) {
         testPassRate: integration.testResults.passRate
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -171,8 +187,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

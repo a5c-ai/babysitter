@@ -20,17 +20,25 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Executive Assessment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting executive visibility program development. Assess executive profile and goals?',
     title: 'Phase 1: Executive Assessment',
     context: {
       runId: ctx.runId,
       phase: 'executive-assessment',
       executive: executive.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [executiveAssessment, landscapeAnalysis] = await Promise.all([
     ctx.task(assessExecutiveProfileTask, {
       executive,
@@ -44,130 +52,237 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Positioning Strategy
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Assessment complete. Develop thought leadership positioning?',
     title: 'Phase 2: Positioning Strategy',
     context: {
       runId: ctx.runId,
       phase: 'positioning-strategy'
-    }
-  });
-
-  const positioningStrategy = await ctx.task(developPositioningStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let positioningStrategy = await ctx.task(developPositioningStrategyTask, {
     executiveAssessment,
     landscapeAnalysis,
     thoughtLeadershipGoals
   });
 
-  // Phase 3: Speaking Opportunities Pipeline
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      positioningStrategy = await ctx.task(developPositioningStrategyTask, { ...{
+    executiveAssessment,
+    landscapeAnalysis,
+    thoughtLeadershipGoals
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Positioning defined. Build speaking opportunities pipeline?',
     title: 'Phase 3: Speaking Pipeline',
     context: {
       runId: ctx.runId,
       phase: 'speaking-pipeline'
-    }
-  });
-
-  const speakingPipeline = await ctx.task(buildSpeakingPipelineTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let speakingPipeline = await ctx.task(buildSpeakingPipelineTask, {
     positioningStrategy,
     targetAudiences,
     industry,
     executiveAssessment
   });
 
-  // Phase 4: Bylined Content Strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      speakingPipeline = await ctx.task(buildSpeakingPipelineTask, { ...{
+    positioningStrategy,
+    targetAudiences,
+    industry,
+    executiveAssessment
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Speaking pipeline built. Develop bylined content strategy?',
     title: 'Phase 4: Bylined Content',
     context: {
       runId: ctx.runId,
       phase: 'bylined-content'
-    }
-  });
-
-  const bylinedStrategy = await ctx.task(developBylinedStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let bylinedStrategy = await ctx.task(developBylinedStrategyTask, {
     positioningStrategy,
     targetAudiences,
     industry
   });
 
-  // Phase 5: Media Visibility Plan
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      bylinedStrategy = await ctx.task(developBylinedStrategyTask, { ...{
+    positioningStrategy,
+    targetAudiences,
+    industry
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Bylined strategy developed. Plan media visibility?',
     title: 'Phase 5: Media Visibility',
     context: {
       runId: ctx.runId,
       phase: 'media-visibility'
-    }
-  });
-
-  const mediaVisibilityPlan = await ctx.task(planMediaVisibilityTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let mediaVisibilityPlan = await ctx.task(planMediaVisibilityTask, {
     executiveAssessment,
     positioningStrategy,
     industry
   });
 
-  // Phase 6: Social Media Presence
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      mediaVisibilityPlan = await ctx.task(planMediaVisibilityTask, { ...{
+    executiveAssessment,
+    positioningStrategy,
+    industry
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Media plan ready. Develop social media presence strategy?',
     title: 'Phase 6: Social Media',
     context: {
       runId: ctx.runId,
       phase: 'social-media'
-    }
-  });
-
-  const socialMediaStrategy = await ctx.task(developSocialMediaStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let socialMediaStrategy = await ctx.task(developSocialMediaStrategyTask, {
     executive,
     positioningStrategy,
     existingPlatform
   });
 
-  // Phase 7: Integrated Content Calendar
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      socialMediaStrategy = await ctx.task(developSocialMediaStrategyTask, { ...{
+    executive,
+    positioningStrategy,
+    existingPlatform
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Social strategy developed. Create integrated content calendar?',
     title: 'Phase 7: Content Calendar',
     context: {
       runId: ctx.runId,
       phase: 'content-calendar'
-    }
-  });
-
-  const contentCalendar = await ctx.task(createIntegratedCalendarTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let contentCalendar = await ctx.task(createIntegratedCalendarTask, {
     speakingPipeline,
     bylinedStrategy,
     mediaVisibilityPlan,
     socialMediaStrategy
   });
 
-  // Phase 8: Measurement Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      contentCalendar = await ctx.task(createIntegratedCalendarTask, { ...{
+    speakingPipeline,
+    bylinedStrategy,
+    mediaVisibilityPlan,
+    socialMediaStrategy
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Calendar created. Define measurement framework?',
     title: 'Phase 8: Measurement Framework',
     context: {
       runId: ctx.runId,
       phase: 'measurement-framework'
-    }
-  });
-
-  const measurementFramework = await ctx.task(defineMeasurementFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let measurementFramework = await ctx.task(defineMeasurementFrameworkTask, {
     thoughtLeadershipGoals,
     positioningStrategy
   });
 
-  // Phase 9: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      measurementFramework = await ctx.task(defineMeasurementFrameworkTask, { ...{
+    thoughtLeadershipGoals,
+    positioningStrategy
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate executive visibility program quality?',
     title: 'Phase 9: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateProgramQualityTask, {
     executiveAssessment,
     positioningStrategy,
@@ -219,8 +334,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessExecutiveProfileTask = defineTask('assess-executive-profile', (args, taskCtx) => ({
   kind: 'agent',

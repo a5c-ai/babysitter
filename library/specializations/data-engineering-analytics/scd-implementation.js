@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing dimensions and defining SCD requirements');
 
-  const dimensionAnalysis = await ctx.task(dimensionAnalysisTask, {
+  let dimensionAnalysis = await ctx.task(dimensionAnalysisTask, {
     projectName,
     dimensionTables,
     scdType,
@@ -65,9 +65,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...dimensionAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dimensionAnalysis = await ctx.task(dimensionAnalysisTask, { ...{
+    projectName,
+    dimensionTables,
+    scdType,
+    sourceSystem,
+    includeType1Attributes,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Analyzed ${dimensionTables.length} dimension(s). ${dimensionAnalysis.type2AttributeCount} attributes require Type 2 tracking, ${dimensionAnalysis.type1AttributeCount} use Type 1. Review analysis?`,
     title: 'Dimension Analysis Complete',
     context: {
@@ -82,9 +92,15 @@ export async function process(inputs, ctx) {
         changeFrequency: d.estimatedChangeFrequency
       })),
       files: dimensionAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SURROGATE KEY STRATEGY DESIGN
   // ============================================================================
@@ -106,7 +122,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing temporal tracking fields and logic');
 
-  const temporalTracking = await ctx.task(temporalTrackingDesignTask, {
+  let temporalTracking = await ctx.task(temporalTrackingDesignTask, {
     projectName,
     dimensions: dimensionAnalysis.dimensions,
     scdType,
@@ -114,9 +130,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...temporalTracking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      temporalTracking = await ctx.task(temporalTrackingDesignTask, { ...{
+    projectName,
+    dimensions: dimensionAnalysis.dimensions,
+    scdType,
+    enableAuditLogging,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phase 3 Complete: Temporal tracking configured with ${temporalTracking.trackingFields.length} audit fields. Effective date strategy: ${temporalTracking.effectiveDateStrategy}. Review configuration?`,
     title: 'Temporal Tracking Design Complete',
     context: {
@@ -127,9 +152,15 @@ export async function process(inputs, ctx) {
       currentFlagLogic: temporalTracking.currentFlagLogic,
       versioningEnabled: temporalTracking.versioningEnabled,
       files: temporalTracking.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: SCD TYPE 2 MERGE LOGIC DESIGN
   // ============================================================================
@@ -150,9 +181,18 @@ export async function process(inputs, ctx) {
   const mergeLogicResults = await ctx.parallel.all(mergeTasks);
   artifacts.push(...mergeLogicResults.flatMap(m => m.artifacts));
 
-  const totalMergePatterns = mergeLogicResults.reduce((sum, m) => sum + m.operationCount, 0);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      temporalTracking = await ctx.task(temporalTrackingDesignTask, { ...{
+    projectName,
+    dimensions: dimensionAnalysis.dimensions,
+    scdType,
+    enableAuditLogging,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Phase 4 Complete: Designed merge logic for ${dimensionTables.length} dimension(s) with ${totalMergePatterns} total operations (INSERT new rows, UPDATE current rows, EXPIRE old rows). Review merge patterns?`,
     title: 'SCD Merge Logic Design Complete',
     context: {
@@ -164,9 +204,15 @@ export async function process(inputs, ctx) {
         performanceOptimized: m.performanceOptimized
       })),
       files: mergeLogicResults.flatMap(m => m.artifacts).map(a => ({ path: a.path, format: 'sql' })).slice(0, 10)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: DDL GENERATION FOR SCD TABLES
   // ============================================================================
@@ -190,7 +236,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating initial dimension load procedures');
 
-  const initialLoad = await ctx.task(initialLoadProcedureTask, {
+  let initialLoad = await ctx.task(initialLoadProcedureTask, {
     projectName,
     dimensions: dimensionAnalysis.dimensions,
     surrogateKeyStrategy,
@@ -222,9 +268,20 @@ export async function process(inputs, ctx) {
   );
 
   const incrementalResults = await ctx.parallel.all(incrementalTasks);
-  artifacts.push(...incrementalResults.flatMap(i => i.artifacts));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      initialLoad = await ctx.task(initialLoadProcedureTask, { ...{
+    projectName,
+    dimensions: dimensionAnalysis.dimensions,
+    surrogateKeyStrategy,
+    temporalTracking,
+    targetPlatform,
+    sourceSystem,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Phase 7 Complete: Created incremental update procedures for ${dimensionTables.length} dimension(s). Includes change detection, row expiration, and new row insertion. Review procedures?`,
     title: 'Incremental Update Procedures Complete',
     context: {
@@ -236,9 +293,15 @@ export async function process(inputs, ctx) {
         performance: i.performanceMetrics
       })),
       files: incrementalResults.flatMap(i => i.artifacts).map(a => ({ path: a.path, format: 'sql' })).slice(0, 10)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: LATE-ARRIVING DATA HANDLING
   // ============================================================================
@@ -278,7 +341,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Creating comprehensive SCD validation tests');
 
-  const validationTests = await ctx.task(scdValidationTestsTask, {
+  let validationTests = await ctx.task(scdValidationTestsTask, {
     projectName,
     dimensions: dimensionAnalysis.dimensions,
     temporalTracking,
@@ -287,9 +350,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...validationTests.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      validationTests = await ctx.task(scdValidationTestsTask, { ...{
+    projectName,
+    dimensions: dimensionAnalysis.dimensions,
+    temporalTracking,
+    testingStrategy,
+    targetPlatform,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint({
     question: `Phase 10 Complete: Created ${validationTests.totalTests} validation tests across ${validationTests.testCategories.length} categories (uniqueness, temporal integrity, history tracking, audit). Review test suite?`,
     title: 'SCD Validation Tests Complete',
     context: {
@@ -304,9 +377,15 @@ export async function process(inputs, ctx) {
       },
       testCategories: validationTests.testCategories,
       files: validationTests.artifacts.map(a => ({ path: a.path, format: a.format || 'sql' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: PERFORMANCE OPTIMIZATION
   // ============================================================================
@@ -385,7 +464,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Validating SCD implementation completeness');
 
-  const implementationValidation = await ctx.task(implementationValidationTask, {
+  let implementationValidation = await ctx.task(implementationValidationTask, {
     projectName,
     dimensionAnalysis,
     surrogateKeyStrategy,
@@ -403,8 +482,23 @@ export async function process(inputs, ctx) {
   const validationScore = implementationValidation.overallScore;
   const implementationValid = validationScore >= 85;
 
-  if (!implementationValid) {
-    await ctx.breakpoint({
+      let lastFeedback_phase15Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase15Review) {
+        implementationValidation = await ctx.task(implementationValidationTask, { ...{
+    projectName,
+    dimensionAnalysis,
+    surrogateKeyStrategy,
+    temporalTracking,
+    mergeLogicResults,
+    incrementalResults,
+    validationTests,
+    ddlGeneration,
+    documentation,
+    outputDir
+  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
+      }
+  const phase15Review = await ctx.breakpoint({
       question: `Phase 15 Warning: Implementation validation score: ${validationScore}/100 (below threshold of 85). ${implementationValidation.issues.length} issue(s) found. Review and address issues?`,
       title: 'Implementation Validation Issues',
       context: {
@@ -414,15 +508,35 @@ export async function process(inputs, ctx) {
         issues: implementationValidation.issues,
         recommendations: implementationValidation.recommendations,
         files: implementationValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase15Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase15Review.approved) break;
+      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // FINAL BREAKPOINT: IMPLEMENTATION COMPLETE
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationValidation = await ctx.task(implementationValidationTask, { ...{
+    projectName,
+    dimensionAnalysis,
+    surrogateKeyStrategy,
+    temporalTracking,
+    mergeLogicResults,
+    incrementalResults,
+    validationTests,
+    ddlGeneration,
+    documentation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SCD Implementation Complete for "${projectName}"! Validation score: ${validationScore}/100. Implemented ${scdType} for ${dimensionTables.length} dimension(s) with ${validationTests.totalTests} validation tests. Ready for deployment?`,
     title: 'SCD Implementation Complete',
     context: {
@@ -457,9 +571,15 @@ export async function process(inputs, ctx) {
         { path: implementationValidation.reportPath, format: 'json', label: 'Validation Report' },
         { path: ddlGeneration.ddlScriptPath, format: 'sql', label: 'DDL Scripts' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -586,8 +706,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

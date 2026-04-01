@@ -76,18 +76,30 @@ export async function process(inputs, ctx) {
   artifacts.push(...(communicationCadence.artifacts || []));
 
   // Phase 8: Alignment Plan Compilation
-  const alignmentPlan = await ctx.task(alignmentPlanCompilationTask, {
+  let alignmentPlan = await ctx.task(alignmentPlanCompilationTask, {
     leadDefinitions, funnelDefinitions, slaDevelopment, sharedMetrics,
     feedbackLoops, communicationCadence, outputDir
   });
-  artifacts.push(...(alignmentPlan.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      alignmentPlan = await ctx.task(alignmentPlanCompilationTask, { ...{
+    leadDefinitions, funnelDefinitions, slaDevelopment, sharedMetrics,
+    feedbackLoops, communicationCadence, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sales-Marketing alignment plan ready. ${sharedMetrics.metrics?.length || 0} shared metrics, ${feedbackLoops.loops?.length || 0} feedback loops defined. Review?`,
     title: 'Sales-Marketing Alignment Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     alignmentPlan: alignmentPlan.plan,

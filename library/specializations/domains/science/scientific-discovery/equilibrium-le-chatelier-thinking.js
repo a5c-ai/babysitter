@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Applying Le Chatelier\'s principle');
-  const leChaterlierPrediction = await ctx.task(leChaterlierTask, {
+  let leChaterlierPrediction = await ctx.task(leChaterlierTask, {
     change: changeIdentification.change,
     equilibriumState,
     system,
@@ -75,8 +75,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...leChaterlierPrediction.artifacts);
 
-  // Breakpoint: Review Le Chatelier prediction
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      leChaterlierPrediction = await ctx.task(leChaterlierTask, { ...{
+    change: changeIdentification.change,
+    equilibriumState,
+    system,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Le Chatelier prediction: equilibrium will shift ${leChaterlierPrediction.shiftDirection}. Proceed with quantitative analysis?`,
     title: 'Le Chatelier Prediction Review',
     context: {
@@ -91,9 +100,15 @@ export async function process(inputs, ctx) {
         changeType: changeIdentification.change.type,
         shiftDirection: leChaterlierPrediction.shiftDirection
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: QUANTITATIVE SHIFT CALCULATION
   // ============================================================================
@@ -110,7 +125,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...quantitativeShift.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: NEW EQUILIBRIUM STATE
   // ============================================================================
@@ -145,7 +159,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Deriving practical implications');
-  const practicalImplications = await ctx.task(practicalImplicationsTask, {
+  let practicalImplications = await ctx.task(practicalImplicationsTask, {
     originalEquilibrium: equilibriumState,
     newEquilibrium: newEquilibrium.state,
     change: changeIdentification.change,
@@ -156,8 +170,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...practicalImplications.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      practicalImplications = await ctx.task(practicalImplicationsTask, { ...{
+    originalEquilibrium: equilibriumState,
+    newEquilibrium: newEquilibrium.state,
+    change: changeIdentification.change,
+    shiftDirection: leChaterlierPrediction.shiftDirection,
+    system,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Equilibrium analysis complete. New equilibrium position determined. ${practicalImplications.implications.length} practical implications identified. Review findings?`,
     title: 'Equilibrium Analysis Complete',
     context: {
@@ -173,9 +198,15 @@ export async function process(inputs, ctx) {
         percentShift: quantitativeShift?.percentShift,
         implicationCount: practicalImplications.implications.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -205,8 +236,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

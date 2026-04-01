@@ -30,7 +30,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Identifying competitors and mapping market landscape');
-  const competitorIdentification = await ctx.task(competitorIdentificationTask, {
+  let competitorIdentification = await ctx.task(competitorIdentificationTask, {
     productName,
     targetMarket,
     competitorList,
@@ -41,8 +41,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...competitorIdentification.artifacts);
 
-  // Breakpoint: Review identified competitors
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      competitorIdentification = await ctx.task(competitorIdentificationTask, { ...{
+    productName,
+    targetMarket,
+    competitorList,
+    includeEmergingCompetitors,
+    analysisDepth,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${competitorIdentification.totalCompetitors} competitors (${competitorIdentification.directCompetitors.length} direct, ${competitorIdentification.indirectCompetitors.length} indirect, ${competitorIdentification.emergingCompetitors?.length || 0} emerging). Review competitor list before detailed analysis?`,
     title: 'Competitor Identification Review',
     context: {
@@ -61,9 +72,15 @@ export async function process(inputs, ctx) {
         emergingCompetitors: competitorIdentification.emergingCompetitors?.length || 0,
         marketSegments: competitorIdentification.marketSegments?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: COMPETITOR PROFILING AND RESEARCH
   // ============================================================================
@@ -119,7 +136,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Conducting SWOT analysis');
-  const swotAnalysis = await ctx.task(swotAnalysisTask, {
+  let swotAnalysis = await ctx.task(swotAnalysisTask, {
     productName,
     featureComparison,
     competitorProfiles: profilingSummary.profiles,
@@ -130,8 +147,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...swotAnalysis.artifacts);
 
-  // Breakpoint: Review SWOT analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      swotAnalysis = await ctx.task(swotAnalysisTask, { ...{
+    productName,
+    featureComparison,
+    competitorProfiles: profilingSummary.profiles,
+    targetMarket,
+    includeWorkshop: swotWorkshop,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `SWOT analysis complete. Strengths: ${swotAnalysis.strengths.length}, Weaknesses: ${swotAnalysis.weaknesses.length}, Opportunities: ${swotAnalysis.opportunities.length}, Threats: ${swotAnalysis.threats.length}. Review before positioning strategy?`,
     title: 'SWOT Analysis Review',
     context: {
@@ -151,9 +179,15 @@ export async function process(inputs, ctx) {
         criticalStrengths: swotAnalysis.criticalStrengths?.length || 0,
         criticalWeaknesses: swotAnalysis.criticalWeaknesses?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: DIFFERENTIATION STRATEGY
   // ============================================================================
@@ -205,7 +239,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...positioningMap.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: COMPETITIVE INTELLIGENCE REPORT
   // ============================================================================
@@ -247,7 +280,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Analyzing go-to-market implications');
-  const gtmImplications = await ctx.task(gtmImplicationsTask, {
+  let gtmImplications = await ctx.task(gtmImplicationsTask, {
     productName,
     positioningStrategy,
     differentiation,
@@ -259,8 +292,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gtmImplications.artifacts);
 
-  // Final breakpoint: Review complete analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      gtmImplications = await ctx.task(gtmImplicationsTask, { ...{
+    productName,
+    positioningStrategy,
+    differentiation,
+    targetMarket,
+    competitorProfiles: profilingSummary.profiles,
+    strategicRecommendations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Competitive analysis complete for ${productName}. Analyzed ${profilingSummary.totalProfiled} competitors, identified ${differentiation.differentiators.length} key differentiators, and ${strategicRecommendations.recommendations.length} strategic recommendations. Review and approve final analysis?`,
     title: 'Final Competitive Analysis Review',
     context: {
@@ -281,9 +326,15 @@ export async function process(inputs, ctx) {
         totalArtifacts: artifacts.length,
         analysisDuration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -354,8 +405,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

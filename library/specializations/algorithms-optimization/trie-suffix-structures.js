@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(structureImplementationTask, { structure, design, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const applications = await ctx.task(applicationsTask, { structure, implementation, strings, outputDir });
-  artifacts.push(...applications.artifacts);
-
-  await ctx.breakpoint({
+  let applications = await ctx.task(applicationsTask, { structure, implementation, strings, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      applications = await ctx.task(applicationsTask, { ...{ structure, implementation, strings, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${structure} structure implemented. Applications demonstrated: ${applications.demonstrated.length}. Review?`,
     title: 'Suffix Structure Complete',
-    context: { runId: ctx.runId, structure, applications: applications.demonstrated }
-  });
-
+    context: { runId: ctx.runId, structure, applications: applications.demonstrated },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     structure,

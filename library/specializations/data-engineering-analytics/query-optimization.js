@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Profiling queries and analyzing execution patterns');
 
-  const profilingResults = await ctx.task(queryProfilingTask, {
+  let profilingResults = await ctx.task(queryProfilingTask, {
     database,
     workloadType,
     querySet,
@@ -68,9 +68,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...profilingResults.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      profilingResults = await ctx.task(queryProfilingTask, { ...{
+    database,
+    workloadType,
+    querySet,
+    performanceTargets,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Profiled ${profilingResults.queriesAnalyzed} queries. Identified ${profilingResults.slowQueries} slow queries and ${profilingResults.bottlenecks.length} performance bottlenecks. Review profiling results?`,
     title: 'Query Profiling Complete',
     context: {
@@ -85,16 +94,22 @@ export async function process(inputs, ctx) {
       },
       bottlenecks: profilingResults.bottlenecks,
       files: profilingResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: EXECUTION PLAN ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Analyzing query execution plans');
 
-  const executionPlanAnalysis = await ctx.task(executionPlanAnalysisTask, {
+  let executionPlanAnalysis = await ctx.task(executionPlanAnalysisTask, {
     database,
     querySet,
     profilingResults,
@@ -119,9 +134,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...indexingStrategy.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        executionPlanAnalysis = await ctx.task(executionPlanAnalysisTask, { ...{
+    database,
+    querySet,
+    profilingResults,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Phase 3 Complete: Developed indexing strategy with ${indexingStrategy.recommendedIndexes.length} index recommendations. Estimated performance gain: ${indexingStrategy.estimatedGain}. Review indexing recommendations?`,
       title: 'Indexing Strategy Review',
       context: {
@@ -135,9 +158,15 @@ export async function process(inputs, ctx) {
         },
         topRecommendations: indexingStrategy.recommendedIndexes.slice(0, 10),
         files: indexingStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'sql' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: PARTITIONING STRATEGY
@@ -157,7 +186,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...partitioningStrategy.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: QUERY REWRITING AND OPTIMIZATION
   // ============================================================================
@@ -175,9 +203,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...queryRewriting.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        executionPlanAnalysis = await ctx.task(executionPlanAnalysisTask, { ...{
+    database,
+    querySet,
+    profilingResults,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Phase 5 Complete: Rewrote ${queryRewriting.rewrittenQueries} queries. Average performance improvement: ${queryRewriting.avgImprovement}. Review query optimizations?`,
       title: 'Query Rewriting Review',
       context: {
@@ -190,9 +226,15 @@ export async function process(inputs, ctx) {
         },
         topOptimizations: queryRewriting.optimizations.slice(0, 5),
         files: queryRewriting.artifacts.map(a => ({ path: a.path, format: 'sql' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: MATERIALIZED VIEWS STRATEGY
@@ -213,7 +255,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...materializationStrategy.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: CACHING STRATEGY
   // ============================================================================
@@ -231,9 +272,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...cachingStrategy.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        executionPlanAnalysis = await ctx.task(executionPlanAnalysisTask, { ...{
+    database,
+    querySet,
+    profilingResults,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Phase 7 Complete: Developed ${cachingStrategy.cachingLayers.length}-tier caching strategy. Projected cache hit rate: ${cachingStrategy.projectedHitRate}. Review caching recommendations?`,
       title: 'Caching Strategy Review',
       context: {
@@ -246,9 +295,15 @@ export async function process(inputs, ctx) {
         },
         cachingLayers: cachingStrategy.cachingLayers,
         files: cachingStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: DATABASE CONFIGURATION TUNING
@@ -302,7 +357,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Generating comprehensive optimization plan');
 
-  const optimizationPlan = await ctx.task(optimizationPlanTask, {
+  let optimizationPlan = await ctx.task(optimizationPlanTask, {
     database,
     workloadType,
     profilingResults,
@@ -327,9 +382,27 @@ export async function process(inputs, ctx) {
 
   let implementationResults = null;
   if (enableAutoOptimization) {
-    ctx.log('info', 'Phase 12: Implementing automated optimizations');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase12Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase12Review) {
+        optimizationPlan = await ctx.task(optimizationPlanTask, { ...{
+    database,
+    workloadType,
+    profilingResults,
+    executionPlanAnalysis,
+    indexingStrategy,
+    partitioningStrategy,
+    queryRewriting,
+    materializationStrategy,
+    cachingStrategy,
+    configurationTuning,
+    statisticsMaintenance,
+    performanceMonitoring,
+    performanceTargets,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+      }
+  const phase12Review = await ctx.breakpoint({
       question: `Ready to implement automated optimizations. This will apply ${optimizationPlan.autoApplicableOptimizations} safe optimizations. Proceed with implementation?`,
       title: 'Automated Optimization Confirmation',
       context: {
@@ -337,10 +410,15 @@ export async function process(inputs, ctx) {
         optimizationsToApply: optimizationPlan.autoApplicableOptimizations,
         manualReview: optimizationPlan.manualReviewRequired,
         rollbackPlan: optimizationPlan.rollbackAvailable
-      }
-    });
-
-    implementationResults = await ctx.task(implementationTask, {
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase12Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase12Review.approved) break;
+      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+    }    implementationResults = await ctx.task(implementationTask, {
       database,
       optimizationPlan,
       indexingStrategy,
@@ -353,7 +431,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...implementationResults.artifacts);
   }
-
   // ============================================================================
   // PHASE 13: VALIDATION AND BENCHMARKING
   // ============================================================================
@@ -378,7 +455,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Generating documentation and operational runbooks');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     database,
     workloadType,
     profilingResults,
@@ -403,9 +480,29 @@ export async function process(inputs, ctx) {
   // FINAL BREAKPOINT: OPTIMIZATION COMPLETE
   // ============================================================================
 
-  const performanceGain = validation.performanceGain || optimizationPlan.estimatedGain;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    database,
+    workloadType,
+    profilingResults,
+    executionPlanAnalysis,
+    indexingStrategy,
+    partitioningStrategy,
+    queryRewriting,
+    materializationStrategy,
+    cachingStrategy,
+    configurationTuning,
+    statisticsMaintenance,
+    performanceMonitoring,
+    optimizationPlan,
+    implementationResults,
+    validation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Query Performance Optimization Complete for ${database}! ${validation.implementedOptimizations || optimizationPlan.totalOptimizations} optimizations planned/applied. Estimated performance gain: ${performanceGain}. Review final results?`,
     title: 'Query Optimization Complete',
     context: {
@@ -434,9 +531,15 @@ export async function process(inputs, ctx) {
         { path: validation.reportPath, format: 'json', label: 'Validation Report' },
         { path: documentation.runbookPath, format: 'markdown', label: 'Operations Runbook' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -515,8 +618,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

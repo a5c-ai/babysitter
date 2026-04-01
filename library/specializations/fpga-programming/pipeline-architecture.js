@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Pipeline Stage Definition');
 
-  const stageDefinition = await ctx.task(stageDefinitionTask, {
+  let stageDefinition = await ctx.task(stageDefinitionTask, {
     pipelineName,
     operations,
     dataWidth,
@@ -78,8 +78,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...stageDefinition.artifacts);
 
-  // Quality Gate: Stage review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      stageDefinition = await ctx.task(stageDefinitionTask, { ...{
+    pipelineName,
+    operations,
+    dataWidth,
+    targetFrequency,
+    specification,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Pipeline stages defined for ${pipelineName}. ${stageDefinition.stageCount} stages, estimated latency: ${stageDefinition.estimatedLatency} cycles. Review stage definitions?`,
     title: 'Pipeline Stage Review',
     context: {
@@ -88,9 +99,15 @@ export async function process(inputs, ctx) {
       stages: stageDefinition.stages,
       estimatedLatency: stageDefinition.estimatedLatency,
       files: stageDefinition.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: INTER-STAGE REGISTER DESIGN
   // ============================================================================
@@ -216,7 +233,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Pipeline Testbench Development');
 
-  const testbench = await ctx.task(pipelineTestbenchTask, {
+  let testbench = await ctx.task(pipelineTestbenchTask, {
     pipelineName,
     language,
     stageDefinition,
@@ -228,8 +245,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testbench.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testbench = await ctx.task(pipelineTestbenchTask, { ...{
+    pipelineName,
+    language,
+    stageDefinition,
+    hazardHandling,
+    backpressureSupport,
+    flushSupport,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pipeline Architecture Complete for ${pipelineName}. ${stageDefinition.stageCount} stages, ${throughputAnalysis.effectiveThroughput}. Timing: ${timingAnalysis.timingMet ? 'MET' : 'FAILED'}. Review pipeline package?`,
     title: 'Pipeline Design Complete',
     context: {
@@ -247,9 +276,15 @@ export async function process(inputs, ctx) {
         { path: rtlImplementation.pipelineFilePath, format: 'sv', label: 'Pipeline RTL' },
         { path: testbench.testbenchPath, format: 'sv', label: 'Testbench' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -292,8 +327,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

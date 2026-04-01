@@ -55,7 +55,6 @@ export async function process(inputs, ctx) {
       actionSequence: []
     };
   }
-
   // Phase 3: Subgoal Generation (Backward Chaining)
   const subgoalGeneration = await ctx.task(subgoalGenerationTask, {
     goalAnalysis,
@@ -88,24 +87,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Constraint Satisfaction
-  const constraintSatisfaction = await ctx.task(constraintSatisfactionTask, {
+  let constraintSatisfaction = await ctx.task(constraintSatisfactionTask, {
     taskDecomposition,
     constraints,
     currentState
   });
 
   // Quality Gate: Check constraint feasibility
-  if (!constraintSatisfaction.feasible) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        constraintSatisfaction = await ctx.task(constraintSatisfactionTask, { ...{
+    taskDecomposition,
+    constraints,
+    currentState
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Plan violates constraints: ${constraintSatisfaction.violations.join(', ')}. Revise constraints or accept partial plan?`,
       title: 'Constraint Violation',
       context: {
         runId: ctx.runId,
         violations: constraintSatisfaction.violations,
         recommendation: 'Consider relaxing constraints or finding alternative approaches'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Plan Ordering and Sequencing
   const planOrdering = await ctx.task(planOrderingTask, {
@@ -115,14 +128,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Resource Allocation
-  const resourceAllocation = await ctx.task(resourceAllocationTask, {
+  let resourceAllocation = await ctx.task(resourceAllocationTask, {
     planOrdering,
     constraints,
     domain
   });
 
-  // Breakpoint: Review plan
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      resourceAllocation = await ctx.task(resourceAllocationTask, { ...{
+    planOrdering,
+    constraints,
+    domain
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Means-end plan generated with ${planOrdering.steps.length} steps. Estimated completion: ${resourceAllocation.estimatedDuration}. Review plan?`,
     title: 'Plan Review',
     context: {
@@ -130,9 +151,15 @@ export async function process(inputs, ctx) {
       domain,
       goal: goal.description,
       steps: planOrdering.steps.slice(0, 5).map(s => s.action)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Contingency Planning
   const contingencyPlanning = await ctx.task(contingencyPlanningTask, {
     planOrdering,
@@ -141,15 +168,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Plan Validation
-  const planValidation = await ctx.task(planValidationTask, {
+  let planValidation = await ctx.task(planValidationTask, {
     planOrdering,
     goal,
     currentState,
     contingencyPlanning
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      planValidation = await ctx.task(planValidationTask, { ...{
+    planOrdering,
+    goal,
+    currentState,
+    contingencyPlanning
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Plan validation complete. Confidence: ${planValidation.confidence}. Execute plan?`,
     title: 'Final Plan Review',
     context: {
@@ -159,9 +195,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/plan.json', format: 'json', content: planOrdering },
         { path: 'artifacts/resources.json', format: 'json', content: resourceAllocation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -183,8 +225,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const goalAnalysisTask = defineTask('goal-analysis', (args, taskCtx) => ({
   kind: 'agent',

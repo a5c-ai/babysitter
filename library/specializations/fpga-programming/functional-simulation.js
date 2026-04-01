@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Random Test Execution');
 
-  const randomTests = await ctx.task(randomTestExecutionTask, {
+  let randomTests = await ctx.task(randomTestExecutionTask, {
     designName,
     compilation,
     timeout,
@@ -113,8 +113,18 @@ export async function process(inputs, ctx) {
   const passedTests = directedTests.passedCount + randomTests.passedCount;
   const failedTests = directedTests.failedCount + randomTests.failedCount;
 
-  if (failedTests > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        randomTests = await ctx.task(randomTestExecutionTask, { ...{
+    designName,
+    compilation,
+    timeout,
+    waveformFormat,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Simulation found ${failedTests} failing tests out of ${totalTests}. Proceed with debug analysis?`,
       title: 'Test Failures Detected',
       context: {
@@ -125,9 +135,15 @@ export async function process(inputs, ctx) {
         failedTests,
         failedTestNames: [...directedTests.failedTests, ...randomTests.failedTests],
         files: [...directedTests.artifacts, ...randomTests.artifacts].map(a => ({ path: a.path, format: a.format || 'txt' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: WAVEFORM CAPTURE
@@ -202,7 +218,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Simulation Report Generation');
 
-  const simulationReport = await ctx.task(simulationReportTask, {
+  let simulationReport = await ctx.task(simulationReportTask, {
     designName,
     directedTests,
     randomTests,
@@ -214,8 +230,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...simulationReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      simulationReport = await ctx.task(simulationReportTask, { ...{
+    designName,
+    directedTests,
+    randomTests,
+    coverageCollection,
+    debugAnalysis,
+    rootCauseAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Functional Simulation Complete for ${designName}. ${passedTests}/${totalTests} tests passed. Coverage: ${coverageCollection.overallCoverage}%. Review simulation report?`,
     title: 'Simulation Complete',
     context: {
@@ -232,9 +260,15 @@ export async function process(inputs, ctx) {
         { path: simulationReport.reportPath, format: 'markdown', label: 'Simulation Report' },
         { path: coverageCollection.coverageReportPath, format: 'html', label: 'Coverage Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -271,8 +305,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

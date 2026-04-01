@@ -39,16 +39,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(mvpTypeSelection.artifacts || []));
 
   // Phase 4: MVP Specification
-  const mvpSpec = await ctx.task(mvpSpecificationTask, { companyName, mvpTypeSelection, featureSet });
+  let mvpSpec = await ctx.task(mvpSpecificationTask, { companyName, mvpTypeSelection, featureSet });
   artifacts.push(...(mvpSpec.artifacts || []));
 
-  // Breakpoint: Review MVP spec
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      mvpSpec = await ctx.task(mvpSpecificationTask, { ...{ companyName, mvpTypeSelection, featureSet }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review MVP specification for ${companyName}. Type: ${mvpTypeSelection.selectedType}. Proceed with test planning?`,
     title: 'MVP Specification Review',
-    context: { runId: ctx.runId, companyName, mvpType: mvpTypeSelection.selectedType, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, mvpType: mvpTypeSelection.selectedType, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Test Plan Development
   const testPlan = await ctx.task(testPlanTask, { companyName, mvpSpec, valueHypothesisAnalysis });
   artifacts.push(...(testPlan.artifacts || []));

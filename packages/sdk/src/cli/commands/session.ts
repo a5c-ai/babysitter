@@ -38,6 +38,7 @@ export interface SessionCommandArgs {
   lastIterationAt?: string;
   iterationTimes?: string;
   delete?: boolean;
+  force?: boolean;
   json: boolean;
   runsDir?: string;
 }
@@ -159,7 +160,7 @@ export async function handleSessionInit(args: SessionCommandArgs): Promise<numbe
  * Associates a session with a run ID.
  */
 export async function handleSessionAssociate(args: SessionCommandArgs): Promise<number> {
-  const { sessionId, stateDir, runId, json } = args;
+  const { sessionId, stateDir, runId, force, runsDir, json } = args;
 
   if (!sessionId) {
     const error = { error: 'MISSING_SESSION_ID', message: '--session-id is required' };
@@ -213,17 +214,57 @@ export async function handleSessionAssociate(args: SessionCommandArgs): Promise<
 
   // Check if already associated
   if (existing.state.runId) {
-    const error = {
-      error: 'RUN_ALREADY_ASSOCIATED',
-      message: `Session already associated with run: ${existing.state.runId}`,
-      existingRunId: existing.state.runId,
-    };
-    if (json) {
-      console.error(JSON.stringify(error, null, 2));
-    } else {
-      console.error(`❌ Error: This session is already associated with run: ${existing.state.runId}`);
+    if (!force) {
+      const error = {
+        error: 'RUN_ALREADY_ASSOCIATED',
+        message: `Session already associated with run: ${existing.state.runId}. Use --force to rebind if the existing run is completed or failed.`,
+        existingRunId: existing.state.runId,
+      };
+      if (json) {
+        console.error(JSON.stringify(error, null, 2));
+      } else {
+        console.error(`❌ Error: This session is already associated with run: ${existing.state.runId}`);
+        console.error('');
+        console.error('   If the existing run is completed or failed, use --force to rebind:');
+        console.error(`   babysitter session:associate --session-id <id> --state-dir <dir> --run-id ${runId} --force`);
+      }
+      return 1;
     }
-    return 1;
+
+    // --force: check if old run is in a terminal state before allowing rebind
+    const oldRunId = existing.state.runId;
+    let isTerminal = false;
+
+    if (runsDir) {
+      try {
+        const oldRunDir = path.join(runsDir, oldRunId);
+        const journal = await loadJournal(oldRunDir);
+        const hasCompleted = journal.some((e: { type: string }) => e.type === 'RUN_COMPLETED');
+        const hasFailed = journal.some((e: { type: string }) => e.type === 'RUN_FAILED');
+        isTerminal = hasCompleted || hasFailed;
+      } catch {
+        // Journal unreadable — treat as terminal (force was explicit)
+        isTerminal = true;
+      }
+    } else {
+      // No runsDir to verify — trust the user's --force intent
+      isTerminal = true;
+    }
+
+    if (!isTerminal) {
+      const error = {
+        error: 'RUN_STILL_ACTIVE',
+        message: `Cannot rebind: run ${oldRunId} is still active. Complete or fail the run first.`,
+        existingRunId: oldRunId,
+      };
+      if (json) {
+        console.error(JSON.stringify(error, null, 2));
+      } else {
+        console.error(`❌ Error: Cannot rebind — run ${oldRunId} is still active.`);
+        console.error('   Complete or fail the existing run before rebinding.');
+      }
+      return 1;
+    }
   }
 
   // Update run ID

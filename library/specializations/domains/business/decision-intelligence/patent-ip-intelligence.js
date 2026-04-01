@@ -53,15 +53,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Innovation Trajectory Analysis
-  const innovationTrajectories = await ctx.task(innovationTrajectoryTask, {
+  let innovationTrajectories = await ctx.task(innovationTrajectoryTask, {
     projectName,
     competitorPortfolioAnalysis,
     technologyClusters,
     competitors
   });
 
-  // Breakpoint: Review patent intelligence
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      innovationTrajectories = await ctx.task(innovationTrajectoryTask, { ...{
+    projectName,
+    competitorPortfolioAnalysis,
+    technologyClusters,
+    competitors
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review patent intelligence analysis for ${projectName}. Are the innovation trends identified accurate?`,
     title: 'Patent Intelligence Review',
     context: {
@@ -69,9 +78,15 @@ export async function process(inputs, ctx) {
       projectName,
       patentCount: patentLandscape.totalPatents || 0,
       competitorCount: competitors.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Freedom to Operate Assessment
   const ftoAssessment = await ctx.task(ftoAssessmentTask, {
     projectName,
@@ -124,8 +139,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const patentLandscapeTask = defineTask('patent-landscape', (args, taskCtx) => ({
   kind: 'agent',

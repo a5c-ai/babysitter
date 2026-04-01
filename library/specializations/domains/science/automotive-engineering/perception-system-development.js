@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Sensor Suite Definition and Placement
-  const sensorDefinition = await ctx.task(sensorDefinitionTask, {
+  let sensorDefinition = await ctx.task(sensorDefinitionTask, {
     projectName,
     sensorSuite,
     oddDefinition,
@@ -39,27 +39,50 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Sensor coverage must be adequate
-  if (!sensorDefinition.coverageAnalysis || sensorDefinition.coverageAnalysis.blindSpots?.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        sensorDefinition = await ctx.task(sensorDefinitionTask, { ...{
+    projectName,
+    sensorSuite,
+    oddDefinition,
+    safetyRequirements
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Sensor coverage analysis identified ${sensorDefinition.coverageAnalysis?.blindSpots?.length || 0} blind spots. Review and approve mitigation?`,
       title: 'Sensor Coverage Warning',
       context: {
         runId: ctx.runId,
         blindSpots: sensorDefinition.coverageAnalysis?.blindSpots,
         recommendation: 'Consider additional sensors or placement optimization'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // Phase 2: Sensor Fusion Architecture
-  const sensorFusion = await ctx.task(sensorFusionTask, {
+  let sensorFusion = await ctx.task(sensorFusionTask, {
     projectName,
     sensorDefinition,
     oddDefinition
   });
 
-  // Breakpoint: Fusion architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      sensorFusion = await ctx.task(sensorFusionTask, { ...{
+    projectName,
+    sensorDefinition,
+    oddDefinition
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review sensor fusion architecture for ${projectName}. Approach: ${sensorFusion.approach}. Approve architecture?`,
     title: 'Sensor Fusion Architecture Review',
     context: {
@@ -71,9 +94,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: sensorFusion
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Detection Model Development
   const detectionModels = await ctx.task(detectionModelsTask, {
     projectName,
@@ -99,7 +128,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Model Training and Validation
-  const modelTraining = await ctx.task(modelTrainingTask, {
+  let modelTraining = await ctx.task(modelTrainingTask, {
     projectName,
     detectionModels,
     classificationTracking,
@@ -107,17 +136,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Model performance
-  if (modelTraining.metrics?.mAP < 0.8) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        modelTraining = await ctx.task(modelTrainingTask, { ...{
+    projectName,
+    detectionModels,
+    classificationTracking,
+    dataCollection
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Model mAP is ${modelTraining.metrics?.mAP}. Below target of 0.8. Review training strategy?`,
       title: 'Model Performance Warning',
       context: {
         runId: ctx.runId,
         modelTraining,
         recommendation: 'Augment training data or tune model hyperparameters'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Perception Validation
   const perceptionValidation = await ctx.task(perceptionValidationTask, {
@@ -129,7 +173,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Documentation and Release
-  const perceptionRelease = await ctx.task(perceptionReleaseTask, {
+  let perceptionRelease = await ctx.task(perceptionReleaseTask, {
     projectName,
     sensorDefinition,
     sensorFusion,
@@ -139,8 +183,20 @@ export async function process(inputs, ctx) {
     perceptionValidation
   });
 
-  // Final Breakpoint: Perception system approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      perceptionRelease = await ctx.task(perceptionReleaseTask, { ...{
+    projectName,
+    sensorDefinition,
+    sensorFusion,
+    detectionModels,
+    classificationTracking,
+    modelTraining,
+    perceptionValidation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Perception System Development complete for ${projectName}. mAP: ${modelTraining.metrics?.mAP}. Approve for integration?`,
     title: 'Perception System Approval',
     context: {
@@ -151,9 +207,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/perception-software.json`, format: 'json', content: perceptionRelease },
         { path: `artifacts/validation-reports.json`, format: 'json', content: perceptionValidation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -170,8 +232,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const sensorDefinitionTask = defineTask('sensor-definition', (args, taskCtx) => ({
   kind: 'agent',

@@ -101,7 +101,6 @@ export async function process(inputs, ctx) {
     };
     artifacts.push(...disclosure.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: SUBMISSION PREPARATION
   // ============================================================================
@@ -140,7 +139,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Publishing research');
 
-  const publication = await ctx.task(publicationTask, {
+  let publication = await ctx.task(publicationTask, {
     projectName,
     submission,
     presentation,
@@ -148,9 +147,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...publication.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      publication = await ctx.task(publicationTask, { ...{
+    projectName,
+    submission,
+    presentation,
+    disclosureStatus,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Research publication process complete. Disclosure status: ${disclosureStatus.status}. Publication ready: ${publication.ready}. Proceed with publication?`,
     title: 'Research Publication Ready',
     context: {
@@ -162,9 +170,15 @@ export async function process(inputs, ctx) {
         peerReviewComplete: peerReview.approved
       },
       files: publication.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -188,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

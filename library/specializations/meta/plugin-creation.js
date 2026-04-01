@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing plugin structure');
 
-  const structure = await ctx.task(structureDesignTask, {
+  let structure = await ctx.task(structureDesignTask, {
     pluginName,
     requirements: requirements.analysis,
     components,
@@ -96,8 +96,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(structure.artifacts || []));
 
-  // Breakpoint: Review structure design before authoring
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      structure = await ctx.task(structureDesignTask, { ...{
+    pluginName,
+    requirements: requirements.analysis,
+    components,
+    scope,
+    pluginDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Plugin structure designed for "${pluginName}" with ${structure.fileCount} files. Review the planned structure before creating files?`,
     title: 'Plugin Structure Review',
     context: {
@@ -114,9 +124,15 @@ export async function process(inputs, ctx) {
         hasInstallProcess: !!components.installProcess,
         hasMigrations: !!components.migrations
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: INSTRUCTION AUTHORING
   // ============================================================================
@@ -204,14 +220,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(processResults.main.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 5: VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Validating plugin package');
 
-  const validation = await ctx.task(validatePluginPackageTask, {
+  let validation = await ctx.task(validatePluginPackageTask, {
     pluginName,
     pluginDir,
     requirements: requirements.analysis,
@@ -228,8 +243,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...(validation.artifacts || []));
 
   if (!validation.valid) {
-    // Breakpoint on validation failure
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        validation = await ctx.task(validatePluginPackageTask, { ...{
+    pluginName,
+    pluginDir,
+    requirements: requirements.analysis,
+    structure: structure.design,
+    components,
+    hasInstallMd: true,
+    hasUninstallMd: true,
+    hasConfigureMd: true,
+    hasInstallProcess: !!components.installProcess,
+    hasConfigureProcess: !!components.configureProcess,
+    hasProcessFiles: !!components.processFiles
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Plugin validation found ${(validation.issues || []).length} issues. Review and decide: fix issues or proceed anyway?`,
       title: 'Plugin Validation Issues',
       context: {
@@ -239,9 +270,15 @@ export async function process(inputs, ctx) {
           format: a.format || 'markdown',
           label: a.label
         }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: MARKETPLACE INTEGRATION
@@ -279,8 +316,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

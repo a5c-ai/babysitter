@@ -89,15 +89,23 @@ export async function process(inputs, ctx) {
 
   // Task 8: Create Crisis Escalation Protocol
   ctx.log('info', 'Phase 8: Creating crisis escalation protocol');
-  const crisisProtocol = await ctx.task(crisisEscalationTask, {
+  let crisisProtocol = await ctx.task(crisisEscalationTask, {
     alertSetup,
     alertThresholds,
     outputDir
   });
   artifacts.push(...crisisProtocol.artifacts);
 
-  // Breakpoint: Review monitoring setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      crisisProtocol = await ctx.task(crisisEscalationTask, { ...{
+    alertSetup,
+    alertThresholds,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Social listening setup complete. ${queryConfig.totalQueries} queries configured with ${alertSetup.alertCount} alerts. Review and activate?`,
     title: 'Social Listening Setup Review',
     context: {
@@ -109,9 +117,15 @@ export async function process(inputs, ctx) {
         competitorsTracked: competitorList.length,
         crisisProtocolReady: crisisProtocol.protocolReady
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Create Brand Health Reporting
   ctx.log('info', 'Phase 9: Creating brand health reporting framework');
   const brandHealthReporting = await ctx.task(brandHealthReportingTask, {
@@ -143,8 +157,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const monitoringQueryConfigTask = defineTask('monitoring-query-config', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Configure monitoring queries',

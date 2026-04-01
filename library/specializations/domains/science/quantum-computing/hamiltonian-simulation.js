@@ -41,23 +41,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Hamiltonian Analysis');
 
-  const analysisResult = await ctx.task(hamiltonianAnalysisTask, {
+  let analysisResult = await ctx.task(hamiltonianAnalysisTask, {
     hamiltonian,
     framework
   });
 
-  artifacts.push(...(analysisResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      analysisResult = await ctx.task(hamiltonianAnalysisTask, { ...{
+    hamiltonian,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Hamiltonian analyzed. Terms: ${analysisResult.termCount}, Qubits: ${analysisResult.qubitCount}, Spectral norm: ${analysisResult.spectralNorm}. Proceed with method selection?`,
     title: 'Hamiltonian Analysis Review',
     context: {
       runId: ctx.runId,
       analysis: analysisResult,
       files: (analysisResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SIMULATION METHOD OPTIMIZATION
   // ============================================================================
@@ -83,25 +95,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Evolution Circuit Construction');
 
-  const circuitResult = await ctx.task(evolutionCircuitConstructionTask, {
+  let circuitResult = await ctx.task(evolutionCircuitConstructionTask, {
     hamiltonian,
     methodConfig: methodResult,
     simulationTime,
     framework
   });
 
-  artifacts.push(...(circuitResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      circuitResult = await ctx.task(evolutionCircuitConstructionTask, { ...{
+    hamiltonian,
+    methodConfig: methodResult,
+    simulationTime,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Evolution circuit constructed. Depth: ${circuitResult.circuitDepth}, Gates: ${circuitResult.gateCount}. Review circuit structure?`,
     title: 'Evolution Circuit Review',
     context: {
       runId: ctx.runId,
       circuit: circuitResult,
       files: (circuitResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: CIRCUIT OPTIMIZATION
   // ============================================================================
@@ -123,7 +149,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Error Bound Analysis');
 
-  const errorResult = await ctx.task(simulationErrorAnalysisTask, {
+  let errorResult = await ctx.task(simulationErrorAnalysisTask, {
     hamiltonian,
     methodConfig: methodResult,
     simulationTime,
@@ -132,17 +158,32 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(errorResult.artifacts || []));
 
-  if (errorResult.estimatedError > errorTolerance) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        errorResult = await ctx.task(simulationErrorAnalysisTask, { ...{
+    hamiltonian,
+    methodConfig: methodResult,
+    simulationTime,
+    trotterOrder
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Estimated error ${errorResult.estimatedError} exceeds tolerance ${errorTolerance}. Increase Trotter steps or accept higher error?`,
       title: 'Error Tolerance Warning',
       context: {
         runId: ctx.runId,
         error: errorResult,
         files: (errorResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: SIMULATION VALIDATION
@@ -179,7 +220,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Documentation');
 
-  const reportResult = await ctx.task(hamiltonianSimulationReportTask, {
+  let reportResult = await ctx.task(hamiltonianSimulationReportTask, {
     hamiltonian,
     method,
     simulationTime,
@@ -193,9 +234,24 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(hamiltonianSimulationReportTask, { ...{
+    hamiltonian,
+    method,
+    simulationTime,
+    analysisResult,
+    methodResult,
+    circuitResult,
+    optimizationResult,
+    errorResult,
+    validationResult,
+    resourceResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hamiltonian simulation complete. Time: ${simulationTime}, Error bound: ${errorResult.estimatedError}, Circuit depth: ${optimizationResult.optimizedDepth}. Approve results?`,
     title: 'Hamiltonian Simulation Complete',
     context: {
@@ -208,9 +264,15 @@ export async function process(inputs, ctx) {
         validated: validationResult.validated
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -251,8 +313,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -132,14 +132,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...humanIntegration.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: WORKFLOW COMPILATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Compiling workflow');
 
-  const compilation = await ctx.task(workflowCompilationTask, {
+  let compilation = await ctx.task(workflowCompilationTask, {
     workflowName,
     graphDefinition: graphDefinition.graph,
     nodeImplementation: nodeImplementation.nodes,
@@ -150,8 +149,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...compilation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compilation = await ctx.task(workflowCompilationTask, { ...{
+    workflowName,
+    graphDefinition: graphDefinition.graph,
+    nodeImplementation: nodeImplementation.nodes,
+    checkpointLogic: checkpointLogic.logic,
+    humanIntegration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `LangGraph Workflow ${workflowName} compiled. ${nodes.length} nodes, checkpointing: ${checkpointEnabled}. Review workflow?`,
     title: 'LangGraph Workflow Review',
     context: {
@@ -164,9 +174,15 @@ export async function process(inputs, ctx) {
         persistenceBackend
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

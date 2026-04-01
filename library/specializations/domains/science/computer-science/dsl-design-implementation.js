@@ -131,7 +131,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating complete DSL specification');
-  const specificationDocument = await ctx.task(dslSpecificationTask, {
+  let specificationDocument = await ctx.task(dslSpecificationTask, {
     domainDescription,
     domainAnalysis,
     syntaxDesign,
@@ -145,8 +145,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...specificationDocument.artifacts);
 
-  // Breakpoint: Review DSL design and implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      specificationDocument = await ctx.task(dslSpecificationTask, { ...{
+    domainDescription,
+    domainAnalysis,
+    syntaxDesign,
+    semanticsDefinition,
+    parserTypeChecker,
+    backend,
+    standardLibrary,
+    documentation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DSL design complete. Approach: ${implementationApproach}. Review specification and implementation?`,
     title: 'DSL Design and Implementation Review',
     context: {
@@ -161,9 +175,15 @@ export async function process(inputs, ctx) {
         libraryFunctions: standardLibrary.functions?.length || 0,
         hasTypeChecker: parserTypeChecker.hasTypeChecker
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -204,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

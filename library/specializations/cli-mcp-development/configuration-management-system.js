@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const configTesting = await ctx.task(configTestingTask, { projectName, language, outputDir });
   artifacts.push(...configTesting.artifacts);
 
-  const configDocumentation = await ctx.task(configDocumentationTask, { projectName, configFormats, outputDir });
-  artifacts.push(...configDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let configDocumentation = await ctx.task(configDocumentationTask, { projectName, configFormats, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      configDocumentation = await ctx.task(configDocumentationTask, { ...{ projectName, configFormats, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Configuration Management System complete with ${configFormats.length} formats. Review and approve?`,
     title: 'Configuration System Complete',
-    context: { runId: ctx.runId, summary: { projectName, configFormats, features } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, configFormats, features } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

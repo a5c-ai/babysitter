@@ -79,7 +79,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...audioProcessing.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: VIDEO PROCESSING
   // ============================================================================
@@ -95,7 +94,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...videoProcessing.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: UNIFIED REASONING
   // ============================================================================
@@ -135,7 +133,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Running integration tests');
 
-  const integrationTests = await ctx.task(multiModalTestingTask, {
+  let integrationTests = await ctx.task(multiModalTestingTask, {
     agentName,
     modalities,
     pipeline: multiModalPipeline.pipeline,
@@ -144,8 +142,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...integrationTests.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integrationTests = await ctx.task(multiModalTestingTask, { ...{
+    agentName,
+    modalities,
+    pipeline: multiModalPipeline.pipeline,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-modal agent ${agentName} complete. Modalities: ${modalities.join(', ')}. Review implementation?`,
     title: 'Multi-Modal Agent Review',
     context: {
@@ -158,9 +165,15 @@ export async function process(inputs, ctx) {
         testsPassed: integrationTests.passed
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -180,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Framework Design
   ctx.log('info', 'Phase 1: Designing expertise profiling framework');
-  const frameworkDesign = await ctx.task(frameworkDesignTask, { profileFramework, competencyModel, outputDir });
-  artifacts.push(...frameworkDesign.artifacts);
-
-  await ctx.breakpoint({
+  let frameworkDesign = await ctx.task(frameworkDesignTask, { profileFramework, competencyModel, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      frameworkDesign = await ctx.task(frameworkDesignTask, { ...{ profileFramework, competencyModel, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Expertise framework designed with ${frameworkDesign.dimensions.length} dimensions. Review?`,
     title: 'Framework Design Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { dimensions: frameworkDesign.dimensions.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { dimensions: frameworkDesign.dimensions.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Assessment Instrument Development
   ctx.log('info', 'Phase 2: Developing assessment instruments');
   const assessmentInstruments = await ctx.task(assessmentInstrumentsTask, { frameworkDesign: frameworkDesign.framework, assessmentMethods, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { profilingSystem: frameworkDesign.framework, assessmentInstruments: assessmentInstruments.instruments, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -101,8 +109,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/expertise-profiling', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const frameworkDesignTask = defineTask('framework-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design expertise framework',

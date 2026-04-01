@@ -867,7 +867,7 @@ async function validateProcessExport(filePath: string): Promise<void> {
         category: ErrorCategory.Validation,
         nextSteps: [
           "Every TaskDef returned from defineTask(...) must include a top-level kind string",
-          "Use kind: \"agent\" with agent: { ... }, kind: \"shell\" with shell: { command: ... }, or kind: \"node\" with node: { entry, args? } as appropriate",
+          "Use kind: \"agent\" with agent: { ... }, kind: \"shell\" with shell: { command: ... }, or another supported effect kind that the agent will execute and post manually",
         ],
       },
     );
@@ -883,7 +883,7 @@ async function validateProcessExport(filePath: string): Promise<void> {
         category: ErrorCategory.Validation,
         nextSteps: [
           "Match each task's kind to its body shape",
-          "Agent tasks must use kind: \"agent\", shell tasks must use kind: \"shell\", and node tasks must use kind: \"node\"",
+          "Agent tasks must use kind: \"agent\" and shell tasks must use kind: \"shell\". Do not generate node task definitions in authored processes",
         ],
       },
     );
@@ -898,6 +898,20 @@ async function validateProcessExport(filePath: string): Promise<void> {
         nextSteps: [
           "Define at least one agent task with kind: \"agent\" for the main planning, implementation, or refinement work",
           "Use shell tasks only for concrete runnable commands such as tests, builds, package installs, or linters",
+        ],
+      },
+    );
+  }
+  const nodeTaskIds = getDefineTaskIdsByKind(source, "node");
+  if (nodeTaskIds.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} defines forbidden node tasks: ${nodeTaskIds.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Replace each node task with an agent or skill task",
+          "If the work is a concrete existing CLI command, use a shell task and have the orchestrating agent execute it and post the result",
         ],
       },
     );
@@ -1453,7 +1467,7 @@ export function buildExternalProcessConformancePrompt(args: {
     "- Put instructions inside `agent.prompt.task`, `agent.prompt.instructions`, and related prompt fields rather than top-level `instructions` fields.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
-    "- Node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
+    "- Do not introduce `kind: \"node\"` task definitions in generated or repaired processes. If logic would have been a node task, convert it to an `agent` or `skill` task instead.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
     "- The exported `process(inputs, ctx)` function must run tasks with `await ctx.task(definedTask, args)`; do not invent alternate task runners.",
     "- Inside the named `process(inputs, ctx)` export, never reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
@@ -1492,7 +1506,7 @@ function buildInternalProcessConformancePrompt(args: {
     "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
-    "- Node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
+    "- Do not introduce `kind: \"node\"` task definitions in generated or repaired processes. If logic would have been a node task, convert it to an `agent` or `skill` task instead.",
     "- The exported `process(inputs, ctx)` function must call tasks with `await ctx.task(definedTask, args)`.",
     "- Use `babysitter_write_process_definition` to rewrite the full file to the exact target path.",
     "- After rewriting the file, call `babysitter_report_process_definition` exactly once with the same path.",
@@ -1921,9 +1935,10 @@ export async function runProcessDefinitionPhase(args: {
   const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
   writeVerboseData("phase1 workspace assessment", workspaceAssessment);
 
-  const processDefinitionSystemPrompt = buildProcessDefinitionSystemPrompt(
+  const processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
     args.outputPath,
     args.promptContext,
+    args.interactive,
   );
   const initialMetaPrompt = buildProcessDefinitionUserPrompt(
     args.prompt,

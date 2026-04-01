@@ -44,15 +44,24 @@ export async function process(inputs, ctx) {
   const assumptionChallenging = await ctx.task(assumptionChallengingTask, { problem, problemReframing, existingSolutions, outputDir });
   artifacts.push(...assumptionChallenging.artifacts);
 
-  const randomEntryTechnique = await ctx.task(randomEntryTask, { problem, domain, outputDir });
-  artifacts.push(...randomEntryTechnique.artifacts);
-
-  await ctx.breakpoint({
+  let randomEntryTechnique = await ctx.task(randomEntryTask, { problem, domain, outputDir });
+    let lastFeedback_implementationApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_implementationApproval) {
+      randomEntryTechnique = await ctx.task(randomEntryTask, { ...{ problem, domain, outputDir }, feedback: lastFeedback_implementationApproval, attempt: attempt + 1 });
+    }
+  const implementationApproval = await ctx.breakpoint({
     question: `Assumptions challenged and random entry complete. ${assumptionChallenging.challengedAssumptions?.length || 0} assumptions challenged. Continue with provocation techniques?`,
     title: 'Lateral Thinking Progress Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { problem, assumptionsChallenged: assumptionChallenging.challengedAssumptions?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { problem, assumptionsChallenged: assumptionChallenging.challengedAssumptions?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_implementationApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (implementationApproval.approved) break;
+    lastFeedback_implementationApproval = implementationApproval.response || implementationApproval.feedback || 'Changes requested';
+  }
   const provocationTechnique = await ctx.task(provocationTask, { problem, assumptionChallenging, outputDir });
   artifacts.push(...provocationTechnique.artifacts);
 
@@ -68,15 +77,24 @@ export async function process(inputs, ctx) {
   const noveltyEvaluation = await ctx.task(noveltyEvaluationTask, { ideas: ideaSynthesis.ideas, existingSolutions, minimumNoveltyScore, outputDir });
   artifacts.push(...noveltyEvaluation.artifacts);
 
-  const qualityScore = await ctx.task(lateralThinkingQualityScoringTask, { problemReframing, assumptionChallenging, ideaSynthesis, noveltyEvaluation, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(lateralThinkingQualityScoringTask, { problemReframing, assumptionChallenging, ideaSynthesis, noveltyEvaluation, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(lateralThinkingQualityScoringTask, { ...{ problemReframing, assumptionChallenging, ideaSynthesis, noveltyEvaluation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lateral thinking complete. ${ideaSynthesis.ideas?.length || 0} ideas generated, ${noveltyEvaluation.novelIdeas?.length || 0} novel. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Lateral Thinking Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { ideasGenerated: ideaSynthesis.ideas?.length || 0, novelIdeas: noveltyEvaluation.novelIdeas?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { ideasGenerated: ideaSynthesis.ideas?.length || 0, novelIdeas: noveltyEvaluation.novelIdeas?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problem,

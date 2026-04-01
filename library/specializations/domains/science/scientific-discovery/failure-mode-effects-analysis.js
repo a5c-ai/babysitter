@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Identifying failure modes');
-  const failureModeIdentification = await ctx.task(failureModeIdentificationTask, {
+  let failureModeIdentification = await ctx.task(failureModeIdentificationTask, {
     system,
     functionAnalysis,
     components,
@@ -81,8 +81,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...failureModeIdentification.artifacts);
 
-  // Breakpoint: Review failure modes
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      failureModeIdentification = await ctx.task(failureModeIdentificationTask, { ...{
+    system,
+    functionAnalysis,
+    components,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${failureModeIdentification.totalFailureModes} potential failure modes across ${components.length} components. Review before effects analysis?`,
     title: 'Failure Modes Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         components: components.length,
         failureModes: failureModeIdentification.totalFailureModes
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: FAILURE EFFECTS ANALYSIS
   // ============================================================================
@@ -256,7 +271,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Scoring FMEA quality');
-  const qualityScore = await ctx.task(fmeaQualityScoringTask, {
+  let qualityScore = await ctx.task(fmeaQualityScoringTask, {
     system,
     failureModeIdentification,
     severityAssessment,
@@ -268,8 +283,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityScore.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(fmeaQualityScoringTask, { ...{
+    system,
+    failureModeIdentification,
+    severityAssessment,
+    rpnCalculation,
+    mitigationDevelopment,
+    fmeaTable,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FMEA complete for ${system.name}. ${rpnCalculation.highRiskCount} high-risk items (RPN >= ${rpnThreshold}). Quality score: ${qualityScore.overallScore}/100. Approve FMEA?`,
     title: 'FMEA Approval',
     context: {
@@ -287,9 +314,15 @@ export async function process(inputs, ctx) {
         mitigationsPlanned: mitigationDevelopment.mitigations?.length || 0,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -321,8 +354,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

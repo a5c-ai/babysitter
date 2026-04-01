@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Detention/Retention Design
   ctx.log('info', 'Designing detention/retention facilities');
-  const detentionDesign = await ctx.task(detentionDesignTask, {
+  let detentionDesign = await ctx.task(detentionDesignTask, {
     projectId,
     hydrologicAnalysis,
     prePostComparison,
@@ -92,8 +92,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...detentionDesign.artifacts);
 
-  // Breakpoint: Review stormwater design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      detentionDesign = await ctx.task(detentionDesignTask, { ...{
+    projectId,
+    hydrologicAnalysis,
+    prePostComparison,
+    regulatoryRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stormwater design complete for ${projectId}. Peak flow reduction: ${prePostComparison.peakReduction}%. Review design?`,
     title: 'Stormwater Management Design Review',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
         detentionVolume: detentionDesign.requiredVolume,
         lidArea: lidDesign.totalArea
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Conveyance System Design
   ctx.log('info', 'Designing conveyance systems');
   const conveyanceDesign = await ctx.task(conveyanceDesignTask, {
@@ -186,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Hydrologic Analysis
+  // Task 1: Hydrologic Analysis
 export const hydrologicAnalysisTask = defineTask('hydrologic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform hydrologic analysis',

@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   // PHASE 3: USER INTERVIEW
   // ============================================================================
 
-  await ctx.breakpoint({
+  const interviewResult = await ctx.breakpoint({
     question: [
       'Welcome to babysitter setup! Please tell us about yourself so we can personalize your experience.',
       '',
@@ -101,6 +101,9 @@ export async function process(inputs, ctx) {
       socialProfileUrls: socialProfileUrls.length > 0 ? socialProfileUrls : 'None provided (can be added later)'
     }
   });
+  if (!interviewResult.approved) {
+    return { success: false, reason: 'User cancelled during onboarding interview', feedback: interviewResult.response || interviewResult.feedback, metadata: { processId: 'cradle/user-install', timestamp: ctx.now() } };
+  }
 
   // ============================================================================
   // PHASE 4: SOCIAL RESEARCH (OPTIONAL)
@@ -153,7 +156,7 @@ export async function process(inputs, ctx) {
   // PHASE 8: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
+  const profileReview = await ctx.breakpoint({
     question: [
       'Please review your complete user profile before we save it.',
       '',
@@ -179,6 +182,9 @@ export async function process(inputs, ctx) {
       ]
     }
   });
+  if (!profileReview.approved) {
+    return { success: false, reason: 'User rejected profile at review gate', feedback: profileReview.response || profileReview.feedback, metadata: { processId: 'cradle/user-install', timestamp: ctx.now() } };
+  }
 
   // ============================================================================
   // PHASE 9: SAVE
