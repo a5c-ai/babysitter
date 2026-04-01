@@ -155,7 +155,13 @@ HOOK_SCRIPTS=$(node -e "
     const h = JSON.parse(require('fs').readFileSync(hooksPath,'utf8'));
     for (const matchers of Object.values(h.hooks || {})) {
       for (const m of matchers) {
-        if (m.bash) console.log(m.bash.replace(/^\\.\\//,''));
+        if (m.bash) {
+            // Extract script path from command string (e.g., 'bash \"./hooks/foo.sh\"' -> 'hooks/foo.sh')
+            const cmd = m.bash;
+            const match = cmd.match(/[\"']([^\"']+)[\"']/);
+            const scriptPath = match ? match[1] : cmd;
+            console.log(scriptPath.replace(/^\\.\\//,''));
+          }
       }
     }
   } else {
@@ -189,8 +195,20 @@ HOOK_COMMANDS=$(node -e "
   const h = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
   for (const [type, matchers] of Object.entries(h.hooks || {})) {
     for (const m of matchers) {
-      if (m.bash) console.log('bash|' + m.bash.replace(/^\\.\\//,''));
-      if (m.powershell) console.log('ps1|' + m.powershell.replace(/^\\.\\//,''));
+      if (m.bash) {
+        // Extract script path from command string (e.g., 'bash \"./hooks/foo.sh\"' -> 'hooks/foo.sh')
+        const cmd = m.bash;
+        const match = cmd.match(/[\"']([^\"']+)[\"']/);
+        const scriptPath = match ? match[1] : cmd;
+        console.log('bash|' + scriptPath.replace(/^\\.\\//,''));
+      }
+      if (m.powershell) {
+        // Extract script path from command string (e.g., 'powershell ... -File \"./hooks/foo.ps1\"' -> 'hooks/foo.ps1')
+        const cmd = m.powershell;
+        const match = cmd.match(/-File\s+[\"']([^\"']+)[\"']/);
+        const scriptPath = match ? match[1] : cmd;
+        console.log('ps1|' + scriptPath.replace(/^\\.\\//,''));
+      }
       // Also handle nested hooks array (claude-code style)
       for (const hook of (m.hooks || [])) {
         if (hook.command) console.log('cmd|' + hook.command.replace(/^\\.\\//,''));
