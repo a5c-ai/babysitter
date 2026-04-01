@@ -214,6 +214,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
 
         // ── E. Verify plugin installation/distribution model ──
         `Verify the plugin installation and distribution model for ${args.harnessName}: CLI commands for install/uninstall/update (e.g. "copilot plugin install OWNER/REPO", "claude plugin install", "codex marketplace install"), marketplace system and commands (marketplace.json, browse/list commands), plugin storage paths (e.g. ~/.copilot/installed-plugins/, ~/.claude/plugins/, etc.), and whether plugins are distributed via npm, git repos, binary downloads, or a custom marketplace.`,
+        `CRITICAL: Verify the EXACT local plugin install path from official docs. Different harnesses use different conventions (e.g. Cursor uses ~/.cursor/plugins/local/<name>/, Codex uses ~/.codex/plugins/<name>/). Getting this wrong means the harness won't discover the plugin. Do NOT assume the path from other harnesses.`,
 
         // ── F. Read official documentation URLs ──
         `The research agent MUST find and read the harness's official plugin/extension/hook documentation URLs. Do not infer behavior from code patterns or from other harnesses. If official documentation is sparse or missing, document that as a risk — the integration may need to be based on reverse engineering, which carries higher risk of breaking on updates.`,
@@ -474,6 +475,11 @@ export const createPluginTask = defineTask('create-plugin', (args, taskCtx) => (
         'The `skills` field in plugin.json must be a directory path string like `"skills/"` (NOT an array of {name, file} objects). The harness auto-discovers SKILL.md files in subdirectories.',
         'The `hooks` field in plugin.json must be a path string like `"hooks.json"` (NOT an inline object mapping event names to script paths).',
         'Do NOT include a `contextFileName` field — context files (.cursorrules, AGENTS.md, GEMINI.md) are discovered by convention, not configured in the manifest.',
+
+        // ── PLUGIN NAME CONVENTION (CRITICAL) ──
+        'The plugin MUST register as "babysitter" in the harness plugin manifest — NOT "babysitter-<harness>". This applies to: the `name` field in .cursor-plugin/plugin.json, .codex-plugin/plugin.json, .github/plugin.json, or equivalent manifest; the PLUGIN_NAME constant in install-shared.js or install.js; marketplace entry names; and install target directory names. The npm package name (@a5c-ai/babysitter-<harness>) and CLI bin name (babysitter-<harness>) remain harness-specific, but the plugin identity within the harness ecosystem is always just "babysitter".',
+        'Log prefixes in install/uninstall scripts should use "[babysitter]", not "[babysitter-<harness>]".',
+        'The install target directory should be "<harness-plugins-dir>/babysitter/", not "<harness-plugins-dir>/babysitter-<harness>/".',
       ],
       outputFormat: 'JSON with pluginDir, filesCreated, manifest, hookScripts, summary',
     },
@@ -591,6 +597,12 @@ export const createInstallDistTask = defineTask('create-install-dist', (args, ta
         'The PRIMARY installation method must be marketplace-based (e.g. `copilot plugin install OWNER/REPO:path`, Cursor Marketplace, `babysitter plugin:install`). Document this as the recommended approach.',
         'npm/bin-based installation (npm install -g, npx) is a SECONDARY or development method, not the primary recommendation.',
         'The install scripts (bin/install.js) are for development/testing convenience, not the primary distribution mechanism.',
+
+        // ── PLUGIN NAME AND INSTALL PATH CONVENTIONS (CRITICAL) ──
+        'The plugin MUST install to a directory named "babysitter" (NOT "babysitter-<harness>"). For example, Cursor plugins go to ~/.cursor/plugins/local/babysitter/, Codex plugins to ~/.codex/plugins/babysitter/, etc. The PLUGIN_NAME constant in install-shared.js must be "babysitter".',
+        'The install script must verify the correct local plugin install path from the harness official docs. For example, Cursor requires ~/.cursor/plugins/local/ (not ~/.cursor/plugins/ directly). Each harness has its own convention — do NOT assume the path from other harnesses.',
+        'Marketplace entries must use name: "babysitter" (not "babysitter-<harness>").',
+        'Log prefixes in install/uninstall output should use "[babysitter]".',
       ],
       outputFormat: 'JSON with method, filesCreated, installCommand, uninstallCommand, summary',
     },
@@ -1202,6 +1214,11 @@ export const verifyAssimilationTask = defineTask('verify-assimilation', (args, t
         'Verify skills use the SDK CLI instructions command, not embedded static content.',
         'Verify install/uninstall scripts are idempotent and complete.',
 
+        // ── Plugin naming convention ──
+        'Verify the plugin registers as "babysitter" (NOT "babysitter-<harness>") in: the harness-specific manifest name field (.cursor-plugin/plugin.json, .codex-plugin/plugin.json, .github/plugin.json, etc.), the PLUGIN_NAME or EXTENSION_DIR_NAME constant in install scripts, marketplace entries, and install target directory paths.',
+        'Verify log prefixes use "[babysitter]" not "[babysitter-<harness>]".',
+        'Verify the install target directory path matches the harness official docs (e.g. Cursor requires plugins/local/, not just plugins/).',
+
         // ── Testing coverage ──
         'Verify adapter unit tests exist at packages/sdk/src/harness/__tests__/<adapterName>.test.ts.',
         'Verify adapter tests cover: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook (with completion proof and journal replay), handleSessionStartHook (with state file and context injection), findHookDispatcherPath.',
@@ -1280,6 +1297,8 @@ export const refineAssimilationTask = defineTask('refine-assimilation', (args, t
         'Fix hooks that implement logic directly instead of delegating to babysitter hook:run.',
         'Remove any redundant orchestration scripts, loop drivers, effect adapters, or custom tools.',
         'Fix README content that exposes raw CLI primitives to end users.',
+        'Fix incorrect plugin naming: the plugin must register as "babysitter" (not "babysitter-<harness>") in manifests, PLUGIN_NAME constants, marketplace entries, install target paths, and log prefixes.',
+        'Fix incorrect install paths: verify the install target directory matches the harness official docs (e.g. Cursor requires plugins/local/, not just plugins/).',
         'Return the files created or modified and summarize the fixes applied.',
       ],
       outputFormat: 'JSON with filesCreated, filesModified, fixesApplied, summary',

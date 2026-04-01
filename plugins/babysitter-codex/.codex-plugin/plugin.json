@@ -18,12 +18,6 @@
     "skills"
   ],
   "skills": "./skills/",
-  "skillEntries": [
-    {
-      "name": "babysitter:retrospect",
-      "argumentHint": "[run-id...] [--all] Run IDs or --all for all runs"
-    }
-  ],
   "hooks": "./hooks.json",
   "apps": "./.app.json",
   "interface": {
