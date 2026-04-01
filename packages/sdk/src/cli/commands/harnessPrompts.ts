@@ -111,7 +111,7 @@ function formatSharedContext(context: HarnessPromptContext): string[] {
 }
 
 export async function buildProcessDefinitionSystemPrompt(
-  outputPath: string,
+  outputDir: string,
   context: HarnessPromptContext,
   interactive?: boolean | undefined,
 ): Promise<string> {
@@ -143,6 +143,7 @@ export async function buildProcessDefinitionSystemPrompt(
     "- This phase is unbound. Do not create a run, bind a session, iterate a run, or post task results.",
     "- In interactive mode, AskUserQuestion is the only in-loop way to ask the user for clarification. If you need missing requirements, call AskUserQuestion instead of asking in plain text.",
     "- Use the AskUserQuestion tool when clarification is useful. Ask focused, high-signal questions in batches when possible.",
+    "- Whenever you call AskUserQuestion, set a generous timeout and a recommended option when safe so the turn can recover cleanly instead of stalling forever.",
     "- Before authoring the process in any mode, resolve the active shared process-library and conduct a real search against it. In this built-in PI path, use `babysitter_resolve_process_library`, `babysitter_search_process_library`, and `babysitter_read_process_library_file`; those tools are the internal `harness:create-run` harness surface for process-library work. Outside this built-in path, use `babysitter process-library:active --json`, then search the returned `binding.dir`. Do not skip this process-library search step.",
     "- Treat `binding.dir` as the active process-library root that must be searched first. If you need the cloned repo root itself for adjacent material, use `defaultSpec.cloneDir`. Treat `reference/` under the active root or `defaultSpec.referenceRoot` as the canonical reference area.",
     "- Research the workspace before finalizing the process. Use your available read/search/bash/write tools as needed.",
@@ -171,14 +172,15 @@ export async function buildProcessDefinitionSystemPrompt(
     "",
     composedInstructions,
     "",
-    `Required output path: ${outputPath}`,
+    `Process output directory: ${outputDir}`,
+    'Choose a descriptive kebab-case filename for your process (e.g. "user-auth-tdd.mjs", "data-pipeline-setup.js"). Pass it as the `filename` parameter to babysitter_write_process_definition.',
     ...formatSharedContext(context),
   ].join("\n");
 }
 
 export function buildProcessDefinitionUserPrompt(
   userPrompt: string,
-  outputPath: string,
+  outputDir: string,
   options?: ProcessDefinitionUserPromptOptions,
 ): string {
   const interactive = options?.interactive ?? true;
@@ -194,7 +196,7 @@ export function buildProcessDefinitionUserPrompt(
       : "Non-interactive mode. Do not call AskUserQuestion; infer missing details from the request and workspace state.",
     "",
     `User request: ${userPrompt}`,
-    `Output path: ${outputPath}`,
+    `Process output directory: ${outputDir}`,
   ];
 
   if (workspaceAssessment === "empty") {
@@ -262,6 +264,8 @@ export function buildOrchestrationSystemPrompt(
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
     "- Shell and legacy node effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
     "- Whenever a shell or node effect is requested, execute that work intentionally through the available tools or a delegated worker, then post the outcome yourself.",
+    "- If a delegated worker, tool call, or interactive question times out, adapt instead of failing the run immediately: increase the timeout when the task is still valid, recover partial progress, or narrow the next step.",
+    "- When a tool or delegated worker accepts a `timeout`, use a generous budget by default for meaningful coding or verification work. Substantial delegated work should usually get at least 1800000ms rather than a short interactive default.",
     "- When choosing how to execute pending work, respect task-level harness metadata and the installed harness catalog provided below.",
     "- Stay in the orchestration loop until the run completes, fails, or reaches a hard limit reported by the tools.",
     "- When the run reaches a terminal state, call babysitter_finish_orchestration exactly once.",
@@ -344,6 +348,7 @@ export function buildOrchestrationTurnPrompt(args: {
     lines.push("- For `shell` effects, execute the requested command intentionally, capture the outcome, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
     lines.push("- For legacy `node` effects, execute the requested work intentionally through the available tools or a delegated worker, capture the outcome, then call babysitter_task_post_result yourself.");
     lines.push("- For `agent` or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better for the requested effect.");
+    lines.push("- If a delegated worker or tool call exposes a `timeout`, set a generous value for substantive work and retry with a longer timeout or narrower scope before giving up.");
     lines.push("- For `breakpoint` effects, use AskUserQuestion in interactive mode with explicit approval options or choose the best option non-interactively, then post the result.");
   } else {
     lines.push("");

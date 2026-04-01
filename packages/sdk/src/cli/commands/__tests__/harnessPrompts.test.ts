@@ -98,7 +98,7 @@ describe("harnessPrompts", () => {
   });
 
   test("phase 1 user prompt keeps non-interactive empty-workspace runs bounded", () => {
-    const prompt = buildProcessDefinitionUserPrompt("create a game", "/tmp/out.mjs", {
+    const prompt = buildProcessDefinitionUserPrompt("create a game", "/tmp/processes", {
       interactive: false,
       workspaceAssessment: "empty",
       workspaceEntries: [],
@@ -120,7 +120,7 @@ describe("harnessPrompts", () => {
   });
 
   test("phase 1 user prompt reinforces AskUserQuestion for interactive discovery", () => {
-    const prompt = buildProcessDefinitionUserPrompt("create a game", "/tmp/out.mjs", {
+    const prompt = buildProcessDefinitionUserPrompt("create a game", "/tmp/processes", {
       interactive: true,
       workspaceAssessment: "empty",
       workspaceEntries: [],
