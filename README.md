@@ -59,7 +59,7 @@ Babysitter enforces obedience to agentic workforces, enabling them to manage ext
 
 ```bash
 claude plugin marketplace add a5c-ai/babysitter
-claude plugin install --scope user babysitter@a5c-ai
+claude plugin install --scope user babysitter@a5c.ai
 ```
 
 Then restart Claude Code.
