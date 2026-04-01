@@ -19,26 +19,25 @@ directly.
 
 ## Installation
 
-### From GitHub repository (recommended)
+### From marketplace (recommended)
 
-Install directly from the Git repository using Copilot CLI:
-
-```bash
-copilot plugin install a5c-ai/babysitter:plugins/babysitter-github
-```
-
-### From marketplace
-
-If the a5c.ai marketplace has been registered, install by plugin name:
+Register the a5c.ai marketplace and install the plugin:
 
 ```bash
-copilot plugin install babysitter@a5c.ai
-```
-
-To register the marketplace first:
-
-```bash
+# Register the marketplace
 copilot plugin marketplace add a5c-ai/babysitter
+
+# Install the plugin
+copilot plugin install babysitter
+```
+
+### Direct GitHub install
+
+Install directly from the Git repository using Copilot CLI. Copilot CLI
+discovers the plugin via `.github/plugin/marketplace.json` at the repo root:
+
+```bash
+copilot plugin install a5c-ai/babysitter
 ```
 
 ### Alternative Installation (npm / development)
@@ -99,8 +98,8 @@ The plugin provides:
 
 - `skills/babysit/SKILL.md` as the core orchestration entrypoint
 - Mode wrapper skills such as `$call`, `$plan`, and `$resume`
-- Plugin-level lifecycle hooks for `SessionStart`, `UserPromptSubmit`, and
-  `Stop`
+- Plugin-level lifecycle hooks for `sessionStart`, `sessionEnd`, and
+  `userPromptSubmitted`
 
 The process library is fetched and bound through the SDK CLI in
 `~/.a5c/active/process-library.json`.
@@ -148,10 +147,10 @@ Fires when a new Copilot CLI session begins. The hook:
    `versions.json`)
 3. Creates baseline session state in the `.a5c` state directory
 
-### Stop
+### SessionEnd
 
-The orchestration loop driver. When Copilot CLI attempts to end its turn,
-this hook intercepts the exit and:
+The orchestration loop driver. Registered as `sessionEnd` in `hooks.json`,
+this hook fires when the Copilot CLI session ends and:
 
 1. Checks whether the active run has completed or emitted a completion proof
 2. If the run is still in progress, re-injects the next orchestration step
@@ -163,7 +162,7 @@ This is what keeps Babysitter iterating autonomously within the Copilot CLI
 session -- each turn performs one orchestration phase, and the Stop hook
 decides whether to loop or yield.
 
-### UserPromptSubmit
+### UserPromptSubmitted
 
 Fires before a user prompt reaches the model. The hook applies
 density-filter compression to long user prompts to reduce token usage while
@@ -207,6 +206,10 @@ Copilot CLI looks for the plugin manifest in these paths, checked in order:
 4. `plugin.json` (repository root)
 
 The first match wins. This plugin uses `plugin.json` at the package root.
+
+For marketplace discovery, Copilot CLI looks for `.github/plugin/marketplace.json`
+at the repository root. This file lists all available plugins in the repo and is
+used when installing via `copilot plugin install OWNER/REPO`.
 
 ### plugin.json Schema
 
@@ -337,8 +340,8 @@ repositories that contain a manifest listing available plugins.
 
 ### Creating a Marketplace
 
-A marketplace is a Git repository with a `marketplace.json` file in
-`.github/plugin/` or `.claude-plugin/`:
+A marketplace is a Git repository with a `marketplace.json` file at the
+repository root in `.github/plugin/marketplace.json`:
 
 ```json
 {
@@ -415,7 +418,7 @@ These registries are available without running `marketplace add`.
 ```
 plugins/babysitter-github/
   plugin.json              # Plugin manifest (skills, hooks, metadata)
-  .github/plugin.json      # Marketplace manifest (copy of plugin.json)
+  .github/plugin.json      # Plugin manifest (alternate discovery path)
   hooks.json               # Hook configuration (sessionStart, sessionEnd, userPromptSubmitted)
   hooks/
     session-start.sh       # SessionStart lifecycle hook
@@ -444,6 +447,12 @@ plugins/babysitter-github/
 ```
 
 ## Verification
+
+Verify marketplace registration:
+
+```bash
+copilot plugin marketplace list
+```
 
 Verify the installed plugin:
 

@@ -20,6 +20,10 @@ const DEFAULT_MARKETPLACE = {
   },
   plugins: [],
 };
+const MANAGED_HOOKS_CONFIG_PATHS = [
+  path.join('hooks', 'hooks-cursor.json'),
+  'hooks.json',
+];
 const PLUGIN_BUNDLE_ENTRIES = [
   '.cursor-plugin',
   'plugin.json',
@@ -136,6 +140,16 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function getManagedHooksConfigPath(packageRoot) {
+  for (const relativePath of MANAGED_HOOKS_CONFIG_PATHS) {
+    const candidate = path.join(packageRoot, relativePath);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
 function writeJson(filePath, value) {
   writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
@@ -195,8 +209,8 @@ function removeMarketplaceEntry(marketplacePath) {
 }
 
 function mergeManagedHooksConfig(packageRoot, cursorHome) {
-  const hooksJsonPath = path.join(packageRoot, 'hooks.json');
-  if (!fs.existsSync(hooksJsonPath)) return;
+  const hooksJsonPath = getManagedHooksConfigPath(packageRoot);
+  if (!hooksJsonPath) return;
   const managedConfig = readJson(hooksJsonPath);
   const managedHooks = managedConfig.hooks || {};
   const hooksConfigPath = path.join(cursorHome, 'hooks.json');
@@ -367,6 +381,7 @@ module.exports = {
   copyPluginBundle,
   ensureGlobalProcessLibrary,
   ensureMarketplaceEntry,
+  getManagedHooksConfigPath,
   getCursorHome,
   getHomeMarketplacePath,
   getHomePluginRoot,

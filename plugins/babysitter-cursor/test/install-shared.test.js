@@ -7,6 +7,7 @@ const assert = require('assert');
 
 const {
   ensureMarketplaceEntry,
+  getManagedHooksConfigPath,
   normalizeMarketplaceName,
 } = require('../bin/install-shared');
 
@@ -45,9 +46,34 @@ function testEnsureMarketplaceEntrySanitizesExistingMarketplaceName() {
   assert.strictEqual(written.plugins[0].source.source, 'local');
 }
 
+function testCursorPluginUsesCursorSpecificHooksManifest() {
+  const packageRoot = path.resolve(__dirname, '..');
+  const cursorPluginManifest = JSON.parse(
+    fs.readFileSync(path.join(packageRoot, '.cursor-plugin', 'plugin.json'), 'utf8'),
+  );
+  const packagePluginManifest = JSON.parse(
+    fs.readFileSync(path.join(packageRoot, 'plugin.json'), 'utf8'),
+  );
+  const hooksPath = path.join(packageRoot, 'hooks', 'hooks-cursor.json');
+  const hooksConfig = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+
+  assert.strictEqual(cursorPluginManifest.hooks, 'hooks/hooks-cursor.json');
+  assert.strictEqual(packagePluginManifest.hooks, 'hooks/hooks-cursor.json');
+  assert.strictEqual(getManagedHooksConfigPath(packageRoot), hooksPath);
+  assert.strictEqual(
+    hooksConfig.hooks.sessionStart[0].bash,
+    'bash "./hooks/session-start.sh"',
+  );
+  assert.strictEqual(
+    hooksConfig.hooks.stop[0].powershell,
+    'powershell -NoProfile -ExecutionPolicy Bypass -File "./hooks/stop-hook.ps1"',
+  );
+}
+
 function main() {
   testNormalizeMarketplaceName();
   testEnsureMarketplaceEntrySanitizesExistingMarketplaceName();
+  testCursorPluginUsesCursorSpecificHooksManifest();
   console.log('install-shared tests passed');
 }
 

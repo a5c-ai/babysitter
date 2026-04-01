@@ -104,8 +104,9 @@ plugins/babysitter-cursor/
   .cursor-plugin/
     plugin.json              # Cursor plugin manifest (skills, commands, hooks, metadata)
   plugin.json                # Babysitter plugin manifest (skills dir, hooks path, metadata)
-  hooks.json                 # Hook configuration (sessionStart, stop)
+  hooks.json                 # Legacy/manual hook configuration
   hooks/
+    hooks-cursor.json        # Cursor plugin hook configuration
     session-start.sh         # SessionStart lifecycle hook (bash)
     session-start.ps1        # SessionStart lifecycle hook (PowerShell)
     stop-hook.sh             # Stop hook -- orchestration loop driver (bash)
@@ -136,7 +137,7 @@ plugins/babysitter-cursor/
 
 ## Hook Configuration
 
-The plugin declares lifecycle hooks in `hooks.json` using the version 1
+The plugin declares lifecycle hooks in `hooks/hooks-cursor.json` using the version 1
 format. Hook event names use camelCase (e.g., `sessionStart`, `stop`).
 
 ```json
@@ -146,16 +147,16 @@ format. Hook event names use camelCase (e.g., `sessionStart`, `stop`).
     "sessionStart": [
       {
         "type": "command",
-        "bash": "./hooks/session-start.sh",
-        "powershell": "./hooks/session-start.ps1",
+        "bash": "bash \"./hooks/session-start.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/session-start.ps1\"",
         "timeoutSec": 30
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "./hooks/stop-hook.sh",
-        "powershell": "./hooks/stop-hook.ps1",
+        "bash": "bash \"./hooks/stop-hook.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/stop-hook.ps1\"",
         "loop_limit": null
       }
     ]
@@ -272,7 +273,7 @@ When Cursor attempts to end its turn, this hook intercepts the exit and:
 
 This is what keeps Babysitter iterating autonomously -- each turn performs
 one orchestration phase, and the stop hook decides whether to loop or yield.
-The `loop_limit: null` setting in `hooks.json` allows unlimited iterations.
+The `loop_limit: null` setting in `hooks/hooks-cursor.json` allows unlimited iterations.
 
 **Important:** The stop hook uses `{followup_message: "..."}` to signal
 continuation, NOT `{decision: "block"}`. This is a Cursor-specific
@@ -324,13 +325,13 @@ The Cursor marketplace manifest lives at `.cursor-plugin/plugin.json`:
   "repository": "https://github.com/a5c-ai/babysitter",
   "license": "MIT",
   "skills": "skills/",
-  "hooks": "hooks.json"
+  "hooks": "hooks/hooks-cursor.json"
 }
 ```
 
 The `skills` field points to the skills directory where Cursor
 auto-discovers `SKILL.md` files in subdirectories. The `hooks` field
-references the `hooks.json` configuration file.
+references the `hooks/hooks-cursor.json` configuration file.
 
 ### Marketplace Manifest
 
@@ -435,7 +436,7 @@ modes.
 On native Windows, hook execution depends on shell configuration. The
 plugin includes both `bash` (.sh) and `powershell` (.ps1) hook scripts
 to maximize compatibility. If hooks do not fire, try running from Git Bash
-or WSL. The `hooks.json` file includes `powershell` entries alongside
+or WSL. The Cursor hook manifest includes explicit `powershell` entries alongside
 `bash` entries for Windows PowerShell execution support.
 
 ## Development / Contributing

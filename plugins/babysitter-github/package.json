@@ -21,7 +21,10 @@
     "bin/",
     "scripts/",
     "versions.json",
-    "AGENTS.md"
+    "AGENTS.md",
+    "commands/",
+    ".github/",
+    "README.md"
   ],
   "keywords": [
     "babysitter",
