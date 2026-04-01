@@ -26,6 +26,7 @@ const PLUGIN_BUNDLE_ENTRIES = [
   'hooks.json',
   'hooks',
   'skills',
+  'commands',
   'versions.json',
   '.cursorrules',
 ];
@@ -52,7 +53,7 @@ function getHomePluginRoot() {
   if (process.env.BABYSITTER_CURSOR_PLUGIN_DIR) {
     return path.resolve(process.env.BABYSITTER_CURSOR_PLUGIN_DIR, PLUGIN_NAME);
   }
-  return path.join(getCursorHome(), 'plugins', PLUGIN_NAME);
+  return path.join(getCursorHome(), 'plugins', 'local', PLUGIN_NAME);
 }
 
 function getHomeMarketplacePath() {

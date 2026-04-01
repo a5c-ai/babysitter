@@ -76,6 +76,8 @@ Copy the plugin directory to your local Cursor plugins path:
 
 ```bash
 cp -r plugins/babysitter-cursor ~/.cursor/plugins/local/babysitter-cursor
+# Or symlink for faster iteration:
+ln -s "$(pwd)/plugins/babysitter-cursor" ~/.cursor/plugins/local/babysitter-cursor
 ```
 
 ## Uninstallation
@@ -95,8 +97,8 @@ babysitter plugin:uninstall babysitter-cursor --global
 ```
 plugins/babysitter-cursor/
   .cursor-plugin/
-    plugin.json              # Cursor Marketplace manifest
-  plugin.json                # Plugin manifest (skills dir, hooks path, metadata)
+    plugin.json              # Cursor plugin manifest (skills, commands, hooks, metadata)
+  plugin.json                # Babysitter plugin manifest (skills dir, hooks path, metadata)
   hooks.json                 # Hook configuration (sessionStart, stop)
   hooks/
     session-start.sh         # SessionStart lifecycle hook (bash)

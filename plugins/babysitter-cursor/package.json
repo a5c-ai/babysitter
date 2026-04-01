@@ -17,6 +17,7 @@
     ".cursor-plugin/",
     ".cursorrules",
     "bin/",
+    "commands/",
     "hooks/",
     "hooks.json",
     "plugin.json",
