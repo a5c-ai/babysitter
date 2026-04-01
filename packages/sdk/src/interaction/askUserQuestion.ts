@@ -329,6 +329,12 @@ export function createAskUserQuestionResponse(
   return { answers: normalizedAnswers };
 }
 
+export function createDefaultAskUserQuestionResponse(
+  request: AskUserQuestionRequest,
+): AskUserQuestionResponse {
+  return createAskUserQuestionResponse(request, buildDefaultAnswers(request));
+}
+
 export function createApprovalAskUserQuestion(
   question: string,
   header: string = "Decision",
@@ -426,102 +432,102 @@ export async function promptAskUserQuestionWithUiContext(
   ui: AskUserQuestionUiContext,
   request: AskUserQuestionRequest,
 ): Promise<AskUserQuestionResponse> {
-  validateAskUserQuestionRequest(request);
+  return runAskUserQuestionPrompt(request, async () => {
+    const answers: Record<string, string> = {};
 
-  const answers: Record<string, string> = {};
+    for (const [index, question] of request.questions.entries()) {
+      const key = getQuestionKey(question, index);
+      const options = question.options ?? [];
 
-  for (const [index, question] of request.questions.entries()) {
-    const key = getQuestionKey(question, index);
-    const options = question.options ?? [];
-
-    if (options.length === 0) {
-      let resolved = false;
-      while (!resolved) {
-        const answer = (await ui.input(
-          buildUiTitle(question),
-          question.required ? "Answer (required)" : "Answer",
-        ))?.trim();
-        if (answer) {
-          answers[key] = answer;
-          resolved = true;
-          continue;
+      if (options.length === 0) {
+        let resolved = false;
+        while (!resolved) {
+          const answer = (await ui.input(
+            buildUiTitle(question),
+            question.required ? "Answer (required)" : "Answer",
+          ))?.trim();
+          if (answer) {
+            answers[key] = answer;
+            resolved = true;
+            continue;
+          }
+          if (!question.required) {
+            answers[key] = "";
+            resolved = true;
+          }
         }
-        if (!question.required) {
-          answers[key] = "";
-          resolved = true;
-        }
+        continue;
       }
-      continue;
-    }
 
-    if (question.multiSelect) {
+      if (question.multiSelect) {
+        let resolved = false;
+        while (!resolved) {
+          const rawAnswer = (await ui.input(
+            buildUiTitle(question),
+            "Enter one or more options (numbers or labels, comma-separated)",
+          ))?.trim() ?? "";
+          if (!rawAnswer && !question.required) {
+            answers[key] = "";
+            resolved = true;
+            continue;
+          }
+          const parsed = parseOptionAnswer(rawAnswer, question);
+          if (parsed !== undefined) {
+            answers[key] = parsed;
+            resolved = true;
+          }
+        }
+        continue;
+      }
+
+      const allowOther = question.allowOther !== false;
+      const optionLabels = options.map((option) => option.label);
+      const selectOptions = allowOther
+        ? [...optionLabels, "Other (type a custom answer)"]
+        : optionLabels;
       let resolved = false;
       while (!resolved) {
-        const rawAnswer = (await ui.input(
+        const selection = await ui.select(
           buildUiTitle(question),
-          "Enter one or more options (numbers or labels, comma-separated)",
-        ))?.trim() ?? "";
-        if (!rawAnswer && !question.required) {
+          selectOptions,
+        );
+        if (!selection) {
+          if (question.required) {
+            continue;
+          }
           answers[key] = "";
           resolved = true;
           continue;
         }
-        const parsed = parseOptionAnswer(rawAnswer, question);
+        if (allowOther && selection === "Other (type a custom answer)") {
+          const other = (await ui.input(
+            buildUiTitle(question),
+            "Type your answer",
+          ))?.trim();
+          if (other) {
+            answers[key] = other;
+            resolved = true;
+            continue;
+          }
+          if (!question.required) {
+            answers[key] = "";
+            resolved = true;
+          }
+          continue;
+        }
+        const parsed = parseOptionAnswer(selection, {
+          ...question,
+          allowOther: false,
+        });
         if (parsed !== undefined) {
           answers[key] = parsed;
           resolved = true;
         }
       }
-      continue;
     }
 
-    const allowOther = question.allowOther !== false;
-    const optionLabels = options.map((option) => option.label);
-    const selectOptions = allowOther
-      ? [...optionLabels, "Other (type a custom answer)"]
-      : optionLabels;
-    let resolved = false;
-    while (!resolved) {
-      const selection = await ui.select(
-        buildUiTitle(question),
-        selectOptions,
-      );
-      if (!selection) {
-        if (question.required) {
-          continue;
-        }
-        answers[key] = "";
-        resolved = true;
-        continue;
-      }
-      if (allowOther && selection === "Other (type a custom answer)") {
-        const other = (await ui.input(
-          buildUiTitle(question),
-          "Type your answer",
-        ))?.trim();
-        if (other) {
-          answers[key] = other;
-          resolved = true;
-          continue;
-        }
-        if (!question.required) {
-          answers[key] = "";
-          resolved = true;
-        }
-        continue;
-      }
-      const parsed = parseOptionAnswer(selection, {
-        ...question,
-        allowOther: false,
-      });
-      if (parsed !== undefined) {
-        answers[key] = parsed;
-        resolved = true;
-      }
-    }
-  }
-
-  return createAskUserQuestionResponse(request, answers);
+    return createAskUserQuestionResponse(request, answers);
+  });
 }
 
 function getDefaultAnswerForQuestion(question: AskUserQuestionQuestion): string {
@@ -548,46 +554,58 @@ function buildDefaultAnswers(request: AskUserQuestionRequest): Record<string, st
   return answers;
 }
 
+function runAskUserQuestionPrompt(
+  request: AskUserQuestionRequest,
+  runInteractive: () => Promise<AskUserQuestionResponse>,
+): Promise<AskUserQuestionResponse> {
+  validateAskUserQuestionRequest(request);
+
+  if (request.timeout == null || request.timeout <= 0) {
+    return runInteractive();
+  }
+
+  const fallbackResponse = createDefaultAskUserQuestionResponse(request);
+  return new Promise<AskUserQuestionResponse>((resolve) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      process.stderr.write(
+        `${YELLOW}Ask timeout reached (${request.timeout}ms). Auto-selecting defaults.${RESET}\n`,
+      );
+      resolve(fallbackResponse);
+    }, request.timeout);
+
+    runInteractive()
+      .then((response) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(response);
+      })
+      .catch(() => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(fallbackResponse);
+      });
+  });
+}
+
 export async function promptAskUserQuestionWithReadline(
   rl: readline.Interface,
   request: AskUserQuestionRequest,
 ): Promise<AskUserQuestionResponse> {
-  validateAskUserQuestionRequest(request);
-
-  // If a timeout is specified, race the interactive prompt against a timer
-  if (request.timeout != null && request.timeout > 0) {
-    const defaultAnswers = buildDefaultAnswers(request);
-    return new Promise<AskUserQuestionResponse>((resolve) => {
-      let settled = false;
-      const timer = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          process.stderr.write(
-            `${YELLOW}Ask timeout reached (${request.timeout}ms). Auto-selecting defaults.${RESET}\n`,
-          );
-          resolve(createAskUserQuestionResponse(request, defaultAnswers));
-        }
-      }, request.timeout);
-
-      promptAskUserQuestionInteractive(rl, request)
-        .then((response) => {
-          if (!settled) {
-            settled = true;
-            clearTimeout(timer);
-            resolve(response);
-          }
-        })
-        .catch(() => {
-          if (!settled) {
-            settled = true;
-            clearTimeout(timer);
-            resolve(createAskUserQuestionResponse(request, defaultAnswers));
-          }
-        });
-    });
-  }
-
-  return promptAskUserQuestionInteractive(rl, request);
+  return runAskUserQuestionPrompt(
+    request,
+    () => promptAskUserQuestionInteractive(rl, request),
+  );
 }
 
 async function promptAskUserQuestionInteractive(

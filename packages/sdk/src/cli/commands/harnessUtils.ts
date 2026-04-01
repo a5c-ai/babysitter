@@ -19,6 +19,7 @@ import { loadCompressionConfig } from "../../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../../compression/density-filter";
 import {
   createAskUserQuestionResponse,
+  createDefaultAskUserQuestionResponse,
   promptAskUserQuestionWithUiContext,
   promptAskUserQuestionWithReadline,
   validateAskUserQuestionRequest,
@@ -180,7 +181,9 @@ export const TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS = process.env.VITEST
   ? [0, 0]
   : [1_000, 3_000];
 
-export const PI_WORKER_TIMEOUT_MS = 900_000;
+export const DEFAULT_INTERACTIVE_ASK_TIMEOUT_MS = 600_000;
+export const PI_DEFAULT_PROMPT_TIMEOUT_MS = 900_000;
+export const PI_WORKER_TIMEOUT_MS = 1_800_000;
 
 export const ASK_OPTION_SCHEMA = Type.Object({
   label: Type.String(),
@@ -482,19 +485,30 @@ export async function askUserQuestionViaTool(
   rl: readline.Interface | null,
   toolContext?: AskUserQuestionToolContext,
 ): Promise<AskUserQuestionResponse> {
-  validateAskUserQuestionRequest(request);
+  const effectiveRequest = interactive && (request.timeout == null || request.timeout <= 0)
+    ? {
+      ...request,
+      timeout: DEFAULT_INTERACTIVE_ASK_TIMEOUT_MS,
+    }
+    : request;
+
+  validateAskUserQuestionRequest(effectiveRequest);
 
   if (interactive) {
-    if (toolContext?.hasUI && toolContext.ui) {
-      return promptAskUserQuestionWithUiContext(toolContext.ui, request);
-    }
-    if (rl) {
-      return promptAskUserQuestionWithReadline(rl, request);
+    try {
+      if (toolContext?.hasUI && toolContext.ui) {
+        return await promptAskUserQuestionWithUiContext(toolContext.ui, effectiveRequest);
+      }
+      if (rl) {
+        return await promptAskUserQuestionWithReadline(rl, effectiveRequest);
+      }
+    } catch {
+      return createDefaultAskUserQuestionResponse(effectiveRequest);
     }
   }
 
   const answers: Record<string, string> = {};
-  for (const [index, question] of request.questions.entries()) {
+  for (const [index, question] of effectiveRequest.questions.entries()) {
     const key = question.header?.trim() || `Question ${index + 1}`;
     if (
       question.recommended != null &&
@@ -506,17 +520,17 @@ export async function askUserQuestionViaTool(
       answers[key] = "";
     }
   }
-  if (isApprovalAskRequest(request)) {
-    const key = request.questions[0]?.header?.trim() || "Decision";
-    const rec = request.questions[0]?.recommended;
-    const opts = request.questions[0]?.options;
+  if (isApprovalAskRequest(effectiveRequest)) {
+    const key = effectiveRequest.questions[0]?.header?.trim() || "Decision";
+    const rec = effectiveRequest.questions[0]?.recommended;
+    const opts = effectiveRequest.questions[0]?.options;
     if (rec != null && opts && opts[rec]) {
       answers[key] = opts[rec].label;
     } else {
       answers[key] = "Approve";
     }
   }
-  return createAskUserQuestionResponse(request, answers);
+  return createAskUserQuestionResponse(effectiveRequest, answers);
 }
 
 // ── Harness Resolution Utilities ─────────────────────────────────────
@@ -613,7 +627,10 @@ export function isRetryablePiPromptFailure(error: unknown): boolean {
     normalized.includes("please retry your request") ||
     normalized.includes("temporarily unavailable") ||
     normalized.includes("rate limit") ||
-    normalized.includes("too many requests");
+    normalized.includes("too many requests") ||
+    normalized.includes("pitimeouterror") ||
+    normalized.includes("pi prompt timed out") ||
+    normalized.includes("deadline exceeded");
 }
 
 export function isIgnorablePiPromptFailure(output: string): boolean {
@@ -683,7 +700,7 @@ export function buildPiWorkerSessionOptions(args: {
 
   // Priority: delegationConfig > task metadata > defaults
   const effectiveModel = args.delegationConfig?.model ?? args.model;
-  const effectiveTimeout = args.delegationConfig?.timeout ?? 900_000;
+  const effectiveTimeout = args.delegationConfig?.timeout ?? PI_WORKER_TIMEOUT_MS;
   const effectiveToolsMode = args.delegationConfig?.toolsMode
     ?? readStringMetadata(metadata, "toolsMode") as "default" | "coding" | "readonly" | undefined
     ?? "coding";

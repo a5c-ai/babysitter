@@ -8,6 +8,8 @@ agents in folders next to the reference process file.
 
 When executing the agent task, use the Task tool. Never use the Babysitter skill
 or agent to execute the task.
+When the Task tool or delegated worker accepts a timeout, use a generous budget
+for real coding or verification work instead of a short default.
 
 ```javascript
 export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
@@ -41,6 +43,8 @@ Important: Check which skills are actually available before assigning the skill
 name. Check the skills in the plugin (in nested folders) and to find relevant
 skills to use as a reference. Skills are preferred over subagents for executing
 tasks.
+When delegating the skill execution, use a generous timeout budget and require
+the skill to execute the work and return the real result.
 
 ```javascript
 export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({

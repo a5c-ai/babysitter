@@ -16,7 +16,7 @@ import {
 import { loadCompressionConfig } from "../compression/config-loader";
 import { createSecureBashBackend } from "./piSecureSandbox";
 
-const DEFAULT_TIMEOUT_MS = 120_000;
+const DEFAULT_TIMEOUT_MS = 900_000;
 const DEFAULT_BASH_SANDBOX_MODE: NonNullable<PiSessionOptions["bashSandbox"]> = "local";
 const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
 
