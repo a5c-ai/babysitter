@@ -60,6 +60,7 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("bashSandbox: \"secure\"");
     expect(prompt).toContain("Interview the user");
     expect(prompt).toContain("AskUserQuestion is the only in-loop way to ask the user");
+    expect(prompt).toContain("set a generous timeout");
     expect(prompt).toContain("resolve the active shared process-library");
     expect(prompt).toContain("babysitter_resolve_process_library");
     expect(prompt).toContain("babysitter_search_process_library");
@@ -94,6 +95,8 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("respect task-level harness metadata");
     expect(prompt).toContain("Shell and legacy node effects are first-class pending effects");
     expect(prompt).toContain("Shell effects run through the internal PI worker");
+    expect(prompt).toContain("adapt instead of failing the run immediately");
+    expect(prompt).toContain("at least 1800000ms");
     expect(prompt).toContain("env.CI=true");
   });
 

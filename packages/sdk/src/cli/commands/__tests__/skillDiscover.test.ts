@@ -35,6 +35,10 @@ describe('discoverSkillsInternal', () => {
     testDir = path.join(os.tmpdir(), `skill-discover-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    // Create a library dir in testDir so findRepoLibraryRoot stops here
+    // instead of walking up to system directories (e.g. macOS /Library on
+    // case-insensitive filesystems).
+    await fs.mkdir(path.join(testDir, 'library'), { recursive: true });
     process.chdir(testDir);
   });
 
@@ -129,11 +133,11 @@ category: testing
   });
 
   it('discovers skills from specializations directory', async () => {
+    // Place the skill under testDir/library/specializations/ which is where
+    // the discovery function resolves processRoot to (via findRepoLibraryRoot).
     const specDir = path.join(
-      pluginRoot,
-      'skills',
-      'babysit',
-      'process',
+      testDir,
+      'library',
       'specializations',
       'test-spec'
     );
@@ -187,12 +191,11 @@ category: test
   // ── Deduplication ─────────────────────────────────────────────────────
 
   it('deduplicates skills by name keeping first occurrence', async () => {
-    // Create the same-named skill in both specializations and plugin skills
+    // Create the same-named skill in both specializations (under library/)
+    // and plugin skills. Specializations are scanned first.
     const specDir = path.join(
-      pluginRoot,
-      'skills',
-      'babysit',
-      'process',
+      testDir,
+      'library',
       'specializations',
       'dup-skill'
     );
@@ -895,6 +898,9 @@ describe('discoverFromProcessFile', () => {
     testDir = path.join(os.tmpdir(), `process-discover-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(path.join(pluginRoot, 'skills', 'babysit', 'process'), { recursive: true });
+    // Create a library dir so findRepoLibraryRoot stops here instead of
+    // walking up to system directories (e.g. macOS /Library).
+    await fs.mkdir(path.join(testDir, 'library'), { recursive: true });
     process.chdir(testDir);
   });
 
@@ -925,12 +931,14 @@ export async function process(inputs, ctx) {}
     expect(result!.skills).toHaveLength(1);
     expect(result!.agents).toHaveLength(1);
 
+    // Markers resolve against the repo library root (testDir/library) when it
+    // exists, falling back to the legacy plugin process root otherwise.
     const expectedSkillPath = path.resolve(
-      pluginRoot, 'skills', 'babysit', 'process',
+      testDir, 'library',
       'specializations/web-dev/skills/my-skill/SKILL.md'
     );
     const expectedAgentPath = path.resolve(
-      pluginRoot, 'skills', 'babysit', 'process',
+      testDir, 'library',
       'specializations/web-dev/agents/my-agent/AGENT.md'
     );
 

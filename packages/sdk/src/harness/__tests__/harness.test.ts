@@ -227,11 +227,12 @@ describe("CodexAdapter", () => {
       const originalCwd = process.cwd();
       try {
         process.chdir(tmpDir);
+        const realCwd = require("node:fs").realpathSync(process.cwd());
         expect(
           adapter.resolveStateDir({
             pluginRoot: path.join(os.homedir(), ".codex"),
           }),
-        ).toBe(path.join(tmpDir, ".a5c"));
+        ).toBe(path.join(realCwd, ".a5c"));
       } finally {
         process.chdir(originalCwd);
         await fs.rm(tmpDir, { recursive: true, force: true });

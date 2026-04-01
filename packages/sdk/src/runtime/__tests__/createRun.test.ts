@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import path from "path";
 import os from "os";
-import { promises as fs } from "fs";
+import { promises as fs, realpathSync } from "fs";
 import { createRun } from "../createRun";
 import { loadJournal } from "../../storage/journal";
 import { readRunMetadata, readRunInputs } from "../../storage/runFiles";
@@ -164,7 +164,9 @@ describe("createRun", () => {
       });
 
       expect(path.isAbsolute(result.runDir)).toBe(true);
-      expect(result.runDir).toBe(path.join(workspace, ".a5c", "runs", result.runId));
+      // Use realpathSync to normalize symlinks (macOS /var -> /private/var)
+      const realWorkspace = realpathSync(workspace);
+      expect(realpathSync(result.runDir)).toBe(path.join(realWorkspace, ".a5c", "runs", result.runId));
     } finally {
       process.chdir(originalCwd);
     }
