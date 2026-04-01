@@ -17,7 +17,6 @@ import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata, StoredTaskResult } from "../storage/types";
 import { runIterate } from "./commands/runIterate";
-import { runExecuteTasks } from "./commands/runExecuteTasks";
 import { handleHealthCommand } from "./commands/health";
 import { handleConfigureCommand } from "./commands/configure";
 import {
@@ -107,7 +106,6 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
   babysitter session:check-iteration --session-id <id> --state-dir <dir> [--json]
   babysitter session:last-message --transcript-path <file> [--json]
-  babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
   babysitter log --type <process|hook|cli> --message <msg> [--run-id <id>] [--label <label>] [--level <level>] [--source <src>] [--json]
   babysitter hook:log --hook-type <type> --log-file <path> [--json]
   babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
@@ -220,8 +218,6 @@ interface ParsedArgs {
   lastIterationAt?: string;
   iterationTimes?: string;
   deleteSession?: boolean;
-  // run:execute-tasks args
-  maxTasks?: number;
   timeout?: number;
   // session:last-message args
   transcriptPath?: string;
@@ -516,11 +512,6 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.iterationTimes = expectFlagValue(rest, ++i, "--iteration-times");
       continue;
     }
-    if (arg === "--max-tasks") {
-      const raw = expectFlagValue(rest, ++i, "--max-tasks");
-      parsed.maxTasks = parsePositiveInteger(raw, "--max-tasks");
-      continue;
-    }
     if (arg === "--timeout") {
       const raw = expectFlagValue(rest, ++i, "--timeout");
       parsed.timeout = parsePositiveInteger(raw, "--timeout");
@@ -689,8 +680,6 @@ function parseArgs(argv: string[]): ParsedArgs {
   } else if (parsed.command === "run:iterate") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:events") {
-    [parsed.runDirArg] = positionals;
-  } else if (parsed.command === "run:execute-tasks") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:rebuild-state") {
     [parsed.runDirArg] = positionals;
@@ -1393,53 +1382,6 @@ async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
     return 0;
   } catch (error) {
     console.error(`[run:iterate] Error: ${error instanceof Error ? error.message : String(error)}`);
-    return 1;
-  }
-}
-
-async function handleRunExecuteTasks(parsed: ParsedArgs): Promise<number> {
-  if (!parsed.runDirArg) {
-    console.error(USAGE);
-    return 1;
-  }
-  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
-  logVerbose("run:execute-tasks", parsed, {
-    runDir,
-    maxTasks: parsed.maxTasks,
-    kind: parsed.kindFilter,
-    timeout: parsed.timeout,
-    dryRun: parsed.dryRun,
-    json: parsed.json,
-    verbose: parsed.verbose,
-  });
-
-  try {
-    const result = await runExecuteTasks({
-      runDir,
-      maxTasks: parsed.maxTasks,
-      kind: parsed.kindFilter,
-      timeout: parsed.timeout,
-      verbose: parsed.verbose,
-      json: parsed.json,
-      dryRun: parsed.dryRun,
-    });
-
-    if (parsed.json) {
-      console.log(JSON.stringify(result, null, 2));
-    } else {
-      const taskSummary = result.tasks.length > 0
-        ? ` tasks=[${result.tasks.map((t) => `${t.effectId}:${t.status}`).join(",")}]`
-        : "";
-      console.log(
-        `[run:execute-tasks] action=${result.action} count=${result.count} reason=${result.reason}${taskSummary}`
-      );
-    }
-
-    return 0;
-  } catch (error) {
-    console.error(
-      `[run:execute-tasks] Error: ${error instanceof Error ? error.message : String(error)}`
-    );
     return 1;
   }
 }
@@ -2259,7 +2201,6 @@ const VALID_COMMANDS = [
   "run:events",
   "run:rebuild-state",
   "run:repair-journal",
-  "run:execute-tasks",
   "task:post",
   "task:list",
   "task:show",
@@ -2642,9 +2583,6 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "run:iterate") {
           return await handleRunIterate(parsed);
-        }
-        if (parsed.command === "run:execute-tasks") {
-          return await handleRunExecuteTasks(parsed);
         }
         if (parsed.command === "run:events") {
           return await handleRunEvents(parsed);

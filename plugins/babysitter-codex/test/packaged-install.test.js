@@ -7,6 +7,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
+const INSTALLED_PLUGIN_NAME = 'babysitter';
 
 function run(cmd, args, options = {}) {
   const execOptions = {
@@ -111,7 +112,7 @@ try {
   });
   assert.ok(installOutput.includes('Installation complete!'));
 
-  const installedPluginRoot = path.join(homePluginsRoot, 'babysitter-codex');
+  const installedPluginRoot = path.join(homePluginsRoot, INSTALLED_PLUGIN_NAME);
   [
     '.codex-plugin',
     '.app.json',
@@ -166,7 +167,7 @@ try {
 
   assert.ok(fs.existsSync(homeMarketplacePath));
   const homeMarketplace = readJson(homeMarketplacePath);
-  const homeEntry = homeMarketplace.plugins.find((entry) => entry.name === 'babysitter-codex');
+  const homeEntry = homeMarketplace.plugins.find((entry) => entry.name === INSTALLED_PLUGIN_NAME);
   assert.ok(homeEntry, 'home marketplace should register the plugin');
   assert.strictEqual(homeEntry.source.path, toMarketplaceRelativePath(homeMarketplacePath, installedPluginRoot));
 
@@ -178,7 +179,7 @@ try {
 
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')), 'global install should not write workspace hooks');
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')), 'global install should not write workspace config');
-  assert.ok(!fs.existsSync(path.join(workspaceRoot, 'plugins', 'babysitter-codex')), 'global install should not install workspace plugin files');
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME)), 'global install should not install workspace plugin files');
 
   const teamInstallOutput = run(process.execPath, ['bin/cli.js', 'install', '--workspace', workspaceRoot], {
     cwd: packagedRoot,
@@ -196,18 +197,18 @@ try {
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'call', 'SKILL.md')));
-  assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', 'babysitter-codex', '.codex-plugin', 'plugin.json')));
-  assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', 'babysitter-codex', 'skills', 'babysit', 'SKILL.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME, '.codex-plugin', 'plugin.json')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME, 'skills', 'babysit', 'SKILL.md')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json')));
 
   const workspaceMarketplace = readJson(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json'));
-  const workspaceEntry = workspaceMarketplace.plugins.find((entry) => entry.name === 'babysitter-codex');
+  const workspaceEntry = workspaceMarketplace.plugins.find((entry) => entry.name === INSTALLED_PLUGIN_NAME);
   assert.ok(workspaceEntry, 'workspace marketplace should register the plugin');
   assert.strictEqual(
     workspaceEntry.source.path,
     toMarketplaceRelativePath(
       path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json'),
-      path.join(workspaceRoot, 'plugins', 'babysitter-codex'),
+      path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME),
     ),
   );
 
@@ -215,12 +216,12 @@ try {
   const profileJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'profile.json'));
   assert.strictEqual(path.resolve(installJson.packageRoot), path.resolve(packagedRoot));
   assert.strictEqual(path.resolve(installJson.workspaceRoot), path.resolve(workspaceRoot));
-  assert.strictEqual(path.resolve(installJson.pluginRoot), path.resolve(path.join(workspaceRoot, 'plugins', 'babysitter-codex')));
+  assert.strictEqual(path.resolve(installJson.pluginRoot), path.resolve(path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME)));
   assert.strictEqual(path.resolve(installJson.marketplacePath), path.resolve(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json')));
   assert.strictEqual(path.resolve(installJson.codexConfigPath), path.resolve(path.join(workspaceRoot, '.codex', 'config.toml')));
   assert.strictEqual(path.resolve(installJson.processLibraryCloneDir), path.resolve(path.join(userHome, '.a5c', 'process-library', 'babysitter-repo')));
   assert.strictEqual(path.resolve(installJson.processLibraryStateFile), path.resolve(path.join(userHome, '.a5c', 'active', 'process-library.json')));
-  assert.strictEqual(path.resolve(profileJson.pluginRoot), path.resolve(path.join(workspaceRoot, 'plugins', 'babysitter-codex')));
+  assert.strictEqual(path.resolve(profileJson.pluginRoot), path.resolve(path.join(workspaceRoot, 'plugins', INSTALLED_PLUGIN_NAME)));
   assert.strictEqual(path.resolve(profileJson.marketplacePath), path.resolve(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json')));
   assert.strictEqual(path.resolve(profileJson.codexConfigPath), path.resolve(path.join(workspaceRoot, '.codex', 'config.toml')));
   assert.strictEqual(String(profileJson.processLibraryLookupCommand || ''), 'babysitter process-library:active --json');

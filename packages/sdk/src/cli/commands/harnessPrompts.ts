@@ -84,8 +84,9 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
   return [
     "Harness assignment guidance:",
     `- Only assign installed harness names. Installed harnesses: ${installedList}.`,
-    "- Default `agent`, `node`, and `orchestrator_task` work to the internal PI worker. Prefer `task.execution.harness` to route a task to a specific installed harness. The legacy `task.metadata.harness` field is still supported but `execution.harness` takes precedence when both are present.",
+    "- Default `agent`, legacy `node`, and `orchestrator_task` work to the internal PI worker. Prefer `task.execution.harness` to route a task to a specific installed harness. The legacy `task.metadata.harness` field is still supported but `execution.harness` takes precedence when both are present.",
     "- Treat `pi` / `oh-my-pi` as the internal harness. Its default worker mode is native/local PI execution with isolation disabled unless the task opts into stronger guardrails.",
+    "- Shell and legacy node effects must be executed intentionally by the orchestrating agent and then posted via `task:post`; never assume a host-side auto-executor exists.",
     "- Shell effects run through the internal PI worker even when orchestration is bound to an external CLI harness. Keep shell work on that worker by default.",
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- For risky shell or system-changing subtasks that truly need stronger guardrails, encode them explicitly in task metadata: `bashSandbox: \"secure\"` to opt into AgentSH, `isolated: true` to disable repo/global extensions and skills, and `enableCompaction: true` when a long-running internal worker needs compaction.",
@@ -259,7 +260,8 @@ export function buildOrchestrationSystemPrompt(
     "- Immediately call babysitter_bind_session after run creation and before the first orchestration iteration.",
     "- Work in bounded turns. In each turn, call babysitter_run_iterate at most once unless the prompt explicitly tells you otherwise.",
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
-    "- Shell effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
+    "- Shell and legacy node effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
+    "- Whenever a shell or node effect is requested, execute that work intentionally through the available tools or a delegated worker, then post the outcome yourself.",
     "- When choosing how to execute pending work, respect task-level harness metadata and the installed harness catalog provided below.",
     "- Stay in the orchestration loop until the run completes, fails, or reaches a hard limit reported by the tools.",
     "- When the run reaches a terminal state, call babysitter_finish_orchestration exactly once.",
@@ -339,8 +341,9 @@ export function buildOrchestrationTurnPrompt(args: {
     lines.push("");
     lines.push("Resolve every listed pending effect and post its result in this turn. Do not call babysitter_run_iterate again after posting them.");
     lines.push("Handling rules:");
-    lines.push("- For `shell` effects, prefer babysitter_run_shell_effect, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
-    lines.push("- For `agent`, `node`, or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better for the requested effect.");
+    lines.push("- For `shell` effects, execute the requested command intentionally, capture the outcome, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
+    lines.push("- For legacy `node` effects, execute the requested work intentionally through the available tools or a delegated worker, capture the outcome, then call babysitter_task_post_result yourself.");
+    lines.push("- For `agent` or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better for the requested effect.");
     lines.push("- For `breakpoint` effects, use AskUserQuestion in interactive mode with explicit approval options or choose the best option non-interactively, then post the result.");
   } else {
     lines.push("");

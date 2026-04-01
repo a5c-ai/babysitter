@@ -10,7 +10,7 @@ build tools), `breakpoint` (human approval), and `sleep` (time gates).
 | Kind | Description | Executor | When to use |
 |------|-------------|----------|-------------|
 | ~~`node`~~ | ~~Node.js script~~ | ~~Local node process~~ | **NEVER -- forbidden. Convert to `agent` or `skill`.** |
-| `shell` | Shell command | Local shell process | Only for running existing CLI tools, test suites, git, linters, builds |
+| `shell` | Shell command | Local shell process | Only for running existing CLI tools, test suites, git, linters, builds. The orchestrating agent must execute it intentionally and post the result |
 | `agent` | LLM agent | Agent runtime | **Default for all tasks** -- planning, implementation, analysis, verification, scoring, debugging, code writing, research |
 | `skill` | {{skillSystemLabel}} | Skill system | When a matching installed skill exists (preferred over agent when available) |
 | `breakpoint` | Human approval | UI/CLI | Decision gates requiring user input |

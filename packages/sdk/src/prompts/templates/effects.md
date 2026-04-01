@@ -10,7 +10,7 @@ $CLI task:list .a5c/runs/<runId> --pending --json
   "tasks": [
     {
       "effectId": "effect-abc123",
-      "kind": "agent|skill|breakpoint",
+      "kind": "agent|skill|shell|node|breakpoint",
       "label": "auto",
       "status": "requested"
     }
@@ -29,6 +29,9 @@ into the run by calling `task:post`, which:
 
 IMPORTANT:
 - Delegate using the Task tool if possible.
+- If a pending effect is `shell` or legacy `node`, the orchestrating agent must
+  execute that work intentionally and then post the result via `task:post`.
+  Never assume the SDK or host will auto-run it.
 - Make sure the change was actually performed and not described or implied.
   (for example, if code files were mentioned as created in the summary, make
   sure they were actually created.)
