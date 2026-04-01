@@ -123,6 +123,14 @@ describe("commitEffectResult", () => {
       commitEffectResult({
         runDir: effect.runDir,
         effectId: effect.effectId,
+        result: { status: "ok" },
+      })
+    ).rejects.toThrow(RunFailedError);
+
+    await expect(
+      commitEffectResult({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
         result: { status: "error" },
       })
     ).rejects.toThrow(RunFailedError);

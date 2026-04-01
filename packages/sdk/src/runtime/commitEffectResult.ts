@@ -120,6 +120,9 @@ function validateResultPayload(options: CommitEffectResultOptions) {
   if (options.result.status === "ok" && options.result.error !== undefined) {
     throw new RunFailedError("Cannot provide an error payload when result status is 'ok'");
   }
+  if (options.result.status === "ok" && options.result.value === undefined) {
+    throw new RunFailedError("Missing result payload for result status 'ok'");
+  }
   if (options.result.status === "error" && options.result.error === undefined) {
     throw new RunFailedError("Missing error payload for result status 'error'");
   }

@@ -1,12 +1,12 @@
 /**
- * run:execute-tasks command - Execute pending node tasks in a run
+ * run:execute-tasks command - Execute pending auto-runnable tasks in a run
  *
  * This command replaces the shell-based task execution logic in native-orchestrator.sh.
  * It:
  * 1. Loads the journal and builds the effect index
  * 2. Filters pending effects by kind (default "node")
  * 3. Slices to maxTasks (default 3)
- * 4. For each task: reads task.json, spawns `node`, captures stdout/stderr, commits result
+ * 4. For each task: reads task.json, spawns the configured runtime, captures stdout/stderr, commits result
  * 5. Returns a summary of executed tasks
  */
 
@@ -56,6 +56,13 @@ interface TaskNodeConfig {
   timeoutMs?: number;
 }
 
+interface TaskShellConfig {
+  command: string;
+  cwd?: string;
+  env?: Record<string, string>;
+  timeoutMs?: number;
+}
+
 interface TaskIoConfig {
   inputJsonPath?: string;
   outputJsonPath?: string;
@@ -86,24 +93,26 @@ function toRunRelative(runDir: string, absolute: string): string {
   return path.relative(runDir, absolute).replace(/\\/g, "/");
 }
 
-/**
- * Spawn a node process for the given task and capture its output.
- */
-function spawnNodeTask(options: {
-  entry: string;
-  args: string[];
+interface SpawnTaskOptions {
+  command: string;
+  args?: string[];
   cwd: string;
   env: Record<string, string>;
-  stdoutPath: string;
-  stderrPath: string;
   timeout: number;
-}): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  shell?: boolean;
+}
+
+/**
+ * Spawn a child process for the given task and capture its output.
+ */
+function spawnTask(options: SpawnTaskOptions): Promise<{ exitCode: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
-    const child = spawn("node", [options.entry, ...options.args], {
+    const child = spawn(options.command, options.args ?? [], {
       cwd: options.cwd,
       env: { ...process.env, ...options.env },
       stdio: ["ignore", "pipe", "pipe"],
       timeout: options.timeout,
+      shell: options.shell ?? false,
     });
 
     const stdoutChunks: Buffer[] = [];
@@ -128,6 +137,22 @@ function spawnNodeTask(options: {
       });
     });
   });
+}
+
+async function readTaskOutputValue(outputAbs: string): Promise<unknown> {
+  try {
+    const outputContents = await fs.readFile(outputAbs, "utf8");
+    const trimmed = outputContents.trim();
+    if (trimmed.length === 0) {
+      throw new Error(`Task exited successfully but wrote an empty result payload to ${outputAbs}`);
+    }
+    return JSON.parse(trimmed) as unknown;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("result payload")) {
+      throw error;
+    }
+    throw new Error(`Task exited successfully but did not write a JSON result payload to ${outputAbs}`);
+  }
 }
 
 /**
@@ -176,15 +201,146 @@ async function executeOneTask(
     };
   }
 
-  // Extract node config
-  const nodeConfig = (taskDef.node ?? {}) as Partial<TaskNodeConfig>;
-  const entry = nodeConfig.entry;
+  const taskKind = String(record.kind ?? taskDef.kind ?? "").toLowerCase();
 
-  if (!entry) {
-    log(verbose, `Missing node.entry in task.json for ${effectId}`);
+  // Extract IO config
+  const ioConfig = (taskDef.io ?? {}) as Partial<TaskIoConfig>;
+  const inputRef = ioConfig.inputJsonPath ?? `tasks/${effectId}/inputs.json`;
+  const outputRef = ioConfig.outputJsonPath ?? `tasks/${effectId}/result.json`;
+  const stdoutRef = ioConfig.stdoutPath ?? `tasks/${effectId}/stdout.log`;
+  const stderrRef = ioConfig.stderrPath ?? `tasks/${effectId}/stderr.log`;
+
+  // Resolve paths relative to runDir
+  const inputAbs = resolveRelative(runDir, inputRef);
+  const outputAbs = resolveRelative(runDir, outputRef);
+  const stdoutAbs = resolveRelative(runDir, stdoutRef);
+  const stderrAbs = resolveRelative(runDir, stderrRef);
+  // Ensure directories exist
+  await Promise.all([
+    fs.mkdir(path.dirname(inputAbs), { recursive: true }),
+    fs.mkdir(path.dirname(outputAbs), { recursive: true }),
+    fs.mkdir(path.dirname(stdoutAbs), { recursive: true }),
+    fs.mkdir(path.dirname(stderrAbs), { recursive: true }),
+  ]);
+
+  // Stage inputs.json
+  const inputsRefField = taskDef.inputsRef as string | undefined;
+  if (inputsRefField) {
+    const sourceAbs = resolveRelative(runDir, inputsRefField);
+    try {
+      await fs.copyFile(sourceAbs, inputAbs);
+    } catch {
+      // If the source doesn't exist, write an empty object
+      await fs.writeFile(inputAbs, "{}\n", "utf8");
+    }
+  } else {
+    // Extract inline inputs or default to {}
+    const inputs = taskDef.inputs ?? {};
+    await fs.writeFile(inputAbs, JSON.stringify(inputs) + "\n", "utf8");
+  }
+
+  let spawnOptions: SpawnTaskOptions;
+
+  if (taskKind === "node") {
+    const nodeConfig = (taskDef.node ?? {}) as Partial<TaskNodeConfig>;
+    const entry = nodeConfig.entry;
+
+    if (!entry) {
+      log(verbose, `Missing node.entry in task.json for ${effectId}`);
+      const errorPayload = {
+        name: "Error",
+        message: `Missing node.entry in task definition for effect ${effectId}`,
+      };
+      await commitEffectResult({
+        runDir,
+        effectId,
+        invocationKey: record.invocationKey,
+        result: {
+          status: "error",
+          error: errorPayload,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+        },
+      });
+      return {
+        effectId,
+        label,
+        status: "error",
+        exitCode: 1,
+        durationMs: 0,
+        stdoutRef: null,
+        stderrRef: null,
+        resultRef: null,
+        error: errorPayload,
+      };
+    }
+
+    spawnOptions = {
+      command: "node",
+      args: [resolveRelative(runDir, entry), ...(nodeConfig.args ?? [])],
+      cwd: nodeConfig.cwd ? resolveRelative(runDir, nodeConfig.cwd) : runDir,
+      env: {
+        ...(nodeConfig.env ?? {}),
+        BABYSITTER_INPUT_JSON: inputAbs,
+        BABYSITTER_OUTPUT_JSON: outputAbs,
+        BABYSITTER_STDOUT_PATH: stdoutAbs,
+        BABYSITTER_STDERR_PATH: stderrAbs,
+        BABYSITTER_EFFECT_ID: effectId,
+      },
+      timeout: nodeConfig.timeoutMs ?? timeout,
+    };
+  } else if (taskKind === "shell") {
+    const shellConfig = (taskDef.shell ?? {}) as Partial<TaskShellConfig>;
+    const command = shellConfig.command;
+
+    if (!command) {
+      log(verbose, `Missing shell.command in task.json for ${effectId}`);
+      const errorPayload = {
+        name: "Error",
+        message: `Missing shell.command in task definition for effect ${effectId}`,
+      };
+      await commitEffectResult({
+        runDir,
+        effectId,
+        invocationKey: record.invocationKey,
+        result: {
+          status: "error",
+          error: errorPayload,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+        },
+      });
+      return {
+        effectId,
+        label,
+        status: "error",
+        exitCode: 1,
+        durationMs: 0,
+        stdoutRef: null,
+        stderrRef: null,
+        resultRef: null,
+        error: errorPayload,
+      };
+    }
+
+    spawnOptions = {
+      command,
+      cwd: shellConfig.cwd ? resolveRelative(runDir, shellConfig.cwd) : runDir,
+      env: {
+        ...(shellConfig.env ?? {}),
+        BABYSITTER_INPUT_JSON: inputAbs,
+        BABYSITTER_OUTPUT_JSON: outputAbs,
+        BABYSITTER_STDOUT_PATH: stdoutAbs,
+        BABYSITTER_STDERR_PATH: stderrAbs,
+        BABYSITTER_EFFECT_ID: effectId,
+      },
+      timeout: shellConfig.timeoutMs ?? timeout,
+      shell: true,
+    };
+  } else {
     const errorPayload = {
       name: "Error",
-      message: `Missing node.entry in task definition for effect ${effectId}`,
+      message: `Unsupported auto-runnable task kind "${taskKind || "unknown"}" for effect ${effectId}`,
     };
     await commitEffectResult({
       runDir,
@@ -210,71 +366,11 @@ async function executeOneTask(
     };
   }
 
-  const nodeArgs = nodeConfig.args ?? [];
-  const taskTimeout = nodeConfig.timeoutMs ?? timeout;
-
-  // Extract IO config
-  const ioConfig = (taskDef.io ?? {}) as Partial<TaskIoConfig>;
-  const inputRef = ioConfig.inputJsonPath ?? `tasks/${effectId}/inputs.json`;
-  const outputRef = ioConfig.outputJsonPath ?? `tasks/${effectId}/result.json`;
-  const stdoutRef = ioConfig.stdoutPath ?? `tasks/${effectId}/stdout.log`;
-  const stderrRef = ioConfig.stderrPath ?? `tasks/${effectId}/stderr.log`;
-
-  // Resolve paths relative to runDir
-  const inputAbs = resolveRelative(runDir, inputRef);
-  const outputAbs = resolveRelative(runDir, outputRef);
-  const stdoutAbs = resolveRelative(runDir, stdoutRef);
-  const stderrAbs = resolveRelative(runDir, stderrRef);
-  const entryAbs = resolveRelative(runDir, entry);
-  const cwdAbs = nodeConfig.cwd ? resolveRelative(runDir, nodeConfig.cwd) : runDir;
-
-  // Ensure directories exist
-  await Promise.all([
-    fs.mkdir(path.dirname(inputAbs), { recursive: true }),
-    fs.mkdir(path.dirname(outputAbs), { recursive: true }),
-    fs.mkdir(path.dirname(stdoutAbs), { recursive: true }),
-    fs.mkdir(path.dirname(stderrAbs), { recursive: true }),
-  ]);
-
-  // Stage inputs.json
-  const inputsRefField = taskDef.inputsRef as string | undefined;
-  if (inputsRefField) {
-    const sourceAbs = resolveRelative(runDir, inputsRefField);
-    try {
-      await fs.copyFile(sourceAbs, inputAbs);
-    } catch {
-      // If the source doesn't exist, write an empty object
-      await fs.writeFile(inputAbs, "{}\n", "utf8");
-    }
-  } else {
-    // Extract inline inputs or default to {}
-    const inputs = taskDef.inputs ?? {};
-    await fs.writeFile(inputAbs, JSON.stringify(inputs) + "\n", "utf8");
-  }
-
-  // Build environment for the child process
-  const taskEnv: Record<string, string> = {
-    ...(nodeConfig.env ?? {}),
-    BABYSITTER_INPUT_JSON: inputAbs,
-    BABYSITTER_OUTPUT_JSON: outputAbs,
-    BABYSITTER_STDOUT_PATH: stdoutAbs,
-    BABYSITTER_STDERR_PATH: stderrAbs,
-    BABYSITTER_EFFECT_ID: effectId,
-  };
-
   // Spawn the node process
   const startedAt = new Date().toISOString();
   const startMs = Date.now();
 
-  const spawnResult = await spawnNodeTask({
-    entry: entryAbs,
-    args: nodeArgs,
-    cwd: cwdAbs,
-    env: taskEnv,
-    stdoutPath: stdoutAbs,
-    stderrPath: stderrAbs,
-    timeout: taskTimeout,
-  });
+  const spawnResult = await spawnTask(spawnOptions);
 
   const finishedAt = new Date().toISOString();
   const durationMs = Date.now() - startMs;
@@ -288,16 +384,42 @@ async function executeOneTask(
 
   // Commit the result
   if (spawnResult.exitCode === 0) {
-    // Read the output file produced by the task (if any)
-    let value: unknown = undefined;
+    let value: unknown;
     try {
-      const outputContents = await fs.readFile(outputAbs, "utf8");
-      const trimmed = outputContents.trim();
-      if (trimmed.length > 0) {
-        value = JSON.parse(trimmed) as unknown;
-      }
-    } catch {
-      // Output file may not exist; that is acceptable
+      value = await readTaskOutputValue(outputAbs);
+    } catch (error) {
+      const errorPayload = {
+        name: error instanceof Error ? error.name : "Error",
+        message: error instanceof Error ? error.message : String(error),
+      };
+
+      const committed = await commitEffectResult({
+        runDir,
+        effectId,
+        invocationKey: record.invocationKey,
+        result: {
+          status: "error",
+          error: errorPayload,
+          stdoutRef: stdoutRelRef,
+          stderrRef: stderrRelRef,
+          startedAt,
+          finishedAt,
+        },
+      });
+
+      log(verbose, `Posted error: ${effectId} (missing result payload, ${durationMs}ms)`);
+
+      return {
+        effectId,
+        label,
+        status: "error",
+        exitCode: 1,
+        durationMs,
+        stdoutRef: stdoutRelRef,
+        stderrRef: stderrRelRef,
+        resultRef: committed.resultRef ?? null,
+        error: errorPayload,
+      };
     }
 
     const committed = await commitEffectResult({

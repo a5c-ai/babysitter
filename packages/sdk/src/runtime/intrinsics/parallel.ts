@@ -3,6 +3,19 @@ import { EffectPendingError, EffectRequestedError, ParallelPendingError } from "
 import { buildParallelBatch } from "../../tasks/batching";
 
 export async function runParallelAll<T>(thunks: Array<() => T | Promise<T>>): Promise<T[]> {
+  for (let i = 0; i < thunks.length; i++) {
+    if (typeof thunks[i] !== "function") {
+      const isThenable =
+        thunks[i] && typeof (thunks[i] as unknown as { then?: unknown }).then === "function";
+      const hint = isThenable
+        ? " It looks like a Promise was passed. Wrap each entry: [() => ctx.task(...)] instead of [ctx.task(...)]"
+        : " Wrap each entry as a function: [() => ctx.task(...)] instead of [ctx.task(...)]";
+      throw new TypeError(
+        `parallel.all() expects an array of functions (thunks), but element at index ${i} is ${typeof thunks[i]}.${hint}`
+      );
+    }
+  }
+
   const results: T[] = [];
   const pending: EffectAction[] = [];
 

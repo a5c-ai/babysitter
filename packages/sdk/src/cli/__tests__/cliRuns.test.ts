@@ -662,6 +662,67 @@ describe("run lifecycle inspection commands", () => {
   });
 
 
+  describe("run:repair-journal", () => {
+    it("skips 0-byte corrupt journal files and reports droppedCorrupt count", async () => {
+      const runDir = await createRunSkeleton("run-repair-empty");
+      // Manually write a 0-byte file into the journal directory
+      const journalDir = path.join(runDir, "journal");
+      await fs.writeFile(path.join(journalDir, "000099.FAKECORRUPT00000000.json"), "", "utf8");
+
+      const exitCode = await cli.run(["run:repair-journal", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.journal.droppedCorrupt).toBeGreaterThanOrEqual(1);
+      expect(payload.repaired).toBe(true);
+    });
+
+    it("skips journal files containing invalid JSON and reports them as corrupt", async () => {
+      const runDir = await createRunSkeleton("run-repair-badjson");
+      const journalDir = path.join(runDir, "journal");
+      await fs.writeFile(
+        path.join(journalDir, "000099.FAKECORRUPT00000001.json"),
+        "{ this is not valid json }}}",
+        "utf8"
+      );
+
+      const exitCode = await cli.run(["run:repair-journal", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.journal.droppedCorrupt).toBeGreaterThanOrEqual(1);
+      expect(payload.repaired).toBe(true);
+    });
+
+    it("still processes normal journal files correctly alongside corrupt ones", async () => {
+      const runDir = await createRunSkeleton("run-repair-mixed");
+      const journalDir = path.join(runDir, "journal");
+      // Add a corrupt (0-byte) file
+      await fs.writeFile(path.join(journalDir, "000099.FAKECORRUPT00000002.json"), "", "utf8");
+
+      const exitCode = await cli.run(["run:repair-journal", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      // The RUN_CREATED event from createRunSkeleton should still be kept
+      expect(payload.journal.keptEvents).toBeGreaterThanOrEqual(1);
+      expect(payload.journal.droppedCorrupt).toBeGreaterThanOrEqual(1);
+      expect(payload.repaired).toBe(true);
+    });
+
+    it("includes droppedCorrupt in human-readable dry-run output", async () => {
+      const runDir = await createRunSkeleton("run-repair-dryrun");
+      const journalDir = path.join(runDir, "journal");
+      await fs.writeFile(path.join(journalDir, "000099.FAKECORRUPT00000003.json"), "", "utf8");
+
+      const exitCode = await cli.run(["run:repair-journal", runDir, "--dry-run"]);
+
+      expect(exitCode).toBe(0);
+      const line = findSingleLine(logSpy, (entry) => entry.startsWith("[run:repair-journal]"));
+      expect(line).toContain("droppedCorrupt=");
+    });
+  });
+
   async function createRunWithPendingEffects() {
     const runDir = await createRunSkeleton("run-pending");
     await appendRequestedEffect(runDir, "ef-node", "node", "build");

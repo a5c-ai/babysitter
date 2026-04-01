@@ -549,6 +549,13 @@ function parseExplicitToolResultValue(args: {
   return undefined;
 }
 
+function hasExplicitToolResultValue(args: {
+  valueJson?: string;
+  valueText?: string;
+}): boolean {
+  return args.valueJson !== undefined || args.valueText !== undefined;
+}
+
 // ── Main Phase 2 Entry Point ─────────────────────────────────────────
 
 export async function runOrchestrationPhase(args: {
@@ -1469,25 +1476,42 @@ export async function runOrchestrationPhase(args: {
         let effectResult = state.pendingEffectResults.get(params.effectId);
 
         if (params.status) {
+          const explicitValueProvided = hasExplicitToolResultValue({
+            valueJson: params.valueJson,
+            valueText: params.valueText,
+          });
+          const explicitValue = explicitValueProvided
+            ? parseExplicitToolResultValue({
+                valueJson: params.valueJson,
+                valueText: params.valueText,
+              })
+            : undefined;
           const hasExplicitPayload =
-            params.valueJson !== undefined ||
-            params.valueText !== undefined ||
+            explicitValueProvided ||
             params.error !== undefined ||
             params.stdout !== undefined ||
             params.stderr !== undefined;
 
           if (!effectResult || hasExplicitPayload) {
+            const nextValue = explicitValueProvided ? explicitValue : effectResult?.value;
+            if (params.status === "ok" && nextValue === undefined) {
+              throw new BabysitterRuntimeError(
+                "EffectResultValueMissing",
+                `Explicit ok result for ${params.effectId} is missing a value payload.`,
+                { category: ErrorCategory.Validation },
+              );
+            }
             effectResult = {
               status: params.status,
-              value: parseExplicitToolResultValue({
-                valueJson: params.valueJson,
-                valueText: params.valueText,
-              }),
+              value: nextValue,
               error: params.status === "error"
-                ? new Error(params.error ?? "Effect failed")
+                ? new Error(
+                    params.error ??
+                    (effectResult?.error instanceof Error ? effectResult.error.message : "Effect failed"),
+                  )
                 : undefined,
-              stdout: params.stdout,
-              stderr: params.stderr,
+              stdout: params.stdout ?? effectResult?.stdout,
+              stderr: params.stderr ?? effectResult?.stderr,
             };
           } else if (params.status !== effectResult.status) {
             effectResult = {

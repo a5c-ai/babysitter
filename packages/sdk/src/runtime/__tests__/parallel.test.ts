@@ -23,6 +23,30 @@ function makeAction(effectId: string): EffectAction {
   };
 }
 
+describe("runParallelAll – input validation", () => {
+  test("throws descriptive error when a Promise is passed instead of a thunk", async () => {
+    const promise = Promise.resolve(42);
+    // Common mistake: [ctx.task(...)] instead of [() => ctx.task(...)]
+    const thunks = [promise] as unknown as Array<() => number>;
+
+    await expect(runParallelAll(thunks)).rejects.toThrow(/thunk/i);
+    await expect(runParallelAll(thunks)).rejects.toThrow(/\(\) =>/);
+  });
+
+  test("throws descriptive error when a plain value is passed instead of a thunk", async () => {
+    const thunks = [42] as unknown as Array<() => number>;
+
+    await expect(runParallelAll(thunks)).rejects.toThrow(/thunk/i);
+    await expect(runParallelAll(thunks)).rejects.toThrow(/\(\) =>/);
+  });
+
+  test("accepts valid thunk arrays and resolves normally", async () => {
+    const thunks = [() => 1, () => Promise.resolve(2), async () => 3];
+    const results = await runParallelAll(thunks);
+    expect(results).toEqual([1, 2, 3]);
+  });
+});
+
 describe("runParallelAll", () => {
   test("aggregates pending actions without duplicates", async () => {
     const actionA = makeAction("A");

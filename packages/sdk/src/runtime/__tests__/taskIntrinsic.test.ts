@@ -177,6 +177,59 @@ describe("runTaskIntrinsic", () => {
     ).resolves.toEqual(largeValue);
   });
 
+  test("throws when a resolved ok effect is missing its result payload", async () => {
+    const { runDir, runId } = await createRun("run-undefined-result");
+    const context = await buildContext(runDir, runId);
+
+    let effectId = "";
+    let invocationKey = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 5 },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      effectId = (error as EffectRequestedError).action.effectId;
+      invocationKey = (error as EffectRequestedError).action.invocationKey;
+    }
+
+    await fs.writeFile(
+      path.join(runDir, "tasks", effectId, "result.json"),
+      JSON.stringify(
+        {
+          schemaVersion: "2026.01.results-v1",
+          effectId,
+          taskId: sampleTask.id,
+          invocationKey,
+          status: "ok",
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf8",
+    );
+    await appendEvent({
+      runDir,
+      eventType: "EFFECT_RESOLVED",
+      event: {
+        effectId,
+        status: "ok",
+        resultRef: `tasks/${effectId}/result.json`,
+      },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 5 },
+        context: replayCtx,
+      })
+    ).rejects.toThrow(RunFailedError);
+  });
+
   test("provides TaskBuildContext metadata and records registry entries", async () => {
     const { runDir, runId } = await createRun("run-task-ctx");
     const context = await buildContext(runDir, runId);

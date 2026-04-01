@@ -670,7 +670,7 @@ describe("handleHarnessCreateRun", () => {
       expect(commitEffectResult).not.toHaveBeenCalled();
     });
 
-    it("preserves staged dispatch result when posting with status only", async () => {
+    it("preserves staged dispatch result when posting with stdout overrides", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-preserve-staged-"));
       tempDirs.push(workspace);
 
@@ -733,7 +733,11 @@ describe("handleHarnessCreateRun", () => {
             const effectId = details?.nextActions?.[0]?.effectId;
             if (effectId) {
               await getTool("babysitter_dispatch_effect_harness")?.execute?.("tool-dispatch", { effectId });
-              await getTool("babysitter_task_post_result")?.execute?.("tool-post", { effectId, status: "ok" });
+              await getTool("babysitter_task_post_result")?.execute?.("tool-post", {
+                effectId,
+                status: "ok",
+                stdout: "worker-log",
+              });
             }
             await getTool("babysitter_run_iterate")?.execute?.("tool-iterate-2", {});
             await getTool("babysitter_finish_orchestration")?.execute?.("tool-finish", { summary: "done" });
@@ -759,6 +763,7 @@ describe("handleHarnessCreateRun", () => {
           result: expect.objectContaining({
             status: "ok",
             value: expect.anything(),
+            stdout: "worker-log",
           }),
         }),
       );

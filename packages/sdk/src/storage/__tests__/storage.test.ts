@@ -170,4 +170,65 @@ describe("storage primitives", () => {
     const metadata = await readRunMetadata(runDir);
     expect(metadata.prompt).toBeUndefined();
   });
+
+  test("acquireRunLock recovers stale lock held by dead PID", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-stale-lock",
+      request: "stale-lock-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    // Write a fake lock file with a PID that is almost certainly not alive
+    const staleLock = { pid: 999999, owner: "dead-process", acquiredAt: "2025-01-01T00:00:00.000Z" };
+    await fs.writeFile(
+      path.join(runDir, "run.lock"),
+      JSON.stringify(staleLock, null, 2) + "\n"
+    );
+    // acquireRunLock should detect the dead PID, remove the stale lock, and re-acquire
+    const lockInfo = await acquireRunLock(runDir, "recovery-owner");
+    expect(lockInfo.pid).toBe(process.pid);
+    expect(lockInfo.owner).toBe("recovery-owner");
+    // Clean up
+    await releaseRunLock(runDir);
+  });
+
+  test("acquireRunLock still rejects when lock held by alive PID", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-alive-lock",
+      request: "alive-lock-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    // Write a lock file with the current (alive) PID
+    const aliveLock = { pid: process.pid, owner: "current-process", acquiredAt: "2025-01-01T00:00:00.000Z" };
+    await fs.writeFile(
+      path.join(runDir, "run.lock"),
+      JSON.stringify(aliveLock, null, 2) + "\n"
+    );
+    // Should still throw because the holding PID is alive
+    await expect(acquireRunLock(runDir, "contender")).rejects.toThrow(/run.lock already held/);
+    // Clean up
+    await releaseRunLock(runDir);
+  });
+
+  test("acquireRunLock normal acquire and release cycle works", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-normal-lock",
+      request: "normal-lock-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    // First acquire should succeed
+    const lock1 = await acquireRunLock(runDir, "owner-a");
+    expect(lock1.pid).toBe(process.pid);
+    expect(lock1.owner).toBe("owner-a");
+    // Second acquire should fail while held
+    await expect(acquireRunLock(runDir, "owner-b")).rejects.toThrow(/run.lock already held/);
+    // After release, acquire should succeed again
+    await releaseRunLock(runDir);
+    const lock2 = await acquireRunLock(runDir, "owner-b");
+    expect(lock2.pid).toBe(process.pid);
+    expect(lock2.owner).toBe("owner-b");
+    await releaseRunLock(runDir);
+  });
 });

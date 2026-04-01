@@ -87,7 +87,17 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-123")]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-123", "--status", "ok", "--runs-dir", "."]);
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-123",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"ok":true}',
+      "--runs-dir",
+      ".",
+    ]);
 
     expect(exitCode).toBe(0);
     expect(commitEffectResultMock).toHaveBeenCalledWith(
@@ -115,6 +125,8 @@ describe("CLI main entry", () => {
       "ef-123",
       "--status",
       "ok",
+      "--value-inline",
+      '{"dryRun":true}',
       "--dry-run",
       "--json",
       "--runs-dir",
@@ -208,7 +220,17 @@ describe("CLI main entry", () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:post", "runs/demo", "ef-missing", "--status", "ok", "--runs-dir", "."]);
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-missing",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"ok":true}',
+      "--runs-dir",
+      ".",
+    ]);
 
     expect(exitCode).toBe(1);
     expect(commitEffectResultMock).not.toHaveBeenCalled();
@@ -234,6 +256,17 @@ describe("CLI main entry", () => {
     expect(logSpy).toHaveBeenCalledWith(
       "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/ef-err/result.json"
     );
+  });
+
+  it("rejects task:post ok results without a value payload", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-no-value")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:post", "runs/demo", "ef-no-value", "--status", "ok", "--runs-dir", "."]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] ok results require --value or --value-inline");
   });
 
   it("accepts harness:create-run --non-interactive as an alias for --no-interactive", async () => {

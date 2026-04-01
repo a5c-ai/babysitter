@@ -81,25 +81,33 @@ import {
 import { CONFIG_ENV_VARS, DEFAULTS } from "../config/defaults";
 
 const USAGE = `Usage:
+Agent commands:
   babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--non-interactive] [--json] [--dry-run]
   babysitter run:status <runDir> [--runs-dir <dir>] [--json]
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:repair-journal <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
-  babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
   babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+  babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
+  babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
+  babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
+  babysitter process-library:active [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--json]
+  babysitter profile:read --user|--project [--dir <dir>] [--json]
+  babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
+  babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
+  babysitter profile:render --user|--project [--dir <dir>] [--json]
+  babysitter instructions:babysit-skill --harness <name> [--interactive|--no-interactive] [--json]
+Other commands (agents should never call these directly unless explicitly instructed):
   babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
   babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--force] [--runs-dir <dir>] [--json]
-  babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
   babysitter session:state --session-id <id> --state-dir <dir> [--json]
   babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
   babysitter session:check-iteration --session-id <id> --state-dir <dir> [--json]
   babysitter session:last-message --transcript-path <file> [--json]
-  babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
-  babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
+  babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
   babysitter log --type <process|hook|cli> --message <msg> [--run-id <id>] [--label <label>] [--level <level>] [--source <src>] [--json]
   babysitter hook:log --hook-type <type> --log-file <path> [--json]
   babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
@@ -108,11 +116,6 @@ const USAGE = `Usage:
   babysitter process-library:clone [--repo <url>] [--dir <path>] [--ref <ref>] [--state-dir <dir>] [--json]
   babysitter process-library:update [--dir <path>] [--ref <ref>] [--state-dir <dir>] [--json]
   babysitter process-library:use [--dir <path>] [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--ref <ref>] [--json]
-  babysitter process-library:active [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--json]
-  babysitter profile:read --user|--project [--dir <dir>] [--json]
-  babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
-  babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
-  babysitter profile:render --user|--project [--dir <dir>] [--json]
   babysitter plugin:install [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
   babysitter plugin:uninstall [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
   babysitter plugin:update [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
@@ -149,7 +152,6 @@ const USAGE = `Usage:
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
   babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
   babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
-  babysitter instructions:babysit-skill --harness <name> [--interactive|--no-interactive] [--json]
   babysitter instructions:process-create --harness <name> [--interactive|--no-interactive] [--json]
   babysitter instructions:orchestrate --harness <name> [--interactive|--no-interactive] [--json]
   babysitter instructions:breakpoint-handling --harness <name> [--interactive|--no-interactive] [--json]
@@ -1549,9 +1551,16 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
   const journalDir = path.join(runDir, "journal");
   const files = (await fs.readdir(journalDir)).filter((name) => name.endsWith(".json")).sort();
   const rawEvents: Array<{ filename: string; payload: { type?: unknown; recordedAt?: unknown; data?: unknown } }> = [];
+  let droppedCorrupt = 0;
   for (const filename of files) {
     const fullPath = path.join(journalDir, filename);
-    const payload = JSON.parse(await fs.readFile(fullPath, "utf8")) as { type?: unknown; recordedAt?: unknown; data?: unknown };
+    let payload;
+    try {
+      payload = JSON.parse(await fs.readFile(fullPath, "utf8")) as { type?: unknown; recordedAt?: unknown; data?: unknown };
+    } catch {
+      droppedCorrupt++;
+      continue;
+    }
     rawEvents.push({ filename, payload });
   }
 
@@ -1600,6 +1609,7 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
     journal: {
       originalFiles: files.length,
       keptEvents: kept.length,
+      droppedCorrupt,
       droppedRequested,
       droppedResolved,
     },
@@ -1610,7 +1620,7 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
       console.log(JSON.stringify({ dryRun: true, ...summary }, null, 2));
     } else {
       console.log(
-        `[run:repair-journal] dry-run originalFiles=${files.length} keptEvents=${kept.length} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved}`
+        `[run:repair-journal] dry-run originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved}`
       );
     }
     return 0;
@@ -1643,7 +1653,7 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
     console.log(JSON.stringify({ ...summary, backupDir, repaired: true }, null, 2));
   } else {
     console.log(
-      `[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`
+      `[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`
     );
   }
   return 0;
@@ -1672,6 +1682,10 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   }
   if (parsed.taskStatus === "error" && parsed.valueInline) {
     console.error(`[task:post] --value-inline is only supported with --status ok`);
+    return 1;
+  }
+  if (parsed.taskStatus === "ok" && !parsed.valuePath && !parsed.valueInline) {
+    console.error(`[task:post] ok results require --value or --value-inline`);
     return 1;
   }
 
@@ -1708,7 +1722,12 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     if (path.isAbsolute(candidate) || /^[A-Za-z]:[\\/]/.test(candidate)) {
       return candidate;
     }
-    return path.join(runDir, candidate);
+    // If candidate already starts with .a5c/, it's project-relative, not run-relative.
+    // Joining with runDir would double the .a5c/runs/RUNID prefix.
+    if (/^\.a5c[/\\]/.test(candidate)) {
+      return candidate;
+    }
+    return _sharedCollapseDoubledA5cRuns(path.join(runDir, candidate));
   };
 
   const readJsonFile = async (_label: string, filename?: string): Promise<unknown> => {
