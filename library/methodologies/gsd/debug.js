@@ -1,11 +1,12 @@
 /**
  * @process gsd/debug
- * @description Systematic debugging using scientific method with persistent debug sessions
+ * @description Systematic debugging using scientific method with persistent debug sessions. Phase 0: Root-cause diagnosis with git diff analysis, 2+ evidence signals, no code changes.
  * @inputs { issue: string, sessionId: string, projectDir: string }
  * @outputs { success: boolean, resolved: boolean, rootCause: string, fixCommits: array, sessionPath: string }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+
 
 /**
  * Debug Process
@@ -383,6 +384,9 @@ export const investigateTask = defineTask('investigate', (args, taskCtx) => ({
         previousFindings: args.previousFindings
       },
       instructions: [
+        'PHASE 0 RULE: Before forming any hypothesis, run `git diff` and `git log --oneline -20` to identify what changed recently that could have introduced this issue',
+        'PHASE 0 RULE: You MUST NOT make any code changes during investigation. This is diagnosis only.',
+        'PHASE 0 RULE: You must gather at least 2 independent evidence signals before drawing conclusions. Evidence examples: git blame output, test output, log comparison, config diff.',
         'Read existing debug session file if resuming',
         'Review previous findings to avoid repeating investigations',
         'Form a specific, testable hypothesis about the root cause',
@@ -398,7 +402,7 @@ export const investigateTask = defineTask('investigate', (args, taskCtx) => ({
     },
     outputSchema: {
       type: 'object',
-      required: ['hypothesis', 'testPerformed', 'testResult', 'conclusion', 'confidenceLevel', 'rootCauseIdentified'],
+      required: ['hypothesis', 'testPerformed', 'testResult', 'conclusion', 'confidenceLevel', 'rootCauseIdentified', 'evidenceSignals'],
       properties: {
         hypothesis: { type: 'string' },
         testPerformed: { type: 'string' },
@@ -407,6 +411,16 @@ export const investigateTask = defineTask('investigate', (args, taskCtx) => ({
         confidenceLevel: { type: 'number', minimum: 0, maximum: 100 },
         rootCauseIdentified: { type: 'boolean' },
         rootCause: { type: 'string' },
+        evidenceSignals: {
+          type: 'array',
+          items: { type: 'string' },
+          minItems: 2,
+          description: 'At least 2 independent evidence signals supporting the conclusion'
+        },
+        gitDiffSummary: {
+          type: 'string',
+          description: 'Summary of git diff/log findings that identified the breaking change'
+        },
         affectedFiles: { type: 'array', items: { type: 'string' } },
         codeReferences: {
           type: 'array',

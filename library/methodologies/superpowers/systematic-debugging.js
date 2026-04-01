@@ -1,11 +1,12 @@
 /**
  * @process methodologies/superpowers/systematic-debugging
- * @description Systematic Debugging - 4-phase root cause process: investigate, pattern analysis, hypothesis testing, implementation
+ * @description Systematic Debugging - 4-phase root cause process with Phase 0 diagnosis gate: investigate, pattern analysis, hypothesis testing, diagnosis review, implementation
  * @inputs { issue: string, errorMessage?: string, stackTrace?: string, maxFixAttempts?: number }
  * @outputs { success: boolean, rootCause: object, hypothesis: object, fix: object, phases: array, architecturalIssue: boolean }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+
 
 // ============================================================================
 // AGENT TASK DEFINITIONS
@@ -39,11 +40,11 @@ const agentCheckRecentChangesTask = defineTask('debug-check-changes', async (arg
   return { changes: args };
 }, {
   kind: 'agent',
-  title: 'Phase 1.3: Check Recent Changes',
+  title: 'Phase 1.3: Git Diff Breaking Changes',
   labels: ['superpowers', 'debugging', 'change-analysis'],
   io: {
-    inputs: { issue: 'string' },
-    outputs: { recentCommits: 'array', changedFiles: 'array', configChanges: 'array', suspectChanges: 'array' }
+    inputs: { issue: 'string', gitDiff: 'string' },
+    outputs: { recentCommits: 'array', changedFiles: 'array', configChanges: 'array', suspectChanges: 'array', gitDiffSummary: 'string' }
   }
 });
 
@@ -232,6 +233,38 @@ export async function process(inputs, ctx) {
     name: 'Hypothesis',
     hypothesis: hypothesisResult.hypothesis,
     confidence: hypothesisResult.confidence
+  });
+
+  // ============================================================================
+  // PHASE 3.5: DIAGNOSIS GATE (Phase 0 compliance - no code changes yet)
+  // ============================================================================
+
+  ctx.log('Phase 3.5: Diagnosis gate - verifying evidence before implementation');
+
+  const diagnosisEvidence = [
+    ...(evidenceResult.evidence ? [JSON.stringify(evidenceResult.evidence)] : []),
+    ...(changesResult.suspectChanges || []).map(c => `Suspect change: ${c}`),
+    ...(patternsResult.differences || []).map(d => `Pattern difference: ${d}`),
+  ];
+
+  if (diagnosisEvidence.length < 2) {
+    ctx.log('WARNING: Fewer than 2 evidence signals gathered. Investigation may be incomplete.');
+  }
+
+  await ctx.breakpoint({
+    question: [
+      '=== Root-Cause Diagnosis Review (Phase 0 Gate) ===',
+      '',
+      `HYPOTHESIS: ${hypothesisResult.hypothesis}`,
+      `CONFIDENCE: ${hypothesisResult.confidence}%`,
+      '',
+      `EVIDENCE SIGNALS (${diagnosisEvidence.length}):`,
+      ...diagnosisEvidence.map(e => `  - ${e}`),
+      '',
+      'No code changes have been made. Approve to proceed to implementation phase.',
+    ].join('\n'),
+    title: 'Root-Cause Diagnosis Gate',
+    context: { runId: ctx.runId }
   });
 
   // ============================================================================

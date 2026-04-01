@@ -1,11 +1,12 @@
 /**
  * @process methodologies/maestro/maestro-hotfix
- * @description Maestro Hotfix - Fast-path for urgent production issues: triage, implement, test, deploy
+ * @description Maestro Hotfix - Fast-path for urgent production issues with Phase 0 root-cause diagnosis: triage, diagnose, implement, test, deploy
  * @inputs { issue: object, projectRoot?: string, severity?: string, qualityThreshold?: number, skipPlanning?: boolean }
  * @outputs { success: boolean, triage: object, fix: object, testResults: object, review: object, deployed: boolean, metrics: object }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { rootCauseDiagnosisTask, diagnosisBreakpointQuestion } from '../shared/root-cause-diagnosis.js';
 
 // ============================================================================
 // AGENT TASK DEFINITIONS
@@ -121,6 +122,7 @@ const updateKnowledgeHotfixTask = defineTask('maestro-hotfix-knowledge', async (
  * Workflow:
  * 1. Hotfix specialist triages and classifies issue
  * 2. Locate root cause in codebase
+ * 2.5. Root-cause diagnosis (Phase 0 - no code changes)
  * 3. Plan minimal fix (skipped for simple fixes)
  * 4. Hotfix coder implements fix
  * 5. Test engineer verifies with regression tests
@@ -179,6 +181,26 @@ export async function process(inputs, ctx) {
     triage,
     projectRoot,
     affectedFiles: triage.affectedFiles
+  });
+
+  // ============================================================================
+  // STEP 2.5: ROOT-CAUSE DIAGNOSIS (Phase 0 - no code changes)
+  // ============================================================================
+
+  ctx.log('Step 2.5: Root-cause diagnosis (Phase 0)');
+
+  const diagnosis = await ctx.task(rootCauseDiagnosisTask, {
+    description: issue.description || JSON.stringify(issue),
+    projectDir: projectRoot,
+    errorMessage: issue.stackTrace || '',
+    stackTrace: issue.stackTrace || '',
+    context: { triage, location, severity: effectiveSeverity }
+  });
+
+  await ctx.breakpoint({
+    question: diagnosisBreakpointQuestion(diagnosis),
+    title: 'Root-Cause Diagnosis Review (Phase 0)',
+    context: { runId: ctx.runId }
   });
 
   // ============================================================================

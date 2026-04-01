@@ -1,12 +1,13 @@
 /**
  * @process cradle/bugfix
- * @description Submit a bugfix with code - user already has the fix. Forks repo, creates branch, applies fix, runs tests, and submits PR
+ * @description Submit a bugfix with code. Phase 0: root-cause diagnosis with git diff and evidence. Then forks repo, creates branch, applies fix, runs tests, and submits PR
  * @inputs { bugDescription?: string, fixDescription?: string, component?: string, filesToChange?: array, additionalContext?: string }
  * @outputs { success: boolean, prUrl: string, prNumber: number, forkUrl: string, summary: string }
  *
  * Bugfix Contribution Process (PR-based)
  *
  * Phases:
+ * 0. Root-Cause Diagnosis - Diagnose root cause with git diff and 2+ evidence signals (no code changes)
  * 1. Gather Bug & Fix Details - Collect bug description, fix details, affected files
  * 2. Fork Repository - Fork a5c-ai/babysitter (with breakpoint)
  * 3. Star Repository - Ask to star if not already starred (with breakpoint)
@@ -18,6 +19,7 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { rootCauseDiagnosisTask, diagnosisBreakpointQuestion } from '../methodologies/shared/root-cause-diagnosis.js';
 
 export async function process(inputs, ctx) {
   const {
@@ -27,6 +29,29 @@ export async function process(inputs, ctx) {
     filesToChange = [],
     additionalContext = ''
   } = inputs;
+
+  // ============================================================================
+  // PHASE 0: ROOT-CAUSE DIAGNOSIS (no code changes)
+  // ============================================================================
+
+  ctx.log('info', 'Phase 0: Root-cause diagnosis');
+
+  const diagnosis = await ctx.task(rootCauseDiagnosisTask, {
+    description: bugDescription || additionalContext || 'Bug reported for contribution',
+    projectDir: '.',
+    errorMessage: '',
+    stackTrace: '',
+    context: { component, filesToChange }
+  });
+
+  await ctx.breakpoint({
+    question: diagnosisBreakpointQuestion(diagnosis),
+    title: 'Review Root-Cause Diagnosis (Phase 0)',
+    options: ['Approve', 'Request changes'],
+    expert: 'owner',
+    tags: ['approval-gate', 'diagnosis'],
+    context: { runId: ctx.runId }
+  });
 
   // ============================================================================
   // PHASE 1: GATHER BUG & FIX DETAILS
