@@ -490,6 +490,10 @@ describe("handleHarnessCreateRun", () => {
       expect(phase1Options.systemPrompt).toContain("babysitter_search_process_library");
       expect(phase1Prompt).toContain("The generated process must directly execute the user's requested work");
       expect(phase1Prompt).not.toContain("You are a babysitter process generator");
+      const phase1Session = vi.mocked(createPiSession).mock.results[0]?.value as { prompt: Mock };
+      const phase2Session = vi.mocked(createPiSession).mock.results[1]?.value as { prompt: Mock };
+      expect(phase1Session.prompt).toHaveBeenCalledWith(expect.any(String), 0);
+      expect(phase2Session.prompt).toHaveBeenCalledWith(expect.any(String), 0);
     });
 
     it("binds an interactive UI context into the internal PI sessions", async () => {
@@ -1161,6 +1165,86 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
+      expect(existsSync(generatedFile)).toBe(true);
+    });
+
+    it("keeps internal phase-1 parent prompts unbounded while recovery waits for the agent", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-unbounded-timeout-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      const promptTimeouts: number[] = [];
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase1-unbounded-timeout",
+        runDir: "/tmp/runs/run-phase1-unbounded-timeout",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase1-unbounded-timeout";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async (_prompt: string, timeout?: number) => {
+            promptTimeouts.push(timeout ?? -1);
+            promptCount += 1;
+            if (promptCount === 1) {
+              return { success: true, output: "phase1-without-report", exitCode: 0, duration: 1 };
+            }
+
+            await fs.mkdir(generatedPath, { recursive: true });
+            await writeProcess?.execute?.("tool-write-process", {
+              filename: "test-process.mjs",
+              source: buildMinimalAgentProcessSource(),
+            });
+            await reportProcess?.execute?.("tool-report-process", {
+              processPath: generatedFile,
+              summary: "Generated process after recovery",
+            });
+            return { success: true, output: "phase1-recovery-success", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleHarnessCreateRun({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: true,
+      });
+
+      expect(code).toBe(0);
+      expect(promptTimeouts).toEqual([0, 0]);
       expect(existsSync(generatedFile)).toBe(true);
     });
 

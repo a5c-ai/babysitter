@@ -183,6 +183,9 @@ export const TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS = process.env.VITEST
   : [1_000, 3_000];
 
 export const DEFAULT_INTERACTIVE_ASK_TIMEOUT_MS = 600_000;
+// Parent orchestration turns may legitimately wait on user input or external
+// work for an unbounded duration. A timeout of 0 disables the wrapper timer.
+export const PI_PARENT_PROMPT_TIMEOUT_MS = 0;
 export const PI_DEFAULT_PROMPT_TIMEOUT_MS = 900_000;
 export const PI_WORKER_TIMEOUT_MS = 1_800_000;
 

@@ -47,7 +47,7 @@ import {
   BOLD,
   YELLOW,
   DEFAULT_EFFECT_RETRY_CONFIG,
-  PI_DEFAULT_PROMPT_TIMEOUT_MS,
+  PI_PARENT_PROMPT_TIMEOUT_MS,
   PI_WORKER_TIMEOUT_MS,
   ASK_USER_QUESTION_SCHEMA,
   // Functions
@@ -1795,7 +1795,7 @@ export async function runOrchestrationPhase(args: {
           args.compressionConfig,
           "agent",
         ),
-        timeout: PI_DEFAULT_PROMPT_TIMEOUT_MS,
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
         label: options?.label ?? "phase2",
         writeVerbose,
         writeVerboseData,

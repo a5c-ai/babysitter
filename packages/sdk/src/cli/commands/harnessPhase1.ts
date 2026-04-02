@@ -37,7 +37,7 @@ import {
   PROCESS_LIBRARY_READ_MAX_CHARS,
   PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT,
   ASK_USER_QUESTION_SCHEMA,
-  PI_DEFAULT_PROMPT_TIMEOUT_MS,
+  PI_PARENT_PROMPT_TIMEOUT_MS,
   // Functions
   truncateForVerboseLog,
   writeVerboseLine,
@@ -2007,7 +2007,7 @@ export async function runProcessDefinitionPhase(args: {
     const result = await promptPiWithRetry({
       session,
       message: initialMetaPrompt,
-      timeout: PI_DEFAULT_PROMPT_TIMEOUT_MS,
+      timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
       label: "phase1 initial",
       writeVerbose,
       writeVerboseData,
@@ -2062,7 +2062,7 @@ export async function runProcessDefinitionPhase(args: {
       const recovery = await promptPiWithRetry({
         session,
         message: recoveryPrompt,
-        timeout: 180_000,
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
         label: "phase1 recovery",
         writeVerbose,
         writeVerboseData,
@@ -2127,7 +2127,7 @@ export async function runProcessDefinitionPhase(args: {
       const finalRecovery = await promptPiWithRetry({
         session,
         message: finalRecoveryPrompt,
-        timeout: 180_000,
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
         label: "phase1 final recovery",
         writeVerbose,
         writeVerboseData,
@@ -2218,7 +2218,7 @@ export async function runProcessDefinitionPhase(args: {
         const repair = await promptPiWithRetry({
           session,
           message: conformancePrompt,
-          timeout: 180_000,
+          timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
           label: "phase1 conformance repair",
           writeVerbose,
           writeVerboseData,
