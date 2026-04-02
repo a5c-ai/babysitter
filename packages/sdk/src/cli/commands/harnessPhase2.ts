@@ -384,6 +384,7 @@ async function resolveEffectWithRetry(
   json?: boolean,
   // For recreating Pi session on retry
   piSessionFactory?: () => PiSessionHandle,
+  disposePiSession?: (session: PiSessionHandle) => Promise<void>,
   askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<ResolveEffectResult> {
   const config = { ...DEFAULT_EFFECT_RETRY_CONFIG, ...options.retryConfig };
@@ -470,7 +471,11 @@ async function resolveEffectWithRetry(
 
     // Dispose and recreate Pi session if applicable
     if (currentPiSession && piSessionFactory) {
-      currentPiSession.dispose();
+      if (disposePiSession) {
+        await disposePiSession(currentPiSession);
+      } else {
+        currentPiSession.dispose();
+      }
       currentPiSession = piSessionFactory();
     }
 
@@ -592,13 +597,78 @@ export async function runOrchestrationPhase(args: {
   };
 
   let orchestrationSession: PiSessionHandle | null = null;
+  const activePiSessions = new Set<PiSessionHandle>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
   };
+  const registerPiSession = (session: PiSessionHandle): PiSessionHandle => {
+    activePiSessions.add(session);
+    return session;
+  };
+  const shutdownPiSession = async (session: PiSessionHandle | null | undefined): Promise<void> => {
+    if (!session) {
+      return;
+    }
+    activePiSessions.delete(session);
+    const maybeAbort = session as unknown as { abort?: () => Promise<void> };
+    if (typeof maybeAbort.abort === "function") {
+      await maybeAbort.abort().catch(() => undefined);
+    }
+    session.dispose();
+  };
+  const signalExitCode = (signal: NodeJS.Signals): number => {
+    switch (signal) {
+      case "SIGINT":
+        return 130;
+      case "SIGTERM":
+        return 143;
+      case "SIGBREAK":
+        return 149;
+      default:
+        return 1;
+    }
+  };
+  const shutdownSignals: NodeJS.Signals[] = process.platform === "win32"
+    ? ["SIGINT", "SIGTERM", "SIGBREAK"]
+    : ["SIGINT", "SIGTERM"];
+  let shutdownRequested = false;
+  const removeShutdownHandlers = (): void => {
+    for (const signal of shutdownSignals) {
+      process.off(signal, shutdownHandlers[signal]);
+    }
+  };
+  const shutdownHandlers = Object.fromEntries(
+    shutdownSignals.map((signal) => [
+      signal,
+      () => {
+        if (shutdownRequested) {
+          return;
+        }
+        shutdownRequested = true;
+        removeShutdownHandlers();
+        writeVerbose(
+          `[phase2 shutdown] received ${signal}; aborting ${activePiSessions.size} active internal PI session(s)`,
+        );
+        const cleanup = Promise.allSettled(
+          Array.from(activePiSessions).map((session) => shutdownPiSession(session)),
+        );
+        void Promise.race([
+          cleanup,
+          new Promise<void>((resolve) => setTimeout(resolve, 2_000)),
+        ]).finally(() => {
+          process.exit(signalExitCode(signal));
+        });
+      },
+    ]),
+  ) as Record<NodeJS.Signals, () => void>;
+  for (const signal of shutdownSignals) {
+    process.on(signal, shutdownHandlers[signal]);
+  }
 
+  try {
   if (shouldUseExternalHarness(args.selectedHarnessName)) {
     emitProgress(
       { phase: "2", status: "started", harness: args.selectedHarnessName },
@@ -729,18 +799,18 @@ export async function runOrchestrationPhase(args: {
           const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
           let workerSession: PiSessionHandle | null = null;
           if (action.kind === "shell" || isPiHarness(taskHarness)) {
-            workerSession = createPiSession(buildPiWorkerSessionOptions({
+            workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
               model: args.model,
-            }));
+            })));
           }
           const piSessionFactory = (action.kind === "shell" || isPiHarness(taskHarness))
-            ? () => createPiSession(buildPiWorkerSessionOptions({
+            ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
                 action,
                 workspace: args.workspace,
                 model: args.model,
-              }))
+              })))
             : undefined;
           try {
             const effectResult = await resolveEffectWithRetry(
@@ -757,6 +827,7 @@ export async function runOrchestrationPhase(args: {
               args.rl,
               args.json,
               piSessionFactory,
+              shutdownPiSession,
             );
             await commitEffectResult({
               runDir: state.runDir,
@@ -793,7 +864,7 @@ export async function runOrchestrationPhase(args: {
               args.verbose,
             );
           } finally {
-            workerSession?.dispose();
+            await shutdownPiSession(workerSession);
           }
         }
         continue;
@@ -1198,13 +1269,13 @@ export async function runOrchestrationPhase(args: {
           customTools: phase2AgenticTools,
         });
         writeVerboseData("phase2 worker session options", workerSessionOptions);
-        const workerSession = createPiSession(workerSessionOptions);
-        const piSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+        const workerSession = registerPiSession(createPiSession(workerSessionOptions));
+        const piSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
           action,
           workspace: args.workspace,
           model: args.model,
           customTools: phase2AgenticTools,
-        }));
+        })));
         try {
           const effectResult = await resolveEffectWithRetry(
             action,
@@ -1220,6 +1291,7 @@ export async function runOrchestrationPhase(args: {
             null,
             args.json,
             piSessionFactory,
+            shutdownPiSession,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_run_shell_effect result", {
@@ -1235,7 +1307,7 @@ export async function runOrchestrationPhase(args: {
           // session is disposed inside resolveEffectWithRetry on the next retry
           // or returned as currentPiSession. The original workerSession may have
           // been disposed during retry. This dispose is a safety net.
-          workerSession.dispose();
+          await shutdownPiSession(workerSession);
         }
       },
     },
@@ -1331,14 +1403,14 @@ export async function runOrchestrationPhase(args: {
             delegationConfig,
           });
           writeVerboseData("phase2 worker session options", workerSessionOptions);
-          const workerSession = createPiSession(workerSessionOptions);
-          const shellPiSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+          const workerSession = registerPiSession(createPiSession(workerSessionOptions));
+          const shellPiSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
             customTools: phase2AgenticTools,
             delegationConfig,
-          }));
+          })));
           try {
             const effectResult = await resolveEffectWithRetry(
               action,
@@ -1354,6 +1426,7 @@ export async function runOrchestrationPhase(args: {
               null,
               args.json,
               shellPiSessionFactory,
+              shutdownPiSession,
             );
             state.pendingEffectResults.set(params.effectId, effectResult);
             writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -1366,7 +1439,7 @@ export async function runOrchestrationPhase(args: {
               "Shell effect executed on the internal PI worker and staged for task posting.",
             );
           } finally {
-            workerSession.dispose();
+            await shutdownPiSession(workerSession);
           }
         }
 
@@ -1382,22 +1455,22 @@ export async function runOrchestrationPhase(args: {
         });
         let workerSession: PiSessionHandle | null = null;
         const dispatchPiSessionFactory = isPiHarness(taskHarness)
-          ? () => createPiSession(buildPiWorkerSessionOptions({
+          ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
               model: args.model,
               customTools: phase2AgenticTools,
               delegationConfig,
-            }))
+            })))
           : undefined;
         if (isPiHarness(taskHarness)) {
-          workerSession = createPiSession(buildPiWorkerSessionOptions({
+          workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
             customTools: phase2AgenticTools,
             delegationConfig,
-          }));
+          })));
           writeVerboseData("phase2 worker session options", buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
@@ -1422,6 +1495,7 @@ export async function runOrchestrationPhase(args: {
             null,
             args.json,
             dispatchPiSessionFactory,
+            shutdownPiSession,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -1434,7 +1508,7 @@ export async function runOrchestrationPhase(args: {
             "Effect dispatched through the selected harness and staged for task posting.",
           );
         } finally {
-          workerSession?.dispose();
+          await shutdownPiSession(workerSession);
         }
       },
     },
@@ -1820,7 +1894,7 @@ export async function runOrchestrationPhase(args: {
     );
   };
 
-  orchestrationSession = createPiSession({
+  orchestrationSession = registerPiSession(createPiSession({
     workspace: args.workspace,
     model: args.model,
     toolsMode: "coding",
@@ -1830,7 +1904,7 @@ export async function runOrchestrationPhase(args: {
       : undefined,
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext, args.interactive)],
     ephemeral: true,
-  });
+  }));
 
   writeVerbose(
     `[phase2 setup] harness=${args.selectedHarnessName} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} processPath=${path.resolve(args.processPath)}`,
@@ -2015,6 +2089,11 @@ export async function runOrchestrationPhase(args: {
   } finally {
     if (unsubscribe) unsubscribe();
     if (!args.json && args.verbose) process.stderr.write("\n");
-    orchestrationSession?.dispose();
+  }
+  } finally {
+    removeShutdownHandlers();
+    await Promise.allSettled(
+      Array.from(activePiSessions).map((session) => shutdownPiSession(session)),
+    );
   }
 }

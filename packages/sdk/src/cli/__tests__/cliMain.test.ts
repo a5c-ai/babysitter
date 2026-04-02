@@ -311,6 +311,21 @@ describe("CLI main entry", () => {
         prompt: expect.stringContaining("do not ask the user to restate the initial prompt"),
       }),
     );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Read `binding.dir`"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("specializations/domains/assimilation/workflows/methodology-assimilation"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("specializations/domains/assimilation/harness/<name>"),
+      }),
+    );
   });
 
 });

@@ -472,7 +472,11 @@ export class PiSessionHandle {
    */
   dispose(): void {
     if (this.session) {
-      this.session.dispose();
+      const session = this.session;
+      if (session.isStreaming) {
+        void session.abort().catch(() => undefined);
+      }
+      session.dispose();
       this.session = null;
       this.initPromise = null;
     }

@@ -3020,10 +3020,12 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:assimilate") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
           const assimilatePrefix = "[ASSIMILATE MODE] Convert an external methodology, harness, or specification into babysitter process definitions.\n" +
-            "Use the assimilation domain processes from the active process library. Available workflows:\n" +
-            "- methodology-assimilation: Learn an external methodology from its repo and convert to babysitter processes\n" +
-            "- harness integration: Wire babysitter SDK into a specific AI coding harness (codex, opencode, gemini-cli, etc.)\n" +
             "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.\n" +
+            "Read `binding.dir` from that JSON and treat it as the active process-library root. The assimilation process must be selected from that active library path, not guessed from some other repo-relative location.\n" +
+            "Use the assimilation domain processes under the active library root. Available workflow paths relative to `binding.dir`:\n" +
+            "- `specializations/domains/assimilation/workflows/methodology-assimilation` - Learn an external methodology from its repo/spec/source and convert it into babysitter processes, skills, and agents\n" +
+            "- `specializations/domains/assimilation/harness/<name>` - Use the matching harness integration process for a specific harness target (for example `codex`, `opencode`, `gemini-cli`, `openclaw`, `antigravity`, or the generic fallback in the same directory)\n" +
+            "Search the active assimilation subtree under `binding.dir` first and pick the concrete process from there before authoring anything.\n" +
             "If `Target to assimilate` is provided below, do not ask the user to restate the initial prompt or identify the target again. Only ask follow-up questions for genuinely missing constraints after inspecting the workspace and process-library context.";
           const assimilatePrompt = parsed.prompt
             ? assimilatePrefix + "\n\nTarget to assimilate: " + parsed.prompt

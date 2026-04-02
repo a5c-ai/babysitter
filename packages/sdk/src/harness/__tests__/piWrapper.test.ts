@@ -15,6 +15,7 @@ const mockGetLastAssistantText = vi.fn<() => string | undefined>();
 const mockExecuteBash = vi.fn<(command: string, onChunk?: (chunk: string) => void) => Promise<{ output: string; exitCode: number | undefined; cancelled: boolean; truncated: boolean }>>();
 
 let eventListeners: Array<(event: PiSessionEvent) => void> = [];
+let mockIsStreaming = false;
 
 const mockSession = {
   prompt: mockPrompt,
@@ -35,7 +36,7 @@ const mockSession = {
     return "mock-session-id";
   },
   get isStreaming() {
-    return false;
+    return mockIsStreaming;
   },
   get messages() {
     return [];
@@ -167,6 +168,7 @@ beforeEach(() => {
     getApiKeyForProvider: mockRegistryGetApiKeyForProvider,
   }));
   eventListeners = [];
+  mockIsStreaming = false;
 });
 
 afterEach(() => {
@@ -666,6 +668,22 @@ describe("PiSessionHandle", () => {
       expect(mockDispose).toHaveBeenCalledTimes(1);
       expect(mockSecureBackendDispose).toHaveBeenCalledTimes(1);
       expect(session.isInitialized).toBe(false);
+    });
+
+    test("aborts a streaming session before disposing it", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+      mockAbort.mockResolvedValue(undefined);
+      mockIsStreaming = true;
+
+      const session = createPiSession();
+      await session.prompt("start");
+      session.dispose();
+
+      expect(mockAbort).toHaveBeenCalledTimes(1);
+      expect(mockDispose).toHaveBeenCalledTimes(1);
     });
 
     test("is a no-op when not initialized", () => {
