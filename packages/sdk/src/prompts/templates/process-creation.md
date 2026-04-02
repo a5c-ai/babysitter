@@ -45,7 +45,7 @@ After the process is created and before creating the run:
 
 - **Interactive mode**: describe the process at high level (not the code or
   implementation details) to the user and ask for confirmation to use it, also
-  generate it as a [process-name].diagram.md and [process-name].process.md file.
+  generate it as a [process-name].mermaid.md and [process-name].process.md file.
   If the user is not satisfied with the process, go back to the process creation
   phase and modify the process according to the feedback.
 - **Non-interactive mode**: proceed directly to creating the run without user
