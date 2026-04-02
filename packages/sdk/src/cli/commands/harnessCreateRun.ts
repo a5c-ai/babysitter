@@ -81,9 +81,7 @@ export async function handleHarnessCreateRun(
     }
 
     const discovered = await discoverHarnesses();
-    const selectedHarnessName = preferredHarness === "oh-my-pi"
-      ? "oh-my-pi"
-      : "pi";
+    const selectedHarnessName = preferredHarness ?? "internal";
     const compressionConfig = loadSessionCompressionConfig(workspace);
     const promptContext = buildPromptContext({
       workspace,

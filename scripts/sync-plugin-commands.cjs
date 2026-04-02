@@ -8,6 +8,11 @@ const check = process.argv.includes('--check');
 
 const tasks = [
   {
+    label: 'sdk-command-templates',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'scripts', 'sync-sdk-command-templates.cjs')],
+  },
+  {
     label: 'babysitter-codex',
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-codex', 'scripts', 'sync-command-skills.js')],

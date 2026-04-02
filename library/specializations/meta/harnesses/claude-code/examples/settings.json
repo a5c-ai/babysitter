@@ -1,0 +1,208 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npx *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(git add *)",
+      "Bash(git stash *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(* --version)",
+      "Bash(* --help)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Bash(jq *)",
+      "Read",
+      "Edit(/src/**)",
+      "Edit(/tests/**)",
+      "Edit(/docs/**)",
+      "WebFetch(domain:docs.example.com)",
+      "WebFetch(domain:api.example.com)",
+      "mcp__memory__*",
+      "mcp__filesystem__read_file",
+      "Skill(simplify *)",
+      "Skill(debug *)",
+      "Agent(Explore)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | bash)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(//**/credentials*)",
+      "Read(//**/secrets*)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Edit(./.claude/**)",
+      "Edit(/.github/workflows/**)",
+      "WebFetch(domain:pastebin.com)",
+      "Skill(deploy *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(docker *)",
+      "Edit(/package.json)",
+      "Edit(/tsconfig.json)"
+    ],
+    "defaultMode": "default"
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(rm *)",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-destructive.sh",
+            "timeout": 10,
+            "statusMessage": "Checking command safety..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Edit(*.ts)",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/validate-typescript.sh",
+            "timeout": 30,
+            "statusMessage": "Validating TypeScript..."
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://localhost:8080/hooks/audit-mcp",
+            "headers": {
+              "Authorization": "Bearer $AUDIT_TOKEN"
+            },
+            "allowedEnvVars": ["AUDIT_TOKEN"],
+            "timeout": 10,
+            "statusMessage": "Auditing MCP operation..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && npm run lint --workspace=@company/main-package -- --fix --quiet 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "Auto-formatting..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-init.sh",
+            "timeout": 15,
+            "statusMessage": "Initializing session..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/on-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Does this user prompt contain credentials, API keys, passwords, or other secrets? If yes, respond with a warning. Prompt: $ARGUMENTS",
+            "model": "claude-3-5-haiku-20241022",
+            "timeout": 10,
+            "statusMessage": "Checking for secrets..."
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": ".envrc",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Environment file changed; you may need to reload direnv.'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "Explore|Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-subagent.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+
+  "enabledPlugins": {
+    "acme-devtools@company-tools": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+
+  "extraKnownMarketplaces": {
+    "company-tools": {
+      "source": {
+        "source": "github",
+        "repo": "acme-corp/claude-plugins"
+      }
+    }
+  },
+
+  "autoMode": {
+    "environment": [
+      "Organization: ACME Corp. Primary use: full-stack web development.",
+      "Source control: github.com/acme-corp and all repos under it.",
+      "Cloud provider: AWS (us-east-1, us-west-2 regions).",
+      "Trusted cloud buckets: s3://acme-build-artifacts, s3://acme-staging-assets.",
+      "Trusted internal domains: *.internal.acme.example.com, api.acme.example.com.",
+      "Key internal services: Jenkins at ci.acme.example.com, Artifactory at artifacts.acme.example.com.",
+      "Additional context: SOC2 compliance required. No PII in logs."
+    ]
+  }
+}

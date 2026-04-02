@@ -12,12 +12,14 @@ import * as os from "node:os";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import type {
   HarnessAdapter,
+  HarnessCapability,
   HookHandlerArgs,
   HarnessInstallOptions,
   HarnessInstallResult,
   SessionBindOptions,
   SessionBindResult,
 } from "./types";
+import { HarnessCapability as Cap } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createPiContext } from "../prompts/context";
 import {
@@ -221,6 +223,10 @@ export function createPiAdapter(): HarnessAdapter {
         harness: "pi",
         options,
       });
+    },
+
+    getCapabilities(): HarnessCapability[] {
+      return [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt];
     },
 
     getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {

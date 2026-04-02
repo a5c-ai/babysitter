@@ -1940,7 +1940,7 @@ export async function runProcessDefinitionPhase(args: {
   const mergedCustomTools: unknown[] = [...customTools, ...agenticTools];
 
   emitProgress(
-    { phase: "1", status: "started", harness: "pi (agentic)" },
+    { phase: "1", status: "started", harness: "internal (agentic)" },
     args.json,
     args.verbose,
   );
@@ -2247,7 +2247,7 @@ export async function runProcessDefinitionPhase(args: {
         phase: "1",
         status: "completed",
         processPath: state.report.processPath,
-        harness: "pi (agentic)",
+        harness: "internal (agentic)",
       },
       args.json,
       args.verbose,
@@ -2269,7 +2269,7 @@ export async function runProcessDefinitionPhase(args: {
       {
         phase: "1",
         status: "failed",
-        harness: "pi (agentic)",
+        harness: "internal (agentic)",
         error: error instanceof Error ? error.message : String(error),
       },
       args.json,

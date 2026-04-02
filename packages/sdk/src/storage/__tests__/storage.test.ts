@@ -41,6 +41,7 @@ describe("storage primitives", () => {
       runId: "run-2",
       request: "append",
       processPath: ".a5c/processes/foo.js",
+      harness: "pi",
     });
     await appendEvent({ runDir, eventType: "RUN_CREATED", event: { ok: true } });
     await appendEvent({ runDir, eventType: "EFFECT_REQUESTED", event: { effectId: "01" } });
@@ -50,7 +51,9 @@ describe("storage primitives", () => {
     expect(files[0].startsWith("000001")).toBe(true);
     const events = await loadJournal(runDir);
     expect(events[0].type).toBe("RUN_CREATED");
+    expect(events[0].data.harness).toBe("pi");
     expect(events[1].type).toBe("EFFECT_REQUESTED");
+    expect(events[1].data.harness).toBe("pi");
   });
 
   test("snapshotState writes rebuildable cache", async () => {
@@ -133,6 +136,18 @@ describe("storage primitives", () => {
     });
     const runJson = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8"));
     expect(runJson.prompt).toBe("Build a REST API for user management");
+  });
+
+  test("createRunDir writes harness to run.json when provided", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-harness",
+      request: "harness-test",
+      processPath: ".a5c/processes/foo.js",
+      harness: "claude-code",
+    });
+    const runJson = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8"));
+    expect(runJson.harness).toBe("claude-code");
   });
 
   test("createRunDir omits prompt from run.json when not provided", async () => {

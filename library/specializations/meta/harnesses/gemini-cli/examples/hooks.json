@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "example-session-init",
+            "type": "command",
+            "command": "bash \"${extensionPath}/hooks/session-start.sh\"",
+            "timeout": 30000,
+            "description": "Initialize session state -- creates a baseline state file so the AfterAgent hook can track orchestration progress across turns"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "example-orchestration-loop",
+            "type": "command",
+            "command": "bash \"${extensionPath}/hooks/after-agent.sh\"",
+            "timeout": 30000,
+            "description": "Core orchestration loop driver -- inspects run state after each agent turn and decides whether to block (continue iterating) or allow (exit session). Reads prompt_response from stdin JSON; outputs block/allow/deny decision as JSON on stdout."
+          }
+        ]
+      }
+    ]
+  }
+}

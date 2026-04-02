@@ -58,7 +58,7 @@ import {
   formatToolResult,
   askUserQuestionViaTool,
   resolveTaskHarness,
-  isPiHarness,
+  isInternalHarness,
   shouldUseExternalHarness,
   shellQuoteArg,
   readStringMetadata,
@@ -128,7 +128,7 @@ export async function resolveEffect(
       ? resolveTaskHarness(action, harnessName, discovered)
       : harnessName;
 
-    if ((taskHarness === "pi" || taskHarness === "oh-my-pi") && piSession) {
+    if (isInternalHarness(taskHarness) && piSession) {
       const piResult = await promptPiWithRetry({
         session: piSession,
         message: effectivePrompt,
@@ -272,7 +272,7 @@ export async function resolveEffect(
       : harnessName;
 
     const explicitCliRequested =
-      taskHarness !== harnessName && taskHarness !== "pi" && taskHarness !== "oh-my-pi";
+      taskHarness !== harnessName && !isInternalHarness(taskHarness);
 
     if (explicitCliRequested) {
       const result = await invokeHarness(taskHarness, {
@@ -693,6 +693,7 @@ export async function runOrchestrationPhase(args: {
       // Create new run
       const created = await createRun({
         runsDir: args.runsDir,
+        harness: args.selectedHarnessName,
         process: {
           processId,
           importPath: path.resolve(args.processPath),
@@ -798,14 +799,14 @@ export async function runOrchestrationPhase(args: {
         for (const action of result.nextActions) {
           const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
           let workerSession: PiSessionHandle | null = null;
-          if (action.kind === "shell" || isPiHarness(taskHarness)) {
+          if (action.kind === "shell" || isInternalHarness(taskHarness)) {
             workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
               model: args.model,
             })));
           }
-          const piSessionFactory = (action.kind === "shell" || isPiHarness(taskHarness))
+          const piSessionFactory = (action.kind === "shell" || isInternalHarness(taskHarness))
             ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
                 action,
                 workspace: args.workspace,
@@ -1020,6 +1021,7 @@ export async function runOrchestrationPhase(args: {
         const effectivePrompt = args.prompt ?? params.prompt;
         const result = await createRun({
           runsDir: args.runsDir,
+          harness: args.selectedHarnessName,
           process: {
             processId,
             importPath: path.resolve(args.processPath),
@@ -1072,7 +1074,7 @@ export async function runOrchestrationPhase(args: {
           );
         }
         if (
-          (args.selectedHarnessName === "pi" || args.selectedHarnessName === "oh-my-pi") &&
+          isInternalHarness(args.selectedHarnessName) &&
           orchestrationSession?.sessionId
         ) {
           process.env.PI_SESSION_ID = process.env.PI_SESSION_ID || orchestrationSession.sessionId;
@@ -1454,7 +1456,7 @@ export async function runOrchestrationPhase(args: {
           delegationConfig,
         });
         let workerSession: PiSessionHandle | null = null;
-        const dispatchPiSessionFactory = isPiHarness(taskHarness)
+        const dispatchPiSessionFactory = isInternalHarness(taskHarness)
           ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
@@ -1463,7 +1465,7 @@ export async function runOrchestrationPhase(args: {
               delegationConfig,
             })))
           : undefined;
-        if (isPiHarness(taskHarness)) {
+        if (isInternalHarness(taskHarness)) {
           workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,

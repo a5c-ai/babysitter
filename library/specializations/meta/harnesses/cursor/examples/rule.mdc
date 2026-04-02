@@ -1,0 +1,41 @@
+---
+description: TypeScript project conventions and coding standards for the babysitter SDK
+globs:
+  - "packages/sdk/src/**/*.ts"
+  - "!packages/sdk/src/**/*.test.ts"
+alwaysApply: false
+---
+
+# TypeScript Conventions
+
+## General Rules
+
+- Target ES2022 with CommonJS module output
+- Use strict TypeScript configuration
+- No `any` types -- use `unknown` and narrow with type guards
+- No floating promises -- always `await` or handle with `.catch()`
+- Prefix unused variables with `_` (e.g., `_unusedParam`)
+
+## Import Rules
+
+- Import workspace packages by name (`@a5c-ai/babysitter-sdk`), never via relative cross-package paths
+- No circular dependencies between packages
+- Prefer named exports over default exports
+
+## Error Handling
+
+- Use `BabysitterRuntimeError` with appropriate `ErrorCategory` for SDK errors
+- Always include `suggestCommand` for recoverable errors
+- Wrap external errors with `formatErrorWithContext`
+
+## Event Sourcing
+
+- All state changes must go through the event journal
+- Never mutate state cache directly -- use `commitEffectResult` or `rebuildStateCache`
+- Effect results must be deterministic for replay stability
+
+## Testing
+
+- Test files use `*.test.ts` naming
+- Co-locate tests in `__tests__/` directories
+- Use `runHarness` from `@a5c-ai/babysitter-sdk/testing` for integration tests

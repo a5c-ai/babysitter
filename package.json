@@ -7,6 +7,8 @@
   ],
   "scripts": {
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
+    "sync:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs",
+    "check:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs --check",
     "sync:plugin-commands": "node ./scripts/sync-plugin-commands.cjs",
     "check:plugin-commands": "node ./scripts/sync-plugin-commands.cjs --check",
     "test:sdk": "npm run test --workspace=@a5c-ai/babysitter-sdk",

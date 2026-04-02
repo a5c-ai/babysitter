@@ -284,6 +284,17 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Test 11: cloud-agent installer
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 11: Cloud-agent installer ==="
+if node "$PLUGIN_DIR/test/cloud-agent-install.test.js"; then
+  pass "cloud-agent installer materializes repo support files"
+else
+  fail "cloud-agent installer regression test failed"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""

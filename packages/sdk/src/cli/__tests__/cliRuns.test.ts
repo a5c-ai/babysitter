@@ -199,6 +199,33 @@ describe("babysitter run:create CLI", () => {
     expect(journal[0].data.prompt).toBe("Build a REST API with user authentication");
   });
 
+  it("persists --harness in run.json and stamps it on journal events", async () => {
+    const entryFile = await writeEntrypoint("processes/harnessed.mjs", `export async function process() {\n  return "harnessed";\n}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/harnessed",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "codex",
+    ]);
+
+    expect(exitCode).toBe(0);
+
+    const runDir = await expectSingleRunDir();
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.harness).toBe("codex");
+
+    const journal = await loadJournal(runDir);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.harness).toBe("codex");
+  });
+
   it("omits prompt from metadata and journal when --prompt is not provided", async () => {
     const entryFile = await writeEntrypoint("processes/noprompt.mjs", `export async function process() {\n  return "no-prompt";\n}\n`);
 

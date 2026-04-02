@@ -169,8 +169,9 @@ export const DEFAULT_EFFECT_RETRY_CONFIG: EffectRetryConfig = {
 };
 
 const HARNESS_PRIORITY: readonly string[] = [
-  "pi",
+  "internal",
   "oh-my-pi",
+  "pi",
   "claude-code",
   "codex",
   "gemini-cli",
@@ -552,8 +553,19 @@ export function resolveTaskHarness(
   return defaultHarness;
 }
 
+/**
+ * Returns true if the harness uses the internal programmatic engine (piWrapper).
+ * 'internal' is the primary programmatic harness; 'oh-my-pi' also uses piWrapper.
+ * 'pi' is CLI-only and does NOT use the programmatic engine.
+ *
+ * @deprecated Prefer isInternalHarness — isPiHarness is kept for backward compat.
+ */
 export function isPiHarness(harnessName: string): boolean {
-  return harnessName === "pi" || harnessName === "oh-my-pi";
+  return isInternalHarness(harnessName);
+}
+
+export function isInternalHarness(harnessName: string): boolean {
+  return harnessName === "internal" || harnessName === "oh-my-pi";
 }
 
 export function usesExternalHarness(harnessName: string): boolean {

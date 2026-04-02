@@ -1,6 +1,9 @@
 # @a5c-ai/babysitter-github
 
-Babysitter orchestration plugin for [GitHub Copilot CLI](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line).
+Babysitter orchestration plugin for GitHub Copilot. It supports both:
+
+- **GitHub Copilot CLI** via the local plugin and hook model
+- **GitHub Copilot coding agent / cloud agent** via repository-installed skills and instructions
 
 This package ships a complete Copilot CLI plugin bundle -- skills, lifecycle
 hooks, and SDK integration -- that lets you run Babysitter's event-sourced,
@@ -71,6 +74,30 @@ Install into a specific workspace:
 babysitter-github install --workspace /path/to/repo
 ```
 
+### GitHub Copilot cloud agent installation
+
+For GitHub Copilot's cloud-hosted coding agent, install repository-scoped
+Babysitter support instead of the local `~/.copilot` CLI plugin surface:
+
+```bash
+babysitter-github install --cloud-agent --workspace /path/to/repo
+```
+
+This installs:
+
+- a mirrored Babysitter GitHub plugin bundle under `.github/babysitter/github-plugin/`
+- Babysitter skills under `.github/skills/`
+- a managed Babysitter block in `AGENTS.md`
+- a managed Babysitter block in `.github/copilot-instructions.md`
+- a `copilot-setup-steps` workflow, or a generated merge candidate if the repo already has one
+
+If the repository already has a custom `copilot-setup-steps.yml`, the
+installer preserves it and writes a merge candidate to:
+
+```text
+.github/workflows/copilot-setup-steps.babysitter.generated.yml
+```
+
 If the workspace does not already have an active process-library binding, the
 installer bootstraps the shared global SDK process library automatically:
 
@@ -100,6 +127,11 @@ The plugin provides:
 - Mode wrapper skills such as `$call`, `$plan`, and `$resume`
 - Plugin-level lifecycle hooks for `sessionStart`, `sessionEnd`, and
   `userPromptSubmitted`
+
+For Copilot cloud agent, the hook scripts are mirrored into the repository as
+part of the installed plugin bundle for reference and parity, but the hosted
+agent path is driven by repository instructions, skills, and setup workflow
+instead of local `~/.copilot/hooks.json`.
 
 The process library is fetched and bound through the SDK CLI in
 `~/.a5c/active/process-library.json`.
@@ -173,8 +205,21 @@ preserving semantic content.
 ### AGENTS.md
 
 The plugin uses `AGENTS.md` (the Copilot CLI equivalent of `CLAUDE.md`) for
-custom agent instructions. This file is read by Copilot CLI to configure
-agent behavior within sessions.
+custom agent instructions. The cloud-agent installer appends a managed
+Babysitter section to the repository root `AGENTS.md` so the hosted agent can
+see the same orchestration guidance.
+
+### .github/copilot-instructions.md
+
+The cloud-agent installer also appends a managed Babysitter block to
+`.github/copilot-instructions.md`. This gives GitHub-hosted Copilot sessions a
+repository-wide entrypoint for the Babysitter skills and setup workflow.
+
+### copilot-setup-steps workflow
+
+The cloud-agent path seeds `.github/workflows/copilot-setup-steps.yml` with a
+`copilot-setup-steps` job that installs the Babysitter SDK and initializes the
+active process library before the cloud agent starts working.
 
 ### Environment Variables
 
@@ -444,6 +489,22 @@ plugins/babysitter-github/
   versions.json            # SDK version pinning
   package.json             # npm package metadata
   AGENTS.md                # Custom instructions for Copilot CLI
+```
+
+Cloud-agent installation additionally writes into the target repository:
+
+```
+.github/
+  babysitter/github-plugin/                # Mirrored plugin bundle for repo-local visibility
+  skills/
+    babysitter-babysit/SKILL.md            # Installed Babysitter cloud skills
+    babysitter-call/SKILL.md
+    ...
+  copilot-instructions.md                  # Managed Babysitter block appended
+  workflows/
+    copilot-setup-steps.yml                # Managed workflow when no custom file exists
+    copilot-setup-steps.babysitter.generated.yml  # Merge candidate when a custom file already exists
+AGENTS.md                                  # Managed Babysitter block appended
 ```
 
 ## Verification

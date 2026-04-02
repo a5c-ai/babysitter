@@ -16,11 +16,14 @@ const {
 function parseArgs(argv) {
   const args = {
     workspace: process.cwd(),
+    cloudAgent: false,
     dryRun: false,
   };
   for (let i = 2; i < argv.length; i += 1) {
     if (argv[i] === '--workspace' && argv[i + 1]) {
       args.workspace = path.resolve(argv[++i]);
+    } else if (argv[i] === '--cloud-agent') {
+      args.cloudAgent = true;
     } else if (argv[i] === '--dry-run') {
       args.dryRun = true;
     }
@@ -58,6 +61,10 @@ function main() {
   ensureMarketplaceEntry(workspaceMarketplacePath, workspacePluginRoot);
   registerCopilotPlugin(workspacePluginRoot);
   installCopilotSurface(packageRoot, workspaceCopilotDir);
+  if (args.cloudAgent) {
+    const { installCloudAgentSurface } = require('../bin/install-shared');
+    installInfo.cloudAgent = installCloudAgentSurface(packageRoot, workspaceRoot);
+  }
 
   const active = ensureGlobalProcessLibrary(packageRoot);
   installInfo.processLibraryStateFile = active.stateFile;

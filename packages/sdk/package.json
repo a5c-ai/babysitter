@@ -15,7 +15,9 @@
     "skills"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs');const p=require('path');const s=p.join('src','cli','commands','templates');const d=p.join('dist','cli','commands','templates');fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).forEach(f=>fs.copyFileSync(p.join(s,f),p.join(d,f)));const s2=p.join('src','prompts','templates');const d2=p.join('dist','prompts','templates');fs.mkdirSync(d2,{recursive:true});fs.readdirSync(s2).forEach(f=>fs.copyFileSync(p.join(s2,f),p.join(d2,f)));\"",
+    "build": "tsc -p tsconfig.json && node scripts/copy-template-assets.cjs",
+    "sync:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs",
+    "check:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs --check",
     "clean": "rimraf dist",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",

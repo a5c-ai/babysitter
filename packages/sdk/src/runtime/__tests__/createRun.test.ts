@@ -119,6 +119,28 @@ describe("createRun", () => {
     expect(journal[0].data.prompt).toBe("Build a REST API with authentication");
   });
 
+  test("persists harness to run.json and stamps it on journal events", async () => {
+    const entryFile = path.join(tmpRoot, "processes", "harnessed.mjs");
+    await fs.mkdir(path.dirname(entryFile), { recursive: true });
+    await fs.writeFile(entryFile, "export async function process() { return 'ok'; }");
+
+    const result = await createRun({
+      runsDir: tmpRoot,
+      harness: "codex",
+      process: {
+        processId: "ci/harnessed",
+        importPath: entryFile,
+        exportName: "process",
+      },
+    });
+
+    const metadata = await readRunMetadata(result.runDir);
+    expect(metadata.harness).toBe("codex");
+
+    const journal = await loadJournal(result.runDir);
+    expect(journal[0].data.harness).toBe("codex");
+  });
+
   test("omits prompt from RUN_CREATED event and run.json when not provided", async () => {
     vi.spyOn(ulids, "nextUlid").mockReturnValue("01HZWNOPROMPTRUN");
     const entryFile = path.join(tmpRoot, "processes", "noprompt.mjs");

@@ -328,6 +328,66 @@ describe("CLI main entry", () => {
     );
   });
 
+  it("renders cleanup prompt details from the synced command template", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:cleanup",
+      "--keep-days",
+      "14",
+      "--dry-run",
+      "--prompt",
+      "be conservative",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("older than 14 days"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("DRY RUN"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Additional instructions: be conservative"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("docs/run-history-insights.md"),
+      }),
+    );
+  });
+
+  it("renders doctor diagnostics from the synced command template", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:doctor",
+      "--run-id",
+      "run-123",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Target run ID: run-123"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Run Discovery"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("BABYSITTER DIAGNOSTIC REPORT"),
+      }),
+    );
+  });
+
 });
 
 function mockRunMetadata() {

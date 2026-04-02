@@ -68,6 +68,7 @@ import { handleInstructionsCommand } from "./commands/instructions";
 import type { InstructionsCommandArgs } from "./commands/instructions";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
+import { renderCommandTemplate } from "../prompts";
 import type { SessionBindResult } from "../harness";
 import {
   BabysitterRuntimeError,
@@ -1144,11 +1145,13 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     console.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
+  const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
   const result = await createRun({
     runsDir,
     runId: parsed.runIdOverride,
     request: parsed.requestId,
     prompt: parsed.prompt,
+    harness: requestedHarness,
     processRevision: parsed.processRevision,
     process: {
       processId: parsed.processId,
@@ -2926,8 +2929,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:forever") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const foreverSuffix = "\n\n[IMPORTANT: Design this process as an infinite loop. The process should never complete — use ctx.sleepUntil() to pause between iterations and loop forever.]";
-          const foreverPrompt = parsed.prompt ? parsed.prompt + foreverSuffix : foreverSuffix.trim();
+          const foreverPrompt = renderCommandTemplate("forever", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: foreverPrompt,
             harness: parsed.harness,
@@ -2957,25 +2961,15 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:retrospect") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const retrospectPrefix = "[RETROSPECT MODE] Analyze a completed babysitter run. Create and run a retrospect process that:\n" +
-            "- Analyzes the run and its results (what went well, what didn't, what could be improved)\n" +
-            "- Analyzes the process that was followed (steps, tools, effectiveness)\n" +
-            "- Suggests improvements, optimizations, and fixes for both run and process\n" +
-            "- Implements approved improvements iteratively\n" +
-            "- Includes breakpoints for user steering at each analysis phase\n" +
-            "- Ends by prompting the user to contribute back via /babysitter:contrib\n" +
-            (() => {
-              const targetText = parsed.retrospectAll
-                ? "\nTarget: ALL completed/failed runs in .a5c/runs/"
-                : (parsed.runIds && parsed.runIds.length > 1)
-                  ? `\nTarget run IDs: ${parsed.runIds.join(", ")}`
-                  : (parsed.runIdOverride ? `\nTarget run ID: ${parsed.runIdOverride}` : "\nTarget: most recent run");
-              return targetText;
-            })() +
-            "\nAfter completing the retrospect analysis, suggest running /babysitter:cleanup to clean up old runs.";
-          const retrospectPrompt = parsed.prompt
-            ? retrospectPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : retrospectPrefix;
+          const targetRunText = parsed.retrospectAll
+            ? "Target: ALL completed/failed runs in .a5c/runs/"
+            : (parsed.runIds && parsed.runIds.length > 1)
+              ? `Target run IDs: ${parsed.runIds.join(", ")}`
+              : (parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run");
+          const retrospectPrompt = renderCommandTemplate("retrospect", {
+            targetRunText,
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: retrospectPrompt,
             harness: parsed.harness,
@@ -2992,18 +2986,11 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:cleanup") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
           const keepDays = parsed.keepDays ?? 7;
-          const cleanupPrefix = "[CLEANUP MODE] Clean up .a5c/runs and .a5c/processes directories. Create and run a cleanup process that:\n" +
-            "- Scans .a5c/runs/ for completed/failed runs\n" +
-            "- Aggregates insights from completed runs into docs/run-history-insights.md\n" +
-            "- Removes terminal runs (completed/failed) older than " + keepDays + " days\n" +
-            "- Never removes active/in-progress runs\n" +
-            "- Removes orphaned process files not referenced by remaining runs\n" +
-            "- Shows remaining run count and disk usage after cleanup\n" +
-            (parsed.dryRun ? "- DRY RUN: show what would be removed without deleting anything\n" : "") +
-            "- Always show the user a preview before removing (via breakpoints in interactive mode)";
-          const cleanupPrompt = parsed.prompt
-            ? cleanupPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : cleanupPrefix;
+          const cleanupPrompt = renderCommandTemplate("cleanup", {
+            keepDays: String(keepDays),
+            dryRunLine: parsed.dryRun ? "- DRY RUN: show what would be removed without deleting anything" : "",
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: cleanupPrompt,
             harness: parsed.harness,
@@ -3019,17 +3006,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:assimilate") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const assimilatePrefix = "[ASSIMILATE MODE] Convert an external methodology, harness, or specification into babysitter process definitions.\n" +
-            "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.\n" +
-            "Read `binding.dir` from that JSON and treat it as the active process-library root. The assimilation process must be selected from that active library path, not guessed from some other repo-relative location.\n" +
-            "Use the assimilation domain processes under the active library root. Available workflow paths relative to `binding.dir`:\n" +
-            "- `specializations/domains/assimilation/workflows/methodology-assimilation` - Learn an external methodology from its repo/spec/source and convert it into babysitter processes, skills, and agents\n" +
-            "- `specializations/domains/assimilation/harness/<name>` - Use the matching harness integration process for a specific harness target (for example `codex`, `opencode`, `gemini-cli`, `openclaw`, `antigravity`, or the generic fallback in the same directory)\n" +
-            "Search the active assimilation subtree under `binding.dir` first and pick the concrete process from there before authoring anything.\n" +
-            "If `Target to assimilate` is provided below, do not ask the user to restate the initial prompt or identify the target again. Only ask follow-up questions for genuinely missing constraints after inspecting the workspace and process-library context.";
-          const assimilatePrompt = parsed.prompt
-            ? assimilatePrefix + "\n\nTarget to assimilate: " + parsed.prompt
-            : assimilatePrefix;
+          const assimilatePrompt = renderCommandTemplate("assimilate", {
+            targetToAssimilate: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: assimilatePrompt,
             harness: parsed.harness,
@@ -3045,15 +3024,11 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:doctor") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const doctorPrefix = "[DOCTOR MODE] Comprehensive 10-point health check on a babysitter run. Diagnose:\n" +
-            "1. Run Discovery\n2. Journal Integrity (checksums, sequence, timestamps)\n" +
-            "3. State Cache Consistency\n4. Effect Status (stuck/errored/pending)\n" +
-            "5. Lock Status (stale locks)\n6. Session State (runaway loops)\n" +
-            "7. Log Analysis\n8. Disk Usage\n9. Process Validation\n10. Hook Execution Health\n" +
-            "Produce a structured diagnostic report with PASS/WARN/FAIL per check and specific fix commands.\n" +
-            (parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run");
+          const doctorPrompt = renderCommandTemplate("doctor", {
+            targetRunText: parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run",
+          });
           return await handleHarnessCreateRun({
-            prompt: doctorPrefix,
+            prompt: doctorPrompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
             workspace: parsed.workspace,
@@ -3067,15 +3042,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:contrib") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const contribPrefix = "[CONTRIB MODE] Submit feedback or contribute to the babysitter project.\n" +
-            "Route to the appropriate workflow based on arguments:\n" +
-            "Issue-based (opens GitHub issue): bug report, feature request, documentation question\n" +
-            "PR-based (forks repo, creates branch, submits PR): bugfix, feature implementation, library contribution, harness integration\n" +
-            "Use contribution processes from the active process library (cradle/ directory).\n" +
-            "Add breakpoints before ALL GitHub actions (fork, star, submit PR/issue).";
-          const contribPrompt = parsed.prompt
-            ? contribPrefix + "\n\nContribution details: " + parsed.prompt
-            : contribPrefix;
+          const contribPrompt = renderCommandTemplate("contrib", {
+            contributionDetails: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: contribPrompt,
             harness: parsed.harness,
@@ -3097,15 +3066,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:user-install") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const userInstallPrefix = "[USER-INSTALL MODE] First-time onboarding for new babysitter users.\n" +
-            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
-            "then use the `cradle/user-install` process from the active library.\n" +
-            "This process: installs dependencies, interviews about specialties/preferences,\n" +
-            "builds user profile at ~/.a5c/user-profile.json, and configures tools.\n" +
-            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
-          const userInstallPrompt = parsed.prompt
-            ? userInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : userInstallPrefix;
+          const userInstallPrompt = renderCommandTemplate("user-install", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: userInstallPrompt,
             harness: parsed.harness,
@@ -3121,16 +3084,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:project-install") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const projectInstallPrefix = "[PROJECT-INSTALL MODE] Onboard a project for babysitter orchestration.\n" +
-            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
-            "then use the `cradle/project-install` process from the active library.\n" +
-            "This process: analyzes the codebase, interviews about goals/workflows,\n" +
-            "generates project profile at .a5c/project-profile.json, installs recommended tools,\n" +
-            "and optionally configures CI/CD integration.\n" +
-            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
-          const projectInstallPrompt = parsed.prompt
-            ? projectInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : projectInstallPrefix;
+          const projectInstallPrompt = renderCommandTemplate("project-install", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: projectInstallPrompt,
             harness: parsed.harness,

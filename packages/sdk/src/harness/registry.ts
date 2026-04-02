@@ -12,6 +12,7 @@ import { createCodexAdapter } from "./codex";
 import { createGeminiCliAdapter } from "./geminiCli";
 import { createPiAdapter } from "./pi";
 import { createOhMyPiAdapter } from "./ohMyPi";
+import { createInternalAdapter } from "./internal";
 import { createCursorAdapter } from "./cursor";
 import { createGithubCopilotAdapter } from "./githubCopilot";
 import { createCustomAdapter } from "./customAdapter";
@@ -23,6 +24,7 @@ import { createCustomAdapter } from "./customAdapter";
 const knownAdapters: HarnessAdapter[] = [
   createCodexAdapter(),
   createOhMyPiAdapter(),
+  createInternalAdapter(),
   createPiAdapter(),
   createClaudeCodeAdapter(),
   createGeminiCliAdapter(),

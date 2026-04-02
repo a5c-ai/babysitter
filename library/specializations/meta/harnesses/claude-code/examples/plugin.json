@@ -1,0 +1,95 @@
+{
+  "name": "acme-devtools",
+  "version": "2.1.0",
+  "description": "ACME Corp development tools: code review, deployment automation, and security scanning",
+  "author": {
+    "name": "ACME DevTools Team",
+    "email": "devtools@acme.example.com",
+    "url": "https://github.com/acme-corp"
+  },
+  "homepage": "https://docs.acme.example.com/claude-plugin",
+  "repository": "https://github.com/acme-corp/acme-devtools",
+  "license": "MIT",
+  "keywords": [
+    "devtools",
+    "code-review",
+    "deployment",
+    "security",
+    "ci-cd"
+  ],
+
+  "commands": [
+    "./commands/"
+  ],
+
+  "agents": [
+    "./agents/security-reviewer.md",
+    "./agents/performance-tester.md"
+  ],
+
+  "skills": [
+    "./skills/"
+  ],
+
+  "hooks": "./hooks/hooks.json",
+
+  "mcpServers": {
+    "acme-jira": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/jira-server.js"],
+      "env": {
+        "JIRA_URL": "${user_config.jira_url}",
+        "JIRA_TOKEN": "${user_config.jira_token}"
+      }
+    },
+    "acme-metrics": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/metrics-server",
+      "args": ["--port", "0", "--config", "${CLAUDE_PLUGIN_ROOT}/config/metrics.json"]
+    }
+  },
+
+  "lspServers": {
+    "acme-dsl": {
+      "command": "acme-lsp",
+      "args": ["--stdio"],
+      "extensionToLanguage": {
+        ".acme": "acme-dsl",
+        ".adsl": "acme-dsl"
+      },
+      "initializationOptions": {
+        "schemaPath": "${CLAUDE_PLUGIN_ROOT}/schemas/"
+      }
+    }
+  },
+
+  "outputStyles": [
+    "./output-styles/"
+  ],
+
+  "userConfig": {
+    "jira_url": {
+      "description": "Your JIRA instance URL (e.g., https://acme.atlassian.net)",
+      "sensitive": false
+    },
+    "jira_token": {
+      "description": "JIRA API token for authentication",
+      "sensitive": true
+    },
+    "deploy_env": {
+      "description": "Default deployment environment (staging or production)",
+      "sensitive": false
+    }
+  },
+
+  "channels": [
+    {
+      "server": "acme-jira",
+      "userConfig": {
+        "webhook_secret": {
+          "description": "Webhook secret for JIRA notifications",
+          "sensitive": true
+        }
+      }
+    }
+  ]
+}

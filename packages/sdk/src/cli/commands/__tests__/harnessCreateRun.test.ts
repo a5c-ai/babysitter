@@ -2836,7 +2836,7 @@ describe("handleHarnessCreateRun", () => {
   });
 
   describe("error handling", () => {
-    it("proceeds with pi programmatic API even when no CLI harness is installed", async () => {
+    it("proceeds with internal programmatic API even when no CLI harness is installed", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi", installed: false }),
       ]);
@@ -2858,12 +2858,12 @@ describe("handleHarnessCreateRun", () => {
         interactive: false,
       });
 
-      // No CLI harness found, but harness:create-run proceeds using pi
+      // No CLI harness found, but harness:create-run proceeds using internal
       // programmatic API as the default — does not exit with error
       expect(code).toBe(0);
     });
 
-    it("honors explicit --harness pi even when another installed harness is discovered", async () => {
+    it("honors explicit --harness pi and uses CLI invocation (pi is non-programmatic)", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "claude-code" }),
       ]);
@@ -2892,6 +2892,9 @@ describe("handleHarnessCreateRun", () => {
           output: "done",
         });
       (commitEffectResult as Mock).mockResolvedValue({});
+      (invokeHarness as Mock).mockResolvedValue(
+        makeInvokeResult({ harness: "pi" }),
+      );
 
       const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
@@ -2903,8 +2906,8 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenCalled();
-      expect(invokeHarness).not.toHaveBeenCalled();
+      // pi is now non-programmatic (CLI-only), so it uses invokeHarness
+      expect(invokeHarness).toHaveBeenCalled();
       expect(commitEffectResult).toHaveBeenCalledWith(
         expect.objectContaining({
           runDir: "/tmp/runs/run-1",

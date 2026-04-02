@@ -21,6 +21,11 @@ export {
   resolveTemplatePath,
 } from './templateRenderer';
 
+export {
+  renderCommandTemplate,
+  resolveCommandTemplatePath,
+} from './commandTemplates';
+
 // Composers
 export {
   composeBabysitSkillPrompt,
