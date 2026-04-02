@@ -1977,7 +1977,7 @@ export async function runProcessDefinitionPhase(args: {
   const phase1ToolsMode: PiSessionOptions["toolsMode"] =
     workspaceAssessment.kind === "empty"
       ? "default"
-      : "readonly";
+      : "coding";
 
   session = createPiSession({
     workspace: args.workspace,

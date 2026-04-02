@@ -473,7 +473,7 @@ describe("handleHarnessCreateRun", () => {
         isolated: true,
         ephemeral: true,
       });
-      expect(["default", "readonly"]).toContain(phase1Options.toolsMode ?? "");
+      expect(["default", "coding"]).toContain(phase1Options.toolsMode ?? "");
       expect(phase1Options.customTools?.map((tool) => tool.name)).toEqual(
         expect.arrayContaining([
           "babysitter_write_process_definition",
