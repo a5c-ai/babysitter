@@ -6,6 +6,7 @@ import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
+import { invokeHarness } from "../../harness/invoker";
 import type { EffectRecord } from "../../runtime/types";
 
 vi.mock("../../runtime/replay/effectIndex", () => ({
@@ -24,10 +25,15 @@ vi.mock("../commands/harnessCreateRun", () => ({
   handleHarnessCreateRun: vi.fn().mockResolvedValue(0),
 }));
 
+vi.mock("../../harness/invoker", () => ({
+  invokeHarness: vi.fn(),
+}));
+
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 const handleSessionCreateMock = handleHarnessCreateRun as unknown as ReturnType<typeof vi.fn>;
+const invokeHarnessMock = invokeHarness as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
@@ -50,6 +56,14 @@ describe("CLI main entry", () => {
     });
     handleSessionCreateMock.mockReset();
     handleSessionCreateMock.mockResolvedValue(0);
+    invokeHarnessMock.mockReset();
+    invokeHarnessMock.mockResolvedValue({
+      success: true,
+      output: "ok",
+      exitCode: 0,
+      duration: 1,
+      harness: "internal",
+    });
   });
 
   afterEach(() => {
@@ -285,6 +299,27 @@ describe("CLI main entry", () => {
         interactive: false,
       }),
     );
+  });
+
+  it("routes harness:invoke internal through the invoker", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:invoke",
+      "internal",
+      "--prompt",
+      "hello",
+      "--model",
+      "gpt-5.4",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(invokeHarnessMock).toHaveBeenCalledWith("internal", {
+      prompt: "hello",
+      workspace: undefined,
+      model: "gpt-5.4",
+      timeout: undefined,
+    });
+    expect(logSpy).toHaveBeenCalledWith("ok");
   });
 
   it("passes the assimilate target through without asking the agent to restate it", async () => {
