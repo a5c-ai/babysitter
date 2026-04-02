@@ -120,6 +120,15 @@
       "packagePath": "plugins/prompt-master",
       "tags": ["skill", "prompts", "prompt-engineering", "multi-tool", "hooks", "claude-code", "cursor", "midjourney", "chatgpt"],
       "author": "a5c-ai"
+    },
+    "welcome": {
+      "name": "welcome",
+      "description": "Add a contextual welcome screen to every Claude Code session. Interviews you about your role and preferences, researches the project's tech stack and conventions, then generates a tailored /welcome skill and session-start hook that shows project status, recent activity, and suggested next actions.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/welcome",
+      "tags": ["skill", "hooks", "session-start", "dashboard", "onboarding", "ux", "project-status", "claude-code"],
+      "author": "a5c-ai"
     }
   }
 }
