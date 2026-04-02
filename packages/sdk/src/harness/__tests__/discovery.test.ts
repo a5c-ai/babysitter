@@ -11,6 +11,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { execFile } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
+import { promises as fsPromises } from "node:fs";
 
 // Mock child_process before importing the module under test.
 vi.mock("node:child_process", () => ({
@@ -36,6 +37,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const mockedExecFile = vi.mocked(execFile);
+const mockedFsAccess = vi.mocked(fsPromises.access);
 
 type ExecFileCallback = (error: Error | null, stdout: string | Buffer) => void;
 
@@ -116,6 +118,7 @@ beforeEach(() => {
     delete process.env[key];
   }
   vi.clearAllMocks();
+  mockedFsAccess.mockRejectedValue(new Error("ENOENT"));
 });
 
 afterEach(() => {
@@ -329,6 +332,23 @@ describe("discoverHarnesses", () => {
 
     // activeSession is not part of the installed-discovery result
     expect(claude).not.toHaveProperty("activeSession");
+  });
+
+  it("detects oh-my-pi config from .omp instead of .pi", async () => {
+    stubExecFile({});
+    mockedFsAccess.mockImplementation(async (targetPath) => {
+      if (String(targetPath).includes(".omp")) {
+        return;
+      }
+      throw new Error("ENOENT");
+    });
+
+    const results = await discoverHarnesses();
+    const ohMyPi = results.find((r) => r.name === "oh-my-pi");
+    const pi = results.find((r) => r.name === "pi");
+
+    expect(ohMyPi?.configFound).toBe(true);
+    expect(pi?.configFound).toBe(false);
   });
 });
 

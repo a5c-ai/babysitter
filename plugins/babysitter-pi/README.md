@@ -71,6 +71,12 @@ Install the published oh-my-pi plugin globally:
 npx @a5c-ai/babysitter-pi install --harness oh-my-pi
 ```
 
+This installs into the unified oh-my-pi plugin root:
+
+```text
+~/.omp/plugins/babysitter
+```
+
 Install into a specific workspace instead of the user profile:
 
 ```bash
@@ -110,6 +116,14 @@ Check status:
 
 The pi README is user-facing. Raw Babysitter runtime mechanics belong in the pi
 command implementation docs, not here.
+
+## Troubleshooting
+
+- `babysitter harness:discover --json` is the supported way to verify whether
+  `oh-my-pi` is installed from the current environment.
+- `omp --help` may be silent or behave differently across shells. If discovery
+  reports `oh-my-pi` as installed but a direct `omp` invocation fails, validate
+  the current shell `PATH` first with `where omp` on Windows.
 
 ## Tests
 

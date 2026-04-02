@@ -12,6 +12,7 @@ import assert from 'node:assert';
 
 // SDK harness imports from the local repo build output.
 import * as piHarnessModule from '../../../packages/sdk/dist/harness/pi.js';
+import * as ohMyPiHarnessModule from '../../../packages/sdk/dist/harness/ohMyPi.js';
 import * as harnessRegistryModule from '../../../packages/sdk/dist/harness/registry.js';
 
 // Extension module imports (TypeScript source -- requires --experimental-strip-types)
@@ -133,6 +134,61 @@ describe('Pi harness adapter', () => {
         `adapter.${method} must be a function`,
       );
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Oh-My-Pi adapter tests
+// ---------------------------------------------------------------------------
+
+describe('Oh-My-Pi harness adapter', () => {
+  it('has correct name "oh-my-pi"', () => {
+    const adapter = ohMyPiHarnessModule.createOhMyPiAdapter();
+    assert.strictEqual(adapter.name, 'oh-my-pi');
+  });
+
+  it('is retrievable by name from registry', () => {
+    const adapter = harnessRegistryModule.getAdapterByName('oh-my-pi');
+    assert.ok(adapter, 'getAdapterByName("oh-my-pi") must return an adapter');
+    assert.strictEqual(adapter.name, 'oh-my-pi');
+  });
+
+  it('isActive() only responds to OMP_* env vars', () => {
+    const saved = {
+      OMP_SESSION_ID: process.env.OMP_SESSION_ID,
+      OMP_PLUGIN_ROOT: process.env.OMP_PLUGIN_ROOT,
+      PI_SESSION_ID: process.env.PI_SESSION_ID,
+      PI_PLUGIN_ROOT: process.env.PI_PLUGIN_ROOT,
+    };
+
+    delete process.env.OMP_SESSION_ID;
+    delete process.env.OMP_PLUGIN_ROOT;
+    delete process.env.PI_SESSION_ID;
+    delete process.env.PI_PLUGIN_ROOT;
+
+    try {
+      const adapter = ohMyPiHarnessModule.createOhMyPiAdapter();
+      assert.strictEqual(adapter.isActive(), false, 'adapter should be inactive without OMP_* env vars');
+
+      process.env.PI_SESSION_ID = 'pi-only-session';
+      assert.strictEqual(adapter.isActive(), false, 'adapter should ignore PI_* env vars when detecting oh-my-pi');
+
+      process.env.OMP_SESSION_ID = 'omp-session';
+      assert.strictEqual(adapter.isActive(), true, 'adapter should activate when OMP_SESSION_ID is set');
+    } finally {
+      for (const [key, value] of Object.entries(saved)) {
+        if (value !== undefined) {
+          process.env[key] = value;
+        } else {
+          delete process.env[key];
+        }
+      }
+    }
+  });
+
+  it('auto-resolves session ids through the pi-family implementation', () => {
+    const adapter = ohMyPiHarnessModule.createOhMyPiAdapter();
+    assert.strictEqual(adapter.autoResolvesSessionId(), true);
   });
 });
 

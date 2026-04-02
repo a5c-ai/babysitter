@@ -112,7 +112,7 @@ const CONFIG_PATHS: Record<string, string[]> = {
   "claude-code": [".claude"],
   codex: [".codex"],
   pi: [".pi"],
-  "oh-my-pi": [".pi"],
+  "oh-my-pi": [".omp"],
   "gemini-cli": [".gemini"],
   "github-copilot": [".copilot", ".github"],
   cursor: [".cursor", ".cursorrules"],

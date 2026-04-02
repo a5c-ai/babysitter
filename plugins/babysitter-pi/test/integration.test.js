@@ -27,6 +27,10 @@ function fileExists(...segments) {
   return fs.existsSync(pluginPath(...segments));
 }
 
+function readText(...segments) {
+  return fs.readFileSync(pluginPath(...segments), 'utf-8');
+}
+
 // ---------------------------------------------------------------------------
 // package.json structure
 // ---------------------------------------------------------------------------
@@ -129,6 +133,22 @@ describe('documentation and metadata', () => {
       'skills/babysitter/SKILL.md must exist',
     );
   });
+
+  it('README documents active process-library bootstrapping', () => {
+    const readme = readText('README.md');
+    assert.match(readme, /babysitter process-library:active --json/);
+  });
+
+  it('README documents harness discovery as the supported oh-my-pi troubleshooting path', () => {
+    const readme = readText('README.md');
+    assert.match(readme, /babysitter harness:discover --json/);
+    assert.match(readme, /where omp/);
+  });
+
+  it('AGENTS guidance does not advertise node as an active generated PI-family effect kind', () => {
+    const agents = readText('AGENTS.md');
+    assert.match(agents, /Do not present `node` as a generated PI-family effect kind\./);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -142,6 +162,13 @@ describe('installer assets', () => {
 
   it('bin/install.cjs exists', () => {
     assert.ok(fileExists('bin', 'install.cjs'), 'bin/install.cjs must exist');
+  });
+
+  it('bin/install.cjs bootstraps the shared active process library', () => {
+    const installer = readText('bin', 'install.cjs');
+    assert.match(installer, /process-library:active/);
+    assert.match(installer, /--state-dir/);
+    assert.match(installer, /getGlobalStateDir/);
   });
 
   it('bin/uninstall.cjs exists', () => {

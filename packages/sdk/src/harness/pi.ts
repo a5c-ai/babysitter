@@ -44,8 +44,9 @@ function resolvePiStateDir(args: {
 
   const pluginRoot = resolvePiPluginRoot(args);
   if (pluginRoot) {
-    // Oh-My-Pi plugins conventionally live under ".omp", while state is in ".a5c".
-    return path.resolve(pluginRoot, "..", ".a5c");
+    // PI-family plugins install under <root>/.omp|.pi/plugins/babysitter while
+    // the shared Babysitter state lives at <root>/.a5c.
+    return path.resolve(pluginRoot, "..", "..", "..", ".a5c");
   }
 
   return path.resolve(".a5c");
@@ -81,7 +82,8 @@ function getPiPluginInstallRoot(args: {
   const pluginsDir = args.harness === "oh-my-pi"
     ? path.join(base, ".omp", "plugins")
     : path.join(base, ".pi", "plugins");
-  return path.join(pluginsDir, "babysitter-pi");
+  // PI-family plugin manifests install under the unified plugin name "babysitter".
+  return path.join(pluginsDir, "babysitter");
 }
 
 export async function installPiFamilyPlugin(args: {
