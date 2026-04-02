@@ -38,6 +38,15 @@ function testSyntax() {
   console.log(`  ✓ syntax: ${passed} JS files pass node --check`);
 }
 
+function testCommandBackedSkills() {
+  execFileSync(process.execPath, [path.join(SCRIPTS_DIR, 'sync-command-skills.js'), '--check'], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+    stdio: 'inherit',
+  });
+  console.log('  ✓ command-backed skills are synchronized with plugins/babysitter/commands');
+}
+
 // Test: Shell hook scripts have valid syntax
 function testShellSyntax() {
   const shellScripts = [
@@ -65,6 +74,7 @@ console.log('Integration Tests:');
 try {
   testSyntax();
   testShellSyntax();
+  testCommandBackedSkills();
   console.log('\nAll integration tests passed!');
 } catch (err) {
   console.error('\nTest failed:', err.message);

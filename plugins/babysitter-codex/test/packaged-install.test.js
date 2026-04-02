@@ -146,7 +146,7 @@ try {
   assert.ok(installedSkill.includes('name: babysit'));
   assert.ok(installedSkill.includes('instructions:babysit-skill'), 'babysit skill should reference instructions:babysit-skill command');
   const installedCallSkill = fs.readFileSync(path.join(installedPluginRoot, 'skills', 'call', 'SKILL.md'), 'utf8');
-  assert.ok(installedCallSkill.includes('Load and use the installed `babysit` skill.'));
+  assert.ok(installedCallSkill.includes('Invoke the babysitter:babysit skill (using the Skill tool) and follow its instructions (SKILL.md).'));
 
   const homeConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf8');
   assert.ok(homeConfig.includes('project_doc_max_bytes = 65536'));
