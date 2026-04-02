@@ -182,6 +182,7 @@ Read the last 50 lines of each of these log files (if they exist):
 - `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook-stderr.log`
 - `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook.log`
 - `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook-stderr.log`
+- `$HOME/.a5c/logs/` and relevant logs and run/session specific logs there
 
 For each log file:
 - If the file does not exist, note it as "Not found (OK if hooks have not run yet)."

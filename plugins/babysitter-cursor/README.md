@@ -385,6 +385,9 @@ Also check log output in `<plugin-root>/.a5c/logs/`:
 - `babysitter-stop-hook-stderr.log`
 - `babysitter-session-start-hook-stderr.log`
 
+- `$HOME/.a5c/logs/` and relevant logs and run/session specific logs there
+
+
 ### Run stuck or not progressing
 
 Check the run status and diagnose:
