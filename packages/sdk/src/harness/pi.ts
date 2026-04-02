@@ -44,9 +44,9 @@ function resolvePiStateDir(args: {
 
   const pluginRoot = resolvePiPluginRoot(args);
   if (pluginRoot) {
-    // PI-family plugins install under <root>/.omp|.pi/plugins/babysitter while
-    // the shared Babysitter state lives at <root>/.a5c.
-    return path.resolve(pluginRoot, "..", "..", "..", ".a5c");
+    // PI-family plugins keep shared Babysitter session state adjacent to the
+    // plugin install root so the harness and plugin resolve the same files.
+    return path.resolve(pluginRoot, "..", ".a5c");
   }
 
   return path.resolve(".a5c");

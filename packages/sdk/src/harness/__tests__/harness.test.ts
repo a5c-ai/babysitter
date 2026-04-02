@@ -283,7 +283,7 @@ describe("PiAdapter", () => {
     const result = adapter.resolveStateDir({
       pluginRoot: "/workspace/.omp/plugins/babysitter",
     });
-    expect(result).toBe(path.resolve("/workspace/.a5c"));
+    expect(result).toBe(path.resolve("/workspace/.omp/plugins/.a5c"));
   });
 });
 
