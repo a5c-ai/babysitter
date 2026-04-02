@@ -1164,12 +1164,13 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // Bind only when the caller is explicit about harness/session context.
-  // Ambient harness env inside editor/test hosts should not silently mutate
-  // generic CLI runs.
-  const adapter = parsed.harness
-    ? getAdapterByName(parsed.harness)
-    : (parsed.sessionId ? getAdapter() : undefined);
+  // Persisting --harness in run metadata must not silently bind the new run to
+  // an ambient editor/CLI session. Only attempt session binding when the user
+  // explicitly supplies --session-id.
+  const shouldBindSession = parsed.sessionId !== undefined;
+  const adapter = shouldBindSession
+    ? (parsed.harness ? getAdapterByName(parsed.harness) : getAdapter())
+    : undefined;
 
   // Reject explicit --session-id when the adapter auto-resolves it.
   if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
@@ -1201,10 +1202,10 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
         verbose: parsed.verbose,
         json: parsed.json,
       });
-      } else if (parsed.harness) {
-        // --harness was specified but no session ID could be resolved
+      } else if (parsed.sessionId !== undefined) {
+        // --session-id was requested but the adapter could not resolve it.
         sessionBound = {
-          harness: parsed.harness,
+          harness: parsed.harness ?? adapter.name,
           sessionId: "",
           error: (
             adapter.getMissingSessionIdHint?.() ??
@@ -1212,8 +1213,8 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           ),
         };
       }
-  } else if (parsed.harness) {
-    // --harness was specified but the adapter name is unknown
+  } else if (parsed.sessionId !== undefined && parsed.harness) {
+    // --session-id requested an unknown explicit harness.
     sessionBound = {
       harness: parsed.harness,
       sessionId: "",
