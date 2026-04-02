@@ -59,6 +59,17 @@ assert_file_exists "versions.json exists" "$PLUGIN_DIR/versions.json"
 assert_file_exists "README.md exists" "$PLUGIN_DIR/README.md"
 
 # ---------------------------------------------------------------------------
+# Test 1b: command/skill sync is current
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 1b: Command sync ==="
+if node "$PLUGIN_DIR/scripts/sync-command-surfaces.js" --check; then
+  pass "command and skill surfaces are synchronized"
+else
+  fail "command and skill surfaces are not synchronized"
+fi
+
+# ---------------------------------------------------------------------------
 # Test 2: JSON files are valid
 # ---------------------------------------------------------------------------
 echo ""

@@ -1,15 +1,9 @@
 ---
 name: resume
-description: Resume an existing Babysitter run from Cursor IDE/CLI.
+description: Resume orchestrating of a babysitter run. use this command to resume babysitting a complex workflow.
 ---
 
 # resume
 
-Load and use the installed `babysit` skill.
-
-Resolve the request in `resume` mode:
-
-- treat everything after `$resume` as the run selector or run id
-- focus on restoring the orchestration context and continuing the run honestly
-- do not create a separate command surface here; this skill only forwards into
-  `babysit`
+Invoke the babysitter:babysit skill (using the Skill tool) and follow its instructions (SKILL.md). to resume a run.
+if no run was given, discover the runs and suggest which incomplete run to resume based on the run's status, inputs, process , etc.

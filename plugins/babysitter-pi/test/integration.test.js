@@ -120,6 +120,19 @@ describe('command files', () => {
       assert.ok(fileExists('commands', cmd), `commands/${cmd} must exist`);
     });
   }
+
+  it('command docs are synchronized with the PI command sync script', async () => {
+    const { spawnSync } = await import('node:child_process');
+    const result = spawnSync(
+      process.execPath,
+      [pluginPath('scripts', 'sync-command-docs.cjs'), '--check'],
+      {
+        cwd: PLUGIN_ROOT,
+        encoding: 'utf8',
+      },
+    );
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'PI command sync check failed');
+  });
 });
 
 // ---------------------------------------------------------------------------

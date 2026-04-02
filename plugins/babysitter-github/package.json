@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Babysitter orchestration plugin for GitHub Copilot CLI with lifecycle hooks and SDK-managed process-library bootstrapping",
   "scripts": {
-    "test": "echo \"No tests yet\"",
+    "test": "node scripts/sync-command-surfaces.js --check",
+    "sync:commands": "node scripts/sync-command-surfaces.js",
     "postinstall": "node bin/install.js",
     "preuninstall": "node bin/uninstall.js",
     "team:install": "node scripts/team-install.js",

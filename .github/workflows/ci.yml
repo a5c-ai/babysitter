@@ -35,6 +35,11 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/test-logs
 
+      - name: Check plugin command sync
+        run: |
+          set -euo pipefail
+          npm run check:plugin-commands 2>&1 | tee artifacts/test-logs/plugin-command-sync.log
+
       - name: Lint
         run: |
           set -euo pipefail

@@ -16,6 +16,7 @@
   },
   "scripts": {
     "test": "node --test test/integration.test.js && npx tsx --test test/harness.test.js && npx tsx --test test/tui.test.js",
+    "sync:commands": "node scripts/sync-command-docs.cjs",
     "test:integration": "node --test test/integration.test.js",
     "test:harness": "npx tsx --test test/harness.test.js",
     "test:tui": "npx tsx --test test/tui.test.js",

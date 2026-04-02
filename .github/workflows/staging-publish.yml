@@ -42,6 +42,11 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/logs
 
+      - name: Check plugin command sync
+        run: |
+          set -euo pipefail
+          npm run check:plugin-commands 2>&1 | tee artifacts/logs/plugin-command-sync.log
+
       - name: Verify metadata
         run: |
           set -euo pipefail
