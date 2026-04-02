@@ -3023,7 +3023,8 @@ export function createBabysitterCli() {
             "Use the assimilation domain processes from the active process library. Available workflows:\n" +
             "- methodology-assimilation: Learn an external methodology from its repo and convert to babysitter processes\n" +
             "- harness integration: Wire babysitter SDK into a specific AI coding harness (codex, opencode, gemini-cli, etc.)\n" +
-            "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.";
+            "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.\n" +
+            "If `Target to assimilate` is provided below, do not ask the user to restate the initial prompt or identify the target again. Only ask follow-up questions for genuinely missing constraints after inspecting the workspace and process-library context.";
           const assimilatePrompt = parsed.prompt
             ? assimilatePrefix + "\n\nTarget to assimilate: " + parsed.prompt
             : assimilatePrefix;

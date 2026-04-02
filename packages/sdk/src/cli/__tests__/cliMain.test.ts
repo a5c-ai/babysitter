@@ -287,6 +287,32 @@ describe("CLI main entry", () => {
     );
   });
 
+  it("passes the assimilate target through without asking the agent to restate it", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:assimilate",
+      "--prompt",
+      "oh-my-pi",
+      "--interactive",
+      "--model",
+      "gpt-5.4",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interactive: true,
+        model: "gpt-5.4",
+        prompt: expect.stringContaining("Target to assimilate: oh-my-pi"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("do not ask the user to restate the initial prompt"),
+      }),
+    );
+  });
+
 });
 
 function mockRunMetadata() {
