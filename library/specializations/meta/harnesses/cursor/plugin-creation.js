@@ -220,20 +220,25 @@ Each agent markdown defines a specialized subagent with:
 - Task delegation patterns
 - When to invoke this agent vs handling directly
 
-### Hooks (hooks/hooks.json + hook scripts)
-Create hooks.json following the Cursor hooks format:
+### Hooks (hooks.json)
+Create hooks.json following the Cursor hooks format. The \`stop\` hook supports a \`loop_limit\`
+field (null for unlimited) that controls orchestration re-entry:
 \`\`\`json
 {
+  "version": 1,
   "hooks": {
-    "SessionStart": [
-      { "matcher": "*", "hooks": [{ "type": "command", "command": "./hooks/<script>.sh" }] }
-    ],
-    "Stop": [...],
-    "PreToolUse": [...],
-    "PostToolUse": [...]
+    "stop": [
+      {
+        "type": "command",
+        "bash": "bash \\"./hooks/stop-hook.sh\\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \\"./hooks/stop-hook.ps1\\"",
+        "loop_limit": null
+      }
+    ]
   }
 }
 \`\`\`
+The stop hook with \`loop_limit: null\` enables infinite orchestration loops (critical for babysitter).
 Hook scripts must be standalone executables that handle Cursor's hook environment.
 
 ### Commands (commands/<name>.md)

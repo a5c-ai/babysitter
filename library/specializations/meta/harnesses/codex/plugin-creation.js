@@ -1,9 +1,10 @@
 /**
  * @process codex-plugin-creation
  * @description Create and distribute a plugin for the Codex CLI harness. Guides through
- *   requirements analysis, scaffolding the plugin with TOML configuration, SKILL.md files,
- *   Rust-native or script-based hooks in config.toml, MCP server entries in config.toml,
- *   then validating, preparing for npm/GitHub distribution, and generating documentation.
+ *   requirements analysis, scaffolding the plugin with .codex-plugin/plugin.json manifest (with
+ *   interface object), .app.json, hooks.json (SessionStart/UserPromptSubmit/Stop with matcher+hooks
+ *   array format), SKILL.md files, MCP server entries, then validating, preparing for npm/GitHub
+ *   distribution, and generating documentation.
  * @inputs { pluginName: string, pluginDescription: string, outputDir?: string, components?: { skills?: string[], hooks?: string[], commands?: string[], mcp?: boolean }, language?: string, author?: string }
  * @outputs { success: boolean, pluginDir: string, manifest: object, components: object, distributionReady: boolean }
  */
@@ -44,8 +45,10 @@ Determine:
 Codex CLI plugin structure reference:
 \`\`\`
 <plugin-root>/
-  .app.json             # Plugin manifest (name, version, description)
-  hooks.json            # Hook definitions (SessionStart, UserPromptSubmit, Stop)
+  .codex-plugin/
+    plugin.json         # Plugin manifest with interface object (displayName, category, capabilities)
+  .app.json             # App manifest (name, version, description)
+  hooks.json            # Hook definitions (SessionStart, UserPromptSubmit, Stop) with matcher+hooks arrays
   hooks/
     *.sh                # Hook script implementations
   skills/
@@ -53,6 +56,8 @@ Codex CLI plugin structure reference:
       SKILL.md          # Skill definition
   commands/
     <command>.md        # Command definitions
+  assets/
+    icon.svg            # Plugin icon
   config.toml.template  # Template for user's config.toml additions
   babysitter.lock.json  # Lock file for version tracking
   versions.json         # Version history
@@ -107,7 +112,26 @@ Steps:
    - commands/ (if commands are needed)
    - assets/ (for static resources if any)
 
-3. Write .app.json manifest:
+3. Create .codex-plugin/ directory with plugin.json manifest:
+\`\`\`json
+{
+  "name": "${args.pluginName}",
+  "version": "1.0.0",
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "${args.pluginName}",
+    "shortDescription": "${args.pluginDescription}",
+    "category": "Coding",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/icon.svg"
+  }
+}
+\`\`\`
+
+4. Write .app.json manifest:
 \`\`\`json
 {
   "name": "${args.pluginName}",
@@ -121,7 +145,7 @@ Steps:
 }
 \`\`\`
 
-4. Write hooks.json following the Codex hook format:
+5. Write hooks.json following the Codex hook format:
 \`\`\`json
 {
   "hooks": {
@@ -139,7 +163,7 @@ Steps:
 }
 \`\`\`
 
-5. Write config.toml.template showing what entries the user should add to their Codex config:
+6. Write config.toml.template showing what entries the user should add to their Codex config:
 \`\`\`toml
 # ${args.pluginName} plugin configuration
 [plugins.${args.pluginName}]
@@ -151,17 +175,17 @@ enabled = true
 # args = ["-y", "<mcp-package>"]
 \`\`\`
 
-6. Write versions.json with initial version entry.
+7. Write versions.json with initial version entry.
 
-7. Write babysitter.lock.json for version tracking.
+8. Write babysitter.lock.json for version tracking.
 
-8. Write package.json for npm distribution:
+9. Write package.json for npm distribution:
 \`\`\`json
 {
   "name": "@${args.author || 'unknown'}/${args.pluginName}",
   "version": "1.0.0",
   "description": "${args.pluginDescription}",
-  "files": ["hooks/", "skills/", "commands/", "assets/", ".app.json", "hooks.json", "config.toml.template"],
+  "files": [".codex-plugin/", "hooks/", "skills/", "commands/", "assets/", ".app.json", "hooks.json", "config.toml.template"],
   "keywords": ["codex", "codex-cli", "plugin", "babysitter-plugin"]
 }
 \`\`\`
