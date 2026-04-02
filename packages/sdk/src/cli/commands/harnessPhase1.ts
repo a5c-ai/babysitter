@@ -2011,6 +2011,15 @@ export async function runProcessDefinitionPhase(args: {
       label: "phase1 initial",
       writeVerbose,
       writeVerboseData,
+    }).catch((err: unknown) => {
+      const isTimeout =
+        err instanceof BabysitterRuntimeError &&
+        (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+      if (isTimeout) {
+        writeVerbose("[phase1] Pi prompt timed out, converting to failure result");
+        return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+      }
+      throw err;
     });
     phaseOutputs.push(result.output);
 
@@ -2057,6 +2066,15 @@ export async function runProcessDefinitionPhase(args: {
         label: "phase1 recovery",
         writeVerbose,
         writeVerboseData,
+      }).catch((err: unknown) => {
+        const isTimeout =
+          err instanceof BabysitterRuntimeError &&
+          (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+        if (isTimeout) {
+          writeVerbose("[phase1 recovery] Pi prompt timed out, converting to failure result");
+          return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+        }
+        throw err;
       });
       phaseOutputs.push(recovery.output);
       if (!recovery.success) {
@@ -2113,6 +2131,15 @@ export async function runProcessDefinitionPhase(args: {
         label: "phase1 final recovery",
         writeVerbose,
         writeVerboseData,
+      }).catch((err: unknown) => {
+        const isTimeout =
+          err instanceof BabysitterRuntimeError &&
+          (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+        if (isTimeout) {
+          writeVerbose("[phase1 final recovery] Pi prompt timed out, converting to failure result");
+          return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+        }
+        throw err;
       });
       phaseOutputs.push(finalRecovery.output);
       if (!finalRecovery.success) {
@@ -2195,6 +2222,15 @@ export async function runProcessDefinitionPhase(args: {
           label: "phase1 conformance repair",
           writeVerbose,
           writeVerboseData,
+        }).catch((err: unknown) => {
+          const isTimeout =
+            err instanceof BabysitterRuntimeError &&
+            (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+          if (isTimeout) {
+            writeVerbose("[phase1 conformance repair] Pi prompt timed out, converting to failure result");
+            return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+          }
+          throw err;
         });
         phaseOutputs.push(repair.output);
         if (!repair.success) {

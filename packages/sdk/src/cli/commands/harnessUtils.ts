@@ -485,7 +485,10 @@ export async function askUserQuestionViaTool(
   rl: readline.Interface | null,
   toolContext?: AskUserQuestionToolContext,
 ): Promise<AskUserQuestionResponse> {
-  const effectiveRequest = interactive && (request.timeout == null || request.timeout <= 0)
+  // Apply a default timeout only when interactive AND no explicit timeout was
+  // provided.  An explicit timeout of 0 means "wait indefinitely" and must be
+  // respected — do NOT override it with the default.
+  const effectiveRequest = interactive && request.timeout == null
     ? {
       ...request,
       timeout: DEFAULT_INTERACTIVE_ASK_TIMEOUT_MS,

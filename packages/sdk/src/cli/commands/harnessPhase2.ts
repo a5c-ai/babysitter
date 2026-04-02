@@ -82,6 +82,13 @@ const PROCESS_MODULE_LOAD_RETRY_DELAYS_MS = process.env.VITEST
   ? [0, 0]
   : [100, 250, 500];
 
+/**
+ * Maximum number of consecutive Pi prompt timeouts before the orchestration
+ * run is failed.  A single timeout is recoverable — the loop simply continues
+ * — but repeated timeouts indicate a persistent infrastructure issue.
+ */
+export const MAX_CONSECUTIVE_TIMEOUTS = 3;
+
 // For tests
 const EFFECT_RETRY_DELAYS_OVERRIDE = process.env.VITEST ? [0, 0, 0] : undefined;
 
@@ -1703,18 +1710,36 @@ export async function runOrchestrationPhase(args: {
     writeVerboseData(`${options?.label ?? "phase2"} prompt`, message);
     const progressSnapshot = captureOrchestrationProgressSnapshot();
 
-    const result = await promptPiWithRetry({
-      session: orchestrationSession,
-      message: compressInternalHarnessPrompt(
-        message,
-        args.compressionConfig,
-        "agent",
-      ),
-      timeout: PI_DEFAULT_PROMPT_TIMEOUT_MS,
-      label: options?.label ?? "phase2",
-      writeVerbose,
-      writeVerboseData,
-    });
+    let result: { success: boolean; output: string };
+    try {
+      result = await promptPiWithRetry({
+        session: orchestrationSession,
+        message: compressInternalHarnessPrompt(
+          message,
+          args.compressionConfig,
+          "agent",
+        ),
+        timeout: PI_DEFAULT_PROMPT_TIMEOUT_MS,
+        label: options?.label ?? "phase2",
+        writeVerbose,
+        writeVerboseData,
+      });
+    } catch (err: unknown) {
+      const isTimeout =
+        err instanceof BabysitterRuntimeError &&
+        (err.name === "PiTimeoutError" || err.message.includes("timed out"));
+      if (isTimeout) {
+        writeVerbose(
+          `[phase2] Pi prompt timed out, returning failure result for graceful recovery`,
+        );
+        result = {
+          success: false,
+          output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      } else {
+        throw err;
+      }
+    }
 
     if (!result.success) {
       writeVerboseData(`${options?.label ?? "phase2"} agent failure output`, result.output);
@@ -1850,6 +1875,7 @@ export async function runOrchestrationPhase(args: {
       );
     }
 
+    let consecutiveTimeouts = 0;
     while (state.iteration < args.maxIterations) {
       const terminal = ensureTerminalResult();
       if (terminal !== null) {
@@ -1857,25 +1883,53 @@ export async function runOrchestrationPhase(args: {
       }
 
       const progressBeforeTurn = captureOrchestrationProgressSnapshot();
-      await promptOrchestrationAgent(
-        buildOrchestrationTurnPrompt({
-          processPath: path.resolve(args.processPath),
-          userPrompt: args.prompt,
-          maxIterations: args.maxIterations,
-          currentIteration: state.iteration,
-          runId: state.runId,
-          runDir: state.runDir,
-          lastStatus: state.lastIterationResult?.status,
-          pendingEffects: describePendingActions(),
-        }),
-        { label: `phase2 iteration ${state.iteration + 1}` },
-      );
+      try {
+        await promptOrchestrationAgent(
+          buildOrchestrationTurnPrompt({
+            processPath: path.resolve(args.processPath),
+            userPrompt: args.prompt,
+            maxIterations: args.maxIterations,
+            currentIteration: state.iteration,
+            runId: state.runId,
+            runDir: state.runDir,
+            lastStatus: state.lastIterationResult?.status,
+            pendingEffects: describePendingActions(),
+          }),
+          { label: `phase2 iteration ${state.iteration + 1}` },
+        );
+      } catch (err: unknown) {
+        // Timeout-related OrchestrationAgentFailed errors are recoverable
+        // unless they happen too many times in a row.
+        const isTimeoutFailure =
+          err instanceof BabysitterRuntimeError &&
+          err.name === "OrchestrationAgentFailed" &&
+          (err.message.includes("timed out") || err.message.includes("PiTimeoutError"));
+
+        if (isTimeoutFailure) {
+          consecutiveTimeouts += 1;
+          writeVerbose(
+            `[phase2] Pi prompt timeout (${consecutiveTimeouts}/${MAX_CONSECUTIVE_TIMEOUTS} consecutive)`,
+          );
+          if (consecutiveTimeouts >= MAX_CONSECUTIVE_TIMEOUTS) {
+            throw new BabysitterRuntimeError(
+              "OrchestrationAgentTimedOut",
+              `Pi prompt timed out ${consecutiveTimeouts} consecutive times — aborting orchestration.`,
+              { category: ErrorCategory.External },
+            );
+          }
+          continue;
+        }
+        throw err;
+      }
 
       if (ensureTerminalResult() !== null) {
         break;
       }
 
-      if (!orchestrationStateAdvanced(progressBeforeTurn)) {
+      // Reset consecutive timeout counter when progress is made.
+      if (orchestrationStateAdvanced(progressBeforeTurn)) {
+        consecutiveTimeouts = 0;
+      } else {
         throw new BabysitterRuntimeError(
           "OrchestrationAgentStalled",
           "The orchestration agent did not advance the run or resolve pending effects in this turn.",
