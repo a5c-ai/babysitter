@@ -11,11 +11,11 @@ import path from "path";
 
 const ROOT = path.resolve(__dirname, "../..");
 const HOOK = `${PLUGIN_DIR}/hooks/babysitter-stop-hook.sh`;
-// The stop hook hardcodes STATE_DIR="$PLUGIN_ROOT/skills/babysit/state",
-// so we must use the same directory for session init calls.
-const STATE_DIR = `${PLUGIN_DIR}/skills/babysit/state`;
+// Claude session state now lives in the global Babysitter state dir so all
+// harness entrypoints (hooks, CLI, Bash tool calls) resolve the same files.
+const STATE_DIR = "/home/claude/.a5c/state";
 const LOG_DIR = "/tmp/hook-test-logs";
-const HOOK_ENV = `CLAUDE_PLUGIN_ROOT=${PLUGIN_DIR} BABYSITTER_LOG_DIR=${LOG_DIR} CLI=babysitter`;
+const HOOK_ENV = `CLAUDE_PLUGIN_ROOT=${PLUGIN_DIR} BABYSITTER_STATE_DIR=${STATE_DIR} BABYSITTER_LOG_DIR=${LOG_DIR} CLI=babysitter`;
 
 beforeAll(() => {
   buildImage(ROOT);

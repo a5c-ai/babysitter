@@ -102,14 +102,14 @@ describe('context factories', () => {
       expect(ctx.harness).toBe('pi');
     });
 
-    it('sets loopControlTerm to "loop-driver"', () => {
+    it('sets loopControlTerm to "skill-driven"', () => {
       const ctx = createPiContext();
-      expect(ctx.loopControlTerm).toBe('loop-driver');
+      expect(ctx.loopControlTerm).toBe('skill-driven');
     });
 
-    it('sets pluginRootVar to empty string', () => {
+    it('sets pluginRootVar to ${PI_PLUGIN_ROOT}', () => {
       const ctx = createPiContext();
-      expect(ctx.pluginRootVar).toBe('');
+      expect(ctx.pluginRootVar).toBe('${PI_PLUGIN_ROOT}');
     });
 
     it('sets hasNonNegotiables to false', () => {
@@ -185,12 +185,12 @@ describe('composeBabysitSkillPrompt', () => {
     expect(output).toContain('--harness pi');
   });
 
-  it('contains "loop-driver" for PI context', () => {
+  it('contains "skill-driven" for PI context', () => {
     const output = composeBabysitSkillPrompt(createPiContext());
-    expect(output).toContain('loop-driver');
+    expect(output).toContain('skill-driven');
   });
 
-  it('does NOT contain non-hook-driven caveat for PI context (uses loop-driver)', () => {
+  it('does NOT contain non-hook-driven caveat for PI context (uses skill-driven)', () => {
     const output = composeBabysitSkillPrompt(createPiContext());
     expect(output).not.toContain('Non-hook-driven continuation');
   });
@@ -404,10 +404,9 @@ describe('individual parts', () => {
       expect(result).toContain('stop-hook');
     });
 
-    it('uses loop-driver language for PI', () => {
+    it('renders no loop-control section for PI', () => {
       const result = renderLoopControl(createPiContext());
-      expect(result).toContain('Return control to the loop-driver');
-      expect(result).toContain('agent_end');
+      expect(result).toBe('');
     });
   });
 });
@@ -441,7 +440,7 @@ describe('joinNonEmpty', () => {
 // 9. Capability-conditional prompt sections
 // ---------------------------------------------------------------------------
 describe('capability-conditional sections', () => {
-  describe('PI context (harness-routing + breakpoint-routing)', () => {
+  describe('PI context (harness-routing only)', () => {
     it('shows execution.harness and execution.permissions in task kinds', () => {
       const ctx = createPiContext();
       const output = renderTaskKinds(ctx);
@@ -457,22 +456,22 @@ describe('capability-conditional sections', () => {
       expect(output).toContain("permissions:");
     });
 
-    it('shows breakpoint routing fields', () => {
+    it('does not show breakpoint routing fields', () => {
       const ctx = createPiContext();
       const output = renderBreakpointHandling(ctx);
-      expect(output).toContain('Breakpoint routing fields');
-      expect(output).toContain('`expert`');
-      expect(output).toContain('`tags`');
-      expect(output).toContain('`strategy`');
-      expect(output).toContain('`previousFeedback`');
-      expect(output).toContain('`attempt`');
+      expect(output).not.toContain('Breakpoint routing fields');
+      expect(output).not.toContain('`expert`');
+      expect(output).not.toContain('`tags`');
+      expect(output).not.toContain('`strategy`');
+      expect(output).not.toContain('`previousFeedback`');
+      expect(output).not.toContain('`attempt`');
     });
 
-    it('shows retry/refine convergence pattern', () => {
+    it('does not show retry/refine convergence pattern', () => {
       const ctx = createPiContext();
       const output = renderBreakpointHandling(ctx);
-      expect(output).toContain('retry/refine pattern');
-      expect(output).toContain('lastFeedback');
+      expect(output).not.toContain('retry/refine pattern');
+      expect(output).not.toContain('lastFeedback');
     });
   });
 

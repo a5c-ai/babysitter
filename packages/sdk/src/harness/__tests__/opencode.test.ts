@@ -24,7 +24,7 @@ import { HarnessCapability } from "../types";
 
 const ENV_KEYS = [
   "OPENCODE_SESSION_ID",
-  "OPENCODE_PROJECT_DIR",
+  "OPENCODE_CONFIG",
   "OPENCODE_PLUGIN_ROOT",
   "BABYSITTER_SESSION_ID",
   "BABYSITTER_STATE_DIR",
@@ -67,28 +67,28 @@ describe("createOpenCodeAdapter", () => {
 // ---------------------------------------------------------------------------
 
 describe("OpenCode isActive()", () => {
-  it("returns true when OPENCODE_SESSION_ID is set", () => {
-    process.env.OPENCODE_SESSION_ID = "test-session-123";
+  it("returns true when BABYSITTER_SESSION_ID is set", () => {
+    process.env.BABYSITTER_SESSION_ID = "test-session-123";
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(true);
   });
 
-  it("returns true when OPENCODE_PROJECT_DIR is set", () => {
-    process.env.OPENCODE_PROJECT_DIR = "/tmp/project";
+  it("returns true when OPENCODE_CONFIG is set", () => {
+    process.env.OPENCODE_CONFIG = "/tmp/opencode.json";
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(true);
   });
 
-  it("returns true when both OPENCODE_SESSION_ID and OPENCODE_PROJECT_DIR are set", () => {
-    process.env.OPENCODE_SESSION_ID = "sess-1";
-    process.env.OPENCODE_PROJECT_DIR = "/proj";
+  it("returns true when both BABYSITTER_SESSION_ID and OPENCODE_CONFIG are set", () => {
+    process.env.BABYSITTER_SESSION_ID = "sess-1";
+    process.env.OPENCODE_CONFIG = "/tmp/opencode.json";
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(true);
   });
 
   it("returns false when no OpenCode env vars are set", () => {
-    delete process.env.OPENCODE_SESSION_ID;
-    delete process.env.OPENCODE_PROJECT_DIR;
+    delete process.env.BABYSITTER_SESSION_ID;
+    delete process.env.OPENCODE_CONFIG;
     const adapter = createOpenCodeAdapter();
     expect(adapter.isActive()).toBe(false);
   });

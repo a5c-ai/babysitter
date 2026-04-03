@@ -18,16 +18,39 @@ describe("babysitter run:create CLI", () => {
   let runsRoot: string;
   let logSpy: ReturnType<typeof vi.spyOn>;
   let errorSpy: ReturnType<typeof vi.spyOn>;
+  const sessionEnvKeys = [
+    "BABYSITTER_SESSION_ID",
+    "CODEX_THREAD_ID",
+    "CODEX_SESSION_ID",
+    "CODEX_PLUGIN_ROOT",
+  ] as const;
+  let savedSessionEnv: Record<(typeof sessionEnvKeys)[number], string | undefined>;
 
   beforeEach(async () => {
     runsRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-"));
     logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    savedSessionEnv = {
+      BABYSITTER_SESSION_ID: process.env.BABYSITTER_SESSION_ID,
+      CODEX_THREAD_ID: process.env.CODEX_THREAD_ID,
+      CODEX_SESSION_ID: process.env.CODEX_SESSION_ID,
+      CODEX_PLUGIN_ROOT: process.env.CODEX_PLUGIN_ROOT,
+    };
+    for (const key of sessionEnvKeys) {
+      delete process.env[key];
+    }
   });
 
   afterEach(async () => {
     logSpy.mockRestore();
     errorSpy.mockRestore();
+    for (const key of sessionEnvKeys) {
+      if (savedSessionEnv[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = savedSessionEnv[key];
+      }
+    }
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
 

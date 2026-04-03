@@ -378,12 +378,14 @@ describe("detectCallerHarness", () => {
     expect(caller!.matchedEnvVars).toContain("CLAUDE_ENV_FILE");
   });
 
-  it("does not detect a harness from BABYSITTER_SESSION_ID alone", () => {
-    // BABYSITTER_SESSION_ID is cross-harness and should not identify any specific harness
+  it("detects opencode from BABYSITTER_SESSION_ID alone", () => {
+    // OpenCode self-injects BABYSITTER_SESSION_ID via shell.env and uses it for caller detection.
     process.env.BABYSITTER_SESSION_ID = "session-abc";
 
     const caller = detectCallerHarness();
-    expect(caller).toBeNull();
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("opencode");
+    expect(caller!.matchedEnvVars).toContain("BABYSITTER_SESSION_ID");
   });
 
   it("detects codex via CODEX_THREAD_ID", () => {

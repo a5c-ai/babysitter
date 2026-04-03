@@ -68,3 +68,4 @@ e2e-artifacts/ci-run-*/
 # --- babysitter managed ---
 .a5c/logs/
 # --- end babysitter managed ---
+.claude/scheduled_tasks.lock

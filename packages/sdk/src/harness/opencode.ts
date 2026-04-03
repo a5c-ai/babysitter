@@ -2,7 +2,7 @@
  * OpenCode harness adapter.
  *
  * Centralizes all OpenCode-specific behaviors:
- *   - Session ID resolution (BABYSITTER_SESSION_ID → OPENCODE_SESSION_ID)
+ *   - Session ID resolution (BABYSITTER_SESSION_ID, self-injected via shell.env hook)
  *   - State directory conventions (global state dir by default)
  *   - Session binding (run:create → state file with run association)
  *   - Minimal stop hook handler (no native stop hook — in-turn model)
@@ -563,12 +563,12 @@ export function createOpenCodeAdapter(): HarnessAdapter {
     name: HARNESS_NAME,
 
     isActive(): boolean {
-      // OpenCode does NOT inject distinctive env vars into plugins.
-      // The babysitter plugin's shell.env hook self-injects BABYSITTER_SESSION_ID
-      // and OPENCODE_SESSION_ID. OPENCODE_PROJECT_DIR may be set by the plugin.
+      // OpenCode does NOT inject distinctive env vars into plugin subprocesses.
+      // The babysitter plugin's shell.env hook self-injects BABYSITTER_SESSION_ID.
+      // OPENCODE_CONFIG is a real OpenCode env var that indicates OpenCode context.
       return !!(
-        process.env.OPENCODE_SESSION_ID ||
-        process.env.OPENCODE_PROJECT_DIR
+        process.env.BABYSITTER_SESSION_ID ||
+        process.env.OPENCODE_CONFIG
       );
     },
 

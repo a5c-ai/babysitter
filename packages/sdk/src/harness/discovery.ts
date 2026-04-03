@@ -86,7 +86,7 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "opencode",
     cli: "opencode",
-    callerEnvVars: ["OPENCODE_SESSION_ID", "OPENCODE_PROJECT_DIR"],
+    callerEnvVars: ["BABYSITTER_SESSION_ID", "OPENCODE_CONFIG"],
     capabilities: [Cap.HeadlessPrompt],
   },
   {
