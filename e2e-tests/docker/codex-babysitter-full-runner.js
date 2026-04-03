@@ -654,6 +654,8 @@ function main() {
     "codex",
     "--plugin-root",
     path.join(WORKSPACE, ".codex"),
+    "--state-dir",
+    path.join(WORKSPACE, ".a5c"),
   ], {
     env: {
       CODEX_SESSION_ID: sessionId,

@@ -154,6 +154,12 @@ jobs:
           BASE_GEMINI=$(node -e "console.log(require('./plugins/babysitter-gemini/package.json').version)")
           IFS='.' read -r GEMINI_MAJOR GEMINI_MINOR GEMINI_PATCH <<< "$BASE_GEMINI"
           GEMINI_NEXT_PATCH=$((GEMINI_PATCH + 1))
+          BASE_PI=$(node -e "console.log(require('./plugins/babysitter-pi/package.json').version)")
+          IFS='.' read -r PI_MAJOR PI_MINOR PI_PATCH <<< "$BASE_PI"
+          PI_NEXT_PATCH=$((PI_PATCH + 1))
+          BASE_OMP=$(node -e "console.log(require('./plugins/babysitter-omp/package.json').version)")
+          IFS='.' read -r OMP_MAJOR OMP_MINOR OMP_PATCH <<< "$BASE_OMP"
+          OMP_NEXT_PATCH=$((OMP_PATCH + 1))
           BASE_OPENCODE=$(node -e "console.log(require('./plugins/babysitter-opencode/package.json').version)")
           IFS='.' read -r OPENCODE_MAJOR OPENCODE_MINOR OPENCODE_PATCH <<< "$BASE_OPENCODE"
           OPENCODE_NEXT_PATCH=$((OPENCODE_PATCH + 1))
@@ -163,18 +169,24 @@ jobs:
           STAGING_VERSION_GITHUB="${GITHUB_MAJOR}.${GITHUB_MINOR}.${GITHUB_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CURSOR="${CURSOR_MAJOR}.${CURSOR_MINOR}.${CURSOR_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_GEMINI="${GEMINI_MAJOR}.${GEMINI_MINOR}.${GEMINI_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_PI="${PI_MAJOR}.${PI_MINOR}.${PI_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_OMP="${OMP_MAJOR}.${OMP_MINOR}.${OMP_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_OPENCODE="${OPENCODE_MAJOR}.${OPENCODE_MINOR}.${OPENCODE_NEXT_PATCH}-staging.${SHORT_SHA}"
           echo "staging_version_sdk=$STAGING_VERSION_SDK" >> "$GITHUB_OUTPUT"
           echo "staging_version_codex=$STAGING_VERSION_CODEX" >> "$GITHUB_OUTPUT"
           echo "staging_version_github=$STAGING_VERSION_GITHUB" >> "$GITHUB_OUTPUT"
           echo "staging_version_cursor=$STAGING_VERSION_CURSOR" >> "$GITHUB_OUTPUT"
           echo "staging_version_gemini=$STAGING_VERSION_GEMINI" >> "$GITHUB_OUTPUT"
+          echo "staging_version_pi=$STAGING_VERSION_PI" >> "$GITHUB_OUTPUT"
+          echo "staging_version_omp=$STAGING_VERSION_OMP" >> "$GITHUB_OUTPUT"
           echo "staging_version_opencode=$STAGING_VERSION_OPENCODE" >> "$GITHUB_OUTPUT"
           echo "Setting SDK staging version: $STAGING_VERSION_SDK"
           echo "Setting Codex staging version: $STAGING_VERSION_CODEX"
           echo "Setting GitHub staging version: $STAGING_VERSION_GITHUB"
           echo "Setting Cursor staging version: $STAGING_VERSION_CURSOR"
           echo "Setting Gemini staging version: $STAGING_VERSION_GEMINI"
+          echo "Setting Pi staging version: $STAGING_VERSION_PI"
+          echo "Setting OMP staging version: $STAGING_VERSION_OMP"
           echo "Setting OpenCode staging version: $STAGING_VERSION_OPENCODE"
           # Write prerelease version into package.json files (for npm publish)
           node -e "
@@ -213,6 +225,14 @@ jobs:
             const geminiExtension = JSON.parse(fs.readFileSync(geminiExtensionPath, 'utf8'));
             geminiExtension.version = '${STAGING_VERSION_GEMINI}';
             fs.writeFileSync(geminiExtensionPath, JSON.stringify(geminiExtension, null, 2) + '\n');
+            const piPkgPath = 'plugins/babysitter-pi/package.json';
+            const piPkg = JSON.parse(fs.readFileSync(piPkgPath, 'utf8'));
+            piPkg.version = '${STAGING_VERSION_PI}';
+            fs.writeFileSync(piPkgPath, JSON.stringify(piPkg, null, 2) + '\n');
+            const ompPkgPath = 'plugins/babysitter-omp/package.json';
+            const ompPkg = JSON.parse(fs.readFileSync(ompPkgPath, 'utf8'));
+            ompPkg.version = '${STAGING_VERSION_OMP}';
+            fs.writeFileSync(ompPkgPath, JSON.stringify(ompPkg, null, 2) + '\n');
             const opencodePkgPath = 'plugins/babysitter-opencode/package.json';
             const opencodePkg = JSON.parse(fs.readFileSync(opencodePkgPath, 'utf8'));
             opencodePkg.version = '${STAGING_VERSION_OPENCODE}';
