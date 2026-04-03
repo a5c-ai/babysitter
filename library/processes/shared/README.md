@@ -212,6 +212,142 @@ console.log(`${costs.totalRuns} runs over ${costs.calendarDays} days, ${costs.to
 
 ---
 
+### `tdd-triplet`
+
+Provides a composable TDD triplet for the canonical red-green-validate cycle: write tests, run tests, validate results. The module exposes two surfaces: a factory (`createTddTriplet`) that returns three `defineTask` descriptors for fine-grained manual control, and a convenience wrapper (`executeTddTriplet`) that drives the full sequence with built-in retry logic.
+
+**Import**
+
+```js
+import { createTddTriplet, executeTddTriplet } from './index.js';
+// or directly:
+import { createTddTriplet, executeTddTriplet } from './tdd-triplet.js';
+```
+
+**`createTddTriplet(config)` — factory**
+
+Creates three babysitter task definitions that can be dispatched individually via `ctx.task()`. The returned descriptors carry no shared mutable state and are safe to reuse across multiple convergence loop iterations.
+
+```js
+function createTddTriplet(config: TddTripletConfig): {
+  writeTestsTask: TaskDef,  // agent task — writes test files
+  runTestsTask:   TaskDef,  // shell task — executes the test suite
+  validateTask:   TaskDef,  // agent task — inspects results and produces a verdict
+}
+```
+
+**`TddTripletConfig` options**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `name` | `string` | yes | — | Human-readable identifier for this triplet, e.g. `'auth-module'`. Used in task IDs and titles. |
+| `writeTests.prompt` | `string` | yes | — | Agent prompt describing which tests to write. |
+| `writeTests.targetPath` | `string` | yes | — | Relative path where the test file should be written, e.g. `'tests/auth.test.ts'`. |
+| `writeTests.context` | `object` | no | `{}` | Additional structured context forwarded to the write-tests agent. |
+| `runTests.command` | `string` | yes | — | Shell command used to execute the test suite, e.g. `'npm test -- --grep auth'`. |
+| `runTests.timeout` | `number` | no | `60000` | Maximum test execution time in milliseconds. |
+| `validate.expectAllPass` | `boolean` | no | `true` | When `true`, a single failing test causes `passed: false`. |
+| `validate.minCoverage` | `number` | no | `undefined` | Minimum required line coverage percentage (0–100). Omit to skip coverage checking. |
+| `validate.customChecks` | `string[]` | no | `[]` | Free-text validation instructions appended to the validate agent prompt. |
+| `retryPolicy.maxRetries` | `number` | no | `2` | Maximum number of retry attempts after the initial test run. |
+| `retryPolicy.retryableExitCodes` | `number[]` | no | `[1]` | Exit codes from the shell task that trigger a retry. |
+
+**Validate task output schema**
+
+```js
+{
+  passed:             boolean,
+  summary:            string,
+  failingTests:       string[],
+  coverage:           number | null,
+  coverageMet:        boolean,
+  customCheckResults: Array<{ check: string, met: boolean, notes: string }>
+}
+```
+
+**`executeTddTriplet(ctx, config, args?)` — convenience wrapper**
+
+Orchestrates the full triplet in sequence: write tests (once), run tests (with retry), validate (on the final run result). Returns a `TddTripletResult`.
+
+```js
+async function executeTddTriplet(
+  ctx:    ProcessContext,
+  config: TddTripletConfig,
+  args?:  {
+    iteration?:        number;  // convergence loop iteration, default 1
+    previousFeedback?: string;  // feedback from a prior triplet run forwarded to the write-tests agent
+  }
+): Promise<{
+  passed:       boolean,  // true when validate reports a passing suite
+  testsWritten: object,   // raw result from the writeTests agent task
+  testResults:  object,   // raw result from the runTests shell task
+  validation:   object,   // raw result from the validate agent task
+  retriesUsed:  number    // retry iterations consumed (0 = passed on first attempt)
+}>
+```
+
+**Retry policy**
+
+`executeTddTriplet` retries the `runTests` shell task (not the `writeTests` agent task) when:
+- the shell task exits with a code listed in `retryPolicy.retryableExitCodes`, AND
+- the number of attempts has not yet reached `maxRetries + 1`.
+
+The `validateTask` always runs on the most recent test run result. To re-write tests on failure, wrap `executeTddTriplet` in a higher-level convergence loop and pass `previousFeedback` from `result.validation.summary` into the next call.
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createTddTriplet } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { writeTestsTask, runTestsTask, validateTask } = createTddTriplet({
+    name: 'auth-module',
+    writeTests: {
+      prompt: 'Write unit tests for the auth module covering login, logout, and token refresh.',
+      targetPath: 'tests/auth.test.ts',
+      context: { moduleUnderTest: 'src/auth.ts' }
+    },
+    runTests:   { command: 'npm test -- --grep auth', timeout: 90000 },
+    validate:   { expectAllPass: true, minCoverage: 75 }
+  });
+
+  const written   = await ctx.task(writeTestsTask, { iteration: 1 });
+  const testRun   = await ctx.task(runTestsTask,   { attempt: 1 });
+  const verdict   = await ctx.task(validateTask,   { testResults: testRun, attempt: 1 });
+
+  return { passed: verdict.passed, ...verdict };
+}
+```
+
+**Usage — convenience approach**
+
+```js
+import { executeTddTriplet } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await executeTddTriplet(ctx, {
+    name: 'phase-4-cost-aggregation',
+    writeTests: {
+      prompt: 'Write unit tests for the cost aggregation module.',
+      targetPath: 'tests/cost-aggregation.test.ts',
+      context: { moduleUnderTest: 'src/cost-aggregation.ts' }
+    },
+    runTests:   { command: 'npm test -- --grep cost-aggregation', timeout: 90000 },
+    validate:   { expectAllPass: true, minCoverage: 80 },
+    retryPolicy: { maxRetries: 2, retryableExitCodes: [1] }
+  }, { iteration: inputs.iteration ?? 1, previousFeedback: inputs.previousFeedback });
+
+  if (!result.passed) {
+    // Pass result.validation.summary back as previousFeedback in the next iteration
+    return { ...result, nextFeedback: result.validation.summary };
+  }
+
+  return result;
+}
+```
+
+---
+
 ## Composing All Three
 
 A complete example process that scans prior attempts and aggregates costs in parallel, performs analysis, then enforces a completeness gate before completing.
@@ -296,5 +432,7 @@ Within a process, read `relatedProcessIds` from `inputs` and pass them through t
 | `completenessGateTask` | `completeness-gate` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
 | `aggregateCosts` | `cost-aggregation` | `async function` | Aggregate cost-proxy metrics across related runs |
 | `costAggregationTask` | `cost-aggregation` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
+| `createTddTriplet` | `tdd-triplet` | `function` | Factory that returns three `defineTask` descriptors for the write-tests, run-tests, and validate phases |
+| `executeTddTriplet` | `tdd-triplet` | `async function` | Convenience wrapper that drives the full TDD triplet sequence with built-in retry logic |
 
 All exports are available from `./index.js` (the preferred import path) or from the individual module files.

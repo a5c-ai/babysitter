@@ -8,3 +8,4 @@
 export { priorAttemptsScannerTask, scanPriorAttempts } from './prior-attempts-scanner.js';
 export { completenessGateTask, evaluateCompleteness, checkCompleteness } from './completeness-gate.js';
 export { costAggregationTask, aggregateCosts } from './cost-aggregation.js';
+export { createTddTriplet, executeTddTriplet } from './tdd-triplet.js';
