@@ -1240,8 +1240,8 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
         verbose: parsed.verbose,
         json: parsed.json,
       });
-      } else if (parsed.sessionId !== undefined) {
-        // --session-id was requested but the adapter could not resolve it.
+      } else {
+        // --session-id or --harness was passed but the adapter could not resolve a session ID.
         sessionBound = {
           harness: parsed.harness ?? adapter.name,
           sessionId: "",
