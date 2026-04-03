@@ -47,6 +47,7 @@ RUN mkdir -p /tmp/babysitter-process-library-source/library && \
 RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source \
     BABYSITTER_GITHUB_PLUGIN_DIR=/home/github/.copilot/plugins \
     node /app/plugins/babysitter-github/bin/install.js
+RUN find /home/github/.copilot -name "*.sh" -exec chmod +x {} + 2>/dev/null || true
 
 WORKDIR /workspace
 

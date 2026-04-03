@@ -28,7 +28,7 @@ afterAll(() => {
 
 afterEach(() => {
   dockerExec(
-    `rm -rf ${STATE_DIR}/* ${LOG_DIR}/* /tmp/cursor-hook-test-run-* /tmp/cursor-hook-transcript-* /tmp/cursor-hook-input-* 2>/dev/null || true`,
+    `rm -rf ${STATE_DIR}/* ${LOG_DIR}/* /tmp/cursor-hook-test-run-* /tmp/cursor-hook-input-* 2>/dev/null || true`,
   );
 });
 
@@ -39,12 +39,12 @@ afterEach(() => {
 /** Write a hook input file and run the stop hook, reading from that file. */
 function runHook(
   sessionId: string,
-  transcriptPath: string,
+  lastResponse?: string,
 ): { stdout: string; exitCode: number } {
   const inputFile = `/tmp/cursor-hook-input-${Date.now()}.json`;
   const inputJson = JSON.stringify({
-    session_id: sessionId,
-    transcript_path: transcriptPath,
+    conversation_id: sessionId,
+    ...(lastResponse !== undefined ? { last_response: lastResponse } : {}),
   });
 
   const cmd = [
@@ -106,17 +106,6 @@ function parseJsonBlock(
   }
 }
 
-/** Create a mock JSONL transcript file inside the container. */
-function createTranscript(filePath: string, text: string): void {
-  const line = JSON.stringify({
-    role: "assistant",
-    message: { content: [{ type: "text", text }] },
-  });
-  dockerExec(
-    `printf '%s\\n' '${line.replace(/'/g, "'\\''")}' > ${filePath}`,
-  );
-}
-
 /**
  * Create a mock run directory with journal events inside the container.
  * Returns the path to the run directory.
@@ -154,12 +143,13 @@ function createMockRun(
   return runDir;
 }
 
-/** Assert the hook allowed exit (exit 0, no "block" decision). */
+/** Assert the hook allowed exit (exit 0, no followup_message). */
 function assertAllowsExit(result: { stdout: string; exitCode: number }): void {
   expect(result.exitCode).toBe(0);
   const parsed = parseJsonBlock(result.stdout);
   if (parsed) {
-    expect(parsed.decision).not.toBe("block");
+    // Cursor allows exit by returning {} (no followup_message)
+    expect(parsed.followup_message).toBeUndefined();
   }
 }
 
@@ -179,12 +169,11 @@ describe("Cursor stop hook core lifecycle", () => {
   test("exits 0 (allows exit) when no session state exists", () => {
     const { exitCode, stdout } = runHook(
       "nonexistent-session-" + Date.now(),
-      "/dev/null",
     );
     expect(exitCode).toBe(0);
     const parsed = parseJsonBlock(stdout);
     if (parsed) {
-      expect(parsed.decision).not.toBe("block");
+      expect(parsed.followup_message).toBeUndefined();
     }
   });
 
@@ -210,7 +199,6 @@ describe("Cursor stop hook core lifecycle", () => {
 
   test("blocks exit when active session with associated run", () => {
     const sid = "active-" + Date.now();
-    const transcriptFile = `/tmp/cursor-hook-transcript-active-${sid}.jsonl`;
 
     const runDir = createMockRun("active-run", [
       {
@@ -222,20 +210,20 @@ describe("Cursor stop hook core lifecycle", () => {
     dockerExec(
       `babysitter session:init --session-id ${sid} --state-dir ${STATE_DIR} --prompt "test orchestration" --run-id ${runDir} --json`,
     );
-    createTranscript(transcriptFile, "some assistant output here");
 
-    const { exitCode, stdout } = runHook(sid, transcriptFile);
+    const { exitCode, stdout } = runHook(sid, "some assistant output here");
 
     expect(exitCode).toBe(0);
     const output = parseJsonBlock(stdout);
     expect(output).toBeDefined();
-    expect(output!.decision).toBe("block");
-    expect(output!.reason).toContain("test orchestration");
+    // Cursor uses followup_message to auto-continue (not decision: "block")
+    expect(output!.followup_message).toBeDefined();
+    expect(typeof output!.followup_message).toBe("string");
+    expect(output!.followup_message as string).toContain("test orchestration");
   });
 
   test("increments iteration counter on each invocation", () => {
     const sid = "iter-" + Date.now();
-    const transcriptFile = `/tmp/cursor-hook-transcript-iter-${sid}.jsonl`;
 
     const runDir = createMockRun("iter-run", [
       {
@@ -247,19 +235,19 @@ describe("Cursor stop hook core lifecycle", () => {
     dockerExec(
       `babysitter session:init --session-id ${sid} --state-dir ${STATE_DIR} --prompt "counting test" --run-id ${runDir} --json`,
     );
-    createTranscript(transcriptFile, "iteration output");
 
-    // First invocation
-    const first = runHook(sid, transcriptFile);
+    // First invocation — Cursor adapter uses followup_message containing iteration number
+    const first = runHook(sid, "iteration output");
     const firstOut = parseJsonBlock(first.stdout);
     expect(firstOut).toBeDefined();
-    expect(firstOut!.systemMessage).toContain("iteration 2");
+    expect(firstOut!.followup_message).toBeDefined();
+    expect(firstOut!.followup_message as string).toContain("iteration 2");
 
     // Second invocation
-    const second = runHook(sid, transcriptFile);
+    const second = runHook(sid, "iteration output");
     const secondOut = parseJsonBlock(second.stdout);
     expect(secondOut).toBeDefined();
-    expect(secondOut!.systemMessage).toContain("iteration 3");
+    expect(secondOut!.followup_message as string).toContain("iteration 3");
 
     // Verify state
     const stateOut = dockerExec(
@@ -272,7 +260,6 @@ describe("Cursor stop hook core lifecycle", () => {
   test("detects completion proof tag and allows exit", () => {
     const sid = "complete-" + Date.now();
     const runDir = `/tmp/cursor-hook-test-run-complete-${sid}`;
-    const transcriptFile = `/tmp/cursor-hook-transcript-complete-${sid}.jsonl`;
 
     // sha256("test-run:babysitter-completion-secret-v1")
     const secret =
@@ -292,23 +279,23 @@ describe("Cursor stop hook core lifecycle", () => {
     dockerExec(
       `babysitter session:init --session-id ${sid} --state-dir ${STATE_DIR} --prompt "complete test" --run-id ${runDir} --json`,
     );
-    createTranscript(
-      transcriptFile,
+
+    // Cursor adapter reads last_response from hook input (not transcript files)
+    const { exitCode, stdout } = runHook(
+      sid,
       `Done! <promise>${secret}</promise>`,
     );
 
-    const { exitCode, stdout } = runHook(sid, transcriptFile);
-
     expect(exitCode).toBe(0);
     const parsed = parseJsonBlock(stdout);
-    expect(parsed?.decision).not.toBe("block");
+    // On completion, cursor adapter outputs {} (no followup_message)
+    expect(parsed?.followup_message).toBeUndefined();
 
     assertSessionDeleted(sid);
   });
 
   test("allows exit at max iterations", () => {
     const sid = "maxiter-" + Date.now();
-    const transcriptFile = `/tmp/cursor-hook-transcript-maxiter-${sid}.jsonl`;
 
     dockerExec(
       `babysitter session:init --session-id ${sid} --state-dir ${STATE_DIR} --max-iterations 3 --prompt "maxiter test" --json`,
@@ -316,9 +303,8 @@ describe("Cursor stop hook core lifecycle", () => {
     dockerExec(
       `babysitter session:update --session-id ${sid} --state-dir ${STATE_DIR} --iteration 3 --json`,
     );
-    createTranscript(transcriptFile, "some output");
 
-    const result = runHook(sid, transcriptFile);
+    const result = runHook(sid, "some output");
 
     assertAllowsExit(result);
     assertSessionDeleted(sid);

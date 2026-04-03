@@ -47,6 +47,7 @@ RUN mkdir -p /tmp/babysitter-process-library-source/library && \
 RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source \
     BABYSITTER_CURSOR_PLUGIN_DIR=/home/cursor/.cursor/plugins/local \
     node /app/plugins/babysitter-cursor/bin/install.js
+RUN find /home/cursor/.cursor -name "*.sh" -exec chmod +x {} + 2>/dev/null || true
 
 WORKDIR /workspace
 
