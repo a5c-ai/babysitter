@@ -319,7 +319,7 @@ These environment variables are available to hooks:
 | `HOOK_PAYLOAD` | The JSON payload (also available via stdin) |
 | `HOOK_TYPE` | The hook type being executed |
 | `REPO_ROOT` | Repository root directory |
-| `CLAUDE_SESSION_ID` | Current Claude Code session ID |
+| `BABYSITTER_SESSION_ID` | Cross-harness session identifier |
 | `CLAUDE_PLUGIN_ROOT` | Plugin installation directory |
 | `CLAUDE_ENV_FILE` | Path to session environment file |
 

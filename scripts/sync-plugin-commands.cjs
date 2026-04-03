@@ -33,6 +33,11 @@ const tasks = [
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-gemini', 'scripts', 'sync-command-surfaces.js')],
   },
   {
+    label: 'babysitter-omp',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-omp', 'scripts', 'sync-command-docs.cjs')],
+  },
+  {
     label: 'babysitter-pi',
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-pi', 'scripts', 'sync-command-docs.cjs')],

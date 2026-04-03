@@ -2,8 +2,8 @@
   "name": "@a5c-ai/babysitter-pi",
   "version": "0.1.0",
   "type": "module",
-  "description": "Babysitter PI-family plugin bundle with explicit installer commands for pi and oh-my-pi plugin roots",
-  "keywords": ["pi-package", "omp", "babysitter", "orchestration", "ai-agent"],
+  "description": "Babysitter plugin package for the upstream pi coding agent",
+  "keywords": ["pi", "babysitter", "orchestration", "ai-agent"],
   "omp": {
     "extensions": ["./extensions"],
     "skills": ["./skills"]

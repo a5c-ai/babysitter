@@ -178,7 +178,8 @@ Harness-specific plugin packages providing hooks, commands, skills, and integrat
 | `plugins/babysitter-cursor/` | Cursor | Hooks (`hooks.json`), commands, skills, `plugin.json` |
 | `plugins/babysitter-gemini/` | Gemini CLI | `GEMINI.md`, commands, hooks, `gemini-extension.json` |
 | `plugins/babysitter-github/` | GitHub Copilot | `AGENTS.md`, commands, hooks, skills |
-| `plugins/babysitter-pi/` | Pi / Oh-My-Pi | `AGENTS.md`, commands, extensions, skills, state |
+| `plugins/babysitter-pi/` | Pi | `AGENTS.md`, commands, extensions, skills, state |
+| `plugins/babysitter-omp/` | oh-my-pi | `AGENTS.md`, commands, extensions, skills, state |
 | `plugins/a5c/` | -- | Marketplace configuration (`marketplace/marketplace.json`, plugin registry) |
 
 All harness plugins use the unified plugin name `babysitter` in their manifests.

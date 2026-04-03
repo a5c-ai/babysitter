@@ -1,8 +1,8 @@
 # @a5c-ai/babysitter-pi
 
-Babysitter integration plugin for pi and oh-my-pi. It adapts Babysitter's
-harness contract to the PI-family session lifecycle, command system, and agent
-execution model.
+Babysitter integration plugin for the upstream `pi` coding agent. This package
+owns the Pi-specific install surface, command docs, and skill wiring while the
+shared runtime internals remain compatible with the wider PI-family.
 
 ## Integration Model
 
@@ -14,17 +14,39 @@ The pi plugin keeps Babysitter as the orchestration layer for pi sessions:
 - the plugin runtime records effect outcomes and updates the run state
 - completion requires the emitted `completionProof`
 
-## Active Process-Library Model
+## Installation
 
-Process discovery should prefer active roots:
+Install the published Pi plugin globally:
 
-1. `.a5c/processes` in the current workspace
-2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
-3. The cloned process-library repo root from `defaultSpec.cloneDir` when adjacent reference material is needed
-4. Installed plugin content only as a compatibility fallback
+```bash
+npx @a5c-ai/babysitter-pi install
+```
 
-Do not document team-only or plugin-bundled process roots as the primary source
-of truth.
+Install into a specific workspace instead of the user profile:
+
+```bash
+npx @a5c-ai/babysitter-pi install --workspace /path/to/repo
+```
+
+Or use the Babysitter SDK helper:
+
+```bash
+babysitter harness:install-plugin pi
+babysitter harness:install-plugin pi --workspace /path/to/repo
+```
+
+This package installs under:
+
+```text
+~/.pi/plugins/babysitter
+```
+
+If the workspace does not already have an active process-library binding, the
+installer bootstraps the shared global SDK process library automatically:
+
+```bash
+babysitter process-library:active --json
+```
 
 ## Commands
 
@@ -35,95 +57,12 @@ The plugin exposes pi-facing Babysitter commands such as:
 - `/babysitter:resume`
 - `/babysitter:doctor`
 
-## Orchestration Contract
-
-pi-facing docs should preserve the same core rules used by the active
-Babysitter contract:
-
-- start and resume work through the `/babysitter:*` command surface
-- execute one orchestration phase per harness turn
-- let the pi plugin and command implementation own the low-level Babysitter runtime mechanics
-- complete only when the emitted `completionProof` is returned
-
-## Task Kinds
-
-Current generated-process guidance should prefer:
-
-- `agent`
-- `skill`
-- `shell`
-- `breakpoint`
-- `sleep`
-
-Do not present `node` as an active generated effect kind in pi docs.
-
-## Installation
-
-Install the published PI plugin globally:
-
-```bash
-npx @a5c-ai/babysitter-pi install --harness pi
-```
-
-Install the published oh-my-pi plugin globally:
-
-```bash
-npx @a5c-ai/babysitter-pi install --harness oh-my-pi
-```
-
-This installs into the unified oh-my-pi plugin root:
-
-```text
-~/.omp/plugins/babysitter
-```
-
-Install into a specific workspace instead of the user profile:
-
-```bash
-npx @a5c-ai/babysitter-pi install --harness pi --workspace /path/to/repo
-npx @a5c-ai/babysitter-pi install --harness oh-my-pi --workspace /path/to/repo
-```
-
-Or use the Babysitter SDK helpers, which run the same published package flow:
-
-```bash
-babysitter harness:install-plugin pi
-babysitter harness:install-plugin pi --workspace /path/to/repo
-babysitter harness:install-plugin oh-my-pi
-babysitter harness:install-plugin oh-my-pi --workspace /path/to/repo
-```
-
-If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
-
-```bash
-babysitter process-library:active --json
-```
-
-## Usage
-
-Start a run:
-
-```text
-/babysitter:call Scan the codebase and generate a quality report
-```
-
-Check status:
-
-```text
-/babysitter:status
-/babysitter:status <runId>
-```
-
-The pi README is user-facing. Raw Babysitter runtime mechanics belong in the pi
-command implementation docs, not here.
-
 ## Troubleshooting
 
 - `babysitter harness:discover --json` is the supported way to verify whether
-  `oh-my-pi` is installed from the current environment.
-- `omp --help` may be silent or behave differently across shells. If discovery
-  reports `oh-my-pi` as installed but a direct `omp` invocation fails, validate
-  the current shell `PATH` first with `where omp` on Windows.
+  `pi` is installed from the current environment.
+- If discovery reports `pi` as installed but a direct invocation fails, validate
+  the current shell `PATH` first with `where pi` on Windows.
 
 ## Tests
 

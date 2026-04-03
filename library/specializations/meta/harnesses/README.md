@@ -78,7 +78,7 @@ All adapters use `BABYSITTER_SESSION_ID` as the cross-harness standard env var f
 
 | Harness | Env File Mechanism | Native Env Injection | Cross-Harness Var | Stdin JSON |
 |---------|-------------------|---------------------|-------------------|------------|
-| **Claude Code** | `CLAUDE_ENV_FILE` | None (was `CLAUDE_SESSION_ID` — fabricated) | `BABYSITTER_SESSION_ID` written to `CLAUDE_ENV_FILE` | `session_id` |
+| **Claude Code** | `CLAUDE_ENV_FILE` | None | `BABYSITTER_SESSION_ID` written to `CLAUDE_ENV_FILE` | `session_id` |
 | **Codex CLI** | None | `CODEX_THREAD_ID` (auto-injected) | `BABYSITTER_SESSION_ID` (env), fallback to `CODEX_THREAD_ID` | `session_id` |
 | **Gemini CLI** | None needed | `GEMINI_SESSION_ID` (auto-injected) | `BABYSITTER_SESSION_ID` (env), fallback to `GEMINI_SESSION_ID` | `session_id` |
 | **Pi / Oh My Pi** | None | `OMP_SESSION_ID` / `PI_SESSION_ID` | `BABYSITTER_SESSION_ID` (env), fallback to native | N/A (in-process) |

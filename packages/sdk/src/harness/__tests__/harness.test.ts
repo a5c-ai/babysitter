@@ -20,7 +20,7 @@ import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
 import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
-import { createPiAdapter, installPiFamilyPlugin } from "../pi";
+import { createPiAdapter, installPiPlugin } from "../pi";
 import { createOhMyPiAdapter } from "../ohMyPi";
 import { createNullAdapter } from "../nullAdapter";
 import {
@@ -271,17 +271,31 @@ describe("OhMyPiAdapter", () => {
     expect(adapter.isActive()).toBe(true);
   });
 
-  it("reuses the unified babysitter install root for existing oh-my-pi plugins", async () => {
+  it("reuses the oh-my-pi babysitter install root when already present", async () => {
     const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "omp-plugin-install-test-"));
     const targetDir = path.join(workspace, ".omp", "plugins", "babysitter");
 
     try {
       await fs.mkdir(targetDir, { recursive: true });
-      const result = await installPiFamilyPlugin({
-        harness: "oh-my-pi",
-        options: { workspace },
-      });
+      const adapter = createOhMyPiAdapter();
+      const result = await adapter.installPlugin?.({ workspace });
 
+      expect(result.location).toBe(targetDir);
+      expect(result.warning).toContain("already installed");
+    } finally {
+      await fs.rm(workspace, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Pi install helpers", () => {
+  it("reuses the existing pi install root when already present", async () => {
+    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "pi-plugin-install-test-"));
+    const targetDir = path.join(workspace, ".pi", "plugins", "babysitter");
+
+    try {
+      await fs.mkdir(targetDir, { recursive: true });
+      const result = await installPiPlugin({ workspace });
       expect(result.location).toBe(targetDir);
       expect(result.warning).toContain("already installed");
     } finally {

@@ -32,8 +32,16 @@ const pluginManifests = [
 ];
 const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
 const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
+const geminiPackageManifestPath = "plugins/babysitter-gemini/package.json";
+const geminiPluginManifestPath = "plugins/babysitter-gemini/plugin.json";
+const geminiExtensionManifestPath = "plugins/babysitter-gemini/gemini-extension.json";
+const geminiVersionsPath = "plugins/babysitter-gemini/versions.json";
 const githubPackageManifestPath = "plugins/babysitter-github/package.json";
 const cursorPackageManifestPath = "plugins/babysitter-cursor/package.json";
+const piPackageManifestPath = "plugins/babysitter-pi/package.json";
+const piPackageLockPath = "plugins/babysitter-pi/package-lock.json";
+const ompPackageManifestPath = "plugins/babysitter-omp/package.json";
+const ompPackageLockPath = "plugins/babysitter-omp/package-lock.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -50,6 +58,24 @@ const codexPackageManifest = existsSync(codexPackageManifestPath)
       data: JSON.parse(readFileSync(codexPackageManifestPath, "utf8")),
     }
   : null;
+const geminiPackageManifest = existsSync(geminiPackageManifestPath)
+  ? {
+      path: geminiPackageManifestPath,
+      data: JSON.parse(readFileSync(geminiPackageManifestPath, "utf8")),
+    }
+  : null;
+const geminiPluginManifest = existsSync(geminiPluginManifestPath)
+  ? {
+      path: geminiPluginManifestPath,
+      data: JSON.parse(readFileSync(geminiPluginManifestPath, "utf8")),
+    }
+  : null;
+const geminiExtensionManifest = existsSync(geminiExtensionManifestPath)
+  ? {
+      path: geminiExtensionManifestPath,
+      data: JSON.parse(readFileSync(geminiExtensionManifestPath, "utf8")),
+    }
+  : null;
 const githubPackageManifest = existsSync(githubPackageManifestPath)
   ? {
       path: githubPackageManifestPath,
@@ -60,6 +86,18 @@ const cursorPackageManifest = existsSync(cursorPackageManifestPath)
   ? {
       path: cursorPackageManifestPath,
       data: JSON.parse(readFileSync(cursorPackageManifestPath, "utf8")),
+    }
+  : null;
+const piPackageManifest = existsSync(piPackageManifestPath)
+  ? {
+      path: piPackageManifestPath,
+      data: JSON.parse(readFileSync(piPackageManifestPath, "utf8")),
+    }
+  : null;
+const ompPackageManifest = existsSync(ompPackageManifestPath)
+  ? {
+      path: ompPackageManifestPath,
+      data: JSON.parse(readFileSync(ompPackageManifestPath, "utf8")),
     }
   : null;
 
@@ -115,6 +153,38 @@ if (codexPackageManifest) {
   }
 }
 
+if (geminiPackageManifest) {
+  const currentGeminiVersion = geminiPackageManifest.data.version;
+  const newGeminiVersion = bumpVersion(currentGeminiVersion, bumpTarget);
+  geminiPackageManifest.data.version = newGeminiVersion;
+  writeFileSync(
+    geminiPackageManifest.path,
+    `${JSON.stringify(geminiPackageManifest.data, null, 2)}\n`,
+  );
+
+  if (geminiPluginManifest) {
+    geminiPluginManifest.data.version = newGeminiVersion;
+    writeFileSync(
+      geminiPluginManifest.path,
+      `${JSON.stringify(geminiPluginManifest.data, null, 2)}\n`,
+    );
+  }
+
+  if (geminiExtensionManifest) {
+    geminiExtensionManifest.data.version = newGeminiVersion;
+    writeFileSync(
+      geminiExtensionManifest.path,
+      `${JSON.stringify(geminiExtensionManifest.data, null, 2)}\n`,
+    );
+  }
+
+  if (existsSync(geminiVersionsPath)) {
+    const geminiVersions = JSON.parse(readFileSync(geminiVersionsPath, "utf8"));
+    geminiVersions.extensionVersion = newGeminiVersion;
+    writeFileSync(geminiVersionsPath, `${JSON.stringify(geminiVersions, null, 2)}\n`);
+  }
+}
+
 // Update GitHub package manifest - keep its own version stream, bumped by policy.
 if (githubPackageManifest) {
   const currentGithubVersion = githubPackageManifest.data.version;
@@ -137,12 +207,51 @@ if (cursorPackageManifest) {
   );
 }
 
+if (piPackageManifest) {
+  const currentPiVersion = piPackageManifest.data.version;
+  const newPiVersion = bumpVersion(currentPiVersion, bumpTarget);
+  piPackageManifest.data.version = newPiVersion;
+  writeFileSync(
+    piPackageManifest.path,
+    `${JSON.stringify(piPackageManifest.data, null, 2)}\n`,
+  );
+
+  if (existsSync(piPackageLockPath)) {
+    const piLock = JSON.parse(readFileSync(piPackageLockPath, "utf8"));
+    piLock.version = newPiVersion;
+    if (piLock.packages && piLock.packages[""]) {
+      piLock.packages[""].version = newPiVersion;
+    }
+    writeFileSync(piPackageLockPath, `${JSON.stringify(piLock, null, 2)}\n`);
+  }
+}
+
+if (ompPackageManifest) {
+  const currentOmpVersion = ompPackageManifest.data.version;
+  const newOmpVersion = bumpVersion(currentOmpVersion, bumpTarget);
+  ompPackageManifest.data.version = newOmpVersion;
+  writeFileSync(
+    ompPackageManifest.path,
+    `${JSON.stringify(ompPackageManifest.data, null, 2)}\n`,
+  );
+
+  if (existsSync(ompPackageLockPath)) {
+    const ompLock = JSON.parse(readFileSync(ompPackageLockPath, "utf8"));
+    ompLock.version = newOmpVersion;
+    if (ompLock.packages && ompLock.packages[""]) {
+      ompLock.packages[""].version = newOmpVersion;
+    }
+    writeFileSync(ompPackageLockPath, `${JSON.stringify(ompLock, null, 2)}\n`);
+  }
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
 for (const versionsPath of [
   "plugins/babysitter/versions.json",
   "plugins/babysitter-codex/versions.json",
   "plugins/babysitter-gemini/versions.json",
+  "plugins/babysitter-omp/versions.json",
   "plugins/babysitter-pi/versions.json",
   "plugins/babysitter-github/versions.json",
   "plugins/babysitter-cursor/versions.json",

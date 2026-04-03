@@ -871,7 +871,7 @@ npm install -g @a5c-ai/babysitter-sdk
 
 A unique identifier for a Claude Code session. Used for state isolation in in-session loops.
 
-**Environment Variable:** `CLAUDE_SESSION_ID`
+**Environment Variable:** `BABYSITTER_SESSION_ID`
 
 **Related:** [In-Session Loop](#in-session-loop)
 

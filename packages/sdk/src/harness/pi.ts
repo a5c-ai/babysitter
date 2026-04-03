@@ -1,9 +1,9 @@
 /**
- * Oh-My-Pi harness adapter.
+ * Pi harness adapter.
  *
- * Extends the SDK harness layer with "pi" support while reusing the
- * mature Claude stop/session-start hook handlers. The Pi adapter maps
- * Oh-My-Pi-specific environment conventions to the generic adapter interface.
+ * Extends the SDK harness layer with "pi" support while reusing the mature
+ * Claude stop/session-start hook handlers. The adapter also shares some
+ * internal PI-family helpers with the dedicated oh-my-pi adapter.
  */
 
 import * as path from "node:path";
@@ -68,7 +68,7 @@ async function installPiFamilyHarness(args: {
   });
 }
 
-function getPiPluginInstallRoot(args: {
+export function getPiFamilyPluginInstallRoot(args: {
   harness: "pi" | "oh-my-pi";
   workspace?: string;
 }): string {
@@ -76,7 +76,7 @@ function getPiPluginInstallRoot(args: {
   const pluginsDir = args.harness === "oh-my-pi"
     ? path.join(base, ".omp", "plugins")
     : path.join(base, ".pi", "plugins");
-  // PI-family plugin manifests install under the unified plugin name "babysitter".
+  // PI-family plugin manifests install under the harness-local plugin name "babysitter".
   return path.join(pluginsDir, "babysitter");
 }
 
@@ -84,7 +84,7 @@ export async function installPiFamilyPlugin(args: {
   harness: "pi" | "oh-my-pi";
   options: HarnessInstallOptions;
 }): Promise<HarnessInstallResult> {
-  const targetDir = getPiPluginInstallRoot({
+  const targetDir = getPiFamilyPluginInstallRoot({
     harness: args.harness,
     workspace: args.options.workspace,
   });
@@ -113,6 +113,15 @@ export async function installPiFamilyPlugin(args: {
     options: args.options,
     env: process.env,
     location: targetDir,
+  });
+}
+
+export async function installPiPlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installPiFamilyPlugin({
+    harness: "pi",
+    options,
   });
 }
 
@@ -212,10 +221,7 @@ export function createPiAdapter(): HarnessAdapter {
     },
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
-      return installPiFamilyPlugin({
-        harness: "pi",
-        options,
-      });
+      return installPiPlugin(options);
     },
 
     getCapabilities(): HarnessCapability[] {

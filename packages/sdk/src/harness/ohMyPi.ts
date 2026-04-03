@@ -7,13 +7,50 @@
  * both are installed.
  */
 
-import { createPiAdapter, installPiFamilyPlugin } from "./pi";
+import { existsSync } from "node:fs";
+import * as path from "node:path";
+import { createPiAdapter, getPiFamilyPluginInstallRoot } from "./pi";
 import type {
   HarnessAdapter,
   HarnessInstallOptions,
   HarnessInstallResult,
 } from "./types";
-import { installCliViaNpm } from "./installSupport";
+import { installCliViaNpm, runPackageBinaryViaNpx } from "./installSupport";
+
+async function installOhMyPiPlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  const targetDir = getPiFamilyPluginInstallRoot({
+    harness: "oh-my-pi",
+    workspace: options.workspace,
+  });
+  if (existsSync(targetDir)) {
+    return {
+      harness: "oh-my-pi",
+      warning: "The Babysitter oh-my-pi plugin is already installed at the target location; skipping reinstall.",
+      location: targetDir,
+    };
+  }
+
+  const packageArgs = ["install"];
+  if (options.workspace) {
+    packageArgs.push("--workspace", path.resolve(options.workspace));
+  } else {
+    packageArgs.push("--global");
+  }
+
+  return runPackageBinaryViaNpx({
+    harness: "oh-my-pi",
+    packageName: "@a5c-ai/babysitter-omp",
+    packageArgs,
+    summary: options.workspace
+      ? "Install the published Babysitter oh-my-pi plugin into the target workspace."
+      : "Install the published Babysitter oh-my-pi plugin into the user-level oh-my-pi plugin directory.",
+    options,
+    env: process.env,
+    location: targetDir,
+  });
+}
 
 /**
  * Create an adapter for oh-my-pi.
@@ -46,10 +83,7 @@ export function createOhMyPiAdapter(): HarnessAdapter {
     },
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
-      return installPiFamilyPlugin({
-        harness: "oh-my-pi",
-        options,
-      });
+      return installOhMyPiPlugin(options);
     },
   };
 }

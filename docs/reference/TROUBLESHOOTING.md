@@ -398,8 +398,8 @@ cat /tmp/babysitter-stop-hook.log
 The session ID is set by the SessionStart hook. Check if it was persisted:
 
 ```bash
-# Check if CLAUDE_SESSION_ID is set
-echo "$CLAUDE_SESSION_ID"
+# Check if BABYSITTER_SESSION_ID is set
+echo "$BABYSITTER_SESSION_ID"
 ```
 
 **Step 4: Check hook registration**
@@ -423,20 +423,20 @@ echo '{"session_id":"test-123","transcript_path":"/tmp/test.jsonl"}' | \
 
 If the state file is missing, the setup script may have failed:
 
-1. Check that `CLAUDE_SESSION_ID` is available:
+1. Check that `BABYSITTER_SESSION_ID` is available:
    ```bash
-   echo "$CLAUDE_SESSION_ID"
+   echo "$BABYSITTER_SESSION_ID"
    ```
 2. If not set, the SessionStart hook may have failed
 3. Check hook registration in `hooks.json`
 
 **Session ID not persisted:**
 
-Babysitter first looks for `CLAUDE_SESSION_ID`. If that is absent, the
+Babysitter first looks for `BABYSITTER_SESSION_ID`. If that is absent, the
 SessionStart hook can persist it through `CLAUDE_ENV_FILE` as a fallback.
 Check:
 
-1. whether `CLAUDE_SESSION_ID` is already present in the current Claude session
+1. whether `BABYSITTER_SESSION_ID` is already present in the current Claude session
 2. if not, whether `CLAUDE_ENV_FILE` is set
 3. whether that file is writable
 4. whether the hook is executable:
@@ -773,7 +773,7 @@ $CLI run:events <runId> --limit 100 --json | jq '.events'
 
 **Q: Can I run multiple orchestrations in parallel?**
 
-A: Yes. Each run has its own directory and state. For in-session loops, each Claude Code session has isolated state via `CLAUDE_SESSION_ID`.
+A: Yes. Each run has its own directory and state. For in-session loops, each Claude Code session has isolated state via `BABYSITTER_SESSION_ID`.
 
 ### Hooks
 
@@ -816,7 +816,7 @@ A:
 
 **Q: Where is the session state stored?**
 
-A: `plugins/babysitter/skills/babysit/state/${CLAUDE_SESSION_ID}.md`
+A: `plugins/babysitter/skills/babysit/state/${BABYSITTER_SESSION_ID}.md`
 
 **Q: What happens if I close Claude Code during a loop?**
 

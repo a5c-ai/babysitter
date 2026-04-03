@@ -17,17 +17,10 @@ const INSTALL_ENTRIES = [
 
 function parseArgs(argv) {
   const args = {
-    harness: 'pi',
     workspace: null,
   };
   for (let i = 2; i < argv.length; i += 1) {
-    if (argv[i] === '--harness' && argv[i + 1]) {
-      const value = String(argv[++i]).trim();
-      if (value !== 'pi' && value !== 'oh-my-pi') {
-        throw new Error(`unsupported harness: ${value}`);
-      }
-      args.harness = value;
-    } else if (argv[i] === '--workspace' && argv[i + 1]) {
+    if (argv[i] === '--workspace' && argv[i + 1]) {
       args.workspace = path.resolve(argv[++i]);
     } else if (argv[i] === '--global') {
       args.workspace = null;
@@ -47,10 +40,7 @@ function getGlobalStateDir() {
 
 function getPluginRoot(args) {
   const base = args.workspace ? path.resolve(args.workspace) : os.homedir();
-  const pluginsDir = args.harness === 'oh-my-pi'
-    ? path.join(base, '.omp', 'plugins')
-    : path.join(base, '.pi', 'plugins');
-  return path.join(pluginsDir, 'babysitter');
+  return path.join(base, '.pi', 'plugins', 'babysitter');
 }
 
 function copyRecursive(src, dest) {
@@ -134,7 +124,7 @@ function installEntry(pluginRoot, entry) {
 function main() {
   const args = parseArgs(process.argv);
   const pluginRoot = getPluginRoot(args);
-  console.log(`[babysitter] Installing ${args.harness} plugin to ${pluginRoot}`);
+  console.log(`[babysitter] Installing pi plugin to ${pluginRoot}`);
 
   try {
     fs.rmSync(pluginRoot, { recursive: true, force: true });
