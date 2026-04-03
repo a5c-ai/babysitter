@@ -1,0 +1,57 @@
+FROM node:20-bookworm
+
+LABEL maintainer="a5c.ai"
+LABEL description="Gemini CLI with babysitter SDK and repo-installed babysitter-gemini for E2E validation"
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r gemini && useradd -r -g gemini -m -d /home/gemini gemini
+
+ENV HOME=/home/gemini
+ENV GEMINI_HOME=/home/gemini/.gemini
+ENV PATH=/home/gemini/.local/bin:${PATH}
+
+RUN mkdir -p /home/gemini/.local /home/gemini/.gemini && \
+    echo "prefix=/home/gemini/.local" > /home/gemini/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-gemini/package.json ./plugins/babysitter-gemini/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk
+
+RUN mkdir -p /workspace && chown -R gemini:gemini /app /home/gemini /workspace
+
+USER gemini
+
+RUN npm install -g /app/packages/sdk
+RUN mkdir -p /tmp/babysitter-process-library-source/library && \
+    cp -R /app/library/. /tmp/babysitter-process-library-source/library/ && \
+    cd /tmp/babysitter-process-library-source && \
+    git init -q && \
+    git config user.name "Babysitter E2E" && \
+    git config user.email "e2e@example.com" && \
+    git add . && \
+    git commit -qm "seed process library"
+RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source \
+    GEMINI_EXTENSION_PATH=/home/gemini/.gemini/extensions/babysitter-gemini \
+    node /app/plugins/babysitter-gemini/bin/cli.js install --global
+RUN find /home/gemini/.gemini -name "*.sh" -exec chmod +x {} + 2>/dev/null || true
+
+WORKDIR /workspace
+
+ENV GEMINI_EXTENSION_PATH=/home/gemini/.gemini/extensions/babysitter-gemini
+ENV GEMINI_SESSION_ID=""
+
+CMD ["bash"]

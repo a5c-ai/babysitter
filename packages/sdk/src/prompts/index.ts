@@ -11,6 +11,7 @@ export type { PromptContext, PromptPart } from './types';
 export {
   createClaudeCodeContext,
   createCodexContext,
+  createGeminiCliContext,
   createPiContext,
 } from './context';
 

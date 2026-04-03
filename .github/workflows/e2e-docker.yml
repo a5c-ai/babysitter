@@ -9,8 +9,12 @@ on:
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
+      - 'plugins/babysitter-gemini/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
+      - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   push:
     branches:
@@ -23,8 +27,12 @@ on:
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
+      - 'plugins/babysitter-gemini/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
+      - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
 
@@ -77,6 +85,7 @@ jobs:
             e2e-tests/docker/pi-harness.test.ts \
             e2e-tests/docker/pi-secure-sandbox.test.ts \
             e2e-tests/docker/pi-workflow.test.ts \
+            e2e-tests/docker/gemini-cli-structural.test.ts \
             2>&1 | tee e2e-artifacts/structural-tests.log
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —

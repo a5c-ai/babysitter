@@ -1,6 +1,18 @@
 {
   "name": "babysitter",
-  "version": "4.0.145",
+  "version": "4.0.153",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — powered by the Babysitter SDK",
-  "contextFileName": "GEMINI.md"
+  "contextFileName": "GEMINI.md",
+  "settings": [
+    {
+      "name": "babysitterRunsDir",
+      "description": "Directory for babysitter run storage (defaults to .a5c/runs)",
+      "envVar": "BABYSITTER_RUNS_DIR"
+    },
+    {
+      "name": "babysitterStateDir",
+      "description": "State directory for harness adapters (defaults to .a5c)",
+      "envVar": "BABYSITTER_STATE_DIR"
+    }
+  ]
 }

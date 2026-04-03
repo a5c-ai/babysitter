@@ -1,4 +1,5 @@
 {
+  "description": "Babysitter plugin hooks for Gemini CLI — session initialization and AfterAgent continuation loop",
   "hooks": {
     "SessionStart": [
       {

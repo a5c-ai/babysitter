@@ -174,6 +174,44 @@ export function createCursorContext(
 }
 
 /**
+ * Create a PromptContext pre-configured for Gemini CLI.
+ */
+export function createGeminiCliContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'gemini-cli',
+    harnessLabel: 'Gemini CLI',
+    capabilities: ['hooks', 'stop-hook', 'task-tool', 'breakpoint-routing'],
+    pluginRootVar: '${GEMINI_EXTENSION_PATH}',
+    loopControlTerm: 'stop-hook',
+    sessionBindingFlags: '--state-dir .a5c/state',
+    hookDriven: true,
+    interactiveToolName: 'AskUserQuestion tool',
+    sessionEnvVars: 'GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD',
+    resumeFlags: '--state-dir .a5c/state',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
  * Create a PromptContext pre-configured for PI.
  */
 export function createPiContext(

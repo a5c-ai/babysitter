@@ -61,6 +61,8 @@ import {
   isGeminiPluginInstalled,
   runPackageBinaryViaNpx,
 } from "./installSupport";
+import type { PromptContext } from "../prompts/types";
+import { createGeminiCliContext } from "../prompts/context";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -957,6 +959,10 @@ export function createGeminiCliAdapter(): HarnessAdapter {
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
       return installGeminiPlugin(options);
+    },
+
+    getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
+      return createGeminiCliContext(opts);
     },
   };
 }

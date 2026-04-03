@@ -2,11 +2,16 @@
  * Tests for the Gemini CLI harness adapter.
  *
  * Covers:
- *   - isActive() detection via env vars
+ *   - isActive() detection via env vars (GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD)
+ *   - autoResolvesSessionId() returns true
  *   - resolveSessionId() from parsed args and env
+ *   - resolveStateDir() resolution chain (explicit > pluginRoot > env > default)
+ *   - resolvePluginRoot() resolution chain (explicit > env > undefined)
+ *   - getPromptContext() factory — correct harness metadata, capabilities, labels
  *   - AfterAgent hook (stop): approve, block, max-iterations, completion proof
  *   - SessionStart hook: creates baseline state file
  *   - bindSession(): creates/updates session state file
+ *   - findHookDispatcherPath() resolution
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -106,6 +111,9 @@ afterEach(async () => {
   delete process.env.GEMINI_SESSION_ID;
   delete process.env.GEMINI_PROJECT_DIR;
   delete process.env.GEMINI_CWD;
+  delete process.env.GEMINI_EXTENSION_PATH;
+  delete process.env.BABYSITTER_EXTENSION_PATH;
+  delete process.env.BABYSITTER_LOG_DIR;
   try {
     await fs.rm(tmpDir, { recursive: true, force: true });
   } catch {
@@ -151,6 +159,25 @@ describe("createGeminiCliAdapter", () => {
     process.env.GEMINI_PROJECT_DIR = "/tmp/project";
     const adapter = createGeminiCliAdapter();
     expect(adapter.isActive()).toBe(true);
+  });
+
+  it("isActive() returns true when GEMINI_CWD is set", () => {
+    process.env.GEMINI_CWD = "/tmp/cwd";
+    const adapter = createGeminiCliAdapter();
+    expect(adapter.isActive()).toBe(true);
+  });
+
+  it("isActive() returns true when multiple Gemini env vars are set", () => {
+    process.env.GEMINI_SESSION_ID = "sess-1";
+    process.env.GEMINI_PROJECT_DIR = "/proj";
+    process.env.GEMINI_CWD = "/cwd";
+    const adapter = createGeminiCliAdapter();
+    expect(adapter.isActive()).toBe(true);
+  });
+
+  it("autoResolvesSessionId() returns true", () => {
+    const adapter = createGeminiCliAdapter();
+    expect(adapter.autoResolvesSessionId()).toBe(true);
   });
 
   it("resolveSessionId() returns parsed sessionId when provided", () => {
@@ -491,5 +518,229 @@ describe("Gemini CLI bindSession", () => {
     });
 
     expect(result.error).toContain("existing-run-999");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveStateDir tests
+// ---------------------------------------------------------------------------
+
+describe("Gemini CLI resolveStateDir", () => {
+  it("returns explicit stateDir when provided", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({ stateDir: "/custom/state" });
+    expect(result).toBe(path.resolve("/custom/state"));
+  });
+
+  it("returns pluginRoot/state when pluginRoot is provided", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({
+      pluginRoot: "/plugins/gemini",
+    });
+    expect(result).toBe(path.resolve("/plugins/gemini", "state"));
+  });
+
+  it("falls back to GEMINI_EXTENSION_PATH env var", () => {
+    process.env.GEMINI_EXTENSION_PATH = "/env/ext/path";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({});
+    expect(result).toBe(path.resolve("/env/ext/path", "state"));
+  });
+
+  it("falls back to BABYSITTER_EXTENSION_PATH env var", () => {
+    process.env.BABYSITTER_EXTENSION_PATH = "/env/babysitter/ext";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({});
+    expect(result).toBe(path.resolve("/env/babysitter/ext", "state"));
+  });
+
+  it("returns default .a5c/state when nothing is set", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({});
+    expect(result).toBe(path.resolve(".a5c/state"));
+  });
+
+  it("prefers explicit stateDir over pluginRoot", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({
+      stateDir: "/explicit",
+      pluginRoot: "/plugin",
+    });
+    expect(result).toBe(path.resolve("/explicit"));
+  });
+
+  it("prefers GEMINI_EXTENSION_PATH over BABYSITTER_EXTENSION_PATH", () => {
+    process.env.GEMINI_EXTENSION_PATH = "/gemini/ext";
+    process.env.BABYSITTER_EXTENSION_PATH = "/babysitter/ext";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolveStateDir!({});
+    expect(result).toBe(path.resolve("/gemini/ext", "state"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolvePluginRoot tests
+// ---------------------------------------------------------------------------
+
+describe("Gemini CLI resolvePluginRoot", () => {
+  it("returns explicit pluginRoot when provided", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolvePluginRoot!({
+      pluginRoot: "/my/gemini/plugin",
+    });
+    expect(result).toBe(path.resolve("/my/gemini/plugin"));
+  });
+
+  it("falls back to GEMINI_EXTENSION_PATH env var", () => {
+    process.env.GEMINI_EXTENSION_PATH = "/env/gemini/extension";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolvePluginRoot!({});
+    expect(result).toBe(path.resolve("/env/gemini/extension"));
+  });
+
+  it("falls back to BABYSITTER_EXTENSION_PATH env var", () => {
+    process.env.BABYSITTER_EXTENSION_PATH = "/env/babysitter/extension";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolvePluginRoot!({});
+    expect(result).toBe(path.resolve("/env/babysitter/extension"));
+  });
+
+  it("returns undefined when neither arg nor env is set", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolvePluginRoot!({});
+    expect(result).toBeUndefined();
+  });
+
+  it("prefers explicit pluginRoot over env var", () => {
+    process.env.GEMINI_EXTENSION_PATH = "/env/root";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.resolvePluginRoot!({
+      pluginRoot: "/explicit/root",
+    });
+    expect(result).toBe(path.resolve("/explicit/root"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getPromptContext tests
+// ---------------------------------------------------------------------------
+
+describe("Gemini CLI getPromptContext", () => {
+  it("returns context with harness 'gemini-cli'", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.harness).toBe("gemini-cli");
+  });
+
+  it("returns context with harnessLabel 'Gemini CLI'", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.harnessLabel).toBe("Gemini CLI");
+  });
+
+  it("returns context with hookDriven true", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.hookDriven).toBe(true);
+  });
+
+  it("returns context with loopControlTerm 'stop-hook'", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.loopControlTerm).toBe("stop-hook");
+  });
+
+  it("returns context with capabilities including stop-hook and hooks", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.capabilities).toContain("stop-hook");
+    expect(ctx.capabilities).toContain("hooks");
+    expect(ctx.capabilities).toContain("task-tool");
+    expect(ctx.capabilities).toContain("breakpoint-routing");
+  });
+
+  it("returns context with GEMINI_EXTENSION_PATH pluginRootVar", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.pluginRootVar).toContain("GEMINI_EXTENSION_PATH");
+  });
+
+  it("returns context with sessionEnvVars listing Gemini env vars", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.sessionEnvVars).toContain("GEMINI_SESSION_ID");
+    expect(ctx.sessionEnvVars).toContain("GEMINI_PROJECT_DIR");
+    expect(ctx.sessionEnvVars).toContain("GEMINI_CWD");
+  });
+
+  it("returns context with default interactive true", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.interactive).toBe(true);
+  });
+
+  it("passes interactive override through to context", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!({ interactive: false });
+    expect(ctx.interactive).toBe(false);
+  });
+
+  it("returns context with cliSetupSnippet containing babysitter", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.cliSetupSnippet).toContain("babysitter");
+  });
+
+  it("returns context with hasIntentFidelityChecks false", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.hasIntentFidelityChecks).toBe(false);
+  });
+
+  it("returns context with hasNonNegotiables false", () => {
+    const adapter = createGeminiCliAdapter();
+    const ctx = adapter.getPromptContext!();
+    expect(ctx.hasNonNegotiables).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findHookDispatcherPath tests
+// ---------------------------------------------------------------------------
+
+describe("Gemini CLI findHookDispatcherPath", () => {
+  it("returns null when no extension env vars are set", () => {
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.findHookDispatcherPath!("/some/cwd");
+    expect(result).toBeNull();
+  });
+
+  it("returns null when GEMINI_EXTENSION_PATH points to a nonexistent directory", () => {
+    process.env.GEMINI_EXTENSION_PATH = "/nonexistent/extension/path";
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.findHookDispatcherPath!("/some/cwd");
+    expect(result).toBeNull();
+  });
+
+  it("returns after-agent.sh path when it exists under GEMINI_EXTENSION_PATH", async () => {
+    const hookDir = path.join(tmpDir, "hooks");
+    await fs.mkdir(hookDir, { recursive: true });
+    await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
+    process.env.GEMINI_EXTENSION_PATH = tmpDir;
+
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.findHookDispatcherPath!("/some/cwd");
+    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
+  });
+
+  it("checks BABYSITTER_EXTENSION_PATH when GEMINI_EXTENSION_PATH is not set", async () => {
+    const hookDir = path.join(tmpDir, "hooks");
+    await fs.mkdir(hookDir, { recursive: true });
+    await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
+    process.env.BABYSITTER_EXTENSION_PATH = tmpDir;
+
+    const adapter = createGeminiCliAdapter();
+    const result = adapter.findHookDispatcherPath!("/some/cwd");
+    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
   });
 });

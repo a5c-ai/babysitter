@@ -9,8 +9,8 @@
 # Protocol:
 #   Input:  JSON via stdin (contains session_id, prompt_response, etc.)
 #   Output: JSON via stdout
-#     - {} or {"decision":"allow"} → allow session to exit normally
-#     - {"decision":"block","reason":"...","systemMessage":"..."} → continue loop
+#     - {} or {"decision":"allow"} -> allow session to exit normally
+#     - {"decision":"block","reason":"...","systemMessage":"..."} -> continue loop
 #   Stderr: debug/log output only
 #   Exit 0: success (stdout parsed as JSON)
 #   Exit 2: block immediately (stderr used as rejection reason)
@@ -22,10 +22,12 @@
 set -uo pipefail
 
 EXTENSION_PATH="${GEMINI_EXTENSION_PATH:-$(cd "$(dirname "$0")/.." && pwd)}"
-LOG_DIR="${BABYSITTER_LOG_DIR:-.a5c/logs}"
+
+LOG_DIR="${BABYSITTER_LOG_DIR:-${EXTENSION_PATH}/.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-after-agent-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 
+# Structured logging helper — writes to both local log and via CLI
 blog() {
   local msg="$1"
   local ts
@@ -43,12 +45,19 @@ blog "AfterAgent hook invoked"
 # ---------------------------------------------------------------------------
 
 if ! command -v babysitter &>/dev/null; then
+  # Try user-local prefix (set by session-start hook)
   if [ -x "$HOME/.local/bin/babysitter" ]; then
     export PATH="$HOME/.local/bin:$PATH"
   else
     SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${EXTENSION_PATH}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
-    babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION:-latest}" "$@"; }
-    export -f babysitter
+    if [ -n "$SDK_VERSION" ]; then
+      babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
+      export -f babysitter
+    else
+      # No CLI available at all — allow exit silently
+      echo '{}'
+      exit 0
+    fi
   fi
 fi
 
@@ -73,6 +82,7 @@ blog "Hook input received ($INPUT_SIZE bytes)"
 RESULT=$(babysitter hook:run \
   --hook-type stop \
   --harness gemini-cli \
+  --plugin-root "$EXTENSION_PATH" \
   --state-dir ".a5c/state" \
   --json < "$INPUT_FILE" 2>>"$LOG_DIR/babysitter-after-agent-hook-stderr.log")
 EXIT_CODE=$?

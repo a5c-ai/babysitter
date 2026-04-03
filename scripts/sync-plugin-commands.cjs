@@ -28,6 +28,11 @@ const tasks = [
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-cursor', 'scripts', 'sync-command-surfaces.js')],
   },
   {
+    label: 'babysitter-gemini',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-gemini', 'scripts', 'sync-command-surfaces.js')],
+  },
+  {
     label: 'babysitter-pi',
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-pi', 'scripts', 'sync-command-docs.cjs')],

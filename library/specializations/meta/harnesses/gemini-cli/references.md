@@ -1,6 +1,6 @@
 # Gemini CLI Harness -- References
 
-All reference URLs organized by category. Last verified: 2026-04-02.
+All reference URLs organized by category. Last verified: 2026-04-03.
 
 ---
 
@@ -12,6 +12,17 @@ All reference URLs organized by category. Last verified: 2026-04-02.
 | Gemini CLI Extension Gallery | https://geminicli.com/extensions |
 | Google Gemini (product page) | https://gemini.google.com |
 | Google AI Studio | https://aistudio.google.com |
+
+## Official Documentation
+
+| Resource | URL |
+|----------|-----|
+| Extensions Overview | https://geminicli.com/docs/extensions/ |
+| Writing Extensions | https://geminicli.com/docs/extensions/writing-extensions/ |
+| Releasing Extensions | https://geminicli.com/docs/extensions/releasing/ |
+| Extension Best Practices | https://geminicli.com/docs/extensions/best-practices/ |
+| Hooks Overview (all 11 types) | https://geminicli.com/docs/hooks/ |
+| Writing Hooks (I/O protocol) | https://geminicli.com/docs/hooks/writing-hooks/ |
 
 ## Community Resources
 

@@ -43,6 +43,10 @@ export function renderCommand(command: string, args: string[]): string {
   return [command, ...args].join(" ");
 }
 
+export function getNpmCommand(): string {
+  return process.platform === "win32" ? "npm.cmd" : "npm";
+}
+
 export function getNpxCommand(): string {
   return process.platform === "win32" ? "npx.cmd" : "npx";
 }
@@ -115,14 +119,14 @@ export async function installCliViaNpm(args: {
     };
   }
 
-  const command = "npm";
+  const command = getNpmCommand();
   const commandArgs = ["install", "-g", args.packageName];
   if (args.options.dryRun) {
     return {
       harness: args.harness,
       dryRun: true,
       summary: args.summary,
-      command: renderCommand(command, commandArgs),
+      command: renderCommand("npm", commandArgs),
     };
   }
 
@@ -183,7 +187,7 @@ export function isClaudePluginInstalled(): boolean {
 
 export function getGeminiExtensionDir(workspace?: string): string {
   const base = path.resolve(workspace ?? os.homedir());
-  return path.join(base, ".gemini", "extensions", "babysitter-gemini");
+  return path.join(base, ".gemini", "extensions", "babysitter");
 }
 
 export function isGeminiPluginInstalled(workspace?: string): boolean {

@@ -1,10 +1,14 @@
 /**
  * @process assimilation/harness/gemini-cli
  * @description Orchestrate babysitter SDK integration into Gemini CLI.
- *   Gemini CLI uses an extension manifest, GEMINI.md for agent instructions,
- *   SessionStart for initialization, AfterAgent for continuation, BeforeTool for
- *   guards, and MCP tools for CLI access. Environment variables: GEMINI_SESSION_ID,
- *   GEMINI_PROJECT_DIR, GEMINI_CWD.
+ *   Gemini CLI uses an extension manifest (gemini-extension.json with settings,
+ *   mcpServers, contextFileName), GEMINI.md for agent instructions, 11 hook types
+ *   (SessionStart, SessionEnd, BeforeAgent, AfterAgent, BeforeModel, AfterModel,
+ *   BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification), commands
+ *   in TOML format, and git-based distribution (`gemini extensions install <repo>`).
+ *   Hook I/O: JSON stdin/stdout with allow/block/deny decisions, exit codes 0/2.
+ *   Environment variables: GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD,
+ *   GEMINI_EXTENSION_PATH.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -46,13 +50,20 @@ export async function process(inputs, ctx) {
   // hooks config format, plugin manifest format/location, plugin install/
   // distribution CLI commands, and stop-hook existence verification.
   //
-  // Gemini-specific: extension manifest in ~/.gemini/extensions/, GEMINI.md,
-  // SessionStart/AfterAgent/BeforeTool hooks, MCP server config,
-  // GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars.
-  // Research must verify exact hook type names and whether AfterAgent (not
-  // Stop) is the correct continuation hook from Gemini CLI official docs.
-  // Research must also verify plugin manifest format (skills/hooks as path
-  // strings vs arrays/objects, no contextFileName field).
+  // Gemini-specific: extension manifest (gemini-extension.json) with settings
+  // array, mcpServers, contextFileName in ~/.gemini/extensions/. GEMINI.md as
+  // context file. 11 hook types: SessionStart, SessionEnd, BeforeAgent,
+  // AfterAgent, BeforeModel, AfterModel, BeforeToolSelection, BeforeTool,
+  // AfterTool, PreCompress, Notification. Hook I/O: JSON stdin/stdout with
+  // allow/block/deny decisions, exit codes 0 (success) and 2 (system block).
+  // AfterAgent is the primary continuation hook for orchestration loops.
+  // Commands use TOML format in commands/<group>/<name>.toml with description
+  // and prompt fields, {{args}} placeholder.
+  // Distribution: git repo-based (`gemini extensions install <repo-uri>`),
+  // GitHub Releases with pre-built archives, gallery via `gemini-cli-extension`
+  // topic tag. Settings with sensitive:true stored in system keychain.
+  // Env vars: GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD,
+  // GEMINI_EXTENSION_PATH.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Gemini CLI extension model, hook chain, and distribution');
@@ -65,8 +76,9 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 1: SDK ADAPTER
   // Gemini CLI adapter exists at packages/sdk/src/harness/geminiCli.ts.
-  // Key: AfterAgent as primary continuation hook (not Stop), GEMINI_* env vars,
-  // SessionBinding + HeadlessPrompt capabilities.
+  // Key: AfterAgent as primary continuation hook (block/allow/deny JSON decisions),
+  // GEMINI_* env vars (SESSION_ID, PROJECT_DIR, CWD, EXTENSION_PATH),
+  // SessionBinding + StopHook + HeadlessPrompt capabilities.
   // ==========================================================================
 
   ctx.log('phase:adapter', 'Verifying/updating Gemini CLI adapter and registry entries');
@@ -83,9 +95,10 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 2: PLUGIN + SKILLS + COMMANDS
-  // Gemini plugin uses extension manifest (skills/hooks as path strings,
-  // no contextFileName field), GEMINI.md for instructions,
-  // skills activated via activate_skill tool.
+  // Gemini plugin uses gemini-extension.json manifest with settings array,
+  // mcpServers, contextFileName. GEMINI.md for agent instructions.
+  // Commands in TOML format: commands/<group>/<name>.toml with description
+  // and prompt fields. Skills activated via activate_skill tool.
   // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
   // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
@@ -111,7 +124,9 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
-  // PRIMARY install: marketplace/extension-system (marketplace-first).
+  // PRIMARY install: git repo-based (`gemini extensions install <repo-uri>`).
+  // Gallery listing via `gemini-cli-extension` GitHub topic tag.
+  // GitHub Releases with pre-built archives for faster install.
   // SECONDARY install: npm/bin-based for development/testing convenience.
   // ==========================================================================
 
@@ -169,6 +184,7 @@ export async function process(inputs, ctx) {
     async () => ctx.task(writePluginTestsTask, {
       projectDir,
       harnessName,
+      adapterName,
       pluginDir,
       research,
       integrationFiles,
