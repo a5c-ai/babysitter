@@ -17,8 +17,8 @@ babysitter process-library:active --json
 Run the process after formalizing it.
 
 Available assimilation workflows:
-- **methodology-assimilation** (`specializations/domains/assimilation/workflows/methodology-assimilation`) - Learns an external methodology from its repo and converts procedural instructions, commands, and manual flows into babysitter processes with refactored skills and agents. Supports output as methodology or specialization.
-- **harness integration** (`specializations/domains/assimilation/harness/*`) - Integrates babysitter SDK with a specific AI coding harness (generic, codex, opencode, gemini-cli, openclaw, antigravity).
+- **methodology-assimilation** (`specializations/meta/assimilation/workflows/methodology-assimilation`) - Learns an external methodology from its repo and converts procedural instructions, commands, and manual flows into babysitter processes with refactored skills and agents. Supports output as methodology or specialization.
+- **harness integration** (`specializations/meta/assimilation/harness/*`) - Integrates babysitter SDK with a specific AI coding harness (generic, codex, opencode, gemini-cli, openclaw, antigravity).
 
 During the interview phase, determine which assimilation workflow to use based on the user's target:
 - If the target is a **repo URL or methodology name** then use the methodology-assimilation workflow.

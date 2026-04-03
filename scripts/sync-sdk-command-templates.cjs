@@ -22,8 +22,8 @@ const TEMPLATE_BUILDERS = {
     `Resolve the active process library with \`babysitter process-library:active --json\` before selecting the workflow.
 Read \`binding.dir\` from that JSON and treat it as the active process-library root. The assimilation process must be selected from that active library path, not guessed from some other repo-relative location.
 Use the assimilation domain processes under the active library root. Available workflow paths relative to \`binding.dir\`:
-- \`specializations/domains/assimilation/workflows/methodology-assimilation\` - Learn an external methodology from its repo/spec/source and convert it into babysitter processes, skills, and agents
-- \`specializations/domains/assimilation/harness/<name>\` - Use the matching harness integration process for a specific harness target (for example \`codex\`, \`opencode\`, \`gemini-cli\`, \`openclaw\`, \`antigravity\`, or the generic fallback in the same directory)
+- \`specializations/meta/assimilation/workflows/methodology-assimilation\` - Learn an external methodology from its repo/spec/source and convert it into babysitter processes, skills, and agents
+- \`specializations/meta/assimilation/harness/<name>\` - Use the matching harness integration process for a specific harness target (for example \`codex\`, \`opencode\`, \`gemini-cli\`, \`openclaw\`, \`antigravity\`, or the generic fallback in the same directory)
 Search the active assimilation subtree under \`binding.dir\` first and pick the concrete process from there before authoring anything.
 If \`Target to assimilate\` is provided below, do not ask the user to restate the initial prompt or identify the target again. Only ask follow-up questions for genuinely missing constraints after inspecting the workspace and process-library context.`,
     `## Synced Command Guidance

@@ -57,7 +57,7 @@ All reference URLs organized by category. Last verified: 2026-04-02.
 
 | File | Path | Description |
 |------|------|-------------|
-| Gemini CLI Assimilation | `library/specializations/domains/assimilation/harness/gemini-cli.js` | Process definition for assimilating Gemini CLI into Babysitter |
+| Gemini CLI Assimilation | `library/specializations/meta/assimilation/harness/gemini-cli.js` | Process definition for assimilating Gemini CLI into Babysitter |
 
 ## Related Harness Instruction Files
 

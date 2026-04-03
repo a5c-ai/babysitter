@@ -353,12 +353,12 @@ describe("CLI main entry", () => {
     );
     expect(handleSessionCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        prompt: expect.stringContaining("specializations/domains/assimilation/workflows/methodology-assimilation"),
+        prompt: expect.stringContaining("specializations/meta/assimilation/workflows/methodology-assimilation"),
       }),
     );
     expect(handleSessionCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        prompt: expect.stringContaining("specializations/domains/assimilation/harness/<name>"),
+        prompt: expect.stringContaining("specializations/meta/assimilation/harness/<name>"),
       }),
     );
   });

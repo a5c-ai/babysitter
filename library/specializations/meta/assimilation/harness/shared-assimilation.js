@@ -927,25 +927,28 @@ export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, ta
  * Reference plugin test files the agent should study:
  *   plugins/babysitter-codex/test/integration.test.js  — syntax validation (node --check, sh -n)
  *   plugins/babysitter-codex/test/packaged-install.test.js — npm pack, install, verify files/hooks/skills/config/marketplace
+ *   e2e-tests/docker/Dockerfile.codex — harness-specific Dockerfile pattern (node:20-bookworm, non-root user, SDK+plugin install)
+ *   e2e-tests/docker/helpers-codex.ts — Docker helpers pattern (buildImage, startContainer, stopContainer, dockerExec, image/container/skill-dir constants)
  *   e2e-tests/docker/structural.test.ts — Docker image validation (CLI, plugins, hooks, settings)
- *   e2e-tests/docker/stop-hook.test.ts — stop hook behavior tests
+ *   e2e-tests/docker/stop-hook.test.ts — stop hook behavior tests (lifecycle, session state, iteration counter, completion proof)
  *   e2e-tests/docker/codex-full-run.test.ts — full Codex E2E with real LLM
  */
 
 export const writePluginTestsTask = defineTask('write-plugin-tests', (args, taskCtx) => ({
   kind: 'agent',
-  title: `Write ${args.harnessName} plugin integration and installation tests`,
-  description: 'Create integration tests for syntax validation, packaged installation, hook registration, skill distribution, and configuration verification following the babysitter-codex test patterns',
+  title: `Write ${args.harnessName} plugin integration, installation, and Docker E2E tests`,
+  description: 'Create integration tests for syntax validation, packaged installation, and comprehensive Docker E2E tests (Dockerfile, helpers, structural tests, stop hook tests) following the Codex E2E patterns',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'senior test engineer',
-      task: `Write comprehensive integration tests for the ${args.harnessName} babysitter plugin`,
+      task: `Write comprehensive integration tests and Docker E2E tests for the ${args.harnessName} babysitter plugin`,
       context: {
         projectDir: args.projectDir,
         harnessName: args.harnessName,
         pluginDir: args.pluginDir,
+        adapterName: args.adapterName,
         research: args.research,
         integrationFiles: args.integrationFiles,
       },
@@ -965,11 +968,67 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         '  - How it tests workspace/team installation separately from global installation',
         '  - How it checks for exclusions (no installer binaries, no UTF-8 BOM, no deprecated files)',
         '  - Helper patterns: run(), readJson(), listModeSkillNames(), assertExists()',
-        'Read e2e-tests/docker/structural.test.ts — understand how Docker E2E tests verify:',
-        '  - CLI availability (babysitter command exists and returns version)',
-        '  - Plugin installation (plugin files present in expected paths)',
-        '  - Hook registration and executability (scripts have +x, hooks.json is valid)',
-        '  - Settings configuration (settings.json references correct hooks)',
+
+        // ── Study Docker E2E reference files (CRITICAL — these are the templates) ──
+        'Read e2e-tests/docker/Dockerfile.codex thoroughly — this is the template for the new Dockerfile. Understand:',
+        '  - Base image: node:20-bookworm with apt-get install bash, git, jq, ca-certificates',
+        '  - Non-root user creation: groupadd + useradd with -r -g -m -d flags, HOME env, PATH extension',
+        '  - Harness home/config dir setup: mkdir for .local and harness-specific config dir (e.g. .codex), .npmrc prefix',
+        '  - Monorepo COPY pattern: package.json + package-lock.json first, then per-package package.json for cache-friendly layers',
+        '  - SDK build: npm install --include=dev, COPY entire repo, npm run build:sdk',
+        '  - Permissions: chown -R on /app, /home/<user>, /workspace before switching to non-root USER',
+        '  - Harness CLI install: npm install -g <harness-cli> (e.g. @openai/codex@latest)',
+        '  - SDK global install: npm install -g /app/packages/sdk',
+        '  - Process library seed: copy library/ to /tmp, git init, commit (for process library commands)',
+        '  - Plugin install: npm install -g /app/plugins/<plugin-dir> with BABYSITTER_PROCESS_LIBRARY_REPO env, then run install command',
+        '  - WORKDIR /workspace with empty env vars for API keys and harness-specific config',
+        '  - CMD ["bash"]',
+
+        'Read e2e-tests/docker/helpers-codex.ts thoroughly — this is the template for the new helpers file. Understand:',
+        '  - Constants: IMAGE name (babysitter-<harness>-e2e:test), CONTAINER name (babysitter-<harness>-e2e-container), SKILL_DIR (harness-specific plugin/skill install path)',
+        '  - DEFAULT_OPTS: encoding utf-8, timeout 30_000, stdio pipe, env with MSYS_NO_PATHCONV=1 (for Windows Docker compatibility)',
+        '  - exec(cmd, opts): thin wrapper around execSync with DEFAULT_OPTS spread',
+        '  - dockerExec(cmd, opts): exec("docker exec -i CONTAINER bash", { input: cmd + "\\n" }) — sends commands via stdin, NOT command-line args',
+        '  - buildImage(contextDir): docker build -f contextDir/e2e-tests/docker/Dockerfile.<harness> -t IMAGE --load contextDir, timeout 900_000 (15 min)',
+        '  - startContainer(): docker rm -f (ignore errors), then docker run -d with env forwarding (-e flags for API keys), --entrypoint tail IMAGE -f /dev/null',
+        '  - stopContainer(): docker rm -f (ignore errors)',
+        '  - Forwarded env vars: harness-specific API key and config env vars (e.g. AZURE_OPENAI_API_KEY, OPENAI_API_KEY, A5C_PROVIDER_NAME)',
+
+        'Read e2e-tests/docker/structural.test.ts thoroughly — this is the template for structural tests. Understand:',
+        '  - beforeAll: buildImage(ROOT) + startContainer() with 300_000 timeout (5 min)',
+        '  - afterAll: stopContainer()',
+        '  - "Docker structural tests" suite: babysitter CLI version, harness CLI available, Node.js v20+, jq installed, non-root user, correct HOME, entrypoint exists and executable, /workspace exists',
+        '  - "Plugin installation" suite: plugin directory exists, plugin.json has correct skills, hooks.json registers Stop hook (jq extraction of command path), hooks.json registers SessionStart hook, stop hook script is executable (+x), session start hook script is executable, installed_plugins.json has correct install path',
+        '  - "SKILL.md files" suite: babysit skill SKILL.md exists and has expected content',
+        '  - "Settings configuration" suite: settings.json exists and is valid JSON',
+        '  - Import pattern: import { buildImage, dockerExec, PLUGIN_DIR, startContainer, stopContainer } from helpers module',
+
+        'Read e2e-tests/docker/stop-hook.test.ts thoroughly — this is the template for stop hook tests. Understand:',
+        '  - Constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (PLUGIN_DIR/skills/babysit/state), LOG_DIR, HOOK_ENV (CLAUDE_PLUGIN_ROOT, BABYSITTER_LOG_DIR, CLI vars)',
+        '  - beforeAll: buildImage + startContainer + mkdir STATE_DIR and LOG_DIR, 300_000 timeout',
+        '  - afterAll: stopContainer()',
+        '  - afterEach: rm -rf STATE_DIR/*, LOG_DIR/*, and temp files for test isolation',
+        '  - runHook(sessionId, transcriptPath) helper: writes JSON input to temp file, pipes it to hook via bash redirection, captures exit code via "EXIT_CODE=$?" echo trick, parses exit code from output',
+        '  - runHookRaw(jsonInput) helper: same pattern but accepts arbitrary JSON (for testing malformed/non-standard input)',
+        '  - parseJsonBlock(output) helper: tries JSON.parse on full output first, then regex extracts { ... } block (for mixed stdout/stderr output)',
+        '  - createTranscript(filePath, text) helper: writes JSONL with { role: "assistant", message: { content: [{ type: "text", text }] } } to simulate harness transcript format',
+        '  - createMockRun(runId, events) helper: creates full run directory (/tmp/hook-test-run-<id>/) with journal/, state/, tasks/, run.json, and numbered journal event files with seq/ulid/type/recordedAt/data',
+        '  - assertAllowsExit(result) helper: expects exitCode 0, parsed decision not "block"',
+        '  - assertSessionDeleted(sid) helper: babysitter session:state --session-id <sid> returns found=false',
+        '  - "Stop hook core lifecycle" suite:',
+        '    - exits 0 (allows exit) when no session state exists — runHook with nonexistent session',
+        '    - blocks exit when active session with pending effects — babysitter session:init + session:associate with mock run, runHook expects exitCode 2 or decision "block"',
+        '    - allows exit after run completes — createMockRun with RUN_COMPLETED event, session:init + associate, runHook expects exit 0',
+        '  - "Stop hook edge cases" suite:',
+        '    - handles empty stdin gracefully — runHookRaw("") expects no crash',
+        '    - handles malformed JSON input — runHookRaw("not json") expects no crash',
+        '    - handles missing transcript_path — runHookRaw with only session_id',
+        '  - "Stop hook iteration tracking" suite:',
+        '    - increments iteration counter across invocations — multiple runHook calls on same session, verify counter increases',
+        '    - respects max iteration limit — set low max iterations, verify hook allows exit when exceeded',
+        '  - "Stop hook completion proof" suite:',
+        '    - detects completion proof in transcript — createTranscript with completion proof hash, createMockRun with RUN_COMPLETED, verify hook allows exit and cleans up session',
+        '    - blocks when no completion proof despite active run — session with associated run but no proof in transcript',
 
         // ── Create the test directory and files ──
         `Create ${args.pluginDir}/test/ directory with the following test files:`,
@@ -1011,14 +1070,108 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         '     - No test files in final install',
         '     - No deprecated or unnecessary files',
 
-        // ── E2E test file (for Docker tests) ──
-        `Create e2e-tests/docker/${args.adapterName}.test.ts following the structural.test.ts pattern:`,
-        '  - Test babysitter CLI detects the harness (harness:discover shows it)',
-        `  - Test plugin files are correctly installed in Docker image`,
-        '  - Test hook scripts are executable and have valid syntax',
-        '  - Test hook invocation produces expected JSON output (stdin → hook → stdout)',
-        '  - Test session creation flow if applicable',
-        'Import helpers from e2e-tests/docker/helpers.ts for Docker exec and image management.',
+        // ═══════════════════════════════════════════════════════════════════════
+        // Docker E2E Test Artifacts (4 files in e2e-tests/docker/)
+        // ═══════════════════════════════════════════════════════════════════════
+
+        // ── 1. Dockerfile.<harness> ──
+        `Create e2e-tests/docker/Dockerfile.${args.adapterName} following the Dockerfile.codex template exactly. The Dockerfile MUST:`,
+        '  - Use FROM node:20-bookworm as base',
+        '  - LABEL with maintainer="a5c.ai" and description mentioning the harness name',
+        '  - Install system deps: apt-get update && apt-get install -y bash git jq ca-certificates',
+        `  - Create non-root user/group for the harness (e.g. groupadd -r <harness> && useradd -r -g <harness> -m -d /home/<harness> <harness>)`,
+        `  - Set ENV HOME=/home/<harness>, ENV <HARNESS>_HOME=/home/<harness>/.<harness> (harness config dir), ENV PATH with /home/<harness>/.local/bin`,
+        `  - Create .local and harness config directories, write .npmrc with prefix=/home/<harness>/.local`,
+        '  - WORKDIR /app',
+        '  - COPY package.json and package-lock.json first (layer cache)',
+        '  - COPY packages/sdk/package.json to ./packages/sdk/',
+        `  - COPY ${args.pluginDir}/package.json to ./${args.pluginDir}/`,
+        '  - RUN npm install --include=dev',
+        '  - COPY . . (full monorepo)',
+        '  - RUN npm run build:sdk',
+        `  - RUN mkdir -p /workspace && chown -R <user>:<group> /app /home/<user> /workspace`,
+        '  - USER <harness-user> (switch to non-root)',
+        `  - RUN npm install -g <harness-cli-package> (install the harness CLI globally, e.g. @openai/codex@latest)`,
+        '  - RUN npm install -g /app/packages/sdk (install babysitter SDK globally)',
+        '  - RUN process library seed block: mkdir -p /tmp/babysitter-process-library-source/library, cp library content, git init + add + commit',
+        `  - RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source npm install -g /app/${args.pluginDir} && run plugin install command (e.g. babysitter-<harness> install --global)`,
+        '  - WORKDIR /workspace',
+        '  - Set empty ENV vars for API keys and harness-specific config (A5C_PROVIDER_NAME, A5C_SELECTED_CLI_COMMAND, harness API keys, etc.)',
+        '  - CMD ["bash"]',
+        `  - The Dockerfile name MUST be Dockerfile.${args.adapterName} (not Dockerfile.<harnessName>) to match the helpers file`,
+
+        // ── 2. helpers-<harness>.ts ──
+        `Create e2e-tests/docker/helpers-${args.adapterName}.ts following the helpers-codex.ts template exactly. The file MUST export:`,
+        `  - const ${args.adapterName.toUpperCase().replace(/-/g, '_')}_IMAGE = "babysitter-${args.adapterName}-e2e:test"`,
+        `  - const ${args.adapterName.toUpperCase().replace(/-/g, '_')}_CONTAINER = "babysitter-${args.adapterName}-e2e-container"`,
+        `  - const ${args.adapterName.toUpperCase().replace(/-/g, '_')}_SKILL_DIR = "<harness-specific-plugin-install-path>/skills/babysit" (e.g. /home/<user>/.<harness>/skills/babysit or equivalent from research findings)`,
+        '  - DEFAULT_OPTS with encoding "utf-8", timeout 30_000, stdio ["pipe","pipe","pipe"], env with MSYS_NO_PATHCONV: "1"',
+        '  - exec(cmd, opts): execSync wrapper with DEFAULT_OPTS merge',
+        '  - dockerExec(cmd, opts): exec("docker exec -i CONTAINER bash", { input: cmd + "\\n" }) — MUST send via stdin, NOT command args',
+        `  - build${args.adapterName.charAt(0).toUpperCase() + args.adapterName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Image(contextDir): docker build -f contextDir/e2e-tests/docker/Dockerfile.${args.adapterName} -t IMAGE --load contextDir, timeout 900_000`,
+        `  - start${args.adapterName.charAt(0).toUpperCase() + args.adapterName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Container(): docker rm -f (ignore), docker run -d with forwarded env vars, --entrypoint tail IMAGE -f /dev/null, timeout 120_000`,
+        `  - stop${args.adapterName.charAt(0).toUpperCase() + args.adapterName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Container(): docker rm -f (ignore errors)`,
+        '  - Forwarded env vars: A5C_PROVIDER_NAME, A5C_SELECTED_CLI_COMMAND, A5C_CLI_TOOL, A5C_SELECTED_MODEL, plus any harness-specific API key env vars from research',
+        '  - Import { execSync, ExecSyncOptions } from "child_process"',
+
+        // ── 3. <harness>-structural.test.ts ──
+        `Create e2e-tests/docker/${args.adapterName}-structural.test.ts following the structural.test.ts template. The file MUST:`,
+        `  - Import build, start, stop, dockerExec, and SKILL_DIR from ./helpers-${args.adapterName}`,
+        '  - Import path and use path.resolve(__dirname, "../..") for ROOT',
+        '  - beforeAll: buildImage(ROOT) + startContainer() with 300_000 timeout',
+        '  - afterAll: stopContainer()',
+        '  - "Docker structural tests" describe block:',
+        '    - "babysitter CLI is available and returns a version": dockerExec("babysitter --version"), expect match /^\\d+\\.\\d+\\.\\d+$/',
+        `    - "${args.harnessName} CLI is available": dockerExec("<harness-cli> --version"), expect truthy`,
+        '    - "Node.js v20+ is installed": dockerExec("node --version"), parse major, expect >= 20',
+        '    - "jq is installed": dockerExec("jq --version"), expect match /^jq-/',
+        `    - "runs as non-root user <harness>": dockerExec("whoami"), expect <harness-user>`,
+        `    - "HOME is /home/<harness>": dockerExec("echo $HOME"), expect /home/<harness>`,
+        '    - "/workspace directory exists": dockerExec("test -d /workspace")',
+        '  - "Plugin installation" describe block:',
+        '    - "plugin directory exists": dockerExec("test -d PLUGIN_DIR")',
+        '    - "plugin.json exists with correct skills": jq extract .skills[].name from plugin.json, expect "babysitter"',
+        '    - "hooks.json registers Stop hook": jq extract Stop hook command path, expect contains stop hook script name',
+        '    - "hooks.json registers SessionStart hook": jq extract SessionStart hook command path, expect contains session start script name',
+        '    - "stop hook script is executable": dockerExec("test -x PLUGIN_DIR/hooks/<stop-hook>.sh")',
+        '    - "session start hook script is executable": dockerExec("test -x PLUGIN_DIR/hooks/<session-start-hook>.sh")',
+        '    - "installed_plugins.json has correct install path" (if harness uses installed_plugins tracking): jq extract installPath',
+        '  - "SKILL.md files" describe block:',
+        '    - "babysit skill SKILL.md exists": dockerExec("test -f SKILL_DIR/SKILL.md")',
+        '    - "SKILL.md contains expected content": dockerExec("cat SKILL_DIR/SKILL.md"), expect contains "babysitter" or harness-specific keywords',
+        '  - "Settings configuration" describe block (if harness has settings file):',
+        '    - "settings file exists and is valid": dockerExec("cat <settings-path>"), JSON.parse succeeds',
+
+        // ── 4. <harness>-stop-hook.test.ts ──
+        `Create e2e-tests/docker/${args.adapterName}-stop-hook.test.ts following the stop-hook.test.ts template. The file MUST:`,
+        `  - Import build, start, stop, dockerExec (and dockerExecSafe if needed) from ./helpers-${args.adapterName}`,
+        '  - Import PLUGIN_DIR/SKILL_DIR from the helpers module',
+        '  - Define constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (PLUGIN_DIR/skills/babysit/state), LOG_DIR (/tmp/hook-test-logs), HOOK_ENV (plugin root, log dir, CLI vars)',
+        '  - beforeAll: buildImage(ROOT) + startContainer() + mkdir STATE_DIR LOG_DIR, timeout 300_000',
+        '  - afterAll: stopContainer()',
+        '  - afterEach: rm -rf STATE_DIR/*, LOG_DIR/*, and all /tmp/hook-test-* temp files for test isolation',
+        '  - Helper functions (copy patterns from stop-hook.test.ts):',
+        '    - runHook(sessionId, transcriptPath): write JSON input to temp file, pipe to hook via bash, capture EXIT_CODE from output',
+        '    - runHookRaw(jsonInput): same pattern for arbitrary JSON input testing',
+        '    - parseJsonBlock(output): JSON.parse full output, fallback to regex { ... } extraction',
+        '    - createTranscript(filePath, text): write JSONL with assistant role and text content',
+        '    - createMockRun(runId, events): create /tmp/hook-test-run-<id>/ with journal/, state/, tasks/, run.json, numbered journal events with seq/ulid/type/recordedAt/data',
+        '    - assertAllowsExit(result): expect exitCode 0, parsed decision not "block"',
+        '    - assertSessionDeleted(sid): babysitter session:state returns found=false',
+        '  - "Stop hook core lifecycle" describe block:',
+        '    - "exits 0 (allows exit) when no session state exists": runHook with nonexistent session ID, assertAllowsExit',
+        '    - "blocks exit when active session with pending effects": babysitter session:init + session:associate with mock run containing EFFECT_REQUESTED (no EFFECT_RESOLVED), runHook, expect exitCode 2 or decision "block"',
+        '    - "allows exit after run completes": createMockRun with RUN_COMPLETED event, session:init + associate, runHook, assertAllowsExit',
+        '  - "Stop hook edge cases" describe block:',
+        '    - "handles empty stdin gracefully": runHookRaw(""), expect no crash (exit 0 or graceful error)',
+        '    - "handles malformed JSON input": runHookRaw("not json"), expect no crash',
+        '    - "handles missing transcript_path": runHookRaw with only session_id field',
+        '  - "Stop hook iteration tracking" describe block:',
+        '    - "increments iteration counter across invocations": babysitter session:init, multiple runHook calls, read session state, verify iterationCount increases',
+        '    - "respects max iteration limit": set low BABYSITTER_MAX_ITERATIONS env var, create session with many iterations, verify hook allows exit when exceeded',
+        '  - "Stop hook completion proof" describe block:',
+        '    - "detects completion proof in transcript": create run with RUN_COMPLETED, resolve completion proof hash, createTranscript with proof, runHook, assertAllowsExit, assertSessionDeleted',
+        '    - "blocks when no completion proof despite active run": session with associated run but no proof in transcript, expect hook blocks',
 
         // ── Package.json test script ──
         `Add or update ${args.pluginDir}/package.json with test scripts:`,
@@ -1028,8 +1181,9 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         // ── Run tests ──
         'Run the integration test to verify it passes: node test/integration.test.js',
         'If the packaged-install test requires npm pack, verify the package.json has correct files/bin fields.',
+        `Docker E2E tests (${args.adapterName}-structural.test.ts, ${args.adapterName}-stop-hook.test.ts) will be validated in CI via the e2e-docker workflow.`,
       ],
-      outputFormat: 'JSON with testFiles, testCategories, filesCreated, summary',
+      outputFormat: 'JSON with testFiles, testCategories, dockerArtifacts, filesCreated, summary',
     },
     outputSchema: {
       type: 'object',
@@ -1037,6 +1191,16 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
       properties: {
         testFiles: { type: 'array', items: { type: 'string' } },
         testCategories: { type: 'array', items: { type: 'string' } },
+        dockerArtifacts: {
+          type: 'object',
+          description: 'Docker E2E test artifacts created',
+          properties: {
+            dockerfile: { type: 'string', description: 'Path to e2e-tests/docker/Dockerfile.<harness>' },
+            helpers: { type: 'string', description: 'Path to e2e-tests/docker/helpers-<harness>.ts' },
+            structuralTest: { type: 'string', description: 'Path to e2e-tests/docker/<harness>-structural.test.ts' },
+            stopHookTest: { type: 'string', description: 'Path to e2e-tests/docker/<harness>-stop-hook.test.ts' },
+          },
+        },
         filesCreated: { type: 'array', items: { type: 'string' } },
         summary: { type: 'string' },
       },
@@ -1048,7 +1212,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
     outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
   },
 
-  labels: ['agent', 'assimilation', 'testing', 'plugin'],
+  labels: ['agent', 'assimilation', 'testing', 'plugin', 'docker', 'e2e'],
 }));
 
 // ---------------------------------------------------------------------------
@@ -1108,9 +1272,28 @@ export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
 
         // ── Update E2E Docker workflow (e2e-docker.yml) ──
         `Add '${args.pluginDir}/**' to the paths trigger list in e2e-docker.yml (both pull_request and push sections).`,
-        `If an E2E test file was created (e2e-tests/docker/${args.adapterName}.test.ts):`,
-        '  - Add it to the structural test run command (no API key required tests)',
-        '  - If the harness supports full orchestration E2E, consider a separate gated job similar to codex-docker-e2e',
+        `Add 'e2e-tests/docker/Dockerfile.${args.adapterName}' and 'e2e-tests/docker/helpers-${args.adapterName}.ts' to the paths trigger list.`,
+        `Add 'e2e-tests/docker/${args.adapterName}-structural.test.ts' and 'e2e-tests/docker/${args.adapterName}-stop-hook.test.ts' to the paths trigger list.`,
+
+        '  ── Wire structural tests into the no-API-key test run ──',
+        '  The docker-e2e-tests job runs structural tests that require no API key. Add the new harness structural test:',
+        `  - Add "e2e-tests/docker/${args.adapterName}-structural.test.ts" to the vitest run command in the structural test step`,
+        '  - This runs alongside existing structural.test.ts and codex-structural.test.ts (no API key needed)',
+        `  - The structural test file imports from helpers-${args.adapterName}.ts which builds Dockerfile.${args.adapterName} — the workflow just needs to run the test file`,
+
+        '  ── Wire stop hook tests into the no-API-key test run ──',
+        `  - Add "e2e-tests/docker/${args.adapterName}-stop-hook.test.ts" to the vitest run command in the same structural/no-API-key step`,
+        '  - Stop hook tests exercise the hook scripts inside Docker but do NOT require API keys (they use mock runs and mock transcripts)',
+        '  - This follows the pattern of stop-hook.test.ts which runs in the same no-API-key job',
+
+        '  ── Optionally add gated full-run job ──',
+        `  - If ${args.harnessName} supports full orchestration E2E (real LLM invocation), add a separate job similar to codex-docker-e2e:`,
+        `    - Job name: ${args.adapterName}-docker-e2e`,
+        `    - Condition: gated on API key secrets (if: secrets.<HARNESS_API_KEY> != '')`,
+        '    - Timeout: 90 minutes (timeout-minutes: 90)',
+        `    - Runs: npx vitest run e2e-tests/docker/${args.adapterName}-full-run.test.ts (only create this test if the harness supports it)`,
+        '    - Upload e2e-artifacts/ with 14-day retention',
+        '  - If the harness does NOT support full E2E (no API key, no headless mode), skip this gated job',
 
         // ── Update release workflow (release.yml) ──
         'If the plugin is published to npm:',
@@ -1131,14 +1314,19 @@ export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
 
         // ── Update Docker build (docker-publish.yml) ──
         `Add '${args.pluginDir}/**' to the paths trigger list so Docker image rebuilds when the plugin changes.`,
-        'If the plugin should be included in the Docker image, update Dockerfile to COPY the plugin.',
+        `Add 'e2e-tests/docker/Dockerfile.${args.adapterName}' to the paths trigger list.`,
+        'If the plugin should be included in the main Docker image (Dockerfile), update it to COPY the plugin.',
 
-        // ── Dockerfile updates (if applicable) ──
-        'Read the existing Dockerfile to understand how plugins are installed in the Docker image.',
-        'If the new plugin should be included:',
+        // ── Dockerfile updates (the harness-specific Dockerfile was created in Phase 8) ──
+        `The harness-specific Dockerfile (e2e-tests/docker/Dockerfile.${args.adapterName}) was created in Phase 8 (writePluginTestsTask). Verify it:`,
+        '  - Builds successfully: docker build -f e2e-tests/docker/Dockerfile.<harness> -t babysitter-<harness>-e2e:test .',
+        '  - Uses the same monorepo COPY pattern as Dockerfile.codex (package.json first, then full copy)',
+        '  - Installs the harness CLI, SDK, and plugin correctly as non-root user',
+        '  - Seeds the process library for process-library commands',
+        '  - Has correct empty env vars for API keys',
+        'If the main production Dockerfile also needs this plugin:',
         '  - Add COPY instruction for the plugin directory',
         '  - Add install step if the plugin has a setup script',
-        '  - Verify the plugin is available in the Docker image by updating structural.test.ts expectations',
 
         // ── Verify CI/CD changes ──
         'Verify all workflow YAML files are valid (correct indentation, valid syntax).',
