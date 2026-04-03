@@ -30,7 +30,7 @@ export function createClaudeCodeContext(
     sessionBindingFlags: '',
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'CLAUDE_SESSION_ID, CLAUDE_ENV_FILE',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (via CLAUDE_ENV_FILE)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Read the SDK version from `versions.json` to ensure version compatibility:',

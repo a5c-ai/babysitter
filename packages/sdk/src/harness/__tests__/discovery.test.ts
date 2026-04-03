@@ -331,7 +331,7 @@ describe("discoverHarnesses", () => {
   });
 
   it("does not include activeSession in results", async () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
     stubExecFile({});
 
     const results = await discoverHarnesses();
@@ -369,16 +369,6 @@ describe("detectCallerHarness", () => {
     expect(caller).toBeNull();
   });
 
-  it("detects claude-code via CLAUDE_SESSION_ID", () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
-
-    const caller = detectCallerHarness();
-
-    expect(caller).not.toBeNull();
-    expect(caller!.name).toBe("claude-code");
-    expect(caller!.matchedEnvVars).toContain("CLAUDE_SESSION_ID");
-  });
-
   it("detects claude-code via CLAUDE_ENV_FILE", () => {
     process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
 
@@ -387,6 +377,14 @@ describe("detectCallerHarness", () => {
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("claude-code");
     expect(caller!.matchedEnvVars).toContain("CLAUDE_ENV_FILE");
+  });
+
+  it("does not detect a harness from BABYSITTER_SESSION_ID alone", () => {
+    // BABYSITTER_SESSION_ID is cross-harness and should not identify any specific harness
+    process.env.BABYSITTER_SESSION_ID = "session-abc";
+
+    const caller = detectCallerHarness();
+    expect(caller).toBeNull();
   });
 
   it("detects codex via CODEX_THREAD_ID", () => {
@@ -466,7 +464,7 @@ describe("detectCallerHarness", () => {
 
   it("returns only the first matching harness", () => {
     // Set env vars for multiple harnesses
-    process.env.CLAUDE_SESSION_ID = "claude-123";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
     process.env.CODEX_SESSION_ID = "codex-456";
 
     const caller = detectCallerHarness();
@@ -492,7 +490,7 @@ describe("detectCallerHarness", () => {
   });
 
   it("includes capabilities of the detected caller", () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
 
     const caller = detectCallerHarness();
 

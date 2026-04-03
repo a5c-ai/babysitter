@@ -60,8 +60,8 @@ export interface PromptContext {
 
   /**
    * Environment variables the harness auto-resolves for session binding.
-   * e.g., 'CLAUDE_SESSION_ID, CLAUDE_ENV_FILE' or
-   *       'CODEX_THREAD_ID, CODEX_SESSION_ID, CODEX_ENV_FILE'
+   * e.g., 'BABYSITTER_SESSION_ID (via CLAUDE_ENV_FILE)' or
+   *       'BABYSITTER_SESSION_ID, CODEX_THREAD_ID (via CODEX_ENV_FILE)'
    */
   sessionEnvVars: string;
 
