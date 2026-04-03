@@ -30,8 +30,9 @@ export function createOhMyPiAdapter(): HarnessAdapter {
 
     isActive(): boolean {
       // oh-my-pi shares OMP_* env vars with pi, but we only claim active
-      // if OMP_PLUGIN_ROOT or OMP_SESSION_ID is set (not PI_* variants)
-      return !!(process.env.OMP_SESSION_ID || process.env.OMP_PLUGIN_ROOT);
+      // if OMP_PLUGIN_ROOT or OMP_SESSION_ID is set (not PI_* variants).
+      // BABYSITTER_SESSION_ID is cross-harness and accepted everywhere.
+      return !!(process.env.BABYSITTER_SESSION_ID || process.env.OMP_SESSION_ID || process.env.OMP_PLUGIN_ROOT);
     },
 
     installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {

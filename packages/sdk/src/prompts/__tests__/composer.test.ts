@@ -70,11 +70,9 @@ describe('context factories', () => {
       expect(ctx.harness).toBe('codex');
     });
 
-    it('sets hookDriven based on platform detection', () => {
+    it('defaults hookDriven to true (overridden at instruction-generation time by session state detection)', () => {
       const ctx = createCodexContext();
-      // hookDriven is auto-detected: true on non-win32, false on win32
-      const expected = typeof globalThis.process !== 'undefined' ? globalThis.process.platform !== 'win32' : true;
-      expect(ctx.hookDriven).toBe(expected);
+      expect(ctx.hookDriven).toBe(true);
     });
 
     it('sets hasNonNegotiables to true', () => {

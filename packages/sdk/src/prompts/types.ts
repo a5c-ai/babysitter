@@ -67,9 +67,8 @@ export interface PromptContext {
 
   /**
    * Extra flags for session:resume command.
-   * e.g., '--state-dir "${CLAUDE_PLUGIN_ROOT}/skills/babysit/state"'
-   *    or '--state-dir .a5c'
-   *    or '' (PI, no extra flags)
+   * Usually empty — state dir defaults to ~/.a5c/state/ globally.
+   * Only set when a harness needs an explicit override.
    */
   resumeFlags: string;
 

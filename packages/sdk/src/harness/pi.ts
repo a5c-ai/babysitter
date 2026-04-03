@@ -22,6 +22,7 @@ import type {
 import { HarnessCapability as Cap } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createPiContext } from "../prompts/context";
+import { getGlobalStateDir } from "../config";
 import {
   installCliViaNpm,
   runPackageBinaryViaNpx,
@@ -40,22 +41,13 @@ function resolvePiStateDir(args: {
   pluginRoot?: string;
 }): string {
   if (args.stateDir) return path.resolve(args.stateDir);
-  if (process.env.BABYSITTER_STATE_DIR) {
-    return path.resolve(process.env.BABYSITTER_STATE_DIR);
-  }
-
-  const pluginRoot = resolvePiPluginRoot(args);
-  if (pluginRoot) {
-    // PI-family plugins keep shared Babysitter session state adjacent to the
-    // plugin install root so the harness and plugin resolve the same files.
-    return path.resolve(pluginRoot, "..", ".a5c");
-  }
-
-  return path.resolve(".a5c");
+  return getGlobalStateDir();
 }
 
 function resolvePiSessionId(parsed: { sessionId?: string }): string | undefined {
   if (parsed.sessionId) return parsed.sessionId;
+  // Cross-harness standard first, then Pi-native (auto-injected in-process)
+  if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
   if (process.env.OMP_SESSION_ID) return process.env.OMP_SESSION_ID;
   if (process.env.PI_SESSION_ID) return process.env.PI_SESSION_ID;
   return undefined;
@@ -132,6 +124,7 @@ export function createPiAdapter(): HarnessAdapter {
 
     isActive(): boolean {
       return !!(
+        process.env.BABYSITTER_SESSION_ID ||
         process.env.OMP_SESSION_ID ||
         process.env.PI_SESSION_ID ||
         process.env.OMP_PLUGIN_ROOT ||

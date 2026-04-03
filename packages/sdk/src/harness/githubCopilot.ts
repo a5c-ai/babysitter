@@ -56,15 +56,13 @@ import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createGithubCopilotContext } from "../prompts/context";
 import { installCliViaNpm } from "./installSupport";
+import { getGlobalStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const HARNESS_NAME = "github-copilot";
-
-/** Default state directory for GitHub Copilot CLI sessions */
-const DEFAULT_STATE_DIR = ".a5c/state";
 
 // ---------------------------------------------------------------------------
 // Structured file logger
@@ -219,21 +217,7 @@ function resolveStateDirInternal(args: {
   pluginRoot?: string;
 }): string {
   if (args.stateDir) return path.resolve(args.stateDir);
-  if (process.env.BABYSITTER_STATE_DIR) {
-    return path.resolve(process.env.BABYSITTER_STATE_DIR);
-  }
-  if (args.pluginRoot) {
-    return path.resolve(args.pluginRoot, "skills", "babysit", "state");
-  }
-  // Check Copilot plugin root env vars
-  const pluginData =
-    process.env.CLAUDE_PLUGIN_DATA ||
-    process.env.COPILOT_PLUGIN_ROOT;
-  if (pluginData) {
-    return path.resolve(pluginData, "skills", "babysit", "state");
-  }
-  // Default: project-relative .a5c/state/
-  return path.resolve(DEFAULT_STATE_DIR);
+  return getGlobalStateDir();
 }
 
 // ---------------------------------------------------------------------------
@@ -256,8 +240,8 @@ function resolveSessionIdInternal(parsed: { sessionId?: string }): string | unde
   // 1. Explicit arg (highest priority)
   if (parsed.sessionId) return parsed.sessionId;
 
-  // 2. Env var (best-effort — official docs do not confirm this is injected)
-  if (process.env.COPILOT_SESSION_ID) return process.env.COPILOT_SESSION_ID;
+  // 2. Cross-harness standard env var (written by session-start hook to env file)
+  if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
 
   // 3. Env file (if COPILOT_ENV_FILE or CLAUDE_ENV_FILE exists)
   const envFile = process.env.COPILOT_ENV_FILE || process.env.CLAUDE_ENV_FILE;
@@ -265,7 +249,7 @@ function resolveSessionIdInternal(parsed: { sessionId?: string }): string | unde
     try {
       const content = readFileSync(envFile, "utf-8");
       const match = content.match(
-        /(?:^|\n)\s*(?:export\s+)?COPILOT_SESSION_ID="([^"]+)"/,
+        /(?:^|\n)\s*(?:export\s+)?BABYSITTER_SESSION_ID="([^"]+)"/,
       );
       return match?.[1] || undefined;
     } catch {
@@ -319,11 +303,10 @@ async function handleSessionEndHookImpl(
   const hookInput = parseHookInput(rawInput) as CopilotHookInput;
   log.info("Hook input received");
 
-  // 2. Resolve session ID from hook input (stdin JSON) or env var fallback
-  // Note: official docs do not confirm env var injection, but we check as fallback
+  // 2. Resolve session ID from hook input (stdin JSON) or cross-harness env var
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
-    process.env.COPILOT_SESSION_ID ||
+    process.env.BABYSITTER_SESSION_ID ||
     "";
 
   if (!sessionId) {
@@ -342,30 +325,17 @@ async function handleSessionEndHookImpl(
   log.info(`Resolved stateDir: ${stateDir}`);
 
   // 4. Read session state file
-  let filePath = getSessionFilePath(stateDir, sessionId);
+  const filePath = getSessionFilePath(stateDir, sessionId);
   log.info(`Checking session file at: ${filePath}`);
 
   let sessionFile;
   try {
     if (!(await sessionFileExists(filePath))) {
-      // Fallback: check .a5c/state/ directory
-      const fallbackPath = getSessionFilePath(
-        path.resolve(DEFAULT_STATE_DIR),
-        sessionId,
-      );
       log.info(
-        `Primary state file not found, trying fallback: ${fallbackPath}`,
+        `No active babysitter loop for session ${sessionId} — allowing exit`,
       );
-      if (await sessionFileExists(fallbackPath)) {
-        filePath = fallbackPath;
-        log.info(`Found session file at fallback path: ${filePath}`);
-      } else {
-        log.info(
-          `No active babysitter loop for session ${sessionId} — allowing exit`,
-        );
-        process.stdout.write("{}\n");
-        return 0;
-      }
+      process.stdout.write("{}\n");
+      return 0;
     }
     sessionFile = await readSessionFile(filePath);
   } catch {
@@ -448,7 +418,7 @@ async function handleSessionStartHookImpl(
   // 2. Resolve session ID
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
-    process.env.COPILOT_SESSION_ID ||
+    process.env.BABYSITTER_SESSION_ID ||
     "";
 
   if (!sessionId) {
@@ -460,13 +430,13 @@ async function handleSessionStartHookImpl(
   log.setContext("session", sessionId);
   log.info(`Session ID: ${sessionId}`);
 
-  // 3. Write session ID to env file if available
+  // 3. Persist BABYSITTER_SESSION_ID to env file (COPILOT_ENV_FILE or CLAUDE_ENV_FILE)
   const envFile = process.env.COPILOT_ENV_FILE || process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
       appendFileSync(
         envFile,
-        `export COPILOT_SESSION_ID="${sessionId}"\n`,
+        `export BABYSITTER_SESSION_ID="${sessionId}"\n`,
       );
     } catch {
       if (verbose) {
@@ -676,6 +646,7 @@ export function createGithubCopilotAdapter(): HarnessAdapter {
       // COPILOT_GITHUB_TOKEN may be present when running inside a Copilot
       // CLI session. This distinguishes from Claude Code which uses CLAUDE_* vars.
       return !!(
+        process.env.BABYSITTER_SESSION_ID ||
         process.env.COPILOT_HOME ||
         process.env.COPILOT_GITHUB_TOKEN
       );

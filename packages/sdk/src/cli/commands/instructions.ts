@@ -7,6 +7,7 @@
  * @module cli/commands/instructions
  */
 
+import { existsSync } from "node:fs";
 import {
   createClaudeCodeContext,
   createCodexContext,
@@ -22,6 +23,7 @@ import {
   getDefaultProcessLibrarySpec,
 } from "../../processLibrary/active";
 import { getAdapterByName } from "../../harness/registry";
+import { getSessionFilePath } from "../../session/parse";
 
 export interface InstructionsCommandArgs {
   subcommand: "babysit-skill" | "process-create" | "orchestrate" | "breakpoint-handling";
@@ -137,6 +139,29 @@ async function tryResolveProcessLibraryRoot(): Promise<{
 }
 
 /**
+ * Detect whether the session-start hook has actually run by checking for the
+ * session state file it creates (`<stateDir>/<sessionId>.md`).
+ *
+ * Some adapters can resolve a session ID from env vars alone (e.g.
+ * GEMINI_SESSION_ID, CODEX_SESSION_ID) without the hook ever firing.
+ * The definitive signal is the state file — the hook writes it as a
+ * side effect of `babysitter hook:run --hook-type session-start`.
+ */
+function detectHooksActive(harness: string): boolean {
+  const adapter = getAdapterByName(harness);
+  if (!adapter) return false;
+
+  const sessionId = adapter.resolveSessionId({});
+  if (!sessionId) return false;
+
+  const stateDir = adapter.resolveStateDir({});
+  if (!stateDir) return false;
+
+  const stateFile = getSessionFilePath(stateDir, sessionId);
+  return existsSync(stateFile);
+}
+
+/**
  * Route and handle an `instructions:*` subcommand.
  */
 export async function handleInstructionsCommand(
@@ -181,9 +206,19 @@ export async function handleInstructionsCommand(
   // Resolve the active process-library root before composing the prompt
   const libraryInfo = await tryResolveProcessLibraryRoot();
 
+  // Detect whether hooks are actually active in this session.
+  // If the session-start hook never ran (no breadcrumb file), override
+  // hookDriven to false so the agent drives the loop in-turn.
+  const hooksActive = detectHooksActive(args.harness);
+  const hookOverride: Partial<PromptContext> = {};
+  if (!hooksActive) {
+    hookOverride.hookDriven = false;
+  }
+
   const ctx = factory({
     interactive: args.interactive,
     ...libraryInfo,
+    ...hookOverride,
   });
   const content = composer.fn(ctx);
 
@@ -194,6 +229,8 @@ export async function handleInstructionsCommand(
           harness: args.harness,
           interactive: args.interactive,
           promptType: composer.promptType,
+          hookDriven: ctx.hookDriven,
+          hooksDetected: hooksActive,
           content,
           partsIncluded: composer.partsIncluded,
         },
@@ -202,6 +239,12 @@ export async function handleInstructionsCommand(
       ),
     );
   } else {
+    if (!hooksActive && ctx.hookDriven !== false) {
+      // Context factory defaulted hookDriven to true, but we overrode it.
+      // This is a no-op because the override already happened, but it
+      // clarifies the JSON output. The text output is self-explanatory
+      // from the generated instructions.
+    }
     console.log(content);
   }
 

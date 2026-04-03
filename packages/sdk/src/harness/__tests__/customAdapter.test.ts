@@ -85,10 +85,12 @@ describe("createCustomAdapter", () => {
     expect(hint).toContain("explicit");
   });
 
-  it("resolveStateDir() defaults to .a5c", () => {
+  it("resolveStateDir() defaults to ~/.a5c/state/", () => {
     const adapter = createCustomAdapter();
     const dir = adapter.resolveStateDir({});
-    expect(dir).toContain(".a5c");
+    const os = require("node:os");
+    const path = require("node:path");
+    expect(dir).toBe(path.join(os.homedir(), ".a5c", "state"));
   });
 
   it("resolveStateDir() respects explicit stateDir", () => {

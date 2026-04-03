@@ -62,15 +62,13 @@ import type {
 import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createCursorContext } from "../prompts/context";
+import { getGlobalStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const HARNESS_NAME = "cursor";
-
-/** Default state directory for Cursor sessions */
-const DEFAULT_STATE_DIR = ".a5c/state";
 
 // ---------------------------------------------------------------------------
 // Structured file logger
@@ -262,15 +260,7 @@ function resolveStateDirInternal(args: {
   pluginRoot?: string;
 }): string {
   if (args.stateDir) return path.resolve(args.stateDir);
-  if (args.pluginRoot) {
-    return path.resolve(args.pluginRoot, "state");
-  }
-  const pluginRoot = process.env.CURSOR_PLUGIN_ROOT;
-  if (pluginRoot) {
-    return path.resolve(pluginRoot, "state");
-  }
-  // Default: project-relative .a5c/state/
-  return path.resolve(DEFAULT_STATE_DIR);
+  return getGlobalStateDir();
 }
 
 // ---------------------------------------------------------------------------
@@ -313,9 +303,13 @@ async function handleStopHookImpl(
   const hookInput = parseHookInput(rawInput) as CursorStopHookInput;
   log.info("Hook input received");
 
-  // 2. Resolve session ID from hook input
-  // Cursor provides conversation_id in the hook stdin JSON, NOT as an env var.
-  const sessionId = safeStr(hookInput as Record<string, unknown>, "conversation_id");
+  // 2. Resolve session ID from hook input or cross-harness env var
+  //    Cursor provides conversation_id via stdin JSON only; BABYSITTER_SESSION_ID
+  //    may be set externally as a cross-harness fallback.
+  const sessionId =
+    safeStr(hookInput as Record<string, unknown>, "conversation_id") ||
+    process.env.BABYSITTER_SESSION_ID ||
+    "";
 
   if (!sessionId) {
     log.info("No conversation_id in hook input — allowing exit");
@@ -324,7 +318,7 @@ async function handleStopHookImpl(
   }
 
   log.setContext("session", sessionId);
-  log.info(`Session ID (conversation_id): ${sessionId}`);
+  log.info(`Session ID: ${sessionId}`);
 
   // 3. Resolve state directory
   const stateDir = resolveStateDirInternal(args);
@@ -333,28 +327,17 @@ async function handleStopHookImpl(
   log.info(`Resolved stateDir: ${stateDir}`);
 
   // 4. Read session state file
-  let filePath = getSessionFilePath(stateDir, sessionId);
+  const filePath = getSessionFilePath(stateDir, sessionId);
   log.info(`Checking session file at: ${filePath}`);
 
   let sessionFile;
   try {
     if (!(await sessionFileExists(filePath))) {
-      // Fallback: check .a5c/state/ directory
-      const fallbackPath = getSessionFilePath(
-        path.resolve(DEFAULT_STATE_DIR),
-        sessionId,
+      log.info(
+        `No active babysitter loop for session ${sessionId} — allowing exit`,
       );
-      log.info(`Primary state file not found, trying fallback: ${fallbackPath}`);
-      if (await sessionFileExists(fallbackPath)) {
-        filePath = fallbackPath;
-        log.info(`Found session file at fallback path: ${filePath}`);
-      } else {
-        log.info(
-          `No active babysitter loop for session ${sessionId} — allowing exit`,
-        );
-        process.stdout.write("{}\n");
-        return 0;
-      }
+      process.stdout.write("{}\n");
+      return 0;
     }
     sessionFile = await readSessionFile(filePath);
   } catch {
@@ -662,7 +645,12 @@ async function handleSessionStartHookImpl(
   const hookInput = parseHookInput(rawInput) as CursorSessionStartHookInput;
 
   // 2. Resolve session ID from conversation_id in hook input
-  const sessionId = safeStr(hookInput as Record<string, unknown>, "conversation_id");
+  //    Cursor has no env file mechanism; conversation_id is the only source.
+  //    BABYSITTER_SESSION_ID used as cross-harness fallback if set externally.
+  const sessionId =
+    safeStr(hookInput as Record<string, unknown>, "conversation_id") ||
+    process.env.BABYSITTER_SESSION_ID ||
+    "";
 
   if (!sessionId) {
     log.info("No conversation_id in hook input — skipping state file creation");
@@ -671,7 +659,7 @@ async function handleSessionStartHookImpl(
   }
 
   log.setContext("session", sessionId);
-  log.info(`Session ID (conversation_id): ${sessionId}`);
+  log.info(`Session ID: ${sessionId}`);
 
   // 3. Resolve state directory and create baseline session file
   const stateDir = resolveStateDirInternal(args);
@@ -901,11 +889,10 @@ export function createCursorAdapter(): HarnessAdapter {
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
-      // Cursor has no session ID env var. The only source is the
-      // conversation_id from hook stdin JSON, which the sessionStart hook
-      // persists to the state file. If an explicit sessionId is passed
-      // (e.g. from CLI args), use it.
       if (parsed.sessionId) return parsed.sessionId;
+      // Cursor has no env file mechanism, but BABYSITTER_SESSION_ID may be
+      // set externally or by a wrapper script.
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
       return undefined;
     },
 

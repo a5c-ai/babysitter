@@ -20,6 +20,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as path from "node:path";
+import * as os from "node:os";
 import { createCursorAdapter } from "../cursor";
 import { HarnessCapability } from "../types";
 import { KNOWN_HARNESSES } from "../discovery";
@@ -288,26 +289,13 @@ describe("createCursorAdapter", () => {
       expect(result).toBe(path.resolve("/custom/state"));
     });
 
-    it("returns pluginRoot/state when pluginRoot is provided", () => {
-      const adapter = createCursorAdapter();
-      const result = adapter.resolveStateDir!({ pluginRoot: "/plugins/cursor" });
-      expect(result).toBe(path.resolve("/plugins/cursor", "state"));
-    });
-
-    it("falls back to CURSOR_PLUGIN_ROOT env var", () => {
-      process.env.CURSOR_PLUGIN_ROOT = "/env/plugin/root";
+    it("defaults to ~/.a5c/state/ when nothing is set", () => {
       const adapter = createCursorAdapter();
       const result = adapter.resolveStateDir!({});
-      expect(result).toBe(path.resolve("/env/plugin/root", "state"));
+      expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
 
-    it("returns default .a5c/state when nothing is set", () => {
-      const adapter = createCursorAdapter();
-      const result = adapter.resolveStateDir!({});
-      expect(result).toBe(path.resolve(".a5c/state"));
-    });
-
-    it("prefers explicit stateDir over pluginRoot", () => {
+    it("prefers explicit stateDir over default", () => {
       const adapter = createCursorAdapter();
       const result = adapter.resolveStateDir!({
         stateDir: "/explicit",
@@ -316,11 +304,11 @@ describe("createCursorAdapter", () => {
       expect(result).toBe(path.resolve("/explicit"));
     });
 
-    it("prefers explicit pluginRoot over CURSOR_PLUGIN_ROOT env", () => {
-      process.env.CURSOR_PLUGIN_ROOT = "/env/root";
+    it("respects BABYSITTER_STATE_DIR env var", () => {
+      process.env.BABYSITTER_STATE_DIR = "/custom/global/state";
       const adapter = createCursorAdapter();
-      const result = adapter.resolveStateDir!({ pluginRoot: "/explicit/root" });
-      expect(result).toBe(path.resolve("/explicit/root", "state"));
+      const result = adapter.resolveStateDir!({});
+      expect(result).toBe(path.resolve("/custom/global/state"));
     });
   });
 

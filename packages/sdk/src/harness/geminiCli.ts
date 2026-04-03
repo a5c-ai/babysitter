@@ -63,15 +63,13 @@ import {
 } from "./installSupport";
 import type { PromptContext } from "../prompts/types";
 import { createGeminiCliContext } from "../prompts/context";
+import { getGlobalStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const HARNESS_NAME = "gemini-cli";
-
-/** Default state directory for Gemini CLI sessions */
-const DEFAULT_STATE_DIR = ".a5c/state";
 
 // ---------------------------------------------------------------------------
 // Structured file logger
@@ -269,18 +267,7 @@ function resolveStateDirInternal(args: {
   pluginRoot?: string;
 }): string {
   if (args.stateDir) return path.resolve(args.stateDir);
-  if (args.pluginRoot) {
-    return path.resolve(args.pluginRoot, "state");
-  }
-  // Check Gemini CLI extension path env var
-  const extensionPath =
-    process.env.GEMINI_EXTENSION_PATH ||
-    process.env.BABYSITTER_EXTENSION_PATH;
-  if (extensionPath) {
-    return path.resolve(extensionPath, "state");
-  }
-  // Default: project-relative .a5c/state/
-  return path.resolve(DEFAULT_STATE_DIR);
+  return getGlobalStateDir();
 }
 
 // ---------------------------------------------------------------------------
@@ -313,8 +300,10 @@ async function handleAfterAgentHookImpl(
   log.info("Hook input received");
 
   // 2. Resolve session ID from hook input or env var
+  //    Priority: stdin session_id → BABYSITTER_SESSION_ID → GEMINI_SESSION_ID
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
+    process.env.BABYSITTER_SESSION_ID ||
     process.env.GEMINI_SESSION_ID ||
     "";
 
@@ -334,30 +323,17 @@ async function handleAfterAgentHookImpl(
   log.info(`Resolved stateDir: ${stateDir}`);
 
   // 4. Read session state file
-  let filePath = getSessionFilePath(stateDir, sessionId);
+  const filePath = getSessionFilePath(stateDir, sessionId);
   log.info(`Checking session file at: ${filePath}`);
 
   let sessionFile;
   try {
     if (!(await sessionFileExists(filePath))) {
-      // Fallback: check .a5c/state/ directory
-      const fallbackPath = getSessionFilePath(
-        path.resolve(DEFAULT_STATE_DIR),
-        sessionId,
-      );
       log.info(
-        `Primary state file not found, trying fallback: ${fallbackPath}`,
+        `No active babysitter loop for session ${sessionId} — allowing exit`,
       );
-      if (await sessionFileExists(fallbackPath)) {
-        filePath = fallbackPath;
-        log.info(`Found session file at fallback path: ${filePath}`);
-      } else {
-        log.info(
-          `No active babysitter loop for session ${sessionId} — allowing exit`,
-        );
-        process.stdout.write("{}\n");
-        return 0;
-      }
+      process.stdout.write("{}\n");
+      return 0;
     }
     sessionFile = await readSessionFile(filePath);
   } catch {
@@ -705,8 +681,11 @@ async function handleSessionStartHookImpl(
   const hookInput = parseHookInput(rawInput) as GeminiSessionStartHookInput;
 
   // 2. Resolve session ID
+  //    Gemini auto-injects GEMINI_SESSION_ID; BABYSITTER_SESSION_ID takes priority
+  //    if set (no env file mechanism — Gemini injects natively).
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
+    process.env.BABYSITTER_SESSION_ID ||
     process.env.GEMINI_SESSION_ID ||
     "";
 
@@ -889,6 +868,7 @@ export function createGeminiCliAdapter(): HarnessAdapter {
 
     isActive(): boolean {
       return !!(
+        process.env.BABYSITTER_SESSION_ID ||
         process.env.GEMINI_SESSION_ID ||
         process.env.GEMINI_PROJECT_DIR ||
         process.env.GEMINI_CWD
@@ -901,6 +881,8 @@ export function createGeminiCliAdapter(): HarnessAdapter {
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       if (parsed.sessionId) return parsed.sessionId;
+      // Cross-harness standard first, then Gemini-native (auto-injected)
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
       if (process.env.GEMINI_SESSION_ID) return process.env.GEMINI_SESSION_ID;
       return undefined;
     },

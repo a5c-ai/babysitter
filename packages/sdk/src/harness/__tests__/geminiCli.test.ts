@@ -114,6 +114,8 @@ afterEach(async () => {
   delete process.env.GEMINI_EXTENSION_PATH;
   delete process.env.BABYSITTER_EXTENSION_PATH;
   delete process.env.BABYSITTER_LOG_DIR;
+  delete process.env.BABYSITTER_STATE_DIR;
+  delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
   try {
     await fs.rm(tmpDir, { recursive: true, force: true });
   } catch {
@@ -532,35 +534,13 @@ describe("Gemini CLI resolveStateDir", () => {
     expect(result).toBe(path.resolve("/custom/state"));
   });
 
-  it("returns pluginRoot/state when pluginRoot is provided", () => {
-    const adapter = createGeminiCliAdapter();
-    const result = adapter.resolveStateDir!({
-      pluginRoot: "/plugins/gemini",
-    });
-    expect(result).toBe(path.resolve("/plugins/gemini", "state"));
-  });
-
-  it("falls back to GEMINI_EXTENSION_PATH env var", () => {
-    process.env.GEMINI_EXTENSION_PATH = "/env/ext/path";
+  it("defaults to ~/.a5c/state/ when nothing is set", () => {
     const adapter = createGeminiCliAdapter();
     const result = adapter.resolveStateDir!({});
-    expect(result).toBe(path.resolve("/env/ext/path", "state"));
+    expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
   });
 
-  it("falls back to BABYSITTER_EXTENSION_PATH env var", () => {
-    process.env.BABYSITTER_EXTENSION_PATH = "/env/babysitter/ext";
-    const adapter = createGeminiCliAdapter();
-    const result = adapter.resolveStateDir!({});
-    expect(result).toBe(path.resolve("/env/babysitter/ext", "state"));
-  });
-
-  it("returns default .a5c/state when nothing is set", () => {
-    const adapter = createGeminiCliAdapter();
-    const result = adapter.resolveStateDir!({});
-    expect(result).toBe(path.resolve(".a5c/state"));
-  });
-
-  it("prefers explicit stateDir over pluginRoot", () => {
+  it("prefers explicit stateDir over default", () => {
     const adapter = createGeminiCliAdapter();
     const result = adapter.resolveStateDir!({
       stateDir: "/explicit",
@@ -569,12 +549,11 @@ describe("Gemini CLI resolveStateDir", () => {
     expect(result).toBe(path.resolve("/explicit"));
   });
 
-  it("prefers GEMINI_EXTENSION_PATH over BABYSITTER_EXTENSION_PATH", () => {
-    process.env.GEMINI_EXTENSION_PATH = "/gemini/ext";
-    process.env.BABYSITTER_EXTENSION_PATH = "/babysitter/ext";
+  it("respects BABYSITTER_STATE_DIR env var", () => {
+    process.env.BABYSITTER_STATE_DIR = "/custom/global/state";
     const adapter = createGeminiCliAdapter();
     const result = adapter.resolveStateDir!({});
-    expect(result).toBe(path.resolve("/gemini/ext", "state"));
+    expect(result).toBe(path.resolve("/custom/global/state"));
   });
 });
 

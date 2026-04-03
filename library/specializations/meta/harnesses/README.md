@@ -72,6 +72,20 @@ This directory documents the extensibility, plugin systems, and capabilities of 
 | **GitHub Copilot** | Yes | 8 | `.github/hooks/*.json` | sessionStart, preToolUse, postToolUse, agentStop, errorOccurred |
 | **Cursor** | Yes | 6+ | `.cursor/hooks.json` | beforeShellExecution, beforeMCPExecution, afterFileEdit, stop |
 
+### Session ID Persistence Between Hooks
+
+| Harness | Env File Mechanism | Native Env Injection | Stdin JSON | Auto-Resolved |
+|---------|-------------------|---------------------|------------|---------------|
+| **Claude Code** | `CLAUDE_ENV_FILE` | `CLAUDE_SESSION_ID` | No | Yes |
+| **Codex CLI** | `CODEX_ENV_FILE` | `CODEX_THREAD_ID`, `CODEX_SESSION_ID` | Fallback | Yes |
+| **Gemini CLI** | None needed | `GEMINI_SESSION_ID` (auto-injected) | Fallback | Yes |
+| **Pi / Oh My Pi** | None | `OMP_SESSION_ID` / `PI_SESSION_ID` | N/A (in-process) | Yes |
+| **OpenCode** | None | None | `session.created` event | No |
+| **GitHub Copilot** | `COPILOT_ENV_FILE` (or `CLAUDE_ENV_FILE`) | Best-effort | Fallback | No |
+| **Cursor** | None | None | `conversation_id` only | No |
+
+**Note:** Session state files (iteration tracking, run binding) are stored in `~/.a5c/state/` globally, independent of the env persistence mechanism above.
+
 ### MCP (Model Context Protocol) Support
 
 | Harness | MCP Support | Transports | Config Location |

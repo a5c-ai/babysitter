@@ -2,9 +2,9 @@
  * Claude Code harness adapter.
  *
  * Centralizes all Claude Code-specific behaviors:
- *   - Session ID resolution (CLAUDE_SESSION_ID, CLAUDE_ENV_FILE)
+ *   - Session ID resolution (BABYSITTER_SESSION_ID via CLAUDE_ENV_FILE)
  *   - Plugin root resolution (CLAUDE_PLUGIN_ROOT)
- *   - State directory conventions (pluginRoot/skills/babysit/state)
+ *   - State directory conventions (~/.a5c/state/)
  *   - Session binding (run:create → state file with run association)
  *   - Stop hook handler (approve/block decision)
  *   - Session-start hook handler (env file + baseline state file)
@@ -50,6 +50,7 @@ import type {
 } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createClaudeCodeContext } from "../prompts/context";
+import { getGlobalStateDir } from "../config";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
@@ -225,15 +226,19 @@ async function cleanupSession(filePath: string): Promise<void> {
 /**
  * Resolve the current session ID from environment, independent of the hook
  * payload. After `/clear`, the hook payload may carry a stale session ID while
- * CLAUDE_SESSION_ID or CLAUDE_ENV_FILE reflects the actual active session.
+ * BABYSITTER_SESSION_ID (persisted via CLAUDE_ENV_FILE) reflects the actual
+ * active session.
  */
 function resolveCurrentSessionIdFromEnv(): string | undefined {
-  if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
+  // Cross-harness standard env var (written by session-start hook to CLAUDE_ENV_FILE)
+  if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+
+  // Fallback: read BABYSITTER_SESSION_ID from CLAUDE_ENV_FILE directly
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
       const content = readFileSync(envFile, "utf-8");
-      const match = content.match(/export CLAUDE_SESSION_ID="([^"]+)"/);
+      const match = content.match(/export BABYSITTER_SESSION_ID="([^"]+)"/);
       if (match?.[1]) return match[1];
     } catch {
       // Non-fatal
@@ -288,7 +293,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   const stateDir =
     args.stateDir
       ? path.resolve(args.stateDir)
-      : (resolvedPluginRoot ? path.resolve(resolvedPluginRoot, "skills", "babysit", "state") : "");
+      : getGlobalStateDir();
 
   if (!stateDir) {
     log.warn("Cannot determine state directory — allowing exit");
@@ -306,59 +311,44 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
 
   const runsDir = collapseDoubledA5cRuns(path.resolve(args.runsDir || ".a5c/runs"));
 
-  // 3. Check iteration — try primary stateDir, then fallback to .a5c/state/
+  // 3. Check iteration — look up session state file in the resolved stateDir
   let filePath = getSessionFilePath(stateDir, sessionId);
   log.info(`Checking session file at: ${filePath}`);
 
   let sessionFile;
   try {
     if (!(await sessionFileExists(filePath))) {
-      // Fallback: check .a5c/state/ directory
-      const fallbackStateDir = path.resolve(".a5c", "state");
-      const fallbackPath = getSessionFilePath(fallbackStateDir, sessionId);
-      log.info(`Primary state file not found, trying fallback: ${fallbackPath}`);
-      if (await sessionFileExists(fallbackPath)) {
-        filePath = fallbackPath;
-        log.info(`Found session file at fallback path: ${filePath}`);
-      } else {
-        // Fallback: the hook payload may carry a stale session ID (e.g. after
-        // /clear). Try resolving the *current* session ID from CLAUDE_SESSION_ID
-        // or CLAUDE_ENV_FILE and retry the lookup if it differs.
-        const envSessionId = resolveCurrentSessionIdFromEnv();
-        if (envSessionId && envSessionId !== sessionId) {
-          log.info(`Payload session ${sessionId} is stale; current env session is ${envSessionId} — retrying lookup`);
-          const primaryRetry = getSessionFilePath(stateDir, envSessionId);
-          const fallbackRetry = getSessionFilePath(fallbackStateDir, envSessionId);
-          if (await sessionFileExists(primaryRetry)) {
-            filePath = primaryRetry;
-            sessionId = envSessionId;
-            log.setContext("session", sessionId);
-            log.info(`Found session file for env session at primary: ${filePath}`);
-          } else if (await sessionFileExists(fallbackRetry)) {
-            filePath = fallbackRetry;
-            sessionId = envSessionId;
-            log.setContext("session", sessionId);
-            log.info(`Found session file for env session at fallback: ${filePath}`);
-          } else {
-            log.info(`No active loop found for payload session ${sessionId} or env session ${envSessionId} — allowing exit`);
-            if (verbose) {
-              process.stderr.write(
-                `[hook:run stop] No active loop found for session ${sessionId} or ${envSessionId}\n`,
-              );
-            }
-            process.stdout.write("{}\n");
-            return 0;
-          }
+      // Fallback: the hook payload may carry a stale session ID (e.g. after
+      // /clear). Try resolving the *current* session ID from BABYSITTER_SESSION_ID
+      // (persisted via CLAUDE_ENV_FILE) and retry the lookup if it differs.
+      const envSessionId = resolveCurrentSessionIdFromEnv();
+      if (envSessionId && envSessionId !== sessionId) {
+        log.info(`Payload session ${sessionId} is stale; current env session is ${envSessionId} — retrying lookup`);
+        const retryPath = getSessionFilePath(stateDir, envSessionId);
+        if (await sessionFileExists(retryPath)) {
+          filePath = retryPath;
+          sessionId = envSessionId;
+          log.setContext("session", sessionId);
+          log.info(`Found session file for env session: ${filePath}`);
         } else {
-          log.info(`No active loop found at primary (${filePath}) or fallback (${fallbackPath}) — allowing exit`);
+          log.info(`No active loop found for payload session ${sessionId} or env session ${envSessionId} — allowing exit`);
           if (verbose) {
             process.stderr.write(
-              `[hook:run stop] No active loop found for session ${sessionId}\n`,
+              `[hook:run stop] No active loop found for session ${sessionId} or ${envSessionId}\n`,
             );
           }
           process.stdout.write("{}\n");
           return 0;
         }
+      } else {
+        log.info(`No active loop found for session ${sessionId} — allowing exit`);
+        if (verbose) {
+          process.stderr.write(
+            `[hook:run stop] No active loop found for session ${sessionId}\n`,
+          );
+        }
+        process.stdout.write("{}\n");
+        return 0;
       }
     }
     sessionFile = await readSessionFile(filePath);
@@ -841,12 +831,13 @@ async function handleSessionStartHookImpl(
     return 0;
   }
 
-  // 2. If CLAUDE_ENV_FILE is set, append session ID export
+  // 2. If CLAUDE_ENV_FILE is set, persist BABYSITTER_SESSION_ID so subsequent
+  //    hooks (stop hook, Bash tool calls) can resolve it from the environment.
   let envFilePersisted = false;
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
-      appendFileSync(envFile, `export CLAUDE_SESSION_ID="${sessionId}"\n`);
+      appendFileSync(envFile, `export BABYSITTER_SESSION_ID="${sessionId}"\n`);
       envFilePersisted = true;
     } catch {
       process.stderr.write(
@@ -866,7 +857,7 @@ async function handleSessionStartHookImpl(
   const stateDir =
     args.stateDir
       ? path.resolve(args.stateDir)
-      : (resolvedPluginRoot ? path.resolve(resolvedPluginRoot, "skills", "babysit", "state") : "");
+      : getGlobalStateDir();
 
   let stateFilePersisted = false;
   if (stateDir) {
@@ -955,21 +946,10 @@ async function handleSessionStartHookImpl(
 async function bindSessionImpl(
   opts: SessionBindOptions,
 ): Promise<SessionBindResult> {
-  const { sessionId, runId, pluginRoot, runsDir, maxIterations = 256, prompt, verbose } = opts;
+  const { sessionId, runId, pluginRoot: _pluginRoot, runsDir, maxIterations = 256, prompt, verbose } = opts;
 
   // Resolve state directory (always resolve to absolute paths)
-  const resolvedPluginRoot = pluginRoot ? path.resolve(pluginRoot) : "";
-  let stateDir = opts.stateDir ? path.resolve(opts.stateDir) : "";
-  if (!stateDir && resolvedPluginRoot) {
-    stateDir = path.resolve(resolvedPluginRoot, "skills", "babysit", "state");
-  }
-  if (!stateDir) {
-    return {
-      harness: "claude-code",
-      sessionId,
-      error: "Cannot bind session: --state-dir or --plugin-root required for claude-code harness",
-    };
-  }
+  const stateDir = opts.stateDir ? path.resolve(opts.stateDir) : getGlobalStateDir();
 
   const filePath = getSessionFilePath(stateDir, sessionId);
 
@@ -1159,7 +1139,7 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
     name: "claude-code",
 
     isActive(): boolean {
-      return !!(process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_ENV_FILE);
+      return !!(process.env.BABYSITTER_SESSION_ID || process.env.CLAUDE_ENV_FILE);
     },
 
     autoResolvesSessionId(): boolean {
@@ -1168,14 +1148,16 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       if (parsed.sessionId) return parsed.sessionId;
-      if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
 
-      // Fallback: read from CLAUDE_ENV_FILE (written by session-start hook)
+      // Cross-harness standard (written by session-start hook to CLAUDE_ENV_FILE)
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+
+      // Fallback: read BABYSITTER_SESSION_ID from CLAUDE_ENV_FILE directly
       const envFile = process.env.CLAUDE_ENV_FILE;
       if (envFile) {
         try {
           const content = readFileSync(envFile, "utf-8");
-          const match = content.match(/export CLAUDE_SESSION_ID="([^"]+)"/);
+          const match = content.match(/export BABYSITTER_SESSION_ID="([^"]+)"/);
           if (match?.[1]) return match[1];
         } catch {
           // Non-fatal
@@ -1187,9 +1169,7 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {
       if (args.stateDir) return path.resolve(args.stateDir);
-      const root = args.pluginRoot || process.env.CLAUDE_PLUGIN_ROOT;
-      if (root) return path.resolve(root, "skills", "babysit", "state");
-      return undefined;
+      return getGlobalStateDir();
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {

@@ -48,6 +48,8 @@ const ENV_KEYS = [
   "PI_SESSION_ID",
   "OMP_PLUGIN_ROOT",
   "PI_PLUGIN_ROOT",
+  "BABYSITTER_STATE_DIR",
+  "BABYSITTER_GLOBAL_STATE_DIR",
 ];
 let savedEnv: Record<string, string | undefined>;
 
@@ -125,24 +127,17 @@ describe("ClaudeCodeAdapter", () => {
       expect(adapter.resolveStateDir({ stateDir: "/custom/state" })).toBe(path.resolve("/custom/state"));
     });
 
-    it("derives from pluginRoot arg", () => {
-      const adapter = createClaudeCodeAdapter();
-      const result = adapter.resolveStateDir({ pluginRoot: "/plugins/babysitter" });
-      expect(result).toContain("skills");
-      expect(result).toContain("state");
-    });
-
-    it("derives from CLAUDE_PLUGIN_ROOT env", () => {
-      process.env.CLAUDE_PLUGIN_ROOT = "/env/plugin";
+    it("defaults to ~/.a5c/state/ when nothing is set", () => {
       const adapter = createClaudeCodeAdapter();
       const result = adapter.resolveStateDir({});
-      expect(result).toContain("skills");
-      expect(result).toContain("state");
+      expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
 
-    it("returns undefined when nothing is set", () => {
+    it("respects BABYSITTER_STATE_DIR env var", () => {
+      process.env.BABYSITTER_STATE_DIR = "/custom/global/state";
       const adapter = createClaudeCodeAdapter();
-      expect(adapter.resolveStateDir({})).toBeUndefined();
+      const result = adapter.resolveStateDir({});
+      expect(result).toBe(path.resolve("/custom/global/state"));
     });
   });
 
@@ -222,27 +217,9 @@ describe("CodexAdapter", () => {
       expect(adapter.resolveStateDir({ stateDir: "/custom/state" })).toBe(path.resolve("/custom/state"));
     });
 
-    it("defaults to .a5c when no values are provided", () => {
+    it("defaults to ~/.a5c/state/ when no values are provided", () => {
       const adapter = createCodexAdapter();
-      expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
-    });
-
-    it("keeps session state in the active workspace when pluginRoot is global CODEX_HOME", async () => {
-      const adapter = createCodexAdapter();
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-state-dir-test-"));
-      const originalCwd = process.cwd();
-      try {
-        process.chdir(tmpDir);
-        const realCwd = require("node:fs").realpathSync(process.cwd());
-        expect(
-          adapter.resolveStateDir({
-            pluginRoot: path.join(os.homedir(), ".codex"),
-          }),
-        ).toBe(path.join(realCwd, ".a5c"));
-      } finally {
-        process.chdir(originalCwd);
-        await fs.rm(tmpDir, { recursive: true, force: true });
-      }
+      expect(adapter.resolveStateDir({})).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
   });
 
@@ -278,12 +255,10 @@ describe("CodexAdapter", () => {
 // ---------------------------------------------------------------------------
 
 describe("PiAdapter", () => {
-  it("derives oh-my-pi state dir from .omp plugin roots", () => {
+  it("defaults state dir to ~/.a5c/state/", () => {
     const adapter = createPiAdapter();
-    const result = adapter.resolveStateDir({
-      pluginRoot: "/workspace/.omp/plugins/babysitter",
-    });
-    expect(result).toBe(path.resolve("/workspace/.omp/plugins/.a5c"));
+    const result = adapter.resolveStateDir({});
+    expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
   });
 });
 
