@@ -51,6 +51,7 @@ import {
   writeAdapterTestsTask,
   writePluginTestsTask,
   setupCiCdTask,
+  createSyncScriptTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -269,6 +270,29 @@ export async function process(inputs, ctx) {
   });
 
   integrationFiles.push(...ciCd.filesModified);
+
+  // ==========================================================================
+  // PHASE 6b: COMMAND SYNC SCRIPT
+  // Create a sync script at plugins/babysitter-github/scripts/ that keeps
+  // plugin commands and skills in sync with the canonical babysitter commands.
+  // GitHub Copilot has both commands/ and skills/ directories, so this should
+  // use the "commands + skills" variant (sync-command-surfaces.js pattern).
+  // The script is registered in scripts/sync-plugin-commands.cjs so that
+  // `node scripts/sync-plugin-commands.cjs` and `--check` mode include it.
+  // ==========================================================================
+
+  ctx.log('phase:sync-script', 'Creating command sync script and registering in central orchestrator');
+
+  const syncScript = await ctx.task(createSyncScriptTask, {
+    projectDir,
+    harnessName,
+    pluginDir,
+    adapterName: 'github',
+    research,
+    syncVariant: 'commands-and-skills',
+  });
+
+  integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
   // PHASE 7: VERIFY + CONVERGE

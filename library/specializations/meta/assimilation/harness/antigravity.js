@@ -21,6 +21,7 @@ import {
   writeAdapterTestsTask,
   writePluginTestsTask,
   setupCiCdTask,
+  createSyncScriptTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -195,6 +196,29 @@ export async function process(inputs, ctx) {
   });
 
   integrationFiles.push(...ciCd.filesModified);
+
+  // ==========================================================================
+  // PHASE 6b: COMMAND SYNC SCRIPT
+  // Create a sync script at plugins/babysitter-antigravity/scripts/ that keeps
+  // plugin commands/skills in sync with the canonical babysitter commands.
+  // Antigravity uses SKILL.md format with scripts/ and references/ dirs.
+  // The sync variant is auto-detected based on the plugin directory structure.
+  // The script is registered in scripts/sync-plugin-commands.cjs so that
+  // `node scripts/sync-plugin-commands.cjs` and `--check` mode include it.
+  // ==========================================================================
+
+  ctx.log('phase:sync-script', 'Creating command sync script and registering in central orchestrator');
+
+  const syncScript = await ctx.task(createSyncScriptTask, {
+    projectDir,
+    harnessName,
+    pluginDir,
+    adapterName,
+    research,
+    syncVariant: 'auto-detect',
+  });
+
+  integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
   // PHASE 7: VERIFY + CONVERGE

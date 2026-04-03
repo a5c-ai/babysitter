@@ -12,6 +12,7 @@
  *   - Adapter unit tests (Vitest, following SDK harness test patterns)
  *   - Plugin integration tests (syntax, packaged install, hooks, skills, config)
  *   - CI/CD workflow integration (PR validation, E2E Docker, release pipeline)
+ *   - Command sync script (keeps plugin commands/skills in sync with canonical babysitter commands)
  *   - Quality verification and refinement
  */
 
@@ -23,8 +24,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 
 const referencePlugins = [
   'plugins/babysitter/',            // Claude Code reference plugin (hooks, skills, commands)
-  'plugins/babysitter-codex/',      // Codex reference plugin (skills, hooks, .codex-plugin/)
-  'plugins/babysitter-pi/',         // PI reference plugin (npm package, extensions, bin/)
+  'plugins/babysitter-codex/',      // Codex reference plugin (skills, hooks, .codex-plugin/, sync-command-skills.js)
+  'plugins/babysitter-cursor/',     // Cursor reference plugin (commands, skills, hooks, sync-command-surfaces.js)
+  'plugins/babysitter-github/',     // GitHub reference plugin (commands, skills, hooks, sync-command-surfaces.js)
+  'plugins/babysitter-pi/',         // PI reference plugin (npm package, extensions, bin/, sync-command-docs.cjs)
 ];
 
 /**
@@ -72,6 +75,14 @@ const sdkHarnessCore = [
   'packages/sdk/src/prompts/types.ts',         // PromptContext interface: hookDriven, interactive tri-state, capabilities, loopControlTerm, etc.
   'packages/sdk/src/compression/',             // loadCompressionConfig, densityFilterText, estimateTokens, getOrCompressFile, findLibraryFiles
   'packages/sdk/src/cli/commands/skill.ts',    // discoverSkillsInternal — used by session-start hooks for context injection
+
+  // ── Command sync infrastructure (must be integrated per-plugin) ──
+  'scripts/sync-plugin-commands.cjs',          // Central orchestrator: spawns all plugin sync scripts, supports --check mode
+  'scripts/plugin-command-sync-lib.cjs',       // Shared sync library: syncCommandMirrors, syncSkillsFromCommands, buildSkillFromCommand, reportCheckResult
+  'plugins/babysitter-codex/scripts/sync-command-skills.js',     // Reference: skills-only sync variant
+  'plugins/babysitter-cursor/scripts/sync-command-surfaces.js',  // Reference: commands + skills sync variant
+  'plugins/babysitter-github/scripts/sync-command-surfaces.js',  // Reference: commands + skills sync variant
+  'plugins/babysitter-pi/scripts/sync-command-docs.cjs',         // Reference: custom docs sync variant
 ];
 
 /**
@@ -1355,6 +1366,111 @@ export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
   },
 
   labels: ['agent', 'assimilation', 'ci-cd', 'devops'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 9b: Command Sync Script
+// ---------------------------------------------------------------------------
+
+export const createSyncScriptTask = defineTask('create-sync-script', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Create command sync script for ${args.harnessName} plugin`,
+  description: 'Create a sync script that keeps plugin commands/skills in sync with the canonical babysitter commands, and register it in the central sync-plugin-commands.cjs orchestrator',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior build tooling engineer',
+      task: `Create a command sync script for the ${args.harnessName} plugin at ${args.pluginDir}/scripts/ and register it in scripts/sync-plugin-commands.cjs`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        adapterName: args.adapterName,
+        research: args.research,
+        syncVariant: args.syncVariant,
+      },
+      instructions: [
+        // ── Study existing sync patterns ──
+        'Read scripts/sync-plugin-commands.cjs — the central orchestrator that spawns all plugin sync scripts. Understand the task array structure: { label, cmd, args } entries.',
+        'Read scripts/plugin-command-sync-lib.cjs — the shared library with: listDirectories, listMarkdownBasenames, syncCommandMirrors, syncSkillsFromCommands, reportCheckResult, buildSkillFromCommand, writeFileIfChanged.',
+        'Study the THREE existing sync script variants to understand which pattern to follow:',
+        '',
+        '  VARIANT A — "commands + skills" (used by babysitter-cursor and babysitter-github):',
+        '    plugins/babysitter-cursor/scripts/sync-command-surfaces.js',
+        '    plugins/babysitter-github/scripts/sync-command-surfaces.js',
+        '    These scripts do TWO things:',
+        '      1. Mirror command .md files from plugins/babysitter/commands/ to the plugin\'s commands/ directory',
+        '      2. Derive skills from those mirrored commands (generate SKILL.md in skills/<name>/ from command .md)',
+        '    Use this variant when the plugin has BOTH a commands/ directory AND a skills/ directory.',
+        '',
+        '  VARIANT B — "skills only" (used by babysitter-codex):',
+        '    plugins/babysitter-codex/scripts/sync-command-skills.js',
+        '    This script does ONE thing:',
+        '      1. Derive skills from canonical commands (generate SKILL.md in skills/<name>/ from plugins/babysitter/commands/<name>.md)',
+        '    Use this variant when the plugin has a skills/ directory but commands are NOT mirrored (they live only in the canonical plugin).',
+        '',
+        '  VARIANT C — "docs sync" (used by babysitter-pi):',
+        '    plugins/babysitter-pi/scripts/sync-command-docs.cjs',
+        '    This is a custom variant for Pi\'s specific needs. Only use if the harness has a unique documentation format.',
+        '',
+
+        // ── Determine the correct variant ──
+        `Examine the plugin directory structure at ${args.pluginDir}/ to determine which variant is appropriate:`,
+        `  - If ${args.pluginDir}/commands/ exists AND ${args.pluginDir}/skills/ exists → use VARIANT A (sync-command-surfaces.js)`,
+        `  - If ${args.pluginDir}/skills/ exists but NO commands/ directory → use VARIANT B (sync-command-skills.js)`,
+        `  - If neither exists yet, use research findings to decide: does ${args.harnessName} support mirrored commands? If yes → VARIANT A. If commands are handled differently → VARIANT B.`,
+        `  - The syncVariant hint (if provided) suggests: "${args.syncVariant || 'auto-detect'}"`,
+
+        // ── Create the sync script ──
+        `Create the sync script at ${args.pluginDir}/scripts/<script-name>.js following the chosen variant pattern EXACTLY:`,
+        '  - Use \'use strict\'; at the top',
+        '  - Require path and functions from ../../../scripts/plugin-command-sync-lib.cjs',
+        '  - Define PACKAGE_ROOT, REPO_ROOT, source/target paths',
+        `  - Set LABEL to 'babysitter-${args.adapterName} sync'`,
+        '  - Implement the discovery functions (getMirroredCommandNames and/or getDerivedSkillNames or getCommandBackedSkillNames)',
+        '  - Implement main() with --check support',
+        '  - Call main()',
+        'The script MUST follow the exact same require/path/label/check patterns as the reference implementations.',
+
+        // ── Register in central orchestrator ──
+        'Add an entry to the tasks array in scripts/sync-plugin-commands.cjs:',
+        '  {',
+        `    label: 'babysitter-${args.adapterName}',`,
+        '    cmd: process.execPath,',
+        `    args: [path.join(REPO_ROOT, '${args.pluginDir}', 'scripts', '<script-name>.js')],`,
+        '  },',
+        'Insert it in alphabetical order among the existing plugin entries (after sdk-command-templates, before or after existing plugin entries as alphabetical order dictates).',
+        'Do NOT remove or modify any existing entries in the tasks array.',
+
+        // ── Verify ──
+        'After creating the script and updating sync-plugin-commands.cjs:',
+        '  - Verify the script can be parsed: node --check <script-path>',
+        '  - Verify the require path to plugin-command-sync-lib.cjs resolves correctly (three levels up from plugins/<name>/scripts/)',
+        '  - Verify the central orchestrator still parses: node --check scripts/sync-plugin-commands.cjs',
+      ],
+      outputFormat: 'JSON with syncScriptPath, syncScriptVariant, centralOrchestratorUpdated, filesCreated, filesModified, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['syncScriptPath', 'syncScriptVariant', 'filesCreated', 'filesModified'],
+      properties: {
+        syncScriptPath: { type: 'string', description: 'Path to the created sync script' },
+        syncScriptVariant: { type: 'string', enum: ['commands-and-skills', 'skills-only', 'custom'], description: 'Which variant pattern was used' },
+        centralOrchestratorUpdated: { type: 'boolean', description: 'Whether sync-plugin-commands.cjs was updated' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        filesModified: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'sync', 'build-tooling'],
 }));
 
 // ---------------------------------------------------------------------------

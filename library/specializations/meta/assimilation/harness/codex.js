@@ -20,6 +20,7 @@ import {
   writeAdapterTestsTask,
   writePluginTestsTask,
   setupCiCdTask,
+  createSyncScriptTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -198,6 +199,29 @@ export async function process(inputs, ctx) {
   });
 
   integrationFiles.push(...ciCd.filesModified);
+
+  // ==========================================================================
+  // PHASE 6b: COMMAND SYNC SCRIPT
+  // Create a sync script at plugins/babysitter-codex/scripts/ that keeps
+  // plugin skills in sync with the canonical babysitter commands.
+  // Codex uses the "skills only" variant (sync-command-skills.js pattern) —
+  // commands are not mirrored, only skills are derived from canonical commands.
+  // The script is registered in scripts/sync-plugin-commands.cjs so that
+  // `node scripts/sync-plugin-commands.cjs` and `--check` mode include it.
+  // ==========================================================================
+
+  ctx.log('phase:sync-script', 'Creating command sync script and registering in central orchestrator');
+
+  const syncScript = await ctx.task(createSyncScriptTask, {
+    projectDir,
+    harnessName,
+    pluginDir,
+    adapterName,
+    research,
+    syncVariant: 'skills-only',
+  });
+
+  integrationFiles.push(...syncScript.filesCreated, ...syncScript.filesModified);
 
   // ==========================================================================
   // PHASE 7: VERIFY + CONVERGE
