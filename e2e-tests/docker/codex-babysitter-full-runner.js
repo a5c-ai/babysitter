@@ -15,7 +15,7 @@ const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
 const WORKSPACE_CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
 const HOME_CONFIG_PATH = path.join(CODEX_HOME, "config.toml");
 const HOOKS_PATH = path.join(WORKSPACE, ".codex", "hooks.json");
-const ENV_FILE_PATH = path.join(WORKSPACE, ".codex", "codex.env.sh");
+// ENV_FILE_PATH removed — Codex auto-injects CODEX_THREAD_ID, no env file mechanism
 const ALPHA_PATH = path.join(WORKSPACE, "codex-artifacts", "alpha.txt");
 const REPORT_PATH = path.join(WORKSPACE, "codex-artifacts", "final-report.json");
 
@@ -627,22 +627,20 @@ function main() {
   writeFile(HOOKS_PATH, JSON.stringify(workspaceHooksConfig(HOOKS_DIR), null, 2));
   writeFile(AGENTS_PATH, workspaceAgents());
   writeFile(PROCESS_PATH, processSource());
-  writeFile(ENV_FILE_PATH, "");
+  // No env file to initialize — Codex auto-injects CODEX_THREAD_ID natively
 
   runChecked("git", ["init", "-q"], { cwd: WORKSPACE });
   runChecked("git", ["config", "user.email", "ci@example.com"], { cwd: WORKSPACE });
   runChecked("git", ["config", "user.name", "CI"], { cwd: WORKSPACE });
 
   const sessionId = `codex-ci-${Date.now()}`;
+  // Codex auto-injects CODEX_THREAD_ID into all hooks — no env file write needed.
+  // The session-start hook initializes session state only.
   runHook(
     ["--hook-type", "session-start", "--harness", "codex", "--plugin-root", path.join(WORKSPACE, ".codex"), "--state-dir", path.join(WORKSPACE, ".a5c")],
     JSON.stringify({ session_id: sessionId }),
-    { env: { CODEX_ENV_FILE: ENV_FILE_PATH } },
+    { env: { CODEX_THREAD_ID: sessionId } },
   );
-  const envFile = fs.readFileSync(ENV_FILE_PATH, "utf8");
-  if (!envFile.includes(sessionId)) {
-    fail("Session-start hook did not write CODEX env session identity", { envFile, sessionId });
-  }
 
   const created = runBabysitterJson([
     "run:create",
