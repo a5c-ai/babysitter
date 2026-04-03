@@ -3,6 +3,7 @@
   "version": "4.0.153",
   "description": "Babysitter plugin for Gemini CLI — event-sourced orchestration with AfterAgent continuation hooks, session binding, and human-in-the-loop approval gates",
   "scripts": {
+    "test": "node test/integration.test.js",
     "postinstall": "node bin/postinstall.js",
     "preuninstall": "node bin/preuninstall.js",
     "deploy": "npm publish --access public",
