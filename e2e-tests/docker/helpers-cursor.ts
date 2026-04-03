@@ -72,4 +72,9 @@ export function stopCursorContainer(): void {
   } catch {
     // ignore
   }
+  try {
+    exec("docker builder prune -af", { stdio: "pipe", timeout: 120_000 });
+  } catch {
+    // ignore
+  }
 }
