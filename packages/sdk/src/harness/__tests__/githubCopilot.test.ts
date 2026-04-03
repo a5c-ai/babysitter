@@ -28,7 +28,7 @@ import { buildHarnessArgs, HARNESS_CLI_MAP } from "../invoker";
 const ENV_KEYS = [
   "COPILOT_HOME",
   "COPILOT_GITHUB_TOKEN",
-  "COPILOT_SESSION_ID",
+  "BABYSITTER_SESSION_ID",
   "COPILOT_ENV_FILE",
   "CLAUDE_ENV_FILE",
   "CLAUDE_PLUGIN_DATA",
@@ -110,15 +110,15 @@ describe("createGithubCopilotAdapter", () => {
     });
 
     it("returns parsed sessionId even when env var is set", () => {
-      process.env.COPILOT_SESSION_ID = "env-session";
+      process.env.BABYSITTER_SESSION_ID = "env-session";
       const adapter = createGithubCopilotAdapter();
       expect(adapter.resolveSessionId({ sessionId: "explicit-id" })).toBe(
         "explicit-id",
       );
     });
 
-    it("falls back to COPILOT_SESSION_ID env var", () => {
-      process.env.COPILOT_SESSION_ID = "env-session-456";
+    it("falls back to BABYSITTER_SESSION_ID env var", () => {
+      process.env.BABYSITTER_SESSION_ID = "env-session-456";
       const adapter = createGithubCopilotAdapter();
       expect(adapter.resolveSessionId({})).toBe("env-session-456");
     });
@@ -130,7 +130,7 @@ describe("createGithubCopilotAdapter", () => {
       const envFile = path.join(tmpDir, "copilot.env.sh");
       await fs.writeFile(
         envFile,
-        'export COPILOT_SESSION_ID="file-session-789"\n',
+        'export BABYSITTER_SESSION_ID="file-session-789"\n',
         "utf-8",
       );
       process.env.COPILOT_ENV_FILE = envFile;
@@ -150,7 +150,7 @@ describe("createGithubCopilotAdapter", () => {
       const envFile = path.join(tmpDir, "claude.env.sh");
       await fs.writeFile(
         envFile,
-        'export COPILOT_SESSION_ID="claude-env-session"\n',
+        'export BABYSITTER_SESSION_ID="claude-env-session"\n',
         "utf-8",
       );
       process.env.CLAUDE_ENV_FILE = envFile;

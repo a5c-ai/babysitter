@@ -92,7 +92,7 @@ function stubExecFile(
 // ---------------------------------------------------------------------------
 
 const CALLER_ENV_KEYS = [
-  "CLAUDE_SESSION_ID",
+  "BABYSITTER_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",

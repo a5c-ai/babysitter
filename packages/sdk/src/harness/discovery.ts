@@ -51,7 +51,7 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "claude-code",
     cli: "claude",
-    callerEnvVars: ["CLAUDE_SESSION_ID", "CLAUDE_ENV_FILE"],
+    callerEnvVars: ["CLAUDE_ENV_FILE"],
     capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.Mcp, Cap.HeadlessPrompt],
   },
   {

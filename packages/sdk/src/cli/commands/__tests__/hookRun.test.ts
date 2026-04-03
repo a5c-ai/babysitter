@@ -422,7 +422,7 @@ describe("handleHookRun session-start", () => {
       );
       expect(code).toBe(0);
       const content = await fs.readFile(envFile, "utf8");
-      expect(content).toContain('export CLAUDE_SESSION_ID="my-session-42"');
+      expect(content).toContain('export BABYSITTER_SESSION_ID="my-session-42"');
     } finally {
       if (origEnvFile !== undefined) {
         process.env.CLAUDE_ENV_FILE = origEnvFile;
