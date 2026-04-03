@@ -59,4 +59,9 @@ export function stopPiContainer(): void {
   } catch {
     // ignore
   }
+  try {
+    exec(`docker image rm -f ${PI_IMAGE}`, { stdio: "pipe", timeout: 120_000 });
+  } catch {
+    // ignore
+  }
 }

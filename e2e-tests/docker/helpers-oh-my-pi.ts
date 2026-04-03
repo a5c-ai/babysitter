@@ -59,4 +59,9 @@ export function stopOhMyPiContainer(): void {
   } catch {
     // ignore
   }
+  try {
+    exec(`docker image rm -f ${OH_MY_PI_IMAGE}`, { stdio: "pipe", timeout: 120_000 });
+  } catch {
+    // ignore
+  }
 }

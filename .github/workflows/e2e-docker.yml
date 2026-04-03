@@ -104,8 +104,7 @@ jobs:
             e2e-tests/docker/pi-stop-hook.test.ts \
             e2e-tests/docker/oh-my-pi-structural.test.ts \
             e2e-tests/docker/oh-my-pi-stop-hook.test.ts \
-            e2e-tests/docker/gemini-cli-structural.test.ts \
-            2>&1 | tee e2e-artifacts/structural-tests.log
+            e2e-tests/docker/gemini-cli-structural.test.ts
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
@@ -117,8 +116,7 @@ jobs:
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-provider-full-run.json \
-            e2e-tests/docker/session-create-full-run.test.ts \
-            2>&1 | tee e2e-artifacts/provider-full-run-tests.log
+            e2e-tests/docker/session-create-full-run.test.ts
 
       - name: Upload test artifacts
         if: always()
@@ -191,8 +189,7 @@ jobs:
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-codex.json \
-            e2e-tests/docker/codex-full-run.test.ts \
-            2>&1 | tee e2e-artifacts/codex-docker-e2e.log
+            e2e-tests/docker/codex-full-run.test.ts
 
       - name: Upload Codex test artifacts
         if: always()

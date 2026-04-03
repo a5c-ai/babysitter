@@ -66,4 +66,9 @@ export function stopContainer(): void {
   } catch {
     // ignore
   }
+  try {
+    exec(`docker image rm -f ${GITHUB_IMAGE}`, { stdio: "pipe", timeout: 120_000 });
+  } catch {
+    // ignore
+  }
 }
