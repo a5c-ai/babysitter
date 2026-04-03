@@ -57,7 +57,7 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "codex",
     cli: "codex",
-    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_ENV_FILE", "CODEX_PLUGIN_ROOT"],
+    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
     capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
   },
   {

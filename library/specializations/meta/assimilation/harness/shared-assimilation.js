@@ -113,14 +113,15 @@ const sdkHarnessCore = [
  *   getPromptContext?(opts?: {interactive?}): PromptContext   — harness-specific prompt config
  *
  * ENV PERSISTENCE MECHANISMS (session-start → stop hook):
- *   Session-start hooks persist the session ID via TWO independent mechanisms:
- *   1. Env file injection (harness-specific) — writes session ID to an env file so
- *      subsequent hooks (stop, pre-tool-use) receive it as an env var.
- *      - Claude Code: CLAUDE_ENV_FILE → writes "export CLAUDE_SESSION_ID=..."
- *      - Codex: CODEX_ENV_FILE → writes "export CODEX_THREAD_ID=..." + "export CODEX_SESSION_ID=..."
- *      - Gemini CLI: native injection — GEMINI_SESSION_ID is auto-injected by the harness (no write needed)
+ *   All adapters use BABYSITTER_SESSION_ID as the cross-harness standard env var.
+ *   Session-start hooks persist it via TWO independent mechanisms:
+ *   1. Env file injection (harness-specific) — writes BABYSITTER_SESSION_ID to env file
+ *      so subsequent hooks (stop, pre-tool-use) receive it as an env var.
+ *      - Claude Code: CLAUDE_ENV_FILE → writes "export BABYSITTER_SESSION_ID=..."
+ *      - Codex: NO env file — CODEX_THREAD_ID auto-injected by Codex CLI natively
+ *      - Gemini CLI: NO env file — GEMINI_SESSION_ID auto-injected by Gemini CLI natively
  *      - Cursor: NO env file — conversation_id comes only via hook stdin JSON
- *      - GitHub Copilot: COPILOT_ENV_FILE (or CLAUDE_ENV_FILE fallback) → writes "export COPILOT_SESSION_ID=..."
+ *      - GitHub Copilot: COPILOT_ENV_FILE (or CLAUDE_ENV_FILE fallback) → writes "export BABYSITTER_SESSION_ID=..."
  *   2. State file (universal) — writes ~/.a5c/state/<sessionId>.md with YAML frontmatter
  *      for iteration tracking, run binding, and lifecycle management.
  *
@@ -171,7 +172,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
 
         // ── Study ALL reference adapter implementations ──
         'Read claudeCode.ts (1200+ lines) as the canonical reference — understand how it implements: session-start hook (env file creation, state file baseline, skill discovery context injection, compression of session-start output via density filter), stop hook (journal replay, completion proof validation, pending effect inspection, approve/block decision), bindSession (state file creation with run association), installPlugin (filesystem operations to register with Claude), getPromptContext (createClaudeCodeContext factory).',
-        'Read codex.ts — understand multi-format hooks.json support, Windows auto-detection for hookDriven flag, CODEX_THREAD_ID/CODEX_SESSION_ID/CODEX_ENV_FILE resolution chain, supportsHookType whitelist, getMissingSessionIdHint.',
+        'Read codex.ts — understand multi-format hooks.json support, Windows auto-detection for hookDriven flag, BABYSITTER_SESSION_ID/CODEX_THREAD_ID resolution chain (CODEX_THREAD_ID auto-injected by Codex, no env file), supportsHookType whitelist, getMissingSessionIdHint.',
         'Read pi.ts — understand the PI-specific adapter: PI_SESSION_ID/PI_PLUGIN_ROOT env vars, in-process model, loop-driver, programmatic delegation to piWrapper.ts.',
         'Read ohMyPi.ts — understand how it differs from pi.ts: OMP_SESSION_ID/OMP_PLUGIN_ROOT env vars, omp CLI, its own discovery entry.',
         'Read geminiCli.ts (960+ lines) — understand AfterAgent as primary continuation hook (not Stop), GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars, session-start context generation with compression.',
@@ -179,7 +180,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
 
         // ── Study env persistence between hooks ──
         'Understand the TWO independent persistence mechanisms in session-start hooks:',
-        '  1. ENV FILE INJECTION (harness-specific): session-start hook writes session ID to an env file so subsequent hooks receive it as an env var. Claude Code uses CLAUDE_ENV_FILE, Codex uses CODEX_ENV_FILE, Gemini CLI has native injection (GEMINI_SESSION_ID auto-injected, no write needed), Cursor has NO env file (conversation_id via stdin JSON only), GitHub Copilot uses COPILOT_ENV_FILE or CLAUDE_ENV_FILE fallback.',
+        '  1. ENV FILE INJECTION (BABYSITTER_SESSION_ID, cross-harness standard): session-start hook writes BABYSITTER_SESSION_ID to the harness env file. Claude Code uses CLAUDE_ENV_FILE, GitHub Copilot uses COPILOT_ENV_FILE or CLAUDE_ENV_FILE fallback. Codex auto-injects CODEX_THREAD_ID natively (no env file needed). Gemini CLI auto-injects GEMINI_SESSION_ID natively. Cursor has NO env file (conversation_id via stdin JSON only).',
         '  2. STATE FILE (universal, ~/.a5c/state/): writes <sessionId>.md with YAML frontmatter for iteration tracking, run binding, and lifecycle management. Uses getGlobalStateDir() from config/defaults.ts. State dir is NEVER derived from plugin root.',
         'When researching the target harness, determine: does it provide an env file mechanism? Does it auto-inject session ID into hook subprocesses? Or does it only pass session ID via stdin JSON? This determines which persistence pattern the adapter should use.',
 
@@ -397,7 +398,7 @@ export const implementAdapterTask = defineTask('implement-adapter', (args, taskC
 
         // ── Required methods ──
         'Implement isActive(): check the harness-specific environment variables identified in research.',
-        'Implement resolveSessionId(parsed): follow the standard chain: explicit arg → harness-specific env vars (e.g. HARNESS_SESSION_ID) → env file parsing → undefined. Use the pattern from claudeCode.ts (CLAUDE_SESSION_ID → CLAUDE_ENV_FILE parsing).',
+        'Implement resolveSessionId(parsed): follow the standard chain: explicit arg → BABYSITTER_SESSION_ID (cross-harness standard) → harness-native env vars (e.g. CODEX_THREAD_ID, GEMINI_SESSION_ID) → env file parsing for BABYSITTER_SESSION_ID → undefined.',
         'Implement resolveStateDir(args): explicit arg → getGlobalStateDir() (resolves BABYSITTER_STATE_DIR → BABYSITTER_GLOBAL_STATE_DIR → ~/.a5c/state/). Do NOT derive state dir from plugin root.',
         'Implement resolvePluginRoot(args): explicit arg → harness-specific env var (e.g. HARNESS_PLUGIN_ROOT) → undefined.',
         'Implement bindSession(opts: SessionBindOptions): create or update the session state file with run association. Use writeSessionFile from session.ts. Return SessionBindResult with harness name, sessionId, stateFile path.',

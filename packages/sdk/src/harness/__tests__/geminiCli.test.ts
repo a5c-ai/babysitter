@@ -647,9 +647,8 @@ describe("Gemini CLI getPromptContext", () => {
   it("returns context with sessionEnvVars listing Gemini env vars", () => {
     const adapter = createGeminiCliAdapter();
     const ctx = adapter.getPromptContext!();
+    expect(ctx.sessionEnvVars).toContain("BABYSITTER_SESSION_ID");
     expect(ctx.sessionEnvVars).toContain("GEMINI_SESSION_ID");
-    expect(ctx.sessionEnvVars).toContain("GEMINI_PROJECT_DIR");
-    expect(ctx.sessionEnvVars).toContain("GEMINI_CWD");
   });
 
   it("returns context with default interactive true", () => {

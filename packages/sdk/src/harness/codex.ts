@@ -8,7 +8,6 @@
  */
 
 import * as path from "node:path";
-import { appendFileSync, readFileSync } from "node:fs";
 import { Readable } from "node:stream";
 import { getGlobalStateDir } from "../config";
 import { createClaudeCodeAdapter } from "./claudeCode";
@@ -54,26 +53,14 @@ function resolveCodexStateDir(args: {
 function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefined {
   if (parsed.sessionId) return parsed.sessionId;
 
-  // Cross-harness standard (written by session-start hook to CODEX_ENV_FILE)
+  // Cross-harness standard
   if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
 
-  // Codex-native env vars (auto-injected by Codex CLI)
+  // Codex-native env vars (auto-injected by Codex CLI into all hooks)
   if (process.env.CODEX_THREAD_ID) return process.env.CODEX_THREAD_ID;
   if (process.env.CODEX_SESSION_ID) return process.env.CODEX_SESSION_ID;
 
-  // Fallback: read from CODEX_ENV_FILE
-  const envFile = process.env.CODEX_ENV_FILE;
-  if (!envFile) return undefined;
-
-  try {
-    const content = readFileSync(envFile, "utf-8");
-    const match = content.match(
-      /(?:^|\n)\s*(?:export\s+)?(?:BABYSITTER_SESSION_ID|CODEX_THREAD_ID|CODEX_SESSION_ID)="([^"]+)"/,
-    );
-    return match?.[1] || undefined;
-  } catch {
-    return undefined;
-  }
+  return undefined;
 }
 
 function readStdin(): Promise<string> {
@@ -196,21 +183,7 @@ async function handleCodexSessionStartHookImpl(
     return 0;
   }
 
-  const envFile = process.env.CODEX_ENV_FILE;
-  if (envFile) {
-    try {
-      appendFileSync(
-        envFile,
-        `export BABYSITTER_SESSION_ID="${sessionId}"\nexport CODEX_THREAD_ID="${sessionId}"\nexport CODEX_SESSION_ID="${sessionId}"\n`,
-      );
-    } catch {
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Failed to write to CODEX_ENV_FILE: ${envFile}\n`,
-        );
-      }
-    }
-  }
+  // Codex auto-injects CODEX_THREAD_ID into all hooks — no env file write needed.
 
   const stateDir = resolveCodexStateDir({
     stateDir: args.stateDir,
@@ -337,7 +310,6 @@ export function createCodexAdapter(): HarnessAdapter {
         process.env.BABYSITTER_SESSION_ID ||
         process.env.CODEX_THREAD_ID ||
         process.env.CODEX_SESSION_ID ||
-        process.env.CODEX_ENV_FILE ||
         process.env.CODEX_PLUGIN_ROOT
       );
     },

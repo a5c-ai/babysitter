@@ -69,7 +69,7 @@ export function createCodexContext(
     hookDriven: true, // overridden at instruction-generation time if session-start hook hasn't run
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars:
-      'CODEX_THREAD_ID, CODEX_SESSION_ID, CODEX_ENV_FILE',
+      'BABYSITTER_SESSION_ID, CODEX_THREAD_ID (auto-injected)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
@@ -109,7 +109,7 @@ export function createGithubCopilotContext(
     sessionBindingFlags: '',
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'session_id (via hook stdin JSON, if configured)',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (via COPILOT_ENV_FILE or CLAUDE_ENV_FILE)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
@@ -149,7 +149,7 @@ export function createCursorContext(
     sessionBindingFlags: '',
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'conversation_id (via hook stdin JSON)',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID or conversation_id (via hook stdin JSON)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
@@ -187,7 +187,7 @@ export function createGeminiCliContext(
     sessionBindingFlags: '',
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, GEMINI_SESSION_ID (auto-injected)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
@@ -225,7 +225,7 @@ export function createPiContext(
     sessionBindingFlags: '',
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
-    sessionEnvVars: '(auto-resolved by PI extension)',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, OMP_SESSION_ID, PI_SESSION_ID (in-process)',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',

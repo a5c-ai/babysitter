@@ -42,7 +42,6 @@ const ENV_KEYS = [
   "CLAUDE_PLUGIN_ROOT",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
-  "CODEX_ENV_FILE",
   "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID",
   "PI_SESSION_ID",
@@ -375,7 +374,7 @@ describe("Registry", () => {
     });
 
     it("returns claude-code adapter when env vars are set", () => {
-      process.env.BABYSITTER_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       const adapter = detectAdapter();
       expect(adapter.name).toBe("claude-code");
     });
@@ -388,7 +387,7 @@ describe("Registry", () => {
 
   describe("singleton lifecycle", () => {
     it("getAdapter auto-detects on first call", () => {
-      process.env.BABYSITTER_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       const adapter = getAdapter();
       expect(adapter.name).toBe("claude-code");
     });
@@ -411,7 +410,7 @@ describe("Registry", () => {
       expect(a1.name).toBe("custom");
 
       // Set env and reset → should re-detect
-      process.env.BABYSITTER_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       resetAdapter();
       const a2 = getAdapter();
       expect(a2.name).toBe("claude-code");
