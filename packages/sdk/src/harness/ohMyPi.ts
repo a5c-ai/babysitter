@@ -169,14 +169,14 @@ export function createOhMyPiAdapter(): HarnessAdapter {
       return bindOhMyPiSession(opts);
     },
 
-    async handleStopHook(_args: HookHandlerArgs): Promise<number> {
+    handleStopHook(_args: HookHandlerArgs): Promise<number> {
       writeNoopHookResult();
-      return 0;
+      return Promise.resolve(0);
     },
 
-    async handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
+    handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
       writeNoopHookResult();
-      return 0;
+      return Promise.resolve(0);
     },
 
     findHookDispatcherPath(_startCwd: string): string | null {
