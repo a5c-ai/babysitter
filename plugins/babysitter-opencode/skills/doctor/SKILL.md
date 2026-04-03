@@ -153,6 +153,7 @@ If it exists:
 **Goal:** Inspect babysitter session files for health and detect runaway loops.
 
 - Search for session state files using Glob:
+  - `plugins/babysitter/skills/babysit/state/*.md`
   - `.a5c/state/*.md`
   - `.a5c/state/*.json`
 - For each session state file found:
@@ -174,24 +175,38 @@ Mark as PASS if no issues. Mark as WARN if runaway loops or stale sessions detec
 
 ## 7. Log Analysis
 
-**Goal:** Analyze babysitter log files for errors, warnings, and hook decisions.
+**Goal:** Analyze babysitter log files for errors, warnings, and stop hook decisions.
 
 Read the last 50 lines of each of these log files (if they exist):
-- `.a5c/logs/hooks.log`
-- `.a5c/logs/babysitter-opencode-stop-hook.log`
-- `.a5c/logs/babysitter-opencode-session-start-hook.log`
-- `.a5c/logs/babysitter.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/hooks.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook-stderr.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook-stderr.log`
+- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter.log`
 - `$HOME/.a5c/logs/` and relevant logs and run/session specific logs there
+
 
 For each log file:
 - If the file does not exist, note it as "Not found (OK if hooks have not run yet)."
 - If the file exists, analyze its content.
 
+**Stop hook analysis (babysitter-stop-hook.log):**
+- Count lines containing "approve" vs "block" decisions (case-insensitive).
+- Display the approve/block ratio.
+- Show the last 20 stop hook decision entries (lines containing "approve" or "block").
+- Count and display CLI exit codes from lines containing "CLI exit code=".
+
+**Stderr analysis (babysitter-stop-hook-stderr.log, babysitter-session-start-hook-stderr.log):**
+- If stderr logs contain content, display the last 20 lines from each.
+- Look for common failure patterns: "command not found", "MODULE_NOT_FOUND", "ENOENT", "EACCES", "permission denied", "npm ERR", "Cannot find module".
+- Flag any stderr content as a potential issue.
+
 **Error/Warning detection (all logs):**
 - Count and list lines containing "ERROR" or "WARN" (case-insensitive).
 - Display the last 10 error/warning lines from each log.
 
-Mark as PASS if no ERROR lines found. Mark as WARN if WARN lines found but no ERROR. Mark as FAIL if ERROR lines found.
+Mark as PASS if no ERROR lines found and stderr logs are empty. Mark as WARN if WARN lines found or stderr has content but no ERROR. Mark as FAIL if ERROR lines found.
 
 ---
 
@@ -238,37 +253,101 @@ Mark as PASS if total size < 500MB and no files > 10MB. Mark as WARN if total si
 
 ## 10. Hook Execution Health
 
-**Goal:** Verify that the babysitter CLI is available and the OpenCode plugin is properly configured.
+**Goal:** Verify that the stop hook and session-start hook are properly configured, can execute, and have been running. If the stop hook has NOT been running, diagnose why.
 
-### 10a. Plugin Configuration
+### 10a. Hook Registration
 
-- Check if `.opencode/plugins/babysitter/` directory exists in the project.
-- If found, verify that the plugin entry point (`index.js` or `index.ts`) exists.
-- If the plugin directory doesn't exist, mark as WARN ("OpenCode babysitter plugin not installed in .opencode/plugins/").
+- Locate the plugin root. Check for `CLAUDE_PLUGIN_ROOT` env var, or search for `plugins/babysitter/hooks/hooks.json` by walking up from the current directory.
+- If found, read `hooks.json` and verify:
+  - A `Stop` hook entry exists with a command referencing `babysitter-stop-hook.sh`.
+  - A `SessionStart` hook entry exists with a command referencing `babysitter-session-start-hook.sh`.
+- If `hooks.json` is not found, mark as FAIL ("Hook registration file not found — hooks are not registered with Claude Code").
 
-### 10b. CLI Availability (babysitter command)
+### 10b. Hook Script Availability
 
-The orchestration loop delegates to the `babysitter` CLI. Check if it is available:
+- Locate the hook scripts relative to the plugin root:
+  - `hooks/babysitter-stop-hook.sh`
+  - `hooks/babysitter-session-start-hook.sh`
+- For each script:
+  - Check if the file exists.
+  - Check if it is executable (`test -x <path>`).
+- If any script is missing or not executable, mark as FAIL and list which scripts are missing/not-executable.
+
+### 10c. CLI Availability (babysitter command)
+
+The hooks delegate to the `babysitter` CLI. Check if it is available:
 - Run: `command -v babysitter 2>/dev/null && babysitter --version 2>/dev/null`
 - If the command is found, display its path and version. Mark sub-check as PASS.
 - If not found, check the user-local prefix: `$HOME/.local/bin/babysitter --version 2>/dev/null`
-- If neither is found, mark sub-check as FAIL ("babysitter CLI not found — orchestration will fail. Install with: `npm i -g @a5c-ai/babysitter-sdk`").
+- If neither is found, mark sub-check as FAIL ("babysitter CLI not found — hooks will fail with exit code 127. Install with: `npm i -g @a5c-ai/babysitter-sdk`").
 
-### 10c. OpenCode-Specific Notes
+### 10d. Stop Hook Execution Evidence
 
-OpenCode does NOT have a native blocking stop hook. The `session.idle` event is fire-and-forget. Orchestration must use the in-turn loop model (agent drives `run:iterate` repeatedly within a single turn). This is expected behavior, not a failure.
+Check whether the stop hook has actually been invoked during this run's lifetime:
 
-### 10d. Verdict
+**From log files:**
+- Read `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook.log` (if it exists).
+- Count the number of "Hook script invoked" lines. This is the total invocation count.
+- Count the number of "CLI exit code=" lines and extract exit codes.
+- If the log file does not exist or has zero invocations, the stop hook has NOT been running.
+
+**From journal events:**
+- Search the run's journal events for `STOP_HOOK_INVOKED` type events (using the run:events output from section 2 if available).
+- Count the number of STOP_HOOK_INVOKED events.
+- If present, display the last 5 with their timestamps and decision data.
+- If no STOP_HOOK_INVOKED events exist in the journal, note that the stop hook has not recorded any decisions for this run.
+
+**From stderr:**
+- Read `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook-stderr.log`.
+- If it contains error output, display it and diagnose:
+  - "command not found" or exit code 127 → CLI not installed (see 10c)
+  - "MODULE_NOT_FOUND" or "Cannot find module" → SDK package corrupted or not built
+  - "ENOENT" → Missing file referenced by the hook
+  - "EACCES" or "permission denied" → Permission issue on hook script or CLI
+  - "npm ERR" → npm installation failure during hook execution
+
+### 10e. Stop Hook Not Running — Root Cause Diagnosis
+
+If the stop hook shows NO evidence of execution (no log entries, no journal events, zero invocations):
+
+Perform these diagnostic steps in order and report the first failure found:
+
+1. **Plugin not installed**: Check if `plugins/babysitter/` exists relative to the project root and if `CLAUDE_PLUGIN_ROOT` is set. If the plugin directory doesn't exist, report: "Plugin not installed — the babysitter plugin directory is missing."
+
+2. **Plugin not enabled**: Check for Claude settings files:
+   - `~/.claude/settings.json` — look for `babysitter` in `enabledPlugins`.
+   - `~/.claude/plugins/installed_plugins.json` — look for `babysitter` in the plugins list.
+   - If not found in either, report: "Plugin not enabled in Claude Code settings."
+
+3. **hooks.json not registered**: If `hooks.json` doesn't contain a `Stop` hook entry (checked in 10a), report: "Stop hook not registered in hooks.json."
+
+4. **Hook script missing or not executable**: If the stop hook script doesn't exist or isn't executable (checked in 10b), report with the specific file path.
+
+5. **CLI not available**: If `babysitter` CLI is not found (checked in 10c), report: "babysitter CLI not installed — hook script will fail silently."
+
+6. **Hook running but failing silently**: If the log file exists but shows exit codes other than 0, or if stderr has content, report: "Stop hook is being invoked but failing — see stderr log for details."
+
+7. **No active session**: If no session state files exist (from section 6), report: "No active babysitter session — the stop hook only activates when a session is bound to a run."
+
+8. **All checks pass but hook still not running**: Report: "All prerequisites are met but the stop hook shows no evidence of execution. Possible causes: Claude Code may not be invoking plugin hooks (check Claude Code version), or the session may have ended before the hook could fire."
+
+### 10f. Verdict
 
 Mark as PASS if:
-- CLI is available (10b)
-- Plugin is configured (10a)
+- Hook registration is correct (10a)
+- Hook scripts exist and are executable (10b)
+- CLI is available (10c)
+- There is evidence of stop hook execution (10d) with exit code 0
 
 Mark as WARN if:
-- CLI is available but plugin is not configured
+- Hooks are registered and scripts exist, but there's no evidence of execution yet
+- Stop hook ran but had non-zero exit codes
 
 Mark as FAIL if:
+- Hook registration is missing
+- Hook scripts are missing or not executable
 - CLI is not available
+- Stop hook is failing (consistent non-zero exit codes or stderr errors)
 
 ---
 
@@ -319,6 +398,17 @@ OVERALL HEALTH: <HEALTHY | WARNING | CRITICAL>
 - **CRITICAL**: At least one check is FAIL.
 
 Present the full detailed findings for each check BEFORE the summary table, so the user can see the evidence. End with the summary table and recommendations. Also, create a single HTML report file with all the findings that uses the arwes UI framework and open it for the user in the browser.
+
+---
+
+## Escalation: Claude /debug
+
+If any check results in FAIL and the root cause is unclear after your own analysis -- especially for environment issues, hook execution failures, CLI availability problems, or permission errors that may relate to the Claude Code runtime itself -- invoke the built-in Claude `/debug` command to get additional diagnostic context from the Claude Code environment. This is particularly useful for:
+- Hook scripts that should be running but show no evidence of execution (check 10)
+- Permission or path resolution issues that don't match expected behavior
+- Unexpected CLI behavior that might be a Claude Code environment issue rather than a babysitter issue
+
+Call `/debug` with a summary of the failing check and what you've already ruled out, so it can focus on environment-level causes.
 
 ---
 
