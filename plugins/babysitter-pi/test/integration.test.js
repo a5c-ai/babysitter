@@ -27,6 +27,10 @@ function fileExists(...segments) {
   return fs.existsSync(pluginPath(...segments));
 }
 
+function readText(...segments) {
+  return fs.readFileSync(pluginPath(...segments), 'utf-8');
+}
+
 // ---------------------------------------------------------------------------
 // package.json structure
 // ---------------------------------------------------------------------------
@@ -116,6 +120,19 @@ describe('command files', () => {
       assert.ok(fileExists('commands', cmd), `commands/${cmd} must exist`);
     });
   }
+
+  it('command docs are synchronized with the PI command sync script', async () => {
+    const { spawnSync } = await import('node:child_process');
+    const result = spawnSync(
+      process.execPath,
+      [pluginPath('scripts', 'sync-command-docs.cjs'), '--check'],
+      {
+        cwd: PLUGIN_ROOT,
+        encoding: 'utf8',
+      },
+    );
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'PI command sync check failed');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -128,6 +145,22 @@ describe('documentation and metadata', () => {
       fileExists('skills', 'babysitter', 'SKILL.md'),
       'skills/babysitter/SKILL.md must exist',
     );
+  });
+
+  it('README documents active process-library bootstrapping', () => {
+    const readme = readText('README.md');
+    assert.match(readme, /babysitter process-library:active --json/);
+  });
+
+  it('README documents harness discovery as the supported oh-my-pi troubleshooting path', () => {
+    const readme = readText('README.md');
+    assert.match(readme, /babysitter harness:discover --json/);
+    assert.match(readme, /where omp/);
+  });
+
+  it('AGENTS guidance does not advertise node as an active generated PI-family effect kind', () => {
+    const agents = readText('AGENTS.md');
+    assert.match(agents, /Do not present `node` as a generated PI-family effect kind\./);
   });
 });
 
@@ -142,6 +175,13 @@ describe('installer assets', () => {
 
   it('bin/install.cjs exists', () => {
     assert.ok(fileExists('bin', 'install.cjs'), 'bin/install.cjs must exist');
+  });
+
+  it('bin/install.cjs bootstraps the shared active process library', () => {
+    const installer = readText('bin', 'install.cjs');
+    assert.match(installer, /process-library:active/);
+    assert.match(installer, /--state-dir/);
+    assert.match(installer, /getGlobalStateDir/);
   });
 
   it('bin/uninstall.cjs exists', () => {

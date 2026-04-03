@@ -56,6 +56,17 @@ assert_file_exists "versions.json exists" "$PLUGIN_DIR/versions.json"
 assert_file_exists "AGENTS.md exists" "$PLUGIN_DIR/AGENTS.md"
 
 # ---------------------------------------------------------------------------
+# Test 1b: command/skill sync is current
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 1b: Command sync ==="
+if node "$PLUGIN_DIR/scripts/sync-command-surfaces.js" --check; then
+  pass "command and skill surfaces are synchronized"
+else
+  fail "command and skill surfaces are not synchronized"
+fi
+
+# ---------------------------------------------------------------------------
 # Test 2: JSON files are valid
 # ---------------------------------------------------------------------------
 echo ""
@@ -270,6 +281,17 @@ if [[ "$PLUGIN_HOOK_TYPES" == "$HOOKS_JSON_TYPES" ]]; then
   pass "hook types match between plugin.json and hooks.json: $PLUGIN_HOOK_TYPES"
 else
   fail "hook type mismatch: plugin.json=[$PLUGIN_HOOK_TYPES] hooks.json=[$HOOKS_JSON_TYPES]"
+fi
+
+# ---------------------------------------------------------------------------
+# Test 11: cloud-agent installer
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 11: Cloud-agent installer ==="
+if node "$PLUGIN_DIR/test/cloud-agent-install.test.js"; then
+  pass "cloud-agent installer materializes repo support files"
+else
+  fail "cloud-agent installer regression test failed"
 fi
 
 # ---------------------------------------------------------------------------

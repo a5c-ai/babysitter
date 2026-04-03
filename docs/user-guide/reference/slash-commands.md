@@ -135,7 +135,7 @@ while (true) {
 **What it does:**
 1. Interviews you about requirements (same as `/call`)
 2. Creates the complete process definition
-3. Generates `.diagram.md` and `.process.md` visualizations
+3. Generates `.mermaid.md` and `.process.md` visualizations
 4. **Stops there** — no run is created or executed
 
 **When to use:**

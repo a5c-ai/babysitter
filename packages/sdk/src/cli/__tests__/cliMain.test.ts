@@ -6,6 +6,7 @@ import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
+import { invokeHarness } from "../../harness/invoker";
 import type { EffectRecord } from "../../runtime/types";
 
 vi.mock("../../runtime/replay/effectIndex", () => ({
@@ -24,10 +25,15 @@ vi.mock("../commands/harnessCreateRun", () => ({
   handleHarnessCreateRun: vi.fn().mockResolvedValue(0),
 }));
 
+vi.mock("../../harness/invoker", () => ({
+  invokeHarness: vi.fn(),
+}));
+
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 const handleSessionCreateMock = handleHarnessCreateRun as unknown as ReturnType<typeof vi.fn>;
+const invokeHarnessMock = invokeHarness as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
@@ -50,6 +56,14 @@ describe("CLI main entry", () => {
     });
     handleSessionCreateMock.mockReset();
     handleSessionCreateMock.mockResolvedValue(0);
+    invokeHarnessMock.mockReset();
+    invokeHarnessMock.mockResolvedValue({
+      success: true,
+      output: "ok",
+      exitCode: 0,
+      duration: 1,
+      harness: "internal",
+    });
   });
 
   afterEach(() => {
@@ -283,6 +297,128 @@ describe("CLI main entry", () => {
       expect.objectContaining({
         processPath: "/tmp/generated-process.mjs",
         interactive: false,
+      }),
+    );
+  });
+
+  it("routes harness:invoke internal through the invoker", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:invoke",
+      "internal",
+      "--prompt",
+      "hello",
+      "--model",
+      "gpt-5.4",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(invokeHarnessMock).toHaveBeenCalledWith("internal", {
+      prompt: "hello",
+      workspace: undefined,
+      model: "gpt-5.4",
+      timeout: undefined,
+    });
+    expect(logSpy).toHaveBeenCalledWith("ok");
+  });
+
+  it("passes the assimilate target through without asking the agent to restate it", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:assimilate",
+      "--prompt",
+      "oh-my-pi",
+      "--interactive",
+      "--model",
+      "gpt-5.4",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interactive: true,
+        model: "gpt-5.4",
+        prompt: expect.stringContaining("Target to assimilate: oh-my-pi"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("do not ask the user to restate the initial prompt"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Read `binding.dir`"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("specializations/meta/assimilation/workflows/methodology-assimilation"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("specializations/meta/assimilation/harness/<name>"),
+      }),
+    );
+  });
+
+  it("renders cleanup prompt details from the synced command template", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:cleanup",
+      "--keep-days",
+      "14",
+      "--dry-run",
+      "--prompt",
+      "be conservative",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("older than 14 days"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("DRY RUN"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Additional instructions: be conservative"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("docs/run-history-insights.md"),
+      }),
+    );
+  });
+
+  it("renders doctor diagnostics from the synced command template", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:doctor",
+      "--run-id",
+      "run-123",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Target run ID: run-123"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("Run Discovery"),
+      }),
+    );
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining("BABYSITTER DIAGNOSTIC REPORT"),
       }),
     );
   });

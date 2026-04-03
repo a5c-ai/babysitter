@@ -1,0 +1,27 @@
+{
+  "name": "@example/my-babysitter-pi-plugin",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Example Babysitter plugin for Pi / Oh-My-Pi with extension and skill declarations",
+  "omp": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"]
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.180"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "files": [
+    "package.json",
+    "extensions/",
+    "skills/",
+    "commands/"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

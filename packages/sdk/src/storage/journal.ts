@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
 import { AppendEventOptions, AppendEventResult, JournalEvent, JsonRecord } from "./types";
-import { getJournalDir } from "./paths";
+import { getJournalDir, RUN_METADATA_FILE } from "./paths";
 import { writeFileAtomic } from "./atomic";
 import { nextUlid } from "./ulids";
 import { getClockIsoString } from "./clock";
@@ -32,10 +32,14 @@ export async function appendEvent(opts: AppendEventOptions): Promise<AppendEvent
   const ulid = nextUlid();
   const filename = `${formatSeq(seq)}.${ulid}.json`;
   const recordedAt = getClockIsoString();
+  const runHarness = await readRunHarness(opts.runDir);
+  const eventData = runHarness && opts.event.harness === undefined
+    ? { harness: runHarness, ...opts.event }
+    : opts.event;
   const eventPayload: JsonRecord = {
     type: opts.eventType,
     recordedAt,
-    data: opts.event,
+    data: eventData,
   };
   const contents = JSON.stringify(eventPayload, null, 2) + "\n";
   const checksum = crypto.createHash("sha256").update(contents).digest("hex");
@@ -43,6 +47,22 @@ export async function appendEvent(opts: AppendEventOptions): Promise<AppendEvent
   const targetPath = path.join(journalDir, filename);
   await writeFileAtomic(targetPath, payloadWithChecksum);
   return { seq, ulid, filename, checksum, path: targetPath, recordedAt };
+}
+
+async function readRunHarness(runDir: string): Promise<string | undefined> {
+  try {
+    const raw = await fs.readFile(path.join(runDir, RUN_METADATA_FILE), "utf8");
+    const parsed = JSON.parse(raw) as { harness?: unknown };
+    return typeof parsed.harness === "string" && parsed.harness.trim() !== ""
+      ? parsed.harness
+      : undefined;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 function parseJournalFilename(filename: string) {

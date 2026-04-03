@@ -807,6 +807,14 @@ async function handleSessionStartHookImpl(
 ): Promise<number> {
   const { verbose } = args;
 
+  // Propagate CLI flags to process.env so downstream resolvers can find them
+  if (args.pluginRoot && !process.env.CLAUDE_PLUGIN_ROOT) {
+    process.env.CLAUDE_PLUGIN_ROOT = path.resolve(args.pluginRoot);
+  }
+  if (args.stateDir && !process.env.BABYSITTER_STATE_DIR) {
+    process.env.BABYSITTER_STATE_DIR = path.resolve(args.stateDir);
+  }
+
   // 1. Read hook input JSON from stdin
   let rawInput: string;
   try {
@@ -834,17 +842,21 @@ async function handleSessionStartHookImpl(
   }
 
   // 2. If CLAUDE_ENV_FILE is set, append session ID export
+  let envFilePersisted = false;
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
       appendFileSync(envFile, `export CLAUDE_SESSION_ID="${sessionId}"\n`);
+      envFilePersisted = true;
     } catch {
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Failed to write to CLAUDE_ENV_FILE: ${envFile}\n`,
-        );
-      }
+      process.stderr.write(
+        `[hook:run session-start] Failed to write to CLAUDE_ENV_FILE: ${envFile}\n`,
+      );
     }
+  } else {
+    process.stderr.write(
+      `[hook:run session-start] CLAUDE_ENV_FILE not set — session ID will not be persisted to env file\n`,
+    );
   }
 
   // 3. Create baseline session state file so the stop hook can find it later.
@@ -856,6 +868,7 @@ async function handleSessionStartHookImpl(
       ? path.resolve(args.stateDir)
       : (resolvedPluginRoot ? path.resolve(resolvedPluginRoot, "skills", "babysit", "state") : "");
 
+  let stateFilePersisted = false;
   if (stateDir) {
     const filePath = getSessionFilePath(stateDir, sessionId);
     try {
@@ -871,19 +884,24 @@ async function handleSessionStartHookImpl(
           iterationTimes: [],
         };
         await writeSessionFile(filePath, state, "");
+        stateFilePersisted = true;
         if (verbose) {
           process.stderr.write(
             `[hook:run session-start] Created session state: ${filePath}\n`,
           );
         }
+      } else {
+        stateFilePersisted = true;
       }
     } catch {
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Failed to create session state in ${stateDir}\n`,
-        );
-      }
+      process.stderr.write(
+        `[hook:run session-start] Failed to create session state in ${stateDir}\n`,
+      );
     }
+  } else {
+    process.stderr.write(
+      `[hook:run session-start] Cannot resolve state directory — session state will not be persisted\n`,
+    );
   }
 
   // 4. Pre-warm processLibraryCache for all SKILL.md / AGENT.md files in the plugin root.
@@ -916,7 +934,16 @@ async function handleSessionStartHookImpl(
     );
   }
 
-  // 5. Output empty object
+  // 5. Check persistence success
+  if (!envFilePersisted && !stateFilePersisted) {
+    process.stderr.write(
+      `[hook:run session-start] Session persistence failed — neither env file nor state file was written\n`,
+    );
+    process.stdout.write("{}\n");
+    return 1;
+  }
+
+  // 6. Output empty object
   process.stdout.write("{}\n");
   return 0;
 }

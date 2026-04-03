@@ -29,14 +29,21 @@ vi.mock("../discovery", () => ({
   checkCliAvailable: vi.fn(),
 }));
 
+vi.mock("../piWrapper", () => ({
+  createPiSession: vi.fn(),
+}));
+
 import { execFile } from "node:child_process";
 import { checkCliAvailable } from "../discovery";
+import { createPiSession } from "../piWrapper";
 
 const mockExecFile = vi.mocked(execFile);
 const mockCheckCliAvailable = vi.mocked(checkCliAvailable);
+const mockCreatePiSession = vi.mocked(createPiSession);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockCreatePiSession.mockReset();
 });
 
 // ---------------------------------------------------------------------------
@@ -147,6 +154,12 @@ describe("buildHarnessArgs", () => {
       /Unknown harness: "unknown-harness"/,
     );
   });
+
+  it("includes programmatic-only harnesses in the supported-name error", () => {
+    expect(() => buildHarnessArgs("unknown-harness", baseOptions)).toThrow(
+      /Supported harnesses: internal, claude-code, codex, pi, oh-my-pi, gemini-cli, github-copilot, cursor, opencode/,
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -154,6 +167,44 @@ describe("buildHarnessArgs", () => {
 // ---------------------------------------------------------------------------
 
 describe("invokeHarness", () => {
+  it("invokes the internal harness through the programmatic PI wrapper", async () => {
+    const prompt = vi.fn(async () => ({
+      success: true,
+      output: "hello back",
+      exitCode: 0,
+      duration: 12,
+    }));
+    const dispose = vi.fn();
+    mockCreatePiSession.mockReturnValue({
+      prompt,
+      dispose,
+    } as unknown as ReturnType<typeof createPiSession>);
+
+    const result = await invokeHarness("internal", {
+      prompt: "hello",
+      workspace: "/tmp/project",
+      model: "gpt-5.4",
+      timeout: 1234,
+    });
+
+    expect(mockCreatePiSession).toHaveBeenCalledWith({
+      workspace: "/tmp/project",
+      model: "gpt-5.4",
+      timeout: 1234,
+      ephemeral: true,
+    });
+    expect(prompt).toHaveBeenCalledWith("hello", 1234);
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      success: true,
+      output: "hello back",
+      exitCode: 0,
+      duration: 12,
+      harness: "internal",
+    });
+    expect(mockCheckCliAvailable).not.toHaveBeenCalled();
+  });
+
   it("returns success result on happy path", async () => {
     mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/claude" });
     mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {

@@ -68,6 +68,7 @@ import { handleInstructionsCommand } from "./commands/instructions";
 import type { InstructionsCommandArgs } from "./commands/instructions";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
+import { renderCommandTemplate } from "../prompts";
 import type { SessionBindResult } from "../harness";
 import {
   BabysitterRuntimeError,
@@ -141,6 +142,7 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter harness:assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:anycli --service <name> [--scope <scopes>] [--mcp] [--auth-file <path>] [--transport <type>] [--prompt <text>] [--workspace <dir>] [--json] [--verbose]
   babysitter harness:help [<topic>]
   babysitter harness:observe [--workspace <dir>]
   babysitter harness:user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
@@ -271,6 +273,12 @@ interface ParsedArgs {
   runIds?: string[];
   // harness:cleanup flags
   keepDays?: number;
+  // harness:anycli flags
+  anycliService?: string;
+  anycliScope?: string;
+  anycliMcp?: boolean;
+  anycliAuthFile?: string;
+  anycliTransport?: string;
 }
 
 interface ActionSummary {
@@ -323,7 +331,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   if (parsed.command === "--version" || parsed.command === "-v") {
     parsed.command = "version";
   }
-  const positionals: string[] = [];
+  let positionals: string[] = [];
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
     if (arg === "--help" || arg === "-h") {
@@ -655,6 +663,27 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.logSource = expectFlagValue(rest, ++i, "--source");
       continue;
     }
+    // harness:anycli flags
+    if (arg === "--service") {
+      parsed.anycliService = expectFlagValue(rest, ++i, "--service");
+      continue;
+    }
+    if (arg === "--scope") {
+      parsed.anycliScope = expectFlagValue(rest, ++i, "--scope");
+      continue;
+    }
+    if (arg === "--mcp") {
+      parsed.anycliMcp = true;
+      continue;
+    }
+    if (arg === "--auth-file") {
+      parsed.anycliAuthFile = expectFlagValue(rest, ++i, "--auth-file");
+      continue;
+    }
+    if (arg === "--transport") {
+      parsed.anycliTransport = expectFlagValue(rest, ++i, "--transport");
+      continue;
+    }
     // harness:cleanup flags
     if (arg === "--keep-days") {
       const raw = expectFlagValue(rest, ++i, "--keep-days");
@@ -729,9 +758,20 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.command === "harness:cleanup" ||
     parsed.command === "harness:assimilate" ||
     parsed.command === "harness:contrib" ||
+    parsed.command === "harness:anycli" ||
     parsed.command === "harness:user-install" ||
     parsed.command === "harness:project-install"
   ) {
+    // For harness:anycli, first positional matching a service name pattern becomes the service
+    if (
+      parsed.command === "harness:anycli" &&
+      !parsed.anycliService &&
+      positionals.length > 0 &&
+      /^[a-zA-Z0-9-]+$/.test(positionals[0])
+    ) {
+      parsed.anycliService = positionals[0];
+      positionals = positionals.slice(1);
+    }
     // Positionals join as prompt text if no --prompt given
     if (positionals.length > 0 && !parsed.prompt) {
       parsed.prompt = positionals.join(" ");
@@ -1144,11 +1184,13 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     console.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
+  const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
   const result = await createRun({
     runsDir,
     runId: parsed.runIdOverride,
     request: parsed.requestId,
     prompt: parsed.prompt,
+    harness: requestedHarness,
     processRevision: parsed.processRevision,
     process: {
       processId: parsed.processId,
@@ -1161,12 +1203,12 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // Bind only when the caller is explicit about harness/session context.
-  // Ambient harness env inside editor/test hosts should not silently mutate
-  // generic CLI runs.
-  const adapter = parsed.harness
-    ? getAdapterByName(parsed.harness)
-    : (parsed.sessionId ? getAdapter() : undefined);
+  // Attempt session binding when --session-id is provided or --harness is
+  // explicitly passed (the adapter resolves session IDs from env vars).
+  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined;
+  const adapter = shouldBindSession
+    ? (parsed.harness ? getAdapterByName(parsed.harness) : getAdapter())
+    : undefined;
 
   // Reject explicit --session-id when the adapter auto-resolves it.
   if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
@@ -1198,10 +1240,10 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
         verbose: parsed.verbose,
         json: parsed.json,
       });
-      } else if (parsed.harness) {
-        // --harness was specified but no session ID could be resolved
+      } else {
+        // --session-id or --harness was passed but the adapter could not resolve a session ID.
         sessionBound = {
-          harness: parsed.harness,
+          harness: parsed.harness ?? adapter.name,
           sessionId: "",
           error: (
             adapter.getMissingSessionIdHint?.() ??
@@ -1209,8 +1251,8 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           ),
         };
       }
-  } else if (parsed.harness) {
-    // --harness was specified but the adapter name is unknown
+  } else if (parsed.sessionId !== undefined && parsed.harness) {
+    // --session-id requested an unknown explicit harness.
     sessionBound = {
       harness: parsed.harness,
       sessionId: "",
@@ -2224,6 +2266,7 @@ const VALID_COMMANDS = [
   "harness:assimilate",
   "harness:doctor",
   "harness:contrib",
+  "harness:anycli",
   "harness:help",
   "harness:observe",
   "harness:user-install",
@@ -2315,6 +2358,7 @@ ${bold}SECONDARY COMMANDS${reset}
   ${cyan}harness:cleanup${reset} [--keep-days <n>]       Clean up old runs and orphaned processes
   ${cyan}harness:assimilate${reset} [--prompt <text>]     Convert external methodology to babysitter processes
   ${cyan}harness:contrib${reset} [--prompt <text>]        Submit feedback or contribute to babysitter
+  ${cyan}harness:anycli${reset} --service <name>         Generate CLI/MCP tools for any service
   ${cyan}harness:user-install${reset}                     First-time user onboarding
   ${cyan}harness:project-install${reset}                  Onboard a project for babysitter
   ${cyan}harness:observe${reset}                          Launch real-time observer dashboard
@@ -2926,8 +2970,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:forever") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const foreverSuffix = "\n\n[IMPORTANT: Design this process as an infinite loop. The process should never complete — use ctx.sleepUntil() to pause between iterations and loop forever.]";
-          const foreverPrompt = parsed.prompt ? parsed.prompt + foreverSuffix : foreverSuffix.trim();
+          const foreverPrompt = renderCommandTemplate("forever", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: foreverPrompt,
             harness: parsed.harness,
@@ -2957,25 +3002,15 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:retrospect") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const retrospectPrefix = "[RETROSPECT MODE] Analyze a completed babysitter run. Create and run a retrospect process that:\n" +
-            "- Analyzes the run and its results (what went well, what didn't, what could be improved)\n" +
-            "- Analyzes the process that was followed (steps, tools, effectiveness)\n" +
-            "- Suggests improvements, optimizations, and fixes for both run and process\n" +
-            "- Implements approved improvements iteratively\n" +
-            "- Includes breakpoints for user steering at each analysis phase\n" +
-            "- Ends by prompting the user to contribute back via /babysitter:contrib\n" +
-            (() => {
-              const targetText = parsed.retrospectAll
-                ? "\nTarget: ALL completed/failed runs in .a5c/runs/"
-                : (parsed.runIds && parsed.runIds.length > 1)
-                  ? `\nTarget run IDs: ${parsed.runIds.join(", ")}`
-                  : (parsed.runIdOverride ? `\nTarget run ID: ${parsed.runIdOverride}` : "\nTarget: most recent run");
-              return targetText;
-            })() +
-            "\nAfter completing the retrospect analysis, suggest running /babysitter:cleanup to clean up old runs.";
-          const retrospectPrompt = parsed.prompt
-            ? retrospectPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : retrospectPrefix;
+          const targetRunText = parsed.retrospectAll
+            ? "Target: ALL completed/failed runs in .a5c/runs/"
+            : (parsed.runIds && parsed.runIds.length > 1)
+              ? `Target run IDs: ${parsed.runIds.join(", ")}`
+              : (parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run");
+          const retrospectPrompt = renderCommandTemplate("retrospect", {
+            targetRunText,
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: retrospectPrompt,
             harness: parsed.harness,
@@ -2992,18 +3027,11 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:cleanup") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
           const keepDays = parsed.keepDays ?? 7;
-          const cleanupPrefix = "[CLEANUP MODE] Clean up .a5c/runs and .a5c/processes directories. Create and run a cleanup process that:\n" +
-            "- Scans .a5c/runs/ for completed/failed runs\n" +
-            "- Aggregates insights from completed runs into docs/run-history-insights.md\n" +
-            "- Removes terminal runs (completed/failed) older than " + keepDays + " days\n" +
-            "- Never removes active/in-progress runs\n" +
-            "- Removes orphaned process files not referenced by remaining runs\n" +
-            "- Shows remaining run count and disk usage after cleanup\n" +
-            (parsed.dryRun ? "- DRY RUN: show what would be removed without deleting anything\n" : "") +
-            "- Always show the user a preview before removing (via breakpoints in interactive mode)";
-          const cleanupPrompt = parsed.prompt
-            ? cleanupPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : cleanupPrefix;
+          const cleanupPrompt = renderCommandTemplate("cleanup", {
+            keepDays: String(keepDays),
+            dryRunLine: parsed.dryRun ? "- DRY RUN: show what would be removed without deleting anything" : "",
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: cleanupPrompt,
             harness: parsed.harness,
@@ -3019,14 +3047,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:assimilate") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const assimilatePrefix = "[ASSIMILATE MODE] Convert an external methodology, harness, or specification into babysitter process definitions.\n" +
-            "Use the assimilation domain processes from the active process library. Available workflows:\n" +
-            "- methodology-assimilation: Learn an external methodology from its repo and convert to babysitter processes\n" +
-            "- harness integration: Wire babysitter SDK into a specific AI coding harness (codex, opencode, gemini-cli, etc.)\n" +
-            "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.";
-          const assimilatePrompt = parsed.prompt
-            ? assimilatePrefix + "\n\nTarget to assimilate: " + parsed.prompt
-            : assimilatePrefix;
+          const assimilatePrompt = renderCommandTemplate("assimilate", {
+            targetToAssimilate: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: assimilatePrompt,
             harness: parsed.harness,
@@ -3042,15 +3065,11 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:doctor") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const doctorPrefix = "[DOCTOR MODE] Comprehensive 10-point health check on a babysitter run. Diagnose:\n" +
-            "1. Run Discovery\n2. Journal Integrity (checksums, sequence, timestamps)\n" +
-            "3. State Cache Consistency\n4. Effect Status (stuck/errored/pending)\n" +
-            "5. Lock Status (stale locks)\n6. Session State (runaway loops)\n" +
-            "7. Log Analysis\n8. Disk Usage\n9. Process Validation\n10. Hook Execution Health\n" +
-            "Produce a structured diagnostic report with PASS/WARN/FAIL per check and specific fix commands.\n" +
-            (parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run");
+          const doctorPrompt = renderCommandTemplate("doctor", {
+            targetRunText: parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run",
+          });
           return await handleHarnessCreateRun({
-            prompt: doctorPrefix,
+            prompt: doctorPrompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
             workspace: parsed.workspace,
@@ -3064,17 +3083,46 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:contrib") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const contribPrefix = "[CONTRIB MODE] Submit feedback or contribute to the babysitter project.\n" +
-            "Route to the appropriate workflow based on arguments:\n" +
-            "Issue-based (opens GitHub issue): bug report, feature request, documentation question\n" +
-            "PR-based (forks repo, creates branch, submits PR): bugfix, feature implementation, library contribution, harness integration\n" +
-            "Use contribution processes from the active process library (cradle/ directory).\n" +
-            "Add breakpoints before ALL GitHub actions (fork, star, submit PR/issue).";
-          const contribPrompt = parsed.prompt
-            ? contribPrefix + "\n\nContribution details: " + parsed.prompt
-            : contribPrefix;
+          const contribPrompt = renderCommandTemplate("contrib", {
+            contributionDetails: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: contribPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:anycli") {
+          if (!parsed.anycliService) {
+            console.error("--service is required for harness:anycli");
+            console.error(USAGE);
+            return 1;
+          }
+          if (parsed.anycliTransport === "websocket") {
+            console.error(
+              "Error: WebSocket transport is not yet supported.\n" +
+              "Use --transport stdio (default) or --transport http-sse instead."
+            );
+            return 1;
+          }
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const anycliPrompt = renderCommandTemplate("anycli", {
+            serviceName: parsed.anycliService,
+            scope: parsed.anycliScope ?? "*",
+            mcpMode: parsed.anycliMcp ? "true" : "",
+            authFile: parsed.anycliAuthFile ?? "",
+            transport: parsed.anycliTransport ?? "stdio",
+            userPrompt: parsed.prompt ?? "",
+          });
+          return await handleHarnessCreateRun({
+            prompt: anycliPrompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
             workspace: parsed.workspace,
@@ -3094,15 +3142,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:user-install") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const userInstallPrefix = "[USER-INSTALL MODE] First-time onboarding for new babysitter users.\n" +
-            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
-            "then use the `cradle/user-install` process from the active library.\n" +
-            "This process: installs dependencies, interviews about specialties/preferences,\n" +
-            "builds user profile at ~/.a5c/user-profile.json, and configures tools.\n" +
-            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
-          const userInstallPrompt = parsed.prompt
-            ? userInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : userInstallPrefix;
+          const userInstallPrompt = renderCommandTemplate("user-install", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: userInstallPrompt,
             harness: parsed.harness,
@@ -3118,16 +3160,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "harness:project-install") {
           const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
-          const projectInstallPrefix = "[PROJECT-INSTALL MODE] Onboard a project for babysitter orchestration.\n" +
-            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
-            "then use the `cradle/project-install` process from the active library.\n" +
-            "This process: analyzes the codebase, interviews about goals/workflows,\n" +
-            "generates project profile at .a5c/project-profile.json, installs recommended tools,\n" +
-            "and optionally configures CI/CD integration.\n" +
-            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
-          const projectInstallPrompt = parsed.prompt
-            ? projectInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
-            : projectInstallPrefix;
+          const projectInstallPrompt = renderCommandTemplate("project-install", {
+            additionalInstructions: parsed.prompt ?? "",
+          });
           return await handleHarnessCreateRun({
             prompt: projectInstallPrompt,
             harness: parsed.harness,

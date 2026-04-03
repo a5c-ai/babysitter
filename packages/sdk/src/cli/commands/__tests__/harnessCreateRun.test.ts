@@ -76,8 +76,15 @@ vi.mock("../../../harness/piWrapper", () => {
         prompt: vi.fn(async () => {
           const reportProcess = getTool("babysitter_report_process_definition");
           if (reportProcess?.execute) {
+            const writeProcess = getTool("babysitter_write_process_definition");
+            if (writeProcess?.execute) {
+              await writeProcess.execute("tool-write", {
+                source: 'function defineTask(id, build) { return { id, build }; }\nconst t = defineTask("t", () => ({ kind: "agent", agent: { name: "a", prompt: { task: "x" }, outputSchema: { type: "object" } } }));\nexport async function process(inputs, ctx) { return await ctx.task(t, {}); }',
+                filename: "generated-process.mjs",
+              });
+            }
             await reportProcess.execute("tool-process", {
-            processPath: "/tmp/generated-process.mjs",
+            processPath: "/tmp/.a5c/processes/generated-process.mjs",
             summary: "Generated process",
           });
           return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -382,10 +389,12 @@ describe("handleHarnessCreateRun", () => {
     it("uses the internal pi wrapper for phase 1 and as the default phase 2 harness even when external harnesses are discovered", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-internal-default-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let phase1Prompt = "";
+      await fs.mkdir(generatedPath, { recursive: true });
       await fs.writeFile(
-        generatedPath,
+        generatedFile,
         buildMinimalAgentProcessSource(),
         "utf8",
       );
@@ -423,7 +432,7 @@ describe("handleHarnessCreateRun", () => {
           prompt: vi.fn(async (prompt: string) => {
             phase1Prompt = prompt;
             await reportProcess?.execute?.("tool-process", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Generated process",
             });
             return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -464,7 +473,7 @@ describe("handleHarnessCreateRun", () => {
         isolated: true,
         ephemeral: true,
       });
-      expect(["default", "readonly"]).toContain(phase1Options.toolsMode ?? "");
+      expect(["default", "coding"]).toContain(phase1Options.toolsMode ?? "");
       expect(phase1Options.customTools?.map((tool) => tool.name)).toEqual(
         expect.arrayContaining([
           "babysitter_write_process_definition",
@@ -481,12 +490,17 @@ describe("handleHarnessCreateRun", () => {
       expect(phase1Options.systemPrompt).toContain("babysitter_search_process_library");
       expect(phase1Prompt).toContain("The generated process must directly execute the user's requested work");
       expect(phase1Prompt).not.toContain("You are a babysitter process generator");
+      const phase1Session = vi.mocked(createPiSession).mock.results[0]?.value as { prompt: Mock };
+      const phase2Session = vi.mocked(createPiSession).mock.results[1]?.value as { prompt: Mock };
+      expect(phase1Session.prompt).toHaveBeenCalledWith(expect.any(String), 0);
+      expect(phase2Session.prompt).toHaveBeenCalledWith(expect.any(String), 0);
     });
 
     it("binds an interactive UI context into the internal PI sessions", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-interactive-ui-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
 
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi" }),
@@ -527,11 +541,11 @@ describe("handleHarnessCreateRun", () => {
             },
             prompt: vi.fn(async () => {
               await writeProcess?.execute?.("tool-write-process", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: buildMinimalAgentProcessSource(),
               });
               await reportProcess?.execute?.("tool-report-process", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process",
               });
               return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -772,9 +786,11 @@ describe("handleHarnessCreateRun", () => {
     it("continues phase 2 after a late bootstrap prompt failure and preserves the original user prompt", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-late-failure-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      await fs.mkdir(generatedPath, { recursive: true });
       await fs.writeFile(
-        generatedPath,
+        generatedFile,
         buildMinimalAgentProcessSource(),
         "utf8",
       );
@@ -808,7 +824,7 @@ describe("handleHarnessCreateRun", () => {
             },
             prompt: vi.fn(async () => {
               await reportProcess?.execute?.("tool-process", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process",
               });
               return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -850,7 +866,7 @@ describe("handleHarnessCreateRun", () => {
               if (phase2PromptCount === 1) {
                 await runCreate?.execute?.("tool-run-create", {
                   prompt: [
-                    `Process path: ${generatedPath}`,
+                    `Process path: ${generatedFile}`,
                     "User prompt: create a game",
                     "Maximum iterations: 256",
                   ].join("\n"),
@@ -908,9 +924,11 @@ describe("handleHarnessCreateRun", () => {
     it("fails phase 2 when pi returns the known post-turn failure before any progress", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-host-fallback-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      await fs.mkdir(generatedPath, { recursive: true });
       await fs.writeFile(
-        generatedPath,
+        generatedFile,
         buildMinimalAgentProcessSource(),
         "utf8",
       );
@@ -943,7 +961,7 @@ describe("handleHarnessCreateRun", () => {
             },
             prompt: vi.fn(async () => {
               await reportProcess?.execute?.("tool-process", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process",
               });
               return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -1002,9 +1020,11 @@ describe("handleHarnessCreateRun", () => {
     it("continues when the phase-1 tool report succeeds before pi returns a late prompt failure", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-late-failure-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      await fs.mkdir(generatedPath, { recursive: true });
       await fs.writeFile(
-        generatedPath,
+        generatedFile,
         buildMinimalAgentProcessSource(),
         "utf8",
       );
@@ -1035,7 +1055,7 @@ describe("handleHarnessCreateRun", () => {
           },
           prompt: vi.fn(async () => {
             await reportProcess?.execute?.("tool-process", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Generated process before prompt failure",
             });
             return {
@@ -1067,14 +1087,15 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(existsSync(generatedPath)).toBe(true);
+      expect(existsSync(generatedFile)).toBe(true);
       expect(createRun).toHaveBeenCalled();
     });
 
     it("retries a transient phase-1 PI service failure before failing the command", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-transient-retry-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1122,9 +1143,10 @@ describe("handleHarnessCreateRun", () => {
               };
             }
 
-            await fs.writeFile(generatedPath, buildMinimalAgentProcessSource(), "utf8");
+            await fs.mkdir(generatedPath, { recursive: true });
+            await fs.writeFile(generatedFile, buildMinimalAgentProcessSource(), "utf8");
             await reportProcess?.execute?.("tool-report-transient-retry", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Generated process after transient retry",
             });
             return { success: true, output: "phase1-success", exitCode: 0, duration: 1 };
@@ -1143,7 +1165,87 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      expect(existsSync(generatedPath)).toBe(true);
+      expect(existsSync(generatedFile)).toBe(true);
+    });
+
+    it("keeps internal phase-1 parent prompts unbounded while recovery waits for the agent", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-unbounded-timeout-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      const promptTimeouts: number[] = [];
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase1-unbounded-timeout",
+        runDir: "/tmp/runs/run-phase1-unbounded-timeout",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase1-unbounded-timeout";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async (_prompt: string, timeout?: number) => {
+            promptTimeouts.push(timeout ?? -1);
+            promptCount += 1;
+            if (promptCount === 1) {
+              return { success: true, output: "phase1-without-report", exitCode: 0, duration: 1 };
+            }
+
+            await fs.mkdir(generatedPath, { recursive: true });
+            await writeProcess?.execute?.("tool-write-process", {
+              filename: "test-process.mjs",
+              source: buildMinimalAgentProcessSource(),
+            });
+            await reportProcess?.execute?.("tool-report-process", {
+              processPath: generatedFile,
+              summary: "Generated process after recovery",
+            });
+            return { success: true, output: "phase1-recovery-success", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleHarnessCreateRun({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: true,
+      });
+
+      expect(code).toBe(0);
+      expect(promptTimeouts).toEqual([0, 0]);
+      expect(existsSync(generatedFile)).toBe(true);
     });
 
     it("recovers by writing a process code block returned by the phase-1 agent when the tool report is missing", async () => {
@@ -1242,9 +1344,12 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
       expect(existsSync(generatedPath)).toBe(true);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const entries = await fs.readdir(generatedPath);
+      const processFiles = entries.filter((e) => /\.m?js$/.test(e));
+      expect(processFiles.length).toBeGreaterThan(0);
+      const source = await fs.readFile(path.join(generatedPath, processFiles[0]!), "utf8");
       expect(source).toContain('export async function process');
       expect(source).toContain('defineTask("build-game"');
     });
@@ -1252,7 +1357,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs an invalid reported process export before moving to phase 2", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-conformance-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1300,11 +1406,11 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-invalid", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: 'export default { name: "bad-process", tasks: [] };\n',
               });
               await reportProcess?.execute?.("tool-report-invalid", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process",
               });
               return { success: true, output: "phase1-invalid", exitCode: 0, duration: 1 };
@@ -1314,11 +1420,11 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("named `async function process(inputs, ctx)`");
             expect(prompt).not.toContain("export default async function process");
             await writeProcess?.execute?.("tool-write-valid", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-valid", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired process",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1337,14 +1443,15 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain("export async function process");
     });
 
     it("rejects a default-exported process and repairs it to a named process export", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-default-export-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1392,11 +1499,11 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-default-export", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: 'export default async function process() { return { success: true }; }\n',
               });
               await reportProcess?.execute?.("tool-report-default-export", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated default-exported process",
               });
               return { success: true, output: "phase1-default-export", exitCode: 0, duration: 1 };
@@ -1405,11 +1512,11 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("does not export a function named 'process'");
             expect(prompt).toContain("named `async function process(inputs, ctx)`");
             await writeProcess?.execute?.("tool-write-named-export", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-named-export", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired named process export",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1428,7 +1535,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain("export async function process");
       expect(source).not.toContain("export default async function process");
     });
@@ -1436,7 +1543,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs a named process export that incorrectly references process.cwd()", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-process-shadow-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1484,7 +1592,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-process-shadow", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   'export async function process(inputs, ctx) {',
                   '  const root = process.cwd();',
@@ -1494,7 +1602,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-process-shadow", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated named process export with process cwd lookup",
               });
               return { success: true, output: "phase1-process-shadow", exitCode: 0, duration: 1 };
@@ -1504,7 +1612,7 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("globalThis.process");
             expect(prompt).toContain("nodeProcess");
             await writeProcess?.execute?.("tool-write-process-shadow-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource({
                 processLines: [
                   '  const root = globalThis.process.cwd();',
@@ -1513,7 +1621,7 @@ describe("handleHarnessCreateRun", () => {
               }),
             });
             await reportProcess?.execute?.("tool-report-process-shadow-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired named process export to avoid global process shadowing",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1532,7 +1640,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain("export async function process");
       expect(source).toContain("globalThis.process.cwd()");
       expect(source).not.toContain("const root = process.cwd();");
@@ -1541,7 +1649,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs a process that assumes ctx.workspaceDir or ctx.cwd exists", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-workspace-context-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1589,7 +1698,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-workspace-context", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   'export async function process(inputs, ctx) {',
                   '  const root = ctx.workspaceDir || ctx.cwd;',
@@ -1600,7 +1709,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-workspace-context", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process that assumes runtime workspace paths exist",
               });
               return { success: true, output: "phase1-workspace-context", exitCode: 0, duration: 1 };
@@ -1610,7 +1719,7 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("import.meta.url");
             expect(prompt).toContain("fileURLToPath");
             await writeProcess?.execute?.("tool-write-workspace-context-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource({
                 preludeLines: [
                   'import path from "node:path";',
@@ -1625,7 +1734,7 @@ describe("handleHarnessCreateRun", () => {
               }),
             });
             await reportProcess?.execute?.("tool-report-workspace-context-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired process to derive workspace from import.meta.url",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1644,7 +1753,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain("fileURLToPath(import.meta.url)");
       expect(source).toContain("const workspaceDir = path.dirname");
       expect(source).not.toContain("ctx.workspaceDir || ctx.cwd");
@@ -1653,7 +1762,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs a syntactically invalid process that embeds raw nested template literals", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-syntax-error-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1701,7 +1811,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-syntax-error", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   "export async function process(inputs, ctx) {",
                   "  const embeddedScript = `",
@@ -1715,7 +1825,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-syntax-error", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process with nested template literal syntax bug",
               });
               return { success: true, output: "phase1-syntax-error", exitCode: 0, duration: 1 };
@@ -1726,7 +1836,7 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("raw nested template literals");
             expect(prompt).toContain("String.raw");
             await writeProcess?.execute?.("tool-write-syntax-error-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource({
                 processLines: [
                   "  const embeddedScript = [",
@@ -1737,7 +1847,7 @@ describe("handleHarnessCreateRun", () => {
               }),
             });
             await reportProcess?.execute?.("tool-report-syntax-error-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired process to avoid nested template literal syntax bugs",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1756,7 +1866,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('].join("\\n")');
       expect(source).not.toContain("const embeddedScript = `");
     });
@@ -1764,7 +1874,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs a direct process that does not define any babysitter tasks", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-no-tasks-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1812,7 +1923,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-no-tasks", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   "export async function process(inputs, ctx) {",
                   "  return { ok: true };",
@@ -1821,7 +1932,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-no-tasks", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated direct process without babysitter tasks",
               });
               return { success: true, output: "phase1-no-tasks", exitCode: 0, duration: 1 };
@@ -1831,11 +1942,11 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("orchestrate real work through defined tasks");
             expect(prompt).toContain('Define at least one `agent` task');
             await writeProcess?.execute?.("tool-write-no-tasks-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-no-tasks-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired direct process into a task-orchestrating process",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1854,7 +1965,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('defineTask("main-task"');
       expect(source).toContain("await ctx.task(mainTask, {})");
     });
@@ -1862,7 +1973,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs task-orchestrating processes that never define an agent task", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-no-agent-task-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -1910,7 +2022,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-no-agent-task", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                   "",
@@ -1926,7 +2038,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-no-agent-task", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated shell-only task process",
               });
               return { success: true, output: "phase1-no-agent-task", exitCode: 0, duration: 1 };
@@ -1935,11 +2047,11 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("does not define any agent tasks");
             expect(prompt).toContain('kind: "agent"');
             await writeProcess?.execute?.("tool-write-no-agent-task-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-no-agent-task-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired process to include an agent task",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -1958,7 +2070,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('kind: "agent"');
       expect(source).toContain("await ctx.task(mainTask, {})");
     });
@@ -1966,7 +2078,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs ctx.task calls that pass plain task objects instead of defineTask bindings", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-plain-task-object-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -2014,7 +2127,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-plain-task-object", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   "function defineTask(taskId, build) {",
                   "  return { taskId, build };",
@@ -2035,7 +2148,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-plain-task-object", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated process that passes a plain task object to ctx.task",
               });
               return { success: true, output: "phase1-plain-task-object", exitCode: 0, duration: 1 };
@@ -2045,11 +2158,11 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain("verifyTask");
             expect(prompt).toContain("do not pass plain object task definitions");
             await writeProcess?.execute?.("tool-write-plain-task-object-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-plain-task-object-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired process to use defineTask before ctx.task",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -2068,7 +2181,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('const mainTask = defineTask("main-task"');
       expect(source).toContain("await ctx.task(mainTask, {})");
       expect(source).not.toContain('const verifyTask = { kind: "shell"');
@@ -2077,7 +2190,8 @@ describe("handleHarnessCreateRun", () => {
     it("repairs defineTask outputs that omit their top-level kind", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-missing-kind-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -2125,7 +2239,7 @@ describe("handleHarnessCreateRun", () => {
             promptCount += 1;
             if (promptCount === 1) {
               await writeProcess?.execute?.("tool-write-missing-kind", {
-                processPath: generatedPath,
+                filename: "test-process.mjs",
                 source: [
                   'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                   '',
@@ -2144,7 +2258,7 @@ describe("handleHarnessCreateRun", () => {
                 ].join("\n"),
               });
               await reportProcess?.execute?.("tool-report-missing-kind", {
-                processPath: generatedPath,
+                processPath: generatedFile,
                 summary: "Generated task definition without kind",
               });
               return { success: true, output: "phase1-missing-kind", exitCode: 0, duration: 1 };
@@ -2154,7 +2268,7 @@ describe("handleHarnessCreateRun", () => {
             expect(prompt).toContain('kind: "agent"');
             expect(prompt).toContain("await ctx.task(definedTask, args)");
             await writeProcess?.execute?.("tool-write-missing-kind-fixed", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: [
                 'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                 '',
@@ -2174,7 +2288,7 @@ describe("handleHarnessCreateRun", () => {
               ].join("\n"),
             });
             await reportProcess?.execute?.("tool-report-missing-kind-fixed", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Repaired task definition to include top-level kind",
             });
             return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
@@ -2193,7 +2307,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('kind: "agent"');
       expect(source).toContain("await ctx.task(goodAgentTask, {})");
       expect(source).not.toContain("const badAgentTask");
@@ -2202,7 +2316,8 @@ describe("handleHarnessCreateRun", () => {
     it("does not infer a node-kind mismatch from quoted node: specifiers inside task strings", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-node-specifier-"));
       tempDirs.push(workspace);
-      const generatedPath = path.join(workspace, "generated-process.mjs");
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
       let promptCount = 0;
 
       (discoverHarnesses as Mock).mockResolvedValue([
@@ -2253,7 +2368,7 @@ describe("handleHarnessCreateRun", () => {
             }
 
             await writeProcess?.execute?.("tool-write-node-specifier", {
-              processPath: generatedPath,
+              filename: "test-process.mjs",
               source: [
                 'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                 "",
@@ -2282,7 +2397,7 @@ describe("handleHarnessCreateRun", () => {
               ].join("\n"),
             });
             await reportProcess?.execute?.("tool-report-node-specifier", {
-              processPath: generatedPath,
+              processPath: generatedFile,
               summary: "Generated process with quoted node: specifiers inside task strings",
             });
             return { success: true, output: "phase1-node-specifier", exitCode: 0, duration: 1 };
@@ -2301,7 +2416,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(promptCount).toBe(1);
-      const source = await fs.readFile(generatedPath, "utf8");
+      const source = await fs.readFile(generatedFile, "utf8");
       expect(source).toContain('kind: "shell"');
       expect(source).toContain('echo node:fs');
     });
@@ -2462,7 +2577,7 @@ describe("handleHarnessCreateRun", () => {
       expect(code).toBe(0);
       expect(createPiSession).toHaveBeenCalledWith(
         expect.objectContaining({
-          timeout: 900_000,
+          timeout: 1_800_000,
           toolsMode: "coding",
           bashSandbox: "secure",
           isolated: true,
@@ -2518,7 +2633,7 @@ describe("handleHarnessCreateRun", () => {
       expect(code).toBe(0);
       expect(createPiSession).toHaveBeenCalledWith(
         expect.objectContaining({
-          timeout: 900_000,
+          timeout: 1_800_000,
           toolsMode: "coding",
           ephemeral: true,
         }),
@@ -2805,7 +2920,7 @@ describe("handleHarnessCreateRun", () => {
   });
 
   describe("error handling", () => {
-    it("proceeds with pi programmatic API even when no CLI harness is installed", async () => {
+    it("proceeds with internal programmatic API even when no CLI harness is installed", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi", installed: false }),
       ]);
@@ -2827,12 +2942,12 @@ describe("handleHarnessCreateRun", () => {
         interactive: false,
       });
 
-      // No CLI harness found, but harness:create-run proceeds using pi
+      // No CLI harness found, but harness:create-run proceeds using internal
       // programmatic API as the default — does not exit with error
       expect(code).toBe(0);
     });
 
-    it("honors explicit --harness pi even when another installed harness is discovered", async () => {
+    it("honors explicit --harness pi and uses CLI invocation (pi is non-programmatic)", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "claude-code" }),
       ]);
@@ -2861,6 +2976,9 @@ describe("handleHarnessCreateRun", () => {
           output: "done",
         });
       (commitEffectResult as Mock).mockResolvedValue({});
+      (invokeHarness as Mock).mockResolvedValue(
+        makeInvokeResult({ harness: "pi" }),
+      );
 
       const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
@@ -2872,8 +2990,8 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenCalled();
-      expect(invokeHarness).not.toHaveBeenCalled();
+      // pi is now non-programmatic (CLI-only), so it uses invokeHarness
+      expect(invokeHarness).toHaveBeenCalled();
       expect(commitEffectResult).toHaveBeenCalledWith(
         expect.objectContaining({
           runDir: "/tmp/runs/run-1",

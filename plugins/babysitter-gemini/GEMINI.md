@@ -104,7 +104,7 @@ You must abide the syntax and structure of the process files from the process li
 **IMPORTANT -- Profile I/O in processes**: When generating process files, all profile read/write/merge operations MUST use the babysitter CLI commands (`babysitter profile:read`, `profile:write`, `profile:merge`, `profile:render`). Never instruct agents to import or call SDK profile functions (`readUserProfile`, `writeUserProfile`, etc.) directly. The CLI handles atomic writes, directory creation, and markdown generation automatically.
 
 After the process is created and before creating the run:
-- **Interactive mode**: Describe the process at high level (not the code or implementation details) to the user and ask for confirmation using the `ask_user` tool. Also generate it as a [process-name].diagram.md and [process-name].process.md file. If the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback.
+- **Interactive mode**: Describe the process at high level (not the code or implementation details) to the user and ask for confirmation using the `ask_user` tool. Also generate it as a [process-name].mermaid.md and [process-name].process.md file. If the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback.
 - **Non-interactive mode**: Proceed directly to creating the run without user confirmation.
 
 ### 2. Create run and bind session (single command):

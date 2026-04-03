@@ -1,5 +1,8 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import type { PiSessionEvent } from "../types";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 
 // ---------------------------------------------------------------------------
 // Mock the pi-coding-agent module
@@ -15,6 +18,7 @@ const mockGetLastAssistantText = vi.fn<() => string | undefined>();
 const mockExecuteBash = vi.fn<(command: string, onChunk?: (chunk: string) => void) => Promise<{ output: string; exitCode: number | undefined; cancelled: boolean; truncated: boolean }>>();
 
 let eventListeners: Array<(event: PiSessionEvent) => void> = [];
+let mockIsStreaming = false;
 
 const mockSession = {
   prompt: mockPrompt,
@@ -35,7 +39,7 @@ const mockSession = {
     return "mock-session-id";
   },
   get isStreaming() {
-    return false;
+    return mockIsStreaming;
   },
   get messages() {
     return [];
@@ -167,6 +171,7 @@ beforeEach(() => {
     getApiKeyForProvider: mockRegistryGetApiKeyForProvider,
   }));
   eventListeners = [];
+  mockIsStreaming = false;
 });
 
 afterEach(() => {
@@ -301,6 +306,50 @@ describe("PiSessionHandle", () => {
       await session.prompt("ask later");
 
       expect(mockBindExtensions).toHaveBeenCalledWith({ uiContext });
+    });
+
+    test("injects repository instruction files from repo root to workspace, preferring CLAUDE.md over AGENTS.md", async () => {
+      const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "pi-wrapper-repo-instructions-"));
+      const nestedDir = path.join(repoRoot, "packages", "sdk");
+      await fs.mkdir(path.join(repoRoot, ".git"));
+      await fs.mkdir(nestedDir, { recursive: true });
+      await fs.writeFile(path.join(repoRoot, "CLAUDE.md"), "root claude instructions", "utf8");
+      await fs.writeFile(path.join(repoRoot, "packages", "AGENTS.md"), "packages agents instructions", "utf8");
+      await fs.writeFile(path.join(nestedDir, "CLAUDE.md"), "workspace claude instructions", "utf8");
+      await fs.writeFile(path.join(nestedDir, "AGENTS.md"), "workspace agents fallback should be ignored", "utf8");
+
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: nestedDir,
+        toolsMode: "coding",
+      });
+      try {
+        await session.prompt("inspect");
+      } finally {
+        session.dispose();
+        await fs.rm(repoRoot, { recursive: true, force: true });
+      }
+
+      const loaderOptions = mockDefaultResourceLoader.mock.calls.at(-1)?.[0] as {
+        appendSystemPromptOverride?: (base: string[]) => string[];
+      } | undefined;
+      expect(loaderOptions?.appendSystemPromptOverride).toBeTypeOf("function");
+
+      const appended = loaderOptions?.appendSystemPromptOverride?.([]) ?? [];
+      const packageAgentsLabel = path.join("packages", "AGENTS.md");
+      const workspaceClaudeLabel = path.join("packages", "sdk", "CLAUDE.md");
+      expect(appended).toHaveLength(3);
+      expect(appended[0]).toContain("Repository instructions from CLAUDE.md:");
+      expect(appended[0]).toContain("root claude instructions");
+      expect(appended[1]).toContain(`Repository instructions from ${packageAgentsLabel}:`);
+      expect(appended[1]).toContain("packages agents instructions");
+      expect(appended[2]).toContain(`Repository instructions from ${workspaceClaudeLabel}:`);
+      expect(appended[2]).toContain("workspace claude instructions");
+      expect(appended.join("\n")).not.toContain("workspace agents fallback should be ignored");
     });
 
     test("supports modern ModelRegistry implementations that do not expose getApiKey()", async () => {
@@ -666,6 +715,22 @@ describe("PiSessionHandle", () => {
       expect(mockDispose).toHaveBeenCalledTimes(1);
       expect(mockSecureBackendDispose).toHaveBeenCalledTimes(1);
       expect(session.isInitialized).toBe(false);
+    });
+
+    test("aborts a streaming session before disposing it", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+      mockAbort.mockResolvedValue(undefined);
+      mockIsStreaming = true;
+
+      const session = createPiSession();
+      await session.prompt("start");
+      session.dispose();
+
+      expect(mockAbort).toHaveBeenCalledTimes(1);
+      expect(mockDispose).toHaveBeenCalledTimes(1);
     });
 
     test("is a no-op when not initialized", () => {

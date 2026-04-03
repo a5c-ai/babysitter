@@ -37,6 +37,7 @@ import {
   PROCESS_LIBRARY_READ_MAX_CHARS,
   PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT,
   ASK_USER_QUESTION_SCHEMA,
+  PI_PARENT_PROMPT_TIMEOUT_MS,
   // Functions
   truncateForVerboseLog,
   writeVerboseLine,
@@ -70,8 +71,13 @@ const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown
 
 // ── Process File Utilities ───────────────────────────────────────────
 
+export function getProcessOutputDir(workDir: string): string {
+  return path.join(workDir, ".a5c", "processes");
+}
+
+/** @deprecated Use getProcessOutputDir instead */
 export function getGeneratedProcessPath(workDir: string): string {
-  return path.join(workDir, "generated-process.mjs");
+  return getProcessOutputDir(workDir);
 }
 
 function looksLikeProcessDefinitionSource(source: string): boolean {
@@ -119,6 +125,7 @@ function extractMentionedProcessPaths(text: string, workspace?: string): string[
     /([A-Za-z]:[\\/][^\r\n"'`]+?\.m?js)\b/g,
     /((?:\.{0,2}[\\/]|\/)[^\r\n"'`]+?\.m?js)\b/g,
     /\b([A-Za-z0-9_.\-\\/]+generated-process\.m?js)\b/g,
+    /\b(\.a5c[\\/]processes[\\/][A-Za-z0-9_.-]+\.m?js)\b/g,
   ];
 
   const matches = new Set<string>();
@@ -1260,20 +1267,25 @@ export function coerceAgentResultValue(taskDef: Record<string, unknown>, output:
 // ── Process Recovery ─────────────────────────────────────────────────
 
 async function recoverProcessDefinitionFromOutputs(args: {
-  outputPath: string;
+  outputDir: string;
   workspace?: string;
   outputs: string[];
 }): Promise<ProcessDefinitionReport | null> {
-  const expectedPath = path.resolve(args.outputPath);
+  const resolvedDir = path.resolve(args.outputDir);
 
+  // Check if any .js/.mjs files already exist in the output directory
   try {
-    await waitForProcessFile(expectedPath, 1_000);
-    return {
-      processPath: expectedPath,
-      summary: "Recovered from missing process-definition tool report by using the expected output path.",
-    };
+    const entries = await fs.readdir(resolvedDir);
+    const processFiles = entries.filter((e) => /\.m?js$/.test(e));
+    if (processFiles.length > 0) {
+      const candidatePath = path.join(resolvedDir, processFiles[0]);
+      return {
+        processPath: candidatePath,
+        summary: "Recovered from missing process-definition tool report by scanning the output directory.",
+      };
+    }
   } catch {
-    // continue to other recovery strategies
+    // directory may not exist yet
   }
 
   for (const output of args.outputs) {
@@ -1295,10 +1307,12 @@ async function recoverProcessDefinitionFromOutputs(args: {
     if (!extracted || !looksLikeProcessDefinitionSource(extracted)) {
       continue;
     }
-    await fs.mkdir(path.dirname(expectedPath), { recursive: true });
-    await fs.writeFile(expectedPath, extracted, "utf8");
+    const recoveredName = `recovered-process-${Date.now()}.mjs`;
+    const recoveredPath = path.join(resolvedDir, recoveredName);
+    await fs.mkdir(resolvedDir, { recursive: true });
+    await fs.writeFile(recoveredPath, extracted, "utf8");
     return {
-      processPath: expectedPath,
+      processPath: recoveredPath,
       summary: "Recovered process-definition output by writing a JavaScript code block returned by the agent.",
     };
   }
@@ -1307,10 +1321,12 @@ async function recoverProcessDefinitionFromOutputs(args: {
     if (!looksLikeProcessDefinitionSource(output)) {
       continue;
     }
-    await fs.mkdir(path.dirname(expectedPath), { recursive: true });
-    await fs.writeFile(expectedPath, output.trim(), "utf8");
+    const recoveredName = `recovered-process-${Date.now()}.mjs`;
+    const recoveredPath = path.join(resolvedDir, recoveredName);
+    await fs.mkdir(resolvedDir, { recursive: true });
+    await fs.writeFile(recoveredPath, output.trim(), "utf8");
     return {
-      processPath: expectedPath,
+      processPath: recoveredPath,
       summary: "Recovered process-definition output by writing the agent's direct JavaScript response.",
     };
   }
@@ -1329,7 +1345,7 @@ function normalizeProcessDefinitionSource(source: string): string {
 
 async function recoverReportedProcessDefinition(args: {
   state: { report?: ProcessDefinitionReport };
-  outputPath: string;
+  outputDir: string;
   workspace?: string;
   outputs: string[];
   verbose: boolean;
@@ -1340,7 +1356,7 @@ async function recoverReportedProcessDefinition(args: {
   }
 
   const recovered = await recoverProcessDefinitionFromOutputs({
-    outputPath: args.outputPath,
+    outputDir: args.outputDir,
     workspace: args.workspace,
     outputs: args.outputs,
   });
@@ -1361,7 +1377,7 @@ function writeVerboseProcessDefinitionRecovery(json: boolean): void {
 
 export function buildExternalProcessDefinitionPrompt(args: {
   prompt: string;
-  outputPath: string;
+  outputDir: string;
   workspace?: string;
   promptContext: SessionCreatePromptContext;
   workspaceAssessment: ExternalWorkspaceAssessment;
@@ -1393,7 +1409,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "Task:",
     `- User request: ${args.prompt}`,
     `- Workspace: ${workspace}`,
-    `- Output path: ${path.resolve(args.outputPath)}`,
+    `- Process output directory: ${path.resolve(args.outputDir)}`,
     `- Workspace assessment: ${args.workspaceAssessment.kind} (${workspaceSummary})`,
     "",
     "Requirements:",
@@ -1429,7 +1445,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "- External harnesses do not provide PI sandbox guardrails for their own tool execution. Keep security-sensitive shell work on the internal PI worker by using shell effects without routing them to an external harness.",
     "",
     "Output rules:",
-    "- Write the file now to the exact output path.",
+    `- Choose a descriptive kebab-case filename (e.g. "user-auth-tdd.mjs", "data-pipeline-setup.js") and write the file to the process output directory.`,
     "- Return a short summary that confirms what you wrote and the final path.",
     "- Do not rely on AskUserQuestion or babysitter_report_process_definition. Those tools are not available here.",
     "- Do not return pseudocode, placeholders, or a plan without writing the file.",
@@ -1447,7 +1463,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
 }
 
 export function buildExternalProcessConformancePrompt(args: {
-  outputPath: string;
+  outputPath: string; // full path to the actual written process file
   prompt: string;
 }): string {
   return [
@@ -1508,7 +1524,7 @@ function buildInternalProcessConformancePrompt(args: {
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
     "- Do not introduce `kind: \"node\"` task definitions in generated or repaired processes. If logic would have been a node task, convert it to an `agent` or `skill` task instead.",
     "- The exported `process(inputs, ctx)` function must call tasks with `await ctx.task(definedTask, args)`.",
-    "- Use `babysitter_write_process_definition` to rewrite the full file to the exact target path.",
+    "- Use `babysitter_write_process_definition` with the `filename` parameter to rewrite the process file in the output directory.",
     "- After rewriting the file, call `babysitter_report_process_definition` exactly once with the same path.",
     "- Do not answer with plain text only.",
   ].join("\n");
@@ -1540,7 +1556,7 @@ async function assessWorkspaceForExternalAuthoring(
 
 async function _runExternalProcessDefinitionPhase(args: {
   prompt: string;
-  outputPath: string;
+  outputDir: string;
   workspace?: string;
   model?: string;
   json: boolean;
@@ -1563,7 +1579,7 @@ async function _runExternalProcessDefinitionPhase(args: {
   );
 
   writeVerbose(
-    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputPath=${path.resolve(args.outputPath)} harness=${args.selectedHarnessName}`,
+    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputDir=${path.resolve(args.outputDir)} harness=${args.selectedHarnessName}`,
   );
 
   const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
@@ -1593,7 +1609,7 @@ async function _runExternalProcessDefinitionPhase(args: {
     "phase1 initial",
     buildExternalProcessDefinitionPrompt({
       prompt: args.prompt,
-      outputPath: args.outputPath,
+      outputDir: args.outputDir,
       workspace: args.workspace,
       promptContext: args.promptContext,
       workspaceAssessment,
@@ -1602,7 +1618,7 @@ async function _runExternalProcessDefinitionPhase(args: {
   );
 
   let report = await recoverProcessDefinitionFromOutputs({
-    outputPath: args.outputPath,
+    outputDir: args.outputDir,
     workspace: args.workspace,
     outputs: phaseOutputs,
   });
@@ -1614,14 +1630,15 @@ async function _runExternalProcessDefinitionPhase(args: {
     await invokeProcessAuthor(
       "phase1 recovery",
       [
-        `Write the full process file now to ${args.outputPath}.`,
+        `Write the full process file now to the output directory ${args.outputDir}.`,
+        "Choose a descriptive kebab-case filename (e.g. recovered-process.mjs).",
         "Do not describe the plan only; materialize the file in the workspace.",
         "After writing it, return either a concise summary or the full file in a ```javascript fenced block.",
       ].join("\n"),
       300_000,
     );
     report = await recoverProcessDefinitionFromOutputs({
-      outputPath: args.outputPath,
+      outputDir: args.outputDir,
       workspace: args.workspace,
       outputs: phaseOutputs,
     });
@@ -1634,14 +1651,14 @@ async function _runExternalProcessDefinitionPhase(args: {
     await invokeProcessAuthor(
       "phase1 final recovery",
       [
-        `Final recovery step: write the complete JavaScript process file to ${args.outputPath}.`,
+        `Final recovery step: write the complete JavaScript process file to the output directory ${args.outputDir}.`,
         "Return the full file in a ```javascript fenced block after it exists on disk.",
         "Do not omit the file write.",
       ].join("\n"),
       300_000,
     );
     report = await recoverProcessDefinitionFromOutputs({
-      outputPath: args.outputPath,
+      outputDir: args.outputDir,
       workspace: args.workspace,
       outputs: phaseOutputs,
     });
@@ -1689,7 +1706,7 @@ async function _runExternalProcessDefinitionPhase(args: {
 
 export async function runProcessDefinitionPhase(args: {
   prompt: string;
-  outputPath: string;
+  outputDir: string;
   workspace?: string;
   model?: string;
   interactive: boolean;
@@ -1716,36 +1733,42 @@ export async function runProcessDefinitionPhase(args: {
     {
       name: "babysitter_write_process_definition",
       label: "Write Process Definition",
-      description: "Write the final JavaScript process file to the exact required output path.",
+      description: "Write the final JavaScript process file to the process output directory with a descriptive filename.",
       parameters: Type.Object({
         source: Type.String(),
-        processPath: Type.Optional(Type.String()),
+        filename: Type.String(),
       }),
       execute: async (
         _toolCallId: string,
-        params: { source: string; processPath?: string },
+        params: { source: string; filename: string },
       ): Promise<ToolResultShape> => {
-        const resolvedOutputPath = path.resolve(args.outputPath);
-        const requestedPath = params.processPath
-          ? path.resolve(params.processPath)
-          : resolvedOutputPath;
-        if (requestedPath !== resolvedOutputPath) {
+        const filename = params.filename;
+        if (!/\.m?js$/.test(filename)) {
           throw new BabysitterRuntimeError(
-            "ProcessDefinitionPathMismatch",
-            `Process definitions must be written to ${resolvedOutputPath}.`,
-            { category: ErrorCategory.Runtime },
+            "ProcessDefinitionInvalidFilename",
+            `Filename must end in .js or .mjs, got: ${filename}`,
+            { category: ErrorCategory.Validation },
           );
         }
+        if (/[/\\]/.test(filename) || filename.includes("..")) {
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionInvalidFilename",
+            `Filename must be a simple name without path separators or '..', got: ${filename}`,
+            { category: ErrorCategory.Validation },
+          );
+        }
+        const resolvedDir = path.resolve(args.outputDir);
+        const resolvedPath = path.join(resolvedDir, filename);
 
         const normalizedSource = normalizeProcessDefinitionSource(params.source);
         writeVerboseData("phase1 tool babysitter_write_process_definition", {
-          processPath: requestedPath,
+          processPath: resolvedPath,
           sourcePreview: truncateForVerboseLog(normalizedSource, 600),
         });
-        await fs.mkdir(path.dirname(resolvedOutputPath), { recursive: true });
-        await fs.writeFile(resolvedOutputPath, normalizedSource, "utf8");
+        await fs.mkdir(resolvedDir, { recursive: true });
+        await fs.writeFile(resolvedPath, normalizedSource, "utf8");
         return formatToolResult(
-          { processPath: resolvedOutputPath },
+          { processPath: resolvedPath },
           "Process definition written.",
         );
       },
@@ -1917,13 +1940,13 @@ export async function runProcessDefinitionPhase(args: {
   const mergedCustomTools: unknown[] = [...customTools, ...agenticTools];
 
   emitProgress(
-    { phase: "1", status: "started", harness: "pi (agentic)" },
+    { phase: "1", status: "started", harness: "internal (agentic)" },
     args.json,
     args.verbose,
   );
 
   writeVerbose(
-    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputPath=${path.resolve(args.outputPath)}`,
+    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputDir=${path.resolve(args.outputDir)}`,
   );
   writeVerboseData(
     "phase1 tools",
@@ -1936,13 +1959,13 @@ export async function runProcessDefinitionPhase(args: {
   writeVerboseData("phase1 workspace assessment", workspaceAssessment);
 
   const processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
-    args.outputPath,
+    args.outputDir,
     args.promptContext,
     args.interactive,
   );
   const initialMetaPrompt = buildProcessDefinitionUserPrompt(
     args.prompt,
-    args.outputPath,
+    args.outputDir,
     {
       interactive: args.interactive,
       workspaceAssessment: workspaceAssessment.kind,
@@ -1954,7 +1977,7 @@ export async function runProcessDefinitionPhase(args: {
   const phase1ToolsMode: PiSessionOptions["toolsMode"] =
     workspaceAssessment.kind === "empty"
       ? "default"
-      : "readonly";
+      : "coding";
 
   session = createPiSession({
     workspace: args.workspace,
@@ -1984,10 +2007,19 @@ export async function runProcessDefinitionPhase(args: {
     const result = await promptPiWithRetry({
       session,
       message: initialMetaPrompt,
-      timeout: 300_000,
+      timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
       label: "phase1 initial",
       writeVerbose,
       writeVerboseData,
+    }).catch((err: unknown) => {
+      const isTimeout =
+        err instanceof BabysitterRuntimeError &&
+        (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+      if (isTimeout) {
+        writeVerbose("[phase1] Pi prompt timed out, converting to failure result");
+        return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+      }
+      throw err;
     });
     phaseOutputs.push(result.output);
 
@@ -1998,7 +2030,7 @@ export async function runProcessDefinitionPhase(args: {
       writeVerboseData("phase1 agent failure output", result.output);
       const recovered = await recoverReportedProcessDefinition({
         state,
-        outputPath: args.outputPath,
+        outputDir: args.outputDir,
         workspace: args.workspace,
         outputs: phaseOutputs,
         verbose: args.verbose,
@@ -2022,7 +2054,7 @@ export async function runProcessDefinitionPhase(args: {
       writeVerboseProcessDefinitionRecovery(args.json);
       const recoveryPrompt = [
         "Recovery step:",
-        `- Write the full process file now to ${args.outputPath}`,
+        `- Write the process file now to the output directory ${args.outputDir} using babysitter_write_process_definition with a descriptive filename.`,
         "- Then call babysitter_report_process_definition exactly once.",
         "- Do not just describe the process in plain text.",
       ].join("\n");
@@ -2030,17 +2062,26 @@ export async function runProcessDefinitionPhase(args: {
       const recovery = await promptPiWithRetry({
         session,
         message: recoveryPrompt,
-        timeout: 180_000,
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
         label: "phase1 recovery",
         writeVerbose,
         writeVerboseData,
+      }).catch((err: unknown) => {
+        const isTimeout =
+          err instanceof BabysitterRuntimeError &&
+          (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+        if (isTimeout) {
+          writeVerbose("[phase1 recovery] Pi prompt timed out, converting to failure result");
+          return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+        }
+        throw err;
       });
       phaseOutputs.push(recovery.output);
       if (!recovery.success) {
         writeVerboseData("phase1 recovery failure output", recovery.output);
         const recovered = await recoverReportedProcessDefinition({
           state,
-          outputPath: args.outputPath,
+          outputDir: args.outputDir,
           workspace: args.workspace,
           outputs: phaseOutputs,
           verbose: args.verbose,
@@ -2065,7 +2106,7 @@ export async function runProcessDefinitionPhase(args: {
       writeVerbose("[phase1 recovery] attempting host-side recovery from agent outputs");
       await recoverReportedProcessDefinition({
         state,
-        outputPath: args.outputPath,
+        outputDir: args.outputDir,
         workspace: args.workspace,
         outputs: phaseOutputs,
         verbose: args.verbose,
@@ -2076,7 +2117,7 @@ export async function runProcessDefinitionPhase(args: {
     if (!state.report?.processPath) {
       const finalRecoveryPrompt = [
         "Final recovery step:",
-        `- Write the complete JavaScript process file to ${args.outputPath}.`,
+        `- Write the process file to the output directory ${args.outputDir} using babysitter_write_process_definition with a descriptive filename.`,
         "- If you already wrote it, do not rewrite unnecessarily.",
         "- Call babysitter_report_process_definition exactly once after the file exists.",
         "- Do not answer with plain text only.",
@@ -2086,17 +2127,26 @@ export async function runProcessDefinitionPhase(args: {
       const finalRecovery = await promptPiWithRetry({
         session,
         message: finalRecoveryPrompt,
-        timeout: 180_000,
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
         label: "phase1 final recovery",
         writeVerbose,
         writeVerboseData,
+      }).catch((err: unknown) => {
+        const isTimeout =
+          err instanceof BabysitterRuntimeError &&
+          (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+        if (isTimeout) {
+          writeVerbose("[phase1 final recovery] Pi prompt timed out, converting to failure result");
+          return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+        }
+        throw err;
       });
       phaseOutputs.push(finalRecovery.output);
       if (!finalRecovery.success) {
         writeVerboseData("phase1 final recovery failure output", finalRecovery.output);
         const recovered = await recoverReportedProcessDefinition({
           state,
-          outputPath: args.outputPath,
+          outputDir: args.outputDir,
           workspace: args.workspace,
           outputs: phaseOutputs,
           verbose: args.verbose,
@@ -2117,7 +2167,7 @@ export async function runProcessDefinitionPhase(args: {
       }
       await recoverReportedProcessDefinition({
         state,
-        outputPath: args.outputPath,
+        outputDir: args.outputDir,
         workspace: args.workspace,
         outputs: phaseOutputs,
         verbose: args.verbose,
@@ -2168,10 +2218,19 @@ export async function runProcessDefinitionPhase(args: {
         const repair = await promptPiWithRetry({
           session,
           message: conformancePrompt,
-          timeout: 180_000,
+          timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
           label: "phase1 conformance repair",
           writeVerbose,
           writeVerboseData,
+        }).catch((err: unknown) => {
+          const isTimeout =
+            err instanceof BabysitterRuntimeError &&
+            (err.name === "PiTimeoutError" || (err.message ?? "").includes("timed out"));
+          if (isTimeout) {
+            writeVerbose("[phase1 conformance repair] Pi prompt timed out, converting to failure result");
+            return { success: false as const, output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}` };
+          }
+          throw err;
         });
         phaseOutputs.push(repair.output);
         if (!repair.success) {
@@ -2188,7 +2247,7 @@ export async function runProcessDefinitionPhase(args: {
         phase: "1",
         status: "completed",
         processPath: state.report.processPath,
-        harness: "pi (agentic)",
+        harness: "internal (agentic)",
       },
       args.json,
       args.verbose,
@@ -2210,7 +2269,7 @@ export async function runProcessDefinitionPhase(args: {
       {
         phase: "1",
         status: "failed",
-        harness: "pi (agentic)",
+        harness: "internal (agentic)",
         error: error instanceof Error ? error.message : String(error),
       },
       args.json,

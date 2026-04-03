@@ -32,6 +32,9 @@ IMPORTANT:
 - If a pending effect is `shell` or legacy `node`, the orchestrating agent must
   execute that work intentionally and then post the result via `task:post`.
   Never assume the SDK or host will auto-run it.
+- When delegating substantial work to an agent or skill, pass a generous
+  timeout budget and instruct the worker to execute the task fully and return
+  the actual result, not a plan.
 - Make sure the change was actually performed and not described or implied.
   (for example, if code files were mentioned as created in the summary, make
   sure they were actually created.)

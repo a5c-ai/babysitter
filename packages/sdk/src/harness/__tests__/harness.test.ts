@@ -20,6 +20,8 @@ import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
 import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
+import { createPiAdapter, installPiFamilyPlugin } from "../pi";
+import { createOhMyPiAdapter } from "../ohMyPi";
 import { createNullAdapter } from "../nullAdapter";
 import {
   detectAdapter,
@@ -42,6 +44,10 @@ const ENV_KEYS = [
   "CODEX_SESSION_ID",
   "CODEX_ENV_FILE",
   "CODEX_PLUGIN_ROOT",
+  "OMP_SESSION_ID",
+  "PI_SESSION_ID",
+  "OMP_PLUGIN_ROOT",
+  "PI_PLUGIN_ROOT",
 ];
 let savedEnv: Record<string, string | undefined>;
 
@@ -227,11 +233,12 @@ describe("CodexAdapter", () => {
       const originalCwd = process.cwd();
       try {
         process.chdir(tmpDir);
+        const realCwd = require("node:fs").realpathSync(process.cwd());
         expect(
           adapter.resolveStateDir({
             pluginRoot: path.join(os.homedir(), ".codex"),
           }),
-        ).toBe(path.join(tmpDir, ".a5c"));
+        ).toBe(path.join(realCwd, ".a5c"));
       } finally {
         process.chdir(originalCwd);
         await fs.rm(tmpDir, { recursive: true, force: true });
@@ -263,6 +270,49 @@ describe("CodexAdapter", () => {
       json: true,
     });
     expect(result.harness).toBe("codex");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PI-family adapters
+// ---------------------------------------------------------------------------
+
+describe("PiAdapter", () => {
+  it("derives oh-my-pi state dir from .omp plugin roots", () => {
+    const adapter = createPiAdapter();
+    const result = adapter.resolveStateDir({
+      pluginRoot: "/workspace/.omp/plugins/babysitter",
+    });
+    expect(result).toBe(path.resolve("/workspace/.omp/plugins/.a5c"));
+  });
+});
+
+describe("OhMyPiAdapter", () => {
+  it("activates only for OMP-scoped env vars", () => {
+    process.env.PI_SESSION_ID = "pi-session";
+    const adapter = createOhMyPiAdapter();
+    expect(adapter.isActive()).toBe(false);
+
+    process.env.OMP_SESSION_ID = "omp-session";
+    expect(adapter.isActive()).toBe(true);
+  });
+
+  it("reuses the unified babysitter install root for existing oh-my-pi plugins", async () => {
+    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "omp-plugin-install-test-"));
+    const targetDir = path.join(workspace, ".omp", "plugins", "babysitter");
+
+    try {
+      await fs.mkdir(targetDir, { recursive: true });
+      const result = await installPiFamilyPlugin({
+        harness: "oh-my-pi",
+        options: { workspace },
+      });
+
+      expect(result.location).toBe(targetDir);
+      expect(result.warning).toContain("already installed");
+    } finally {
+      await fs.rm(workspace, { recursive: true, force: true });
+    }
   });
 });
 

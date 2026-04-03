@@ -11,6 +11,7 @@ function printUsage() {
     'Usage:',
     '  babysitter-github install [--global]',
     '  babysitter-github install --workspace [path]',
+    '  babysitter-github install --cloud-agent [--workspace [path]]',
     '  babysitter-github uninstall',
   ].join('\n'));
 }
@@ -18,6 +19,7 @@ function printUsage() {
 function parseInstallArgs(argv) {
   let scope = 'global';
   let workspace = null;
+  let cloudAgent = false;
   const passthrough = [];
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -43,10 +45,16 @@ function parseInstallArgs(argv) {
       }
       continue;
     }
+    if (arg === '--cloud-agent') {
+      cloudAgent = true;
+      passthrough.push(arg);
+      continue;
+    }
     passthrough.push(arg);
   }
 
   return {
+    cloudAgent,
     scope,
     workspace,
     passthrough,
@@ -75,6 +83,10 @@ function main() {
 
   if (command === 'install') {
     const parsed = parseInstallArgs(rest);
+    if (parsed.cloudAgent) {
+      runNodeScript(path.join(PACKAGE_ROOT, 'bin', 'install.js'), parsed.passthrough);
+      return;
+    }
     if (parsed.scope === 'workspace') {
       const args = [];
       if (parsed.workspace) {

@@ -11,6 +11,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { execFile } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
+import { promises as fsPromises } from "node:fs";
 
 // Mock child_process before importing the module under test.
 vi.mock("node:child_process", () => ({
@@ -36,6 +37,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const mockedExecFile = vi.mocked(execFile);
+const mockedFsAccess = vi.mocked(fsPromises.access);
 
 type ExecFileCallback = (error: Error | null, stdout: string | Buffer) => void;
 
@@ -116,6 +118,7 @@ beforeEach(() => {
     delete process.env[key];
   }
   vi.clearAllMocks();
+  mockedFsAccess.mockRejectedValue(new Error("ENOENT"));
 });
 
 afterEach(() => {
@@ -133,8 +136,8 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("KNOWN_HARNESSES", () => {
-  it("contains exactly 8 harness specs", () => {
-    expect(KNOWN_HARNESSES).toHaveLength(8);
+  it("contains exactly 9 harness specs", () => {
+    expect(KNOWN_HARNESSES).toHaveLength(9);
   });
 
   it("includes all expected harness names", () => {
@@ -147,6 +150,7 @@ describe("KNOWN_HARNESSES", () => {
     expect(names).toContain("cursor");
     expect(names).toContain("opencode");
     expect(names).toContain("github-copilot");
+    expect(names).toContain("internal");
   });
 });
 
@@ -240,12 +244,12 @@ describe("checkCliAvailable", () => {
 // ---------------------------------------------------------------------------
 
 describe("discoverHarnesses", () => {
-  it("returns results for all 8 known harnesses", async () => {
+  it("returns results for all 9 known harnesses", async () => {
     stubExecFile({});
 
     const results = await discoverHarnesses();
 
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(9);
     const names = results.map((r) => r.name);
     expect(names).toContain("claude-code");
     expect(names).toContain("codex");
@@ -254,6 +258,7 @@ describe("discoverHarnesses", () => {
     expect(names).toContain("gemini-cli");
     expect(names).toContain("cursor");
     expect(names).toContain("opencode");
+    expect(names).toContain("internal");
   });
 
   it("returns results sorted alphabetically by name", async () => {
@@ -305,10 +310,15 @@ describe("discoverHarnesses", () => {
     const results = await discoverHarnesses();
     const pi = results.find((r) => r.name === "pi");
 
-    expect(pi?.capabilities).toContain("programmatic");
+    expect(pi?.capabilities).not.toContain("programmatic");
     expect(pi?.capabilities).toContain("session-binding");
     expect(pi?.capabilities).toContain("stop-hook");
     expect(pi?.capabilities).toContain("headless-prompt");
+
+    const internal = results.find((r) => r.name === "internal");
+    expect(internal?.capabilities).toContain("programmatic");
+    expect(internal?.capabilities).toContain("session-binding");
+    expect(internal?.installed).toBe(true);
   });
 
   it("sets cliCommand from the spec", async () => {
@@ -329,6 +339,23 @@ describe("discoverHarnesses", () => {
 
     // activeSession is not part of the installed-discovery result
     expect(claude).not.toHaveProperty("activeSession");
+  });
+
+  it("detects oh-my-pi config from .omp instead of .pi", async () => {
+    stubExecFile({});
+    mockedFsAccess.mockImplementation(async (targetPath) => {
+      if (String(targetPath).includes(".omp")) {
+        return;
+      }
+      throw new Error("ENOENT");
+    });
+
+    const results = await discoverHarnesses();
+    const ohMyPi = results.find((r) => r.name === "oh-my-pi");
+    const pi = results.find((r) => r.name === "pi");
+
+    expect(ohMyPi?.configFound).toBe(true);
+    expect(pi?.configFound).toBe(false);
   });
 });
 

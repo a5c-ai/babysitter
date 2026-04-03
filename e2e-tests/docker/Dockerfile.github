@@ -1,0 +1,54 @@
+FROM node:20-bookworm
+
+LABEL maintainer="a5c.ai"
+LABEL description="GitHub Copilot CLI with babysitter SDK and repo-installed babysitter-github for E2E validation"
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r github && useradd -r -g github -m -d /home/github github
+
+ENV HOME=/home/github
+ENV COPILOT_HOME=/home/github/.copilot
+ENV PATH=/home/github/.local/bin:${PATH}
+
+RUN mkdir -p /home/github/.local /home/github/.copilot && \
+    echo "prefix=/home/github/.local" > /home/github/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-github/package.json ./plugins/babysitter-github/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk
+
+RUN mkdir -p /workspace && chown -R github:github /app /home/github /workspace
+
+USER github
+
+RUN npm install -g /app/packages/sdk
+RUN mkdir -p /tmp/babysitter-process-library-source/library && \
+    cp -R /app/library/. /tmp/babysitter-process-library-source/library/ && \
+    cd /tmp/babysitter-process-library-source && \
+    git init -q && \
+    git config user.name "Babysitter E2E" && \
+    git config user.email "e2e@example.com" && \
+    git add . && \
+    git commit -qm "seed process library"
+RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source \
+    BABYSITTER_GITHUB_PLUGIN_DIR=/home/github/.copilot/plugins \
+    node /app/plugins/babysitter-github/bin/install.js
+RUN find /home/github/.copilot -name "*.sh" -exec chmod +x {} + 2>/dev/null || true
+
+WORKDIR /workspace
+
+CMD ["bash"]

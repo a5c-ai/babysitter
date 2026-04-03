@@ -12,12 +12,14 @@ import * as os from "node:os";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import type {
   HarnessAdapter,
+  HarnessCapability,
   HookHandlerArgs,
   HarnessInstallOptions,
   HarnessInstallResult,
   SessionBindOptions,
   SessionBindResult,
 } from "./types";
+import { HarnessCapability as Cap } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createPiContext } from "../prompts/context";
 import {
@@ -44,7 +46,8 @@ function resolvePiStateDir(args: {
 
   const pluginRoot = resolvePiPluginRoot(args);
   if (pluginRoot) {
-    // Oh-My-Pi plugins conventionally live under ".omp", while state is in ".a5c".
+    // PI-family plugins keep shared Babysitter session state adjacent to the
+    // plugin install root so the harness and plugin resolve the same files.
     return path.resolve(pluginRoot, "..", ".a5c");
   }
 
@@ -81,7 +84,8 @@ function getPiPluginInstallRoot(args: {
   const pluginsDir = args.harness === "oh-my-pi"
     ? path.join(base, ".omp", "plugins")
     : path.join(base, ".pi", "plugins");
-  return path.join(pluginsDir, "babysitter-pi");
+  // PI-family plugin manifests install under the unified plugin name "babysitter".
+  return path.join(pluginsDir, "babysitter");
 }
 
 export async function installPiFamilyPlugin(args: {
@@ -219,6 +223,10 @@ export function createPiAdapter(): HarnessAdapter {
         harness: "pi",
         options,
       });
+    },
+
+    getCapabilities(): HarnessCapability[] {
+      return [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt];
     },
 
     getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {

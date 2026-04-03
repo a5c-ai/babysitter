@@ -99,6 +99,12 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
     name: "pi",
     cli: "pi",
     callerEnvVars: ["OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT"],
+    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  },
+  {
+    name: "internal",
+    cli: "internal",
+    callerEnvVars: [],
     capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
   },
 ] as const;
@@ -112,7 +118,7 @@ const CONFIG_PATHS: Record<string, string[]> = {
   "claude-code": [".claude"],
   codex: [".codex"],
   pi: [".pi"],
-  "oh-my-pi": [".pi"],
+  "oh-my-pi": [".omp"],
   "gemini-cli": [".gemini"],
   "github-copilot": [".copilot", ".github"],
   cursor: [".cursor", ".cursorrules"],
@@ -220,6 +226,12 @@ export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
       platform: process.platform,
     };
   });
+
+  // The 'internal' harness is always available (built into the SDK).
+  const internalIdx = results.findIndex((r) => r.name === "internal");
+  if (internalIdx >= 0) {
+    results[internalIdx].installed = true;
+  }
 
   results.sort((a, b) => a.name.localeCompare(b.name));
   return results;

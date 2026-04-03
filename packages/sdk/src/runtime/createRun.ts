@@ -28,6 +28,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     runId,
     request: requestId,
     processId: options.process.processId,
+    harness: options.harness,
     processRevision: options.processRevision,
     layoutVersion: options.layoutVersion,
     inputs: options.inputs,
@@ -46,6 +47,9 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
       processId: metadata.processId,
       entrypoint: metadata.entrypoint,
     };
+    if (metadata.harness) {
+      eventPayload.harness = metadata.harness;
+    }
     if (metadata.processRevision) {
       eventPayload.processRevision = metadata.processRevision;
     }

@@ -81,7 +81,7 @@ cat > "$INPUT_FILE"
 
 blog "Hook input received ($(wc -c < "$INPUT_FILE") bytes)"
 
-RESULT=$(babysitter hook:run --hook-type session-start --harness claude-code --plugin-root "$PLUGIN_ROOT" --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-session-start-hook-stderr.log")
+RESULT=$(babysitter hook:run --hook-type session-start --harness claude-code --plugin-root "$PLUGIN_ROOT" --verbose --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-session-start-hook-stderr.log")
 EXIT_CODE=$?
 
 blog "CLI exit code=$EXIT_CODE"

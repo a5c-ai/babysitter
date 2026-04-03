@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/session-start.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/session-start.ps1\"",
+        "timeoutSec": 30
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/validate-shell-command.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/validate-shell-command.ps1\"",
+        "timeoutSec": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/post-edit-lint.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/post-edit-lint.ps1\"",
+        "timeoutSec": 60
+      }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/stop-hook.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/stop-hook.ps1\"",
+        "loop_limit": null
+      }
+    ]
+  }
+}

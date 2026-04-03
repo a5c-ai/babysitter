@@ -64,3 +64,7 @@ e2e-artifacts/test-results.json
 .tmp/
 e2e-artifacts/ci-run-*/
 .cursor/settings.json
+
+# --- babysitter managed ---
+.a5c/logs/
+# --- end babysitter managed ---

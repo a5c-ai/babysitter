@@ -514,7 +514,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       workspace: args.workspace,
       model: args.model,
       thinkingLevel: "low",
-      toolsMode: "readonly",
+      toolsMode: "coding",
       customTools: mergedCustomTools,
       systemPrompt,
       isolated: true,

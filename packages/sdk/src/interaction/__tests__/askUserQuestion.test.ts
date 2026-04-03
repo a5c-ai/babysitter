@@ -91,6 +91,32 @@ describe("AskUserQuestion", () => {
     });
   });
 
+  it("auto-selects defaults when a UI question times out", async () => {
+    vi.useFakeTimers();
+    try {
+      const responsePromise = promptAskUserQuestionWithUiContext(
+        {
+          select: vi.fn(async () => new Promise<string>(() => {})),
+          input: vi.fn(async () => undefined),
+          confirm: vi.fn(async () => false),
+        },
+        {
+          ...createApprovalAskUserQuestion("Continue?"),
+          timeout: 50,
+        },
+      );
+
+      await vi.advanceTimersByTimeAsync(50);
+      const response = await responsePromise;
+
+      expect(response.answers).toEqual({
+        Decision: "Approve",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("allows free-text answers when options exist and allowOther is enabled", async () => {
     const rl = createMockReadline(["something custom"]);
     const response = await promptAskUserQuestionWithReadline(rl, {

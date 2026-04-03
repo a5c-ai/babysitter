@@ -1,0 +1,54 @@
+FROM node:20-bookworm
+
+LABEL maintainer="a5c.ai"
+LABEL description="Cursor IDE with babysitter SDK and repo-installed babysitter-cursor for E2E validation"
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r cursor && useradd -r -g cursor -m -d /home/cursor cursor
+
+ENV HOME=/home/cursor
+ENV CURSOR_HOME=/home/cursor/.cursor
+ENV PATH=/home/cursor/.local/bin:${PATH}
+
+RUN mkdir -p /home/cursor/.local /home/cursor/.cursor && \
+    echo "prefix=/home/cursor/.local" > /home/cursor/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-cursor/package.json ./plugins/babysitter-cursor/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk
+
+RUN mkdir -p /workspace && chown -R cursor:cursor /app /home/cursor /workspace
+
+USER cursor
+
+RUN npm install -g /app/packages/sdk
+RUN mkdir -p /tmp/babysitter-process-library-source/library && \
+    cp -R /app/library/. /tmp/babysitter-process-library-source/library/ && \
+    cd /tmp/babysitter-process-library-source && \
+    git init -q && \
+    git config user.name "Babysitter E2E" && \
+    git config user.email "e2e@example.com" && \
+    git add . && \
+    git commit -qm "seed process library"
+RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source \
+    BABYSITTER_CURSOR_PLUGIN_DIR=/home/cursor/.cursor/plugins/local \
+    node /app/plugins/babysitter-cursor/bin/install.js
+RUN find /home/cursor/.cursor -name "*.sh" -exec chmod +x {} + 2>/dev/null || true
+
+WORKDIR /workspace
+
+CMD ["bash"]

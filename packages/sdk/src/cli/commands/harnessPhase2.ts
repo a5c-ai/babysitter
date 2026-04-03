@@ -47,6 +47,7 @@ import {
   BOLD,
   YELLOW,
   DEFAULT_EFFECT_RETRY_CONFIG,
+  PI_PARENT_PROMPT_TIMEOUT_MS,
   PI_WORKER_TIMEOUT_MS,
   ASK_USER_QUESTION_SCHEMA,
   // Functions
@@ -57,7 +58,7 @@ import {
   formatToolResult,
   askUserQuestionViaTool,
   resolveTaskHarness,
-  isPiHarness,
+  isInternalHarness,
   shouldUseExternalHarness,
   shellQuoteArg,
   readStringMetadata,
@@ -80,6 +81,13 @@ import {
 const PROCESS_MODULE_LOAD_RETRY_DELAYS_MS = process.env.VITEST
   ? [0, 0]
   : [100, 250, 500];
+
+/**
+ * Maximum number of consecutive Pi prompt timeouts before the orchestration
+ * run is failed.  A single timeout is recoverable — the loop simply continues
+ * — but repeated timeouts indicate a persistent infrastructure issue.
+ */
+export const MAX_CONSECUTIVE_TIMEOUTS = 3;
 
 // For tests
 const EFFECT_RETRY_DELAYS_OVERRIDE = process.env.VITEST ? [0, 0, 0] : undefined;
@@ -120,7 +128,7 @@ export async function resolveEffect(
       ? resolveTaskHarness(action, harnessName, discovered)
       : harnessName;
 
-    if ((taskHarness === "pi" || taskHarness === "oh-my-pi") && piSession) {
+    if (isInternalHarness(taskHarness) && piSession) {
       const piResult = await promptPiWithRetry({
         session: piSession,
         message: effectivePrompt,
@@ -264,7 +272,7 @@ export async function resolveEffect(
       : harnessName;
 
     const explicitCliRequested =
-      taskHarness !== harnessName && taskHarness !== "pi" && taskHarness !== "oh-my-pi";
+      taskHarness !== harnessName && !isInternalHarness(taskHarness);
 
     if (explicitCliRequested) {
       const result = await invokeHarness(taskHarness, {
@@ -376,6 +384,7 @@ async function resolveEffectWithRetry(
   json?: boolean,
   // For recreating Pi session on retry
   piSessionFactory?: () => PiSessionHandle,
+  disposePiSession?: (session: PiSessionHandle) => Promise<void>,
   askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<ResolveEffectResult> {
   const config = { ...DEFAULT_EFFECT_RETRY_CONFIG, ...options.retryConfig };
@@ -462,7 +471,11 @@ async function resolveEffectWithRetry(
 
     // Dispose and recreate Pi session if applicable
     if (currentPiSession && piSessionFactory) {
-      currentPiSession.dispose();
+      if (disposePiSession) {
+        await disposePiSession(currentPiSession);
+      } else {
+        currentPiSession.dispose();
+      }
       currentPiSession = piSessionFactory();
     }
 
@@ -584,13 +597,78 @@ export async function runOrchestrationPhase(args: {
   };
 
   let orchestrationSession: PiSessionHandle | null = null;
+  const activePiSessions = new Set<PiSessionHandle>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
   };
+  const registerPiSession = (session: PiSessionHandle): PiSessionHandle => {
+    activePiSessions.add(session);
+    return session;
+  };
+  const shutdownPiSession = async (session: PiSessionHandle | null | undefined): Promise<void> => {
+    if (!session) {
+      return;
+    }
+    activePiSessions.delete(session);
+    const maybeAbort = session as unknown as { abort?: () => Promise<void> };
+    if (typeof maybeAbort.abort === "function") {
+      await maybeAbort.abort().catch(() => undefined);
+    }
+    session.dispose();
+  };
+  const signalExitCode = (signal: NodeJS.Signals): number => {
+    switch (signal) {
+      case "SIGINT":
+        return 130;
+      case "SIGTERM":
+        return 143;
+      case "SIGBREAK":
+        return 149;
+      default:
+        return 1;
+    }
+  };
+  const shutdownSignals: NodeJS.Signals[] = process.platform === "win32"
+    ? ["SIGINT", "SIGTERM", "SIGBREAK"]
+    : ["SIGINT", "SIGTERM"];
+  let shutdownRequested = false;
+  const removeShutdownHandlers = (): void => {
+    for (const signal of shutdownSignals) {
+      process.off(signal, shutdownHandlers[signal]);
+    }
+  };
+  const shutdownHandlers = Object.fromEntries(
+    shutdownSignals.map((signal) => [
+      signal,
+      () => {
+        if (shutdownRequested) {
+          return;
+        }
+        shutdownRequested = true;
+        removeShutdownHandlers();
+        writeVerbose(
+          `[phase2 shutdown] received ${signal}; aborting ${activePiSessions.size} active internal PI session(s)`,
+        );
+        const cleanup = Promise.allSettled(
+          Array.from(activePiSessions).map((session) => shutdownPiSession(session)),
+        );
+        void Promise.race([
+          cleanup,
+          new Promise<void>((resolve) => setTimeout(resolve, 2_000)),
+        ]).finally(() => {
+          process.exit(signalExitCode(signal));
+        });
+      },
+    ]),
+  ) as Record<NodeJS.Signals, () => void>;
+  for (const signal of shutdownSignals) {
+    process.on(signal, shutdownHandlers[signal]);
+  }
 
+  try {
   if (shouldUseExternalHarness(args.selectedHarnessName)) {
     emitProgress(
       { phase: "2", status: "started", harness: args.selectedHarnessName },
@@ -615,6 +693,7 @@ export async function runOrchestrationPhase(args: {
       // Create new run
       const created = await createRun({
         runsDir: args.runsDir,
+        harness: args.selectedHarnessName,
         process: {
           processId,
           importPath: path.resolve(args.processPath),
@@ -720,19 +799,19 @@ export async function runOrchestrationPhase(args: {
         for (const action of result.nextActions) {
           const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
           let workerSession: PiSessionHandle | null = null;
-          if (action.kind === "shell" || isPiHarness(taskHarness)) {
-            workerSession = createPiSession(buildPiWorkerSessionOptions({
+          if (action.kind === "shell" || isInternalHarness(taskHarness)) {
+            workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
               model: args.model,
-            }));
+            })));
           }
-          const piSessionFactory = (action.kind === "shell" || isPiHarness(taskHarness))
-            ? () => createPiSession(buildPiWorkerSessionOptions({
+          const piSessionFactory = (action.kind === "shell" || isInternalHarness(taskHarness))
+            ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
                 action,
                 workspace: args.workspace,
                 model: args.model,
-              }))
+              })))
             : undefined;
           try {
             const effectResult = await resolveEffectWithRetry(
@@ -749,6 +828,7 @@ export async function runOrchestrationPhase(args: {
               args.rl,
               args.json,
               piSessionFactory,
+              shutdownPiSession,
             );
             await commitEffectResult({
               runDir: state.runDir,
@@ -785,7 +865,7 @@ export async function runOrchestrationPhase(args: {
               args.verbose,
             );
           } finally {
-            workerSession?.dispose();
+            await shutdownPiSession(workerSession);
           }
         }
         continue;
@@ -941,6 +1021,7 @@ export async function runOrchestrationPhase(args: {
         const effectivePrompt = args.prompt ?? params.prompt;
         const result = await createRun({
           runsDir: args.runsDir,
+          harness: args.selectedHarnessName,
           process: {
             processId,
             importPath: path.resolve(args.processPath),
@@ -993,7 +1074,7 @@ export async function runOrchestrationPhase(args: {
           );
         }
         if (
-          (args.selectedHarnessName === "pi" || args.selectedHarnessName === "oh-my-pi") &&
+          isInternalHarness(args.selectedHarnessName) &&
           orchestrationSession?.sessionId
         ) {
           process.env.PI_SESSION_ID = process.env.PI_SESSION_ID || orchestrationSession.sessionId;
@@ -1190,13 +1271,13 @@ export async function runOrchestrationPhase(args: {
           customTools: phase2AgenticTools,
         });
         writeVerboseData("phase2 worker session options", workerSessionOptions);
-        const workerSession = createPiSession(workerSessionOptions);
-        const piSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+        const workerSession = registerPiSession(createPiSession(workerSessionOptions));
+        const piSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
           action,
           workspace: args.workspace,
           model: args.model,
           customTools: phase2AgenticTools,
-        }));
+        })));
         try {
           const effectResult = await resolveEffectWithRetry(
             action,
@@ -1212,6 +1293,7 @@ export async function runOrchestrationPhase(args: {
             null,
             args.json,
             piSessionFactory,
+            shutdownPiSession,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_run_shell_effect result", {
@@ -1227,7 +1309,7 @@ export async function runOrchestrationPhase(args: {
           // session is disposed inside resolveEffectWithRetry on the next retry
           // or returned as currentPiSession. The original workerSession may have
           // been disposed during retry. This dispose is a safety net.
-          workerSession.dispose();
+          await shutdownPiSession(workerSession);
         }
       },
     },
@@ -1323,14 +1405,14 @@ export async function runOrchestrationPhase(args: {
             delegationConfig,
           });
           writeVerboseData("phase2 worker session options", workerSessionOptions);
-          const workerSession = createPiSession(workerSessionOptions);
-          const shellPiSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+          const workerSession = registerPiSession(createPiSession(workerSessionOptions));
+          const shellPiSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
             customTools: phase2AgenticTools,
             delegationConfig,
-          }));
+          })));
           try {
             const effectResult = await resolveEffectWithRetry(
               action,
@@ -1346,6 +1428,7 @@ export async function runOrchestrationPhase(args: {
               null,
               args.json,
               shellPiSessionFactory,
+              shutdownPiSession,
             );
             state.pendingEffectResults.set(params.effectId, effectResult);
             writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -1358,7 +1441,7 @@ export async function runOrchestrationPhase(args: {
               "Shell effect executed on the internal PI worker and staged for task posting.",
             );
           } finally {
-            workerSession.dispose();
+            await shutdownPiSession(workerSession);
           }
         }
 
@@ -1373,23 +1456,23 @@ export async function runOrchestrationPhase(args: {
           delegationConfig,
         });
         let workerSession: PiSessionHandle | null = null;
-        const dispatchPiSessionFactory = isPiHarness(taskHarness)
-          ? () => createPiSession(buildPiWorkerSessionOptions({
+        const dispatchPiSessionFactory = isInternalHarness(taskHarness)
+          ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
               workspace: args.workspace,
               model: args.model,
               customTools: phase2AgenticTools,
               delegationConfig,
-            }))
+            })))
           : undefined;
-        if (isPiHarness(taskHarness)) {
-          workerSession = createPiSession(buildPiWorkerSessionOptions({
+        if (isInternalHarness(taskHarness)) {
+          workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
             customTools: phase2AgenticTools,
             delegationConfig,
-          }));
+          })));
           writeVerboseData("phase2 worker session options", buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
@@ -1414,6 +1497,7 @@ export async function runOrchestrationPhase(args: {
             null,
             args.json,
             dispatchPiSessionFactory,
+            shutdownPiSession,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -1426,7 +1510,7 @@ export async function runOrchestrationPhase(args: {
             "Effect dispatched through the selected harness and staged for task posting.",
           );
         } finally {
-          workerSession?.dispose();
+          await shutdownPiSession(workerSession);
         }
       },
     },
@@ -1702,18 +1786,36 @@ export async function runOrchestrationPhase(args: {
     writeVerboseData(`${options?.label ?? "phase2"} prompt`, message);
     const progressSnapshot = captureOrchestrationProgressSnapshot();
 
-    const result = await promptPiWithRetry({
-      session: orchestrationSession,
-      message: compressInternalHarnessPrompt(
-        message,
-        args.compressionConfig,
-        "agent",
-      ),
-      timeout: 900_000,
-      label: options?.label ?? "phase2",
-      writeVerbose,
-      writeVerboseData,
-    });
+    let result: { success: boolean; output: string };
+    try {
+      result = await promptPiWithRetry({
+        session: orchestrationSession,
+        message: compressInternalHarnessPrompt(
+          message,
+          args.compressionConfig,
+          "agent",
+        ),
+        timeout: PI_PARENT_PROMPT_TIMEOUT_MS,
+        label: options?.label ?? "phase2",
+        writeVerbose,
+        writeVerboseData,
+      });
+    } catch (err: unknown) {
+      const isTimeout =
+        err instanceof BabysitterRuntimeError &&
+        (err.name === "PiTimeoutError" || err.message.includes("timed out"));
+      if (isTimeout) {
+        writeVerbose(
+          `[phase2] Pi prompt timed out, returning failure result for graceful recovery`,
+        );
+        result = {
+          success: false,
+          output: `Pi prompt timed out: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      } else {
+        throw err;
+      }
+    }
 
     if (!result.success) {
       writeVerboseData(`${options?.label ?? "phase2"} agent failure output`, result.output);
@@ -1794,7 +1896,7 @@ export async function runOrchestrationPhase(args: {
     );
   };
 
-  orchestrationSession = createPiSession({
+  orchestrationSession = registerPiSession(createPiSession({
     workspace: args.workspace,
     model: args.model,
     toolsMode: "coding",
@@ -1804,7 +1906,7 @@ export async function runOrchestrationPhase(args: {
       : undefined,
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext, args.interactive)],
     ephemeral: true,
-  });
+  }));
 
   writeVerbose(
     `[phase2 setup] harness=${args.selectedHarnessName} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} processPath=${path.resolve(args.processPath)}`,
@@ -1849,6 +1951,7 @@ export async function runOrchestrationPhase(args: {
       );
     }
 
+    let consecutiveTimeouts = 0;
     while (state.iteration < args.maxIterations) {
       const terminal = ensureTerminalResult();
       if (terminal !== null) {
@@ -1856,25 +1959,53 @@ export async function runOrchestrationPhase(args: {
       }
 
       const progressBeforeTurn = captureOrchestrationProgressSnapshot();
-      await promptOrchestrationAgent(
-        buildOrchestrationTurnPrompt({
-          processPath: path.resolve(args.processPath),
-          userPrompt: args.prompt,
-          maxIterations: args.maxIterations,
-          currentIteration: state.iteration,
-          runId: state.runId,
-          runDir: state.runDir,
-          lastStatus: state.lastIterationResult?.status,
-          pendingEffects: describePendingActions(),
-        }),
-        { label: `phase2 iteration ${state.iteration + 1}` },
-      );
+      try {
+        await promptOrchestrationAgent(
+          buildOrchestrationTurnPrompt({
+            processPath: path.resolve(args.processPath),
+            userPrompt: args.prompt,
+            maxIterations: args.maxIterations,
+            currentIteration: state.iteration,
+            runId: state.runId,
+            runDir: state.runDir,
+            lastStatus: state.lastIterationResult?.status,
+            pendingEffects: describePendingActions(),
+          }),
+          { label: `phase2 iteration ${state.iteration + 1}` },
+        );
+      } catch (err: unknown) {
+        // Timeout-related OrchestrationAgentFailed errors are recoverable
+        // unless they happen too many times in a row.
+        const isTimeoutFailure =
+          err instanceof BabysitterRuntimeError &&
+          err.name === "OrchestrationAgentFailed" &&
+          (err.message.includes("timed out") || err.message.includes("PiTimeoutError"));
+
+        if (isTimeoutFailure) {
+          consecutiveTimeouts += 1;
+          writeVerbose(
+            `[phase2] Pi prompt timeout (${consecutiveTimeouts}/${MAX_CONSECUTIVE_TIMEOUTS} consecutive)`,
+          );
+          if (consecutiveTimeouts >= MAX_CONSECUTIVE_TIMEOUTS) {
+            throw new BabysitterRuntimeError(
+              "OrchestrationAgentTimedOut",
+              `Pi prompt timed out ${consecutiveTimeouts} consecutive times — aborting orchestration.`,
+              { category: ErrorCategory.External },
+            );
+          }
+          continue;
+        }
+        throw err;
+      }
 
       if (ensureTerminalResult() !== null) {
         break;
       }
 
-      if (!orchestrationStateAdvanced(progressBeforeTurn)) {
+      // Reset consecutive timeout counter when progress is made.
+      if (orchestrationStateAdvanced(progressBeforeTurn)) {
+        consecutiveTimeouts = 0;
+      } else {
         throw new BabysitterRuntimeError(
           "OrchestrationAgentStalled",
           "The orchestration agent did not advance the run or resolve pending effects in this turn.",
@@ -1960,6 +2091,11 @@ export async function runOrchestrationPhase(args: {
   } finally {
     if (unsubscribe) unsubscribe();
     if (!args.json && args.verbose) process.stderr.write("\n");
-    orchestrationSession?.dispose();
+  }
+  } finally {
+    removeShutdownHandlers();
+    await Promise.allSettled(
+      Array.from(activePiSessions).map((session) => shutdownPiSession(session)),
+    );
   }
 }

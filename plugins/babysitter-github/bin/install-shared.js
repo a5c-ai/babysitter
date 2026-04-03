@@ -35,6 +35,22 @@ const PLUGIN_BUNDLE_ENTRIES = [
   'versions.json',
   'AGENTS.md',
 ];
+const CLOUD_AGENT_BUNDLE_ENTRIES = [
+  '.github',
+  'AGENTS.md',
+  'README.md',
+  'bin',
+  'commands',
+  'hooks',
+  'hooks.json',
+  'package.json',
+  'plugin.json',
+  'scripts',
+  'skills',
+  'versions.json',
+];
+const MANAGED_BLOCK_START = '<!-- BEGIN BABYSITTER GITHUB CLOUD AGENT -->';
+const MANAGED_BLOCK_END = '<!-- END BABYSITTER GITHUB CLOUD AGENT -->';
 
 function getCopilotHome() {
   if (process.env.COPILOT_HOME) return path.resolve(process.env.COPILOT_HOME);
@@ -143,6 +159,79 @@ function readJson(filePath) {
 
 function writeJson(filePath, value) {
   writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function replaceManagedMarkdownBlock(existing, block) {
+  const normalized = String(existing || '').replace(/\r\n/g, '\n');
+  const managedBlock = `${MANAGED_BLOCK_START}\n${block.trim()}\n${MANAGED_BLOCK_END}`;
+  const escapedStart = MANAGED_BLOCK_START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapedEnd = MANAGED_BLOCK_END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const managedPattern = new RegExp(`${escapedStart}[\\s\\S]*?${escapedEnd}`, 'm');
+
+  if (managedPattern.test(normalized)) {
+    return normalized.replace(managedPattern, managedBlock).replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  }
+
+  if (normalized.trim().length === 0) {
+    return `${managedBlock}\n`;
+  }
+
+  return `${normalized.trimEnd()}\n\n${managedBlock}\n`;
+}
+
+function writeManagedMarkdown(filePath, block) {
+  const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+  return writeFileIfChanged(filePath, replaceManagedMarkdownBlock(existing, block));
+}
+
+function readSdkVersion(packageRoot) {
+  const versionsPath = path.join(packageRoot, 'versions.json');
+  if (!fs.existsSync(versionsPath)) {
+    return 'latest';
+  }
+  try {
+    const parsed = readJson(versionsPath);
+    return typeof parsed.sdkVersion === 'string' && parsed.sdkVersion.trim() !== ''
+      ? parsed.sdkVersion.trim()
+      : 'latest';
+  } catch {
+    return 'latest';
+  }
+}
+
+function toLowerHyphenName(name) {
+  return String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function rewriteCloudSkill(skillId, contents) {
+  const normalized = String(contents).replace(/\r\n/g, '\n');
+  const prefixedName = `babysitter-${skillId}`;
+  let next = normalized;
+
+  if (next.startsWith('---\n')) {
+    next = next.replace(/^---\n([\s\S]*?)\n---\n?/, (_match, frontmatter) => {
+      const lines = String(frontmatter).split('\n');
+      let sawName = false;
+      const updatedLines = lines.map((line) => {
+        if (/^name:\s*/.test(line)) {
+          sawName = true;
+          return `name: ${prefixedName}`;
+        }
+        return line;
+      });
+      if (!sawName) {
+        updatedLines.push(`name: ${prefixedName}`);
+      }
+      return `---\n${updatedLines.join('\n')}\n---\n`;
+    });
+  }
+
+  next = next.replace(/^#\s+.+$/m, `# ${prefixedName}`);
+  return next.replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
 }
 
 function ensureMarketplaceEntry(marketplacePath, pluginSourcePath) {
@@ -369,6 +458,167 @@ function installCopilotSurface(packageRoot, copilotHome) {
   installManagedHooks(packageRoot, copilotHome);
 }
 
+function renderCloudAgentAgentsBlock() {
+  return [
+    '## Babysitter Cloud Agent',
+    '',
+    'This repository is configured to let GitHub Copilot cloud agent use Babysitter orchestration assets.',
+    '',
+    '- For complex multi-step work, use the Babysitter skills installed under `.github/skills/` when relevant.',
+    '- The cloud-agent setup workflow installs the Babysitter SDK before work begins.',
+    '- If you need the full orchestration instructions, run `babysitter instructions:babysit-skill --harness github-copilot --json`.',
+    '- Execute requested shell and Node tasks directly and report the results instead of describing what should be done.',
+    '- Do not revert unrelated user changes.',
+  ].join('\n');
+}
+
+function renderCloudAgentCopilotInstructionsBlock() {
+  return [
+    '# Babysitter Copilot Cloud Agent Support',
+    '',
+    'This repository includes Babysitter support for GitHub Copilot cloud agent.',
+    '',
+    '- Read the nearest `AGENTS.md` instructions before making changes.',
+    '- Consider the Babysitter skills under `.github/skills/` when the task is a multi-step workflow, orchestration run, diagnosis, planning, or retrospective.',
+    '- The `copilot-setup-steps` workflow installs the Babysitter SDK and initializes the active process library before the agent starts working.',
+    '- Add repository-specific build, test, and validation commands below this managed section if they are not already documented elsewhere in the repo.',
+  ].join('\n');
+}
+
+function renderCloudAgentSetupWorkflow(packageRoot) {
+  const sdkVersion = readSdkVersion(packageRoot);
+  return [
+    'name: "Copilot Setup Steps"',
+    '',
+    'on:',
+    '  workflow_dispatch:',
+    '  push:',
+    '    paths:',
+    '      - .github/workflows/copilot-setup-steps.yml',
+    '      - .github/copilot-instructions.md',
+    '      - .github/skills/**',
+    '      - AGENTS.md',
+    '  pull_request:',
+    '    paths:',
+    '      - .github/workflows/copilot-setup-steps.yml',
+    '      - .github/copilot-instructions.md',
+    '      - .github/skills/**',
+    '      - AGENTS.md',
+    '',
+    'jobs:',
+    '  copilot-setup-steps:',
+    '    runs-on: ubuntu-latest',
+    '    permissions:',
+    '      contents: read',
+    '    steps:',
+    '      - name: Check out repository',
+    '        uses: actions/checkout@v4',
+    '',
+    '      - name: Set up Node.js',
+    '        uses: actions/setup-node@v4',
+    '        with:',
+    '          node-version: 22',
+    '          cache: npm',
+    '',
+    '      - name: Install Babysitter SDK',
+    `        run: npm install -g @a5c-ai/babysitter-sdk@${sdkVersion}`,
+    '',
+    '      - name: Initialize active process library',
+    '        run: babysitter process-library:active --json',
+  ].join('\n') + '\n';
+}
+
+function installCloudAgentBundle(packageRoot, workspaceRoot) {
+  const bundleRoot = path.join(workspaceRoot, '.github', 'babysitter', 'github-plugin');
+  fs.rmSync(bundleRoot, { recursive: true, force: true });
+  fs.mkdirSync(bundleRoot, { recursive: true });
+  for (const entry of CLOUD_AGENT_BUNDLE_ENTRIES) {
+    const sourcePath = path.join(packageRoot, entry);
+    if (!fs.existsSync(sourcePath)) {
+      continue;
+    }
+    copyRecursive(sourcePath, path.join(bundleRoot, entry));
+  }
+  return bundleRoot;
+}
+
+function installCloudAgentSkills(packageRoot, workspaceRoot) {
+  const sourceRoot = path.join(packageRoot, 'skills');
+  if (!fs.existsSync(sourceRoot)) return [];
+
+  const targetRoot = path.join(workspaceRoot, '.github', 'skills');
+  fs.mkdirSync(targetRoot, { recursive: true });
+  const installed = [];
+
+  for (const entry of fs.readdirSync(sourceRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const sourceDir = path.join(sourceRoot, entry.name);
+    const skillId = toLowerHyphenName(entry.name);
+    const targetDir = path.join(targetRoot, `babysitter-${skillId}`);
+    fs.rmSync(targetDir, { recursive: true, force: true });
+    copyRecursive(sourceDir, targetDir);
+    const skillPath = path.join(targetDir, 'SKILL.md');
+    if (fs.existsSync(skillPath)) {
+      const rewritten = rewriteCloudSkill(skillId, fs.readFileSync(skillPath, 'utf8'));
+      fs.writeFileSync(skillPath, rewritten, 'utf8');
+    }
+    installed.push(targetDir);
+  }
+
+  return installed;
+}
+
+function installCloudAgentInstructions(packageRoot, workspaceRoot) {
+  const agentsPath = path.join(workspaceRoot, 'AGENTS.md');
+  const copilotInstructionsPath = path.join(workspaceRoot, '.github', 'copilot-instructions.md');
+
+  writeManagedMarkdown(agentsPath, renderCloudAgentAgentsBlock(packageRoot));
+  writeManagedMarkdown(copilotInstructionsPath, renderCloudAgentCopilotInstructionsBlock(packageRoot));
+
+  return {
+    agentsPath,
+    copilotInstructionsPath,
+  };
+}
+
+function installCloudAgentSetupSteps(packageRoot, workspaceRoot) {
+  const workflowsDir = path.join(workspaceRoot, '.github', 'workflows');
+  const workflowPath = path.join(workflowsDir, 'copilot-setup-steps.yml');
+  const examplePath = path.join(workflowsDir, 'copilot-setup-steps.babysitter.generated.yml');
+  const contents = renderCloudAgentSetupWorkflow(packageRoot);
+
+  fs.mkdirSync(workflowsDir, { recursive: true });
+
+  if (!fs.existsSync(workflowPath)) {
+    writeFileIfChanged(workflowPath, contents);
+    fs.rmSync(examplePath, { force: true });
+    return { workflowPath, examplePath: null, managed: true, needsManualMerge: false };
+  }
+
+  const existing = fs.readFileSync(workflowPath, 'utf8');
+  if (existing.includes('copilot-setup-steps') && existing.includes('@a5c-ai/babysitter-sdk')) {
+    writeFileIfChanged(workflowPath, contents);
+    fs.rmSync(examplePath, { force: true });
+    return { workflowPath, examplePath: null, managed: true, needsManualMerge: false };
+  }
+
+  writeFileIfChanged(examplePath, contents);
+  return { workflowPath, examplePath, managed: false, needsManualMerge: true };
+}
+
+function installCloudAgentSurface(packageRoot, workspaceRoot) {
+  const bundleRoot = installCloudAgentBundle(packageRoot, workspaceRoot);
+  const skillDirs = installCloudAgentSkills(packageRoot, workspaceRoot);
+  const instructions = installCloudAgentInstructions(packageRoot, workspaceRoot);
+  const setupWorkflow = installCloudAgentSetupSteps(packageRoot, workspaceRoot);
+  return {
+    bundleRoot,
+    skillDirs,
+    ...instructions,
+    setupWorkflow,
+  };
+}
+
 function resolveBabysitterCommand(packageRoot) {
   if (process.env.BABYSITTER_SDK_CLI) {
     return {
@@ -442,6 +692,7 @@ module.exports = {
   getHomeMarketplacePath,
   getHomePluginRoot,
   installCopilotSurface,
+  installCloudAgentSurface,
   registerCopilotPlugin,
   removeLegacyHooks,
   removeMarketplaceEntry,

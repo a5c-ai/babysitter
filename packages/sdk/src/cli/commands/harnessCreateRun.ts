@@ -27,7 +27,7 @@ import {
   emitProgress,
   discoverHarnesses,
 } from "./harnessUtils";
-import { getGeneratedProcessPath, runProcessDefinitionPhase } from "./harnessPhase1";
+import { getProcessOutputDir, runProcessDefinitionPhase } from "./harnessPhase1";
 import { runOrchestrationPhase } from "./harnessPhase2";
 
 // ── Re-exports for backward compatibility ────────────────────────────
@@ -81,9 +81,7 @@ export async function handleHarnessCreateRun(
     }
 
     const discovered = await discoverHarnesses();
-    const selectedHarnessName = preferredHarness === "oh-my-pi"
-      ? "oh-my-pi"
-      : "pi";
+    const selectedHarnessName = preferredHarness ?? "internal";
     const compressionConfig = loadSessionCompressionConfig(workspace);
     const promptContext = buildPromptContext({
       workspace,
@@ -99,7 +97,7 @@ export async function handleHarnessCreateRun(
       const workDir = workspace ?? process.cwd();
       processPath = await runProcessDefinitionPhase({
         prompt: prompt!,
-        outputPath: getGeneratedProcessPath(workDir),
+        outputDir: getProcessOutputDir(workDir),
         workspace: workDir,
         model,
         interactive,

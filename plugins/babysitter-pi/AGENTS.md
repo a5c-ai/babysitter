@@ -55,49 +55,24 @@ When babysitter presents pending effects, identify the `kind` field and execute 
 | Kind | Action |
 |------|--------|
 | `agent` | Build a prompt from the agent definition and execute as a sub-agent task |
-| `node` | Run the specified Node.js script and capture output |
+| `skill` | Invoke the named skill with the provided parameters |
 | `shell` | Execute the shell command and capture stdout/stderr/exit code |
 | `breakpoint` | Pause execution and present the breakpoint message to the user for approval |
 | `sleep` | Wait until the specified timestamp (handled by the runtime) |
-| `skill` | Invoke the named skill with the provided parameters |
 
-For each effect, capture all outputs (stdout, stderr, return codes, generated files) for inclusion in the result.
+For PI-family generated-process guidance, treat `agent`, `skill`, `shell`, `breakpoint`, and `sleep` as the active effect kinds. Do not present `node` as a generated PI-family effect kind.
 
 ---
 
 ## 5. Posting Results
 
-After executing an effect, post the result back to babysitter using the **SDK bridge** (not the CLI directly). The SDK bridge is provided by the plugin extension:
-
-- `postResult(runId, effectId, result)` for successful completions
-- `postResult(runId, effectId, error)` for failures
-
-Result structure:
-
-```json
-{
-  "success": true,
-  "result": { /* effect-specific output fields */ }
-}
-```
-
-Error structure:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "SHORT_ERROR_CODE",
-    "message": "Human-readable description",
-    "detail": "Stack trace or stderr output"
-  }
-}
-```
+After executing an effect, hand the outcome back to the Babysitter plugin/runtime bridge so the run state, journal, and pending-effect cache stay consistent.
 
 Rules:
-- Always use the SDK bridge functions, not raw CLI commands. The bridge handles journal appending and state consistency.
-- Do not retry failed effects unless the task definition specifies `"retryable": true`.
-- Do not abort the entire run on a single task failure -- post the error result and let the orchestrator decide.
+- Use the plugin-owned Babysitter bridge/command flow rather than inventing an alternate posting path.
+- Complete one orchestration phase per harness turn, then let the loop-driver trigger the next phase.
+- Do not abort the entire run on a single task failure -- return the effect outcome and let the orchestrator decide the next step.
+- Keep low-level runtime mechanics in the command/extension implementation surface; this file is the behavioral contract for the active agent session.
 
 ---
 

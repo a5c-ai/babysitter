@@ -12,6 +12,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import type { HarnessInvokeOptions, HarnessInvokeResult } from "./types";
 import { checkCliAvailable } from "./discovery";
+import { createPiSession } from "./piWrapper";
 import { BabysitterRuntimeError, ErrorCategory } from "../runtime/exceptions";
 
 // ---------------------------------------------------------------------------
@@ -57,6 +58,12 @@ export const HARNESS_CLI_MAP: Readonly<Record<string, HarnessCliSpec>> = {
   cursor: { cli: "cursor", supportsModel: true, promptStyle: "positional", baseArgs: ["agent"], workspaceFlag: "--workspace" },
   opencode: { cli: "opencode", supportsModel: false, promptStyle: "flag" },
 } as const;
+
+const PROGRAMMATIC_ONLY_HARNESSES = ["internal"] as const;
+const SUPPORTED_HARNESS_NAMES = [
+  ...PROGRAMMATIC_ONLY_HARNESSES,
+  ...Object.keys(HARNESS_CLI_MAP),
+] as const;
 
 function quotePowerShellArg(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
@@ -121,10 +128,10 @@ export function buildHarnessArgs(
   if (!spec) {
     throw new BabysitterRuntimeError(
       "UnknownHarnessError",
-      `Unknown harness: "${name}". Supported harnesses: ${Object.keys(HARNESS_CLI_MAP).join(", ")}`,
+      `Unknown harness: "${name}". Supported harnesses: ${SUPPORTED_HARNESS_NAMES.join(", ")}`,
       {
         category: ErrorCategory.Validation,
-        suggestions: [`Did you mean one of: ${Object.keys(HARNESS_CLI_MAP).join(", ")}?`],
+        suggestions: [`Did you mean one of: ${SUPPORTED_HARNESS_NAMES.join(", ")}?`],
         nextSteps: ["Use a supported harness name"],
       },
     );
@@ -175,14 +182,32 @@ export async function invokeHarness(
   name: string,
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
+  if (name === "internal") {
+    const session = createPiSession({
+      workspace: options.workspace,
+      model: options.model,
+      timeout: options.timeout,
+      ephemeral: true,
+    });
+    try {
+      const result = await session.prompt(options.prompt, options.timeout);
+      return {
+        ...result,
+        harness: "internal",
+      };
+    } finally {
+      session.dispose();
+    }
+  }
+
   const spec = HARNESS_CLI_MAP[name];
   if (!spec) {
     throw new BabysitterRuntimeError(
       "UnknownHarnessError",
-      `Unknown harness: "${name}". Supported harnesses: ${Object.keys(HARNESS_CLI_MAP).join(", ")}`,
+      `Unknown harness: "${name}". Supported harnesses: ${SUPPORTED_HARNESS_NAMES.join(", ")}`,
       {
         category: ErrorCategory.Validation,
-        suggestions: [`Did you mean one of: ${Object.keys(HARNESS_CLI_MAP).join(", ")}?`],
+        suggestions: [`Did you mean one of: ${SUPPORTED_HARNESS_NAMES.join(", ")}?`],
         nextSteps: ["Use a supported harness name"],
       },
     );

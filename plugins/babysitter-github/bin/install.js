@@ -10,11 +10,38 @@ const {
   getCopilotHome,
   getHomeMarketplacePath,
   getHomePluginRoot,
+  installCloudAgentSurface,
   installCopilotSurface,
   warnWindowsHooks,
 } = require('./install-shared');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
+
+function parseArgs(argv) {
+  const args = {
+    cloudAgent: false,
+    workspace: process.cwd(),
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--cloud-agent') {
+      args.cloudAgent = true;
+      continue;
+    }
+    if (arg === '--workspace') {
+      const next = argv[i + 1];
+      if (next && !next.startsWith('-')) {
+        args.workspace = path.resolve(next);
+        i += 1;
+      } else {
+        args.workspace = process.cwd();
+      }
+    }
+  }
+
+  return args;
+}
 
 /**
  * Attempt to register the plugin via `copilot plugin install ./path`.
@@ -43,9 +70,30 @@ function registerViaCopilotCli(pluginRoot) {
 }
 
 function main() {
+  const args = parseArgs(process.argv.slice(2));
   const copilotHome = getCopilotHome();
   const pluginRoot = getHomePluginRoot();
   const marketplacePath = getHomeMarketplacePath();
+
+  if (args.cloudAgent) {
+    const active = ensureGlobalProcessLibrary(PACKAGE_ROOT);
+    const installed = installCloudAgentSurface(PACKAGE_ROOT, args.workspace);
+    console.log(`[babysitter] Installed Copilot cloud-agent support into ${args.workspace}`);
+    console.log(`[babysitter]   plugin bundle: ${installed.bundleRoot}`);
+    console.log(`[babysitter]   skills: ${path.join(args.workspace, '.github', 'skills')}`);
+    console.log(`[babysitter]   instructions: ${installed.copilotInstructionsPath}`);
+    console.log(`[babysitter]   agents: ${installed.agentsPath}`);
+    if (installed.setupWorkflow.needsManualMerge) {
+      console.warn(`[babysitter] Existing copilot-setup-steps workflow preserved: ${installed.setupWorkflow.workflowPath}`);
+      console.warn(`[babysitter] Merge Babysitter setup steps from: ${installed.setupWorkflow.examplePath}`);
+    } else {
+      console.log(`[babysitter]   setup workflow: ${installed.setupWorkflow.workflowPath}`);
+    }
+    console.log(`[babysitter]   process library: ${active.binding?.dir}`);
+    console.log(`[babysitter]   process library state: ${active.stateFile}`);
+    console.log('[babysitter] Cloud-agent installation complete!');
+    return;
+  }
 
   console.log(`[babysitter] Installing plugin to ${pluginRoot}`);
 

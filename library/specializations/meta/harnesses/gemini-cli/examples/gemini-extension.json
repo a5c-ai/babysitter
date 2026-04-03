@@ -1,0 +1,23 @@
+{
+  "name": "example-orchestrator",
+  "version": "1.0.0",
+  "description": "Example Gemini CLI extension demonstrating manifest structure with MCP servers, context file, and typical configuration patterns",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "project-tools": {
+      "command": "node",
+      "args": ["./mcp-server.js", "--stdio"],
+      "env": {
+        "LOG_LEVEL": "info",
+        "PROJECT_DIR": "${workspaceDir}"
+      }
+    },
+    "external-api": {
+      "command": "npx",
+      "args": ["-y", "@example/api-mcp-server"],
+      "env": {
+        "API_KEY": "{{settings.apiKey}}"
+      }
+    }
+  }
+}

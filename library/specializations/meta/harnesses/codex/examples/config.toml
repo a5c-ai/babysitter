@@ -1,0 +1,70 @@
+# Codex CLI Configuration Example
+# Location: ~/.codex/config.toml
+
+# --- Approval Policy ---
+approval_policy = "suggest"  # "suggest" | "auto-edit" | "full-auto"
+
+# --- Sandbox Mode ---
+sandbox_mode = "workspace-write"  # Restrict writes to workspace
+
+# --- Model ---
+model = "o3"
+model_provider = "openai"
+
+# --- Developer Instructions ---
+developer_instructions = "Always use TypeScript strict mode. Follow conventional commits."
+
+# --- Feature Flags ---
+[features]
+child_agents_md = true  # Enable hierarchical AGENTS.md
+
+# --- Named Profiles ---
+[profiles.conservative]
+approval_policy = "suggest"
+sandbox_mode = "workspace-write"
+
+[profiles.autonomous]
+approval_policy = "full-auto"
+
+# --- Named Permissions ---
+[permissions.default]
+# Default permission profile
+
+# --- MCP Servers ---
+[mcp_servers.docs]
+command = "npx"
+args = ["-y", "@company/docs-mcp-server"]
+
+[mcp_servers.docs.tools.search]
+approval_mode = "approve"
+
+[mcp_servers.docs.tools.index]
+approval_mode = "auto"
+
+[mcp_servers.database]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-postgres"]
+
+[mcp_servers.database.env]
+DATABASE_URL = "postgresql://localhost/mydb"
+
+# --- Plugins ---
+[plugins.my-plugin]
+enabled = true
+
+# --- Skills ---
+[skills."path/to/SKILL.md"]
+enabled = true
+
+# --- Notification ---
+[notify]
+command = "notify-send"
+args = ["Codex", "Task complete"]
+
+# --- History ---
+[history]
+max_entries = 1000
+
+# --- Web Search ---
+[web_search]
+enabled = true
