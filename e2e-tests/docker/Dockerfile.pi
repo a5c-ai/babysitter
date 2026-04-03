@@ -1,0 +1,41 @@
+FROM node:20-bookworm
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r pi && useradd -r -g pi -m -d /home/pi pi
+
+ENV HOME=/home/pi
+ENV PATH=/home/pi/.local/bin:${PATH}
+
+RUN mkdir -p /home/pi/.local && \
+    echo "prefix=/home/pi/.local" > /home/pi/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-pi/package.json ./plugins/babysitter-pi/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk && chown -R pi:pi /app /home/pi
+
+USER pi
+
+RUN npm install -g @mariozechner/pi-coding-agent @a5c-ai/babysitter-sdk /app/plugins/babysitter-pi
+
+WORKDIR /workspace
+
+ENV A5C_PROVIDER_NAME=""
+ENV A5C_SELECTED_CLI_COMMAND=""
+ENV A5C_CLI_TOOL=""
+ENV A5C_SELECTED_MODEL=""
+
+CMD ["bash"]

@@ -1,15 +1,4 @@
-/**
- * Pi harness adapter.
- *
- * Extends the SDK harness layer with "pi" support while reusing the mature
- * Claude stop/session-start hook handlers. The adapter also shares some
- * internal PI-family helpers with the dedicated oh-my-pi adapter.
- */
-
 import * as path from "node:path";
-import { existsSync } from "node:fs";
-import * as os from "node:os";
-import { createClaudeCodeAdapter } from "./claudeCode";
 import type {
   HarnessAdapter,
   HarnessCapability,
@@ -24,6 +13,15 @@ import type { PromptContext } from "../prompts/types";
 import { createPiContext } from "../prompts/context";
 import { getGlobalStateDir } from "../config";
 import {
+  getCurrentTimestamp,
+  getSessionFilePath,
+  readSessionFile,
+  sessionFileExists,
+  updateSessionState,
+  writeSessionFile,
+} from "../session";
+import type { SessionState } from "../session";
+import {
   installCliViaNpm,
   runPackageBinaryViaNpx,
 } from "./installSupport";
@@ -31,8 +29,7 @@ import {
 function resolvePiPluginRoot(
   args: { pluginRoot?: string } = {},
 ): string | undefined {
-  const root =
-    args.pluginRoot || process.env.OMP_PLUGIN_ROOT || process.env.PI_PLUGIN_ROOT;
+  const root = args.pluginRoot || process.env.PI_PLUGIN_ROOT;
   return root ? path.resolve(root) : undefined;
 }
 
@@ -46,57 +43,72 @@ function resolvePiStateDir(args: {
 
 function resolvePiSessionId(parsed: { sessionId?: string }): string | undefined {
   if (parsed.sessionId) return parsed.sessionId;
-  // Cross-harness standard first, then Pi-native (auto-injected in-process)
   if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
-  if (process.env.OMP_SESSION_ID) return process.env.OMP_SESSION_ID;
   if (process.env.PI_SESSION_ID) return process.env.PI_SESSION_ID;
   return undefined;
 }
 
-async function installPiFamilyHarness(args: {
-  harness: "pi" | "oh-my-pi";
-  cliCommand: "pi" | "omp";
-  packageName: string;
-  options: HarnessInstallOptions;
-}): Promise<HarnessInstallResult> {
-  return installCliViaNpm({
-    harness: args.harness,
-    cliCommand: args.cliCommand,
-    packageName: args.packageName,
-    summary: `Install the ${args.harness} CLI globally via npm.`,
-    options: args.options,
+async function bindPiSession(
+  opts: SessionBindOptions,
+): Promise<SessionBindResult> {
+  const stateDir = resolvePiStateDir({
+    stateDir: opts.stateDir,
+    pluginRoot: opts.pluginRoot,
   });
-}
+  const stateFile = getSessionFilePath(stateDir, opts.sessionId);
 
-export function getPiFamilyPluginInstallRoot(args: {
-  harness: "pi" | "oh-my-pi";
-  workspace?: string;
-}): string {
-  const base = path.resolve(args.workspace ?? os.homedir());
-  const pluginsDir = args.harness === "oh-my-pi"
-    ? path.join(base, ".omp", "plugins")
-    : path.join(base, ".pi", "plugins");
-  // PI-family plugin manifests install under the harness-local plugin name "babysitter".
-  return path.join(pluginsDir, "babysitter");
-}
+  if (await sessionFileExists(stateFile)) {
+    const existing = await readSessionFile(stateFile);
+    if (existing.state.runId && existing.state.runId !== opts.runId) {
+      return {
+        harness: "pi",
+        sessionId: opts.sessionId,
+        stateFile,
+        error: `Session already associated with run ${existing.state.runId}`,
+      };
+    }
 
-export async function installPiFamilyPlugin(args: {
-  harness: "pi" | "oh-my-pi";
-  options: HarnessInstallOptions;
-}): Promise<HarnessInstallResult> {
-  const targetDir = getPiFamilyPluginInstallRoot({
-    harness: args.harness,
-    workspace: args.options.workspace,
-  });
-  if (existsSync(targetDir)) {
+    await updateSessionState(
+      stateFile,
+      { active: true, runId: opts.runId },
+      existing,
+    );
     return {
-      harness: args.harness,
-      warning: "The Babysitter PI plugin is already installed at the target location; skipping reinstall.",
-      location: targetDir,
+      harness: "pi",
+      sessionId: opts.sessionId,
+      stateFile,
     };
   }
 
-  const packageArgs = ["install", "--harness", args.harness];
+  const now = getCurrentTimestamp();
+  const state: SessionState = {
+    active: true,
+    iteration: 1,
+    maxIterations: opts.maxIterations ?? 256,
+    runId: opts.runId,
+    startedAt: now,
+    lastIterationAt: now,
+    iterationTimes: [],
+  };
+  await writeSessionFile(stateFile, state, opts.prompt);
+
+  return {
+    harness: "pi",
+    sessionId: opts.sessionId,
+    stateFile,
+  };
+}
+
+function writeNoopHookResult(): void {
+  process.stdout.write("{}\n");
+}
+
+async function installPiFamilyPlugin(args: {
+  harness: "pi" | "oh-my-pi";
+  packageName: string;
+  options: HarnessInstallOptions;
+}): Promise<HarnessInstallResult> {
+  const packageArgs = ["install"];
   if (args.options.workspace) {
     packageArgs.push("--workspace", path.resolve(args.options.workspace));
   } else {
@@ -105,14 +117,13 @@ export async function installPiFamilyPlugin(args: {
 
   return runPackageBinaryViaNpx({
     harness: args.harness,
-    packageName: "@a5c-ai/babysitter-pi",
+    packageName: args.packageName,
     packageArgs,
     summary: args.options.workspace
-      ? `Install the published Babysitter PI plugin into the target workspace for ${args.harness}.`
-      : `Install the published Babysitter PI plugin into the user-level ${args.harness} plugin directory.`,
+      ? `Install the published Babysitter ${args.harness} package for the target workspace.`
+      : `Install the published Babysitter ${args.harness} package into the user profile.`,
     options: args.options,
     env: process.env,
-    location: targetDir,
   });
 }
 
@@ -121,28 +132,37 @@ export async function installPiPlugin(
 ): Promise<HarnessInstallResult> {
   return installPiFamilyPlugin({
     harness: "pi",
+    packageName: "@a5c-ai/babysitter-pi",
     options,
   });
 }
 
 export function createPiAdapter(): HarnessAdapter {
-  const claude = createClaudeCodeAdapter();
-
   return {
     name: "pi",
 
     isActive(): boolean {
       return !!(
         process.env.BABYSITTER_SESSION_ID ||
-        process.env.OMP_SESSION_ID ||
         process.env.PI_SESSION_ID ||
-        process.env.OMP_PLUGIN_ROOT ||
         process.env.PI_PLUGIN_ROOT
       );
     },
 
     autoResolvesSessionId(): boolean {
       return true;
+    },
+
+    getMissingSessionIdHint(): string {
+      return "Pi should provide PI_SESSION_ID when the Babysitter package is active.";
+    },
+
+    supportsHookType(_hookType: string): boolean {
+      return false;
+    },
+
+    getUnsupportedHookMessage(hookType: string): string {
+      return `Pi does not use babysitter hook:run for "${hookType}". Use the Pi package skills and extension bridge instead.`;
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
@@ -160,62 +180,30 @@ export function createPiAdapter(): HarnessAdapter {
       return resolvePiPluginRoot(args);
     },
 
-    async bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
-      const stateDir = resolvePiStateDir({
-        stateDir: opts.stateDir,
-        pluginRoot: opts.pluginRoot,
-      });
-      const result = await claude.bindSession({
-        ...opts,
-        stateDir,
-      });
-      return { ...result, harness: "pi" };
+    bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
+      return bindPiSession(opts);
     },
 
-    handleStopHook(args: HookHandlerArgs): Promise<number> {
-      const pluginRoot = resolvePiPluginRoot(args);
-      const stateDir = resolvePiStateDir({
-        stateDir: args.stateDir,
-        pluginRoot,
-      });
-      return claude.handleStopHook({
-        ...args,
-        pluginRoot,
-        stateDir,
-      });
+    async handleStopHook(_args: HookHandlerArgs): Promise<number> {
+      writeNoopHookResult();
+      return 0;
     },
 
-    handleSessionStartHook(args: HookHandlerArgs): Promise<number> {
-      const pluginRoot = resolvePiPluginRoot(args);
-      const stateDir = resolvePiStateDir({
-        stateDir: args.stateDir,
-        pluginRoot,
-      });
-      return claude.handleSessionStartHook({
-        ...args,
-        pluginRoot,
-        stateDir,
-      });
+    async handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
+      writeNoopHookResult();
+      return 0;
     },
 
-    findHookDispatcherPath(startCwd: string): string | null {
-      const pluginRoot = resolvePiPluginRoot();
-      if (pluginRoot) {
-        const candidate = path.join(pluginRoot, "hooks", "hook-dispatcher.sh");
-        if (existsSync(candidate)) return candidate;
-      }
-
-      const local = path.join(path.resolve(startCwd), ".omp", "hooks", "hook-dispatcher.sh");
-      if (existsSync(local)) return local;
-
+    findHookDispatcherPath(_startCwd: string): string | null {
       return null;
     },
 
     installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
-      return installPiFamilyHarness({
+      return installCliViaNpm({
         harness: "pi",
         cliCommand: "pi",
         packageName: "@mariozechner/pi-coding-agent",
+        summary: "Install the Pi Coding Agent CLI globally via npm.",
         options,
       });
     },
@@ -225,7 +213,7 @@ export function createPiAdapter(): HarnessAdapter {
     },
 
     getCapabilities(): HarnessCapability[] {
-      return [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt];
+      return [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt];
     },
 
     getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {

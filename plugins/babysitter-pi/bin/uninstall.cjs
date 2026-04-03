@@ -2,39 +2,39 @@
 'use strict';
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
+
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const PACKAGE_JSON = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, 'package.json'), 'utf8'));
 
 function parseArgs(argv) {
-  const args = {
-    workspace: null,
-  };
+  let workspace = null;
   for (let i = 2; i < argv.length; i += 1) {
-    if (argv[i] === '--workspace' && argv[i + 1]) {
-      args.workspace = path.resolve(argv[++i]);
-    } else if (argv[i] === '--global') {
-      args.workspace = null;
-    } else {
-      throw new Error(`unknown argument: ${argv[i]}`);
+    const arg = argv[i];
+    if (arg === '--workspace') {
+      const next = argv[i + 1];
+      workspace = next && !next.startsWith('-') ? path.resolve(argv[++i]) : process.cwd();
+      continue;
     }
+    if (arg === '--global') {
+      workspace = null;
+      continue;
+    }
+    throw new Error(`unknown argument: ${arg}`);
   }
-  return args;
-}
-
-function getPluginRoot(args) {
-  const base = args.workspace ? path.resolve(args.workspace) : os.homedir();
-  return path.join(base, '.pi', 'plugins', 'babysitter');
+  return { workspace };
 }
 
 function main() {
-  const args = parseArgs(process.argv);
-  const pluginRoot = getPluginRoot(args);
-  if (!fs.existsSync(pluginRoot)) {
-    console.log('[babysitter] Nothing to uninstall.');
-    return;
-  }
-  fs.rmSync(pluginRoot, { recursive: true, force: true });
-  console.log(`[babysitter] Removed ${pluginRoot}`);
+  const { workspace } = parseArgs(process.argv);
+  const packageSpec = `npm:${PACKAGE_JSON.name}`;
+  const result = spawnSync('pi', workspace ? ['remove', '-l', packageSpec] : ['remove', packageSpec], {
+    cwd: workspace ?? process.cwd(),
+    stdio: 'inherit',
+    env: process.env,
+  });
+  process.exitCode = result.status ?? 1;
 }
 
 main();

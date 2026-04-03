@@ -86,20 +86,20 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "opencode",
     cli: "opencode",
-    callerEnvVars: [],
+    callerEnvVars: ["OPENCODE_SESSION_ID", "OPENCODE_PROJECT_DIR"],
     capabilities: [Cap.HeadlessPrompt],
   },
   {
     name: "oh-my-pi",
     cli: "omp",
     callerEnvVars: ["OMP_SESSION_ID", "OMP_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp],
   },
   {
     name: "pi",
     cli: "pi",
-    callerEnvVars: ["OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+    callerEnvVars: ["PI_SESSION_ID", "PI_PLUGIN_ROOT"],
+    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt],
   },
   {
     name: "internal",

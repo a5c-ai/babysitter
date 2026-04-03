@@ -23,6 +23,7 @@ export { createCursorAdapter } from "./cursor";
 export { createGithubCopilotAdapter } from "./githubCopilot";
 export { createPiAdapter } from "./pi";
 export { createOhMyPiAdapter } from "./ohMyPi";
+export { createOpenCodeAdapter } from "./opencode";
 export { createInternalAdapter } from "./internal";
 export { createPiSession, PiSessionHandle, type PiEventListener } from "./piWrapper";
 export { createNullAdapter } from "./nullAdapter";

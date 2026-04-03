@@ -1,37 +1,108 @@
-/**
- * Oh-My-Pi harness adapter.
- *
- * Oh-my-pi (omp) is a fork of pi that shares the same environment variables,
- * session conventions, and hook mechanisms. This adapter wraps the pi adapter
- * with a different name so the registry can distinguish between the two when
- * both are installed.
- */
-
-import { existsSync } from "node:fs";
 import * as path from "node:path";
-import { createPiAdapter, getPiFamilyPluginInstallRoot } from "./pi";
 import type {
   HarnessAdapter,
+  HarnessCapability,
   HarnessInstallOptions,
   HarnessInstallResult,
+  SessionBindOptions,
+  SessionBindResult,
+  HookHandlerArgs,
 } from "./types";
+import { HarnessCapability as Cap } from "./types";
+import type { PromptContext } from "../prompts/types";
+import { createOhMyPiContext } from "../prompts/context";
+import { getGlobalStateDir } from "../config";
+import {
+  getCurrentTimestamp,
+  getSessionFilePath,
+  readSessionFile,
+  sessionFileExists,
+  updateSessionState,
+  writeSessionFile,
+} from "../session";
+import type { SessionState } from "../session";
 import { installCliViaNpm, runPackageBinaryViaNpx } from "./installSupport";
+
+function resolveOhMyPiPluginRoot(
+  args: { pluginRoot?: string } = {},
+): string | undefined {
+  const root = args.pluginRoot || process.env.OMP_PLUGIN_ROOT;
+  return root ? path.resolve(root) : undefined;
+}
+
+function resolveOhMyPiStateDir(args: {
+  stateDir?: string;
+  pluginRoot?: string;
+}): string {
+  if (args.stateDir) return path.resolve(args.stateDir);
+  return getGlobalStateDir();
+}
+
+function resolveOhMyPiSessionId(parsed: { sessionId?: string }): string | undefined {
+  if (parsed.sessionId) return parsed.sessionId;
+  if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+  if (process.env.OMP_SESSION_ID) return process.env.OMP_SESSION_ID;
+  return undefined;
+}
+
+async function bindOhMyPiSession(
+  opts: SessionBindOptions,
+): Promise<SessionBindResult> {
+  const stateDir = resolveOhMyPiStateDir({
+    stateDir: opts.stateDir,
+    pluginRoot: opts.pluginRoot,
+  });
+  const stateFile = getSessionFilePath(stateDir, opts.sessionId);
+
+  if (await sessionFileExists(stateFile)) {
+    const existing = await readSessionFile(stateFile);
+    if (existing.state.runId && existing.state.runId !== opts.runId) {
+      return {
+        harness: "oh-my-pi",
+        sessionId: opts.sessionId,
+        stateFile,
+        error: `Session already associated with run ${existing.state.runId}`,
+      };
+    }
+
+    await updateSessionState(
+      stateFile,
+      { active: true, runId: opts.runId },
+      existing,
+    );
+    return {
+      harness: "oh-my-pi",
+      sessionId: opts.sessionId,
+      stateFile,
+    };
+  }
+
+  const now = getCurrentTimestamp();
+  const state: SessionState = {
+    active: true,
+    iteration: 1,
+    maxIterations: opts.maxIterations ?? 256,
+    runId: opts.runId,
+    startedAt: now,
+    lastIterationAt: now,
+    iterationTimes: [],
+  };
+  await writeSessionFile(stateFile, state, opts.prompt);
+
+  return {
+    harness: "oh-my-pi",
+    sessionId: opts.sessionId,
+    stateFile,
+  };
+}
+
+function writeNoopHookResult(): void {
+  process.stdout.write("{}\n");
+}
 
 async function installOhMyPiPlugin(
   options: HarnessInstallOptions,
 ): Promise<HarnessInstallResult> {
-  const targetDir = getPiFamilyPluginInstallRoot({
-    harness: "oh-my-pi",
-    workspace: options.workspace,
-  });
-  if (existsSync(targetDir)) {
-    return {
-      harness: "oh-my-pi",
-      warning: "The Babysitter oh-my-pi plugin is already installed at the target location; skipping reinstall.",
-      location: targetDir,
-    };
-  }
-
   const packageArgs = ["install"];
   if (options.workspace) {
     packageArgs.push("--workspace", path.resolve(options.workspace));
@@ -44,32 +115,72 @@ async function installOhMyPiPlugin(
     packageName: "@a5c-ai/babysitter-omp",
     packageArgs,
     summary: options.workspace
-      ? "Install the published Babysitter oh-my-pi plugin into the target workspace."
-      : "Install the published Babysitter oh-my-pi plugin into the user-level oh-my-pi plugin directory.",
+      ? "Install the published Babysitter oh-my-pi package for the target workspace."
+      : "Install the published Babysitter oh-my-pi package into the user profile.",
     options,
     env: process.env,
-    location: targetDir,
   });
 }
 
-/**
- * Create an adapter for oh-my-pi.
- *
- * Reuses the pi adapter's implementation entirely — same env vars, same
- * session binding, same hook handling — but reports `name: "oh-my-pi"`.
- */
 export function createOhMyPiAdapter(): HarnessAdapter {
-  const piAdapter = createPiAdapter();
-
   return {
-    ...piAdapter,
     name: "oh-my-pi",
 
     isActive(): boolean {
-      // oh-my-pi shares OMP_* env vars with pi, but we only claim active
-      // if OMP_PLUGIN_ROOT or OMP_SESSION_ID is set (not PI_* variants).
-      // BABYSITTER_SESSION_ID is cross-harness and accepted everywhere.
-      return !!(process.env.BABYSITTER_SESSION_ID || process.env.OMP_SESSION_ID || process.env.OMP_PLUGIN_ROOT);
+      return !!(
+        process.env.BABYSITTER_SESSION_ID ||
+        process.env.OMP_SESSION_ID ||
+        process.env.OMP_PLUGIN_ROOT
+      );
+    },
+
+    autoResolvesSessionId(): boolean {
+      return true;
+    },
+
+    getMissingSessionIdHint(): string {
+      return "oh-my-pi should provide OMP_SESSION_ID when the Babysitter package is active.";
+    },
+
+    supportsHookType(_hookType: string): boolean {
+      return false;
+    },
+
+    getUnsupportedHookMessage(hookType: string): string {
+      return `oh-my-pi does not use babysitter hook:run for "${hookType}". Use the oh-my-pi package skills and extension bridge instead.`;
+    },
+
+    resolveSessionId(parsed: { sessionId?: string }): string | undefined {
+      return resolveOhMyPiSessionId(parsed);
+    },
+
+    resolveStateDir(args: {
+      stateDir?: string;
+      pluginRoot?: string;
+    }): string | undefined {
+      return resolveOhMyPiStateDir(args);
+    },
+
+    resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {
+      return resolveOhMyPiPluginRoot(args);
+    },
+
+    bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
+      return bindOhMyPiSession(opts);
+    },
+
+    async handleStopHook(_args: HookHandlerArgs): Promise<number> {
+      writeNoopHookResult();
+      return 0;
+    },
+
+    async handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
+      writeNoopHookResult();
+      return 0;
+    },
+
+    findHookDispatcherPath(_startCwd: string): string | null {
+      return null;
     },
 
     installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
@@ -84,6 +195,14 @@ export function createOhMyPiAdapter(): HarnessAdapter {
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
       return installOhMyPiPlugin(options);
+    },
+
+    getCapabilities(): HarnessCapability[] {
+      return [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp];
+    },
+
+    getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
+      return createOhMyPiContext(opts);
     },
   };
 }

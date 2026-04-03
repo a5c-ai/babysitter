@@ -12,7 +12,7 @@ function printUsage() {
     '  babysitter-omp install [--global]',
     '  babysitter-omp install --workspace [path]',
     '  babysitter-omp uninstall [--global]',
-    '  babysitter-omp uninstall --workspace [path]',
+    '  babysitter-omp uninstall',
   ].join('\n'));
 }
 
@@ -23,11 +23,9 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--workspace') {
       const next = argv[i + 1];
+      workspace = next && !next.startsWith('-') ? path.resolve(next) : process.cwd();
       if (next && !next.startsWith('-')) {
-        workspace = path.resolve(next);
         i += 1;
-      } else {
-        workspace = process.cwd();
       }
       continue;
     }
@@ -65,13 +63,7 @@ function main() {
   }
 
   const parsed = parseArgs(rest);
-  const args = [];
-  if (parsed.workspace) {
-    args.push('--workspace', parsed.workspace);
-  } else {
-    args.push('--global');
-  }
-
+  const args = parsed.workspace ? ['--workspace', parsed.workspace] : ['--global'];
   runNodeScript(path.join(PACKAGE_ROOT, 'bin', `${command}.cjs`), args);
 }
 

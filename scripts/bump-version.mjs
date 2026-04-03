@@ -42,6 +42,7 @@ const piPackageManifestPath = "plugins/babysitter-pi/package.json";
 const piPackageLockPath = "plugins/babysitter-pi/package-lock.json";
 const ompPackageManifestPath = "plugins/babysitter-omp/package.json";
 const ompPackageLockPath = "plugins/babysitter-omp/package-lock.json";
+const opencodePackageManifestPath = "plugins/babysitter-opencode/package.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -98,6 +99,12 @@ const ompPackageManifest = existsSync(ompPackageManifestPath)
   ? {
       path: ompPackageManifestPath,
       data: JSON.parse(readFileSync(ompPackageManifestPath, "utf8")),
+    }
+  : null;
+const opencodePackageManifest = existsSync(opencodePackageManifestPath)
+  ? {
+      path: opencodePackageManifestPath,
+      data: JSON.parse(readFileSync(opencodePackageManifestPath, "utf8")),
     }
   : null;
 
@@ -245,6 +252,16 @@ if (ompPackageManifest) {
   }
 }
 
+if (opencodePackageManifest) {
+  const currentOpencodeVersion = opencodePackageManifest.data.version;
+  const newOpencodeVersion = bumpVersion(currentOpencodeVersion, bumpTarget);
+  opencodePackageManifest.data.version = newOpencodeVersion;
+  writeFileSync(
+    opencodePackageManifest.path,
+    `${JSON.stringify(opencodePackageManifest.data, null, 2)}\n`,
+  );
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
 for (const versionsPath of [
@@ -252,6 +269,7 @@ for (const versionsPath of [
   "plugins/babysitter-codex/versions.json",
   "plugins/babysitter-gemini/versions.json",
   "plugins/babysitter-omp/versions.json",
+  "plugins/babysitter-opencode/versions.json",
   "plugins/babysitter-pi/versions.json",
   "plugins/babysitter-github/versions.json",
   "plugins/babysitter-cursor/versions.json",

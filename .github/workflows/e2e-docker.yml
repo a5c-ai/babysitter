@@ -10,11 +10,20 @@ on:
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
       - 'plugins/babysitter-gemini/**'
-      - 'plugins/pi/**'
+      - 'plugins/babysitter-pi/**'
+      - 'plugins/babysitter-omp/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/Dockerfile.pi'
+      - 'e2e-tests/docker/Dockerfile.oh-my-pi'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/helpers-pi.ts'
+      - 'e2e-tests/docker/helpers-oh-my-pi.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
+      - 'e2e-tests/docker/pi-structural.test.ts'
+      - 'e2e-tests/docker/pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
       - '.github/workflows/e2e-docker.yml'
   push:
     branches:
@@ -28,11 +37,20 @@ on:
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
       - 'plugins/babysitter-gemini/**'
-      - 'plugins/pi/**'
+      - 'plugins/babysitter-pi/**'
+      - 'plugins/babysitter-omp/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/Dockerfile.pi'
+      - 'e2e-tests/docker/Dockerfile.oh-my-pi'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/helpers-pi.ts'
+      - 'e2e-tests/docker/helpers-oh-my-pi.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
+      - 'e2e-tests/docker/pi-structural.test.ts'
+      - 'e2e-tests/docker/pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
 
@@ -82,25 +100,25 @@ jobs:
             --outputFile.json=e2e-artifacts/test-results-structural.json \
             e2e-tests/docker/structural.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
-            e2e-tests/docker/pi-harness.test.ts \
-            e2e-tests/docker/pi-secure-sandbox.test.ts \
-            e2e-tests/docker/pi-workflow.test.ts \
+            e2e-tests/docker/pi-structural.test.ts \
+            e2e-tests/docker/pi-stop-hook.test.ts \
+            e2e-tests/docker/oh-my-pi-structural.test.ts \
+            e2e-tests/docker/oh-my-pi-stop-hook.test.ts \
             e2e-tests/docker/gemini-cli-structural.test.ts \
             2>&1 | tee e2e-artifacts/structural-tests.log
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
 
-      - name: Run Pi workflow tests with Azure OpenAI (gated on configured provider)
+      - name: Run provider-gated full-run tests with Azure OpenAI
         if: ${{ env.AZURE_OPENAI_API_KEY != '' && env.AZURE_OPENAI_PROJECT_NAME != '' }}
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
-            --outputFile.json=e2e-artifacts/test-results-pi-azure.json \
-            e2e-tests/docker/pi-workflow.test.ts \
+            --outputFile.json=e2e-artifacts/test-results-provider-full-run.json \
             e2e-tests/docker/session-create-full-run.test.ts \
-            2>&1 | tee e2e-artifacts/pi-azure-tests.log
+            2>&1 | tee e2e-artifacts/provider-full-run-tests.log
 
       - name: Upload test artifacts
         if: always()

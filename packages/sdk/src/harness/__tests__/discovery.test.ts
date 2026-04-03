@@ -309,10 +309,10 @@ describe("discoverHarnesses", () => {
     const results = await discoverHarnesses();
     const pi = results.find((r) => r.name === "pi");
 
-    expect(pi?.capabilities).not.toContain("programmatic");
+    expect(pi?.capabilities).toContain("programmatic");
     expect(pi?.capabilities).toContain("session-binding");
-    expect(pi?.capabilities).toContain("stop-hook");
     expect(pi?.capabilities).toContain("headless-prompt");
+    expect(pi?.capabilities).not.toContain("stop-hook");
 
     const internal = results.find((r) => r.name === "internal");
     expect(internal?.capabilities).toContain("programmatic");
@@ -440,23 +440,16 @@ describe("detectCallerHarness", () => {
 
     const caller = detectCallerHarness();
 
-    // pi shares OMP_SESSION_ID with oh-my-pi in KNOWN_HARNESSES order,
-    // but PI_SESSION_ID is only on pi — so pi should not be matched
-    // unless oh-my-pi doesn't match first. Actually oh-my-pi comes before
-    // pi in the list, and PI_SESSION_ID is only on pi's spec.
-    // oh-my-pi won't match PI_SESSION_ID, so pi wins.
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("pi");
     expect(caller!.matchedEnvVars).toContain("PI_SESSION_ID");
   });
 
-  it("detects oh-my-pi via OMP_SESSION_ID (first match wins)", () => {
+  it("detects oh-my-pi via OMP_SESSION_ID", () => {
     process.env.OMP_SESSION_ID = "omp-sess-1";
 
     const caller = detectCallerHarness();
 
-    // oh-my-pi comes before pi in KNOWN_HARNESSES, and both list OMP_SESSION_ID,
-    // so oh-my-pi wins as the first match.
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("oh-my-pi");
   });

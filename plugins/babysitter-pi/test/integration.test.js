@@ -31,19 +31,30 @@ describe('package.json', () => {
     assert.strictEqual(pkg.name, '@a5c-ai/babysitter-pi');
   });
 
-  it('has omp manifest with extensions and skills', () => {
-    assert.ok(pkg.omp);
-    assert.ok(Array.isArray(pkg.omp.extensions));
-    assert.ok(Array.isArray(pkg.omp.skills));
+  it('has pi manifest with extensions and skills', () => {
+    assert.ok(pkg.pi);
+    assert.ok(Array.isArray(pkg.pi.extensions));
+    assert.ok(Array.isArray(pkg.pi.skills));
   });
 });
 
 describe('command files', () => {
   const commands = [
-    'babysitter-call.md',
-    'babysitter-status.md',
-    'babysitter-resume.md',
-    'babysitter-doctor.md',
+    'assimilate.md',
+    'call.md',
+    'cleanup.md',
+    'contrib.md',
+    'doctor.md',
+    'forever.md',
+    'help.md',
+    'observe.md',
+    'plan.md',
+    'plugins.md',
+    'project-install.md',
+    'resume.md',
+    'retrospect.md',
+    'user-install.md',
+    'yolo.md',
   ];
 
   for (const cmd of commands) {
@@ -64,27 +75,17 @@ describe('command files', () => {
 });
 
 describe('documentation and metadata', () => {
-  it('README documents active process-library bootstrapping', () => {
-    assert.match(readText('README.md'), /babysitter process-library:active --json/);
-  });
-
-  it('README documents harness discovery as the supported Pi troubleshooting path', () => {
+  it('README documents the recommended pi install flow', () => {
     const readme = readText('README.md');
+    assert.match(readme, /pi install npm:@a5c-ai\/babysitter-pi/);
     assert.match(readme, /babysitter harness:discover --json/);
-    assert.match(readme, /where pi/);
   });
 });
 
-describe('installer assets', () => {
-  it('bin scripts exist', () => {
-    assert.ok(fileExists('bin', 'cli.cjs'));
-    assert.ok(fileExists('bin', 'install.cjs'));
-    assert.ok(fileExists('bin', 'uninstall.cjs'));
-  });
-
-  it('bin/install.cjs bootstraps the shared active process library', () => {
-    const installer = readText('bin', 'install.cjs');
-    assert.match(installer, /process-library:active/);
-    assert.match(installer, /--state-dir/);
+describe('skills and extension assets', () => {
+  it('ships the thin babysit skill and extension bridge', () => {
+    assert.ok(fileExists('skills', 'babysit', 'SKILL.md'));
+    assert.ok(fileExists('extensions', 'index.ts'));
+    assert.match(readText('extensions', 'index.ts'), /\/skill:/);
   });
 });

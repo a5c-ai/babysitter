@@ -1,78 +1,121 @@
 # @a5c-ai/babysitter-omp
 
-Babysitter integration plugin for `oh-my-pi`. This package owns the
-oh-my-pi-specific install surface, command docs, and skill wiring while sharing
-compatible runtime internals with the upstream Pi-family.
+Babysitter package for `oh-my-pi`.
 
-## Integration Model
+This is a thin oh-my-pi package:
 
-The oh-my-pi plugin keeps Babysitter as the orchestration layer for omp
-sessions:
-
-- session lifecycle hooks prepare and bind run state
-- omp commands start or resume runs
-- the harness advances one orchestration phase at a time
-- the plugin runtime records effect outcomes and updates the run state
-- completion requires the emitted `completionProof`
+- `skills/` exposes Babysitter workflows through oh-my-pi's skill system
+- `extensions/index.ts` adds lightweight slash-command aliases that forward to those skills
+- the SDK remains responsible for orchestration, runs, tasks, and state
 
 ## Installation
 
-Install the published oh-my-pi plugin globally:
+Recommended:
 
 ```bash
-npx @a5c-ai/babysitter-omp install
+omp plugin install @a5c-ai/babysitter-omp
 ```
 
-Install into a specific workspace instead of the user profile:
+Verify the plugin is available:
+
+```bash
+babysitter harness:discover --json
+```
+
+Development helper:
 
 ```bash
 npx @a5c-ai/babysitter-omp install --workspace /path/to/repo
 ```
 
-Or use the Babysitter SDK helper:
+Removal:
 
 ```bash
-babysitter harness:install-plugin oh-my-pi
-babysitter harness:install-plugin oh-my-pi --workspace /path/to/repo
+omp plugin uninstall @a5c-ai/babysitter-omp
 ```
 
-This package installs under:
+## Using Babysitter
+
+Start oh-my-pi, then use the thin Babysitter entrypoints exposed by the plugin:
+
+- `/babysit` or `/babysitter`
+- `/call`
+- `/plan`
+- `/resume`
+- `/doctor`
+- `/yolo`
+
+Each command forwards into oh-my-pi's native `/skill:<name>` flow. The
+orchestration contract lives in the skills; the extension only provides
+convenient aliases.
+
+## Commands And Skills
+
+The package mirrors the canonical Babysitter command docs and exposes the core
+`babysit` skill plus command-backed skills such as `call`, `doctor`, `plan`,
+`resume`, and `yolo`.
+
+The extension layer is intentionally thin. It only forwards slash commands to
+oh-my-pi's built-in `/skill:<name>` flow; it does not implement a custom loop
+driver, custom tools, or direct run mutation logic.
+
+## Plugin Layout
 
 ```text
-~/.omp/plugins/babysitter
+plugins/babysitter-omp/
+|-- package.json
+|-- versions.json
+|-- extensions/
+|   `-- index.ts
+|-- commands/
+|-- skills/
+|-- bin/
+`-- scripts/
 ```
 
-If the workspace does not already have an active process-library binding, the
-installer bootstraps the shared global SDK process library automatically:
+## SDK Setup
+
+Read the pinned SDK version from `versions.json` when you need a local CLI:
 
 ```bash
-babysitter process-library:active --json
+PLUGIN_ROOT="${OMP_PLUGIN_ROOT:-$(pwd)}"
+SDK_VERSION=$(node -e "try{const fs=require('fs');const path=require('path');const pluginRoot=process.env.OMP_PLUGIN_ROOT||process.env.PLUGIN_ROOT||process.cwd();const probes=[path.join(pluginRoot,'versions.json'),path.join(pluginRoot,'plugins','babysitter-omp','versions.json'),path.join(pluginRoot,'node_modules','@a5c-ai','babysitter-omp','versions.json'),path.join(process.cwd(),'node_modules','@a5c-ai','babysitter-omp','versions.json')];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
+CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 
-## Commands
+## Marketplace And Distribution
 
-The plugin exposes oh-my-pi-facing Babysitter commands such as:
+oh-my-pi discovers this plugin through its native plugin system. Publish new
+versions to npm under `@a5c-ai/babysitter-omp`, then users can install or
+upgrade through `omp plugin install @a5c-ai/babysitter-omp`.
 
-- `/babysitter:call`
-- `/babysitter:status`
-- `/babysitter:resume`
-- `/babysitter:doctor`
+## Upgrade And Uninstall
+
+Upgrade by reinstalling the plugin:
+
+```bash
+omp plugin install @a5c-ai/babysitter-omp
+```
+
+Remove it with:
+
+```bash
+omp plugin uninstall @a5c-ai/babysitter-omp
+```
 
 ## Troubleshooting
 
-- `babysitter harness:discover --json` is the supported way to verify whether
-  `oh-my-pi` is installed from the current environment.
-- If discovery reports `oh-my-pi` as installed but a direct invocation fails,
-  validate the current shell `PATH` first with `where omp` on Windows.
+- Verify the harness with `babysitter harness:discover --json`.
+- If `omp` is not available, check `where omp` on Windows or `which omp` on Unix.
+- If commands do not appear, restart oh-my-pi after installation so it reloads plugin metadata.
+- If the wrong SDK version is used, inspect `versions.json` inside the installed plugin root.
+- Regenerate mirrored commands and command-backed skills with `npm run sync:commands`.
 
 ## Tests
 
 ```bash
 cd plugins/babysitter-omp
 npm test
-npm run test:integration
-npm run test:harness
-npm run test:tui
 ```
 
 ## License

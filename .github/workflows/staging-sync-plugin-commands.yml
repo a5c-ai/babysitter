@@ -13,6 +13,7 @@ on:
       - 'plugins/babysitter-github/scripts/sync-command-surfaces.js'
       - 'plugins/babysitter-cursor/scripts/sync-command-surfaces.js'
       - 'plugins/babysitter-omp/scripts/sync-command-docs.cjs'
+      - 'plugins/babysitter-opencode/scripts/sync-command-docs.cjs'
       - 'plugins/babysitter-pi/scripts/sync-command-docs.cjs'
   workflow_dispatch:
 
@@ -68,5 +69,6 @@ jobs:
             plugins/babysitter-cursor/commands/**
             plugins/babysitter-cursor/skills/**
             plugins/babysitter-omp/commands/**
+            plugins/babysitter-opencode/commands/**
             plugins/babysitter-pi/commands/**
           delete-branch: true

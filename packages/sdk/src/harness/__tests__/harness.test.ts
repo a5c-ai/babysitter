@@ -259,6 +259,16 @@ describe("PiAdapter", () => {
     const result = adapter.resolveStateDir({});
     expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
   });
+
+  it("only activates for PI-scoped env vars", () => {
+    process.env.OMP_SESSION_ID = "omp-session";
+    const adapter = createPiAdapter();
+    expect(adapter.isActive()).toBe(false);
+
+    process.env.PI_SESSION_ID = "pi-session";
+    expect(adapter.isActive()).toBe(true);
+    expect(adapter.supportsHookType?.("stop")).toBe(false);
+  });
 });
 
 describe("OhMyPiAdapter", () => {
@@ -269,38 +279,27 @@ describe("OhMyPiAdapter", () => {
 
     process.env.OMP_SESSION_ID = "omp-session";
     expect(adapter.isActive()).toBe(true);
+    expect(adapter.supportsHookType?.("stop")).toBe(false);
   });
 
-  it("reuses the oh-my-pi babysitter install root when already present", async () => {
-    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "omp-plugin-install-test-"));
-    const targetDir = path.join(workspace, ".omp", "plugins", "babysitter");
-
-    try {
-      await fs.mkdir(targetDir, { recursive: true });
-      const adapter = createOhMyPiAdapter();
-      const result = await adapter.installPlugin?.({ workspace });
-
-      expect(result.location).toBe(targetDir);
-      expect(result.warning).toContain("already installed");
-    } finally {
-      await fs.rm(workspace, { recursive: true, force: true });
-    }
+  it("uses the oh-my-pi specific prompt context", () => {
+    const adapter = createOhMyPiAdapter();
+    const context = adapter.getPromptContext?.();
+    expect(context?.harness).toBe("oh-my-pi");
+    expect(context?.pluginRootVar).toBe("${OMP_PLUGIN_ROOT}");
   });
 });
 
 describe("Pi install helpers", () => {
-  it("reuses the existing pi install root when already present", async () => {
-    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "pi-plugin-install-test-"));
-    const targetDir = path.join(workspace, ".pi", "plugins", "babysitter");
-
-    try {
-      await fs.mkdir(targetDir, { recursive: true });
-      const result = await installPiPlugin({ workspace });
-      expect(result.location).toBe(targetDir);
-      expect(result.warning).toContain("already installed");
-    } finally {
-      await fs.rm(workspace, { recursive: true, force: true });
-    }
+  it("returns an npx-based dry-run install command", async () => {
+    const result = await installPiPlugin({
+      workspace: "/tmp/project",
+      dryRun: true,
+      json: true,
+      verbose: false,
+    });
+    expect(result.dryRun).toBe(true);
+    expect(result.command).toContain("@a5c-ai/babysitter-pi");
   });
 });
 

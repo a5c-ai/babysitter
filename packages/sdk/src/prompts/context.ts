@@ -210,6 +210,47 @@ export function createGeminiCliContext(
 }
 
 /**
+ * Create a PromptContext pre-configured for OpenCode.
+ */
+export function createOpenCodeContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'opencode',
+    harnessLabel: 'OpenCode',
+    capabilities: ['task-tool', 'breakpoint-routing'],
+    pluginRootVar: '',
+    // In-turn model: OpenCode has no blocking stop hook.
+    // session.idle is fire-and-forget. Orchestration is driven in-turn
+    // by the agent itself or via the SDK loop driver.
+    loopControlTerm: 'in-turn',
+    sessionBindingFlags: '',
+    hookDriven: false,
+    interactiveToolName: '',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (self-injected via shell.env hook)',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
  * Create a PromptContext pre-configured for PI.
  */
 export function createPiContext(
@@ -218,14 +259,49 @@ export function createPiContext(
   return {
     ...COMMON_DEFAULTS,
     harness: 'pi',
-    harnessLabel: 'PI',
-    capabilities: ['loop-driver', 'ask-user-question', 'task-tool', 'breakpoint-routing', 'harness-routing'],
-    pluginRootVar: '',
-    loopControlTerm: 'loop-driver',
+    harnessLabel: 'Pi Coding Agent',
+    capabilities: ['skills', 'slash-commands', 'task-tool', 'harness-routing', 'programmatic-session'],
+    pluginRootVar: '${PI_PLUGIN_ROOT}',
+    loopControlTerm: 'skill-driven',
     sessionBindingFlags: '',
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
-    sessionEnvVars: 'BABYSITTER_SESSION_ID, OMP_SESSION_ID, PI_SESSION_ID (in-process)',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, PI_SESSION_ID, PI_PLUGIN_ROOT',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+export function createOhMyPiContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'oh-my-pi',
+    harnessLabel: 'oh-my-pi',
+    capabilities: ['skills', 'slash-commands', 'task-tool', 'harness-routing', 'programmatic-session', 'mcp'],
+    pluginRootVar: '${OMP_PLUGIN_ROOT}',
+    loopControlTerm: 'skill-driven',
+    sessionBindingFlags: '',
+    hookDriven: false,
+    interactiveToolName: 'AskUserQuestion',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, OMP_SESSION_ID, OMP_PLUGIN_ROOT',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',

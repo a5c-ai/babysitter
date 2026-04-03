@@ -1,77 +1,128 @@
 # @a5c-ai/babysitter-pi
 
-Babysitter integration plugin for the upstream `pi` coding agent. This package
-owns the Pi-specific install surface, command docs, and skill wiring while the
-shared runtime internals remain compatible with the wider PI-family.
+Babysitter package for the upstream `pi` coding agent.
 
-## Integration Model
+This is a thin Pi package:
 
-The pi plugin keeps Babysitter as the orchestration layer for pi sessions:
-
-- session lifecycle hooks prepare and bind run state
-- pi commands start or resume runs
-- the harness advances one orchestration phase at a time
-- the plugin runtime records effect outcomes and updates the run state
-- completion requires the emitted `completionProof`
+- `skills/` exposes Babysitter workflows through Pi's skill system
+- `extensions/index.ts` adds lightweight slash-command aliases that forward to those skills
+- the SDK remains responsible for orchestration, runs, tasks, and state
 
 ## Installation
 
-Install the published Pi plugin globally:
+Recommended:
+
+```bash
+pi install npm:@a5c-ai/babysitter-pi
+```
+
+Verify the package is available:
+
+```bash
+babysitter harness:discover --json
+```
+
+Project-local:
+
+```bash
+cd /path/to/repo
+pi install -l npm:@a5c-ai/babysitter-pi
+```
+
+Development helper:
 
 ```bash
 npx @a5c-ai/babysitter-pi install
-```
-
-Install into a specific workspace instead of the user profile:
-
-```bash
 npx @a5c-ai/babysitter-pi install --workspace /path/to/repo
 ```
 
-Or use the Babysitter SDK helper:
+Removal:
 
 ```bash
-babysitter harness:install-plugin pi
-babysitter harness:install-plugin pi --workspace /path/to/repo
+pi remove npm:@a5c-ai/babysitter-pi
 ```
 
-This package installs under:
+## Using Babysitter
+
+Start Pi, then use the thin Babysitter entrypoints exposed by the package:
+
+- `/babysit` or `/babysitter`
+- `/call`
+- `/plan`
+- `/resume`
+- `/doctor`
+- `/yolo`
+
+Each command forwards into Pi's native `/skill:<name>` flow. The orchestration
+contract lives in the skills; the extension only provides convenient aliases.
+
+## Commands And Skills
+
+The package mirrors the canonical Babysitter command docs and exposes the core
+`babysit` skill plus command-backed skills such as `call`, `doctor`, `plan`,
+`resume`, and `yolo`.
+
+The extension layer is intentionally thin. It only forwards slash commands to
+Pi's built-in `/skill:<name>` flow; it does not implement a custom loop driver,
+custom tools, or direct run mutation logic.
+
+## Plugin Layout
 
 ```text
-~/.pi/plugins/babysitter
+plugins/babysitter-pi/
+|-- package.json
+|-- versions.json
+|-- extensions/
+|   `-- index.ts
+|-- commands/
+|-- skills/
+|-- bin/
+`-- scripts/
 ```
 
-If the workspace does not already have an active process-library binding, the
-installer bootstraps the shared global SDK process library automatically:
+## SDK Setup
+
+Read the pinned SDK version from `versions.json` when you need a local CLI:
 
 ```bash
-babysitter process-library:active --json
+PLUGIN_ROOT="${PI_PLUGIN_ROOT:-$(pwd)}"
+SDK_VERSION=$(node -e "try{const fs=require('fs');const path=require('path');const pluginRoot=process.env.PI_PLUGIN_ROOT||process.env.PLUGIN_ROOT||process.cwd();const probes=[path.join(pluginRoot,'versions.json'),path.join(pluginRoot,'plugins','babysitter-pi','versions.json'),path.join(pluginRoot,'node_modules','@a5c-ai','babysitter-pi','versions.json'),path.join(process.cwd(),'node_modules','@a5c-ai','babysitter-pi','versions.json')];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
+CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 
-## Commands
+## Marketplace And Distribution
 
-The plugin exposes pi-facing Babysitter commands such as:
+Pi discovers this package through its native package installation flow. Publish
+new versions to npm under `@a5c-ai/babysitter-pi`, then users can install or
+upgrade through `pi install npm:@a5c-ai/babysitter-pi`.
 
-- `/babysitter:call`
-- `/babysitter:status`
-- `/babysitter:resume`
-- `/babysitter:doctor`
+## Upgrade And Uninstall
+
+Upgrade by reinstalling the package:
+
+```bash
+pi install npm:@a5c-ai/babysitter-pi
+```
+
+Remove it with:
+
+```bash
+pi remove npm:@a5c-ai/babysitter-pi
+```
 
 ## Troubleshooting
 
-- `babysitter harness:discover --json` is the supported way to verify whether
-  `pi` is installed from the current environment.
-- If discovery reports `pi` as installed but a direct invocation fails, validate
-  the current shell `PATH` first with `where pi` on Windows.
+- Verify the harness with `babysitter harness:discover --json`.
+- If `pi` is not available, check `where pi` on Windows or `which pi` on Unix.
+- If commands do not appear, restart Pi after installation so it reloads package metadata.
+- If the wrong SDK version is used, inspect `versions.json` inside the installed package root.
+- Regenerate mirrored commands and command-backed skills with `npm run sync:commands`.
 
 ## Tests
 
 ```bash
 cd plugins/babysitter-pi
 npm test
-npm run test:integration
-npm run test:harness
-npm run test:tui
 ```
 
 ## License

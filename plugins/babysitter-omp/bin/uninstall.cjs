@@ -2,39 +2,19 @@
 'use strict';
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
-function parseArgs(argv) {
-  const args = {
-    workspace: null,
-  };
-  for (let i = 2; i < argv.length; i += 1) {
-    if (argv[i] === '--workspace' && argv[i + 1]) {
-      args.workspace = path.resolve(argv[++i]);
-    } else if (argv[i] === '--global') {
-      args.workspace = null;
-    } else {
-      throw new Error(`unknown argument: ${argv[i]}`);
-    }
-  }
-  return args;
-}
-
-function getPluginRoot(args) {
-  const base = args.workspace ? path.resolve(args.workspace) : os.homedir();
-  return path.join(base, '.omp', 'plugins', 'babysitter');
-}
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const PACKAGE_JSON = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, 'package.json'), 'utf8'));
 
 function main() {
-  const args = parseArgs(process.argv);
-  const pluginRoot = getPluginRoot(args);
-  if (!fs.existsSync(pluginRoot)) {
-    console.log('[babysitter] Nothing to uninstall.');
-    return;
-  }
-  fs.rmSync(pluginRoot, { recursive: true, force: true });
-  console.log(`[babysitter] Removed ${pluginRoot}`);
+  const result = spawnSync('omp', ['plugin', 'uninstall', PACKAGE_JSON.name], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    env: process.env,
+  });
+  process.exitCode = result.status ?? 1;
 }
 
 main();

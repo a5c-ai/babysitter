@@ -1,0 +1,25 @@
+{
+  "name": "babysitter",
+  "version": "0.1.0",
+  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval -- powered by the Babysitter SDK",
+  "author": "a5c.ai",
+  "license": "MIT",
+  "harness": "opencode",
+  "hooks": "hooks/",
+  "commands": "commands/",
+  "skills": "skills/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "automation",
+    "event-sourced",
+    "hooks",
+    "opencode",
+    "agent",
+    "LLM"
+  ]
+}

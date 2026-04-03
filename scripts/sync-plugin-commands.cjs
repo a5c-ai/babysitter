@@ -18,11 +18,6 @@ const tasks = [
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-codex', 'scripts', 'sync-command-skills.js')],
   },
   {
-    label: 'babysitter-github',
-    cmd: process.execPath,
-    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-github', 'scripts', 'sync-command-surfaces.js')],
-  },
-  {
     label: 'babysitter-cursor',
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-cursor', 'scripts', 'sync-command-surfaces.js')],
@@ -33,9 +28,19 @@ const tasks = [
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-gemini', 'scripts', 'sync-command-surfaces.js')],
   },
   {
-    label: 'babysitter-omp',
+    label: 'babysitter-github',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-github', 'scripts', 'sync-command-surfaces.js')],
+  },
+  {
+    label: 'babysitter-oh-my-pi',
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-omp', 'scripts', 'sync-command-docs.cjs')],
+  },
+  {
+    label: 'babysitter-opencode',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-opencode', 'scripts', 'sync-command-docs.cjs')],
   },
   {
     label: 'babysitter-pi',
