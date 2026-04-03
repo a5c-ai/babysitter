@@ -9,6 +9,7 @@ const { spawnSync } = require('child_process');
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const PLUGIN_NAME = 'babysitter-gemini';
 const EXTENSION_NAME = 'babysitter'; // matches gemini-extension.json "name"
+const EXTENSION_DIR_NAME = 'babysitter-gemini';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -47,7 +48,10 @@ function getVersions() {
 }
 
 function getExtensionDir() {
-  return path.join(os.homedir(), '.gemini', 'extensions', EXTENSION_NAME);
+  if (process.env.GEMINI_EXTENSION_PATH) {
+    return path.resolve(process.env.GEMINI_EXTENSION_PATH);
+  }
+  return path.join(os.homedir(), '.gemini', 'extensions', EXTENSION_DIR_NAME);
 }
 
 function isGeminiCliAvailable() {
@@ -68,6 +72,47 @@ function requireGeminiCli() {
     return false;
   }
   return true;
+}
+
+function removePath(targetPath) {
+  fs.rmSync(targetPath, { recursive: true, force: true });
+}
+
+function ensureParentDir(targetPath) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+}
+
+function copyRecursive(sourcePath, targetPath) {
+  const stat = fs.lstatSync(sourcePath);
+  if (stat.isSymbolicLink()) {
+    ensureParentDir(targetPath);
+    const linkTarget = fs.readlinkSync(sourcePath);
+    fs.symlinkSync(linkTarget, targetPath);
+    return;
+  }
+  if (stat.isDirectory()) {
+    fs.mkdirSync(targetPath, { recursive: true });
+    for (const entry of fs.readdirSync(sourcePath)) {
+      copyRecursive(path.join(sourcePath, entry), path.join(targetPath, entry));
+    }
+    return;
+  }
+  ensureParentDir(targetPath);
+  fs.copyFileSync(sourcePath, targetPath);
+}
+
+function installWithoutGeminiCli(useLink) {
+  const extensionDir = getExtensionDir();
+  removePath(extensionDir);
+  ensureParentDir(extensionDir);
+
+  if (useLink) {
+    fs.symlinkSync(PACKAGE_ROOT, extensionDir, process.platform === 'win32' ? 'junction' : 'dir');
+    console.log(`[babysitter] Gemini CLI not found. Linked extension bundle to ${extensionDir}`);
+  } else {
+    copyRecursive(PACKAGE_ROOT, extensionDir);
+    console.log(`[babysitter] Gemini CLI not found. Copied extension bundle to ${extensionDir}`);
+  }
 }
 
 function resolveBabysitterCommand() {
@@ -122,27 +167,29 @@ function getGlobalStateDir() {
 // ---------------------------------------------------------------------------
 
 function install(useLink) {
-  if (!requireGeminiCli()) return;
+  if (isGeminiCliAvailable()) {
+    const subcommand = useLink ? 'link' : 'install';
+    console.log(`[babysitter] Running: gemini extensions ${subcommand} ${PACKAGE_ROOT}`);
 
-  const subcommand = useLink ? 'link' : 'install';
-  console.log(`[babysitter] Running: gemini extensions ${subcommand} ${PACKAGE_ROOT}`);
+    const result = spawnSync('gemini', ['extensions', subcommand, PACKAGE_ROOT], {
+      stdio: 'inherit',
+      shell: true,
+      timeout: 60000,
+    });
 
-  const result = spawnSync('gemini', ['extensions', subcommand, PACKAGE_ROOT], {
-    stdio: 'inherit',
-    shell: true,
-    timeout: 60000,
-  });
+    if (result.status !== 0) {
+      console.error(`[babysitter] gemini extensions ${subcommand} failed (exit ${result.status}).`);
+      process.exitCode = 1;
+      return;
+    }
 
-  if (result.status !== 0) {
-    console.error(`[babysitter] gemini extensions ${subcommand} failed (exit ${result.status}).`);
-    process.exitCode = 1;
-    return;
-  }
-
-  if (useLink) {
-    console.log('[babysitter] Extension linked. Changes to the package are reflected immediately.');
+    if (useLink) {
+      console.log('[babysitter] Extension linked. Changes to the package are reflected immediately.');
+    } else {
+      console.log('[babysitter] Extension installed.');
+    }
   } else {
-    console.log('[babysitter] Extension installed.');
+    installWithoutGeminiCli(useLink);
   }
 
   installSdk();
@@ -189,20 +236,23 @@ function ensureProcessLibrary() {
 // ---------------------------------------------------------------------------
 
 function uninstall() {
-  if (!requireGeminiCli()) return;
+  if (isGeminiCliAvailable()) {
+    console.log(`[babysitter] Running: gemini extensions uninstall ${EXTENSION_NAME}`);
 
-  console.log(`[babysitter] Running: gemini extensions uninstall ${EXTENSION_NAME}`);
+    const result = spawnSync('gemini', ['extensions', 'uninstall', EXTENSION_NAME], {
+      stdio: 'inherit',
+      shell: true,
+      timeout: 30000,
+    });
 
-  const result = spawnSync('gemini', ['extensions', 'uninstall', EXTENSION_NAME], {
-    stdio: 'inherit',
-    shell: true,
-    timeout: 30000,
-  });
-
-  if (result.status !== 0) {
-    console.error(`[babysitter] gemini extensions uninstall failed (exit ${result.status}).`);
-    process.exitCode = 1;
-    return;
+    if (result.status !== 0) {
+      console.error(`[babysitter] gemini extensions uninstall failed (exit ${result.status}).`);
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    removePath(getExtensionDir());
+    console.log(`[babysitter] Gemini CLI not found. Removed extension bundle from ${getExtensionDir()}.`);
   }
 
   console.log('[babysitter] Extension removed. Restart Gemini CLI to complete uninstallation.');

@@ -898,7 +898,7 @@ describe.skipIf(!HAS_AZURE_KEY)(
       });
 
       // Verify omp is available
-      const version = dockerExec("omp --version").trim();
+      const version = dockerExec("omp --version 2>&1").trim();
       expect(version).toBeTruthy();
 
       // Link babysitter-pi as an omp package from local path

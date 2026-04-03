@@ -29,6 +29,7 @@ RUN npm run build:sdk && chown -R omp:omp /app /home/omp
 
 USER omp
 
+RUN npm install -g bun
 RUN npm install -g @oh-my-pi/pi-coding-agent @a5c-ai/babysitter-sdk /app/plugins/babysitter-omp
 
 WORKDIR /workspace

@@ -27,7 +27,7 @@ describe("oh-my-pi Docker structural tests", () => {
   });
 
   test("omp CLI is available", () => {
-    expect(dockerExec("omp --version").trim()).toBeTruthy();
+    expect(dockerExec("omp --version 2>&1").trim()).toBeTruthy();
   });
 
   test("Node.js v20+ and jq are installed", () => {

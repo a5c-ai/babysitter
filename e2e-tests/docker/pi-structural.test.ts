@@ -27,7 +27,7 @@ describe("Pi Docker structural tests", () => {
   });
 
   test("pi CLI is available", () => {
-    expect(dockerExec("pi --version").trim()).toBeTruthy();
+    expect(dockerExec("pi --version 2>&1").trim()).toBeTruthy();
   });
 
   test("Node.js v20+ and jq are installed", () => {
