@@ -155,20 +155,24 @@ export async function appendRunLog(
 export function createRunLogger(options: RunLoggerOptions) {
   const { runId, processId, logDir, source, type: defaultType } = options;
 
+  let pending = Promise.resolve();
+
   function write(level: RunLogLevel, label: string, message: string, context?: Record<string, unknown>): void {
-    void appendRunLog(
-      {
-        timestamp: new Date().toISOString(),
-        level,
-        type: defaultType,
-        label: label || undefined,
-        message,
-        runId,
-        processId,
-        source,
-        context,
-      },
-      { logDir },
+    pending = pending.then(() =>
+      appendRunLog(
+        {
+          timestamp: new Date().toISOString(),
+          level,
+          type: defaultType,
+          label: label || undefined,
+          message,
+          runId,
+          processId,
+          source,
+          context,
+        },
+        { logDir },
+      ).then(() => undefined),
     ).catch(() => {
       // Never let logging break orchestration.
     });
@@ -185,5 +189,7 @@ export function createRunLogger(options: RunLoggerOptions) {
       write("error", label, message, context),
     /** Raw write — lets callers specify the level explicitly. */
     log: write,
+    /** Returns a promise that resolves when all queued writes have completed. */
+    flush: () => pending,
   };
 }

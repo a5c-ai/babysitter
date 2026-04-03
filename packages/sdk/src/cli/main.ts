@@ -142,6 +142,7 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter harness:assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:anycli --service <name> [--scope <scopes>] [--mcp] [--auth-file <path>] [--transport <type>] [--prompt <text>] [--workspace <dir>] [--json] [--verbose]
   babysitter harness:help [<topic>]
   babysitter harness:observe [--workspace <dir>]
   babysitter harness:user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
@@ -272,6 +273,12 @@ interface ParsedArgs {
   runIds?: string[];
   // harness:cleanup flags
   keepDays?: number;
+  // harness:anycli flags
+  anycliService?: string;
+  anycliScope?: string;
+  anycliMcp?: boolean;
+  anycliAuthFile?: string;
+  anycliTransport?: string;
 }
 
 interface ActionSummary {
@@ -324,7 +331,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   if (parsed.command === "--version" || parsed.command === "-v") {
     parsed.command = "version";
   }
-  const positionals: string[] = [];
+  let positionals: string[] = [];
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
     if (arg === "--help" || arg === "-h") {
@@ -656,6 +663,27 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.logSource = expectFlagValue(rest, ++i, "--source");
       continue;
     }
+    // harness:anycli flags
+    if (arg === "--service") {
+      parsed.anycliService = expectFlagValue(rest, ++i, "--service");
+      continue;
+    }
+    if (arg === "--scope") {
+      parsed.anycliScope = expectFlagValue(rest, ++i, "--scope");
+      continue;
+    }
+    if (arg === "--mcp") {
+      parsed.anycliMcp = true;
+      continue;
+    }
+    if (arg === "--auth-file") {
+      parsed.anycliAuthFile = expectFlagValue(rest, ++i, "--auth-file");
+      continue;
+    }
+    if (arg === "--transport") {
+      parsed.anycliTransport = expectFlagValue(rest, ++i, "--transport");
+      continue;
+    }
     // harness:cleanup flags
     if (arg === "--keep-days") {
       const raw = expectFlagValue(rest, ++i, "--keep-days");
@@ -730,9 +758,20 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.command === "harness:cleanup" ||
     parsed.command === "harness:assimilate" ||
     parsed.command === "harness:contrib" ||
+    parsed.command === "harness:anycli" ||
     parsed.command === "harness:user-install" ||
     parsed.command === "harness:project-install"
   ) {
+    // For harness:anycli, first positional matching a service name pattern becomes the service
+    if (
+      parsed.command === "harness:anycli" &&
+      !parsed.anycliService &&
+      positionals.length > 0 &&
+      /^[a-zA-Z0-9-]+$/.test(positionals[0])
+    ) {
+      parsed.anycliService = positionals[0];
+      positionals = positionals.slice(1);
+    }
     // Positionals join as prompt text if no --prompt given
     if (positionals.length > 0 && !parsed.prompt) {
       parsed.prompt = positionals.join(" ");
@@ -1164,10 +1203,9 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // Persisting --harness in run metadata must not silently bind the new run to
-  // an ambient editor/CLI session. Only attempt session binding when the user
-  // explicitly supplies --session-id.
-  const shouldBindSession = parsed.sessionId !== undefined;
+  // Attempt session binding when --session-id is provided or --harness is
+  // explicitly passed (the adapter resolves session IDs from env vars).
+  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined;
   const adapter = shouldBindSession
     ? (parsed.harness ? getAdapterByName(parsed.harness) : getAdapter())
     : undefined;
@@ -2228,6 +2266,7 @@ const VALID_COMMANDS = [
   "harness:assimilate",
   "harness:doctor",
   "harness:contrib",
+  "harness:anycli",
   "harness:help",
   "harness:observe",
   "harness:user-install",
@@ -2319,6 +2358,7 @@ ${bold}SECONDARY COMMANDS${reset}
   ${cyan}harness:cleanup${reset} [--keep-days <n>]       Clean up old runs and orphaned processes
   ${cyan}harness:assimilate${reset} [--prompt <text>]     Convert external methodology to babysitter processes
   ${cyan}harness:contrib${reset} [--prompt <text>]        Submit feedback or contribute to babysitter
+  ${cyan}harness:anycli${reset} --service <name>         Generate CLI/MCP tools for any service
   ${cyan}harness:user-install${reset}                     First-time user onboarding
   ${cyan}harness:project-install${reset}                  Onboard a project for babysitter
   ${cyan}harness:observe${reset}                          Launch real-time observer dashboard
@@ -3048,6 +3088,41 @@ export function createBabysitterCli() {
           });
           return await handleHarnessCreateRun({
             prompt: contribPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:anycli") {
+          if (!parsed.anycliService) {
+            console.error("--service is required for harness:anycli");
+            console.error(USAGE);
+            return 1;
+          }
+          if (parsed.anycliTransport === "websocket") {
+            console.error(
+              "Error: WebSocket transport is not yet supported.\n" +
+              "Use --transport stdio (default) or --transport http-sse instead."
+            );
+            return 1;
+          }
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const anycliPrompt = renderCommandTemplate("anycli", {
+            serviceName: parsed.anycliService,
+            scope: parsed.anycliScope ?? "*",
+            mcpMode: parsed.anycliMcp ? "true" : "",
+            authFile: parsed.anycliAuthFile ?? "",
+            transport: parsed.anycliTransport ?? "stdio",
+            userPrompt: parsed.prompt ?? "",
+          });
+          return await handleHarnessCreateRun({
+            prompt: anycliPrompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
             workspace: parsed.workspace,

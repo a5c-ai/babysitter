@@ -3,6 +3,7 @@ import { resolveTemplatePath, renderTemplateString } from "./templateRenderer";
 import type { PromptContext } from "./types";
 
 export type CommandTemplateName =
+  | "anycli"
   | "assimilate"
   | "cleanup"
   | "contrib"

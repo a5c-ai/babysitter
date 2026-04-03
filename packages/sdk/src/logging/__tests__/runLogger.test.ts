@@ -283,8 +283,7 @@ describe("runLogger", () => {
 
       logger.info("test:label", "info message");
 
-      // Wait for fire-and-forget writes
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await logger.flush();
 
       const logPath = path.join(testDir, "run-factory", "process.log");
       const content = await fs.readFile(logPath, "utf8");
@@ -306,14 +305,11 @@ describe("runLogger", () => {
       });
 
       logger.debug("d", "debug msg");
-      await new Promise((resolve) => setTimeout(resolve, 50));
       logger.info("i", "info msg");
-      await new Promise((resolve) => setTimeout(resolve, 50));
       logger.warn("w", "warn msg");
-      await new Promise((resolve) => setTimeout(resolve, 50));
       logger.error("e", "error msg");
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await logger.flush();
 
       const logPath = path.join(testDir, "run-levels", "process.log");
       const content = await fs.readFile(logPath, "utf8");
@@ -333,7 +329,7 @@ describe("runLogger", () => {
 
       logger.info("hook:stop", "hook completed");
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await logger.flush();
 
       const logPath = path.join(testDir, "run-hook", "hooks.log");
       const content = await fs.readFile(logPath, "utf8");
@@ -349,7 +345,7 @@ describe("runLogger", () => {
 
       logger.info("hook:stop", "hook completed", { exitCode: 0, harness: "claude-code" });
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await logger.flush();
 
       const logPath = path.join(testDir, "run-ctx", "process.log");
       const content = await fs.readFile(logPath, "utf8");
