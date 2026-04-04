@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-codex",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Babysitter Codex skill bundle and integration package for OpenAI Codex CLI with SDK-managed process-library bootstrapping, 15 orchestration modes, and BOM-safe SKILL installation",
   "scripts": {
     "test": "node test/integration.test.js && node test/packaged-install.test.js",
