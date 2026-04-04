@@ -58,4 +58,5 @@ export {
   renderCriticalRules,
   renderSeeAlso,
   renderNonNegotiables,
+  renderProjectInstructions,
 } from './parts';

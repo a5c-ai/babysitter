@@ -60,6 +60,7 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
       "loop-control", "completion-proof", "task-kinds", "task-examples",
       "quick-reference", "recovery", "process-guidelines", "critical-rules",
       "see-also",
+      "project-instructions",
     ],
   },
   "process-create": {
@@ -69,6 +70,7 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
       "interview", "user-profile", "process-creation",
       "intent-fidelity-checks", "process-guidelines",
       "parallel-phase-detection", "task-kinds", "task-examples",
+      "project-instructions",
     ],
   },
   "orchestrate": {
