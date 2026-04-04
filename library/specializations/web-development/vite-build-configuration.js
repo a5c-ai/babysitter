@@ -24,6 +24,12 @@ export async function process(inputs, ctx) {
   const optimizationSetup = await ctx.task(optimizationSetupTask, { projectName, outputDir });
   artifacts.push(...optimizationSetup.artifacts);
 
+  // Cache-bust verification protocol (issue #89) - Vite specific (node_modules/.vite)
+  const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
+  artifacts.push(...(cacheBustResult.artifacts || []));
+  const buildHashResult = await ctx.task(buildHashCheckTask, { projectName, outputDir });
+  artifacts.push(...(buildHashResult.artifacts || []));
+
   let devServerSetup = await ctx.task(devServerSetupTask, { projectName, outputDir });
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -47,5 +53,9 @@ export const pluginsSetupTask = defineTask('plugins-setup', (args, taskCtx) => (
 export const optimizationSetupTask = defineTask('optimization-setup', (args, taskCtx) => ({ kind: 'agent', title: `Optimization Setup - ${args.projectName}`, agent: { name: 'build-optimization-specialist', prompt: { role: 'Build Optimization Specialist', task: 'Configure build optimization', context: args, instructions: ['1. Configure code splitting', '2. Set up tree shaking', '3. Configure minification', '4. Set up chunk strategy', '5. Configure rollup options', '6. Set up source maps', '7. Configure preload', '8. Set up CSS code split', '9. Configure asset inlining', '10. Document optimization'], outputFormat: 'JSON with optimization' }, outputSchema: { type: 'object', required: ['config', 'artifacts'], properties: { config: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'vite', 'optimization'] }));
 
 export const devServerSetupTask = defineTask('dev-server-setup', (args, taskCtx) => ({ kind: 'agent', title: `Dev Server Setup - ${args.projectName}`, agent: { name: 'dev-server-specialist', prompt: { role: 'Dev Server Specialist', task: 'Configure dev server', context: args, instructions: ['1. Configure HMR', '2. Set up proxy', '3. Configure CORS', '4. Set up HTTPS', '5. Configure headers', '6. Set up open', '7. Configure watch', '8. Set up middlewares', '9. Configure host', '10. Document server'], outputFormat: 'JSON with server config' }, outputSchema: { type: 'object', required: ['config', 'artifacts'], properties: { config: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'vite', 'dev-server'] }));
+
+export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf node_modules/.vite dist 2>/dev/null; echo "Vite cache cleared at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'vite', 'cache-bust'] }));
+
+export const buildHashCheckTask = defineTask('build-hash-check', (args, taskCtx) => ({ kind: 'shell', title: `Build Hash Check - ${args.projectName}`, shell: { command: 'ls -la dist/assets/*.js 2>/dev/null | head -5 || echo "no-build-output"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'vite', 'build-hash'] }));
 
 export const documentationTask = defineTask('vite-documentation', (args, taskCtx) => ({ kind: 'agent', title: `Documentation - ${args.projectName}`, agent: { name: 'technical-writer-agent', prompt: { role: 'Technical Writer', task: 'Generate Vite documentation', context: args, instructions: ['1. Create README', '2. Document configuration', '3. Create plugins guide', '4. Document optimization', '5. Create dev server guide', '6. Document env variables', '7. Create troubleshooting', '8. Document best practices', '9. Create examples', '10. Generate templates'], outputFormat: 'JSON with documentation' }, outputSchema: { type: 'object', required: ['docs', 'artifacts'], properties: { docs: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'vite', 'documentation'] }));

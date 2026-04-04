@@ -25,12 +25,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...componentPatterns.artifacts);
 
   let globalStyles = await ctx.task(globalStylesTask, { projectName, outputDir });
+
+  // Cache-bust verification protocol (issue #89)
+  const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
+  artifacts.push(...(cacheBustResult.artifacts || []));
+  const buildHashResult = await ctx.task(buildHashCheckTask, { projectName, outputDir });
+  artifacts.push(...(buildHashResult.artifacts || []));
+  const hardRefreshResult = await ctx.task(hardRefreshInstructionTask, { projectName, framework: 'styled-components' });
+  artifacts.push(...(hardRefreshResult.artifacts || []));
+
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback) {
       globalStyles = await ctx.task(globalStylesTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({ question: `CSS-in-JS setup complete for ${projectName}. Approve?`, title: 'CSS-in-JS Review', context: { runId: ctx.runId, components: componentPatterns.components }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+  const finalApproval = await ctx.breakpoint({ question: `CSS-in-JS setup complete for ${projectName}. Framework caches have been cleared and rebuild verified. Hard-refresh your browser (Cmd+Shift+R) to verify. Approve?`, title: 'CSS-in-JS Review', context: { runId: ctx.runId, components: componentPatterns.components, cacheBust: cacheBustResult, buildHash: buildHashResult, hardRefresh: hardRefreshResult }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
   }
@@ -47,5 +56,11 @@ export const themingSetupTask = defineTask('theming-setup', (args, taskCtx) => (
 export const componentPatternsTask = defineTask('component-patterns', (args, taskCtx) => ({ kind: 'agent', title: `Component Patterns - ${args.projectName}`, agent: { name: 'styled-component-developer', prompt: { role: 'Styled Component Developer', task: 'Create component patterns', context: args, instructions: ['1. Create base components', '2. Set up extending', '3. Create variants', '4. Configure props', '5. Set up attrs', '6. Create animations', '7. Set up media queries', '8. Create compound components', '9. Set up polymorphic', '10. Document patterns'], outputFormat: 'JSON with patterns' }, outputSchema: { type: 'object', required: ['components', 'artifacts'], properties: { components: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'patterns'] }));
 
 export const globalStylesTask = defineTask('global-styles', (args, taskCtx) => ({ kind: 'agent', title: `Global Styles - ${args.projectName}`, agent: { name: 'global-styles-specialist', prompt: { role: 'Global Styles Specialist', task: 'Configure global styles', context: args, instructions: ['1. Create global styles', '2. Set up CSS reset', '3. Configure normalize', '4. Set up base styles', '5. Configure fonts', '6. Set up CSS variables', '7. Configure keyframes', '8. Set up scrollbar styles', '9. Configure selection', '10. Document globals'], outputFormat: 'JSON with global styles' }, outputSchema: { type: 'object', required: ['styles', 'artifacts'], properties: { styles: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'global'] }));
+
+export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next .cache dist/static node_modules/.vite node_modules/.cache 2>/dev/null; echo "Cache cleared at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'cache-bust'] }));
+
+export const buildHashCheckTask = defineTask('build-hash-check', (args, taskCtx) => ({ kind: 'shell', title: `Build Hash Check - ${args.projectName}`, shell: { command: 'find . -maxdepth 3 -name "*.manifest.json" -o -name "build-manifest.json" -o -name ".next/BUILD_ID" 2>/dev/null | head -5 | xargs cat 2>/dev/null || echo "no-manifest-found"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'build-hash'] }));
+
+export const hardRefreshInstructionTask = defineTask('hard-refresh-instruction', (args, taskCtx) => ({ kind: 'agent', title: `Hard Refresh Instructions - ${args.projectName}`, agent: { name: 'cache-bust-advisor', prompt: { role: 'Cache Bust Advisor', task: 'Generate hard-refresh instructions for the user', context: args, instructions: ['1. Detect framework from project context', '2. Generate browser-specific hard-refresh instructions (Ctrl+Shift+R / Cmd+Shift+R)', '3. Include instructions for clearing framework-specific caches', '4. Include service worker unregistration steps if applicable', '5. Provide DevTools cache-disable guidance'], outputFormat: 'JSON with instructions and framework fields' }, outputSchema: { type: 'object', required: ['instructions', 'framework'], properties: { instructions: { type: 'string' }, framework: { type: 'string' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'hard-refresh'] }));
 
 export const documentationTask = defineTask('css-in-js-documentation', (args, taskCtx) => ({ kind: 'agent', title: `Documentation - ${args.projectName}`, agent: { name: 'technical-writer-agent', prompt: { role: 'Technical Writer', task: 'Generate CSS-in-JS documentation', context: args, instructions: ['1. Create README', '2. Document theme', '3. Create patterns guide', '4. Document global styles', '5. Create testing guide', '6. Document SSR', '7. Create migration guide', '8. Document best practices', '9. Create examples', '10. Generate templates'], outputFormat: 'JSON with documentation' }, outputSchema: { type: 'object', required: ['docs', 'artifacts'], properties: { docs: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'css-in-js', 'documentation'] }));

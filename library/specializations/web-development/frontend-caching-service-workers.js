@@ -25,12 +25,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...offlineSetup.artifacts);
 
   let updateSetup = await ctx.task(updateHandlingTask, { projectName, outputDir });
+
+  // Cache-bust verification protocol (issue #89)
+  const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, framework, outputDir });
+  artifacts.push(...(cacheBustResult.artifacts || []));
+  const buildHashResult = await ctx.task(buildHashCheckTask, { projectName, outputDir });
+  artifacts.push(...(buildHashResult.artifacts || []));
+  const hardRefreshResult = await ctx.task(hardRefreshInstructionTask, { projectName, framework });
+  artifacts.push(...(hardRefreshResult.artifacts || []));
+
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback) {
       updateSetup = await ctx.task(updateHandlingTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({ question: `Frontend caching setup complete for ${projectName}. Approve?`, title: 'Caching Review', context: { runId: ctx.runId, strategies: cachingStrategies.strategies }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+  const finalApproval = await ctx.breakpoint({ question: `Frontend caching setup complete for ${projectName}. Dev-server caches cleared and rebuild verified. Hard-refresh your browser (Cmd+Shift+R) and unregister service workers to verify. Approve?`, title: 'Caching Review', context: { runId: ctx.runId, strategies: cachingStrategies.strategies, cacheBust: cacheBustResult, buildHash: buildHashResult, hardRefresh: hardRefreshResult }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
   }
@@ -47,5 +56,11 @@ export const cachingStrategiesTask = defineTask('caching-strategies', (args, tas
 export const offlineSupportTask = defineTask('offline-support', (args, taskCtx) => ({ kind: 'agent', title: `Offline Support - ${args.projectName}`, agent: { name: 'offline-specialist', prompt: { role: 'Offline Support Specialist', task: 'Implement offline support', context: args, instructions: ['1. Create offline page', '2. Configure offline detection', '3. Set up queue management', '4. Configure background sync', '5. Set up IndexedDB', '6. Configure data persistence', '7. Set up offline UI', '8. Configure sync notifications', '9. Set up conflict resolution', '10. Document offline'], outputFormat: 'JSON with offline support' }, outputSchema: { type: 'object', required: ['config', 'artifacts'], properties: { config: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'offline'] }));
 
 export const updateHandlingTask = defineTask('update-handling', (args, taskCtx) => ({ kind: 'agent', title: `Update Handling - ${args.projectName}`, agent: { name: 'update-specialist', prompt: { role: 'SW Update Specialist', task: 'Handle SW updates', context: args, instructions: ['1. Configure update detection', '2. Set up update prompt', '3. Configure auto-update', '4. Set up version management', '5. Configure cache busting', '6. Set up graceful updates', '7. Configure rollback', '8. Set up update logging', '9. Configure A/B testing', '10. Document updates'], outputFormat: 'JSON with update handling' }, outputSchema: { type: 'object', required: ['config', 'artifacts'], properties: { config: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'updates'] }));
+
+export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next .cache dist/static node_modules/.vite node_modules/.cache 2>/dev/null; echo "Cache cleared at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'cache-bust'] }));
+
+export const buildHashCheckTask = defineTask('build-hash-check', (args, taskCtx) => ({ kind: 'shell', title: `Build Hash Check - ${args.projectName}`, shell: { command: 'find . -maxdepth 3 -name "*.manifest.json" -o -name "build-manifest.json" -o -name ".next/BUILD_ID" 2>/dev/null | head -5 | xargs cat 2>/dev/null || echo "no-manifest-found"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'build-hash'] }));
+
+export const hardRefreshInstructionTask = defineTask('hard-refresh-instruction', (args, taskCtx) => ({ kind: 'agent', title: `Hard Refresh Instructions - ${args.projectName}`, agent: { name: 'cache-bust-advisor', prompt: { role: 'Cache Bust Advisor', task: 'Generate hard-refresh instructions for the user', context: args, instructions: ['1. Detect framework from project context', '2. Generate browser-specific hard-refresh instructions (Ctrl+Shift+R / Cmd+Shift+R)', '3. Include service worker unregistration steps', '4. Include instructions for clearing Application > Storage in DevTools', '5. Provide DevTools cache-disable guidance'], outputFormat: 'JSON with instructions and framework fields' }, outputSchema: { type: 'object', required: ['instructions', 'framework'], properties: { instructions: { type: 'string' }, framework: { type: 'string' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'hard-refresh'] }));
 
 export const documentationTask = defineTask('caching-documentation', (args, taskCtx) => ({ kind: 'agent', title: `Documentation - ${args.projectName}`, agent: { name: 'technical-writer-agent', prompt: { role: 'Technical Writer', task: 'Generate caching documentation', context: args, instructions: ['1. Create README', '2. Document strategies', '3. Create offline guide', '4. Document updates', '5. Create debugging guide', '6. Document testing', '7. Create troubleshooting', '8. Document best practices', '9. Create examples', '10. Generate diagrams'], outputFormat: 'JSON with documentation' }, outputSchema: { type: 'object', required: ['docs', 'artifacts'], properties: { docs: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'caching', 'documentation'] }));
