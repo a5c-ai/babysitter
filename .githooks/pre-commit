@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 set -eu
 
-node ./scripts/validate-library-js-syntax.cjs
+node ./scripts/validate-library-js-syntax.cjs --staged

@@ -256,25 +256,30 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Quality below target: ${currentQuality}/${targetQuality}`);
 
       // Breakpoint: Review iteration results before continuing
-          let lastFeedback_iterationApproval = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (lastFeedback_iterationApproval) {
-            qualityScore = await ctx.task(storageQualityScoringTask, { ...{
-      projectName,
-      architectureDesign,
-      storageImplementation,
-      validationChecks: {
-        performance: performanceValidation,
-        consistency: consistencyValidation,
-        scalability: scalabilityValidation,
-        reliability: reliabilityValidation
-      },
-      iteration,
-      targetQuality,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-          }
-  const iterationApproval = await ctx.breakpoint({
+      let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          qualityScore = await ctx.task(storageQualityScoringTask, {
+            ...{
+              projectName,
+              architectureDesign,
+              storageImplementation,
+              validationChecks: {
+                performance: performanceValidation,
+                consistency: consistencyValidation,
+                scalability: scalabilityValidation,
+                reliability: reliabilityValidation
+              },
+              iteration,
+              targetQuality,
+              outputDir
+            },
+            feedback: lastFeedback_iterationApproval,
+            attempt: attempt + 1
+          });
+        }
+
+        const iterationApproval = await ctx.breakpoint({
           question: `Storage layer iteration ${iteration} complete. Quality: ${currentQuality}/${targetQuality}. Continue to iteration ${iteration + 1} for refinement?`,
           title: `Storage Layer Iteration ${iteration} Review`,
           context: {
@@ -295,10 +300,11 @@ export async function process(inputs, ctx) {
           tags: ['approval-gate'],
           previousFeedback: lastFeedback_iterationApproval || undefined,
           attempt: attempt > 0 ? attempt + 1 : undefined
-          });
-          if (iterationApproval.approved) break;
-          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-        }     }
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval =
+          iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }
     }
   }
   const finalStorageIteration = iterationResults[iteration - 1];
