@@ -162,9 +162,9 @@ describe('command files', () => {
     });
   }
 
-  it('has exactly 15 command files', () => {
+  it('has exactly 16 command files', () => {
     const mdFiles = fs.readdirSync(pluginPath('commands')).filter((f) => f.endsWith('.md'));
-    assert.strictEqual(mdFiles.length, 15, `expected 15 command files, found ${mdFiles.length}`);
+    assert.strictEqual(mdFiles.length, 16, `expected 16 command files, found ${mdFiles.length}`);
   });
 
   it('command docs are synchronized with the command sync script', async () => {
