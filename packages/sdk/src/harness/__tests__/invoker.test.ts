@@ -51,12 +51,12 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("HARNESS_CLI_MAP", () => {
-  it("has entries for all 7 supported harnesses", () => {
-    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot"];
+  it("has entries for all 9 supported harnesses", () => {
+    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot", "openclaw"];
     for (const name of expectedNames) {
       expect(HARNESS_CLI_MAP[name]).toBeDefined();
     }
-    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(8);
+    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(9);
   });
 });
 
@@ -157,7 +157,7 @@ describe("buildHarnessArgs", () => {
 
   it("includes programmatic-only harnesses in the supported-name error", () => {
     expect(() => buildHarnessArgs("unknown-harness", baseOptions)).toThrow(
-      /Supported harnesses: internal, claude-code, codex, pi, oh-my-pi, gemini-cli, github-copilot, cursor, opencode/,
+      /Supported harnesses: internal, claude-code, codex, pi, oh-my-pi, gemini-cli, github-copilot, cursor, openclaw, opencode/,
     );
   });
 });
