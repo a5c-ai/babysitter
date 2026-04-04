@@ -96,6 +96,12 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
     capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp],
   },
   {
+    name: "openclaw",
+    cli: "openclaw",
+    callerEnvVars: ["OPENCLAW_SHELL", "OPENCLAW_HOME"],
+    capabilities: [Cap.SessionBinding, Cap.Mcp, Cap.HeadlessPrompt],
+  },
+  {
     name: "pi",
     cli: "pi",
     callerEnvVars: ["PI_SESSION_ID", "PI_PLUGIN_ROOT"],
@@ -123,6 +129,7 @@ const CONFIG_PATHS: Record<string, string[]> = {
   "github-copilot": [".copilot", ".github"],
   cursor: [".cursor", ".cursorrules"],
   opencode: [".opencode"],
+  openclaw: [".openclaw"],
 };
 
 /**

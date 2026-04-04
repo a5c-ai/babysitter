@@ -15,7 +15,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 STATE_DIR="${BABYSITTER_STATE_DIR:-${PWD}/.a5c}"
-LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_ROOT/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
 
 export CURSOR_PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${PLUGIN_ROOT}}"

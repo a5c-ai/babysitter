@@ -23,7 +23,7 @@ set -uo pipefail
 
 EXTENSION_PATH="${GEMINI_EXTENSION_PATH:-$(cd "$(dirname "$0")/.." && pwd)}"
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-${EXTENSION_PATH}/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-after-agent-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 

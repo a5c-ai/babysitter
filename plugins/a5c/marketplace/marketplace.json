@@ -129,6 +129,17 @@
       "packagePath": "plugins/welcome",
       "tags": ["skill", "hooks", "session-start", "dashboard", "onboarding", "ux", "project-status", "claude-code"],
       "author": "a5c-ai"
+    },
+    "babysitter-openclaw": {
+      "name": "babysitter",
+      "description": "Babysitter orchestration plugin for OpenClaw — event-sourced workflows, multi-step process management, hook-based extensibility, and human-in-the-loop approval. Provides skills, commands, and lifecycle hooks for deterministic AI agent orchestration.",
+      "latestVersion": "0.1.0",
+      "versions": ["0.1.0"],
+      "packagePath": "plugins/babysitter-openclaw",
+      "npmPackage": "@a5c-ai/babysitter-openclaw",
+      "tags": ["openclaw", "orchestration", "workflow", "hooks", "skills", "agent", "process-management"],
+      "author": "a5c-ai",
+      "harness": "openclaw"
     }
   }
 }

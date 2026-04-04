@@ -16,12 +16,13 @@
 
 const { execSync, execFileSync } = require("child_process");
 const { readFileSync, mkdirSync, appendFileSync, existsSync, writeFileSync } = require("fs");
+const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 
 const PLUGIN_ROOT = process.env.OPENCODE_PLUGIN_ROOT || path.resolve(__dirname, "..");
 const STATE_DIR = process.env.BABYSITTER_STATE_DIR || path.join(process.cwd(), ".a5c");
-const LOG_DIR = process.env.BABYSITTER_LOG_DIR || path.join(PLUGIN_ROOT, ".a5c", "logs");
+const LOG_DIR = process.env.BABYSITTER_LOG_DIR || path.join(os.homedir(), ".a5c", "logs");
 const LOG_FILE = path.join(LOG_DIR, "babysitter-session-created-hook.log");
 
 // ---------------------------------------------------------------------------

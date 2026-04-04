@@ -50,7 +50,7 @@ import type {
 } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createClaudeCodeContext } from "../prompts/context";
-import { getGlobalStateDir } from "../config";
+import { getGlobalLogDir, getGlobalStateDir } from "../config";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
@@ -74,7 +74,7 @@ interface HookLogger {
 }
 
 function createHookLogger(hookName: string): HookLogger {
-  const logDir = process.env.BABYSITTER_LOG_DIR || '.a5c/logs';
+  const logDir = getGlobalLogDir();
   const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
   const context: Record<string, string> = {};
 

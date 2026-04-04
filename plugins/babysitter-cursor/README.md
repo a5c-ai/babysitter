@@ -294,7 +294,7 @@ behavior within sessions.
 | `CURSOR_API_KEY` | -- | API key for headless CLI mode (required) |
 | `CURSOR_PLUGIN_ROOT` | Plugin directory | Plugin root directory |
 | `BABYSITTER_STATE_DIR` | `<cwd>/.a5c` | State directory for session data |
-| `BABYSITTER_LOG_DIR` | `<plugin>/.a5c/logs` | Log output directory |
+| `BABYSITTER_LOG_DIR` | `~/.a5c/logs` | Log output directory override; default is the user-global Babysitter log root |
 
 ### SDK Version Pinning
 
@@ -378,7 +378,7 @@ session health:
 $doctor
 ```
 
-Also check log output in `<plugin-root>/.a5c/logs/`:
+Also check log output in `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/`:
 
 - `babysitter-session-start-hook.log`
 - `babysitter-stop-hook.log`

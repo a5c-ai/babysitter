@@ -102,6 +102,11 @@ jobs:
           set -euo pipefail
           npm test --prefix plugins/babysitter-opencode 2>&1 | tee artifacts/logs/babysitter-opencode-tests.log
 
+      - name: babysitter-openclaw plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-openclaw 2>&1 | tee artifacts/logs/babysitter-openclaw-tests.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -163,6 +168,9 @@ jobs:
           BASE_OPENCODE=$(node -e "console.log(require('./plugins/babysitter-opencode/package.json').version)")
           IFS='.' read -r OPENCODE_MAJOR OPENCODE_MINOR OPENCODE_PATCH <<< "$BASE_OPENCODE"
           OPENCODE_NEXT_PATCH=$((OPENCODE_PATCH + 1))
+          BASE_OPENCLAW=$(node -e "console.log(require('./plugins/babysitter-openclaw/package.json').version)")
+          IFS='.' read -r OPENCLAW_MAJOR OPENCLAW_MINOR OPENCLAW_PATCH <<< "$BASE_OPENCLAW"
+          OPENCLAW_NEXT_PATCH=$((OPENCLAW_PATCH + 1))
           SHORT_SHA=$(git rev-parse --short HEAD)
           STAGING_VERSION_SDK="${SDK_MAJOR}.${SDK_MINOR}.${SDK_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CODEX="${CODEX_MAJOR}.${CODEX_MINOR}.${CODEX_NEXT_PATCH}-staging.${SHORT_SHA}"
@@ -172,6 +180,7 @@ jobs:
           STAGING_VERSION_PI="${PI_MAJOR}.${PI_MINOR}.${PI_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_OMP="${OMP_MAJOR}.${OMP_MINOR}.${OMP_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_OPENCODE="${OPENCODE_MAJOR}.${OPENCODE_MINOR}.${OPENCODE_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_OPENCLAW="${OPENCLAW_MAJOR}.${OPENCLAW_MINOR}.${OPENCLAW_NEXT_PATCH}-staging.${SHORT_SHA}"
           echo "staging_version_sdk=$STAGING_VERSION_SDK" >> "$GITHUB_OUTPUT"
           echo "staging_version_codex=$STAGING_VERSION_CODEX" >> "$GITHUB_OUTPUT"
           echo "staging_version_github=$STAGING_VERSION_GITHUB" >> "$GITHUB_OUTPUT"
@@ -180,6 +189,7 @@ jobs:
           echo "staging_version_pi=$STAGING_VERSION_PI" >> "$GITHUB_OUTPUT"
           echo "staging_version_omp=$STAGING_VERSION_OMP" >> "$GITHUB_OUTPUT"
           echo "staging_version_opencode=$STAGING_VERSION_OPENCODE" >> "$GITHUB_OUTPUT"
+          echo "staging_version_openclaw=$STAGING_VERSION_OPENCLAW" >> "$GITHUB_OUTPUT"
           echo "Setting SDK staging version: $STAGING_VERSION_SDK"
           echo "Setting Codex staging version: $STAGING_VERSION_CODEX"
           echo "Setting GitHub staging version: $STAGING_VERSION_GITHUB"
@@ -188,6 +198,7 @@ jobs:
           echo "Setting Pi staging version: $STAGING_VERSION_PI"
           echo "Setting OMP staging version: $STAGING_VERSION_OMP"
           echo "Setting OpenCode staging version: $STAGING_VERSION_OPENCODE"
+          echo "Setting OpenClaw staging version: $STAGING_VERSION_OPENCLAW"
           # Write prerelease version into package.json files (for npm publish)
           node -e "
             const fs = require('fs');
@@ -237,12 +248,16 @@ jobs:
             const opencodePkg = JSON.parse(fs.readFileSync(opencodePkgPath, 'utf8'));
             opencodePkg.version = '${STAGING_VERSION_OPENCODE}';
             fs.writeFileSync(opencodePkgPath, JSON.stringify(opencodePkg, null, 2) + '\n');
+            const openclawPkgPath = 'plugins/babysitter-openclaw/package.json';
+            const openclawPkg = JSON.parse(fs.readFileSync(openclawPkgPath, 'utf8'));
+            openclawPkg.version = '${STAGING_VERSION_OPENCLAW}';
+            fs.writeFileSync(openclawPkgPath, JSON.stringify(openclawPkg, null, 2) + '\n');
           "
           # Write sdkVersion into versions.json (separate from plugin.json to avoid
           # Claude Code's plugin validator rejecting unrecognized keys)
           node -e "
             const fs = require('fs');
-            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-omp/versions.json', 'plugins/babysitter-opencode/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json']) {
+            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-omp/versions.json', 'plugins/babysitter-opencode/versions.json', 'plugins/babysitter-openclaw/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json']) {
               const data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {};
               data.sdkVersion = '${STAGING_VERSION_SDK}';
               fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
@@ -254,7 +269,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json
+          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json
           if git diff --cached --quiet; then
             echo "No sdkVersion changes to commit."
           else
@@ -417,6 +432,26 @@ jobs:
           set -euo pipefail
           npm run deploy:staging
         working-directory: plugins/babysitter-opencode
+
+      - name: Inject SDK dependency into openclaw package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-openclaw/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-openclaw package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-openclaw
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

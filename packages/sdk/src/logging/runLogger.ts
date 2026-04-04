@@ -16,7 +16,7 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import * as os from "node:os";
+import { getGlobalLogDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,7 +58,7 @@ export interface RunLoggerOptions {
 const LOG_DIR_ENV = "BABYSITTER_LOG_DIR";
 
 export function getDefaultLogDir(): string {
-  return process.env[LOG_DIR_ENV] || path.join(os.homedir(), ".a5c", "logs");
+  return process.env[LOG_DIR_ENV] || getGlobalLogDir();
 }
 
 /** Log file names by type. */

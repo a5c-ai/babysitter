@@ -63,7 +63,7 @@ import {
 } from "./installSupport";
 import type { PromptContext } from "../prompts/types";
 import { createGeminiCliContext } from "../prompts/context";
-import { getGlobalStateDir } from "../config";
+import { getGlobalLogDir, getGlobalStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -83,7 +83,7 @@ interface HookLogger {
 }
 
 function createHookLogger(hookName: string): HookLogger {
-  const logDir = process.env.BABYSITTER_LOG_DIR || ".a5c/logs";
+  const logDir = getGlobalLogDir();
   const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
   const context: Record<string, string> = {};
 

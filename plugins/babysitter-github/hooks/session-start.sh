@@ -15,7 +15,7 @@ set -euo pipefail
 PLUGIN_ROOT="${COPILOT_PLUGIN_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 MARKER_FILE="${PLUGIN_ROOT}/.babysitter-install-attempted"
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_ROOT/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 

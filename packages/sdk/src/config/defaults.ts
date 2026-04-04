@@ -226,6 +226,25 @@ export function getGlobalStateDir(): string {
 }
 
 /**
+ * Returns the global babysitter log directory (~/.a5c/logs/).
+ *
+ * Structured hook/CLI/process logs are user-global by default so every
+ * harness entrypoint resolves the same log root regardless of plugin install
+ * location or current working directory.
+ *
+ * Override: set BABYSITTER_LOG_DIR to use a different path.
+ */
+export function getGlobalLogDir(): string {
+  if (process.env.BABYSITTER_LOG_DIR) {
+    return path.resolve(process.env.BABYSITTER_LOG_DIR);
+  }
+  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
+    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
+    : path.join(os.homedir(), ".a5c");
+  return path.join(globalRoot, "logs");
+}
+
+/**
  * Valid log levels for validation
  */
 const VALID_LOG_LEVELS: readonly LogLevel[] = ["debug", "info", "warn", "error", "silent"];

@@ -17,7 +17,7 @@ set -euo pipefail
 EXTENSION_PATH="${GEMINI_EXTENSION_PATH:-$(cd "$(dirname "$0")/.." && pwd)}"
 MARKER_FILE="${EXTENSION_PATH}/.babysitter-install-attempted"
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-${EXTENSION_PATH}/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 

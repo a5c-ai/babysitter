@@ -288,6 +288,45 @@ export function createPiContext(
   } as PromptContext;
 }
 
+/**
+ * Create a PromptContext pre-configured for OpenClaw.
+ */
+export function createOpenClawContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'openclaw',
+    harnessLabel: 'OpenClaw',
+    capabilities: ['session-binding', 'mcp', 'headless-prompt', 'task-tool', 'breakpoint-routing'],
+    pluginRootVar: '',
+    // Daemon model: no stop-hook. Agent lifecycle managed by agent_end signal.
+    loopControlTerm: 'agent_end',
+    sessionBindingFlags: '',
+    hookDriven: false,
+    interactiveToolName: 'AskUserQuestion tool',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, OPENCLAW_SHELL (auto-injected by gateway)',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
 export function createOhMyPiContext(
   overrides?: Partial<PromptContext>,
 ): PromptContext {
