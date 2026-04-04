@@ -102,6 +102,11 @@ jobs:
           set -euo pipefail
           npm test --prefix plugins/babysitter-openclaw 2>&1 | tee artifacts/logs/babysitter-openclaw-tests.log
 
+      - name: babysitter-paperclip plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-paperclip 2>&1 | tee artifacts/logs/babysitter-paperclip-tests.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -166,7 +171,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/package-lock.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/package-lock.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/package-lock.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json .claude-plugin/marketplace.json
+          git add package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/package-lock.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/package-lock.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/package-lock.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json plugins/babysitter-paperclip/package.json plugins/babysitter-paperclip/versions.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -193,6 +198,7 @@ jobs:
           (cd plugins/babysitter-omp && npm pack --pack-destination ../../artifacts/release)
           (cd plugins/babysitter-opencode && npm pack --pack-destination ../../artifacts/release)
           (cd plugins/babysitter-openclaw && npm pack --pack-destination ../../artifacts/release)
+          (cd plugins/babysitter-paperclip && npm pack --pack-destination ../../artifacts/release)
 
       - name: Generate artifact checksums
         run: |
@@ -371,6 +377,26 @@ jobs:
           set -euo pipefail
           npm run deploy
         working-directory: plugins/babysitter-openclaw
+
+      - name: Inject SDK dependency into paperclip package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-paperclip/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.bump.outputs.version }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-paperclip package to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy
+        working-directory: plugins/babysitter-paperclip
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

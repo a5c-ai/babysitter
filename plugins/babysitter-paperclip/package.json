@@ -1,0 +1,29 @@
+{
+  "name": "@a5c-ai/babysitter-paperclip",
+  "version": "0.0.1",
+  "description": "Babysitter orchestration plugin for Paperclip AI",
+  "type": "module",
+  "main": "dist/worker.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "dev": "paperclip-plugin-dev-server --root . --ui-dir dist/ui --port 4177",
+    "test": "vitest run",
+    "deploy": "npm publish --access public",
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "peerDependencies": {
+    "@paperclipai/plugin-sdk": ">=0.1.0"
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@paperclipai/plugin-sdk": "latest",
+    "esbuild": "^0.21.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  }
+}

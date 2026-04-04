@@ -286,6 +286,7 @@ Harness-specific plugin packages that provide hooks, commands, skills, and integ
 | `plugins/babysitter-github/` | GitHub Copilot | `AGENTS.md`, commands, hooks, skills |
 | `plugins/babysitter-pi/` | Pi | `AGENTS.md`, commands, extensions, skills, state |
 | `plugins/babysitter-omp/` | oh-my-pi | `AGENTS.md`, commands, extensions, skills, state |
+| `plugins/babysitter-paperclip/` | Paperclip AI | Meta-harness plugin: delegating adapter, breakpoint UI, dashboard widget, sidebar panel |
 | `plugins/a5c/` | -- | Marketplace configuration (`marketplace/marketplace.json`, plugin registry) |
 
 All harness plugins share the unified plugin name `babysitter` in their `plugin.json` manifests (previously named `babysitter-codex`, `babysitter-cursor`, etc. -- unified in a recent refactor).

@@ -1,0 +1,40 @@
+FROM node:20-bookworm
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r paperclip && useradd -r -g paperclip -m -d /home/paperclip paperclip
+
+ENV HOME=/home/paperclip
+ENV PATH=/home/paperclip/.local/bin:${PATH}
+
+RUN mkdir -p /home/paperclip/.local && \
+    echo "prefix=/home/paperclip/.local" > /home/paperclip/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-paperclip/package.json ./plugins/babysitter-paperclip/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk && chown -R paperclip:paperclip /app /home/paperclip
+
+USER paperclip
+
+# Install SDK globally and set up the paperclip plugin from local source
+RUN npm install -g @a5c-ai/babysitter-sdk
+
+# Verify the babysitter CLI is available
+RUN babysitter --version
+
+WORKDIR /workspace
+
+CMD ["bash"]

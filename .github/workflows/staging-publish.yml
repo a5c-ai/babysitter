@@ -107,6 +107,11 @@ jobs:
           set -euo pipefail
           npm test --prefix plugins/babysitter-openclaw 2>&1 | tee artifacts/logs/babysitter-openclaw-tests.log
 
+      - name: babysitter-paperclip plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-paperclip 2>&1 | tee artifacts/logs/babysitter-paperclip-tests.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -171,6 +176,9 @@ jobs:
           BASE_OPENCLAW=$(node -e "console.log(require('./plugins/babysitter-openclaw/package.json').version)")
           IFS='.' read -r OPENCLAW_MAJOR OPENCLAW_MINOR OPENCLAW_PATCH <<< "$BASE_OPENCLAW"
           OPENCLAW_NEXT_PATCH=$((OPENCLAW_PATCH + 1))
+          BASE_PAPERCLIP=$(node -e "console.log(require('./plugins/babysitter-paperclip/package.json').version)")
+          IFS='.' read -r PAPERCLIP_MAJOR PAPERCLIP_MINOR PAPERCLIP_PATCH <<< "$BASE_PAPERCLIP"
+          PAPERCLIP_NEXT_PATCH=$((PAPERCLIP_PATCH + 1))
           SHORT_SHA=$(git rev-parse --short HEAD)
           STAGING_VERSION_SDK="${SDK_MAJOR}.${SDK_MINOR}.${SDK_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CODEX="${CODEX_MAJOR}.${CODEX_MINOR}.${CODEX_NEXT_PATCH}-staging.${SHORT_SHA}"
@@ -181,6 +189,7 @@ jobs:
           STAGING_VERSION_OMP="${OMP_MAJOR}.${OMP_MINOR}.${OMP_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_OPENCODE="${OPENCODE_MAJOR}.${OPENCODE_MINOR}.${OPENCODE_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_OPENCLAW="${OPENCLAW_MAJOR}.${OPENCLAW_MINOR}.${OPENCLAW_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_PAPERCLIP="${PAPERCLIP_MAJOR}.${PAPERCLIP_MINOR}.${PAPERCLIP_NEXT_PATCH}-staging.${SHORT_SHA}"
           echo "staging_version_sdk=$STAGING_VERSION_SDK" >> "$GITHUB_OUTPUT"
           echo "staging_version_codex=$STAGING_VERSION_CODEX" >> "$GITHUB_OUTPUT"
           echo "staging_version_github=$STAGING_VERSION_GITHUB" >> "$GITHUB_OUTPUT"
@@ -190,6 +199,7 @@ jobs:
           echo "staging_version_omp=$STAGING_VERSION_OMP" >> "$GITHUB_OUTPUT"
           echo "staging_version_opencode=$STAGING_VERSION_OPENCODE" >> "$GITHUB_OUTPUT"
           echo "staging_version_openclaw=$STAGING_VERSION_OPENCLAW" >> "$GITHUB_OUTPUT"
+          echo "staging_version_paperclip=$STAGING_VERSION_PAPERCLIP" >> "$GITHUB_OUTPUT"
           echo "Setting SDK staging version: $STAGING_VERSION_SDK"
           echo "Setting Codex staging version: $STAGING_VERSION_CODEX"
           echo "Setting GitHub staging version: $STAGING_VERSION_GITHUB"
@@ -199,6 +209,7 @@ jobs:
           echo "Setting OMP staging version: $STAGING_VERSION_OMP"
           echo "Setting OpenCode staging version: $STAGING_VERSION_OPENCODE"
           echo "Setting OpenClaw staging version: $STAGING_VERSION_OPENCLAW"
+          echo "Setting Paperclip staging version: $STAGING_VERSION_PAPERCLIP"
           # Write prerelease version into package.json files (for npm publish)
           node -e "
             const fs = require('fs');
@@ -252,12 +263,16 @@ jobs:
             const openclawPkg = JSON.parse(fs.readFileSync(openclawPkgPath, 'utf8'));
             openclawPkg.version = '${STAGING_VERSION_OPENCLAW}';
             fs.writeFileSync(openclawPkgPath, JSON.stringify(openclawPkg, null, 2) + '\n');
+            const paperclipPkgPath = 'plugins/babysitter-paperclip/package.json';
+            const paperclipPkg = JSON.parse(fs.readFileSync(paperclipPkgPath, 'utf8'));
+            paperclipPkg.version = '${STAGING_VERSION_PAPERCLIP}';
+            fs.writeFileSync(paperclipPkgPath, JSON.stringify(paperclipPkg, null, 2) + '\n');
           "
           # Write sdkVersion into versions.json (separate from plugin.json to avoid
           # Claude Code's plugin validator rejecting unrecognized keys)
           node -e "
             const fs = require('fs');
-            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-omp/versions.json', 'plugins/babysitter-opencode/versions.json', 'plugins/babysitter-openclaw/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json']) {
+            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-omp/versions.json', 'plugins/babysitter-opencode/versions.json', 'plugins/babysitter-openclaw/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json', 'plugins/babysitter-paperclip/versions.json']) {
               const data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {};
               data.sdkVersion = '${STAGING_VERSION_SDK}';
               fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
@@ -269,7 +284,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json
+          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json plugins/babysitter-paperclip/versions.json
           if git diff --cached --quiet; then
             echo "No sdkVersion changes to commit."
           else
@@ -452,6 +467,26 @@ jobs:
           set -euo pipefail
           npm run deploy:staging
         working-directory: plugins/babysitter-openclaw
+
+      - name: Inject SDK dependency into paperclip package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-paperclip/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-paperclip package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-paperclip
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

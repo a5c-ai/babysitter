@@ -161,6 +161,18 @@ The postinstall script copies the plugin to `.opencode/plugins/babysitter/` auto
 
 [Plugin README](plugins/babysitter-opencode/README.md)
 
+### Paperclip AI (Experimental)
+
+Paperclip plugin that wraps babysitter orchestration around any Paperclip-managed harness. Provides a dashboard widget, run detail tab, sidebar panel, and breakpoint approval UI.
+
+```bash
+npm install -g @a5c-ai/babysitter-paperclip
+```
+
+The plugin auto-detects which underlying harness (Claude Code, Codex, Gemini CLI, etc.) each Paperclip agent uses via a 3-tier detection system and delegates accordingly.
+
+[Plugin README](plugins/babysitter-paperclip/README.md)
+
 ### Internal Harness (No AI Coding Agent Required)
 
 Babysitter ships with a built-in **internal harness** that runs processes programmatically without any external AI coding agent. This is useful for CI/CD pipelines, scripts, automated testing, and headless orchestration:

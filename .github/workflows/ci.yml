@@ -85,6 +85,11 @@ jobs:
           set -euo pipefail
           npm test --prefix plugins/babysitter-openclaw 2>&1 | tee artifacts/test-logs/babysitter-openclaw-tests.log
 
+      - name: babysitter-paperclip plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-paperclip 2>&1 | tee artifacts/test-logs/babysitter-paperclip-tests.log
+
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4

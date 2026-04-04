@@ -12,18 +12,22 @@ on:
       - 'plugins/babysitter-gemini/**'
       - 'plugins/babysitter-pi/**'
       - 'plugins/babysitter-omp/**'
+      - 'plugins/babysitter-paperclip/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
       - 'e2e-tests/docker/Dockerfile.pi'
       - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/Dockerfile.paperclip'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
       - 'e2e-tests/docker/helpers-pi.ts'
       - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/helpers-paperclip.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - 'e2e-tests/docker/pi-structural.test.ts'
       - 'e2e-tests/docker/pi-stop-hook.test.ts'
       - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
       - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/paperclip-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   push:
     branches:
@@ -39,18 +43,22 @@ on:
       - 'plugins/babysitter-gemini/**'
       - 'plugins/babysitter-pi/**'
       - 'plugins/babysitter-omp/**'
+      - 'plugins/babysitter-paperclip/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
       - 'e2e-tests/docker/Dockerfile.pi'
       - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/Dockerfile.paperclip'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
       - 'e2e-tests/docker/helpers-pi.ts'
       - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/helpers-paperclip.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - 'e2e-tests/docker/pi-structural.test.ts'
       - 'e2e-tests/docker/pi-stop-hook.test.ts'
       - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
       - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/paperclip-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
 
@@ -116,7 +124,8 @@ jobs:
             e2e-tests/docker/pi-stop-hook.test.ts \
             e2e-tests/docker/oh-my-pi-structural.test.ts \
             e2e-tests/docker/oh-my-pi-stop-hook.test.ts \
-            e2e-tests/docker/gemini-cli-structural.test.ts
+            e2e-tests/docker/gemini-cli-structural.test.ts \
+            e2e-tests/docker/paperclip-structural.test.ts
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
