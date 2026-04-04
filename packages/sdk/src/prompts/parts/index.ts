@@ -13,6 +13,7 @@ export { renderRunCreation } from './runCreation';
 export { renderRunOverlapDetection } from './runOverlapDetection';
 export { renderIteration } from './iteration';
 export { renderEffects } from './effects';
+export { renderParallelPhaseDetection } from './parallelPhaseDetection';
 export { renderBreakpointHandling } from './breakpointHandling';
 export { renderResultsPosting } from './resultsPosting';
 export { renderLoopControl } from './loopControl';

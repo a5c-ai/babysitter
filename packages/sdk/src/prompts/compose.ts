@@ -98,6 +98,7 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
     parts.renderProcessGuidelines(ctx),
+    parts.renderParallelPhaseDetection(ctx),
     parts.renderTaskKinds(ctx),
     parts.renderTaskExamples(ctx),
   ]);

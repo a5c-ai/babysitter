@@ -68,7 +68,7 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     partsIncluded: [
       "interview", "user-profile", "process-creation",
       "intent-fidelity-checks", "process-guidelines",
-      "task-kinds", "task-examples",
+      "parallel-phase-detection", "task-kinds", "task-examples",
     ],
   },
   "orchestrate": {
