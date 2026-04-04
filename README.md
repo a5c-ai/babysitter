@@ -55,26 +55,92 @@ Babysitter enforces obedience to agentic workforces, enabling them to manage ext
 
 ## Installation
 
-### 1. Install the Plugin
+Babysitter supports multiple AI coding harnesses. Install the plugin for your harness of choice:
+
+### Claude Code (recommended)
+
+Native marketplace install:
 
 ```bash
 claude plugin marketplace add a5c-ai/babysitter
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
-Then restart Claude Code.
+Restart Claude Code, then type `/skills` to verify "babysit" appears.
 
-### 2. Verify Installation
+[Plugin README](plugins/babysitter/README.md)
 
-Type `/skills` in Claude Code to verify "babysit" appears.
+### Codex CLI (Beta)
 
-### Codex CLI Integration (babysitter-codex)
+After cloning this repo, From within the Codex CLI:
 
-Codex support is available as a dedicated plugin bundle in:
+```
+codex
+> /plugins
+```
 
-`plugins/babysitter-codex`
+Navigate to the "babysitter" entry and select "Install".
 
-It includes Codex hook wiring, slash command dispatch, and orchestration harness scripts compatible with the Babysitter SDK.
+[Plugin README](plugins/babysitter-codex/README.md)
+
+### Cursor IDE and CLI (Experimental)
+
+Via the Cursor marketplace or npm:
+
+```bash
+npm install -g @a5c-ai/babysitter-cursor
+```
+
+[Plugin README](plugins/babysitter-cursor/README.md)
+
+### Gemini CLI (Experimental)
+
+```bash
+npm install -g @a5c-ai/babysitter-gemini
+babysitter-gemini install --global
+```
+
+[Plugin README](plugins/babysitter-gemini/README.md)
+
+### GitHub Copilot (Experimental)
+
+Via the GitHub Copilot CLI marketplace, or:
+
+```bash
+npm install -g @a5c-ai/babysitter-github
+```
+
+[Plugin README](plugins/babysitter-github/README.md)
+
+### Pi (Experimental)
+
+Native Pi plugin install:
+
+```bash
+pi install npm:@a5c-ai/babysitter-pi
+```
+
+[Plugin README](plugins/babysitter-pi/README.md)
+
+### Oh-My-Pi (Experimental)
+
+Native omp plugin install:
+
+```bash
+omp plugin install @a5c-ai/babysitter-omp
+```
+
+[Plugin README](plugins/babysitter-omp/README.md)
+
+### OpenCode (Experimental)
+
+```bash
+npm install -g @a5c-ai/babysitter-opencode
+```
+
+The postinstall script copies the plugin to `.opencode/plugins/babysitter/` automatically.
+
+[Plugin README](plugins/babysitter-opencode/README.md)
 
 ---
 
