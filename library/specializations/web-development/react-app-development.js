@@ -181,6 +181,10 @@ export async function process(inputs, ctx) {
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
   }
+  // Cache-bust verification protocol (issue #89) - Generic React builds
+  const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
+  artifacts.push(...(cacheBustResult.artifacts || []));
+
   // ============================================================================
   // PHASE 8: PERFORMANCE OPTIMIZATION
   // ============================================================================
@@ -688,6 +692,8 @@ export const errorHandlingTask = defineTask('error-handling', (args, taskCtx) =>
   },
   labels: ['web', 'react', 'error-handling', 'error-boundaries']
 }));
+
+export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next node_modules/.vite node_modules/.cache build dist 2>/dev/null; echo "React build cache cleared at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'react', 'cache-bust'] }));
 
 export const documentationTask = defineTask('documentation', (args, taskCtx) => ({
   kind: 'agent',

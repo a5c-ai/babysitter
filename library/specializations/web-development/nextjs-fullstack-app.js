@@ -152,6 +152,14 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...clientComponents.artifacts);
 
+  // Cache-bust verification protocol (issue #89) - Next.js specific (.next + Turbopack HMR cache)
+  const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
+  artifacts.push(...(cacheBustResult.artifacts || []));
+  const buildHashResult = await ctx.task(buildHashCheckTask, { projectName, outputDir });
+  artifacts.push(...(buildHashResult.artifacts || []));
+  const hardRefreshResult = await ctx.task(hardRefreshInstructionTask, { projectName, framework: 'nextjs' });
+  artifacts.push(...(hardRefreshResult.artifacts || []));
+
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback) {
@@ -162,7 +170,7 @@ export async function process(inputs, ctx) {
   }, feedback: lastFeedback, attempt: attempt + 1 });
     }
   const finalApproval = await ctx.breakpoint({
-    question: `Next.js full-stack setup complete for ${projectName}. ${appRouterSetup.routes.length} routes, ${serverComponents.components.length} server components. Approve configuration?`,
+    question: `Next.js full-stack setup complete for ${projectName}. ${appRouterSetup.routes.length} routes, ${serverComponents.components.length} server components. .next cache and Turbopack HMR cache cleared. Hard-refresh your browser (Cmd+Shift+R) to verify. Approve configuration?`,
     title: 'Next.js Full-Stack Review',
     context: {
       runId: ctx.runId,
@@ -608,6 +616,12 @@ export const deploymentConfigTask = defineTask('deployment-config', (args, taskC
   },
   labels: ['web', 'nextjs', 'deployment', 'vercel']
 }));
+
+export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next .next/cache node_modules/.cache 2>/dev/null; echo "Next.js cache cleared (including Turbopack HMR cache) at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'nextjs', 'cache-bust'] }));
+
+export const buildHashCheckTask = defineTask('build-hash-check', (args, taskCtx) => ({ kind: 'shell', title: `Build Hash Check - ${args.projectName}`, shell: { command: 'cat .next/BUILD_ID 2>/dev/null || echo "no-build-id"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'nextjs', 'build-hash'] }));
+
+export const hardRefreshInstructionTask = defineTask('hard-refresh-instruction', (args, taskCtx) => ({ kind: 'agent', title: `Hard Refresh Instructions - ${args.projectName}`, agent: { name: 'cache-bust-advisor', prompt: { role: 'Cache Bust Advisor', task: 'Generate hard-refresh instructions for Next.js/Turbopack', context: args, instructions: ['1. Hard-refresh browser (Ctrl+Shift+R / Cmd+Shift+R)', '2. Clear .next/ directory to bust Turbopack HMR cache', '3. If using ISR, purge on-demand revalidation cache', '4. Clear browser Application > Storage if service workers are involved', '5. Restart next dev to regenerate Turbopack cache'], outputFormat: 'JSON with instructions and framework fields' }, outputSchema: { type: 'object', required: ['instructions', 'framework'], properties: { instructions: { type: 'string' }, framework: { type: 'string' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'nextjs', 'hard-refresh'] }));
 
 export const documentationTask = defineTask('nextjs-documentation', (args, taskCtx) => ({
   kind: 'agent',
