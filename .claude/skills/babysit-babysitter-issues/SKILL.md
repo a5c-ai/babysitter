@@ -35,10 +35,11 @@ If multiple issues are selected, process them sequentially -- complete one befor
 
 ### Step 4: Summary
 
-After all selected issues have been processed, provide a summary of what was done for each issue.
+After all open a5c-assigned issues have been processed, provide a summary of what was done for each issue.
 
 ## Notes
 
 - Only issues assigned to `a5c-agent` are fetched. Other assignees are ignored.
 - The `gh` CLI must be authenticated. If authentication fails, prompt the user to run `gh auth login`.
 - Each issue is handed off to `/babysitter:yolo` which handles the actual implementation work.
+- the entire workflow should be without any user interaction or breakpoints in the run, allowing for a seamless babysitting experience.
