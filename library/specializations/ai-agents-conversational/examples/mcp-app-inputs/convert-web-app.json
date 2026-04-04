@@ -1,0 +1,25 @@
+{
+  "webAppPath": "./frontend",
+  "framework": "react",
+  "description": "Existing React dashboard that fetches data from a REST API and displays charts. Converting to work as both a standalone web app and an MCP App in AI chat hosts.",
+  "dataSources": {
+    "restApi": "https://api.example.com/v1",
+    "cdnAssets": "https://cdn.example.com",
+    "webFonts": "https://fonts.googleapis.com"
+  },
+  "featuresToExpose": [
+    {
+      "name": "view_analytics",
+      "description": "Display analytics dashboard for a given date range",
+      "dataSource": "REST API"
+    },
+    {
+      "name": "view_report",
+      "description": "Display a formatted report",
+      "dataSource": "REST API"
+    }
+  ],
+  "transport": "http",
+  "preserveStandalone": true,
+  "compositionPattern": "full-pipeline"
+}

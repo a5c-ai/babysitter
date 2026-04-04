@@ -1,0 +1,32 @@
+{
+  "serverPath": "./src/server.ts",
+  "toolsToEnhance": [
+    {
+      "name": "query_database",
+      "currentOutput": "JSON array of rows",
+      "uiBenefit": "high",
+      "proposedUI": "Interactive sortable/filterable table with pagination"
+    },
+    {
+      "name": "get_metrics",
+      "currentOutput": "JSON object with numeric values",
+      "uiBenefit": "high",
+      "proposedUI": "Dashboard with gauges and sparkline charts"
+    }
+  ],
+  "toolsToSkip": [
+    {
+      "name": "run_migration",
+      "reason": "Simple text confirmation output, no UI benefit"
+    }
+  ],
+  "framework": "react",
+  "enhancements": {
+    "appOnlyTools": true,
+    "cspConfig": false,
+    "streamingInput": false,
+    "gracefulDegradation": true,
+    "fullscreen": false
+  },
+  "compositionPattern": "full-pipeline"
+}
