@@ -15,11 +15,13 @@ import {
 } from "./paths";
 import { writeFileAtomic } from "./atomic";
 import { getClockIsoString } from "./clock";
+import { warnIfICloudDrivePath } from "./icloudWarning";
 
 const GITIGNORE_CONTENT = `state/\ntasks/*/artifacts/\nblobs/\norphaned/\n`;
 
 export async function createRunDir(options: CreateRunDirOptions) {
   const runDir = getRunDir(options.runsRoot, options.runId);
+  await warnIfICloudDrivePath(runDir);
   await fs.mkdir(runDir, { recursive: true });
   await Promise.all([
     fs.mkdir(getJournalDir(runDir), { recursive: true }),
