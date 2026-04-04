@@ -3,7 +3,7 @@
  * @description Create and distribute a GitHub Copilot plugin with plugin.json manifest,
  *   hooks.json (version 1 format: sessionStart, sessionEnd, userPromptSubmitted, preToolUse, postToolUse,
  *   agentStop, subagentStop, errorOccurred), .github/agents/*.agent.md, skills/<name>/SKILL.md,
- *   commands/*.md, AGENTS.md, .github/instructions/**/*.instructions.md, MCP configs,
+ *   commands/*.md, AGENTS.md, .github/instructions/<name>.instructions.md files, MCP configs,
  *   copilot-setup-steps.yml, and npm distribution
  * @inputs { extensionName: string, description: string, components?: object, outputDir?: string, repoOwner?: string, author?: string }
  * @outputs { success: boolean, outputDir: string, agents: array, hooks: array, instructions: array, distribution: object }

@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "check:library-syntax": "node ./scripts/validate-library-js-syntax.cjs",
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
     "sync:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs",
     "check:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs --check",
