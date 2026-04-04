@@ -421,6 +421,201 @@ Within a process, read `relatedProcessIds` from `inputs` and pass them through t
 
 ---
 
+### `playwright-visual-smoke`
+
+Performs visual regression smoke tests using Playwright to catch CSS/layout regressions. Designed for injection into CI, quality-gate, and convergence processes that need to verify UI integrity before completing or merging.
+
+The module exposes three surfaces:
+- **`createVisualSmokeTest(config)`** — factory that builds two `defineTask` descriptors for fine-grained manual control.
+- **`executeVisualSmokeTest(ctx, config, args?)`** — convenience wrapper that drives the full sequence and returns a unified result.
+- **`playwrightVisualSmokeTask`** — standalone `defineTask` for direct `ctx.task()` usage without a factory.
+
+**Import**
+
+```js
+import {
+  createVisualSmokeTest,
+  executeVisualSmokeTest,
+  playwrightVisualSmokeTask
+} from './index.js';
+// or directly:
+import {
+  createVisualSmokeTest,
+  executeVisualSmokeTest,
+  playwrightVisualSmokeTask
+} from './playwright-visual-smoke.js';
+```
+
+**`createVisualSmokeTest(config)` — factory**
+
+Creates two babysitter task definitions that can be dispatched individually via `ctx.task()`. The returned descriptors carry no shared mutable state and are safe to reuse across multiple convergence loop iterations.
+
+```js
+function createVisualSmokeTest(config: VisualSmokeTestConfig): {
+  smokeTestTask:    TaskDef,  // shell task — runs Playwright checks, outputs raw JSON
+  generateReportTask: TaskDef,  // agent task — analyses results, produces human-readable report
+}
+```
+
+**`VisualSmokeTestConfig` options**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `name` | `string` | yes | — | Human-readable identifier, e.g. `'dashboard-visual-smoke'`. Used in task IDs and titles. |
+| `baseUrl` | `string` | yes | — | Base URL of the application under test, e.g. `'http://localhost:3000'`. |
+| `pages` | `string[]` | no | `['/']` | URL paths to visit relative to `baseUrl`. |
+| `criticalButtons` | `string[]` | no | `['Save','Submit','Cancel']` | Button labels (role=button) to verify are visible and clickable. |
+| `containerSelectors` | `string[]` | no | `['main','[role="main"]','.container']` | CSS selectors whose bounding boxes must have non-zero dimensions. |
+| `viewportWidth` | `number` | no | `1280` | Browser viewport width in pixels. |
+| `viewportHeight` | `number` | no | `720` | Browser viewport height in pixels. |
+| `timeout` | `number` | no | `30000` | Navigation timeout in milliseconds per page. |
+
+**The 4 checks performed per page**
+
+1. **Build error detection** — scans `document.body.innerText` for patterns: `'Build Error'`, `'Compilation Error'`, `'Module not found'`, `'SyntaxError'`. A match is a hard failure.
+2. **Container dimension verification** — checks each `containerSelectors` element has a non-zero bounding box (`width > 0 && height > 0`). The page fails only if *all* containers are missing or zero-area (individual misses are warnings).
+3. **Fixed element bounds validation** — enumerates all `position: fixed` elements via `getComputedStyle` and verifies each lies within the configured viewport bounds. Out-of-bounds fixed elements indicate CSS layout regressions.
+4. **Critical button visibility and clickability** — for each label in `criticalButtons`, locates the first `role=button` match and asserts both `isVisible()` and `isEnabled()`.
+
+**`generateReportTask` output schema**
+
+```js
+{
+  passed:          boolean,
+  summary:         string,
+  pages:           Array<{ url: string, status: 'pass'|'fail'|'error', issues: string[] }>,
+  recommendations: string[]
+}
+```
+
+**`executeVisualSmokeTest(ctx, config, args?)` — convenience wrapper**
+
+Orchestrates the full smoke test sequence in two phases: run Playwright checks (shell task), then analyse results (agent task). Returns a unified `VisualSmokeTestResult`. The final `passed` flag is `true` only when both the raw shell task and the analysis agent independently report success.
+
+```js
+async function executeVisualSmokeTest(
+  ctx:    ProcessContext,
+  config: VisualSmokeTestConfig,
+  args?:  { attempt?: number }  // attempt number for retry tracking, default 1
+): Promise<{
+  passed:  boolean,      // true when all checks across all pages and the agent report pass
+  pages:   PageResult[], // raw per-page results from the Playwright shell task
+  summary: string        // human-readable summary from the report agent
+}>
+```
+
+**`playwrightVisualSmokeTask` — standalone `defineTask`**
+
+A single `defineTask` descriptor that combines script execution and result analysis into one agent task invocation. Use when you want the smoke test as a single orchestrated harness task without the factory split. All config is passed via `args` at call time.
+
+Task inputs (via `args`):
+
+| Field | Type | Default |
+|-------|------|---------|
+| `name` | `string` | `'visual-smoke'` |
+| `baseUrl` | `string` | `'http://localhost:3000'` |
+| `pages` | `string[]` | `['/']` |
+| `criticalButtons` | `string[]` | `['Save','Submit','Cancel']` |
+| `containerSelectors` | `string[]` | `['main','[role="main"]','.container']` |
+| `viewportWidth` | `number` | `1280` |
+| `viewportHeight` | `number` | `720` |
+| `timeout` | `number` | `30000` |
+
+Task output: `{ passed, pages, summary, recommendations }`.
+
+**Usage — convenience approach**
+
+```js
+import { executeVisualSmokeTest } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await executeVisualSmokeTest(ctx, {
+    name: 'dashboard-visual-smoke',
+    baseUrl: inputs.baseUrl ?? 'http://localhost:3000',
+    pages: ['/', '/settings', '/dashboard'],
+    criticalButtons: ['Save', 'Submit', 'Cancel', 'Delete'],
+    containerSelectors: ['main', '.dashboard-grid', '.sidebar'],
+  });
+
+  if (!result.passed) {
+    // Feed result.summary back into a convergence loop breakpoint
+    const response = await ctx.breakpoint({
+      message: `Visual smoke checks failed.\n${result.summary}`,
+      options: ['fix and retry', 'defer', 'abort']
+    });
+  }
+
+  return result;
+}
+```
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createVisualSmokeTest } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { smokeTestTask, generateReportTask } = createVisualSmokeTest({
+    name: 'catalog-visual-smoke',
+    baseUrl: 'http://localhost:3000',
+    pages: ['/', '/browse', '/search'],
+    criticalButtons: ['Search', 'Clear'],
+    containerSelectors: ['main', '.catalog-grid'],
+  });
+
+  const rawResults = await ctx.task(smokeTestTask, { attempt: 1 });
+  const report     = await ctx.task(generateReportTask, { smokeResults: rawResults });
+
+  return { passed: report.passed, summary: report.summary };
+}
+```
+
+**Usage — standalone task**
+
+```js
+import { playwrightVisualSmokeTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(playwrightVisualSmokeTask, {
+    name: 'app-smoke',
+    baseUrl: 'http://localhost:3000',
+    pages: ['/', '/about'],
+  });
+
+  return result;
+}
+```
+
+**Example output**
+
+```json
+{
+  "passed": false,
+  "summary": "Visual regression detected on /dashboard: the .dashboard-grid container has zero area, indicating a rendering failure. All other pages passed.",
+  "pages": [
+    {
+      "url": "/",
+      "status": "pass",
+      "issues": []
+    },
+    {
+      "url": "/dashboard",
+      "status": "fail",
+      "issues": [
+        "Container '.dashboard-grid' has zero area (width=0, height=0)",
+        "Button 'Save' not visible"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Inspect .dashboard-grid CSS — possible display:none or missing layout styles",
+    "Verify the Save button renders within the dashboard view before making it visible"
+  ]
+}
+```
+
+---
+
 ## API Reference
 
 | Export | Module | Type | Description |
@@ -434,5 +629,8 @@ Within a process, read `relatedProcessIds` from `inputs` and pass them through t
 | `costAggregationTask` | `cost-aggregation` | `TaskDef` | `defineTask` wrapper for harness-driven execution |
 | `createTddTriplet` | `tdd-triplet` | `function` | Factory that returns three `defineTask` descriptors for the write-tests, run-tests, and validate phases |
 | `executeTddTriplet` | `tdd-triplet` | `async function` | Convenience wrapper that drives the full TDD triplet sequence with built-in retry logic |
+| `createVisualSmokeTest` | `playwright-visual-smoke` | `function` | Factory that returns two `defineTask` descriptors for the Playwright shell task and report agent task |
+| `executeVisualSmokeTest` | `playwright-visual-smoke` | `async function` | Convenience wrapper that drives the full visual smoke test sequence and returns a unified result |
+| `playwrightVisualSmokeTask` | `playwright-visual-smoke` | `TaskDef` | Standalone `defineTask` for direct `ctx.task()` usage without factory instantiation |
 
 All exports are available from `./index.js` (the preferred import path) or from the individual module files.
