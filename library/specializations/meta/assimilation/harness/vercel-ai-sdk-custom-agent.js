@@ -1,10 +1,9 @@
 /**
- * @process assimilation/harness/openai-agents-sdk-custom-agent
- * @description Assimilate babysitter orchestration into an existing OpenAI
- *   Agents SDK codebase by patching the current agent runner, handoff/tooling
- *   stack, and operator surfaces in place. This process is intentionally
- *   different from the plugin-oriented harness assimilation flow: it targets an
- *   existing application runtime rather than a distributable babysitter plugin.
+ * @process assimilation/harness/vercel-ai-sdk-custom-agent
+ * @description Assimilate babysitter orchestration into an existing Vercel AI
+ *   SDK based agent codebase by patching its current chat loop, streaming/tool
+ *   surfaces, persistence, and operator controls in place. This process is
+ *   deliberately separate from the plugin-oriented harness assimilation flow.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number, targetAssumptions?: string[] }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -30,13 +29,13 @@ export async function process(inputs, ctx) {
     targetAssumptions = [],
   } = inputs;
 
-  const frameworkId = 'openai-agents-sdk';
-  const frameworkDisplayName = 'OpenAI Agents SDK custom agent';
+  const frameworkId = 'vercel-ai-sdk';
+  const frameworkDisplayName = 'Vercel AI SDK custom agent';
   const integrationFiles = [];
   let finalQuality = 0;
   let iterations = 0;
 
-  ctx.log('phase:research', 'Researching OpenAI Agents SDK runner lifecycle, tools, handoffs, and guardrails');
+  ctx.log('phase:research', 'Researching Vercel AI SDK streaming, tool invocation, middleware, and persistence surfaces');
   const research = await ctx.task(researchFrameworkTargetTask, {
     projectDir,
     frameworkId,
@@ -44,14 +43,14 @@ export async function process(inputs, ctx) {
     targetAssumptions,
   });
 
-  ctx.log('phase:map', 'Mapping runner entrypoints, run context, tool dispatch, and handoff seams');
+  ctx.log('phase:map', 'Mapping chat loop ownership, tool execution, persistence, and operator seams');
   const codebaseMap = await ctx.task(mapExistingCodebaseTask, {
     projectDir,
     frameworkDisplayName,
     research,
   });
 
-  ctx.log('phase:architecture', 'Designing in-place OpenAI Agents SDK assimilation plan');
+  ctx.log('phase:architecture', 'Designing in-place Vercel AI SDK assimilation plan');
   const plan = await ctx.task(designInPlaceAssimilationTask, {
     projectDir,
     frameworkDisplayName,
@@ -59,27 +58,27 @@ export async function process(inputs, ctx) {
     codebaseMap,
   });
 
-  ctx.log('phase:runner-bridge', 'Patching runner turn orchestration and completion interception');
-  const runnerBridge = await ctx.task(implementRuntimeBridgeTask, {
+  ctx.log('phase:runtime-bridge', 'Patching the host chat loop, streaming, and orchestration boundaries');
+  const runtimeBridge = await ctx.task(implementRuntimeBridgeTask, {
     projectDir,
     frameworkDisplayName,
-    implementationPhase: 'runner-turn-orchestration',
+    implementationPhase: 'chat-loop-and-streaming-bridge',
     plan,
     codebaseMap,
   });
-  integrationFiles.push(...runnerBridge.filesCreated, ...runnerBridge.filesModified);
+  integrationFiles.push(...runtimeBridge.filesCreated, ...runtimeBridge.filesModified);
 
-  ctx.log('phase:tools-handoffs', 'Integrating babysitter effect execution with tools, handoffs, and guardrails');
-  const toolsAndHandoffs = await ctx.task(implementRuntimeBridgeTask, {
+  ctx.log('phase:tools-persistence', 'Integrating effect execution, resume flow, and persistence surfaces');
+  const toolAndPersistenceBridge = await ctx.task(implementRuntimeBridgeTask, {
     projectDir,
     frameworkDisplayName,
-    implementationPhase: 'tools-handoffs-and-session-bridging',
+    implementationPhase: 'tooling-persistence-and-session-bridge',
     plan,
     codebaseMap,
   });
-  integrationFiles.push(...toolsAndHandoffs.filesCreated, ...toolsAndHandoffs.filesModified);
+  integrationFiles.push(...toolAndPersistenceBridge.filesCreated, ...toolAndPersistenceBridge.filesModified);
 
-  ctx.log('phase:operations', 'Adding process-library, logging, and host operator controls');
+  ctx.log('phase:operations', 'Adding process-library integration, hooks, logging, and operator documentation');
   const operations = await ctx.task(implementOperationsSurfaceTask, {
     projectDir,
     frameworkDisplayName,
@@ -88,7 +87,7 @@ export async function process(inputs, ctx) {
   });
   integrationFiles.push(...operations.filesCreated, ...operations.filesModified);
 
-  ctx.log('phase:verification', 'Adding verification coverage for the patched host runtime');
+  ctx.log('phase:verification', 'Adding verification coverage for the Vercel AI SDK host assimilation');
   const verificationArtifacts = await ctx.task(implementVerificationTask, {
     projectDir,
     frameworkDisplayName,

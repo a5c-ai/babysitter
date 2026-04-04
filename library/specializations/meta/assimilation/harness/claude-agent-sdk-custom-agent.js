@@ -16,6 +16,8 @@ import {
   implementRuntimeBridgeTask,
   implementOperationsSurfaceTask,
   implementVerificationTask,
+  validateInPlaceAssimilationTask,
+  fixInPlaceValidationFailuresTask,
   verifyInPlaceAssimilationTask,
   refineInPlaceAssimilationTask,
 } from './custom-agent-shared-assimilation.js';
@@ -95,41 +97,78 @@ export async function process(inputs, ctx) {
   });
   integrationFiles.push(...verificationArtifacts.filesCreated, ...verificationArtifacts.filesModified);
 
+  ctx.log('phase:validate', 'Running concrete validation checks for the in-place assimilation');
+  let validation = await ctx.task(validateInPlaceAssimilationTask, {
+    projectDir,
+    frameworkId,
+    frameworkDisplayName,
+    research,
+    plan,
+    integrationFiles,
+  });
+
   let verification = await ctx.task(verifyInPlaceAssimilationTask, {
     projectDir,
     frameworkDisplayName,
     targetQuality,
     integrationFiles,
+    validation,
   });
 
   finalQuality = verification.qualityScore;
   iterations = 1;
 
-  while (finalQuality < targetQuality && iterations < maxIterations) {
+  while ((!validation.passed || finalQuality < targetQuality) && iterations < maxIterations) {
     iterations++;
-    ctx.log('phase:converge', `Refining Claude/Anthropic agent assimilation (iteration ${iterations})`);
+    ctx.log('phase:converge', `Validation/refinement iteration ${iterations}`);
 
-    const refinement = await ctx.task(refineInPlaceAssimilationTask, {
+    if (!validation.passed) {
+      ctx.log('phase:fix-validation', `Fixing validation failures for iteration ${iterations}`);
+      const validationFixes = await ctx.task(fixInPlaceValidationFailuresTask, {
+        projectDir,
+        frameworkId,
+        frameworkDisplayName,
+        research,
+        plan,
+        validation,
+        integrationFiles,
+      });
+      integrationFiles.push(...validationFixes.filesCreated, ...validationFixes.filesModified);
+    }
+
+    if (finalQuality < targetQuality) {
+      const refinement = await ctx.task(refineInPlaceAssimilationTask, {
+        projectDir,
+        frameworkDisplayName,
+        iteration: iterations,
+        issues: verification.issues,
+        recommendations: verification.recommendations,
+        integrationFiles,
+      });
+      integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
+    }
+
+    validation = await ctx.task(validateInPlaceAssimilationTask, {
       projectDir,
+      frameworkId,
       frameworkDisplayName,
-      iteration: iterations,
-      issues: verification.issues,
-      recommendations: verification.recommendations,
+      research,
+      plan,
       integrationFiles,
     });
-    integrationFiles.push(...refinement.filesCreated, ...refinement.filesModified);
 
     verification = await ctx.task(verifyInPlaceAssimilationTask, {
       projectDir,
       frameworkDisplayName,
       targetQuality,
       integrationFiles,
+      validation,
     });
     finalQuality = verification.qualityScore;
   }
 
   return {
-    success: finalQuality >= targetQuality,
+    success: validation.passed && finalQuality >= targetQuality,
     integrationFiles: [...new Set(integrationFiles)],
     finalQuality,
     iterations,

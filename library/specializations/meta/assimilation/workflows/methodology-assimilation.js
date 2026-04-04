@@ -733,25 +733,18 @@ export async function process(inputs, ctx) {
       sourceRepo,
       methodologyName,
       methodologyDisplayName
+    });
+
     let lastFeedback_finalApproval2 = null;
     for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_finalApproval2) {
-        verifyResult = await ctx.task(verifyAssimilationTask, { ...{
-      outputBasePath,
-      architecture,
-      sourceResearch,
-      targetScore: targetQuality,
-      methodologyDisplayName
-    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-      }
-  const finalApproval2 = await ctx.breakpoint({
-      question: `Research on ${methodologyDisplayName} is complete. Found ${sourceResearch.workflows?.length || 0} workflows, ${sourceResearch.agents?.length || 0} agents, ${sourceResearch.commands?.length || 0} commands. Proceed with architecture design?`,
-      title: 'Research Review',
-      context: { runId: ctx.runId },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_finalApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
+      const finalApproval2 = await ctx.breakpoint({
+        question: `Research on ${methodologyDisplayName} is complete. Found ${sourceResearch.workflows?.length || 0} workflows, ${sourceResearch.agents?.length || 0} agents, ${sourceResearch.commands?.length || 0} commands. Proceed with architecture design?`,
+        title: 'Research Review',
+        context: { runId: ctx.runId },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_finalApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
       });
       if (finalApproval2.approved) break;
       lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
