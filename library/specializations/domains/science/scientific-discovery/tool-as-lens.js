@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
   // Phase 2: Analyze Each Tool as a Lens
   ctx.log('info', 'Analyzing each tool as a lens');
   for (const tool of toolInventory.tools) {
-    let toolAnalysis = await ctx.task(analyzeToolAsLensTask, {
+    const toolAnalysis = await ctx.task(analyzeToolAsLensTask, {
       phenomenon,
       tool,
       domain
@@ -50,16 +50,9 @@ export async function process(inputs, ctx) {
     toolAnalyses.push(toolAnalysis);
     revealedAspects[tool.name] = toolAnalysis.reveals;
     hiddenAspects[tool.name] = toolAnalysis.hides;
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      toolAnalysis = await ctx.task(analyzeToolAsLensTask, { ...{
-      phenomenon,
-      tool,
-      domain
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Analyzed ${toolInventory.tools.length} tools as lenses. Review before blind spot analysis?`,
     title: 'Tool as Lens - Tool Analyses Complete',
     context: {
@@ -68,15 +61,9 @@ export async function process(inputs, ctx) {
         path: `artifacts/tool-${tool.name}-analysis.json`,
         format: 'json'
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Identify Collective Blind Spots
   let blindSpotAnalysis = null;
   if (analyzeBlindSpots) {
@@ -89,6 +76,7 @@ export async function process(inputs, ctx) {
       domain
     });
   }
+
   // Phase 4: Analyze Tool Complementarity
   ctx.log('info', 'Analyzing tool complementarity');
   const complementarityAnalysis = await ctx.task(analyzeComplementarityTask, {

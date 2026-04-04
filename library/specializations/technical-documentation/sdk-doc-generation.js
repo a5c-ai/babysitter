@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing SDK codebase and creating inventory');
 
-  let sdkAnalysis = await ctx.task(sdkCodeAnalysisTask, {
+  const sdkAnalysis = await ctx.task(sdkCodeAnalysisTask, {
     projectName,
     sdkPath,
     language,
@@ -99,19 +99,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...sdkAnalysis.artifacts);
 
   // Quality Gate: Minimum API surface
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        sdkAnalysis = await ctx.task(sdkCodeAnalysisTask, { ...{
-    projectName,
-    sdkPath,
-    language,
-    targetLanguages,
-    versionNumber,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (sdkAnalysis.publicApiCount < 5) {
+    await ctx.breakpoint({
       question: `Only ${sdkAnalysis.publicApiCount} public API elements found. This may indicate incomplete SDK or analysis issues. Review inventory and approve to continue?`,
       title: 'SDK Inventory Review',
       context: {
@@ -122,15 +111,9 @@ export async function process(inputs, ctx) {
         functions: sdkAnalysis.functions,
         recommendation: 'Verify SDK path and public API exports',
         files: sdkAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: DOCUMENTATION TOOLING SETUP
@@ -163,13 +146,14 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // ============================================================================
   // PHASE 3: INLINE DOCUMENTATION AUDIT
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Auditing inline documentation coverage and quality');
 
-  let docAudit = await ctx.task(inlineDocAuditTask, {
+  const docAudit = await ctx.task(inlineDocAuditTask, {
     projectName,
     sdkPath,
     language,
@@ -184,19 +168,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Documentation coverage
   const currentCoverage = docAudit.coverageMetrics.overallCoverage;
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        docAudit = await ctx.task(inlineDocAuditTask, { ...{
-    projectName,
-    sdkPath,
-    language,
-    sdkAnalysis,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (currentCoverage < acceptanceCriteria.minCoverage) {
+    await ctx.breakpoint({
       question: `Documentation coverage: ${currentCoverage.toFixed(1)}%. Target: ${acceptanceCriteria.minCoverage}%. Below threshold. Review gaps and decide to enhance docs or continue?`,
       title: 'Documentation Coverage Quality Gate',
       context: {
@@ -209,15 +182,9 @@ export async function process(inputs, ctx) {
         coverageByModule: docAudit.coverageByModule,
         recommendation: 'Consider enhancing inline documentation before generation',
         files: docAudit.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: MISSING DOCUMENTATION ENHANCEMENT
@@ -239,7 +206,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...enhancementResults.artifacts);
 
     // Re-audit after enhancement
-    let postEnhancementAudit = await ctx.task(inlineDocAuditTask, {
+    const postEnhancementAudit = await ctx.task(inlineDocAuditTask, {
       projectName,
       sdkPath,
       language,
@@ -251,6 +218,7 @@ export async function process(inputs, ctx) {
     artifacts.push(...postEnhancementAudit.artifacts);
     coverageMetrics = postEnhancementAudit.coverageMetrics;
   }
+
   // ============================================================================
   // PHASE 5: CODE EXAMPLES GENERATION (PARALLEL)
   // ============================================================================
@@ -290,19 +258,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Minimum examples per class
     const examplesPerClass = totalExamples / sdkAnalysis.classes.length;
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          postEnhancementAudit = await ctx.task(inlineDocAuditTask, { ...{
-      projectName,
-      sdkPath,
-      language,
-      sdkAnalysis,
-      acceptanceCriteria,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    if (examplesPerClass < acceptanceCriteria.examplesPerClass) {
+      await ctx.breakpoint({
         question: `Generated ${examplesPerClass.toFixed(1)} examples per class. Target: ${acceptanceCriteria.examplesPerClass}. Below threshold. Review examples and decide to generate more or continue?`,
         title: 'Code Examples Quality Gate',
         context: {
@@ -313,16 +270,11 @@ export async function process(inputs, ctx) {
           classCount: sdkAnalysis.classes.length,
           examplesByCategory: exampleResults.map(r => ({ category: r.category, count: r.examplesGenerated })),
           files: exampleResults.flatMap(r => r.artifacts).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 6: API REFERENCE GENERATION
   // ============================================================================
@@ -354,6 +306,7 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // ============================================================================
   // PHASE 7: INTEGRATION GUIDES AND TUTORIALS
   // ============================================================================
@@ -410,13 +363,14 @@ export async function process(inputs, ctx) {
     artifacts.push(...changelogResult.artifacts);
     generatedArtifacts.push(...changelogResult.generatedFiles);
   }
+
   // ============================================================================
   // PHASE 10: CROSS-REFERENCES AND LINKS VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Building cross-references and validating links');
 
-  let linksValidation = await ctx.task(crossReferenceValidationTask, {
+  const linksValidation = await ctx.task(crossReferenceValidationTask, {
     projectName,
     generatedArtifacts,
     apiReference,
@@ -426,17 +380,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...linksValidation.artifacts);
 
   // Quality Gate: Broken links
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        linksValidation = await ctx.task(crossReferenceValidationTask, { ...{
-    projectName,
-    generatedArtifacts,
-    apiReference,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (linksValidation.brokenLinks.length > acceptanceCriteria.brokenLinksAllowed) {
+    await ctx.breakpoint({
       question: `Found ${linksValidation.brokenLinks.length} broken links. Target: ${acceptanceCriteria.brokenLinksAllowed}. Review and fix broken links?`,
       title: 'Link Validation Quality Gate',
       context: {
@@ -447,15 +392,9 @@ export async function process(inputs, ctx) {
         warningLinks: linksValidation.warningLinks,
         recommendation: 'Fix broken internal and external links',
         files: linksValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: SEARCH INDEX GENERATION
@@ -473,6 +412,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...searchIndexResult.artifacts);
   }
+
   // ============================================================================
   // PHASE 12: MULTI-FORMAT OUTPUT GENERATION (PARALLEL)
   // ============================================================================
@@ -501,7 +441,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Assessing documentation quality and completeness');
 
-  let qualityAssessment = await ctx.task(docQualityAssessmentTask, {
+  const qualityAssessment = await ctx.task(docQualityAssessmentTask, {
     projectName,
     coverageMetrics,
     generatedArtifacts,
@@ -516,20 +456,8 @@ export async function process(inputs, ctx) {
   documentationStats = qualityAssessment.stats;
 
   // Quality Gate: Documentation quality score
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        qualityAssessment = await ctx.task(docQualityAssessmentTask, { ...{
-    projectName,
-    coverageMetrics,
-    generatedArtifacts,
-    sdkAnalysis,
-    linksValidation,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (qualityScore < acceptanceCriteria.minQualityScore) {
+    await ctx.breakpoint({
       question: `Documentation quality score: ${qualityScore}/100. Target: ${acceptanceCriteria.minQualityScore}. Below threshold. Review quality report and decide to improve or proceed?`,
       title: 'Documentation Quality Gate',
       context: {
@@ -541,15 +469,9 @@ export async function process(inputs, ctx) {
         strengths: qualityAssessment.strengths,
         weaknesses: qualityAssessment.weaknesses,
         files: qualityAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: HOSTING PREPARATION AND DEPLOYMENT SETUP
@@ -575,7 +497,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Creating final review package');
 
-  let reviewPackage = await ctx.task(finalReviewPackageTask, {
+  const reviewPackage = await ctx.task(finalReviewPackageTask, {
     projectName,
     documentationStats,
     coverageMetrics,
@@ -587,20 +509,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reviewPackage.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reviewPackage = await ctx.task(finalReviewPackageTask, { ...{
-    projectName,
-    documentationStats,
-    coverageMetrics,
-    qualityScore,
-    generatedArtifacts,
-    hostingPrep,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete documentation
+  await ctx.breakpoint({
     question: `SDK documentation generation complete for ${projectName}. Quality score: ${qualityScore}/100, Coverage: ${coverageMetrics.overallCoverage.toFixed(1)}%. Review final documentation package and approve for deployment?`,
     title: 'Final Documentation Review',
     context: {
@@ -620,15 +530,9 @@ export async function process(inputs, ctx) {
         hosting,
         deploymentReady: hostingPrep.deploymentReady
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -673,7 +577,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

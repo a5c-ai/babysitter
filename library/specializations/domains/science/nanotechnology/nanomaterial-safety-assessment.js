@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
   // PHASE 1: Comprehensive Physicochemical Characterization
   // --------------------------------------------------------------------------
 
-  let characterizationResult = await ctx.task(physicochemicalCharacterizationTask, {
+  const characterizationResult = await ctx.task(physicochemicalCharacterizationTask, {
     nanomaterial,
     existingData,
     regulatoryFrameworks
@@ -81,36 +81,23 @@ export async function process(inputs, ctx) {
       missingParameters: characterizationResult.missingParameters,
       recommendations: characterizationResult.recommendations
     };
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      characterizationResult = await ctx.task(physicochemicalCharacterizationTask, { ...{
-    nanomaterial,
-    existingData,
-    regulatoryFrameworks
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Physicochemical characterization complete. ${characterizationResult.parametersCharacterized} parameters documented including size distribution (${characterizationResult.sizeAnalysis.meanDiameter} nm), surface properties, and composition. Proceed to hazard assessment?`,
     title: 'Characterization Review',
     context: {
       runId: ctx.runId,
       characterizationSummary: characterizationResult.summary,
       dataQuality: characterizationResult.dataQualityAssessment
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // --------------------------------------------------------------------------
   // PHASE 2: In Vitro Hazard Assessment
   // --------------------------------------------------------------------------
 
-  let inVitroResult = await ctx.task(inVitroHazardAssessmentTask, {
+  const inVitroResult = await ctx.task(inVitroHazardAssessmentTask, {
     nanomaterial,
     characterization: characterizationResult,
     requiredEndpoints: requiredEndpoints.filter(e => isInVitroEndpoint(e)),
@@ -120,17 +107,8 @@ export async function process(inputs, ctx) {
   // Evaluate if additional testing is needed based on results
   const hazardFlags = evaluateHazardFlags(inVitroResult);
 
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        inVitroResult = await ctx.task(inVitroHazardAssessmentTask, { ...{
-    nanomaterial,
-    characterization: characterizationResult,
-    requiredEndpoints: requiredEndpoints.filter(e => isInVitroEndpoint(e)),
-    applicationContext
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (hazardFlags.requiresAdditionalTesting) {
+    await ctx.breakpoint({
       question: `In vitro testing identified potential hazards: ${hazardFlags.concerns.join(', ')}. ${hazardFlags.additionalTestingRecommended.length} additional tests recommended. Approve extended testing protocol?`,
       title: 'Additional Testing Required',
       context: {
@@ -138,17 +116,11 @@ export async function process(inputs, ctx) {
         hazardFlags,
         currentResults: inVitroResult.summary,
         recommendedTests: hazardFlags.additionalTestingRecommended
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    }
-  // Perform additional testing
-    let additionalResult = await ctx.task(additionalToxicityTestingTask, {
+      }
+    });
+
+    // Perform additional testing
+    const additionalResult = await ctx.task(additionalToxicityTestingTask, {
       nanomaterial,
       characterization: characterizationResult,
       previousResults: inVitroResult,
@@ -157,6 +129,7 @@ export async function process(inputs, ctx) {
 
     inVitroResult.additionalTesting = additionalResult;
   }
+
   // --------------------------------------------------------------------------
   // PHASE 3: Genotoxicity Assessment (if required)
   // --------------------------------------------------------------------------
@@ -170,33 +143,19 @@ export async function process(inputs, ctx) {
       testBattery: determineGenotoxicityBattery(regulatoryFrameworks)
     });
 
-        let lastFeedback_phase3Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase3Review) {
-          additionalResult = await ctx.task(additionalToxicityTestingTask, { ...{
-      nanomaterial,
-      characterization: characterizationResult,
-      previousResults: inVitroResult,
-      additionalTests: hazardFlags.additionalTestingRecommended
-    }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-        }
-  const phase3Review = await ctx.breakpoint({
+    if (genotoxicityResult.positiveFindings.length > 0) {
+      await ctx.breakpoint({
         question: `Genotoxicity assessment found positive results: ${genotoxicityResult.positiveFindings.map(f => f.test).join(', ')}. Review findings and determine follow-up strategy?`,
         title: 'Genotoxicity Findings',
         context: {
           runId: ctx.runId,
           genotoxicityResults: genotoxicityResult,
           mechanisticAnalysis: genotoxicityResult.mechanisticEvaluation
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase3Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase3Review.approved) break;
-        lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // --------------------------------------------------------------------------
   // PHASE 4: Ecotoxicology Assessment (if required)
   // --------------------------------------------------------------------------
@@ -210,38 +169,24 @@ export async function process(inputs, ctx) {
       characterization: characterizationResult,
       endpoints: ecotoxEndpoints,
       environmentalCompartments: determineEnvironmentalCompartments(exposureScenarios)
-      let lastFeedback_assessmentApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_assessmentApproval) {
-        additionalResult = await ctx.task(additionalToxicityTestingTask, { ...{
-      nanomaterial,
-      characterization: characterizationResult,
-      previousResults: inVitroResult,
-      additionalTests: hazardFlags.additionalTestingRecommended
-    }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
-      }
-  const assessmentApproval = await ctx.breakpoint({
+    });
+
+    await ctx.breakpoint({
       question: `Ecotoxicology assessment complete. PNEC values: Aquatic ${ecotoxicityResult.pnecValues.aquatic} mg/L, Soil ${ecotoxicityResult.pnecValues.soil} mg/kg. Continue to environmental fate modeling?`,
       title: 'Ecotoxicology Review',
       context: {
         runId: ctx.runId,
         ecotoxResults: ecotoxicityResult,
         speciesSensitivity: ecotoxicityResult.speciesSensitivityDistribution
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_assessmentApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (assessmentApproval.approved) break;
-      lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // --------------------------------------------------------------------------
   // PHASE 5: Environmental Fate and Transport Modeling
   // --------------------------------------------------------------------------
 
-  let environmentalFateResult = await ctx.task(environmentalFateModelingTask, {
+  const environmentalFateResult = await ctx.task(environmentalFateModelingTask, {
     nanomaterial,
     characterization: characterizationResult,
     exposureScenarios,
@@ -260,38 +205,23 @@ export async function process(inputs, ctx) {
     applicationContext,
     environmentalFate: environmentalFateResult,
     occupationalControls: inputs.occupationalControls || {}
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      environmentalFateResult = await ctx.task(environmentalFateModelingTask, { ...{
-    nanomaterial,
-    characterization: characterizationResult,
-    exposureScenarios,
-    applicationContext,
-    releaseEstimates: calculateReleaseEstimates(applicationContext, nanomaterial)
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Exposure assessment complete across ${exposureScenarios.length} scenarios. Highest exposure pathway: ${exposureAssessmentResult.dominantPathway} at ${exposureAssessmentResult.maxExposure.value} ${exposureAssessmentResult.maxExposure.unit}. Proceed to risk characterization?`,
     title: 'Exposure Assessment Review',
     context: {
       runId: ctx.runId,
       exposureResults: exposureAssessmentResult,
       scenarioBreakdown: exposureAssessmentResult.scenarioDetails
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // --------------------------------------------------------------------------
   // PHASE 7: Risk Characterization
   // --------------------------------------------------------------------------
 
-  let riskCharacterizationResult = await ctx.task(riskCharacterizationTask, {
+  const riskCharacterizationResult = await ctx.task(riskCharacterizationTask, {
     nanomaterial,
     hazardData: {
       inVitro: inVitroResult,
@@ -310,38 +240,19 @@ export async function process(inputs, ctx) {
 
   while (riskIteration < maxRiskIterations &&
          currentRiskAssessment.requiresRefinement) {
-      let lastFeedback_assessmentApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_assessmentApproval2) {
-        riskCharacterizationResult = await ctx.task(riskCharacterizationTask, { ...{
-    nanomaterial,
-    hazardData: {
-      inVitro: inVitroResult,
-      genotoxicity: genotoxicityResult,
-      ecotoxicity: ecotoxicityResult
-    },
-    exposureData: exposureAssessmentResult,
-    environmentalFate: environmentalFateResult,
-    applicationContext
-  }, feedback: lastFeedback_assessmentApproval2, attempt: attempt + 1 });
-      }
-  const assessmentApproval2 = await ctx.breakpoint({
+    riskIteration++;
+
+    await ctx.breakpoint({
       question: `Risk margins borderline for ${currentRiskAssessment.borderlineScenarios.join(', ')}. Iteration ${riskIteration}: Refine exposure estimates or gather additional hazard data?`,
       title: 'Risk Refinement Required',
       context: {
         runId: ctx.runId,
         currentRisk: currentRiskAssessment,
         refinementOptions: currentRiskAssessment.refinementRecommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_assessmentApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (assessmentApproval2.approved) break;
-      lastFeedback_assessmentApproval2 = assessmentApproval2.response || assessmentApproval2.feedback || 'Changes requested';
-    }
-  let refinementResult = await ctx.task(riskRefinementTask, {
+      }
+    });
+
+    const refinementResult = await ctx.task(riskRefinementTask, {
       iteration: riskIteration,
       currentAssessment: currentRiskAssessment,
       refinementStrategy: currentRiskAssessment.refinementRecommendations[0]
@@ -360,6 +271,7 @@ export async function process(inputs, ctx) {
       previousAssessment: currentRiskAssessment
     });
   }
+
   // --------------------------------------------------------------------------
   // PHASE 8: Risk Management Recommendations
   // --------------------------------------------------------------------------
@@ -369,31 +281,18 @@ export async function process(inputs, ctx) {
     applicationContext,
     exposureScenarios,
     regulatoryFrameworks
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      refinementResult = await ctx.task(riskRefinementTask, { ...{
-      iteration: riskIteration,
-      currentAssessment: currentRiskAssessment,
-      refinementStrategy: currentRiskAssessment.refinementRecommendations[0]
-    }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Risk management measures identified: ${riskManagementResult.measures.length} controls recommended. OEL proposed: ${riskManagementResult.proposedOEL?.value} ${riskManagementResult.proposedOEL?.unit}. Review and approve risk management strategy?`,
     title: 'Risk Management Review',
     context: {
       runId: ctx.runId,
       riskManagement: riskManagementResult,
       controlHierarchy: riskManagementResult.controlHierarchy
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // --------------------------------------------------------------------------
   // PHASE 9: Regulatory Dossier Compilation
   // --------------------------------------------------------------------------
@@ -414,43 +313,29 @@ export async function process(inputs, ctx) {
   });
 
   // Validate dossier completeness
-  let dossierValidation = await ctx.task(dossierValidationTask, {
+  const dossierValidation = await ctx.task(dossierValidationTask, {
     dossier: regulatoryDossierResult,
     regulatoryFrameworks,
     applicationContext
   });
 
-      let lastFeedback_validationApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_validationApproval) {
-        dossierValidation = await ctx.task(dossierValidationTask, { ...{
-    dossier: regulatoryDossierResult,
-    regulatoryFrameworks,
-    applicationContext
-  }, feedback: lastFeedback_validationApproval, attempt: attempt + 1 });
-      }
-  const validationApproval = await ctx.breakpoint({
+  if (!dossierValidation.complete) {
+    await ctx.breakpoint({
       question: `Regulatory dossier incomplete. Missing elements: ${dossierValidation.missingElements.join(', ')}. Address gaps before finalization?`,
       title: 'Dossier Gaps Identified',
       context: {
         runId: ctx.runId,
         validationResults: dossierValidation,
         gapClosureRecommendations: dossierValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_validationApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (validationApproval.approved) break;
-      lastFeedback_validationApproval = validationApproval.response || validationApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // --------------------------------------------------------------------------
   // PHASE 10: Safe Handling Guidelines Development
   // --------------------------------------------------------------------------
 
-  let safeHandlingResult = await ctx.task(safeHandlingGuidelinesTask, {
+  const safeHandlingResult = await ctx.task(safeHandlingGuidelinesTask, {
     nanomaterial,
     characterization: characterizationResult,
     hazardProfile: {
@@ -466,22 +351,9 @@ export async function process(inputs, ctx) {
   // FINAL REVIEW AND COMPLETION
   // --------------------------------------------------------------------------
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      safeHandlingResult = await ctx.task(safeHandlingGuidelinesTask, { ...{
-    nanomaterial,
-    characterization: characterizationResult,
-    hazardProfile: {
-      inVitro: inVitroResult,
-      genotoxicity: genotoxicityResult
-    },
-    riskManagement: riskManagementResult,
-    exposureScenarios,
-    applicationContext
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  const overallRiskLevel = determineOverallRiskLevel(currentRiskAssessment);
+
+  await ctx.breakpoint({
     question: `Nanomaterial safety assessment complete. Overall risk level: ${overallRiskLevel}. Risk quotients within acceptable limits for ${currentRiskAssessment.acceptableScenarios.length}/${exposureScenarios.length} scenarios. Approve final safety documentation package?`,
     title: 'Final Safety Assessment Review',
     context: {
@@ -489,15 +361,9 @@ export async function process(inputs, ctx) {
       overallRisk: overallRiskLevel,
       safetyProfile: currentRiskAssessment.summary,
       regulatoryStatus: dossierValidation.complianceStatus
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     safetyProfile: {
@@ -551,7 +417,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -590,6 +457,7 @@ function evaluateHazardFlags(inVitroResult) {
     flags.concerns.push('Pro-inflammatory response');
     flags.additionalTestingRecommended.push('immunotoxicity-panel');
   }
+
   return flags;
 }
 
@@ -600,6 +468,7 @@ function determineGenotoxicityBattery(frameworks) {
   if (frameworks.includes('REACH')) {
     battery.push('chromosomal-aberration');
   }
+
   return battery;
 }
 
@@ -644,7 +513,8 @@ function countToxicityTests(inVitro, genotox, ecotox) {
   if (ecotox?.testsPerformed) count += ecotox.testsPerformed.length;
   return count;
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

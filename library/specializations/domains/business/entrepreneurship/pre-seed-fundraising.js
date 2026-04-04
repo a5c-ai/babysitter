@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting ${currentStage} Fundraising Process for ${companyName}`);
 
   // Phase 1: Fundraising Readiness Assessment
-  let readinessAssessment = await ctx.task(readinessAssessmentTask, {
+  const readinessAssessment = await ctx.task(readinessAssessmentTask, {
     companyName,
     fundingTarget,
     currentStage,
@@ -47,29 +47,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...(readinessAssessment.artifacts || []));
 
   // Quality Gate
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        readinessAssessment = await ctx.task(readinessAssessmentTask, { ...{
-    companyName,
-    fundingTarget,
-    currentStage,
-    traction,
-    team
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (readinessAssessment.readinessScore < 50) {
+    await ctx.breakpoint({
       question: `Readiness score is ${readinessAssessment.readinessScore}/100. Consider addressing gaps before fundraising. Continue anyway?`,
       title: 'Fundraising Readiness Warning',
-      context: { runId: ctx.runId, gaps: readinessAssessment.gaps },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      context: { runId: ctx.runId, gaps: readinessAssessment.gaps }
+    });
+  }
 
   // Phase 2: Pitch Materials Preparation
   const pitchMaterials = await ctx.task(pitchMaterialsTask, {
@@ -92,7 +76,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(dataRoom.artifacts || []));
 
   // Phase 4: Investor List Building
-  let investorList = await ctx.task(investorListTask, {
+  const investorList = await ctx.task(investorListTask, {
     companyName,
     fundingTarget,
     currentStage,
@@ -101,17 +85,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(investorList.artifacts || []));
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      investorList = await ctx.task(investorListTask, { ...{
-    companyName,
-    fundingTarget,
-    currentStage,
-    traction
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review investor list
+  await ctx.breakpoint({
     question: `Review target investor list for ${companyName}. ${investorList.totalInvestors} investors identified. Ready to begin outreach?`,
     title: 'Investor List Review',
     context: {
@@ -119,15 +94,9 @@ export async function process(inputs, ctx) {
       totalInvestors: investorList.totalInvestors,
       tiers: investorList.tiers,
       files: artifacts
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Warm Introduction Strategy
   const introStrategy = await ctx.task(introductionStrategyTask, {
     companyName,
@@ -166,7 +135,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(negotiationPrep.artifacts || []));
 
   // Phase 9: Closing Process Guide
-  let closingGuide = await ctx.task(closingProcessTask, {
+  const closingGuide = await ctx.task(closingProcessTask, {
     companyName,
     currentStage,
     fundingTarget
@@ -174,16 +143,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(closingGuide.artifacts || []));
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      closingGuide = await ctx.task(closingProcessTask, { ...{
-    companyName,
-    currentStage,
-    fundingTarget
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Fundraising process framework complete for ${companyName}. Target: $${fundingTarget.toLocaleString()}. Ready to execute?`,
     title: 'Fundraising Process Ready',
     context: {
@@ -192,15 +153,9 @@ export async function process(inputs, ctx) {
       fundingTarget,
       investorCount: investorList.totalInvestors,
       files: artifacts
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -226,7 +181,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const readinessAssessmentTask = defineTask('readiness-assessment', (args, taskCtx) => ({
   kind: 'agent',

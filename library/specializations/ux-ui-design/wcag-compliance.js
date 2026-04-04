@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Setting up automated WCAG compliance testing framework');
-  let testingSetup = await ctx.task(complianceTestingSetupTask, {
+  const testingSetup = await ctx.task(complianceTestingSetupTask, {
     projectName,
     applicationUrl,
     wcagLevel,
@@ -93,18 +93,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingSetup.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      testingSetup = await ctx.task(complianceTestingSetupTask, { ...{
-    projectName,
-    applicationUrl,
-    wcagLevel,
-    automatedTooling,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review testing setup
+  await ctx.breakpoint({
     question: `WCAG compliance testing framework configured with ${testingSetup.toolsConfigured.join(', ')}. ${standardsReview.applicableCriteria.length} success criteria identified for Level ${wcagLevel}. Review setup and approve to proceed?`,
     title: 'Testing Framework Setup Review',
     context: {
@@ -118,15 +108,9 @@ export async function process(inputs, ctx) {
         manualTestable: standardsReview.manualTestable
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: AUTOMATED ACCESSIBILITY SCANNING
   // ============================================================================
@@ -173,18 +157,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Automated scanning complete: ${violations.length} violations found across ${scope.length} pages`);
 
   // Quality Gate: Critical violations check
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        testingSetup = await ctx.task(complianceTestingSetupTask, { ...{
-    projectName,
-    applicationUrl,
-    wcagLevel,
-    automatedTooling,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (criticalViolationsFound && breakOnCritical) {
+    await ctx.breakpoint({
       question: `Critical WCAG compliance violations detected. ${violations.filter(v => v.impact === 'critical').length} critical and ${violations.filter(v => v.impact === 'serious').length} serious violations found. Review and decide: Continue testing, fix now, or abort?`,
       title: 'Critical WCAG Violations Detected',
       context: {
@@ -199,15 +173,9 @@ export async function process(inputs, ctx) {
           .filter(v => v.impact === 'critical' || v.impact === 'serious')
           .slice(0, 10),
         files: automatedResults.map(r => ({ path: r.reportPath, format: 'html', label: `Scan: ${r.pageOrFlow}` }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: KEYBOARD NAVIGATION TESTING
@@ -240,6 +208,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Keyboard navigation: ${keyboardResults.passed}/${keyboardResults.totalTests} passed (${keyboardResults.score}/100)`);
   }
+
   // ============================================================================
   // PHASE 5: SCREEN READER COMPATIBILITY TESTING
   // ============================================================================
@@ -271,6 +240,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Screen reader compatibility: ${screenReaderResults.compatible ? 'PASS' : 'FAIL'} (Score: ${screenReaderResults.compatibilityScore}/100)`);
   }
+
   // ============================================================================
   // PHASE 6: COLOR CONTRAST VALIDATION
   // ============================================================================
@@ -301,6 +271,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Color contrast: ${colorContrastResults.passing}/${colorContrastResults.totalElements} elements pass (${colorContrastResults.complianceRate}%)`);
   }
+
   // ============================================================================
   // PHASE 7: SEMANTIC HTML AND ARIA VALIDATION
   // ============================================================================
@@ -344,7 +315,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Validating multimedia content accessibility');
-  let multimediaValidation = await ctx.task(multimediaAccessibilityComplianceTask, {
+  const multimediaValidation = await ctx.task(multimediaAccessibilityComplianceTask, {
     projectName,
     applicationUrl,
     scope,
@@ -389,19 +360,9 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Manual testing: ${manualTestResults.passed}/${manualTestResults.totalTests} criteria passed`);
   }
-  let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      multimediaValidation = await ctx.task(multimediaAccessibilityComplianceTask, { ...{
-    projectName,
-    applicationUrl,
-    scope,
-    wcagLevel,
-    standardsReview,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review testing results
+  await ctx.breakpoint({
     question: `WCAG compliance testing complete. ${violations.length} total violations found. Automated score: ${testResults.automated.averageScore}/100. Review results and approve to proceed with compliance analysis?`,
     title: 'Testing Results Review',
     context: {
@@ -423,21 +384,15 @@ export async function process(inputs, ctx) {
         format: a.format || 'html',
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 11: WCAG COMPLIANCE ANALYSIS AND SCORING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Analyzing WCAG compliance and calculating compliance score');
-  let complianceAnalysis = await ctx.task(wcagComplianceAnalysisTask, {
+  const complianceAnalysis = await ctx.task(wcagComplianceAnalysisTask, {
     projectName,
     wcagLevel,
     standardsReview,
@@ -464,27 +419,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Compliance analysis: Score ${complianceScore}/100, Level ${achievedComplianceLevel} achieved`);
 
   // Quality Gate: Compliance threshold check
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        complianceAnalysis = await ctx.task(wcagComplianceAnalysisTask, { ...{
-    projectName,
-    wcagLevel,
-    standardsReview,
-    violations,
-    testResults,
-    automatedResults,
-    keyboardResults,
-    screenReaderResults,
-    colorContrastResults,
-    semanticValidation,
-    formsValidation,
-    multimediaValidation,
-    manualTestResults,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (complianceScore < complianceThreshold || !meetsCompliance) {
+    await ctx.breakpoint({
       question: `WCAG ${wcagLevel} compliance ${meetsCompliance ? 'partially' : 'not'} achieved. Current level: ${achievedComplianceLevel}, Score: ${complianceScore}/100 (Threshold: ${complianceThreshold}). ${prioritizedViolations.length} violations require remediation. Review and approve to proceed?`,
       title: 'WCAG Compliance Gap Detected',
       context: {
@@ -503,15 +439,9 @@ export async function process(inputs, ctx) {
           { path: complianceAnalysis.reportPath, format: 'html', label: 'Compliance Analysis Report' },
           { path: complianceAnalysis.summaryPath, format: 'json', label: 'Compliance Summary' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: SUCCESS CRITERIA MAPPING AND DOCUMENTATION
@@ -535,7 +465,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Generating comprehensive WCAG compliance report');
-  let complianceReport = await ctx.task(comprehensiveComplianceReportTask, {
+  const complianceReport = await ctx.task(comprehensiveComplianceReportTask, {
     projectName,
     applicationUrl,
     wcagLevel,
@@ -582,6 +512,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...vpatReport.artifacts);
   }
+
   // ============================================================================
   // PHASE 15: REMEDIATION PLAN GENERATION
   // ============================================================================
@@ -604,32 +535,8 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
 
-      let lastFeedback_phase15Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase15Review) {
-        complianceReport = await ctx.task(comprehensiveComplianceReportTask, { ...{
-    projectName,
-    applicationUrl,
-    wcagLevel,
-    complianceScore,
-    achievedComplianceLevel,
-    standardsReview,
-    testResults,
-    violations,
-    prioritizedViolations,
-    complianceAnalysis,
-    criteriaMapping,
-    keyboardResults,
-    screenReaderResults,
-    colorContrastResults,
-    semanticValidation,
-    formsValidation,
-    multimediaValidation,
-    manualTestResults,
-    outputDir
-  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
-      }
-  const phase15Review = await ctx.breakpoint({
+    // Breakpoint: Review remediation plan
+    await ctx.breakpoint({
       question: `Remediation plan created with ${remediationPlan.totalTasks} tasks across ${remediationPlan.phases.length} phases. Estimated effort: ${remediationPlan.estimatedEffort}. Expected score improvement: +${remediationPlan.expectedImprovementScore} points. Review and approve plan?`,
       title: 'Remediation Plan Review',
       context: {
@@ -648,22 +555,16 @@ export async function process(inputs, ctx) {
           { path: remediationPlan.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' },
           { path: complianceReport.mainReportPath, format: 'html', label: 'Compliance Report' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase15Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase15Review.approved) break;
-      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 16: FINAL WCAG COMPLIANCE ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 16: Conducting final WCAG compliance assessment');
-  let finalAssessment = await ctx.task(finalComplianceAssessmentTask, {
+  const finalAssessment = await ctx.task(finalComplianceAssessmentTask, {
     projectName,
     applicationUrl,
     wcagLevel,
@@ -681,26 +582,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalAssessment.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(finalComplianceAssessmentTask, { ...{
-    projectName,
-    applicationUrl,
-    wcagLevel,
-    complianceScore,
-    achievedComplianceLevel,
-    meetsCompliance,
-    complianceThreshold,
-    violations,
-    prioritizedViolations,
-    complianceAnalysis,
-    remediationPlan,
-    complianceReport,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete compliance validation
+  await ctx.breakpoint({
     question: `WCAG compliance validation complete. Target: ${wcagLevel}, Achieved: ${achievedComplianceLevel}, Score: ${complianceScore}/100. ${meetsCompliance ? 'COMPLIANCE ACHIEVED' : 'COMPLIANCE NOT MET'}. ${violations.length} violations found, ${remediationPlan ? remediationPlan.totalTasks + ' remediation tasks created' : 'no remediation plan'}. ${finalAssessment.verdict}. Approve final deliverables?`,
     title: 'Final WCAG Compliance Assessment',
     context: {
@@ -742,15 +625,9 @@ export async function process(inputs, ctx) {
         ...(vpatReport ? [{ path: vpatReport.vpatPath, format: 'html', label: 'VPAT Report' }] : []),
         { path: finalAssessment.reportPath, format: 'markdown', label: 'Final Assessment' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -859,7 +736,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

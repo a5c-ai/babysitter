@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Auditing existing designs and analyzing responsive requirements');
 
-  let designAudit = await ctx.task(responsiveDesignAuditTask, {
+  const designAudit = await ctx.task(responsiveDesignAuditTask, {
     projectName,
     pages,
     components,
@@ -106,20 +106,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Design completeness check
   const missingDesigns = designAudit.missingDesigns || [];
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        designAudit = await ctx.task(responsiveDesignAuditTask, { ...{
-    projectName,
-    pages,
-    components,
-    designSystem,
-    breakpoints,
-    approach,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (missingDesigns.length > 0) {
+    await ctx.breakpoint({
       question: `Design audit found ${missingDesigns.length} missing responsive design(s): ${missingDesigns.join(', ')}. Review and create missing designs?`,
       title: 'Design Completeness Check',
       context: {
@@ -127,15 +115,9 @@ export async function process(inputs, ctx) {
         missingDesigns,
         auditSummary: designAudit.summary,
         files: designAudit.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: BREAKPOINT STRATEGY DEFINITION
@@ -143,7 +125,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Defining breakpoint strategy and responsive grid system');
 
-  let breakpointStrategyResult = await ctx.task(breakpointStrategyTask, {
+  const breakpointStrategyResult = await ctx.task(breakpointStrategyTask, {
     projectName,
     breakpoints,
     approach,
@@ -159,21 +141,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Breakpoint strategy defined: ${breakpointStrategy.breakpoints.length} breakpoints, ${breakpointStrategy.approach} approach`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      breakpointStrategyResult = await ctx.task(breakpointStrategyTask, { ...{
-    projectName,
-    breakpoints,
-    approach,
-    designAudit,
-    pages,
-    components,
-    contentStrategy,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review breakpoint strategy
+  await ctx.breakpoint({
     question: `Breakpoint strategy defined with ${breakpointStrategy.breakpoints.length} breakpoints using ${approach} approach. Review and approve strategy?`,
     title: 'Breakpoint Strategy Review',
     context: {
@@ -189,15 +158,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         label: 'Grid System Specification'
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: RESPONSIVE LAYOUT DESIGN (PARALLEL BY PAGE)
   // ============================================================================
@@ -224,6 +187,7 @@ export async function process(inputs, ctx) {
   if (layoutIssues.length > 0) {
     ctx.log('warning', `Layout design issues found in ${layoutIssues.length} page(s)`);
   }
+
   // ============================================================================
   // PHASE 4: COMPONENT RESPONSIVE DESIGN (PARALLEL)
   // ============================================================================
@@ -250,6 +214,7 @@ export async function process(inputs, ctx) {
   if (componentIssues.length > 0) {
     ctx.log('warning', `Responsive design issues found in ${componentIssues.length} component(s)`);
   }
+
   // ============================================================================
   // PHASE 5: RESPONSIVE TYPOGRAPHY AND SPACING
   // ============================================================================
@@ -275,7 +240,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Defining responsive image and media strategy');
 
-  let imageMediaStrategy = await ctx.task(responsiveImageMediaTask, {
+  const imageMediaStrategy = await ctx.task(responsiveImageMediaTask, {
     projectName,
     breakpointStrategy,
     imageStrategy,
@@ -310,19 +275,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Touch target compliance
     const touchIssues = touchOptimization.violations || [];
-        let lastFeedback_phase7Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase7Review) {
-          imageMediaStrategy = await ctx.task(responsiveImageMediaTask, { ...{
-    projectName,
-    breakpointStrategy,
-    imageStrategy,
-    pages,
-    performanceTargets,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-        }
-  const phase7Review = await ctx.breakpoint({
+    if (touchIssues.length > 0) {
+      await ctx.breakpoint({
         question: `Found ${touchIssues.length} touch target violations (minimum 44x44px). ${touchOptimization.criticalIssues} are critical. Review and fix?`,
         title: 'Touch Target Compliance',
         context: {
@@ -335,23 +289,18 @@ export async function process(inputs, ctx) {
             format: 'html',
             label: 'Touch Target Audit Report'
           }]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase7Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase7Review.approved) break;
-        lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 8: RESPONSIVE NAVIGATION DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Designing responsive navigation patterns');
 
-  let navigationDesign = await ctx.task(responsiveNavigationDesignTask, {
+  const navigationDesign = await ctx.task(responsiveNavigationDesignTask, {
     projectName,
     breakpointStrategy,
     layoutDesigns,
@@ -387,19 +336,9 @@ export async function process(inputs, ctx) {
     // Quality Gate: Accessibility compliance
     const a11yIssues = accessibilityValidation.violations || [];
     if (a11yIssues.length > 0) {
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          navigationDesign = await ctx.task(responsiveNavigationDesignTask, { ...{
-    projectName,
-    breakpointStrategy,
-    layoutDesigns,
-    approach,
-    includeTouchOptimization,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+      const criticalA11y = a11yIssues.filter(v => v.severity === 'critical').length;
+
+      await ctx.breakpoint({
         question: `Found ${a11yIssues.length} accessibility issues in responsive designs (${criticalA11y} critical). Review and remediate?`,
         title: 'Responsive Accessibility Review',
         context: {
@@ -413,23 +352,18 @@ export async function process(inputs, ctx) {
             format: 'html',
             label: 'Accessibility Report'
           }]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 10: CROSS-DEVICE TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Testing responsive designs across devices');
 
-  let crossDeviceTesting = await ctx.task(crossDeviceTestingTask, {
+  const crossDeviceTesting = await ctx.task(crossDeviceTestingTask, {
     projectName,
     pages,
     testDevices,
@@ -447,23 +381,11 @@ export async function process(inputs, ctx) {
   if (failedTests > 0) {
     ctx.log('warning', `${failedTests} cross-device tests failed`);
   }
+
   // Quality Gate: Cross-device testing results
   const testPassRate = (testResults.passed / testResults.total) * 100;
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        crossDeviceTesting = await ctx.task(crossDeviceTestingTask, { ...{
-    projectName,
-    pages,
-    testDevices,
-    breakpointStrategy,
-    browserTargets,
-    layoutDesigns,
-    componentDesigns,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (testPassRate < 95) {
+    await ctx.breakpoint({
       question: `Cross-device testing: ${testPassRate.toFixed(1)}% pass rate (${testResults.passed}/${testResults.total} tests passed). ${failedTests} failures. Review and fix issues?`,
       title: 'Cross-Device Testing Results',
       context: {
@@ -480,15 +402,9 @@ export async function process(inputs, ctx) {
           format: 'directory',
           label: 'Device Screenshots'
         }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: PERFORMANCE TESTING
@@ -514,21 +430,9 @@ export async function process(inputs, ctx) {
     // Quality Gate: Performance targets
     const meetsTargets = performanceTesting.meetsAllTargets;
     if (!meetsTargets) {
-        let lastFeedback_qualityGateApproval4 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval4) {
-          crossDeviceTesting = await ctx.task(crossDeviceTestingTask, { ...{
-    projectName,
-    pages,
-    testDevices,
-    breakpointStrategy,
-    browserTargets,
-    layoutDesigns,
-    componentDesigns,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-        }
-  const qualityGateApproval4 = await ctx.breakpoint({
+      const failedMetrics = performanceTesting.failedMetrics || [];
+
+      await ctx.breakpoint({
         question: `Performance targets not met. ${failedMetrics.length} metric(s) failed: ${failedMetrics.map(m => m.metric).join(', ')}. Optimize and retest?`,
         title: 'Responsive Performance Review',
         context: {
@@ -546,16 +450,11 @@ export async function process(inputs, ctx) {
             format: 'json',
             label: 'Lighthouse Results'
           }]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval4.approved) break;
-        lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 12: RESPONSIVE DESIGN SYSTEM DOCUMENTATION
   // ============================================================================
@@ -660,7 +559,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Conducting final responsive design review');
 
-  let finalReview = await ctx.task(finalResponsiveReviewTask, {
+  const finalReview = await ctx.task(finalResponsiveReviewTask, {
     projectName,
     approach,
     breakpointStrategy,
@@ -679,26 +578,9 @@ export async function process(inputs, ctx) {
   artifacts.push(...finalReview.artifacts);
 
   // Final Breakpoint: Design approval
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(finalResponsiveReviewTask, { ...{
-    projectName,
-    approach,
-    breakpointStrategy,
-    responsiveDesigns,
-    testResults,
-    performanceMetrics,
-    accessibilityValidation,
-    touchOptimization,
-    recommendations,
-    performanceTargets,
-    includeAccessibility,
-    includeTouchOptimization,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  const approvalNeeded = !finalReview.readyForImplementation;
+
+  await ctx.breakpoint({
     question: `Responsive design ${finalReview.readyForImplementation ? 'COMPLETE' : 'NEEDS REVIEW'}. ${pages.length} pages, ${components.length} components across ${breakpointStrategy.breakpoints.length} breakpoints. Cross-device tests: ${testPassRate.toFixed(1)}% pass rate. ${finalReview.verdict}. Approve for implementation?`,
     title: 'Final Responsive Design Approval',
     context: {
@@ -725,15 +607,9 @@ export async function process(inputs, ctx) {
         { path: qaChecklist.checklistPath, format: 'markdown', label: 'QA Checklist' },
         { path: finalReview.reportPath, format: 'markdown', label: 'Final Review' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -808,7 +684,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

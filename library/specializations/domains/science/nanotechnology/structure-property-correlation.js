@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Data Assessment and Preprocessing
-  let dataAssessment = await ctx.task(dataAssessmentTask, {
+  const dataAssessment = await ctx.task(dataAssessmentTask, {
     materialDataset,
     structuralFeatures,
     propertyMeasurements
@@ -48,16 +48,9 @@ export async function process(inputs, ctx) {
       recommendations: dataAssessment.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      dataAssessment = await ctx.task(dataAssessmentTask, { ...{
-    materialDataset,
-    structuralFeatures,
-    propertyMeasurements
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review data assessment
+  await ctx.breakpoint({
     question: `Data assessment complete. ${dataAssessment.validSamples} valid samples identified. ${dataAssessment.featureQuality.completeness}% data completeness. Proceed with analysis?`,
     title: 'Data Assessment Review',
     context: {
@@ -69,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataAssessment
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Feature Engineering
   const featureEngineering = await ctx.task(featureEngineeringTask, {
     dataAssessment,
@@ -93,41 +80,26 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Statistical Correlation Analysis
-  let statisticalCorrelation = await ctx.task(statisticalCorrelationTask, {
+  const statisticalCorrelation = await ctx.task(statisticalCorrelationTask, {
     featureEngineering,
     exploratoryAnalysis,
     structuralFeatures,
     propertyMeasurements
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      statisticalCorrelation = await ctx.task(statisticalCorrelationTask, { ...{
-    featureEngineering,
-    exploratoryAnalysis,
-    structuralFeatures,
-    propertyMeasurements
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review correlation findings
+  await ctx.breakpoint({
     question: `Statistical analysis complete. ${statisticalCorrelation.significantCorrelations.length} significant correlations found. Review before proceeding to ML modeling?`,
     title: 'Statistical Correlation Review',
     context: {
       runId: ctx.runId,
       significantCorrelations: statisticalCorrelation.significantCorrelations,
       correlationMatrix: statisticalCorrelation.correlationMatrix
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Machine Learning Pattern Identification
-  let mlPatternAnalysis = await ctx.task(mlPatternAnalysisTask, {
+  const mlPatternAnalysis = await ctx.task(mlPatternAnalysisTask, {
     featureEngineering,
     statisticalCorrelation,
     structuralFeatures,
@@ -146,34 +118,19 @@ export async function process(inputs, ctx) {
     });
 
     // Quality Gate: Model must meet performance threshold
-        let lastFeedback_phase6Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase6Review) {
-          mlPatternAnalysis = await ctx.task(mlPatternAnalysisTask, { ...{
-    featureEngineering,
-    statisticalCorrelation,
-    structuralFeatures,
-    propertyMeasurements,
-    validationSplit
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-        }
-  const phase6Review = await ctx.breakpoint({
+    if (predictiveModels.bestModelScore < 0.7) {
+      await ctx.breakpoint({
         question: `Best predictive model R2 = ${predictiveModels.bestModelScore.toFixed(3)}. Below target threshold. Continue with current model or iterate?`,
         title: 'Model Performance Warning',
         context: {
           runId: ctx.runId,
           modelPerformance: predictiveModels.modelComparison,
           recommendations: predictiveModels.improvementRecommendations
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase6Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase6Review.approved) break;
-        lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 7: Model Validation
   const modelValidation = await ctx.task(modelValidationTask, {
     predictiveModels,
@@ -201,7 +158,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  let analysisReport = await ctx.task(reportGenerationTask, {
+  const analysisReport = await ctx.task(reportGenerationTask, {
     dataAssessment,
     exploratoryAnalysis,
     statisticalCorrelation,
@@ -212,21 +169,8 @@ export async function process(inputs, ctx) {
     insights
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      analysisReport = await ctx.task(reportGenerationTask, { ...{
-    dataAssessment,
-    exploratoryAnalysis,
-    statisticalCorrelation,
-    mlPatternAnalysis,
-    predictiveModels,
-    modelValidation,
-    physicalInterpretation,
-    insights
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Results approval
+  await ctx.breakpoint({
     question: `Structure-property analysis complete. ${insights.keyInsights.length} key insights generated. ${predictiveModels ? `Best model R2: ${predictiveModels.bestModelScore.toFixed(3)}` : 'No predictive model requested'}. Approve results?`,
     title: 'Structure-Property Analysis Results Approval',
     context: {
@@ -237,15 +181,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/analysis-report.md', format: 'markdown', content: analysisReport.markdown },
         { path: 'artifacts/correlations.json', format: 'json', content: statisticalCorrelation }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     correlations: {
@@ -269,7 +207,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const dataAssessmentTask = defineTask('data-assessment', (args, taskCtx) => ({
   kind: 'agent',

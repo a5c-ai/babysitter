@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
     // Attempt new solution
     ctx.log('info', `Round ${round}: Attempting solution with relaxed constraints`);
-    let newSolution = await ctx.task(attemptSolutionTask, {
+    const newSolution = await ctx.task(attemptSolutionTask, {
       problem,
       constraints: currentConstraints,
       previousSolution: currentSolution,
@@ -113,18 +113,8 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
 
-        let lastFeedback = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback) {
-          newSolution = await ctx.task(attemptSolutionTask, { ...{
-      problem,
-      constraints: currentConstraints,
-      previousSolution: currentSolution,
-      domain,
-      round
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (feasibilityScore < targetFeasibility) {
+      await ctx.breakpoint({
         question: `Round ${round}: Feasibility ${feasibilityScore}% (target: ${targetFeasibility}%). Continue relaxing?`,
         title: `Constraint Sculpting - Round ${round}`,
         context: {
@@ -133,16 +123,11 @@ export async function process(inputs, ctx) {
             { path: `artifacts/round-${round}-solution.json`, format: 'json' },
             { path: `artifacts/relaxation-path.json`, format: 'json' }
           ]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 4: Analyze Constraint Importance
   ctx.log('info', 'Analyzing constraint importance');
   const constraintAnalysis = await ctx.task(analyzeConstraintImportanceTask, {

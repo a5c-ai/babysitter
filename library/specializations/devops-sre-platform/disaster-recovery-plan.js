@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting Business Impact Analysis');
 
-  let biaResult = await ctx.task(businessImpactAnalysisTask, {
+  const biaResult = await ctx.task(businessImpactAnalysisTask, {
     projectName,
     criticalSystems,
     businessContinuityRequirements,
@@ -81,19 +81,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Business Impact Analysis complete - ${biaResult.criticalProcesses.length} critical processes identified`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      biaResult = await ctx.task(businessImpactAnalysisTask, { ...{
-    projectName,
-    criticalSystems,
-    businessContinuityRequirements,
-    complianceRequirements,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: BIA Review
+  await ctx.breakpoint({
     question: `Business Impact Analysis complete. Identified ${biaResult.criticalProcesses.length} critical processes and ${biaResult.dependencies.length} key dependencies. Maximum tolerable downtime: ${biaResult.maxTolerableDowntime} minutes. Review and approve?`,
     title: 'Business Impact Analysis Review',
     context: {
@@ -105,22 +94,16 @@ export async function process(inputs, ctx) {
         complianceImpact: biaResult.complianceImpact
       },
       files: biaResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: RISK ASSESSMENT AND THREAT MODELING
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Conducting risk assessment and threat modeling');
 
-  let riskAssessment = await ctx.task(riskAssessmentTask, {
+  const riskAssessment = await ctx.task(riskAssessmentTask, {
     projectName,
     infrastructure,
     criticalSystems,
@@ -134,20 +117,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Risk Assessment complete - ${riskAssessment.identifiedRisks.length} risks identified, ${riskAssessment.criticalRisks.length} critical`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      riskAssessment = await ctx.task(riskAssessmentTask, { ...{
-    projectName,
-    infrastructure,
-    criticalSystems,
-    disasterScenarios,
-    biaResult,
-    cloudProviders,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Risk Assessment Review
+  await ctx.breakpoint({
     question: `Risk Assessment identified ${riskAssessment.criticalRisks.length} critical risks requiring immediate attention. Top risks: ${riskAssessment.topRisks.slice(0, 3).join(', ')}. Review risk mitigation strategies?`,
     title: 'Risk Assessment Review',
     context: {
@@ -159,22 +130,16 @@ export async function process(inputs, ctx) {
         riskScore: riskAssessment.overallRiskScore
       },
       files: riskAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: DEFINE RTO AND RPO OBJECTIVES
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Defining Recovery Time Objective (RTO) and Recovery Point Objective (RPO)');
 
-  let objectivesResult = await ctx.task(defineRecoveryObjectivesTask, {
+  const objectivesResult = await ctx.task(defineRecoveryObjectivesTask, {
     projectName,
     biaResult,
     riskAssessment,
@@ -191,20 +156,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Recovery objectives defined - RTO: ${rto} minutes, RPO: ${rpo} minutes`);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      objectivesResult = await ctx.task(defineRecoveryObjectivesTask, { ...{
-    projectName,
-    biaResult,
-    riskAssessment,
-    businessContinuityRequirements,
-    criticalSystems,
-    budgetConstraints,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: RTO/RPO Approval
+  await ctx.breakpoint({
     question: `Recovery objectives defined - RTO: ${rto} minutes, RPO: ${rpo} minutes. These objectives require ${objectivesResult.estimatedCost}/month. Budget: ${budgetConstraints}. Approve objectives?`,
     title: 'RTO/RPO Objectives Approval',
     context: {
@@ -218,22 +171,16 @@ export async function process(inputs, ctx) {
         costBreakdown: objectivesResult.costBreakdown
       },
       files: objectivesResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: BACKUP STRATEGY DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing comprehensive backup strategy');
 
-  let backupStrategyResult = await ctx.task(designBackupStrategyTask, {
+  const backupStrategyResult = await ctx.task(designBackupStrategyTask, {
     projectName,
     infrastructure,
     criticalSystems,
@@ -253,22 +200,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Backup strategy designed - ${backupStrategyResult.backupTypes.length} backup types, ${backupStrategyResult.backupFrequency} frequency`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      backupStrategyResult = await ctx.task(designBackupStrategyTask, { ...{
-    projectName,
-    infrastructure,
-    criticalSystems,
-    rpo,
-    dataRetention,
-    complianceRequirements,
-    backupStrategy,
-    cloudProviders,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Backup Strategy Review
+  await ctx.breakpoint({
     question: `Backup strategy designed with ${backupStrategyResult.backupTypes.length} backup types: ${backupStrategyResult.backupTypes.join(', ')}. Backup frequency: ${backupStrategyResult.backupFrequency}. Storage required: ${backupStrategyResult.estimatedStorage}. Approve strategy?`,
     title: 'Backup Strategy Review',
     context: {
@@ -281,15 +214,9 @@ export async function process(inputs, ctx) {
         estimatedCost: backupStrategyResult.estimatedCost
       },
       files: backupStrategyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: HIGH AVAILABILITY AND REDUNDANCY DESIGN
   // ============================================================================
@@ -321,7 +248,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Developing failover and failback procedures');
 
-  let failoverProcedures = await ctx.task(developFailoverProceduresTask, {
+  const failoverProcedures = await ctx.task(developFailoverProceduresTask, {
     projectName,
     infrastructure,
     criticalSystems,
@@ -339,20 +266,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Failover procedures developed - ${failoverProcedures.procedures.length} procedures, ${failoverProcedures.automationLevel}% automated`);
 
-    let lastFeedback_qualityGateApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval2) {
-      failoverProcedures = await ctx.task(developFailoverProceduresTask, { ...{
-    projectName,
-    infrastructure,
-    criticalSystems,
-    haRedundancyResult,
-    rto,
-    cloudProviders,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-    }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  // Quality Gate: Failover Procedures Review
+  await ctx.breakpoint({
     question: `Failover procedures developed for ${failoverProcedures.procedures.length} systems. Automation level: ${failoverProcedures.automationLevel}%. Manual steps: ${failoverProcedures.manualSteps.length}. Review procedures before implementation?`,
     title: 'Failover Procedures Review',
     context: {
@@ -365,15 +280,9 @@ export async function process(inputs, ctx) {
         estimatedFailbackTime: failoverProcedures.estimatedFailbackTime
       },
       files: failoverProcedures.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval2.approved) break;
-    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: DATA REPLICATION AND SYNCHRONIZATION
   // ============================================================================
@@ -444,7 +353,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Developing disaster recovery testing plan');
 
-  let testingPlanResult = await ctx.task(developDRTestingPlanTask, {
+  const testingPlanResult = await ctx.task(developDRTestingPlanTask, {
     projectName,
     criticalSystems,
     disasterScenarios,
@@ -461,22 +370,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `DR testing plan developed - ${testingPlanResult.testScenarios.length} test scenarios, ${testingFrequency} frequency`);
 
-    let lastFeedback_phase10Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase10Review) {
-      testingPlanResult = await ctx.task(developDRTestingPlanTask, { ...{
-    projectName,
-    criticalSystems,
-    disasterScenarios,
-    testingFrequency,
-    rto,
-    rpo,
-    recoveryStrategies,
-    complianceRequirements,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-    }
-  const phase10Review = await ctx.breakpoint({
+  // Quality Gate: DR Testing Plan Review
+  await ctx.breakpoint({
     question: `DR testing plan developed with ${testingPlanResult.testScenarios.length} test scenarios. Testing frequency: ${testingFrequency}. First test scheduled: ${testingPlanResult.firstTestDate}. Approve testing plan?`,
     title: 'DR Testing Plan Review',
     context: {
@@ -489,15 +384,9 @@ export async function process(inputs, ctx) {
         estimatedDuration: testingPlanResult.estimatedTestDuration
       },
       files: testingPlanResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase10Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase10Review.approved) break;
-    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 11: MONITORING AND ALERTING FOR DR READINESS
   // ============================================================================
@@ -544,7 +433,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Conducting cost analysis and optimization');
 
-  let costAnalysisResult = await ctx.task(analyzeDRCostsTask, {
+  const costAnalysisResult = await ctx.task(analyzeDRCostsTask, {
     projectName,
     backupStrategyResult,
     haRedundancyResult,
@@ -559,20 +448,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cost analysis complete - Estimated monthly cost: ${costAnalysisResult.totalMonthlyCost}, Annual: ${costAnalysisResult.totalAnnualCost}`);
 
   // Quality Gate: Cost Review
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        costAnalysisResult = await ctx.task(analyzeDRCostsTask, { ...{
-    projectName,
-    backupStrategyResult,
-    haRedundancyResult,
-    replicationStrategy,
-    testingPlanResult,
-    budgetConstraints,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (costAnalysisResult.budgetExceeded) {
+    await ctx.breakpoint({
       question: `DR plan exceeds budget by ${costAnalysisResult.budgetOverage}%. Current: ${costAnalysisResult.totalMonthlyCost}/month, Budget: ${budgetConstraints}. Review cost optimization recommendations?`,
       title: 'DR Cost Budget Review',
       context: {
@@ -586,15 +463,9 @@ export async function process(inputs, ctx) {
           optimizationRecommendations: costAnalysisResult.optimizationRecommendations
         },
         files: costAnalysisResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: TRAINING AND AWARENESS PROGRAM
@@ -651,7 +522,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Conducting final DR readiness assessment');
 
-  let readinessAssessment = await ctx.task(assessDRReadinessTask, {
+  const readinessAssessment = await ctx.task(assessDRReadinessTask, {
     projectName,
     criticalSystems,
     rto,
@@ -670,23 +541,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `DR Readiness Assessment complete - Score: ${readinessScore}/100, Status: ${readinessAssessment.readinessStatus}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      readinessAssessment = await ctx.task(assessDRReadinessTask, { ...{
-    projectName,
-    criticalSystems,
-    rto,
-    rpo,
-    recoveryStrategies,
-    testingPlanResult,
-    drMonitoringResult,
-    complianceResult,
-    trainingProgramResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: DR Plan Complete
+  await ctx.breakpoint({
     question: `Disaster Recovery Plan complete for ${projectName}. Readiness Score: ${readinessScore}/100. RTO: ${rto} minutes, RPO: ${rpo} minutes. Status: ${readinessAssessment.readinessStatus}. Approve for production deployment?`,
     title: 'Final DR Plan Review and Approval',
     context: {
@@ -723,15 +579,9 @@ export async function process(inputs, ctx) {
         { path: costAnalysisResult.costReportPath, format: 'json', label: 'Cost Analysis Report' },
         { path: runbooksResult.runbookIndexPath, format: 'markdown', label: 'Recovery Runbooks Index' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -853,7 +703,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

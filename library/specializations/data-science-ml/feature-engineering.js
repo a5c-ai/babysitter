@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Feature Engineering Design Planning');
 
-  let featureDesignPlan = await ctx.task(featureDesignPlanningTask, {
+  const featureDesignPlan = await ctx.task(featureDesignPlanningTask, {
     dataPath,
     targetColumn,
     featureEngineering,
@@ -59,17 +59,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...featureDesignPlan.artifacts);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      featureDesignPlan = await ctx.task(featureDesignPlanningTask, { ...{
-    dataPath,
-    targetColumn,
-    featureEngineering,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Breakpoint: Review feature engineering plan
+  await ctx.breakpoint({
     question: `Review feature engineering plan for target "${targetColumn}". Approve to proceed with implementation?`,
     title: 'Feature Engineering Plan Review',
     context: {
@@ -83,15 +74,9 @@ export async function process(inputs, ctx) {
         featureTypes: featureDesignPlan.featureTypes,
         transformationsMapped: featureDesignPlan.transformationCount
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: FEATURE IMPLEMENTATION WITH ITERATIVE REFINEMENT
   // ============================================================================
@@ -170,9 +155,10 @@ export async function process(inputs, ctx) {
       });
       artifacts.push(...featureSelectionResult.artifacts);
     }
-  // Step 4: Feature quality scoring
+
+    // Step 4: Feature quality scoring
     ctx.log('info', 'Scoring feature engineering quality');
-    let qualityScore = await ctx.task(featureQualityScoringTask, {
+    const qualityScore = await ctx.task(featureQualityScoringTask, {
       dataPath,
       targetColumn,
       featureDesignPlan,
@@ -216,27 +202,8 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Quality below target: ${currentQuality}/${targetQuality}`);
 
       // Breakpoint: Review iteration results before continuing
-          let lastFeedback_iterationApproval = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (lastFeedback_iterationApproval) {
-            qualityScore = await ctx.task(featureQualityScoringTask, { ...{
-      dataPath,
-      targetColumn,
-      featureDesignPlan,
-      featureImplementation,
-      validationChecks: {
-        dataLeakage: dataLeakageCheck,
-        trainingServingSkew: trainingServingSkewCheck,
-        distributions: featureDistributionCheck,
-        missingValues: missingValueCheck
-      },
-      featureSelection: featureSelectionResult,
-      iteration,
-      targetQuality,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-          }
-  const iterationApproval = await ctx.breakpoint({
+      if (iteration < maxIterations) {
+        await ctx.breakpoint({
           question: `Iteration ${iteration} complete. Quality: ${currentQuality}/${targetQuality}. Continue to iteration ${iteration + 1} for refinement?`,
           title: `Feature Engineering Iteration ${iteration} Review`,
           context: {
@@ -254,17 +221,12 @@ export async function process(inputs, ctx) {
               featuresCreated: featureImplementation.totalFeatures,
               issuesFound: qualityScore.criticalIssues?.length || 0
             }
-          },
-          expert: 'owner',
-          tags: ['approval-gate'],
-          previousFeedback: lastFeedback_iterationApproval || undefined,
-          attempt: attempt > 0 ? attempt + 1 : undefined
-          });
-          if (iterationApproval.approved) break;
-          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-        }     }
+          }
+        });
+      }
     }
   }
+
   // ============================================================================
   // PHASE 3: FINAL VALIDATION AND ARTIFACT GENERATION
   // ============================================================================
@@ -309,7 +271,7 @@ export async function process(inputs, ctx) {
   );
 
   // Agent-based final review
-  let finalReview = await ctx.task(featureFinalReviewTask, {
+  const finalReview = await ctx.task(featureFinalReviewTask, {
     dataPath,
     targetColumn,
     featureDesignPlan,
@@ -323,22 +285,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(featureFinalReviewTask, { ...{
-    dataPath,
-    targetColumn,
-    featureDesignPlan,
-    iterations: iterationResults,
-    finalQuality: currentQuality,
-    targetQuality,
-    converged,
-    finalValidation: finalFeatureValidation,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final breakpoint for approval
+  await ctx.breakpoint({
     question: `Feature engineering complete. Quality: ${currentQuality}/${targetQuality}. ${finalReview.verdict}. Approve for production use?`,
     title: 'Final Feature Engineering Review',
     context: {
@@ -357,15 +305,9 @@ export async function process(inputs, ctx) {
         totalFeatures: finalIteration.featureImplementation.totalFeatures,
         approved: finalReview.approved
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -401,7 +343,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

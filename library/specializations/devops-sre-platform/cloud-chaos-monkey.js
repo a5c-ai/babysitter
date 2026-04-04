@@ -162,7 +162,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 1: Discovering services, dependencies, and architecture...');
 
-  let discoveryResult = await ctx.task(systemDiscoveryTask, {
+  const discoveryResult = await ctx.task(systemDiscoveryTask, {
     provider,
     projectIdentifier,
     region,
@@ -175,17 +175,9 @@ export async function process(inputs, ctx) {
   // PHASE 2: Component Selection (breakpoint)
   // ═══════════════════════════════════════════════════════════════════════════
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      discoveryResult = await ctx.task(systemDiscoveryTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    hints,
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  ctx.log('Phase 2: Presenting discovered components for selection...');
+
+  await ctx.breakpoint({
     question: `Discovered ${discoveryResult.serviceCount || 'N'} services in `
       + `${provider.toUpperCase()} ${hints.identityLabel} "${projectIdentifier}" (${region}):\n\n`
       + `${discoveryResult.summary || 'Review the discovered services.'}\n\n`
@@ -198,14 +190,8 @@ export async function process(inputs, ctx) {
       serviceCount: discoveryResult.serviceCount,
       services: discoveryResult.services,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+  });
+
   const componentSelectionResult = await ctx.task(processComponentSelectionTask, {
     provider,
     discovery: discoveryResult,
@@ -237,7 +223,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 4: Estimating cloud cost for shadow environment...');
 
-  let costResult = await ctx.task(estimateCostTask, {
+  const costResult = await ctx.task(estimateCostTask, {
     provider,
     projectIdentifier,
     region,
@@ -245,18 +231,9 @@ export async function process(inputs, ctx) {
     shadowPlan: shadowPlanResult,
   });
   output.costEstimate = costResult;
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      costResult = await ctx.task(estimateCostTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    hints,
-    shadowPlan: shadowPlanResult,
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  output.phasesExecuted.push('cost-estimation');
+
+  await ctx.breakpoint({
     question: `Shadow environment cost estimate for ${provider.toUpperCase()}:\n\n`
       + `${costResult.summary || 'Review cost breakdown.'}\n\n`
       + `Estimated total: ${costResult.estimatedTotalUsd || 'N/A'} USD\n`
@@ -269,25 +246,9 @@ export async function process(inputs, ctx) {
       estimatedDurationHours: costResult.estimatedDurationHours,
       costBreakdown: costResult.costBreakdown,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }et lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      costResult = await ctx.task(estimateCostTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    hints,
-    shadowPlan: shadowPlanResult,
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Provisioning plan for shadow environment (${provider.toUpperCase()}):\n\n`
       + `${shadowPlanResult.summary || 'Review the provisioning plan.'}\n\n`
       + `Services to provision: ${(shadowPlanResult.shadowServices || []).map(s => s.shadowName).join(', ') || 'N/A'}\n`
@@ -300,14 +261,9 @@ export async function process(inputs, ctx) {
       provisioningSteps: shadowPlanResult.provisioningSteps,
       dependencyWiring: shadowPlanResult.dependencyWiring,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }  try {
+  });
+
+  try {
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 5: Shadow Environment Provisioning
@@ -334,7 +290,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 6: Generating chaos scenarios based on discovered architecture...');
 
-  let scenariosResult = await ctx.task(generateScenariosTask, {
+  const scenariosResult = await ctx.task(generateScenariosTask, {
     provider,
     projectIdentifier,
     region,
@@ -353,23 +309,9 @@ export async function process(inputs, ctx) {
   // PHASE 7: Scenario Selection (breakpoint)
   // ═══════════════════════════════════════════════════════════════════════════
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      scenariosResult = await ctx.task(generateScenariosTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    chaosPrefix,
-    hints,
-    faultDomains,
-    executionMode,
-    discovery: discoveryResult,
-    selectedComponents: componentSelectionResult,
-    shadowEnv: shadowEnvResult,
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  ctx.log('Phase 7: Presenting scenarios for selection...');
+
+  await ctx.breakpoint({
     question: `Generated ${scenariosResult.scenarioCount || 'N'} chaos scenarios `
       + `across ${faultDomains.length} fault domains:\n\n`
       + `${scenariosResult.summary || 'Review the scenarios list.'}\n\n`
@@ -381,14 +323,8 @@ export async function process(inputs, ctx) {
       faultDomains,
       scenarios: scenariosResult.scenarios,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+  });
+
   const selectionResult = await ctx.task(processScenarioSelectionTask, {
     scenarios: scenariosResult,
     faultDomains,
@@ -403,7 +339,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 8: Measuring baseline health of shadow environment...');
 
-  let baselineResult = await ctx.task(measureBaselineTask, {
+  const baselineResult = await ctx.task(measureBaselineTask, {
     provider,
     projectIdentifier,
     region,
@@ -414,21 +350,9 @@ export async function process(inputs, ctx) {
     shadowEnv: shadowEnvResult,
   });
   output.baseline = baselineResult;
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      baselineResult = await ctx.task(measureBaselineTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    chaosPrefix,
-    hints,
-    healthCheckConfig,
-    discovery: discoveryResult,
-    shadowEnv: shadowEnvResult,
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  output.phasesExecuted.push('baseline-measurement');
+
+  await ctx.breakpoint({
     question: `Baseline measurement complete:\n\n`
       + `${baselineResult.summary || 'All services healthy.'}\n\n`
       + `Services healthy: ${baselineResult.healthyCount || 0}/${baselineResult.totalCount || 0}\n\n`
@@ -440,14 +364,8 @@ export async function process(inputs, ctx) {
       healthyCount: baselineResult.healthyCount,
       totalCount: baselineResult.totalCount,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
+  });
+
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 9: Chaos Execution
   // ═══════════════════════════════════════════════════════════════════════════
@@ -462,7 +380,7 @@ export async function process(inputs, ctx) {
     ctx.log(`  Scenario ${i + 1}/${selectedList.length}: ${scenario.id} — ${scenario.title}`);
 
     if (scenario.executionType === 'automated') {
-      let result = await ctx.task(executeAutomatedChaosTask, {
+      const result = await ctx.task(executeAutomatedChaosTask, {
         provider,
         projectIdentifier,
         region,
@@ -475,22 +393,8 @@ export async function process(inputs, ctx) {
       });
       chaosResults.push({ ...scenario, result, executionType: 'automated' });
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          result = await ctx.task(executeAutomatedChaosTask, { ...{
-        provider,
-        projectIdentifier,
-        region,
-        chaosPrefix,
-        hints,
-        scenario,
-        baseline: baselineResult,
-        safetyControls,
-        shadowEnv: shadowEnvResult,
-      }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    } else {
+      await ctx.breakpoint({
         question: `MANUAL CHAOS: ${scenario.title}\n\n`
           + `${scenario.instructions || 'Follow the runbook steps below.'}\n\n`
           + `Fault domain: ${scenario.faultDomain}\n`
@@ -505,15 +409,9 @@ export async function process(inputs, ctx) {
           faultDomain: scenario.faultDomain,
           faultType: scenario.faultType,
         },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }
-  const result = await ctx.task(observeManualChaosTask, {
+      });
+
+      const result = await ctx.task(observeManualChaosTask, {
         provider,
         projectIdentifier,
         region,
@@ -526,7 +424,8 @@ export async function process(inputs, ctx) {
       });
       chaosResults.push({ ...scenario, result, executionType: 'manual' });
     }
-  // Restore healthy state between scenarios
+
+    // Restore healthy state between scenarios
     if (i < selectedList.length - 1) {
       ctx.log('  Restoring healthy state before next scenario...');
       await ctx.task(restoreHealthyStateTask, {
@@ -569,7 +468,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 11: Generating interactive HTML resilience report...');
 
-  let reportResult = await ctx.task(generateReportTask, {
+  const reportResult = await ctx.task(generateReportTask, {
     provider,
     projectIdentifier,
     region,
@@ -585,26 +484,9 @@ export async function process(inputs, ctx) {
     resilienceScore: analysisResult.resilienceScore || 0,
   });
   output.report = reportResult;
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateReportTask, { ...{
-    provider,
-    projectIdentifier,
-    region,
-    reportOutputPath,
-    reportTheme,
-    discovery: discoveryResult,
-    selectedComponents: componentSelectionResult,
-    scenarios: scenariosResult,
-    selectedScenarios: selectionResult,
-    baseline: baselineResult,
-    chaosResults,
-    analysis: analysisResult,
-    resilienceScore: analysisResult.resilienceScore || 0,
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  output.phasesExecuted.push('report-generation');
+
+  await ctx.breakpoint({
     question: `Resilience report generated.\n\n`
       + `Overall Resilience Score: ${analysisResult.resilienceScore || 'N/A'}/100\n\n`
       + `${analysisResult.summary || 'Review the report.'}\n\n`
@@ -616,14 +498,9 @@ export async function process(inputs, ctx) {
       resilienceScore: analysisResult.resilienceScore,
       reportPath: reportResult.reportPath,
     },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  } catch (err) {
+  });
+
+  } catch (err) {
     output.success = false;
     output.error = err.message;
     ctx.log(`Process error in phase execution: ${err.message}`);
@@ -651,6 +528,7 @@ export async function process(inputs, ctx) {
     output.metadata.completedAt = ctx.now();
     return output;
   }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // PHASE 12: Teardown & Verification
   // ═══════════════════════════════════════════════════════════════════════════
@@ -689,7 +567,8 @@ export async function process(inputs, ctx) {
 
   return output;
 }
-  // ═════════════════════════════════════════════════════════════════════════════
+
+// ═════════════════════════════════════════════════════════════════════════════
 // TASK DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════════════
 

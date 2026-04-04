@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining browser and device matrix');
 
-  let matrixDefinition = await ctx.task(matrixDefinitionTask, {
+  const matrixDefinition = await ctx.task(matrixDefinitionTask, {
     projectName,
     applicationUrl,
     browserMatrix,
@@ -103,21 +103,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...matrixDefinition.artifacts);
 
   // Quality Gate: Matrix coverage must be comprehensive
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        matrixDefinition = await ctx.task(matrixDefinitionTask, { ...{
-    projectName,
-    applicationUrl,
-    browserMatrix,
-    priorityCombinations,
-    responsiveTesting,
-    viewportSizes,
-    cloudPlatform,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (matrixDefinition.priorityCombinations.length < 3) {
+    await ctx.breakpoint({
       question: `Only ${matrixDefinition.priorityCombinations.length} priority browser/device combinations defined. Minimum recommended is 3-5. Review matrix and approve?`,
       title: 'Browser Matrix Review',
       context: {
@@ -127,15 +114,9 @@ export async function process(inputs, ctx) {
         browserCoverage: matrixDefinition.browserCoverage,
         osCoverage: matrixDefinition.osCoverage,
         files: matrixDefinition.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: CLOUD TESTING PLATFORM SETUP
@@ -143,7 +124,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Setting up cloud testing platform integration');
 
-  let platformSetup = await ctx.task(cloudPlatformSetupTask, {
+  const platformSetup = await ctx.task(cloudPlatformSetupTask, {
     projectName,
     cloudPlatform,
     testFramework,
@@ -155,19 +136,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...platformSetup.artifacts);
 
   // Quality Gate: Platform integration must be successful
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        platformSetup = await ctx.task(cloudPlatformSetupTask, { ...{
-    projectName,
-    cloudPlatform,
-    testFramework,
-    matrixDefinition,
-    parallelExecution,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!platformSetup.success || !platformSetup.connectionVerified) {
+    await ctx.breakpoint({
       question: `Cloud platform setup encountered issues. Connection verified: ${platformSetup.connectionVerified}. Review setup and retry?`,
       title: 'Platform Setup Issues',
       context: {
@@ -177,15 +147,9 @@ export async function process(inputs, ctx) {
         setupIssues: platformSetup.issues || [],
         recommendation: 'Verify API credentials and network connectivity',
         files: platformSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: TEST FRAMEWORK INTEGRATION
@@ -193,7 +157,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Integrating cross-browser capabilities with test framework');
 
-  let frameworkIntegration = await ctx.task(frameworkIntegrationTask, {
+  const frameworkIntegration = await ctx.task(frameworkIntegrationTask, {
     projectName,
     testFramework,
     cloudPlatform,
@@ -207,20 +171,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Framework must support all required browsers
   const unsupportedBrowsers = frameworkIntegration.unsupportedBrowsers || [];
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        frameworkIntegration = await ctx.task(frameworkIntegrationTask, { ...{
-    projectName,
-    testFramework,
-    cloudPlatform,
-    platformSetup,
-    matrixDefinition,
-    existingTestSuite,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (unsupportedBrowsers.length > 0) {
+    await ctx.breakpoint({
       question: `${unsupportedBrowsers.length} browser(s) not fully supported: ${unsupportedBrowsers.join(', ')}. Continue with supported browsers or adjust matrix?`,
       title: 'Browser Support Warning',
       context: {
@@ -229,15 +181,9 @@ export async function process(inputs, ctx) {
         supportedBrowsers: frameworkIntegration.supportedBrowsers,
         recommendation: 'Consider alternative testing approach for unsupported browsers',
         files: frameworkIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: CROSS-BROWSER TEST SUITE CREATION
@@ -245,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Creating or adapting test suite for cross-browser execution');
 
-  let testSuiteCreation = await ctx.task(testSuiteCreationTask, {
+  const testSuiteCreation = await ctx.task(testSuiteCreationTask, {
     projectName,
     applicationUrl,
     testFramework,
@@ -259,20 +205,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Test suite must cover critical user flows
   const criticalFlowCoverage = testSuiteCreation.criticalFlowCoverage || 0;
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        testSuiteCreation = await ctx.task(testSuiteCreationTask, { ...{
-    projectName,
-    applicationUrl,
-    testFramework,
-    matrixDefinition,
-    frameworkIntegration,
-    existingTestSuite,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (criticalFlowCoverage < 80) {
+    await ctx.breakpoint({
       question: `Critical flow coverage: ${criticalFlowCoverage}%. Target is 80%+. Add more tests or proceed with current coverage?`,
       title: 'Test Coverage Warning',
       context: {
@@ -282,15 +216,9 @@ export async function process(inputs, ctx) {
         coveredFlows: testSuiteCreation.coveredFlows,
         missingFlows: testSuiteCreation.missingFlows,
         files: testSuiteCreation.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: RESPONSIVE DESIGN TESTING
@@ -299,7 +227,7 @@ export async function process(inputs, ctx) {
   if (responsiveTesting) {
     ctx.log('info', 'Phase 5: Implementing responsive design testing across viewports');
 
-    let responsiveTests = await ctx.task(responsiveTestingTask, {
+    const responsiveTests = await ctx.task(responsiveTestingTask, {
       projectName,
       applicationUrl,
       viewportSizes,
@@ -311,19 +239,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...responsiveTests.artifacts);
 
     // Quality Gate: All critical viewports must be tested
-        let lastFeedback_phase5Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase5Review) {
-          responsiveTests = await ctx.task(responsiveTestingTask, { ...{
-      projectName,
-      applicationUrl,
-      viewportSizes,
-      testSuiteCreation,
-      testFramework,
-      outputDir
-    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-        }
-  const phase5Review = await ctx.breakpoint({
+    if (responsiveTests.viewportsCovered < viewportSizes.length) {
+      await ctx.breakpoint({
         question: `Responsive testing covered ${responsiveTests.viewportsCovered}/${viewportSizes.length} viewports. Some viewports skipped. Review and approve?`,
         title: 'Responsive Coverage Review',
         context: {
@@ -333,16 +250,11 @@ export async function process(inputs, ctx) {
           coveredViewports: responsiveTests.coveredViewportNames,
           skippedViewports: responsiveTests.skippedViewports,
           files: responsiveTests.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase5Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase5Review.approved) break;
-        lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 6: BROWSER-SPECIFIC TEST CREATION
   // ============================================================================
@@ -365,7 +277,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Configuring parallel test execution');
 
-  let parallelConfig = await ctx.task(parallelExecutionConfigTask, {
+  const parallelConfig = await ctx.task(parallelExecutionConfigTask, {
     projectName,
     matrixDefinition,
     platformSetup,
@@ -380,21 +292,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Parallel execution must be optimized
   const estimatedExecutionTime = parallelConfig.estimatedExecutionTime;
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        parallelConfig = await ctx.task(parallelExecutionConfigTask, { ...{
-    projectName,
-    matrixDefinition,
-    platformSetup,
-    testSuiteCreation,
-    browserSpecificTests,
-    parallelExecution,
-    cloudPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (estimatedExecutionTime > acceptanceCriteria.executionTime) {
+    await ctx.breakpoint({
       question: `Estimated execution time: ${estimatedExecutionTime} minutes. Target: ${acceptanceCriteria.executionTime} minutes. Adjust parallelization or proceed?`,
       title: 'Execution Time Warning',
       context: {
@@ -404,15 +303,9 @@ export async function process(inputs, ctx) {
         parallelWorkers: parallelConfig.parallelWorkers,
         recommendation: 'Consider increasing parallel workers or optimizing test suite',
         files: parallelConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: INITIAL CROSS-BROWSER TEST EXECUTION
@@ -420,7 +313,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Running initial cross-browser test execution');
 
-  let initialExecution = await ctx.task(testExecutionTask, {
+  const initialExecution = await ctx.task(testExecutionTask, {
     projectName,
     applicationUrl,
     matrixDefinition,
@@ -435,21 +328,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Initial execution should show reasonable pass rate
   const initialPassRate = initialExecution.overallPassRate;
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        initialExecution = await ctx.task(testExecutionTask, { ...{
-    projectName,
-    applicationUrl,
-    matrixDefinition,
-    testSuiteCreation,
-    parallelConfig,
-    cloudPlatform,
-    outputDir,
-    executionType: 'initial'
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (initialPassRate < 50) {
+    await ctx.breakpoint({
       question: `Initial test execution pass rate: ${initialPassRate}%. Below 50% threshold. This may indicate widespread compatibility issues. Review results and debug?`,
       title: 'Low Pass Rate Warning',
       context: {
@@ -461,15 +341,9 @@ export async function process(inputs, ctx) {
         browserResults: initialExecution.resultsByBrowser,
         topFailures: initialExecution.topFailureReasons,
         files: initialExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'html' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: COMPATIBILITY ISSUE ANALYSIS
@@ -477,7 +351,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Analyzing browser-specific compatibility issues');
 
-  let compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, {
+  const compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, {
     projectName,
     executionResults: initialExecution,
     matrixDefinition,
@@ -490,18 +364,8 @@ export async function process(inputs, ctx) {
   const criticalCompatibilityIssues = compatibilityAnalysis.criticalIssues || [];
 
   // Quality Gate: Critical compatibility issues must be reviewed
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        compatibilityAnalysis = await ctx.task(compatibilityAnalysisTask, { ...{
-    projectName,
-    executionResults: initialExecution,
-    matrixDefinition,
-    testSuiteCreation,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+  if (criticalCompatibilityIssues.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalCompatibilityIssues.length} critical browser compatibility issue(s) identified. Review issues and plan fixes?`,
       title: 'Critical Compatibility Issues',
       context: {
@@ -515,15 +379,9 @@ export async function process(inputs, ctx) {
         totalIssues: compatibilityAnalysis.totalIssues,
         issuesByBrowser: compatibilityAnalysis.issuesByBrowser,
         files: compatibilityAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: COMPATIBILITY FIX IMPLEMENTATION
@@ -564,7 +422,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Running final cross-browser test execution');
 
-  let finalExecution = await ctx.task(testExecutionTask, {
+  const finalExecution = await ctx.task(testExecutionTask, {
     projectName,
     applicationUrl,
     matrixDefinition,
@@ -581,21 +439,8 @@ export async function process(inputs, ctx) {
   const criticalBrowserFailures = finalExecution.criticalBrowserFailures || 0;
 
   // Quality Gate: Final pass rate must meet acceptance criteria
-      let lastFeedback_phase12Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase12Review) {
-        finalExecution = await ctx.task(testExecutionTask, { ...{
-    projectName,
-    applicationUrl,
-    matrixDefinition,
-    testSuiteCreation,
-    parallelConfig,
-    cloudPlatform,
-    outputDir,
-    executionType: 'final'
-  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
-      }
-  const phase12Review = await ctx.breakpoint({
+  if (finalPassRate < acceptanceCriteria.passRate) {
+    await ctx.breakpoint({
       question: `Final pass rate: ${finalPassRate}%. Target: ${acceptanceCriteria.passRate}%. Below acceptance criteria. Review failures and decide to iterate or proceed?`,
       title: 'Pass Rate Quality Gate',
       context: {
@@ -608,32 +453,13 @@ export async function process(inputs, ctx) {
         browserResults: finalExecution.resultsByBrowser,
         recommendation: 'Review browser-specific failures and consider additional fixes',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'html' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase12Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase12Review.approved) break;
-      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Quality Gate: Critical browser failures
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        finalExecution = await ctx.task(testExecutionTask, { ...{
-    projectName,
-    applicationUrl,
-    matrixDefinition,
-    testSuiteCreation,
-    parallelConfig,
-    cloudPlatform,
-    outputDir,
-    executionType: 'final'
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (criticalBrowserFailures > acceptanceCriteria.criticalBugs) {
+    await ctx.breakpoint({
       question: `${criticalBrowserFailures} critical browser failure(s) detected on priority browsers. Target: ${acceptanceCriteria.criticalBugs}. Address critical issues or proceed with known limitations?`,
       title: 'Critical Browser Failures',
       context: {
@@ -643,15 +469,9 @@ export async function process(inputs, ctx) {
         affectedBrowsers: finalExecution.criticalFailureBrowsers,
         recommendation: 'Critical issues on priority browsers should be resolved before release',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'html' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: COVERAGE MATRIX VALIDATION
@@ -659,7 +479,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Validating browser/device coverage matrix');
 
-  let coverageValidation = await ctx.task(coverageValidationTask, {
+  const coverageValidation = await ctx.task(coverageValidationTask, {
     projectName,
     matrixDefinition,
     finalExecution,
@@ -673,18 +493,8 @@ export async function process(inputs, ctx) {
   const actualCoverage = coverageValidation.actualCoverage;
 
   // Quality Gate: Coverage must meet acceptance criteria
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        coverageValidation = await ctx.task(coverageValidationTask, { ...{
-    projectName,
-    matrixDefinition,
-    finalExecution,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (actualCoverage < acceptanceCriteria.coverage) {
+    await ctx.breakpoint({
       question: `Browser/device coverage: ${actualCoverage}%. Target: ${acceptanceCriteria.coverage}%. Increase coverage or accept current level?`,
       title: 'Coverage Quality Gate',
       context: {
@@ -694,15 +504,9 @@ export async function process(inputs, ctx) {
         coverageMatrix: coverageValidation.coverageMatrix,
         uncoveredCombinations: coverageValidation.uncoveredCombinations,
         files: coverageValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: ISSUE TRACKING AND DOCUMENTATION
@@ -728,7 +532,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Integrating cross-browser tests into CI/CD pipeline');
 
-  let cicdIntegration = await ctx.task(cicdIntegrationTask, {
+  const cicdIntegration = await ctx.task(cicdIntegrationTask, {
     projectName,
     cloudPlatform,
     matrixDefinition,
@@ -740,19 +544,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...cicdIntegration.artifacts);
 
   // Quality Gate: CI/CD integration must be functional
-      let lastFeedback_phase15Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase15Review) {
-        cicdIntegration = await ctx.task(cicdIntegrationTask, { ...{
-    projectName,
-    cloudPlatform,
-    matrixDefinition,
-    parallelConfig,
-    testSuiteCreation,
-    outputDir
-  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
-      }
-  const phase15Review = await ctx.breakpoint({
+  if (!cicdIntegration.success) {
+    await ctx.breakpoint({
       question: `CI/CD integration encountered issues. Pipeline configured: ${cicdIntegration.pipelineConfigured}. Review integration and retry?`,
       title: 'CI/CD Integration Issues',
       context: {
@@ -761,15 +554,9 @@ export async function process(inputs, ctx) {
         integrationIssues: cicdIntegration.issues || [],
         recommendation: 'Verify pipeline configuration and credentials',
         files: cicdIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase15Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase15Review.approved) break;
-      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 16: REPORTING AND DASHBOARD SETUP
@@ -795,7 +582,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 17: Conducting final cross-browser testing assessment');
 
-  let finalAssessment = await ctx.task(finalAssessmentTask, {
+  const finalAssessment = await ctx.task(finalAssessmentTask, {
     projectName,
     matrixDefinition,
     testSuiteCreation,
@@ -816,25 +603,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cross-browser testing score: ${finalAssessment.overallScore}/100`);
   ctx.log('info', `Browser coverage: ${actualCoverage}%, Pass rate: ${finalPassRate}%`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
-    projectName,
-    matrixDefinition,
-    testSuiteCreation,
-    finalExecution,
-    compatibilityAnalysis,
-    compatibilityFixes,
-    coverageValidation,
-    issueDocumentation,
-    cicdIntegration,
-    reportingSetup,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Cross-Browser Testing Approval
+  await ctx.breakpoint({
     question: `Cross-Browser Testing Complete for ${projectName}. Overall Score: ${finalAssessment.overallScore}/100, Coverage: ${actualCoverage}%, Pass Rate: ${finalPassRate}%. Approve cross-browser testing for production release?`,
     title: 'Final Cross-Browser Testing Review',
     context: {
@@ -862,15 +632,9 @@ export async function process(inputs, ctx) {
         { path: issueDocumentation.knownIssuesPath, format: 'markdown', label: 'Known Issues' },
         { path: finalAssessment.assessmentReportPath, format: 'markdown', label: 'Final Assessment' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -947,7 +711,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

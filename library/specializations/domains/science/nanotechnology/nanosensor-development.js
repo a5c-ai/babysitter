@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Sensor Design
-  let sensorDesign = await ctx.task(sensorDesignTask, {
+  const sensorDesign = await ctx.task(sensorDesignTask, {
     targetAnalyte,
     sensorPlatform,
     performanceRequirements
@@ -46,16 +46,9 @@ export async function process(inputs, ctx) {
       recommendations: sensorDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      sensorDesign = await ctx.task(sensorDesignTask, { ...{
-    targetAnalyte,
-    sensorPlatform,
-    performanceRequirements
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review sensor design
+  await ctx.breakpoint({
     question: `Review ${sensorPlatform} nanosensor design for ${targetAnalyte.name}. Transducer: ${sensorDesign.transducerType}. Recognition: ${sensorDesign.recognitionElement}. Approve?`,
     title: 'Nanosensor Design Review',
     context: {
@@ -67,15 +60,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: sensorDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Nanomaterial Synthesis/Selection
   const nanomaterialSelection = await ctx.task(nanomaterialSelectionTask, {
     sensorDesign,
@@ -124,7 +111,7 @@ export async function process(inputs, ctx) {
     });
 
     // Response characterization
-    let responseCharacterization = await ctx.task(responseCharacterizationTask, {
+    const responseCharacterization = await ctx.task(responseCharacterizationTask, {
       calibrationOptimization,
       sensorFabrication,
       targetAnalyte
@@ -143,16 +130,8 @@ export async function process(inputs, ctx) {
       linearityMet: linearityAchieved
     });
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          responseCharacterization = await ctx.task(responseCharacterizationTask, { ...{
-      calibrationOptimization,
-      sensorFabrication,
-      targetAnalyte
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if ((!linearityAchieved || detectionLimit > performanceRequirements.detectionLimit) && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: LOD = ${detectionLimit.toFixed(3)} (target: ${performanceRequirements.detectionLimit}). Linearity: ${linearityAchieved ? 'met' : 'not met'}. Continue?`,
         title: 'Calibration Optimization Progress',
         context: {
@@ -160,18 +139,13 @@ export async function process(inputs, ctx) {
           iteration,
           detectionLimit,
           linearityAchieved
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 7: Selectivity Testing
-  let selectivityTesting = await ctx.task(selectivityTestingTask, {
+  const selectivityTesting = await ctx.task(selectivityTestingTask, {
     sensorFabrication,
     targetAnalyte,
     currentCalibration,
@@ -179,32 +153,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Selectivity must meet requirements
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        selectivityTesting = await ctx.task(selectivityTestingTask, { ...{
-    sensorFabrication,
-    targetAnalyte,
-    currentCalibration,
-    performanceRequirements
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (selectivityTesting.selectivityFactor < performanceRequirements.selectivity) {
+    await ctx.breakpoint({
       question: `Selectivity factor ${selectivityTesting.selectivityFactor.toFixed(1)} below target ${performanceRequirements.selectivity}. Review interference mitigation?`,
       title: 'Selectivity Warning',
       context: {
         runId: ctx.runId,
         selectivityTesting,
         interferents: selectivityTesting.interferents
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 8: Reproducibility Assessment
   const reproducibilityAssessment = await ctx.task(reproducibilityAssessmentTask, {
@@ -239,7 +198,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: Validation Report
-  let validationReport = await ctx.task(validationReportTask, {
+  const validationReport = await ctx.task(validationReportTask, {
     sensorDesign,
     nanomaterialSelection,
     surfaceFunctionalization,
@@ -253,24 +212,8 @@ export async function process(inputs, ctx) {
     targetAnalyte
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      validationReport = await ctx.task(validationReportTask, { ...{
-    sensorDesign,
-    nanomaterialSelection,
-    surfaceFunctionalization,
-    sensorFabrication,
-    calibrationHistory,
-    selectivityTesting,
-    reproducibilityAssessment,
-    stabilityTesting,
-    realSampleValidation,
-    performanceSummary,
-    targetAnalyte
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Sensor approval
+  await ctx.breakpoint({
     question: `Nanosensor development complete. LOD: ${detectionLimit.toFixed(3)}. Selectivity: ${selectivityTesting.selectivityFactor.toFixed(1)}. Reproducibility CV: ${reproducibilityAssessment.cv.toFixed(1)}%. Approve?`,
     title: 'Nanosensor Validation Approval',
     context: {
@@ -281,15 +224,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/validation-report.md', format: 'markdown', content: validationReport.markdown },
         { path: 'artifacts/sensor-specs.json', format: 'json', content: performanceSummary }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     sensorDesign: {
@@ -315,7 +252,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const sensorDesignTask = defineTask('sensor-design', (args, taskCtx) => ({
   kind: 'agent',

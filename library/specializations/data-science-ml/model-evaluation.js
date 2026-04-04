@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Loading model and performing basic verification');
 
-  let modelLoadResult = await ctx.task(modelLoadingTask, {
+  const modelLoadResult = await ctx.task(modelLoadingTask, {
     modelPath,
     testDataPath,
     modelType,
@@ -80,17 +80,8 @@ export async function process(inputs, ctx) {
   validationResults.modelLoad = modelLoadResult;
 
   // Quality Gate: Model must load successfully and have valid structure
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        modelLoadResult = await ctx.task(modelLoadingTask, { ...{
-    modelPath,
-    testDataPath,
-    modelType,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (!modelLoadResult.modelValid || modelLoadResult.structureIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Model structure issues detected: ${modelLoadResult.structureIssues.length} issues found. Review and approve to continue?`,
       title: 'Model Structure Validation',
       context: {
@@ -98,15 +89,9 @@ export async function process(inputs, ctx) {
         modelPath,
         issues: modelLoadResult.structureIssues,
         files: modelLoadResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: PERFORMANCE METRICS EVALUATION
@@ -114,7 +99,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Evaluating performance metrics on test set');
 
-  let performanceEval = await ctx.task(performanceEvaluationTask, {
+  const performanceEval = await ctx.task(performanceEvaluationTask, {
     modelPath: modelLoadResult.loadedModelPath,
     testDataPath,
     modelType,
@@ -127,18 +112,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Check if target metrics are met
   const metricsNotMet = performanceEval.metricsComparison.filter(m => !m.targetMet);
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        performanceEval = await ctx.task(performanceEvaluationTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    modelType,
-    targetMetrics,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (metricsNotMet.length > 0) {
+    await ctx.breakpoint({
       question: `${metricsNotMet.length} target metrics not met. Continue validation or adjust targets?`,
       title: 'Performance Metrics Review',
       context: {
@@ -151,15 +126,9 @@ export async function process(inputs, ctx) {
           target: m.targetValue
         })),
         files: performanceEval.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: PARALLEL VALIDATION CHECKS (Basic Level)
@@ -221,18 +190,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...calibrationResult.artifacts);
 
     // Quality Gate: Check calibration quality
-        let lastFeedback_phase4Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase4Review) {
-          performanceEval = await ctx.task(performanceEvaluationTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    modelType,
-    targetMetrics,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-        }
-  const phase4Review = await ctx.breakpoint({
+    if (calibrationResult.calibrationScore < 70) {
+      await ctx.breakpoint({
         question: `Model calibration score: ${calibrationResult.calibrationScore}/100. Model predictions may not be well-calibrated. Proceed?`,
         title: 'Calibration Warning',
         context: {
@@ -240,16 +199,11 @@ export async function process(inputs, ctx) {
           calibrationScore: calibrationResult.calibrationScore,
           recommendation: 'Consider recalibrating the model using Platt scaling or isotonic regression',
           files: calibrationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase4Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase4Review.approved) break;
-        lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 5: ROBUSTNESS TESTING (if enabled and standard+ level)
   // ============================================================================
@@ -302,18 +256,8 @@ export async function process(inputs, ctx) {
     );
 
     // Quality Gate: Check robustness score
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          performanceEval = await ctx.task(performanceEvaluationTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    modelType,
-    targetMetrics,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    if (robustnessResults.overallRobustnessScore < 70) {
+      await ctx.breakpoint({
         question: `Robustness score: ${robustnessResults.overallRobustnessScore.toFixed(2)}/100. Model may be vulnerable to adversarial inputs. Continue?`,
         title: 'Robustness Concerns',
         context: {
@@ -326,16 +270,11 @@ export async function process(inputs, ctx) {
             ...adversarialTest.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })),
             ...perturbationTest.artifacts.slice(0, 2).map(a => ({ path: a.path, format: a.format || 'json' }))
           ]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 6: FAIRNESS ANALYSIS (if attributes provided and comprehensive level)
   // ============================================================================
@@ -357,18 +296,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Check for fairness violations
     const fairnessViolations = fairnessResults.metrics.filter(m => m.violation);
-        let lastFeedback_phase6Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase6Review) {
-          performanceEval = await ctx.task(performanceEvaluationTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    modelType,
-    targetMetrics,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-        }
-  const phase6Review = await ctx.breakpoint({
+    if (fairnessViolations.length > 0) {
+      await ctx.breakpoint({
         question: `${fairnessViolations.length} fairness violations detected across protected attributes. Review and approve to proceed?`,
         title: 'Fairness Violations Detected',
         context: {
@@ -377,16 +306,11 @@ export async function process(inputs, ctx) {
           fairnessScore: fairnessResults.overallFairnessScore,
           recommendation: 'Consider retraining with fairness constraints or applying post-processing debiasing',
           files: fairnessResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase6Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase6Review.approved) break;
-        lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 7: EXPLAINABILITY ANALYSIS (if required and comprehensive level)
   // ============================================================================
@@ -435,13 +359,14 @@ export async function process(inputs, ctx) {
       ...localExplanations.artifacts
     );
   }
+
   // ============================================================================
   // PHASE 8: DATA DRIFT DETECTION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Checking for data drift and distribution shift');
 
-  let driftAnalysis = await ctx.task(dataDriftDetectionTask, {
+  const driftAnalysis = await ctx.task(dataDriftDetectionTask, {
     modelPath: modelLoadResult.loadedModelPath,
     testDataPath,
     trainingDataStats: modelLoadResult.trainingDataStats,
@@ -452,17 +377,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...driftAnalysis.artifacts);
 
   // Quality Gate: Check for significant drift
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        driftAnalysis = await ctx.task(dataDriftDetectionTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    trainingDataStats: modelLoadResult.trainingDataStats,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (driftAnalysis.significantDriftDetected) {
+    await ctx.breakpoint({
       question: `Significant data drift detected in ${driftAnalysis.driftedFeatures.length} features. Model may not generalize well to test data. Continue?`,
       title: 'Data Drift Warning',
       context: {
@@ -471,15 +387,9 @@ export async function process(inputs, ctx) {
         driftedFeatures: driftAnalysis.driftedFeatures,
         recommendation: 'Consider retraining model on more recent data or applying domain adaptation techniques',
         files: driftAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: PRODUCTION SIMULATION (if enabled)
@@ -500,17 +410,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...productionSimResult.artifacts);
 
     // Quality Gate: Check production readiness metrics
-        let lastFeedback_phase9Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase9Review) {
-          driftAnalysis = await ctx.task(dataDriftDetectionTask, { ...{
-    modelPath: modelLoadResult.loadedModelPath,
-    testDataPath,
-    trainingDataStats: modelLoadResult.trainingDataStats,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-        }
-  const phase9Review = await ctx.breakpoint({
+    if (productionSimResult.latencyP99 > productionSimResult.latencyThreshold) {
+      await ctx.breakpoint({
         question: `Model latency exceeds threshold. P99: ${productionSimResult.latencyP99}ms, Threshold: ${productionSimResult.latencyThreshold}ms. Approve for production?`,
         title: 'Performance Warning',
         context: {
@@ -519,16 +420,11 @@ export async function process(inputs, ctx) {
           throughput: productionSimResult.throughput,
           memoryUsage: productionSimResult.memoryUsage,
           files: productionSimResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase9Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase9Review.approved) break;
-        lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 10: OVERALL QUALITY SCORING
   // ============================================================================
@@ -604,7 +500,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Assessing production readiness');
 
-  let readinessAssessment = await ctx.task(productionReadinessTask, {
+  const readinessAssessment = await ctx.task(productionReadinessTask, {
     validationResults,
     scoringResult,
     targetMetrics,
@@ -614,18 +510,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...readinessAssessment.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      readinessAssessment = await ctx.task(productionReadinessTask, { ...{
-    validationResults,
-    scoringResult,
-    targetMetrics,
-    modelType,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Deployment approval
+  await ctx.breakpoint({
     question: `Model evaluation complete. Overall score: ${overallScore}/100. Production ready: ${productionReady}. ${readinessAssessment.verdict}. Approve for deployment?`,
     title: 'Final Model Validation Review',
     context: {
@@ -650,15 +536,9 @@ export async function process(inputs, ctx) {
         { path: readinessAssessment.checklistPath, format: 'markdown', label: 'Production Checklist' },
         { path: `${outputDir}/validation-scorecard.json`, format: 'json', label: 'Scorecard' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -734,7 +614,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

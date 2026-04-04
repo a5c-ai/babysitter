@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  let sculptedDesign = await ctx.task(sculptDesignConstraintsTask, {
+  const sculptedDesign = await ctx.task(sculptDesignConstraintsTask, {
     idealDesign,
     abstraction,
     domain
@@ -60,16 +60,9 @@ export async function process(inputs, ctx) {
     idealDesign,
     sculptedDesign,
     timestamp: ctx.now()
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      sculptedDesign = await ctx.task(sculptDesignConstraintsTask, { ...{
-    idealDesign,
-    abstraction,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Abstraction and constraint sculpting complete. Review before inverted goal analysis?',
     title: 'Robust MAS Design - Stage 2 Complete',
     context: {
@@ -78,15 +71,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/abstraction.json', format: 'json' },
         { path: 'artifacts/sculpted-design.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // STAGE 3: INVERTED-GOAL - Analyze what makes the system fail
   ctx.log('info', 'Stage 3: Inverted goal analysis');
   const invertedGoalAnalysis = await ctx.task(analyzeInvertedGoalsTask, {

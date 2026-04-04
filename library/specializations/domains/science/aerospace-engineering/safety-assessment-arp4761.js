@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         ccaAnalysis = await ctx.task(ccaTask, { ...{ projectName, faultTreeAnalysis, systemDefinition }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `${ccaAnalysis.commonCauses.length} common cause failures identified. Review mitigation strategies?`,
       title: 'CCA Warning',
       context: { runId: ctx.runId, commonCauses: ccaAnalysis.commonCauses },
@@ -46,9 +46,8 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  const fmeaAnalysis = await ctx.task(fmeaTask, { projectName, systemDefinition, pssa });
+    }
+    const fmeaAnalysis = await ctx.task(fmeaTask, { projectName, systemDefinition, pssa });
   const ddAnalysis = await ctx.task(ddAnalysisTask, { projectName, faultTreeAnalysis, fmeaAnalysis });
   const ssa = await ctx.task(ssaTask, { projectName, fha, pssa, faultTreeAnalysis, ccaAnalysis, fmeaAnalysis });
   let safetyCase = await ctx.task(safetyCaseTask, { projectName, fha, pssa, ssa, faultTreeAnalysis, ccaAnalysis });
@@ -57,7 +56,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       safetyCase = await ctx.task(safetyCaseTask, { ...{ projectName, fha, pssa, ssa, faultTreeAnalysis, ccaAnalysis }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Safety assessment complete for ${projectName}. All DAL requirements ${ssa.dalCompliant ? 'met' : 'NOT met'}. Approve?`,
     title: 'Safety Assessment Approval',
     context: { runId: ctx.runId, summary: { hazards: fha.hazards.length, catastrophic: fha.catastrophic, dalCompliant: ssa.dalCompliant } },
@@ -71,7 +70,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, fha, pssa, ssa, safetyCase, report, metadata: { processId: 'safety-assessment-arp4761', timestamp: ctx.now() } };
 }
-
 export const fhaTask = defineTask('fha', (args, taskCtx) => ({
   kind: 'agent', title: `FHA - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Safety Engineer', task: 'Conduct Functional Hazard Assessment', context: args,

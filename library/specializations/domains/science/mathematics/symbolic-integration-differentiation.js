@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Parse Integral/Derivative Expression
-  let expressionParsing = await ctx.task(expressionParsingTask, {
+  const expressionParsing = await ctx.task(expressionParsingTask, {
     expression,
     operation,
     variable,
@@ -50,18 +50,9 @@ export async function process(inputs, ctx) {
       result: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      expressionParsing = await ctx.task(expressionParsingTask, { ...{
-    expression,
-    operation,
-    variable,
-    limits,
-    assumptions
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review parsed expression
+  await ctx.breakpoint({
     question: `Expression parsed for ${operation}. Continue with symbolic computation?`,
     title: 'Expression Parsing Review',
     context: {
@@ -74,15 +65,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: expressionParsing
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Apply Symbolic Computation
   const symbolicComputation = await ctx.task(symbolicComputationTask, {
     parsedExpression: expressionParsing.parsedExpression,
@@ -93,7 +78,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Verify Result Correctness
-  let resultVerification = await ctx.task(resultVerificationTask, {
+  const resultVerification = await ctx.task(resultVerificationTask, {
     originalExpression: expression,
     result: symbolicComputation.result,
     operation,
@@ -103,34 +88,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check verification
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        resultVerification = await ctx.task(resultVerificationTask, { ...{
-    originalExpression: expression,
-    result: symbolicComputation.result,
-    operation,
-    variable,
-    limits,
-    assumptions
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!resultVerification.verified) {
+    await ctx.breakpoint({
       question: `Result verification failed. Review potential issues?`,
       title: 'Verification Warning',
       context: {
         runId: ctx.runId,
         issues: resultVerification.issues,
         recommendation: 'Check special cases and assumptions'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 4: Handle Special Cases
   const specialCaseHandling = await ctx.task(specialCaseHandlingTask, {
@@ -143,7 +111,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Step-by-Step Solution
-  let stepByStepSolution = await ctx.task(stepByStepSolutionTask, {
+  const stepByStepSolution = await ctx.task(stepByStepSolutionTask, {
     expression,
     result: symbolicComputation.result,
     operation,
@@ -152,19 +120,8 @@ export async function process(inputs, ctx) {
     computationSteps: symbolicComputation.steps
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      stepByStepSolution = await ctx.task(stepByStepSolutionTask, { ...{
-    expression,
-    result: symbolicComputation.result,
-    operation,
-    variable,
-    limits,
-    computationSteps: symbolicComputation.steps
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Computation Complete
+  await ctx.breakpoint({
     question: `${operation === 'integrate' ? 'Integration' : 'Differentiation'} complete. Result: ${symbolicComputation.result}. Accept result?`,
     title: 'Symbolic Computation Complete',
     context: {
@@ -175,15 +132,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/solution.json`, format: 'json', content: { symbolicComputation, stepByStepSolution } }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     expression,
@@ -207,7 +158,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const expressionParsingTask = defineTask('expression-parsing', (args, taskCtx) => ({
   kind: 'agent',

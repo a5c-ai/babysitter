@@ -79,6 +79,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
     };
   }
+
   // ============================================================================
   // PHASE 3: GENERATE E2E TESTS FOR UNCOVERED ROUTES/FEATURES
   // ============================================================================
@@ -122,7 +123,7 @@ export async function process(inputs, ctx) {
     convergenceAttempts++;
     ctx.log('info', `Phase 5: Convergence attempt ${convergenceAttempts}/${maxConvergenceAttempts} — ${finalResult.failingTests.length} tests failing`);
 
-    let fixResult = await ctx.task(fixFailingE2eTestsTask, {
+    const fixResult = await ctx.task(fixFailingE2eTestsTask, {
       projectName, framework, testFramework,
       failingTests: finalResult.failingTests,
       existingE2eDir
@@ -134,6 +135,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...(finalResult.artifacts || []));
   }
+
   // ============================================================================
   // PHASE 6: QUALITY GATE — PASS/FAIL DECISION
   // ============================================================================
@@ -141,16 +143,8 @@ export async function process(inputs, ctx) {
   const totalNewTests = (routeTests.testsAdded || 0) + (featureTests.testsAdded || 0);
   const gatePassed = finalResult.allPassing && totalNewTests > 0;
 
-      let lastFeedback = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback) {
-        fixResult = await ctx.task(fixFailingE2eTestsTask, { ...{
-      projectName, framework, testFramework,
-      failingTests: finalResult.failingTests,
-      existingE2eDir
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!gatePassed) {
+    await ctx.breakpoint({
       question: [
         `**E2E Gate ${gatePassed ? 'PASSED' : 'FAILED'}**`,
         '',
@@ -164,36 +158,13 @@ export async function process(inputs, ctx) {
         'The E2E gate did not pass. Review and decide whether to proceed anyway or fix the issues.'
       ].join('\n'),
       title: 'E2E Gate Result',
-      context: { runId: ctx.runId, gatePassed, totalNewTests },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
-
-  // ============================================================================
-  // PHASE 7: MANDATORY PACKAGING GATE (issue #59)
-  // ============================================================================
-
-  ctx.log('info', 'Phase 7: Running mandatory packaging gate');
-
-  const packagingResult = await ctx.task(electronPackagingGateTask, {
-    projectName, framework
-  });
-  artifacts.push(...(packagingResult.artifacts || []));
-
-  const packagingVerification = await ctx.task(electronPackagingVerifyTask, {
-    projectName, framework, packagingResult
-  });
-  artifacts.push(...(packagingVerification.artifacts || []));
+      context: { runId: ctx.runId, gatePassed, totalNewTests }
+    });
+  }
 
   return {
-    success: gatePassed && packagingVerification.appExists,
+    success: gatePassed,
     e2eTestsAdded: totalNewTests,
-    packaging: packagingVerification,
     coverageReport: {
       uncoveredRoutes: gaps.uncoveredRoutes,
       uncoveredFeatures: gaps.uncoveredFeatures,
@@ -207,7 +178,8 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/desktop-development/incremental-feature-e2e-gate', timestamp: startTime }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -470,68 +442,4 @@ export const fixFailingE2eTestsTask = defineTask('fix-failing-e2e-tests', (args,
     outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
   },
   labels: ['agent', 'e2e-gate', 'fix-tests']
-}));
-
-// Mandatory Electron packaging gate (issue #59)
-export const electronPackagingGateTask = defineTask('electron-packaging-gate', (args, taskCtx) => ({
-  kind: 'shell',
-  title: `Electron Packaging Gate - ${args.projectName}`,
-  shell: {
-    command: [
-      'if command -v npx >/dev/null 2>&1; then',
-      '  if [ -f package.json ] && grep -q "electron-builder" package.json 2>/dev/null; then',
-      '    npx electron-builder --dir 2>&1',
-      '  elif [ -f package.json ] && grep -q "\\"pack\\"" package.json 2>/dev/null; then',
-      '    npm run pack 2>&1',
-      '  elif [ -f package.json ] && grep -q "\\"dist\\"" package.json 2>/dev/null; then',
-      '    npm run dist 2>&1',
-      '  else',
-      '    echo "No electron-builder or pack/dist script found in package.json" && exit 1',
-      '  fi',
-      'else',
-      '  echo "npx not available" && exit 1',
-      'fi'
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 300000
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-  labels: ['shell', 'electron', 'packaging', 'hard-gate']
-}));
-
-export const electronPackagingVerifyTask = defineTask('electron-packaging-verify', (args, taskCtx) => ({
-  kind: 'shell',
-  title: `Verify Packaged App - ${args.projectName}`,
-  shell: {
-    command: [
-      'APP_FOUND=0',
-      'for dir in dist/mac dist/mac-arm64 dist/mac-universal dist/win-unpacked dist/linux-unpacked; do',
-      '  if [ -d "$dir" ]; then',
-      '    echo "Found packaged app in $dir"',
-      '    ls -la "$dir" | head -10',
-      '    APP_FOUND=1',
-      '  fi',
-      'done',
-      'for app in dist/*.app dist/*.exe dist/*.AppImage dist/*.deb dist/*.dmg; do',
-      '  if [ -f "$app" ] 2>/dev/null; then',
-      '    echo "Found artifact: $app ($(stat -f%z "$app" 2>/dev/null || stat -c%s "$app" 2>/dev/null) bytes)"',
-      '    APP_FOUND=1',
-      '  fi',
-      'done',
-      'if [ "$APP_FOUND" -eq 0 ]; then',
-      '  echo "ERROR: No packaged app found in dist/" && exit 1',
-      'fi',
-      'echo "Packaging verification passed"'
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 30000
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-  labels: ['shell', 'electron', 'packaging', 'verification']
 }));

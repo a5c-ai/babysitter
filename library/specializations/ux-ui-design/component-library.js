@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning design system strategy');
 
-  let strategyPlanning = await ctx.task(designSystemStrategyTask, {
+  const strategyPlanning = await ctx.task(designSystemStrategyTask, {
     projectName,
     scope,
     designLanguage,
@@ -92,22 +92,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyPlanning.artifacts);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      strategyPlanning = await ctx.task(designSystemStrategyTask, { ...{
-    projectName,
-    scope,
-    designLanguage,
-    platforms,
-    technology,
-    existingDesigns,
-    targetFrameworks,
-    accessibilityLevel,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Strategy review
+  await ctx.breakpoint({
     question: `Design system strategy planned for ${projectName}. Scope: ${strategyPlanning.componentCount} components across ${platforms.length} platform(s). Architecture: ${strategyPlanning.architecture}. Review and approve strategy?`,
     title: 'Design System Strategy Review',
     context: {
@@ -122,15 +108,9 @@ export async function process(inputs, ctx) {
       principles: strategyPlanning.designPrinciples,
       governance: strategyPlanning.governanceModel,
       files: strategyPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DESIGN TOKENS DEFINITION
   // ============================================================================
@@ -156,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing color system');
 
-  let colorSystem = await ctx.task(colorSystemDesignTask, {
+  const colorSystem = await ctx.task(colorSystemDesignTask, {
     projectName,
     designLanguage,
     designTokens: tokenDefinition.designTokens,
@@ -168,19 +148,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...colorSystem.artifacts);
 
   // Quality Gate: Color accessibility validation
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        colorSystem = await ctx.task(colorSystemDesignTask, { ...{
-    projectName,
-    designLanguage,
-    designTokens: tokenDefinition.designTokens,
-    accessibilityLevel,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (colorSystem.accessibilityScore < 90) {
+    await ctx.breakpoint({
       question: `Color accessibility score: ${colorSystem.accessibilityScore}/100. Below recommended threshold of 90 for ${accessibilityLevel}. Review color contrast issues?`,
       title: 'Color Accessibility Review',
       context: {
@@ -192,15 +161,9 @@ export async function process(inputs, ctx) {
           { path: colorSystem.colorPalettePath, format: 'image', label: 'Color Palette' },
           { path: colorSystem.accessibilityReportPath, format: 'markdown', label: 'Accessibility Report' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: TYPOGRAPHY SYSTEM DESIGN
@@ -240,7 +203,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating component inventory');
 
-  let componentInventory = await ctx.task(componentInventoryTask, {
+  const componentInventory = await ctx.task(componentInventoryTask, {
     projectName,
     scope,
     platforms,
@@ -282,19 +245,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Foundational components designed: ${foundationalDesigns.length}`);
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      componentInventory = await ctx.task(componentInventoryTask, { ...{
-    projectName,
-    scope,
-    platforms,
-    existingDesigns,
-    strategyPlanning,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review foundational components
+  await ctx.breakpoint({
     question: `Foundational components designed: ${foundationalDesigns.length} components (Button, Input, Checkbox, Radio, etc.). Review designs and approve to proceed with complex components?`,
     title: 'Foundational Components Review',
     context: {
@@ -311,15 +263,9 @@ export async function process(inputs, ctx) {
         format: 'image',
         label: `Component: ${d.componentName}`
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: COMPLEX COMPONENTS DESIGN (PARALLEL)
   // ============================================================================
@@ -388,6 +334,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Icon system created: ${iconSystem.iconCount} icons`);
   }
+
   // ============================================================================
   // PHASE 11: ILLUSTRATION SYSTEM DESIGN
   // ============================================================================
@@ -406,13 +353,14 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...illustrationSystem.artifacts);
   }
+
   // ============================================================================
   // PHASE 12: ACCESSIBILITY AUDIT AND ENHANCEMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Conducting accessibility audit');
 
-  let accessibilityAudit = await ctx.task(accessibilityAuditTask, {
+  const accessibilityAudit = await ctx.task(accessibilityAuditTask, {
     projectName,
     accessibilityLevel,
     colorSystem,
@@ -430,20 +378,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Accessibility audit: ${accessibilityScore}/100, ${criticalIssues.length} critical issues`);
 
   // Quality Gate: Accessibility compliance
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        accessibilityAudit = await ctx.task(accessibilityAuditTask, { ...{
-    projectName,
-    accessibilityLevel,
-    colorSystem,
-    typographySystem,
-    foundationalDesigns,
-    complexDesigns,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Accessibility audit found ${criticalIssues.length} critical issue(s). Overall score: ${accessibilityScore}/100. Review and fix critical accessibility issues before proceeding?`,
       title: 'Accessibility Compliance Gate',
       context: {
@@ -456,15 +392,9 @@ export async function process(inputs, ctx) {
           { path: accessibilityAudit.reportPath, format: 'markdown', label: 'Accessibility Audit Report' },
           { path: accessibilityAudit.remediationPlanPath, format: 'markdown', label: 'Remediation Plan' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: RESPONSIVE BEHAVIOR DESIGN
@@ -526,7 +456,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Setting up design tool library');
 
-  let designToolSetup = await ctx.task(designToolLibraryTask, {
+  const designToolSetup = await ctx.task(designToolLibraryTask, {
     projectName,
     designTokens: tokenDefinition.designTokens,
     colorSystem: colorSystem.colors,
@@ -542,22 +472,8 @@ export async function process(inputs, ctx) {
 
   componentLibrary = designToolSetup.library;
 
-    let lastFeedback_phase16Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase16Review) {
-      designToolSetup = await ctx.task(designToolLibraryTask, { ...{
-    projectName,
-    designTokens: tokenDefinition.designTokens,
-    colorSystem: colorSystem.colors,
-    typographySystem: typographySystem.typography,
-    foundationalDesigns,
-    complexDesigns,
-    iconSystem,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
-    }
-  const phase16Review = await ctx.breakpoint({
+  // Breakpoint: Design library review
+  await ctx.breakpoint({
     question: `Design library created in ${designToolSetup.tool}. ${totalComponents} components organized and published. Review library structure and component organization?`,
     title: 'Design Library Review',
     context: {
@@ -570,15 +486,9 @@ export async function process(inputs, ctx) {
         { path: designToolSetup.libraryFilePath, format: 'link', label: 'Design Library Link' },
         { path: designToolSetup.organizationGuidePath, format: 'markdown', label: 'Library Organization' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase16Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase16Review.approved) break;
-    lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 17: CODE IMPLEMENTATION PLANNING
   // ============================================================================
@@ -679,7 +589,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 22: Conducting final validation');
 
-  let finalValidation = await ctx.task(componentLibraryValidationTask, {
+  const finalValidation = await ctx.task(componentLibraryValidationTask, {
     projectName,
     componentLibrary,
     designTokens: tokenDefinition.designTokens,
@@ -697,23 +607,8 @@ export async function process(inputs, ctx) {
   const validationScore = finalValidation.validationScore;
   const productionReady = finalValidation.productionReady;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalValidation = await ctx.task(componentLibraryValidationTask, { ...{
-    projectName,
-    componentLibrary,
-    designTokens: tokenDefinition.designTokens,
-    accessibilityAudit,
-    componentDocumentation: componentDocumentation.documentation,
-    storybookSetup,
-    governanceSetup,
-    totalComponents,
-    accessibilityLevel,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Component library approval
+  await ctx.breakpoint({
     question: `Component Library Development Complete! ${projectName}: ${totalComponents} components, ${designTokens.tokenCount} design tokens, validation score: ${validationScore}/100. Production ready: ${productionReady}. Approve for release?`,
     title: 'Component Library Complete',
     context: {
@@ -742,15 +637,9 @@ export async function process(inputs, ctx) {
         { path: developerHandoff.handoffPackagePath, format: 'markdown', label: 'Developer Handoff' },
         { path: finalValidation.reportPath, format: 'markdown', label: 'Validation Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -833,7 +722,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Market Research and Competitor Analysis');
 
-  let marketAnalysis = await ctx.task(marketAnalysisTask, {
+  const marketAnalysis = await ctx.task(marketAnalysisTask, {
     conceptName,
     genre,
     targetPlatforms,
@@ -79,19 +79,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...marketAnalysis.artifacts);
 
   // Quality Gate: Market viability check
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        marketAnalysis = await ctx.task(marketAnalysisTask, { ...{
-    conceptName,
-    genre,
-    targetPlatforms,
-    inspirations,
-    highConcept,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (marketAnalysis.viabilityScore < 0.5) {
+    await ctx.breakpoint({
       question: `Market viability score for ${conceptName} is ${marketAnalysis.viabilityScore}. Concerns: ${marketAnalysis.concerns.join(', ')}. Review market analysis and consider pivoting concept?`,
       title: 'Market Viability Review',
       context: {
@@ -102,15 +91,9 @@ export async function process(inputs, ctx) {
         opportunities: marketAnalysis.opportunities,
         recommendation: 'Consider differentiating features or adjusting scope',
         files: marketAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: TARGET AUDIENCE DEFINITION
@@ -135,7 +118,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Core Gameplay Loop and Mechanics Definition');
 
-  let coreGameplay = await ctx.task(coreGameplayTask, {
+  const coreGameplay = await ctx.task(coreGameplayTask, {
     conceptName,
     genre,
     highConcept,
@@ -146,19 +129,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...coreGameplay.artifacts);
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      coreGameplay = await ctx.task(coreGameplayTask, { ...{
-    conceptName,
-    genre,
-    highConcept,
-    inspirations,
-    audienceAnalysis,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Quality Gate: Core loop validation
+  await ctx.breakpoint({
     question: `Core gameplay loop defined for ${conceptName}. Primary loop: ${coreGameplay.primaryLoop}. Secondary systems: ${coreGameplay.secondarySystems.length}. Review core mechanics design?`,
     title: 'Core Gameplay Loop Review',
     context: {
@@ -167,15 +139,9 @@ export async function process(inputs, ctx) {
       secondaryLoops: coreGameplay.secondaryLoops,
       uniqueMechanics: coreGameplay.uniqueMechanics,
       files: coreGameplay.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: VISUAL DIRECTION AND MOOD BOARDS
   // ============================================================================
@@ -243,7 +209,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Concept Validation and Stakeholder Presentation');
 
-  let conceptValidation = await ctx.task(conceptValidationTask, {
+  const conceptValidation = await ctx.task(conceptValidationTask, {
     conceptName,
     highConcept,
     marketAnalysis,
@@ -254,19 +220,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...conceptValidation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      conceptValidation = await ctx.task(conceptValidationTask, { ...{
-    conceptName,
-    highConcept,
-    marketAnalysis,
-    coreGameplay,
-    pitchDeck,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Stakeholder approval
+  await ctx.breakpoint({
     question: `Game Concept Development Complete for ${conceptName}. Validation score: ${conceptValidation.validationScore}/100. Ready for stakeholder presentation and approval?`,
     title: 'Concept Development Complete',
     context: {
@@ -286,15 +241,9 @@ export async function process(inputs, ctx) {
         { path: pitchDeck.pitchDeckPath, format: 'pdf', label: 'Pitch Deck' },
         { path: highConcept.highConceptPath, format: 'markdown', label: 'High Concept' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -337,7 +286,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

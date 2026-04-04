@@ -17,7 +17,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_stepApproval) {
       requirements = await ctx.task(requirementsImportTask, { ...{ projectName, requirementsSource }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
     }
-  const stepApproval = await ctx.breakpoint({
+    const stepApproval = await ctx.breakpoint({
     question: `${decomposition.totalRequirements} requirements decomposed for ${projectName}. Proceed with verification planning?`,
     title: 'Requirements Decomposition Review',
     context: { runId: ctx.runId, decomposition },
@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         verificationPlan = await ctx.task(verificationPlanTask, { ...{ projectName, traceabilityMatrix, verificationMethods }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `${traceabilityMatrix.unverifiedCount} requirements lack verification method. Review and resolve?`,
       title: 'Verification Gap Warning',
       context: { runId: ctx.runId, gaps: traceabilityMatrix.gaps },
@@ -49,15 +49,14 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  let rvmMatrix = await ctx.task(rvmGenerationTask, { projectName, traceabilityMatrix, verificationPlan });
+    }
+    let rvmMatrix = await ctx.task(rvmGenerationTask, { projectName, traceabilityMatrix, verificationPlan });
     let lastFeedback_finalApproval = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback_finalApproval) {
       rvmMatrix = await ctx.task(rvmGenerationTask, { ...{ projectName, traceabilityMatrix, verificationPlan }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `RVM complete for ${projectName}. Coverage: ${traceabilityMatrix.coverage}%. Approve?`,
     title: 'RVM Approval',
     context: { runId: ctx.runId, summary: { totalRequirements: decomposition.totalRequirements, coverage: traceabilityMatrix.coverage } },
@@ -71,7 +70,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, rvmMatrix, traceability: traceabilityMatrix, verificationPlan, report, metadata: { processId: 'requirements-verification-matrix', timestamp: ctx.now() } };
 }
-
 export const requirementsImportTask = defineTask('requirements-import', (args, taskCtx) => ({
   kind: 'agent', title: `Requirements Import - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Requirements Engineer', task: 'Import and structure requirements', context: args,

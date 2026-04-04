@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing workload characteristics and scaling requirements');
 
-  let workloadAnalysis = await ctx.task(analyzeWorkloadTask, {
+  const workloadAnalysis = await ctx.task(analyzeWorkloadTask, {
     projectName,
     infrastructure,
     services,
@@ -117,19 +117,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Workload analysis complete - ${workloadAnalysis.services.length} services analyzed`);
   ctx.log('info', `Workload patterns: ${workloadAnalysis.patterns.join(', ')}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      workloadAnalysis = await ctx.task(analyzeWorkloadTask, { ...{
-    projectName,
-    infrastructure,
-    services,
-    environment,
-    cloudProvider,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Quality Gate: Workload analysis review
+  await ctx.breakpoint({
     question: `Phase 1 Review: Analyzed ${workloadAnalysis.services.length} services. Workload patterns identified: ${workloadAnalysis.patterns.join(', ')}. Recommended scaling strategy: ${workloadAnalysis.recommendedStrategy}. Approve?`,
     title: 'Workload Analysis Review',
     context: {
@@ -146,15 +135,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(workloadAnalysis, null, 2)
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: CONFIGURE HORIZONTAL POD AUTOSCALER (HPA)
   // ============================================================================
@@ -189,6 +172,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `HPA configured - ${hpaConfig.scalers.length} HPA resources created`);
   }
+
   // ============================================================================
   // PHASE 3: CONFIGURE VERTICAL POD AUTOSCALER (VPA)
   // ============================================================================
@@ -214,6 +198,7 @@ export async function process(inputs, ctx) {
       ctx.log('info', `VPA configured - ${vpaConfig.scalers.length} VPA resources created`);
     }
   }
+
   // ============================================================================
   // PHASE 4: CONFIGURE CLUSTER AUTOSCALER
   // ============================================================================
@@ -221,7 +206,7 @@ export async function process(inputs, ctx) {
   if (enableClusterAutoscaler && infrastructure === 'kubernetes') {
     ctx.log('info', 'Phase 4: Configuring Cluster Autoscaler');
 
-    let clusterAutoscalerConfig = await ctx.task(configureClusterAutoscalerTask, {
+    const clusterAutoscalerConfig = await ctx.task(configureClusterAutoscalerTask, {
       projectName,
       cloudProvider,
       budget,
@@ -248,19 +233,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cluster Autoscaler configured - Min nodes: ${clusterAutoscalerConfig.minNodes}, Max nodes: ${clusterAutoscalerConfig.maxNodes}`);
 
-      let lastFeedback_finalApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_finalApproval2) {
-        clusterAutoscalerConfig = await ctx.task(configureClusterAutoscalerTask, { ...{
-      projectName,
-      cloudProvider,
-      budget,
-      workloadAnalysis,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-      }
-  const finalApproval2 = await ctx.breakpoint({
+    // Quality Gate: Cluster Autoscaler review
+    await ctx.breakpoint({
       question: `Phase 4 Review: Cluster Autoscaler configured with min nodes: ${clusterAutoscalerConfig.minNodes}, max nodes: ${clusterAutoscalerConfig.maxNodes}. Estimated max cost: $${clusterAutoscalerConfig.estimatedMaxMonthlyCost}/month. Approve?`,
       title: 'Cluster Autoscaler Configuration Review',
       context: {
@@ -276,15 +250,9 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(clusterAutoscalerConfig, null, 2)
         }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_finalApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (finalApproval2.approved) break;
-      lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: CONFIGURE VM AUTO SCALING (IF APPLICABLE)
@@ -314,6 +282,7 @@ export async function process(inputs, ctx) {
       ctx.log('info', `VM auto-scaling configured - ${vmAutoscalingConfig.scalers.length} auto-scaling groups created`);
     }
   }
+
   // ============================================================================
   // PHASE 6: CONFIGURE CUSTOM METRICS-BASED SCALING
   // ============================================================================
@@ -341,6 +310,7 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Custom metrics scaling configured - ${customMetricsConfig.scalers.length} custom metric scalers created`);
     }
   }
+
   // ============================================================================
   // PHASE 7: IMPLEMENT PREDICTIVE SCALING (IF ENABLED)
   // ============================================================================
@@ -368,6 +338,7 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Predictive scaling configured - ${predictiveScalingConfig.scalers.length} predictive scalers created`);
     }
   }
+
   // ============================================================================
   // PHASE 8: CONFIGURE SCALING POLICIES AND LIMITS
   // ============================================================================
@@ -408,7 +379,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Setting up scaling monitoring and alerts');
 
-  let monitoringConfig = await ctx.task(setupScalingMonitoringTask, {
+  const monitoringConfig = await ctx.task(setupScalingMonitoringTask, {
     projectName,
     infrastructure,
     services: workloadAnalysis.services,
@@ -426,21 +397,9 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Scaling monitoring configured - ${monitoringConfig.dashboards.length} dashboards, ${monitoringConfig.alerts.length} alerts created`);
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      monitoringConfig = await ctx.task(setupScalingMonitoringTask, { ...{
-    projectName,
-    infrastructure,
-    services: workloadAnalysis.services,
-    scalers,
-    policies,
-    targetMetrics,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Quality Gate: Monitoring review
+  await ctx.breakpoint({
     question: `Phase 9 Review: Scaling monitoring configured with ${monitoringConfig.dashboards.length} dashboards and ${monitoringConfig.alerts.length} alerts. Review monitoring setup?`,
     title: 'Scaling Monitoring Review',
     context: {
@@ -455,22 +414,16 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(monitoringConfig, null, 2)
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 10: CONDUCT LOAD TESTING AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Conducting load testing to validate auto-scaling');
 
-  let loadTestingResult = await ctx.task(conductLoadTestingTask, {
+  const loadTestingResult = await ctx.task(conductLoadTestingTask, {
     projectName,
     infrastructure,
     services: workloadAnalysis.services,
@@ -481,20 +434,9 @@ export async function process(inputs, ctx) {
   });
 
   if (!loadTestingResult.success) {
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        loadTestingResult = await ctx.task(conductLoadTestingTask, { ...{
-    projectName,
-    infrastructure,
-    services: workloadAnalysis.services,
-    scalers,
-    targetMetrics,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+    ctx.log('warn', 'Load testing validation encountered issues');
+
+    await ctx.breakpoint({
       question: `Phase 10 Alert: Load testing validation encountered ${loadTestingResult.failedTests} failed tests. Issues: ${loadTestingResult.issues.length}. Review before proceeding?`,
       title: 'Load Testing Validation Failed',
       context: {
@@ -509,15 +451,9 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(loadTestingResult, null, 2)
         }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   artifacts.push(...loadTestingResult.artifacts);
   validationResults.push(loadTestingResult);
@@ -530,7 +466,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Conducting capacity planning and cost optimization');
 
-  let capacityPlanningResult = await ctx.task(conductCapacityPlanningTask, {
+  const capacityPlanningResult = await ctx.task(conductCapacityPlanningTask, {
     projectName,
     infrastructure,
     workloadAnalysis,
@@ -560,23 +496,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Capacity planning complete - Estimated baseline cost: $${capacityPlanningResult.baselineCost}/month, Peak cost: $${capacityPlanningResult.peakCost}/month`);
 
   // Quality Gate: Cost review
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        capacityPlanningResult = await ctx.task(conductCapacityPlanningTask, { ...{
-    projectName,
-    infrastructure,
-    workloadAnalysis,
-    scalers,
-    policies,
-    budget,
-    loadTestingResult,
-    cloudProvider,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (capacityPlanningResult.peakCost > budget.maxMonthlyCost) {
+    await ctx.breakpoint({
       question: `Phase 11 Alert: Estimated peak cost $${capacityPlanningResult.peakCost}/month exceeds budget $${budget.maxMonthlyCost}/month. Review capacity plan and adjust limits?`,
       title: 'Cost Budget Exceeded',
       context: {
@@ -592,15 +513,9 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(capacityPlanningResult, null, 2)
         }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: GENERATE DOCUMENTATION AND RUNBOOKS
@@ -626,13 +541,14 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentationResult.artifacts);
   }
+
   // ============================================================================
   // FINAL SCORING AND ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Calculating auto-scaling configuration score');
 
-  let scoringResult = await ctx.task(calculateScalingScoreTask, {
+  const scoringResult = await ctx.task(calculateScalingScoreTask, {
     projectName,
     infrastructure,
     scalingStrategy,
@@ -649,21 +565,9 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Auto-Scaling Score: ${scalingScore}/100`);
 
   // Final Breakpoint: Auto-scaling setup complete
-    let lastFeedback_finalApproval3 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval3) {
-      scoringResult = await ctx.task(calculateScalingScoreTask, { ...{
-    projectName,
-    infrastructure,
-    scalingStrategy,
-    scalers,
-    policies,
-    loadTestingResult,
-    capacityPlanningResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
-    }
-  const finalApproval3 = await ctx.breakpoint({
+  const qualityThreshold = environment === 'production' ? 85 : 75;
+
+  await ctx.breakpoint({
     question: `Final Review: Auto-Scaling Configuration complete for ${projectName}. Score: ${scalingScore}/100 (threshold: ${qualityThreshold}). ${scalers.length} scalers configured, ${policies.length} policies created. Ready to deploy?`,
     title: 'Final Auto-Scaling Review',
     context: {
@@ -706,15 +610,9 @@ export async function process(inputs, ctx) {
           content: documentationResult.runbook || 'Runbook generation pending'
         }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval3 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval3.approved) break;
-    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -787,7 +685,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

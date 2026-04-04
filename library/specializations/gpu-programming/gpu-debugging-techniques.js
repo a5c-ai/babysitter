@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...debugInstrumentation.artifacts);
 
   // Phase 6: Issue Resolution
-  let issueResolution = await ctx.task(issueResolutionTask, {
+  const issueResolution = await ctx.task(issueResolutionTask, {
     projectName, memoryErrors, raceConditions, correctnessValidation, outputDir
   });
   artifacts.push(...issueResolution.artifacts);
@@ -76,25 +76,14 @@ export async function process(inputs, ctx) {
     ...memoryErrors.issues,
     ...raceConditions.issues,
     ...correctnessValidation.issues
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      issueResolution = await ctx.task(issueResolutionTask, { ...{
-    projectName, memoryErrors, raceConditions, correctnessValidation, outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  ];
+
+  await ctx.breakpoint({
     question: `GPU debugging complete for ${projectName}. Found ${allIssues.length} issues. Review report?`,
     title: 'GPU Debugging Complete',
-    context: { runId: ctx.runId, allIssues, issueResolution },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, allIssues, issueResolution }
+  });
+
   return {
     success: allIssues.length === 0 || issueResolution.allResolved,
     projectName,

@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: System Architecture Design
-  let systemArchitecture = await ctx.task(systemArchitectureDesignTask, {
+  const systemArchitecture = await ctx.task(systemArchitectureDesignTask, {
     projectName,
     problemFormulation,
     dataCharacteristics,
@@ -53,17 +53,9 @@ export async function process(inputs, ctx) {
       architecture: null
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      systemArchitecture = await ctx.task(systemArchitectureDesignTask, { ...{
-    projectName,
-    problemFormulation,
-    dataCharacteristics,
-    constraints
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review system architecture
+  await ctx.breakpoint({
     question: `Review ML system architecture for ${projectName}. Does the architecture meet scalability, latency, and integration requirements?`,
     title: 'System Architecture Review',
     context: {
@@ -79,15 +71,9 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: systemArchitecture.diagram
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Model Architecture Selection
   const modelSelection = await ctx.task(modelArchitectureSelectionTask, {
     projectName,
@@ -98,24 +84,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Baseline Model Development
-  let baselineModel = await ctx.task(baselineModelTask, {
+  const baselineModel = await ctx.task(baselineModelTask, {
     projectName,
     problemFormulation,
     dataCharacteristics,
     modelSelection
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      baselineModel = await ctx.task(baselineModelTask, { ...{
-    projectName,
-    problemFormulation,
-    dataCharacteristics,
-    modelSelection
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review baseline results
+  await ctx.breakpoint({
     question: `Baseline model established for ${projectName}. Performance: ${baselineModel.performance}. Approve to proceed with candidate models?`,
     title: 'Baseline Model Review',
     context: {
@@ -127,15 +104,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: baselineModel
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Candidate Model Architecture Design (Parallel)
   const candidateModelSpecs = modelSelection.candidateModels.slice(0, 3); // Top 3 candidates
   const candidateModels = await ctx.parallel.all(
@@ -162,7 +133,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Architecture Comparison and Ranking
-  let architectureComparison = await ctx.task(architectureComparisonTask, {
+  const architectureComparison = await ctx.task(architectureComparisonTask, {
     projectName,
     candidateModels,
     baselineModel,
@@ -175,18 +146,8 @@ export async function process(inputs, ctx) {
     arch => arch.exceedsBaseline === true
   );
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        architectureComparison = await ctx.task(architectureComparisonTask, { ...{
-    projectName,
-    candidateModels,
-    baselineModel,
-    evaluationCriteria,
-    constraints
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (viableCandidates.length === 0) {
+    await ctx.breakpoint({
       question: `No candidate architectures exceed baseline performance. Should we refine architectures, adjust constraints, or revisit problem formulation?`,
       title: 'No Viable Candidates Warning',
       context: {
@@ -194,28 +155,12 @@ export async function process(inputs, ctx) {
         projectName,
         comparison: architectureComparison,
         recommendation: 'Consider relaxing constraints, adding more data, or exploring alternative approaches'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      architectureComparison = await ctx.task(architectureComparisonTask, { ...{
-    projectName,
-    candidateModels,
-    baselineModel,
-    evaluationCriteria,
-    constraints
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review architecture comparison
+  await ctx.breakpoint({
     question: `Review architecture comparison for ${projectName}. Top recommendation: ${architectureComparison.recommendation.architecture}. Approve?`,
     title: 'Architecture Comparison Review',
     context: {
@@ -231,15 +176,9 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: architectureComparison.comparisonReport
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 7: Training Infrastructure Planning
   const trainingInfrastructure = await ctx.task(trainingInfrastructureTask, {
     projectName,
@@ -277,7 +216,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Risk and Mitigation Analysis
-  let riskAnalysis = await ctx.task(architectureRiskAnalysisTask, {
+  const riskAnalysis = await ctx.task(architectureRiskAnalysisTask, {
     projectName,
     systemArchitecture,
     recommendedArchitecture: architectureComparison.recommendation,
@@ -290,18 +229,8 @@ export async function process(inputs, ctx) {
     risk => risk.severity === 'critical' && !risk.mitigationPlan
   );
 
-      let lastFeedback_phase11Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase11Review) {
-        riskAnalysis = await ctx.task(architectureRiskAnalysisTask, { ...{
-    projectName,
-    systemArchitecture,
-    recommendedArchitecture: architectureComparison.recommendation,
-    implementationRoadmap,
-    constraints
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-      }
-  const phase11Review = await ctx.breakpoint({
+  if (criticalRisksWithoutMitigation.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalRisksWithoutMitigation.length} critical risks lack mitigation plans. Should we develop mitigation strategies before proceeding?`,
       title: 'Critical Risk Warning',
       context: {
@@ -309,28 +238,12 @@ export async function process(inputs, ctx) {
         projectName,
         criticalRisks: criticalRisksWithoutMitigation,
         recommendation: 'Develop mitigation strategies for all critical risks'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase11Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase11Review.approved) break;
-      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      riskAnalysis = await ctx.task(architectureRiskAnalysisTask, { ...{
-    projectName,
-    systemArchitecture,
-    recommendedArchitecture: architectureComparison.recommendation,
-    implementationRoadmap,
-    constraints
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Architecture Design Approval
+  await ctx.breakpoint({
     question: `ML Architecture Design complete for ${projectName}. Recommended: ${architectureComparison.recommendation.architecture}. Expected performance improvement: ${architectureComparison.recommendation.expectedImprovement}. Approve to proceed to implementation?`,
     title: 'Architecture Design Approval',
     context: {
@@ -344,15 +257,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/final-architecture-design.md', format: 'markdown', content: implementationRoadmap.markdown },
         { path: 'artifacts/implementation-roadmap.md', format: 'markdown', content: implementationRoadmap.roadmapMarkdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -376,7 +283,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const systemArchitectureDesignTask = defineTask('system-architecture-design', (args, taskCtx) => ({
   kind: 'agent',

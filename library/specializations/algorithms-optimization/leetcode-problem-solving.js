@@ -63,7 +63,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Solution Design and Approach Selection');
 
-  let solutionDesign = await ctx.task(solutionDesignTask, {
+  const solutionDesign = await ctx.task(solutionDesignTask, {
     problemId,
     problemAnalysis,
     targetComplexity,
@@ -73,18 +73,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...solutionDesign.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      solutionDesign = await ctx.task(solutionDesignTask, { ...{
-    problemId,
-    problemAnalysis,
-    targetComplexity,
-    language,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Approach review
+  await ctx.breakpoint({
     question: `Solution approach designed for Problem ${problemId}. Approach: ${solutionDesign.approach}. Expected complexity: O(${solutionDesign.expectedTimeComplexity}). Proceed with implementation?`,
     title: 'Solution Approach Review',
     context: {
@@ -95,15 +85,9 @@ export async function process(inputs, ctx) {
       expectedTimeComplexity: solutionDesign.expectedTimeComplexity,
       expectedSpaceComplexity: solutionDesign.expectedSpaceComplexity,
       files: solutionDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: BRUTE FORCE IMPLEMENTATION
   // ============================================================================
@@ -147,7 +131,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Testing and Validation');
 
-  let testingResult = await ctx.task(testingValidationTask, {
+  const testingResult = await ctx.task(testingValidationTask, {
     problemId,
     problemAnalysis,
     optimizedImpl,
@@ -158,18 +142,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...testingResult.artifacts);
 
   // Quality Gate: Test validation
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        testingResult = await ctx.task(testingValidationTask, { ...{
-    problemId,
-    problemAnalysis,
-    optimizedImpl,
-    language,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!testingResult.allTestsPassed) {
+    await ctx.breakpoint({
       question: `Some tests failed for Problem ${problemId}. Passed: ${testingResult.passedCount}/${testingResult.totalCount}. Review and fix issues?`,
       title: 'Test Validation Review',
       context: {
@@ -179,15 +153,9 @@ export async function process(inputs, ctx) {
         failedTests: testingResult.failedTests,
         recommendation: 'Review failing test cases and fix implementation',
         files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: COMPLEXITY ANALYSIS
@@ -211,7 +179,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Pattern Recognition and Learning Notes');
 
-  let patternNotes = await ctx.task(patternNotesTask, {
+  const patternNotes = await ctx.task(patternNotesTask, {
     problemId,
     problemAnalysis,
     solutionDesign,
@@ -222,19 +190,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...patternNotes.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      patternNotes = await ctx.task(patternNotesTask, { ...{
-    problemId,
-    problemAnalysis,
-    solutionDesign,
-    optimizedImpl,
-    complexityAnalysis,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `LeetCode session complete for Problem ${problemId}. Tests passed: ${testingResult.allTestsPassed}. Final complexity: O(${optimizedImpl.timeComplexity}). Review solution?`,
     title: 'LeetCode Session Complete',
     context: {
@@ -254,15 +211,9 @@ export async function process(inputs, ctx) {
         { path: complexityAnalysis.analysisPath, format: 'markdown', label: 'Complexity Analysis' },
         { path: patternNotes.notesPath, format: 'markdown', label: 'Pattern Notes' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -298,7 +249,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

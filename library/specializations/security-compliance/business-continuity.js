@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Business Continuity Program Initialization');
 
-  let programInitialization = await ctx.task(programInitializationTask, {
+  const programInitialization = await ctx.task(programInitializationTask, {
     bcpId,
     organizationName,
     businessUnits,
@@ -74,20 +74,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Program Initialization Complete - Governance: ${programInitialization.governanceEstablished}, Stakeholders: ${programInitialization.stakeholdersIdentified}`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      programInitialization = await ctx.task(programInitializationTask, { ...{
-    bcpId,
-    organizationName,
-    businessUnits,
-    scope,
-    complianceRequirements,
-    stakeholders,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Program approval
+  await ctx.breakpoint({
     question: `Business Continuity Program for ${organizationName} initialized. Governance structure: ${programInitialization.governanceStructure}. Stakeholders identified: ${programInitialization.stakeholdersIdentified}. Approve program scope and proceed?`,
     title: 'BCP Program Initialization Approval',
     context: {
@@ -100,22 +88,16 @@ export async function process(inputs, ctx) {
       steeringCommittee: programInitialization.steeringCommittee,
       recommendation: 'Verify program scope, governance, and stakeholder engagement before proceeding',
       files: programInitialization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: BUSINESS IMPACT ANALYSIS (BIA)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Conducting Business Impact Analysis');
 
-  let businessImpactAnalysis = await ctx.task(businessImpactAnalysisTask, {
+  const businessImpactAnalysis = await ctx.task(businessImpactAnalysisTask, {
     bcpId,
     organizationName,
     businessUnits,
@@ -133,21 +115,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `BIA Complete - Critical Processes: ${criticalProcesses.length}, Mission-Critical: ${missionCriticalCount}`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      businessImpactAnalysis = await ctx.task(businessImpactAnalysisTask, { ...{
-    bcpId,
-    organizationName,
-    businessUnits,
-    criticalSystems,
-    rpo,
-    rto,
-    maxTolerableDowntime,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: BIA review
+  await ctx.breakpoint({
     question: `Business Impact Analysis for ${organizationName} completed. Identified ${criticalProcesses.length} critical business processes (${missionCriticalCount} mission-critical). Review findings and approve before proceeding to risk assessment?`,
     title: 'Business Impact Analysis Review',
     context: {
@@ -160,22 +129,16 @@ export async function process(inputs, ctx) {
       rpoCompliance: businessImpactAnalysis.rpoCompliance,
       recommendation: 'Validate critical process identification and impact assessments with business unit leaders',
       files: businessImpactAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: RISK ASSESSMENT AND THREAT IDENTIFICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Conducting Risk Assessment and Threat Identification');
 
-  let riskAssessment = await ctx.task(riskAssessmentTask, {
+  const riskAssessment = await ctx.task(riskAssessmentTask, {
     bcpId,
     organizationName,
     businessUnits,
@@ -242,21 +205,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Strategy Development Complete - Recovery Strategies: ${recoveryStrategies.strategiesCount}, Backup Strategy: ${dataBackupStrategy.backupTier}`);
 
-    let lastFeedback_qualityGateApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval2) {
-      riskAssessment = await ctx.task(riskAssessmentTask, { ...{
-    bcpId,
-    organizationName,
-    businessUnits,
-    criticalSystems,
-    criticalProcesses,
-    geographicScope,
-    businessImpactAnalysis,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-    }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  // Quality Gate: Strategy approval
+  await ctx.breakpoint({
     question: `Recovery strategies developed for ${organizationName}. ${recoveryStrategies.strategiesCount} strategies identified. Alternative sites: ${alternativeSites.sitesIdentified}. Backup strategy: ${dataBackupStrategy.backupTier}. Approve strategies and budget allocation?`,
     title: 'Recovery Strategy Approval',
     context: {
@@ -273,15 +223,9 @@ export async function process(inputs, ctx) {
         ...recoveryStrategies.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })),
         ...alternativeSites.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval2.approved) break;
-    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: DISASTER RECOVERY PLANNING (if enabled)
   // ============================================================================
@@ -308,6 +252,7 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 5: Disaster Recovery Planning skipped (not requested)');
   }
+
   // ============================================================================
   // PHASE 6: CRISIS MANAGEMENT AND COMMUNICATION PLANNING
   // ============================================================================
@@ -333,6 +278,7 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 6: Crisis Management Planning skipped (not requested)');
   }
+
   // ============================================================================
   // PHASE 7: INCIDENT RESPONSE PROCEDURES DEVELOPMENT
   // ============================================================================
@@ -359,7 +305,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Creating Comprehensive BCP Documentation');
 
-  let bcpDocument = await ctx.task(bcpDocumentationTask, {
+  const bcpDocument = await ctx.task(bcpDocumentationTask, {
     bcpId,
     organizationName,
     scope,
@@ -380,27 +326,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `BCP Documentation Complete - Main Document: ${bcpDocument.mainDocumentPath}, Appendices: ${bcpDocument.appendicesCount}`);
 
-    let lastFeedback_qualityGateApproval3 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval3) {
-      bcpDocument = await ctx.task(bcpDocumentationTask, { ...{
-    bcpId,
-    organizationName,
-    scope,
-    programInitialization,
-    businessImpactAnalysis,
-    riskAssessment,
-    recoveryStrategies,
-    alternativeSites,
-    dataBackupStrategy,
-    disasterRecovery,
-    crisisManagement,
-    incidentResponseProcedures,
-    complianceRequirements,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-    }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  // Quality Gate: BCP document review
+  await ctx.breakpoint({
     question: `Business Continuity Plan for ${organizationName} documented. Document includes ${bcpDocument.sectionsCount} sections, ${bcpDocument.appendicesCount} appendices. Review comprehensive BCP before proceeding to validation and testing?`,
     title: 'BCP Documentation Review',
     context: {
@@ -417,15 +344,9 @@ export async function process(inputs, ctx) {
         { path: bcpDocument.mainDocumentPath, format: 'markdown', label: 'Business Continuity Plan' },
         ...bcpDocument.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval3.approved) break;
-    lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 9: ROLES AND RESPONSIBILITIES DEFINITION
   // ============================================================================
@@ -475,7 +396,7 @@ export async function process(inputs, ctx) {
   if (performTesting) {
     ctx.log('info', 'Phase 11: Planning BCP Testing and Validation');
 
-    let testPlanning = await ctx.task(testPlanningTask, {
+    const testPlanning = await ctx.task(testPlanningTask, {
       bcpId,
       organizationName,
       criticalProcesses,
@@ -490,21 +411,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Test Planning Complete - Test Scenarios: ${testPlanning.testScenariosPlanned}`);
 
-      let lastFeedback_phase11Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase11Review) {
-        testPlanning = await ctx.task(testPlanningTask, { ...{
-      bcpId,
-      organizationName,
-      criticalProcesses,
-      recoveryStrategies,
-      disasterRecovery,
-      bcpDocument,
-      rolesResponsibilities,
-      outputDir
-    }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-      }
-  const phase11Review = await ctx.breakpoint({
+    // Quality Gate: Test execution approval
+    await ctx.breakpoint({
       question: `BCP Test Plan ready for ${organizationName}. ${testPlanning.testScenariosPlanned} test scenarios planned. Tests include: ${testPlanning.testTypes.join(', ')}. Schedule and approve test execution?`,
       title: 'BCP Testing Approval',
       context: {
@@ -516,16 +424,10 @@ export async function process(inputs, ctx) {
         businessImpact: testPlanning.estimatedBusinessImpact,
         recommendation: 'Coordinate test timing with business operations to minimize disruption',
         files: testPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase11Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase11Review.approved) break;
-      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-    }
-  // Execute testing (simulation)
+      }
+    });
+
+    // Execute testing (simulation)
     testResults = await ctx.task(testExecutionTask, {
       bcpId,
       organizationName,
@@ -541,21 +443,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `BCP Testing Complete - Tests Executed: ${testResults.testsExecuted}, Success Rate: ${testResults.successRate}%`);
 
     // Quality Gate: Test results review
-        let lastFeedback_qualityGateApproval4 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval4) {
-          testPlanning = await ctx.task(testPlanningTask, { ...{
-      bcpId,
-      organizationName,
-      criticalProcesses,
-      recoveryStrategies,
-      disasterRecovery,
-      bcpDocument,
-      rolesResponsibilities,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-        }
-  const qualityGateApproval4 = await ctx.breakpoint({
+    if (testResults.successRate < 80) {
+      await ctx.breakpoint({
         question: `BCP Testing for ${organizationName} completed with ${testResults.successRate}% success rate. ${testResults.issuesIdentified} issues found. Review test results and address failures before finalizing BCP?`,
         title: 'BCP Test Results Review',
         context: {
@@ -569,18 +458,13 @@ export async function process(inputs, ctx) {
           criticalIssues: testResults.criticalIssues,
           recommendation: 'Address critical issues and retest before considering BCP production-ready',
           files: testResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval4.approved) break;
-        lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   } else {
     ctx.log('info', 'Phase 11: BCP Testing skipped (not requested)');
   }
+
   // ============================================================================
   // PHASE 12: MAINTENANCE AND REVIEW PROCEDURES
   // ============================================================================
@@ -606,7 +490,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Validating Compliance Requirements');
 
-  let complianceValidation = await ctx.task(complianceValidationTask, {
+  const complianceValidation = await ctx.task(complianceValidationTask, {
     bcpId,
     organizationName,
     complianceRequirements,
@@ -624,21 +508,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Compliance Validation Complete - Requirements Met: ${complianceValidation.requirementsMet}/${complianceValidation.totalRequirements}, Gaps: ${complianceGaps}`);
 
   // Quality Gate: Compliance gaps
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        complianceValidation = await ctx.task(complianceValidationTask, { ...{
-    bcpId,
-    organizationName,
-    complianceRequirements,
-    bcpDocument,
-    businessImpactAnalysis,
-    riskAssessment,
-    testResults,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  if (complianceGaps > 0) {
+    await ctx.breakpoint({
       question: `Compliance validation for ${organizationName} identified ${complianceGaps} gaps against requirements: ${complianceRequirements.join(', ')}. Review gaps and create remediation plan?`,
       title: 'Compliance Gaps Identified',
       context: {
@@ -651,15 +522,9 @@ export async function process(inputs, ctx) {
         gaps: complianceValidation.gaps,
         recommendation: 'Address compliance gaps before BCP approval and implementation',
         files: complianceValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: EXECUTIVE SUMMARY AND REPORTING
@@ -695,7 +560,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Planning BCP Implementation and Deployment');
 
-  let implementationPlan = await ctx.task(implementationPlanTask, {
+  const implementationPlan = await ctx.task(implementationPlanTask, {
     bcpId,
     organizationName,
     businessUnits,
@@ -711,22 +576,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Implementation Plan Complete - Phases: ${implementationPlan.implementationPhases}, Estimated Timeline: ${implementationPlan.estimatedTimeline}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      implementationPlan = await ctx.task(implementationPlanTask, { ...{
-    bcpId,
-    organizationName,
-    businessUnits,
-    bcpDocument,
-    trainingProgram,
-    rolesResponsibilities,
-    maintenanceProcedures,
-    complianceValidation,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: BCP Program Review
+  await ctx.breakpoint({
     question: `Business Continuity Planning for ${organizationName} complete. BCP covers ${criticalProcesses.length} critical processes, ${recoveryStrategies.strategiesCount} recovery strategies. Testing: ${performTesting ? `${testResults.successRate}% success rate` : 'not performed'}. Compliance: ${complianceValidation.requirementsMet}/${complianceValidation.totalRequirements} requirements met. Approve and implement BCP?`,
     title: 'Final BCP Program Review',
     context: {
@@ -756,15 +607,9 @@ export async function process(inputs, ctx) {
         { path: implementationPlan.planPath, format: 'markdown', label: 'Implementation Plan' },
         ...(testResults ? [{ path: testResults.summaryReportPath, format: 'markdown', label: 'Test Results' }] : [])
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const totalDuration = endTime - startTime;
 
@@ -886,7 +731,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

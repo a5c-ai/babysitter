@@ -51,22 +51,15 @@ export async function process(inputs, ctx) {
 
   // Task 2: Mathematical Formulation
   ctx.log('info', 'Phase 2: Creating mathematical formulation');
-  let mathematicalFormulation = await ctx.task(mathematicalFormulationTask, {
+  const mathematicalFormulation = await ctx.task(mathematicalFormulationTask, {
     problemDefinition,
     outputDir
   });
 
   artifacts.push(...mathematicalFormulation.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      mathematicalFormulation = await ctx.task(mathematicalFormulationTask, { ...{
-    problemDefinition,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review model formulation
+  await ctx.breakpoint({
     question: `Linear programming model formulated with ${mathematicalFormulation.variableCount} decision variables and ${mathematicalFormulation.constraintCount} constraints. Review formulation before solving?`,
     title: 'LP Model Formulation Review',
     context: {
@@ -75,15 +68,9 @@ export async function process(inputs, ctx) {
       variableCount: mathematicalFormulation.variableCount,
       constraintCount: mathematicalFormulation.constraintCount,
       files: mathematicalFormulation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Task 3: Model Implementation
   ctx.log('info', 'Phase 3: Implementing model in solver');
   const modelImplementation = await ctx.task(modelImplementationTask, {
@@ -96,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Model Solving
   ctx.log('info', 'Phase 4: Solving optimization model');
-  let solutionResult = await ctx.task(modelSolvingTask, {
+  const solutionResult = await ctx.task(modelSolvingTask, {
     modelImplementation,
     solverPreference,
     outputDir
@@ -104,16 +91,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...solutionResult.artifacts);
 
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        solutionResult = await ctx.task(modelSolvingTask, { ...{
-    modelImplementation,
-    solverPreference,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!solutionResult.feasible) {
+    await ctx.breakpoint({
       question: `Model is infeasible. Review constraints for conflicts or consider relaxing constraints?`,
       title: 'Infeasible Model',
       context: {
@@ -121,15 +100,9 @@ export async function process(inputs, ctx) {
         status: solutionResult.status,
         infeasibilityAnalysis: solutionResult.infeasibilityAnalysis,
         files: solutionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Task 5: Solution Validation
   ctx.log('info', 'Phase 5: Validating solution');
@@ -153,7 +126,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Report Generation
   ctx.log('info', 'Phase 7: Generating optimization report');
-  let optimizationReport = await ctx.task(reportGenerationTask, {
+  const optimizationReport = await ctx.task(reportGenerationTask, {
     problemDefinition,
     mathematicalFormulation,
     solutionResult,
@@ -164,19 +137,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimizationReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      optimizationReport = await ctx.task(reportGenerationTask, { ...{
-    problemDefinition,
-    mathematicalFormulation,
-    solutionResult,
-    solutionValidation,
-    sensitivityAnalysis,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review results
+  await ctx.breakpoint({
     question: `Linear programming optimization complete. Optimal value: ${solutionResult.optimalValue}. Review recommendations?`,
     title: 'LP Optimization Results',
     context: {
@@ -188,15 +150,9 @@ export async function process(inputs, ctx) {
         bindingConstraints: sensitivityAnalysis.bindingConstraints
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,7 +188,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task 1: Problem Definition
+
+// Task 1: Problem Definition
 export const problemDefinitionTask = defineTask('problem-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define LP problem structure and scope',

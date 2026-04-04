@@ -63,7 +63,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Team Structure and Role Definition');
 
-  let teamStructure = await ctx.task(teamStructureTask, {
+  const teamStructure = await ctx.task(teamStructureTask, {
     projectName,
     teamSize,
     scopeDefinition,
@@ -73,18 +73,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...teamStructure.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      teamStructure = await ctx.task(teamStructureTask, { ...{
-    projectName,
-    teamSize,
-    scopeDefinition,
-    targetPlatforms,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Team structure review
+  await ctx.breakpoint({
     question: `Team structure defined for ${projectName}. ${teamStructure.totalHeadcount} total roles across ${teamStructure.disciplineCount} disciplines. Review team org chart?`,
     title: 'Team Structure Review',
     context: {
@@ -94,15 +84,9 @@ export async function process(inputs, ctx) {
       disciplines: teamStructure.disciplines,
       keyRoles: teamStructure.keyRoles,
       files: [{ path: teamStructure.orgChartPath, format: 'svg', label: 'Org Chart' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: MILESTONE PLANNING
   // ============================================================================
@@ -158,7 +142,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Cross-Discipline Dependency Mapping');
 
-  let dependencyMapping = await ctx.task(dependencyMappingTask, {
+  const dependencyMapping = await ctx.task(dependencyMappingTask, {
     projectName,
     detailedSchedule,
     teamStructure,
@@ -168,17 +152,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...dependencyMapping.artifacts);
 
   // Quality Gate: Dependency review
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        dependencyMapping = await ctx.task(dependencyMappingTask, { ...{
-    projectName,
-    detailedSchedule,
-    teamStructure,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (dependencyMapping.criticalDependencies.length > 0) {
+    await ctx.breakpoint({
       question: `${dependencyMapping.criticalDependencies.length} critical dependencies identified in ${projectName}. Review dependency map and mitigation strategies?`,
       title: 'Critical Dependencies Review',
       context: {
@@ -187,15 +162,9 @@ export async function process(inputs, ctx) {
         bottlenecks: dependencyMapping.bottlenecks,
         mitigations: dependencyMapping.mitigations,
         files: [{ path: dependencyMapping.dependencyMapPath, format: 'svg', label: 'Dependency Map' }]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: RISK ASSESSMENT
@@ -253,7 +222,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Production Plan Documentation');
 
-  let productionPlanDoc = await ctx.task(productionPlanDocTask, {
+  const productionPlanDoc = await ctx.task(productionPlanDocTask, {
     projectName,
     scopeDefinition,
     teamStructure,
@@ -269,24 +238,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...productionPlanDoc.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      productionPlanDoc = await ctx.task(productionPlanDocTask, { ...{
-    projectName,
-    scopeDefinition,
-    teamStructure,
-    milestonePlanning,
-    detailedSchedule,
-    resourceAllocation,
-    dependencyMapping,
-    riskAssessment,
-    communicationPlan,
-    trackingSetup,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Production Planning complete for ${projectName}. ${milestonePlanning.milestoneCount} milestones, ${detailedSchedule.totalTasks} tasks, ${riskAssessment.riskCount} identified risks. Ready to begin production?`,
     title: 'Production Planning Complete',
     context: {
@@ -306,15 +259,9 @@ export async function process(inputs, ctx) {
         { path: detailedSchedule.schedulePath, format: 'gantt', label: 'Project Schedule' },
         { path: riskAssessment.riskRegisterPath, format: 'xlsx', label: 'Risk Register' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -357,7 +304,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

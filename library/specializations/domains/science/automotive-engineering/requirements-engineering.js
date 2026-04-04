@@ -46,21 +46,15 @@ export async function process(inputs, ctx) {
       requirementsDatabase: null
     };
   }
+
   // Phase 2: Requirements Analysis and Decomposition
-  let requirementsDecomposition = await ctx.task(requirementsDecompositionTask, {
+  const requirementsDecomposition = await ctx.task(requirementsDecompositionTask, {
     projectName,
     stakeholderRequirements: stakeholderRequirements.requirements
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      requirementsDecomposition = await ctx.task(requirementsDecompositionTask, { ...{
-    projectName,
-    stakeholderRequirements: stakeholderRequirements.requirements
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review decomposed requirements
+  await ctx.breakpoint({
     question: `Review requirements decomposition for ${projectName}. ${requirementsDecomposition.systemRequirements?.length || 0} system-level requirements derived. Approve decomposition?`,
     title: 'Requirements Decomposition Review',
     context: {
@@ -72,15 +66,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: requirementsDecomposition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Traceability Links Establishment
   const traceabilityLinks = await ctx.task(traceabilityLinksTask, {
     projectName,
@@ -96,7 +84,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Requirements Validation
-  let requirementsValidation = await ctx.task(requirementsValidationTask, {
+  const requirementsValidation = await ctx.task(requirementsValidationTask, {
     projectName,
     stakeholderRequirements: stakeholderRequirements.requirements,
     systemRequirements: requirementsDecomposition.systemRequirements,
@@ -104,32 +92,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Requirements validation
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        requirementsValidation = await ctx.task(requirementsValidationTask, { ...{
-    projectName,
-    stakeholderRequirements: stakeholderRequirements.requirements,
-    systemRequirements: requirementsDecomposition.systemRequirements,
-    traceabilityLinks: traceabilityLinks.links
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (requirementsValidation.issues && requirementsValidation.issues.length > 0) {
+    await ctx.breakpoint({
       question: `Requirements validation identified ${requirementsValidation.issues.length} issues. Review and resolve before proceeding?`,
       title: 'Requirements Validation Issues',
       context: {
         runId: ctx.runId,
         validationIssues: requirementsValidation.issues,
         recommendation: 'Resolve critical issues before design phase'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Change Impact Analysis Framework
   const changeFramework = await ctx.task(changeFrameworkTask, {
@@ -139,7 +112,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Requirements Database Generation
-  let requirementsDatabase = await ctx.task(requirementsDatabaseTask, {
+  const requirementsDatabase = await ctx.task(requirementsDatabaseTask, {
     projectName,
     stakeholderRequirements: stakeholderRequirements.requirements,
     systemRequirements: requirementsDecomposition.systemRequirements,
@@ -148,19 +121,8 @@ export async function process(inputs, ctx) {
     validationStatus: requirementsValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      requirementsDatabase = await ctx.task(requirementsDatabaseTask, { ...{
-    projectName,
-    stakeholderRequirements: stakeholderRequirements.requirements,
-    systemRequirements: requirementsDecomposition.systemRequirements,
-    traceabilityLinks: traceabilityLinks.links,
-    complianceMapping: complianceMapping.mapping,
-    validationStatus: requirementsValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Requirements baseline approval
+  await ctx.breakpoint({
     question: `Requirements Engineering complete for ${projectName}. ${requirementsDatabase.totalRequirements} requirements baselined. Approve requirements baseline?`,
     title: 'Requirements Baseline Approval',
     context: {
@@ -172,15 +134,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/traceability-matrix.json`, format: 'json', content: traceabilityLinks },
         { path: `artifacts/compliance-matrix.json`, format: 'json', content: complianceMapping }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -198,7 +154,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const stakeholderElicitationTask = defineTask('stakeholder-elicitation', (args, taskCtx) => ({
   kind: 'agent',

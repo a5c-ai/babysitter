@@ -59,21 +59,14 @@ export async function process(inputs, ctx) {
       appName, platforms, apiBaseUrl, authMethod, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `REST API integration complete for ${appName}. Ready to test API calls?`,
     title: 'API Integration Review',
-    context: { runId: ctx.runId, appName, apiBaseUrl, authMethod },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, apiBaseUrl, authMethod }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

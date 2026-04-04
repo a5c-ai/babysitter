@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Loading and validating training data');
-  let dataLoad = await ctx.task(dataLoadingValidationTask, {
+  const dataLoad = await ctx.task(dataLoadingValidationTask, {
     projectName,
     trainingData,
     validationData,
@@ -110,19 +110,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataLoad.artifacts);
 
   // Quality Gate: Check data quality scores
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        dataLoad = await ctx.task(dataLoadingValidationTask, { ...{
-    projectName,
-    trainingData,
-    validationData,
-    testData,
-    modelType,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (dataLoad.dataQuality.trainingScore < 70 || dataLoad.dataQuality.validationScore < 70) {
+    await ctx.breakpoint({
       question: `Data quality concerns detected. Training: ${dataLoad.dataQuality.trainingScore}/100, Validation: ${dataLoad.dataQuality.validationScore}/100. Proceed with training?`,
       title: 'Data Quality Warning',
       context: {
@@ -130,22 +119,16 @@ export async function process(inputs, ctx) {
         dataQuality: dataLoad.dataQuality,
         recommendation: 'Consider running EDA pipeline and data cleaning before training',
         files: dataLoad.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: BASELINE MODEL ESTABLISHMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Training baseline model');
-  let baselineResult = await ctx.task(baselineModelTrainingTask, {
+  const baselineResult = await ctx.task(baselineModelTrainingTask, {
     projectName,
     modelType,
     trainingData: dataLoad.processedTrainingData,
@@ -170,20 +153,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Baseline ${targetMetric}: ${bestPerformance.toFixed(4)}`);
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      baselineResult = await ctx.task(baselineModelTrainingTask, { ...{
-    projectName,
-    modelType,
-    trainingData: dataLoad.processedTrainingData,
-    validationData: dataLoad.processedValidationData,
-    targetMetric,
-    randomSeed,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review baseline results
+  await ctx.breakpoint({
     question: `Baseline model trained. ${targetMetric}: ${bestPerformance.toFixed(4)}/${targetPerformance}. Review results and approve to proceed with hyperparameter tuning?`,
     title: 'Baseline Model Review',
     context: {
@@ -193,15 +164,9 @@ export async function process(inputs, ctx) {
         metrics: baselineResult.metrics
       },
       files: baselineResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: HYPERPARAMETER SEARCH SPACE DEFINITION
   // ============================================================================
@@ -267,7 +232,7 @@ export async function process(inputs, ctx) {
     });
 
     // Task 5.4: Log experiment to tracking backend
-    let experimentLog = await ctx.task(experimentLoggingTask, {
+    const experimentLog = await ctx.task(experimentLoggingTask, {
       projectName,
       experimentId: envSetup.experimentId,
       experimentTrackingBackend,
@@ -315,28 +280,16 @@ export async function process(inputs, ctx) {
       noImprovementCount++;
       ctx.log('info', `No improvement (${noImprovementCount}/${earlyStoppingPatience})`);
     }
-  // Check convergence
+
+    // Check convergence
     if (bestPerformance >= targetPerformance) {
       ctx.log('info', `Target performance achieved! ${targetMetric}: ${bestPerformance.toFixed(4)} >= ${targetPerformance}`);
       break;
     }
-  // Periodic review breakpoint
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          experimentLog = await ctx.task(experimentLoggingTask, { ...{
-      projectName,
-      experimentId: envSetup.experimentId,
-      experimentTrackingBackend,
-      iteration: currentIteration,
-      hyperparameters: hyperparamConfig.hyperparameters,
-      metrics: evaluation.metrics,
-      model: trainingResult.model,
-      artifacts: trainingResult.artifacts,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+
+    // Periodic review breakpoint
+    if (currentIteration % 5 === 0 && currentIteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${currentIteration} complete. Best ${targetMetric}: ${bestPerformance.toFixed(4)}/${targetPerformance}. No improvement: ${noImprovementCount}/${earlyStoppingPatience}. Continue training?`,
         title: `Training Progress - Iteration ${currentIteration}`,
         context: {
@@ -350,16 +303,11 @@ export async function process(inputs, ctx) {
             recentResults: experimentResults.slice(-5)
           },
           files: artifacts.filter(a => a.iteration === currentIteration).map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   const converged = bestPerformance >= targetPerformance;
   const stoppedEarly = noImprovementCount >= earlyStoppingPatience;
 
@@ -370,7 +318,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Cross-validating best model');
-  let crossValidation = await ctx.task(crossValidationTask, {
+  const crossValidation = await ctx.task(crossValidationTask, {
     projectName,
     modelType,
     trainingData: dataLoad.processedTrainingData,
@@ -388,21 +336,8 @@ export async function process(inputs, ctx) {
   const cvStd = crossValidation.metrics[targetMetric].std;
   const cvStable = cvStd < 0.05; // Standard deviation threshold
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        crossValidation = await ctx.task(crossValidationTask, { ...{
-    projectName,
-    modelType,
-    trainingData: dataLoad.processedTrainingData,
-    bestModelConfig: bestModel.hyperparameters,
-    targetMetric,
-    folds: crossValidationFolds,
-    randomSeed,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (!cvStable) {
+    await ctx.breakpoint({
       question: `Cross-validation shows high variance. ${targetMetric} mean: ${cvMean.toFixed(4)} ± ${cvStd.toFixed(4)}. Model may not generalize well. Proceed?`,
       title: 'Cross-Validation Stability Warning',
       context: {
@@ -410,15 +345,9 @@ export async function process(inputs, ctx) {
         crossValidation: crossValidation.metrics,
         recommendation: 'Consider collecting more data, feature engineering, or regularization',
         files: crossValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: TEST SET EVALUATION (if provided)
@@ -444,21 +373,8 @@ export async function process(inputs, ctx) {
     const performanceDrop = validationPerformance - testPerformance;
     const dropPercent = (performanceDrop / validationPerformance) * 100;
 
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          crossValidation = await ctx.task(crossValidationTask, { ...{
-    projectName,
-    modelType,
-    trainingData: dataLoad.processedTrainingData,
-    bestModelConfig: bestModel.hyperparameters,
-    targetMetric,
-    folds: crossValidationFolds,
-    randomSeed,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (dropPercent > 10) {
+      await ctx.breakpoint({
         question: `Significant performance drop on test set detected. Validation: ${validationPerformance.toFixed(4)}, Test: ${testPerformance.toFixed(4)} (-${dropPercent.toFixed(2)}%). Model may be overfitting. Proceed?`,
         title: 'Overfitting Warning',
         context: {
@@ -470,16 +386,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Consider regularization, more data, or simpler model architecture',
           files: testEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 8: MODEL PERFORMANCE ANALYSIS
   // ============================================================================
@@ -539,7 +450,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Final model review');
-  let finalReview = await ctx.task(finalModelReviewTask, {
+  const finalReview = await ctx.task(finalModelReviewTask, {
     projectName,
     modelType,
     bestModel,
@@ -556,25 +467,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(finalModelReviewTask, { ...{
-    projectName,
-    modelType,
-    bestModel,
-    experimentResults,
-    crossValidation,
-    testEvaluation,
-    performanceAnalysis,
-    targetMetric,
-    targetPerformance,
-    converged,
-    stoppedEarly,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Deployment approval
+  await ctx.breakpoint({
     question: `Training complete. Best ${targetMetric}: ${bestPerformance.toFixed(4)}/${targetPerformance}. ${finalReview.verdict}. Approve model for deployment?`,
     title: 'Final Model Approval',
     context: {
@@ -597,15 +491,9 @@ export async function process(inputs, ctx) {
         { path: performanceAnalysis.reportPath, format: 'markdown', label: 'Performance Analysis' },
         { path: finalReview.reportPath, format: 'markdown', label: 'Final Review' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -654,7 +542,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

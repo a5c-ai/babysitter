@@ -54,6 +54,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'security-compliance/security-logging-monitoring', timestamp: ctx.now() }
     };
   }
+
   const startTime = ctx.now();
   const artifacts = [];
   let siemConfigured = false;
@@ -96,7 +97,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Integrating Log Sources with SIEM');
 
-  let logSourceIntegration = await ctx.task(logSourceIntegrationTask, {
+  const logSourceIntegration = await ctx.task(logSourceIntegrationTask, {
     logSources,
     siemPlatform,
     siemSetup,
@@ -111,18 +112,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Log Source Integration Complete - Integrated: ${integratedSources}/${logSources.length}`);
 
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        logSourceIntegration = await ctx.task(logSourceIntegrationTask, { ...{
-    logSources,
-    siemPlatform,
-    siemSetup,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (failedSources.length > 0) {
+    await ctx.breakpoint({
       question: `Log source integration incomplete. ${failedSources.length} source(s) failed: ${failedSources.join(', ')}. Continue without these sources or retry?`,
       title: 'Log Source Integration Issues',
       context: {
@@ -133,15 +124,9 @@ export async function process(inputs, ctx) {
         failureReasons: logSourceIntegration.failureReasons,
         recommendation: 'Review integration errors and ensure proper authentication and network connectivity',
         files: logSourceIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: LOG PARSING AND NORMALIZATION
@@ -181,7 +166,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Creating Correlation Rules and Detection Logic');
 
-  let correlationRules = await ctx.task(correlationRulesTask, {
+  const correlationRules = await ctx.task(correlationRulesTask, {
     logSources,
     complianceFrameworks,
     threatDetection,
@@ -195,18 +180,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Correlation Rules Created - Total: ${totalRules}, Critical: ${correlationRules.criticalRules}, High: ${correlationRules.highPriorityRules}`);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      correlationRules = await ctx.task(correlationRulesTask, { ...{
-    logSources,
-    complianceFrameworks,
-    threatDetection,
-    siemPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Quality Gate: Review critical detection rules
+  await ctx.breakpoint({
     question: `${totalRules} correlation rules created (${correlationRules.criticalRules} critical, ${correlationRules.highPriorityRules} high priority). Review detection logic before enabling?`,
     title: 'Correlation Rules Review',
     context: {
@@ -218,15 +193,9 @@ export async function process(inputs, ctx) {
       mitreAttackCoverage: correlationRules.mitreAttackCoverage,
       recommendation: 'Review and tune rules to minimize false positives',
       files: correlationRules.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: THREAT DETECTION AND BEHAVIORAL ANALYTICS
   // ============================================================================
@@ -249,13 +218,14 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 6: Advanced threat detection disabled, using basic correlation rules only');
   }
+
   // ============================================================================
   // PHASE 7: ALERTING AND NOTIFICATION CONFIGURATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Configuring Alerting and Notifications');
 
-  let alertingSetup = await ctx.task(alertingNotificationTask, {
+  const alertingSetup = await ctx.task(alertingNotificationTask, {
     correlationRules,
     threatDetectionSetup,
     alertingChannels,
@@ -290,18 +260,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Automated Response Configured - Playbooks: ${automatedResponseSetup.playbooksCreated}, Actions: ${automatedResponseSetup.automatedActions}`);
 
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        alertingSetup = await ctx.task(alertingNotificationTask, { ...{
-    correlationRules,
-    threatDetectionSetup,
-    alertingChannels,
-    siemPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+    // Quality Gate: Review automated response actions
+    await ctx.breakpoint({
       question: `Automated response configured with ${automatedResponseSetup.playbooksCreated} playbooks and ${automatedResponseSetup.automatedActions} automated actions. Review actions before enabling in production?`,
       title: 'Automated Response Review',
       context: {
@@ -311,17 +271,12 @@ export async function process(inputs, ctx) {
         actionTypes: automatedResponseSetup.actionTypes,
         recommendation: 'Test automated responses in non-production environment first',
         files: automatedResponseSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } } else {
+      }
+    });
+  } else {
     ctx.log('info', 'Phase 8: Automated response disabled, manual incident response required');
   }
+
   // ============================================================================
   // PHASE 9: COMPLIANCE LOGGING AND AUDIT TRAILS
   // ============================================================================
@@ -381,6 +336,7 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 11: Dashboard creation skipped');
   }
+
   // ============================================================================
   // PHASE 12: LOG INTEGRITY AND TAMPER DETECTION
   // ============================================================================
@@ -459,7 +415,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Testing Security Logging and Monitoring');
 
-  let testing = await ctx.task(testingValidationTask, {
+  const testing = await ctx.task(testingValidationTask, {
     logSources,
     correlationRules,
     alertingSetup,
@@ -474,19 +430,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Testing Complete - Total Tests: ${testResults.totalTests}, Passed: ${testResults.passed}, Failed: ${testResults.failed}`);
 
-      let lastFeedback_phase16Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase16Review) {
-        testing = await ctx.task(testingValidationTask, { ...{
-    logSources,
-    correlationRules,
-    alertingSetup,
-    automatedResponseSetup,
-    siemPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
-      }
-  const phase16Review = await ctx.breakpoint({
+  if (testResults.failed > 0) {
+    await ctx.breakpoint({
       question: `Security logging testing identified ${testResults.failed} failed test(s). Review failures: ${testing.failedTests.join(', ')}. Address issues before deployment?`,
       title: 'Testing Validation Issues',
       context: {
@@ -498,15 +443,9 @@ export async function process(inputs, ctx) {
         failureDetails: testing.failureDetails,
         recommendation: 'Address critical failures before production deployment',
         files: testing.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase16Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase16Review.approved) break;
-      lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 17: OPERATIONAL RUNBOOKS AND DOCUMENTATION
@@ -534,7 +473,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Generating Comprehensive Security Logging Report');
 
-  let securityReport = await ctx.task(securityReportGenerationTask, {
+  const securityReport = await ctx.task(securityReportGenerationTask, {
     siemSetup,
     logSourceIntegration,
     correlationRules,
@@ -549,23 +488,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      securityReport = await ctx.task(securityReportGenerationTask, { ...{
-    siemSetup,
-    logSourceIntegration,
-    correlationRules,
-    alertingSetup,
-    automatedResponseSetup,
-    complianceValidation,
-    retentionPolicies,
-    dashboards,
-    testResults,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete setup
+  await ctx.breakpoint({
     question: `Security Logging and Monitoring setup complete. SIEM configured: ${siemConfigured}, Log sources: ${integratedSources}, Correlation rules: ${totalRules}, Alerts: ${alertsConfigured}. Compliance: ${complianceStatus.compliant ? 'COMPLIANT' : 'NON-COMPLIANT'}. Deploy to production?`,
     title: 'Security Logging and Monitoring Complete',
     context: {
@@ -593,15 +517,9 @@ export async function process(inputs, ctx) {
         testsPassed: testResults.passed,
         testsFailed: testResults.failed
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -673,7 +591,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -967,7 +886,7 @@ export const correlationRulesTask = defineTask('correlation-rules', (args, taskC
         mitreAttackCoverage: {
           type: 'object',
           properties: {
-            tacticsC covered: { type: 'number' },
+            tacticsCovered: { type: 'number' },
             techniquesCovered: { type: 'number' },
             coveragePercentage: { type: 'number' }
           }

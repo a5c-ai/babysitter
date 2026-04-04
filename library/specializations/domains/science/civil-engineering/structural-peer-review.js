@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Member Design Review
   ctx.log('info', 'Reviewing member designs');
-  let memberReview = await ctx.task(memberReviewTask, {
+  const memberReview = await ctx.task(memberReviewTask, {
     projectId,
     calculationPackage,
     designDocuments,
@@ -91,17 +91,8 @@ export async function process(inputs, ctx) {
   const totalComments = codeCompliance.comments.length +
                         loadReview.comments.length +
                         analysisReview.comments.length +
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      memberReview = await ctx.task(memberReviewTask, { ...{
-    projectId,
-    calculationPackage,
-    designDocuments,
-    outputDir
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+                        memberReview.comments.length;
+  await ctx.breakpoint({
     question: `Peer review complete for ${projectId}. Total comments: ${totalComments}. Review findings?`,
     title: 'Structural Peer Review Summary',
     context: {
@@ -114,15 +105,9 @@ export async function process(inputs, ctx) {
         memberDesignComments: memberReview.comments.length,
         criticalIssues: codeCompliance.criticalIssues + analysisReview.criticalIssues
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Task 6: Connection Review
   ctx.log('info', 'Reviewing connections');
   const connectionReview = await ctx.task(connectionReviewTask, {
@@ -203,7 +188,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task 1: Scope Definition
+
+// Task 1: Scope Definition
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define peer review scope',

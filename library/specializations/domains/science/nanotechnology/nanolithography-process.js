@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Process Design
-  let processDesign = await ctx.task(processDesignTask, {
+  const processDesign = await ctx.task(processDesignTask, {
     lithographyType,
     targetFeatures,
     substrateType,
@@ -51,17 +51,9 @@ export async function process(inputs, ctx) {
       recommendations: processDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      processDesign = await ctx.task(processDesignTask, { ...{
-    lithographyType,
-    targetFeatures,
-    substrateType,
-    patternDesign
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review process design
+  await ctx.breakpoint({
     question: `Review ${lithographyType} lithography process design. Target CD: ${targetFeatures.minimumCD}${targetFeatures.units}. Approve to proceed?`,
     title: 'Lithography Process Design Review',
     context: {
@@ -74,15 +66,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: processDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Resist Processing Development
   const resistProcessing = await ctx.task(resistProcessingTask, {
     lithographyType,
@@ -112,7 +98,7 @@ export async function process(inputs, ctx) {
     });
 
     // Exposure simulation/test
-    let exposureResults = await ctx.task(exposureTestTask, {
+    const exposureResults = await ctx.task(exposureTestTask, {
       exposureParameters: exposureOptimization.optimizedParameters,
       lithographyType,
       patternDesign,
@@ -132,17 +118,8 @@ export async function process(inputs, ctx) {
 
     currentExposureParams = exposureOptimization.optimizedParameters;
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          exposureResults = await ctx.task(exposureTestTask, { ...{
-      exposureParameters: exposureOptimization.optimizedParameters,
-      lithographyType,
-      patternDesign,
-      resistProcessing
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (cdDeviation > cdTolerance && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: CD achieved = ${cdAchieved.toFixed(1)}nm (deviation: ${(cdDeviation * 100).toFixed(1)}%). Continue optimization?`,
         title: 'CD Optimization Progress',
         context: {
@@ -151,16 +128,11 @@ export async function process(inputs, ctx) {
           targetCD: targetFeatures.minimumCD,
           achievedCD: cdAchieved,
           cdDeviation
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 4: Pattern Transfer Development
   const patternTransfer = await ctx.task(patternTransferTask, {
     lithographyType,
@@ -171,7 +143,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Metrology and CD Verification
-  let metrologyValidation = await ctx.task(metrologyValidationTask, {
+  const metrologyValidation = await ctx.task(metrologyValidationTask, {
     targetFeatures,
     achievedResults: optimizationHistory[optimizationHistory.length - 1],
     patternTransfer,
@@ -179,17 +151,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: CD must meet specifications
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        metrologyValidation = await ctx.task(metrologyValidationTask, { ...{
-    targetFeatures,
-    achievedResults: optimizationHistory[optimizationHistory.length - 1],
-    patternTransfer,
-    cdTolerance
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!metrologyValidation.cdWithinSpec) {
+    await ctx.breakpoint({
       question: `CD verification failed. Achieved: ${metrologyValidation.measuredCD.toFixed(1)}nm vs Target: ${targetFeatures.minimumCD}nm. Review and determine action?`,
       title: 'CD Specification Warning',
       context: {
@@ -197,15 +160,9 @@ export async function process(inputs, ctx) {
         measuredCD: metrologyValidation.measuredCD,
         targetCD: targetFeatures.minimumCD,
         recommendations: metrologyValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Defect Analysis
   const defectAnalysis = await ctx.task(defectAnalysisTask, {
@@ -225,6 +182,7 @@ export async function process(inputs, ctx) {
       overlayTolerance
     });
   }
+
   // Phase 8: Process Window Analysis
   const processWindow = await ctx.task(processWindowAnalysisTask, {
     currentExposureParams,
@@ -234,7 +192,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Recipe Documentation
-  let recipeDocumentation = await ctx.task(recipeDocumentationTask, {
+  const recipeDocumentation = await ctx.task(recipeDocumentationTask, {
     lithographyType,
     targetFeatures,
     resistProcessing,
@@ -245,21 +203,8 @@ export async function process(inputs, ctx) {
     optimizationHistory
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      recipeDocumentation = await ctx.task(recipeDocumentationTask, { ...{
-    lithographyType,
-    targetFeatures,
-    resistProcessing,
-    optimizedExposure: currentExposureParams,
-    patternTransfer,
-    metrologyValidation,
-    processWindow,
-    optimizationHistory
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Process approval
+  await ctx.breakpoint({
     question: `Lithography process development complete. CD: ${cdAchieved.toFixed(1)}nm (${(cdDeviation * 100).toFixed(1)}% deviation). Defect density: ${defectAnalysis.defectDensity}/cm2. Approve process recipe?`,
     title: 'Lithography Process Approval',
     context: {
@@ -271,15 +216,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/process-recipe.md', format: 'markdown', content: recipeDocumentation.markdown },
         { path: 'artifacts/exposure-parameters.json', format: 'json', content: currentExposureParams }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     processRecipe: {
@@ -307,7 +246,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const processDesignTask = defineTask('process-design', (args, taskCtx) => ({
   kind: 'agent',

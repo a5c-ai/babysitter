@@ -38,22 +38,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Power-On Sequence Validation
-  let powerOnValidation = await ctx.task(powerOnValidationTask, {
+  const powerOnValidation = await ctx.task(powerOnValidationTask, {
     projectName,
     hardwareType,
     inspectionResults: prePowerInspection.results
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      powerOnValidation = await ctx.task(powerOnValidationTask, { ...{
-    projectName,
-    hardwareType,
-    inspectionResults: prePowerInspection.results
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review power-on results
+  await ctx.breakpoint({
     question: `Power-on validation for ${projectName}. Status: ${powerOnValidation.status}. Issues found: ${powerOnValidation.issues.length}. Proceed with functional testing?`,
     title: 'Power-On Review',
     context: {
@@ -65,41 +57,21 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: powerOnValidation
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Quality Gate: Power-on must pass
-      let lastFeedback_phase2Review2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review2) {
-        powerOnValidation = await ctx.task(powerOnValidationTask, { ...{
-    projectName,
-    hardwareType,
-    inspectionResults: prePowerInspection.results
-  }, feedback: lastFeedback_phase2Review2, attempt: attempt + 1 });
-      }
-  const phase2Review2 = await ctx.breakpoint({
+  if (!powerOnValidation.passed) {
+    await ctx.breakpoint({
       question: `Power-on validation failed with ${powerOnValidation.issues.length} issues. Debug required. Continue with debug phase?`,
       title: 'Power-On Failure',
       context: {
         runId: ctx.runId,
         issues: powerOnValidation.issues,
         recommendations: powerOnValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review2.approved) break;
-      lastFeedback_phase2Review2 = phase2Review2.response || phase2Review2.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 3: Clock and Reset Verification
   const clockResetVerification = await ctx.task(clockResetVerificationTask, {
@@ -116,22 +88,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Analog Subsystem Validation
-  let analogValidation = await ctx.task(analogValidationTask, {
+  const analogValidation = await ctx.task(analogValidationTask, {
     projectName,
     hardwareType,
     testPlan
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      analogValidation = await ctx.task(analogValidationTask, { ...{
-    projectName,
-    hardwareType,
-    testPlan
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review subsystem validation
+  await ctx.breakpoint({
     question: `Digital validation: ${digitalValidation.status}. Analog validation: ${analogValidation.status}. Proceed with performance characterization?`,
     title: 'Subsystem Validation Review',
     context: {
@@ -142,15 +106,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase4-digital.json`, format: 'json', content: digitalValidation },
         { path: `artifacts/phase5-analog.json`, format: 'json', content: analogValidation }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Performance Characterization
   const performanceCharacterization = await ctx.task(performanceCharacterizationTask, {
     projectName,
@@ -161,7 +119,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Environmental and Stress Testing
-  let stressTesting = await ctx.task(stressTestingTask, {
+  const stressTesting = await ctx.task(stressTestingTask, {
     projectName,
     hardwareType,
     performanceBaseline: performanceCharacterization.baseline,
@@ -177,17 +135,8 @@ export async function process(inputs, ctx) {
     ...stressTesting.issues
   ];
 
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        stressTesting = await ctx.task(stressTestingTask, { ...{
-    projectName,
-    hardwareType,
-    performanceBaseline: performanceCharacterization.baseline,
-    debugLevel
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (allIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Total ${allIssues.length} issues found during validation. Root cause analysis required?`,
       title: 'Issues Found',
       context: {
@@ -195,18 +144,12 @@ export async function process(inputs, ctx) {
         issueCount: allIssues.length,
         criticalIssues: allIssues.filter(i => i.severity === 'critical'),
         recommendations: stressTesting.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 8: Generate Validation Report
-  let validationReport = await ctx.task(validationReportTask, {
+  const validationReport = await ctx.task(validationReportTask, {
     projectName,
     bringUp: {
       prePower: prePowerInspection,
@@ -222,26 +165,8 @@ export async function process(inputs, ctx) {
     issues: allIssues
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      validationReport = await ctx.task(validationReportTask, { ...{
-    projectName,
-    bringUp: {
-      prePower: prePowerInspection,
-      powerOn: powerOnValidation,
-      clockReset: clockResetVerification
-    },
-    functional: {
-      digital: digitalValidation,
-      analog: analogValidation
-    },
-    performance: performanceCharacterization,
-    stress: stressTesting,
-    issues: allIssues
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Validation Approval
+  await ctx.breakpoint({
     question: `Hardware validation complete for ${projectName}. Overall status: ${validationReport.overallStatus}. Approve validation?`,
     title: 'Validation Approval',
     context: {
@@ -252,15 +177,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/validation-results.json`, format: 'json', content: { bringUp: powerOnValidation, functional: digitalValidation } },
         { path: `artifacts/validation-report.md`, format: 'markdown', content: validationReport.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -286,7 +205,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const prePowerInspectionTask = defineTask('pre-power-inspection', (args, taskCtx) => ({
   kind: 'agent',

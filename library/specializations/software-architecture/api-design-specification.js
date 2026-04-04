@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing requirements and modeling domain');
 
-  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     apiType,
     apiPurpose,
@@ -97,21 +97,8 @@ export async function process(inputs, ctx) {
            requirementsAnalysis.requirementCategories[cat].length === 0
   );
 
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
-    projectName,
-    apiType,
-    apiPurpose,
-    targetAudience,
-    domainContext,
-    existingAPIs,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (missingCategories.length > 0) {
+    await ctx.breakpoint({
       question: `Requirements analysis incomplete. Missing: ${missingCategories.join(', ')}. Review and supplement requirements?`,
       title: 'Requirements Completeness Check',
       context: {
@@ -120,15 +107,9 @@ export async function process(inputs, ctx) {
         identifiedRequirements: requirementsAnalysis.requirementCategories,
         recommendation: 'Ensure all core requirement categories are addressed',
         files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: API ARCHITECTURE DESIGN
@@ -136,7 +117,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing API architecture and selecting patterns');
 
-  let architectureDesign = await ctx.task(apiArchitectureDesignTask, {
+  const architectureDesign = await ctx.task(apiArchitectureDesignTask, {
     projectName,
     apiType,
     requirementsAnalysis,
@@ -147,19 +128,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...architectureDesign.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      architectureDesign = await ctx.task(apiArchitectureDesignTask, { ...{
-    projectName,
-    apiType,
-    requirementsAnalysis,
-    constraints,
-    targetAudience,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Breakpoint: Review architecture design
+  await ctx.breakpoint({
     question: `Review API architecture for ${projectName}. Architecture pattern: ${architectureDesign.architecturePattern}. Approve to proceed with detailed design?`,
     title: 'API Architecture Review',
     context: {
@@ -176,15 +146,9 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Architecture Documentation'
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: RESOURCE MODELING AND DATA DESIGN
   // ============================================================================
@@ -212,6 +176,7 @@ export async function process(inputs, ctx) {
       details: resourceModeling
     };
   }
+
   // ============================================================================
   // PHASE 4: ENDPOINT DESIGN (PARALLEL)
   // ============================================================================
@@ -285,7 +250,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Designing authentication and authorization mechanisms');
 
-  let authDesign = await ctx.task(authenticationAuthorizationDesignTask, {
+  const authDesign = await ctx.task(authenticationAuthorizationDesignTask, {
     projectName,
     apiType,
     targetAudience,
@@ -298,20 +263,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...authDesign.artifacts);
 
   // Quality Gate: Security review
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        authDesign = await ctx.task(authenticationAuthorizationDesignTask, { ...{
-    projectName,
-    apiType,
-    targetAudience,
-    constraints,
-    endpointDesigns,
-    architectureDesign,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (targetAudience !== 'internal' && authDesign.securityScore < 80) {
+    await ctx.breakpoint({
       question: `Security score: ${authDesign.securityScore}/100 for ${targetAudience} API. Below recommended threshold of 80. Review and strengthen security measures?`,
       title: 'Security Quality Gate',
       context: {
@@ -321,15 +274,9 @@ export async function process(inputs, ctx) {
         vulnerabilities: authDesign.securityGaps,
         recommendations: authDesign.securityRecommendations,
         files: authDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: RATE LIMITING AND THROTTLING DESIGN
@@ -371,7 +318,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating formal API specification');
 
-  let formalSpecification = await ctx.task(formalSpecificationTask, {
+  const formalSpecification = await ctx.task(formalSpecificationTask, {
     projectName,
     apiType,
     architectureDesign,
@@ -389,23 +336,8 @@ export async function process(inputs, ctx) {
   apiSpecification = formalSpecification.specification;
 
   // Quality Gate: Specification validation
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        formalSpecification = await ctx.task(formalSpecificationTask, { ...{
-    projectName,
-    apiType,
-    architectureDesign,
-    endpointDesigns,
-    schemaDesign,
-    errorHandlingDesign,
-    authDesign,
-    rateLimitingDesign,
-    versioningStrategy,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (!formalSpecification.validationPassed) {
+    await ctx.breakpoint({
       question: `API specification validation failed with ${formalSpecification.validationErrors.length} errors. Review and fix validation issues?`,
       title: 'Specification Validation',
       context: {
@@ -414,15 +346,9 @@ export async function process(inputs, ctx) {
         validationWarnings: formalSpecification.validationWarnings,
         specificationPath: formalSpecification.specificationPath,
         files: formalSpecification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: API DOCUMENTATION GENERATION
@@ -507,7 +433,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Designing performance optimization and caching strategy');
 
-  let performanceDesign = await ctx.task(performanceDesignTask, {
+  const performanceDesign = await ctx.task(performanceDesignTask, {
     projectName,
     apiType,
     constraints,
@@ -520,19 +446,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Performance requirements
   const performanceMet = performanceDesign.estimatedP95Latency <= parseInt(constraints.latency);
-      let lastFeedback_phase15Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase15Review) {
-        performanceDesign = await ctx.task(performanceDesignTask, { ...{
-    projectName,
-    apiType,
-    constraints,
-    endpointDesigns,
-    architectureDesign,
-    outputDir
-  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
-      }
-  const phase15Review = await ctx.breakpoint({
+  if (!performanceMet) {
+    await ctx.breakpoint({
       question: `Estimated p95 latency: ${performanceDesign.estimatedP95Latency}ms exceeds target: ${constraints.latency}. Review performance design and optimization strategies?`,
       title: 'Performance Quality Gate',
       context: {
@@ -542,15 +457,9 @@ export async function process(inputs, ctx) {
         bottlenecks: performanceDesign.bottlenecks,
         optimizations: performanceDesign.optimizationStrategies,
         files: performanceDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase15Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase15Review.approved) break;
-      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 16: MONITORING AND OBSERVABILITY DESIGN
@@ -587,6 +496,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...migrationStrategy.artifacts);
   }
+
   // ============================================================================
   // PHASE 18: IMPLEMENTATION ROADMAP
   // ============================================================================
@@ -617,7 +527,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 19: Conducting comprehensive design review');
 
-  let designReview = await ctx.task(designReviewTask, {
+  const designReview = await ctx.task(designReviewTask, {
     projectName,
     apiType,
     targetAudience,
@@ -637,25 +547,8 @@ export async function process(inputs, ctx) {
   const designQualityScore = designReview.qualityScore;
 
   // Quality Gate: Overall design quality
-      let lastFeedback_phase19Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase19Review) {
-        designReview = await ctx.task(designReviewTask, { ...{
-    projectName,
-    apiType,
-    targetAudience,
-    requirementsAnalysis,
-    architectureDesign,
-    formalSpecification,
-    apiDocumentation,
-    performanceDesign,
-    authDesign,
-    implementationRoadmap,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase19Review, attempt: attempt + 1 });
-      }
-  const phase19Review = await ctx.breakpoint({
+  if (designQualityScore < 75) {
+    await ctx.breakpoint({
       question: `Design quality score: ${designQualityScore}/100. Below recommended threshold of 75. Review and address design issues?`,
       title: 'Design Quality Gate',
       context: {
@@ -665,39 +558,16 @@ export async function process(inputs, ctx) {
         recommendations: designReview.recommendations,
         verdict: designReview.verdict,
         files: designReview.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase19Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase19Review.approved) break;
-      lastFeedback_phase19Review = phase19Review.response || phase19Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 20: STAKEHOLDER APPROVAL
   // ============================================================================
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      designReview = await ctx.task(designReviewTask, { ...{
-    projectName,
-    apiType,
-    targetAudience,
-    requirementsAnalysis,
-    architectureDesign,
-    formalSpecification,
-    apiDocumentation,
-    performanceDesign,
-    authDesign,
-    implementationRoadmap,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: API Design Approval
+  await ctx.breakpoint({
     question: `API Design and Specification complete for ${projectName}. Quality Score: ${designQualityScore}/100, Total Endpoints: ${totalEndpoints}, API Type: ${apiType}. Approve design for implementation?`,
     title: 'Final API Design Review and Approval',
     context: {
@@ -724,15 +594,9 @@ export async function process(inputs, ctx) {
         { path: implementationRoadmap.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' },
         { path: designReview.reviewReportPath, format: 'markdown', label: 'Design Review Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -837,7 +701,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

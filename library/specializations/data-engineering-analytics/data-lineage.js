@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and profiling data sources');
 
-  let sourceDiscovery = await ctx.task(dataSourceDiscoveryTask, {
+  const sourceDiscovery = await ctx.task(dataSourceDiscoveryTask, {
     dataSources,
     lineageScope,
     outputDir
@@ -75,16 +75,10 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'data-engineering-analytics/data-lineage', timestamp: startTime }
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      sourceDiscovery = await ctx.task(dataSourceDiscoveryTask, { ...{
-    dataSources,
-    lineageScope,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  artifacts.push(...sourceDiscovery.artifacts);
+
+  await ctx.breakpoint({
     question: `Phase 1 Complete: Discovered ${sourceDiscovery.discoveredSources.length} data sources with ${sourceDiscovery.totalEntities} entities (tables, views, models). Proceed with lineage extraction?`,
     title: 'Data Source Discovery Complete',
     context: {
@@ -94,15 +88,9 @@ export async function process(inputs, ctx) {
       sourceTypes: sourceDiscovery.sourceTypes,
       entityBreakdown: sourceDiscovery.entityBreakdown,
       files: sourceDiscovery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: LINEAGE EXTRACTION (Table-Level)
   // ============================================================================
@@ -124,6 +112,7 @@ export async function process(inputs, ctx) {
     relationships.push(...result.relationships);
     artifacts.push(...result.artifacts);
   }
+
   const totalTableRelationships = relationships.length;
 
   ctx.log('info', `Extracted ${totalTableRelationships} table-level lineage relationships`);
@@ -152,16 +141,9 @@ export async function process(inputs, ctx) {
     }
 
     ctx.log('info', `Extracted ${columnLineageResults.reduce((sum, r) => sum + r.columnRelationships.length, 0)} column-level relationships`);
-    let lastFeedback_stepApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_stepApproval) {
-      sourceDiscovery = await ctx.task(dataSourceDiscoveryTask, { ...{
-    dataSources,
-    lineageScope,
-    outputDir
-  }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
-    }
-  const stepApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Phase 3 Complete: Extracted ${totalTableRelationships} table-level and ${includeColumnLineage ? columnLineageResults.reduce((sum, r) => sum + r.columnRelationships.length, 0) : 0} column-level lineage relationships. Review extraction results?`,
     title: 'Lineage Extraction Complete',
     context: {
@@ -170,15 +152,9 @@ export async function process(inputs, ctx) {
       columnRelationships: includeColumnLineage ? columnLineageResults.reduce((sum, r) => sum + r.columnRelationships.length, 0) : 0,
       relationshipTypes: [...new Set(relationships.map(r => r.type))],
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_stepApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (stepApproval.approved) break;
-    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: LINEAGE GRAPH CONSTRUCTION
   // ============================================================================
@@ -219,7 +195,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Validating lineage graph and performing quality checks');
 
-  let lineageValidation = await ctx.task(lineageValidationTask, {
+  const lineageValidation = await ctx.task(lineageValidationTask, {
     lineageGraph: graphEnrichment.enrichedGraph,
     relationships,
     sourceDiscovery,
@@ -231,6 +207,7 @@ export async function process(inputs, ctx) {
   if (lineageValidation.issues.length > 0) {
     ctx.log('warn', `Found ${lineageValidation.issues.length} lineage quality issues`);
   }
+
   // ============================================================================
   // PHASE 7: IMPACT ANALYSIS (if enabled)
   // ============================================================================
@@ -246,17 +223,9 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        lineageValidation = await ctx.task(lineageValidationTask, { ...{
-    lineageGraph: graphEnrichment.enrichedGraph,
-    relationships,
-    sourceDiscovery,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+    artifacts.push(...impactAnalysisResults.artifacts);
+
+    await ctx.breakpoint({
       question: `Phase 7 Complete: Impact analysis generated for ${impactAnalysisResults.entitiesAnalyzed} entities. Found ${impactAnalysisResults.criticalPaths} critical data paths and ${impactAnalysisResults.highImpactEntities} high-impact entities. Review impact analysis?`,
       title: 'Impact Analysis Complete',
       context: {
@@ -266,15 +235,9 @@ export async function process(inputs, ctx) {
         highImpactEntities: impactAnalysisResults.highImpactEntities,
         impactScores: impactAnalysisResults.topImpactScores,
         files: impactAnalysisResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: LINEAGE VISUALIZATION
@@ -361,6 +324,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...metadataIntegration.artifacts);
   }
+
   // ============================================================================
   // PHASE 13: LINEAGE API AND QUERY INTERFACE
   // ============================================================================
@@ -394,13 +358,14 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...autoRefreshSetup.artifacts);
   }
+
   // ============================================================================
   // PHASE 15: LINEAGE REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Generating final lineage analysis report');
 
-  let lineageReport = await ctx.task(lineageReportGenerationTask, {
+  const lineageReport = await ctx.task(lineageReportGenerationTask, {
     sourceDiscovery,
     lineageGraph: graphEnrichment.enrichedGraph,
     relationships,
@@ -417,23 +382,9 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // FINAL BREAKPOINT: REVIEW AND APPROVAL
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      lineageReport = await ctx.task(lineageReportGenerationTask, { ...{
-    sourceDiscovery,
-    lineageGraph: graphEnrichment.enrichedGraph,
-    relationships,
-    lineageValidation,
-    impactAnalysisResults,
-    dataFlowAnalysis,
-    dependencyMapping,
-    visualization,
-    queryInterface,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: `Data Lineage Mapping complete! Mapped ${sourceDiscovery.totalEntities} entities with ${relationships.length} relationships across ${sourceDiscovery.discoveredSources.length} sources. ${impactAnalysisEnabled ? `Impact analysis identified ${impactAnalysisResults.highImpactEntities} high-impact entities.` : ''} Review deliverables?`,
     title: 'Data Lineage Mapping Complete',
     context: {
@@ -472,15 +423,9 @@ export async function process(inputs, ctx) {
         { path: queryInterface.apiDocsPath, format: 'markdown', label: 'Query API Documentation' },
         { path: `${outputDir}/lineage-graph.json`, format: 'json', label: 'Lineage Graph Data' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -590,7 +535,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

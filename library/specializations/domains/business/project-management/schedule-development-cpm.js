@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Activity Definition
-  let activityDefinition = await ctx.task(activityDefinitionTask, {
+  const activityDefinition = await ctx.task(activityDefinitionTask, {
     projectName,
     wbs,
     constraints
@@ -46,16 +46,9 @@ export async function process(inputs, ctx) {
       schedule: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      activityDefinition = await ctx.task(activityDefinitionTask, { ...{
-    projectName,
-    wbs,
-    constraints
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review activity list
+  await ctx.breakpoint({
     question: `Defined ${activityDefinition.activities.length} activities for ${projectName}. Review and proceed with sequencing?`,
     title: 'Activity Definition Review',
     context: {
@@ -67,15 +60,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: activityDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Activity Sequencing
   const activitySequencing = await ctx.task(activitySequencingTask, {
     projectName,
@@ -106,37 +93,23 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Critical Path Analysis
-  let criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, {
+  const criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, {
     projectName,
     networkDiagram,
     durationEstimation
   });
 
   // Quality Gate: Critical path identified
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        criticalPathAnalysis = await ctx.task(criticalPathAnalysisTask, { ...{
-    projectName,
-    networkDiagram,
-    durationEstimation
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!criticalPathAnalysis.criticalPath || criticalPathAnalysis.criticalPath.length === 0) {
+    await ctx.breakpoint({
       question: `Critical path not identified for ${projectName}. Review network logic?`,
       title: 'Critical Path Warning',
       context: {
         runId: ctx.runId,
         recommendation: 'Check activity dependencies and network diagram'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Resource Leveling
   const resourceLeveling = await ctx.task(resourceLevelingTask, {
@@ -174,7 +147,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Schedule Documentation
-  let scheduleDocumentation = await ctx.task(scheduleDocumentationTask, {
+  const scheduleDocumentation = await ctx.task(scheduleDocumentationTask, {
     projectName,
     activityDefinition,
     activitySequencing,
@@ -190,22 +163,8 @@ export async function process(inputs, ctx) {
   const completenessScore = scheduleDocumentation.completenessScore || 0;
   const ready = completenessScore >= 80;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scheduleDocumentation = await ctx.task(scheduleDocumentationTask, { ...{
-    projectName,
-    activityDefinition,
-    activitySequencing,
-    durationEstimation,
-    criticalPathAnalysis,
-    resourceLeveling,
-    scheduleCompression,
-    milestoneDefinition,
-    scheduleBaseline
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Schedule development complete for ${projectName}. Duration: ${scheduleBaseline.totalDuration}. Critical path: ${criticalPathAnalysis.criticalPath.length} activities. Completeness: ${completenessScore}/100. Approve baseline?`,
     title: 'Schedule Baseline Approval',
     context: {
@@ -218,15 +177,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/schedule-baseline.json`, format: 'json', content: scheduleBaseline },
         { path: `artifacts/schedule-document.md`, format: 'markdown', content: scheduleDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -256,7 +209,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const activityDefinitionTask = defineTask('activity-definition', (args, taskCtx) => ({
   kind: 'agent',

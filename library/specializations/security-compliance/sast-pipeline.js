@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing technology stack and selecting SAST tools');
 
-  let toolSelection = await ctx.task(sastToolSelectionTask, {
+  const toolSelection = await ctx.task(sastToolSelectionTask, {
     projectName,
     repositoryUrl,
     techStack,
@@ -86,19 +86,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...toolSelection.artifacts);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      toolSelection = await ctx.task(sastToolSelectionTask, { ...{
-    projectName,
-    repositoryUrl,
-    techStack,
-    sastTools,
-    cicdPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Tool selection must be validated
+  await ctx.breakpoint({
     question: `Phase 1 Complete: Selected ${toolSelection.selectedTools.length} SAST tool(s) for ${techStack.language}. Tools: ${toolSelection.selectedTools.map(t => t.name).join(', ')}. Proceed with configuration?`,
     title: 'SAST Tool Selection Review',
     context: {
@@ -108,15 +97,9 @@ export async function process(inputs, ctx) {
       toolCapabilities: toolSelection.capabilities,
       estimatedSetupTime: toolSelection.estimatedSetupTime,
       files: toolSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: SAST TOOL CONFIGURATION
   // ============================================================================
@@ -162,7 +145,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Configuring security quality gates');
 
-  let qualityGatesConfig = await ctx.task(qualityGatesConfigTask, {
+  const qualityGatesConfig = await ctx.task(qualityGatesConfigTask, {
     projectName,
     qualityGates,
     severityThreshold,
@@ -173,19 +156,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityGatesConfig.artifacts);
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      qualityGatesConfig = await ctx.task(qualityGatesConfigTask, { ...{
-    projectName,
-    qualityGates,
-    severityThreshold,
-    cicdPlatform,
-    sastTools: toolSelection.selectedTools,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Quality Gate: Review quality gates before baseline
+  await ctx.breakpoint({
     question: `Phase 4 Complete: Configured ${qualityGatesConfig.gates.length} quality gate(s). Pipeline will ${qualityGates.blockOnCritical ? 'BLOCK' : 'WARN'} on critical findings. Review gate configuration?`,
     title: 'Quality Gates Review',
     context: {
@@ -194,15 +166,9 @@ export async function process(inputs, ctx) {
       thresholds: qualityGatesConfig.thresholds,
       blockingBehavior: qualityGatesConfig.blockingBehavior,
       files: qualityGatesConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: BASELINE SECURITY SCAN
   // ============================================================================
@@ -229,7 +195,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Triaging and classifying security findings');
 
-  let vulnerabilityTriage = await ctx.task(vulnerabilityTriageTask, {
+  const vulnerabilityTriage = await ctx.task(vulnerabilityTriageTask, {
     projectName,
     findings: baselineScan.findings,
     qualityGates,
@@ -238,17 +204,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...vulnerabilityTriage.artifacts);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      vulnerabilityTriage = await ctx.task(vulnerabilityTriageTask, { ...{
-    projectName,
-    findings: baselineScan.findings,
-    qualityGates,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Quality Gate: Review triage results
+  await ctx.breakpoint({
     question: `Phase 6 Complete: Baseline scan found ${baselineScan.totalFindings} findings (Critical: ${criticalCount}, High: ${highCount}). Security Score: ${baselineScore}/100. ${vulnerabilityTriage.truePositives} confirmed vulnerabilities require remediation. Review triage results?`,
     title: 'Vulnerability Triage Review',
     context: {
@@ -261,15 +218,9 @@ export async function process(inputs, ctx) {
       falsePositives: vulnerabilityTriage.falsePositives,
       needsReview: vulnerabilityTriage.needsReview,
       files: vulnerabilityTriage.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: FALSE POSITIVE REDUCTION
   // ============================================================================
@@ -348,7 +299,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Validating SAST pipeline integration');
 
-  let validation = await ctx.task(validationTask, {
+  const validation = await ctx.task(validationTask, {
     projectName,
     cicdPlatform,
     sastTools: toolSelection.selectedTools,
@@ -363,20 +314,8 @@ export async function process(inputs, ctx) {
   const validationPassed = validation.overallScore >= 80;
 
   // Quality Gate: Validation must pass
-      let lastFeedback_phase11Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase11Review) {
-        validation = await ctx.task(validationTask, { ...{
-    projectName,
-    cicdPlatform,
-    sastTools: toolSelection.selectedTools,
-    pipelineIntegration,
-    qualityGatesConfig,
-    baselineScan,
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-      }
-  const phase11Review = await ctx.breakpoint({
+  if (!validationPassed) {
+    await ctx.breakpoint({
       question: `Phase 11 Warning: Validation score: ${validation.overallScore}/100 (below threshold of 80). ${validation.failedChecks.length} check(s) failed. Review and fix issues before deployment?`,
       title: 'SAST Pipeline Validation Issues',
       context: {
@@ -386,15 +325,9 @@ export async function process(inputs, ctx) {
         failedChecks: validation.failedChecks,
         recommendations: validation.recommendations,
         files: validation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase11Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase11Review.approved) break;
-      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: FINAL REVIEW AND DEPLOYMENT
@@ -402,7 +335,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Final review and deployment preparation');
 
-  let finalReview = await ctx.task(finalReviewTask, {
+  const finalReview = await ctx.task(finalReviewTask, {
     projectName,
     toolSelection,
     pipelineIntegration,
@@ -417,23 +350,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(finalReviewTask, { ...{
-    projectName,
-    toolSelection,
-    pipelineIntegration,
-    qualityGatesConfig,
-    baselineScan,
-    vulnerabilityTriage,
-    falsePositiveReduction,
-    documentation,
-    validation,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: SAST Pipeline Approval
+  await ctx.breakpoint({
     question: `SAST Pipeline Integration Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Baseline security score: ${baselineScore}/100 with ${vulnerabilityTriage.truePositives} vulnerabilities to remediate. Review deliverables and approve for deployment?`,
     title: 'SAST Pipeline Integration Complete - Final Approval',
     context: {
@@ -460,15 +378,9 @@ export async function process(inputs, ctx) {
         { path: validation.reportPath, format: 'json', label: 'Validation Report' },
         { path: finalReview.deploymentChecklistPath, format: 'markdown', label: 'Deployment Checklist' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -539,7 +451,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing secrets management requirements');
 
-  let assessmentResult = await ctx.task(assessSecretsRequirementsTask, {
+  const assessmentResult = await ctx.task(assessSecretsRequirementsTask, {
     projectName,
     secretsScope,
     environment,
@@ -84,21 +84,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assessment complete - Identified ${secretsManaged} secrets across ${assessmentResult.secretTypes.length} types`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      assessmentResult = await ctx.task(assessSecretsRequirementsTask, { ...{
-    projectName,
-    secretsScope,
-    environment,
-    services,
-    infrastructureType,
-    complianceRequirements,
-    platform,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements review
+  await ctx.breakpoint({
     question: `Secrets management requirements assessed for ${projectName}. Identified ${secretsManaged} secrets of types: ${assessmentResult.secretTypes.join(', ')}. Review security requirements and compliance needs?`,
     title: 'Secrets Management Requirements Review',
     context: {
@@ -111,22 +98,16 @@ export async function process(inputs, ctx) {
         sensitiveDataCategories: assessmentResult.sensitiveDataCategories
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DEPLOY SECRETS MANAGEMENT PLATFORM
   // ============================================================================
 
   ctx.log('info', `Phase 2: Deploying ${platform} secrets management platform`);
 
-  let platformDeployment = await ctx.task(deploySecretsPlatformTask, {
+  const platformDeployment = await ctx.task(deploySecretsPlatformTask, {
     projectName,
     platform,
     environment,
@@ -148,22 +129,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `${platform} deployed - Status: ${platformDeployment.deployed ? 'Active' : 'Failed'}, High Availability: ${platformDeployment.highAvailability}`);
 
   // Quality Gate: Platform deployment verification
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        platformDeployment = await ctx.task(deploySecretsPlatformTask, { ...{
-    projectName,
-    platform,
-    environment,
-    infrastructureType,
-    enableEncryptionAtRest,
-    enableEncryptionInTransit,
-    enableAuditLogging,
-    backupStrategy,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (!platformDeployment.deployed || !platformDeployment.initialized) {
+    await ctx.breakpoint({
       question: `Secrets management platform deployment issue detected. Deployed: ${platformDeployment.deployed}, Initialized: ${platformDeployment.initialized}. Review deployment logs and fix issues before proceeding?`,
       title: 'Platform Deployment Verification',
       context: {
@@ -176,15 +143,9 @@ export async function process(inputs, ctx) {
           issues: platformDeployment.issues || []
         },
         files: platformDeployment.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: CONFIGURE ACCESS CONTROL AND AUTHENTICATION
@@ -192,7 +153,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Configuring access control and authentication');
 
-  let accessControlResult = await ctx.task(configureAccessControlTask, {
+  const accessControlResult = await ctx.task(configureAccessControlTask, {
     projectName,
     platform,
     accessControlModel,
@@ -212,21 +173,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Access control configured - Policies: ${accessControlResult.policiesCreated}, Roles: ${accessControlResult.rolesCreated}, Auth methods: ${accessControlResult.authMethods.length}`);
 
-    let lastFeedback_qualityGateApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval2) {
-      accessControlResult = await ctx.task(configureAccessControlTask, { ...{
-    projectName,
-    platform,
-    accessControlModel,
-    services,
-    infrastructureType,
-    environment,
-    complianceRequirements,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-    }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  // Quality Gate: Access control review
+  await ctx.breakpoint({
     question: `Access control configured with ${accessControlResult.policiesCreated} policies and ${accessControlResult.rolesCreated} roles. Review least-privilege access policies and authentication methods?`,
     title: 'Access Control Review',
     context: {
@@ -239,22 +187,16 @@ export async function process(inputs, ctx) {
         leastPrivilegeEnforced: accessControlResult.leastPrivilegeEnforced
       },
       files: accessControlResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval2.approved) break;
-    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: MIGRATE SECRETS TO SECURE STORAGE
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Migrating secrets to secure storage');
 
-  let secretsMigration = await ctx.task(migrateSecretsTask, {
+  const secretsMigration = await ctx.task(migrateSecretsTask, {
     projectName,
     platform,
     secretsInventory: assessmentResult.secretsInventory,
@@ -274,20 +216,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Secrets migration - Migrated: ${secretsMigration.secretsMigrated}/${secretsManaged}, Failed: ${secretsMigration.migrationFailures.length}`);
 
   // Quality Gate: Migration verification
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        secretsMigration = await ctx.task(migrateSecretsTask, { ...{
-    projectName,
-    platform,
-    secretsInventory: assessmentResult.secretsInventory,
-    platformDeployment,
-    accessControlResult,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (secretsMigration.migrationFailures.length > 0 || secretsMigration.secretsMigrated < secretsManaged) {
+    await ctx.breakpoint({
       question: `Secrets migration incomplete. Migrated: ${secretsMigration.secretsMigrated}/${secretsManaged}. Failed migrations: ${secretsMigration.migrationFailures.length}. Review failures: ${secretsMigration.migrationFailures.map(f => f.secret).join(', ')}`,
       title: 'Secrets Migration Review',
       context: {
@@ -300,15 +230,9 @@ export async function process(inputs, ctx) {
           recommendation: 'Address migration failures before proceeding'
         },
         files: secretsMigration.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: IMPLEMENT SECRET ROTATION POLICIES
@@ -317,7 +241,7 @@ export async function process(inputs, ctx) {
   if (enableAutoRotation) {
     ctx.log('info', 'Phase 5: Implementing secret rotation policies');
 
-    let rotationResult = await ctx.task(implementRotationPoliciesTask, {
+    const rotationResult = await ctx.task(implementRotationPoliciesTask, {
       projectName,
       platform,
       secretsInventory: assessmentResult.secretsInventory,
@@ -337,20 +261,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Rotation policies implemented - ${rotationPolicies} policies, ${rotationResult.automatedRotations} automated rotations`);
 
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        rotationResult = await ctx.task(implementRotationPoliciesTask, { ...{
-      projectName,
-      platform,
-      secretsInventory: assessmentResult.secretsInventory,
-      rotationIntervalDays,
-      services,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+    // Quality Gate: Rotation policy review
+    await ctx.breakpoint({
       question: `Secret rotation policies configured. ${rotationPolicies} policies created, ${rotationResult.automatedRotations} automated rotations. Review rotation schedules and manual rotation requirements?`,
       title: 'Rotation Policy Review',
       context: {
@@ -363,15 +275,9 @@ export async function process(inputs, ctx) {
           highRiskSecrets: rotationResult.highRiskSecrets
         },
         files: rotationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: INTEGRATE WITH CI/CD PIPELINES
@@ -380,7 +286,7 @@ export async function process(inputs, ctx) {
   if (integrateCICD) {
     ctx.log('info', 'Phase 6: Integrating secrets management with CI/CD pipelines');
 
-    let cicdIntegration = await ctx.task(integrateCICDTask, {
+    const cicdIntegration = await ctx.task(integrateCICDTask, {
       projectName,
       platform,
       platformDeployment,
@@ -399,20 +305,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `CI/CD integration complete - Pipelines integrated: ${cicdIntegration.pipelinesIntegrated}, Injection method: ${cicdIntegration.injectionMethod}`);
 
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        cicdIntegration = await ctx.task(integrateCICDTask, { ...{
-      projectName,
-      platform,
-      platformDeployment,
-      services,
-      infrastructureType,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+    // Quality Gate: CI/CD integration review
+    await ctx.breakpoint({
       question: `CI/CD integration configured. ${cicdIntegration.pipelinesIntegrated} pipelines integrated using ${cicdIntegration.injectionMethod}. Verify secrets are injected securely and not logged in plain text?`,
       title: 'CI/CD Integration Review',
       context: {
@@ -424,15 +318,9 @@ export async function process(inputs, ctx) {
           maskedInLogs: cicdIntegration.maskedInLogs
         },
         files: cicdIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: IMPLEMENT RUNTIME SECRET INJECTION
@@ -440,7 +328,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Implementing runtime secret injection for applications');
 
-  let runtimeInjection = await ctx.task(implementRuntimeInjectionTask, {
+  const runtimeInjection = await ctx.task(implementRuntimeInjectionTask, {
     projectName,
     platform,
     platformDeployment,
@@ -459,20 +347,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Runtime injection implemented - Services: ${runtimeInjection.servicesConfigured}, Method: ${runtimeInjection.injectionMethod}`);
 
-    let lastFeedback_qualityGateApproval6 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval6) {
-      runtimeInjection = await ctx.task(implementRuntimeInjectionTask, { ...{
-    projectName,
-    platform,
-    platformDeployment,
-    services,
-    infrastructureType,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
-    }
-  const qualityGateApproval6 = await ctx.breakpoint({
+  // Quality Gate: Runtime injection review
+  await ctx.breakpoint({
     question: `Runtime secret injection configured for ${runtimeInjection.servicesConfigured} services using ${runtimeInjection.injectionMethod}. Verify secrets are never stored on disk in plain text?`,
     title: 'Runtime Injection Review',
     context: {
@@ -485,15 +361,9 @@ export async function process(inputs, ctx) {
         encryptedAtRest: runtimeInjection.encryptedAtRest
       },
       files: runtimeInjection.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval6.approved) break;
-    lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: CONFIGURE AUDIT LOGGING AND MONITORING
   // ============================================================================
@@ -501,7 +371,7 @@ export async function process(inputs, ctx) {
   if (enableAuditLogging) {
     ctx.log('info', 'Phase 8: Configuring audit logging and monitoring');
 
-    let auditLogging = await ctx.task(configureAuditLoggingTask, {
+    const auditLogging = await ctx.task(configureAuditLoggingTask, {
       projectName,
       platform,
       platformDeployment,
@@ -519,19 +389,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Audit logging configured - Events logged: ${auditLogging.auditEventsCount}, SIEM integrated: ${auditLogging.siemIntegrated}`);
 
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        auditLogging = await ctx.task(configureAuditLoggingTask, { ...{
-      projectName,
-      platform,
-      platformDeployment,
-      complianceRequirements,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+    // Quality Gate: Audit logging review
+    await ctx.breakpoint({
       question: `Audit logging configured. ${auditLogging.auditEventsCount} event types monitored. SIEM integration: ${auditLogging.siemIntegrated}. Review audit log retention and alerting thresholds?`,
       title: 'Audit Logging Review',
       context: {
@@ -544,15 +403,9 @@ export async function process(inputs, ctx) {
           criticalEvents: auditLogging.criticalEvents
         },
         files: auditLogging.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: IMPLEMENT CERTIFICATE MANAGEMENT
@@ -561,7 +414,7 @@ export async function process(inputs, ctx) {
   if (enableCertificateManagement) {
     ctx.log('info', 'Phase 9: Implementing certificate management');
 
-    let certManagement = await ctx.task(implementCertificateManagementTask, {
+    const certManagement = await ctx.task(implementCertificateManagementTask, {
       projectName,
       platform,
       platformDeployment,
@@ -580,20 +433,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Certificate management configured - PKI enabled: ${certManagement.pkiEnabled}, Auto-renewal: ${certManagement.autoRenewalEnabled}`);
 
-      let lastFeedback_qualityGateApproval7 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval7) {
-        certManagement = await ctx.task(implementCertificateManagementTask, { ...{
-      projectName,
-      platform,
-      platformDeployment,
-      services,
-      infrastructureType,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
-      }
-  const qualityGateApproval7 = await ctx.breakpoint({
+    // Quality Gate: Certificate management review
+    await ctx.breakpoint({
       question: `Certificate management configured. PKI: ${certManagement.pkiEnabled}, Certificates managed: ${certManagement.certificatesManaged}, Auto-renewal: ${certManagement.autoRenewalEnabled}. Review certificate expiration policies?`,
       title: 'Certificate Management Review',
       context: {
@@ -605,15 +446,9 @@ export async function process(inputs, ctx) {
           expirationMonitoring: certManagement.expirationMonitoring
         },
         files: certManagement.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval7.approved) break;
-      lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: IMPLEMENT BACKUP AND DISASTER RECOVERY
@@ -621,7 +456,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Implementing backup and disaster recovery');
 
-  let backupDR = await ctx.task(implementBackupDRTask, {
+  const backupDR = await ctx.task(implementBackupDRTask, {
     projectName,
     platform,
     platformDeployment,
@@ -639,19 +474,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Backup and DR configured - Strategy: ${backupDR.strategy}, RPO: ${backupDR.rpo}, RTO: ${backupDR.rto}`);
 
-    let lastFeedback_phase10Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase10Review) {
-      backupDR = await ctx.task(implementBackupDRTask, { ...{
-    projectName,
-    platform,
-    platformDeployment,
-    backupStrategy,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-    }
-  const phase10Review = await ctx.breakpoint({
+  // Quality Gate: Backup and DR review
+  await ctx.breakpoint({
     question: `Backup and disaster recovery configured. Strategy: ${backupDR.strategy}, RPO: ${backupDR.rpo}, RTO: ${backupDR.rto}. Verify backup encryption and test restore procedures?`,
     title: 'Backup and DR Review',
     context: {
@@ -665,22 +489,16 @@ export async function process(inputs, ctx) {
         restoreTested: backupDR.restoreTested
       },
       files: backupDR.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase10Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase10Review.approved) break;
-    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 11: CONDUCT SECURITY TESTING AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Conducting security testing and validation');
 
-  let securityTesting = await ctx.task(conductSecurityTestingTask, {
+  const securityTesting = await ctx.task(conductSecurityTestingTask, {
     projectName,
     platform,
     implementations,
@@ -695,20 +513,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Security testing complete - Tests passed: ${securityTesting.testsPassed}/${securityTesting.testsTotal}, Vulnerabilities: ${securityTesting.vulnerabilities.length}`);
 
   // Quality Gate: Security testing review
-      let lastFeedback_qualityGateApproval8 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval8) {
-        securityTesting = await ctx.task(conductSecurityTestingTask, { ...{
-    projectName,
-    platform,
-    implementations,
-    secretsInventory: assessmentResult.secretsInventory,
-    complianceRequirements,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval8, attempt: attempt + 1 });
-      }
-  const qualityGateApproval8 = await ctx.breakpoint({
+  if (securityTesting.criticalVulnerabilities > 0 || securityTesting.testsFailed > 0) {
+    await ctx.breakpoint({
       question: `Security testing found ${securityTesting.criticalVulnerabilities} critical vulnerabilities and ${securityTesting.testsFailed} test failures. Review and remediate before proceeding to production?`,
       title: 'Security Testing Review',
       context: {
@@ -721,15 +527,9 @@ export async function process(inputs, ctx) {
           vulnerabilities: securityTesting.vulnerabilities.slice(0, 10)
         },
         files: securityTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval8 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval8.approved) break;
-      lastFeedback_qualityGateApproval8 = qualityGateApproval8.response || qualityGateApproval8.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: GENERATE COMPLIANCE REPORTS
@@ -737,7 +537,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating compliance reports');
 
-  let complianceReporting = await ctx.task(generateComplianceReportsTask, {
+  const complianceReporting = await ctx.task(generateComplianceReportsTask, {
     projectName,
     platform,
     complianceRequirements,
@@ -752,20 +552,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Compliance reporting complete - ${complianceReporting.reportsGenerated} reports, Compliant: ${complianceReporting.compliant}`);
 
   // Quality Gate: Compliance review
-      let lastFeedback_phase12Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase12Review) {
-        complianceReporting = await ctx.task(generateComplianceReportsTask, { ...{
-    projectName,
-    platform,
-    complianceRequirements,
-    implementations,
-    securityTesting,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
-      }
-  const phase12Review = await ctx.breakpoint({
+  if (!complianceReporting.compliant) {
+    await ctx.breakpoint({
       question: `Compliance validation failed. Non-compliant requirements: ${complianceReporting.nonCompliantItems.length}. Address compliance gaps: ${complianceReporting.nonCompliantItems.map(i => i.requirement).join(', ')}`,
       title: 'Compliance Review',
       context: {
@@ -777,15 +565,9 @@ export async function process(inputs, ctx) {
           recommendation: 'Address all compliance gaps before production deployment'
         },
         files: complianceReporting.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase12Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase12Review.approved) break;
-      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: CREATE OPERATIONAL DOCUMENTATION
@@ -814,7 +596,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Calculating security score and final assessment');
 
-  let scoringResult = await ctx.task(calculateSecurityScoreTask, {
+  const scoringResult = await ctx.task(calculateSecurityScoreTask, {
     projectName,
     platform,
     implementations,
@@ -831,22 +613,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Security Score: ${securityScore}/100 - ${scoringResult.verdict}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(calculateSecurityScoreTask, { ...{
-    projectName,
-    platform,
-    implementations,
-    secretsManaged,
-    rotationPolicies,
-    securityTesting,
-    complianceReporting,
-    complianceRequirements,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Secrets management implementation complete
+  await ctx.breakpoint({
     question: `Secrets Management Implementation Complete for ${projectName}. Security Score: ${securityScore}/100. ${secretsManaged} secrets secured, ${rotationPolicies} rotation policies. Ready for production?`,
     title: 'Final Secrets Management Review',
     context: {
@@ -881,15 +649,9 @@ export async function process(inputs, ctx) {
         { path: scoringResult.scorePath, format: 'json', label: 'Security Score Report' },
         { path: complianceReporting.complianceReportPath, format: 'markdown', label: 'Compliance Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -966,7 +728,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

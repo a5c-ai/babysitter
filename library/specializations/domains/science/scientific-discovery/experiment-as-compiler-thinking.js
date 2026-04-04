@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Analyze Data Language
   ctx.log('info', 'Analyzing data language structure');
-  let dataLanguage = await ctx.task(analyzeDataLanguageTask, {
+  const dataLanguage = await ctx.task(analyzeDataLanguageTask, {
     experimentDesign,
     domain
   });
@@ -45,15 +45,9 @@ export async function process(inputs, ctx) {
     hypothesisLanguage,
     dataLanguage,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      dataLanguage = await ctx.task(analyzeDataLanguageTask, { ...{
-    experimentDesign,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Compilation rules defined. Review before analysis?',
     title: 'Experiment as Compiler - Rules Defined',
     context: {
@@ -63,15 +57,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/data-language.json', format: 'json' },
         { path: 'artifacts/compilation-rules.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Analyze Compilation Process
   ctx.log('info', 'Analyzing the compilation process');
   const compilationAnalysis = await ctx.task(analyzeCompilationTask, {

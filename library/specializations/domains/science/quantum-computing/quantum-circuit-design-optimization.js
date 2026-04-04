@@ -42,24 +42,16 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Problem Analysis and Resource Estimation');
 
-  let analysisResult = await ctx.task(problemAnalysisTask, {
+  const analysisResult = await ctx.task(problemAnalysisTask, {
     problemDescription,
     targetHardware,
     maxQubits,
     framework
   });
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      analysisResult = await ctx.task(problemAnalysisTask, { ...{
-    problemDescription,
-    targetHardware,
-    maxQubits,
-    framework
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  artifacts.push(...(analysisResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Problem analysis complete. Estimated qubits: ${analysisResult.estimatedQubits}, Estimated depth: ${analysisResult.estimatedDepth}. Proceed with circuit design?`,
     title: 'Problem Analysis Review',
     context: {
@@ -67,15 +59,9 @@ export async function process(inputs, ctx) {
       problemDescription,
       analysis: analysisResult,
       files: (analysisResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: CIRCUIT ARCHITECTURE DESIGN
   // ============================================================================
@@ -99,37 +85,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Circuit Implementation');
 
-  let implementationResult = await ctx.task(circuitImplementationTask, {
+  const implementationResult = await ctx.task(circuitImplementationTask, {
     architecture: architectureResult,
     framework,
     problemDescription
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      implementationResult = await ctx.task(circuitImplementationTask, { ...{
-    architecture: architectureResult,
-    framework,
-    problemDescription
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  artifacts.push(...(implementationResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Circuit implementation complete. Gates: ${implementationResult.gateCount}, Depth: ${implementationResult.circuitDepth}. Review implementation?`,
     title: 'Circuit Implementation Review',
     context: {
       runId: ctx.runId,
       implementation: implementationResult,
       files: (implementationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: CIRCUIT OPTIMIZATION
   // ============================================================================
@@ -153,44 +126,31 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Hardware Transpilation');
 
-  let transpilationResult = await ctx.task(hardwareTranspilationTask, {
+  const transpilationResult = await ctx.task(hardwareTranspilationTask, {
     circuit: optimizationResult.optimizedCircuit,
     targetHardware,
     framework
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      transpilationResult = await ctx.task(hardwareTranspilationTask, { ...{
-    circuit: optimizationResult.optimizedCircuit,
-    targetHardware,
-    framework
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  artifacts.push(...(transpilationResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Transpilation to ${targetHardware} complete. Native gates: ${transpilationResult.nativeGateCount}, Final depth: ${transpilationResult.finalDepth}. Review transpiled circuit?`,
     title: 'Transpilation Review',
     context: {
       runId: ctx.runId,
       transpilation: transpilationResult,
       files: (transpilationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: SIMULATION VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Simulation Validation');
 
-  let validationResult = await ctx.task(simulationValidationTask, {
+  const validationResult = await ctx.task(simulationValidationTask, {
     originalCircuit: implementationResult,
     optimizedCircuit: optimizationResult.optimizedCircuit,
     transpiledCircuit: transpilationResult.transpiledCircuit,
@@ -199,32 +159,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(validationResult.artifacts || []));
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        validationResult = await ctx.task(simulationValidationTask, { ...{
-    originalCircuit: implementationResult,
-    optimizedCircuit: optimizationResult.optimizedCircuit,
-    transpiledCircuit: transpilationResult.transpiledCircuit,
-    framework
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!validationResult.validated) {
+    await ctx.breakpoint({
       question: `Validation failed: ${validationResult.issues.join(', ')}. Address issues or proceed with caution?`,
       title: 'Validation Warning',
       context: {
         runId: ctx.runId,
         validation: validationResult,
         files: (validationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: DOCUMENTATION AND RESOURCE ESTIMATION
@@ -232,7 +177,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Documentation and Resource Estimation');
 
-  let documentationResult = await ctx.task(circuitDocumentationTask, {
+  const documentationResult = await ctx.task(circuitDocumentationTask, {
     problemDescription,
     analysisResult,
     architectureResult,
@@ -243,21 +188,9 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentationResult = await ctx.task(circuitDocumentationTask, { ...{
-    problemDescription,
-    analysisResult,
-    architectureResult,
-    implementationResult,
-    optimizationResult,
-    transpilationResult,
-    validationResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  artifacts.push(...(documentationResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Quantum circuit design complete for: ${problemDescription}. Final qubit count: ${transpilationResult.qubitCount}, Final depth: ${transpilationResult.finalDepth}. Approve results?`,
     title: 'Circuit Design Complete',
     context: {
@@ -269,15 +202,9 @@ export async function process(inputs, ctx) {
         validated: validationResult.validated
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
 
   return {
@@ -317,7 +244,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

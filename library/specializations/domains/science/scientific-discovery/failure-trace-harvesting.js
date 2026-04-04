@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Design Failure Instrumentation
   ctx.log('info', 'Designing failure instrumentation');
-  let instrumentation = await ctx.task(designInstrumentationTask, {
+  const instrumentation = await ctx.task(designInstrumentationTask, {
     processDescription,
     failurePotential,
     domain
@@ -47,16 +47,9 @@ export async function process(inputs, ctx) {
     failurePotential,
     instrumentation,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      instrumentation = await ctx.task(designInstrumentationTask, { ...{
-    processDescription,
-    failurePotential,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Failure instrumentation designed. Review before logging design?',
     title: 'Failure Trace Harvesting - Instrumentation Complete',
     context: {
@@ -65,15 +58,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/failure-potential.json', format: 'json' },
         { path: 'artifacts/instrumentation.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Design Rich Logging System
   ctx.log('info', 'Designing rich logging system');
   const loggingSystem = await ctx.task(designLoggingSystemTask, {

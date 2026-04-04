@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Stakeholder Identification
-  let stakeholderIdentification = await ctx.task(comprehensiveStakeholderIdentificationTask, {
+  const stakeholderIdentification = await ctx.task(comprehensiveStakeholderIdentificationTask, {
     projectName,
     knownStakeholders,
     projectContext,
@@ -47,17 +47,9 @@ export async function process(inputs, ctx) {
       stakeholderRegister: null
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      stakeholderIdentification = await ctx.task(comprehensiveStakeholderIdentificationTask, { ...{
-    projectName,
-    knownStakeholders,
-    projectContext,
-    organizationalContext
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review identified stakeholders
+  await ctx.breakpoint({
     question: `Identified ${stakeholderIdentification.stakeholders.length} stakeholders for ${projectName}. Review and proceed with analysis?`,
     title: 'Stakeholder Identification Review',
     context: {
@@ -70,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: stakeholderIdentification
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Stakeholder Analysis
   const stakeholderAnalysis = await ctx.task(stakeholderAnalysisTask, {
     projectName,
@@ -103,7 +89,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Current vs Desired Engagement Assessment
-  let engagementAssessment = await ctx.task(engagementAssessmentTask, {
+  const engagementAssessment = await ctx.task(engagementAssessmentTask, {
     projectName,
     stakeholderAnalysis,
     needsAssessment,
@@ -112,32 +98,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: High-influence stakeholders must have engagement strategy
   const highInfluenceWithoutStrategy = engagementAssessment.gaps?.filter(g => g.severity === 'high') || [];
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        engagementAssessment = await ctx.task(engagementAssessmentTask, { ...{
-    projectName,
-    stakeholderAnalysis,
-    needsAssessment,
-    existingRelationships
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (highInfluenceWithoutStrategy.length > 0) {
+    await ctx.breakpoint({
       question: `${highInfluenceWithoutStrategy.length} high-influence stakeholders lack engagement strategy. Address gaps before proceeding?`,
       title: 'Engagement Gap Warning',
       context: {
         runId: ctx.runId,
         gaps: highInfluenceWithoutStrategy,
         recommendation: 'Develop strategies for all high-influence stakeholders'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Engagement Strategy Development
   const engagementStrategy = await ctx.task(engagementStrategyDevelopmentTask, {
@@ -174,7 +145,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Stakeholder Register and Plan Generation
-  let finalDocuments = await ctx.task(stakeholderDocumentGenerationTask, {
+  const finalDocuments = await ctx.task(stakeholderDocumentGenerationTask, {
     projectName,
     stakeholderIdentification,
     stakeholderAnalysis,
@@ -191,23 +162,8 @@ export async function process(inputs, ctx) {
   const completenessScore = finalDocuments.completenessScore || 0;
   const ready = completenessScore >= 80;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalDocuments = await ctx.task(stakeholderDocumentGenerationTask, { ...{
-    projectName,
-    stakeholderIdentification,
-    stakeholderAnalysis,
-    powerInterestMapping,
-    needsAssessment,
-    engagementAssessment,
-    engagementStrategy,
-    communicationPlan,
-    stakeholderRiskAnalysis,
-    actionPlan
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Stakeholder analysis complete for ${projectName}. Completeness: ${completenessScore}/100. Approve and distribute?`,
     title: 'Stakeholder Analysis Approval',
     context: {
@@ -219,15 +175,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/stakeholder-register.json`, format: 'json', content: finalDocuments.register },
         { path: `artifacts/engagement-plan.md`, format: 'markdown', content: finalDocuments.engagementPlanMarkdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -256,7 +206,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const comprehensiveStakeholderIdentificationTask = defineTask('comprehensive-stakeholder-identification', (args, taskCtx) => ({
   kind: 'agent',

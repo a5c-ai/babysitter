@@ -44,37 +44,23 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Propulsion Model Development
-  let propulsionModel = await ctx.task(simPropulsionModelTask, {
+  const propulsionModel = await ctx.task(simPropulsionModelTask, {
     projectName,
     vehicleData,
     requirements: modelRequirements
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      propulsionModel = await ctx.task(simPropulsionModelTask, { ...{
-    projectName,
-    vehicleData,
-    requirements: modelRequirements
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Core model review
+  await ctx.breakpoint({
     question: `Core models complete for ${projectName}. Aero tables: ${aeroModel.tableCount}, Propulsion: ${propulsionModel.engineCount} engines. Proceed?`,
     title: 'Core Model Review',
     context: {
       runId: ctx.runId,
       aeroModel: aeroModel.summary,
       propulsionModel: propulsionModel.summary
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Flight Control Model
   const flightControlModel = await ctx.task(simFlightControlTask, {
     projectName,
@@ -108,7 +94,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validation Testing
-  let validationTesting = await ctx.task(simValidationTestingTask, {
+  const validationTesting = await ctx.task(simValidationTestingTask, {
     projectName,
     integratedModel,
     validationData,
@@ -116,32 +102,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Validation results
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        validationTesting = await ctx.task(simValidationTestingTask, { ...{
-    projectName,
-    integratedModel,
-    validationData,
-    requirements: modelRequirements
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (validationTesting.passRate < 0.9) {
+    await ctx.breakpoint({
       question: `Validation pass rate ${(validationTesting.passRate * 100).toFixed(1)}% below 90% target. Review failures?`,
       title: 'Validation Warning',
       context: {
         runId: ctx.runId,
         validationTesting,
         failures: validationTesting.failures
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 9: Tuning and Refinement
   const modelTuning = await ctx.task(simModelTuningTask, {
@@ -152,7 +123,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Qualification Documentation
-  let qualificationDocs = await ctx.task(simQualificationTask, {
+  const qualificationDocs = await ctx.task(simQualificationTask, {
     projectName,
     integratedModel: modelTuning.tunedModel,
     validationTesting,
@@ -160,18 +131,8 @@ export async function process(inputs, ctx) {
     requirements: modelRequirements
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualificationDocs = await ctx.task(simQualificationTask, { ...{
-    projectName,
-    integratedModel: modelTuning.tunedModel,
-    validationTesting,
-    modelFidelity,
-    requirements: modelRequirements
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Model Approval
+  await ctx.breakpoint({
     question: `Simulation model complete for ${projectName}. Qualification level: ${qualificationDocs.qualificationLevel}. Approve for release?`,
     title: 'Simulation Model Approval',
     context: {
@@ -185,15 +146,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/sim-model-docs.json', format: 'json', content: qualificationDocs },
         { path: 'artifacts/sim-model-docs.md', format: 'markdown', content: qualificationDocs.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -208,7 +163,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions (abbreviated)
+
+// Task Definitions (abbreviated)
 
 export const simModelRequirementsTask = defineTask('sim-model-requirements', (args, taskCtx) => ({
   kind: 'agent',

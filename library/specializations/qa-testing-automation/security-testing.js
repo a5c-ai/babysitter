@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing security requirements and threat model');
 
-  let securityRequirements = await ctx.task(securityRequirementsAnalysisTask, {
+  const securityRequirements = await ctx.task(securityRequirementsAnalysisTask, {
     projectName,
     applicationUrl,
     applicationType,
@@ -92,21 +92,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...securityRequirements.artifacts);
 
   // Quality Gate: Requirements completeness
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        securityRequirements = await ctx.task(securityRequirementsAnalysisTask, { ...{
-    projectName,
-    applicationUrl,
-    applicationType,
-    securityScans,
-    complianceStandards,
-    authenticationMethods,
-    environmentType,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (!securityRequirements.requirementsComplete) {
+    await ctx.breakpoint({
       question: `Security requirements analysis incomplete. Missing: ${securityRequirements.missingRequirements.join(', ')}. Review and complete requirements?`,
       title: 'Security Requirements Review',
       context: {
@@ -116,15 +103,9 @@ export async function process(inputs, ctx) {
         threatLevel: securityRequirements.overallThreatLevel,
         recommendation: 'Complete security requirements and threat model before testing',
         files: securityRequirements.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: SECURITY TESTING ENVIRONMENT SETUP
@@ -132,7 +113,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Setting up security testing environment and tools');
 
-  let environmentSetup = await ctx.task(securityTestEnvironmentSetupTask, {
+  const environmentSetup = await ctx.task(securityTestEnvironmentSetupTask, {
     projectName,
     applicationUrl,
     applicationType,
@@ -146,21 +127,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...environmentSetup.artifacts);
 
   // Quality Gate: Environment readiness
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        environmentSetup = await ctx.task(securityTestEnvironmentSetupTask, { ...{
-    projectName,
-    applicationUrl,
-    applicationType,
-    securityScans,
-    penTestingEnabled,
-    staticAnalysisEnabled,
-    dynamicAnalysisEnabled,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!environmentSetup.environmentReady) {
+    await ctx.breakpoint({
       question: `Security testing environment not ready. Issues: ${environmentSetup.issues.join(', ')}. Resolve and continue?`,
       title: 'Security Environment Setup',
       context: {
@@ -169,15 +137,9 @@ export async function process(inputs, ctx) {
         toolsInstalled: environmentSetup.toolsInstalled,
         recommendation: 'Ensure all security testing tools are properly configured',
         files: environmentSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: RECONNAISSANCE AND ATTACK SURFACE MAPPING
@@ -219,6 +181,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `SAST completed: ${sastResults.vulnerabilities.length} vulnerabilities found`);
   }
+
   // ============================================================================
   // PHASE 5: AUTHENTICATION AND SESSION MANAGEMENT TESTING
   // ============================================================================
@@ -226,7 +189,7 @@ export async function process(inputs, ctx) {
   if (securityScans.includes('authentication')) {
     ctx.log('info', 'Phase 5: Testing authentication and session management');
 
-    let authenticationTesting = await ctx.task(authenticationTestingTask, {
+    const authenticationTesting = await ctx.task(authenticationTestingTask, {
       projectName,
       applicationUrl,
       authenticationMethods,
@@ -240,19 +203,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Critical authentication vulnerabilities
     const criticalAuthVulns = authenticationTesting.vulnerabilities.filter(v => v.severity === 'critical').length;
-        let lastFeedback_qualityGateApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval) {
-          authenticationTesting = await ctx.task(authenticationTestingTask, { ...{
-      projectName,
-      applicationUrl,
-      authenticationMethods,
-      reconnaissance,
-      environmentSetup,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-        }
-  const qualityGateApproval = await ctx.breakpoint({
+    if (criticalAuthVulns > 0) {
+      await ctx.breakpoint({
         question: `${criticalAuthVulns} critical authentication vulnerabilities detected! These pose immediate security risks. Review findings and address before continuing?`,
         title: 'Critical Authentication Vulnerabilities',
         context: {
@@ -261,18 +213,13 @@ export async function process(inputs, ctx) {
           authenticationScore: authenticationTesting.authenticationScore,
           recommendation: 'Fix critical authentication issues immediately',
           files: authenticationTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval.approved) break;
-        lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
 
     ctx.log('info', `Authentication testing: ${authenticationTesting.vulnerabilities.length} issues, Score: ${authenticationTesting.authenticationScore}/100`);
   }
+
   // ============================================================================
   // PHASE 6: AUTHORIZATION AND ACCESS CONTROL TESTING
   // ============================================================================
@@ -294,6 +241,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Authorization testing: ${authorizationTesting.vulnerabilities.length} issues found`);
   }
+
   // ============================================================================
   // PHASE 7: INPUT VALIDATION AND INJECTION TESTING
   // ============================================================================
@@ -301,7 +249,7 @@ export async function process(inputs, ctx) {
   if (securityScans.includes('owasp-top-10')) {
     ctx.log('info', 'Phase 7: Testing input validation and injection vulnerabilities');
 
-    let injectionTesting = await ctx.task(injectionTestingTask, {
+    const injectionTesting = await ctx.task(injectionTestingTask, {
       projectName,
       applicationUrl,
       attackSurface,
@@ -315,19 +263,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: SQL Injection vulnerabilities
     const sqlInjectionVulns = injectionTesting.vulnerabilities.filter(v => v.type === 'SQL Injection').length;
-        let lastFeedback_phase7Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase7Review) {
-          injectionTesting = await ctx.task(injectionTestingTask, { ...{
-      projectName,
-      applicationUrl,
-      attackSurface,
-      reconnaissance,
-      environmentSetup,
-      outputDir
-    }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-        }
-  const phase7Review = await ctx.breakpoint({
+    if (sqlInjectionVulns > 0) {
+      await ctx.breakpoint({
         question: `${sqlInjectionVulns} SQL injection vulnerabilities detected! This is a critical security risk. Review and remediate immediately?`,
         title: 'SQL Injection Vulnerabilities Detected',
         context: {
@@ -336,18 +273,13 @@ export async function process(inputs, ctx) {
           totalInjectionVulns: injectionTesting.vulnerabilities.length,
           recommendation: 'SQL injection is a critical vulnerability that must be fixed',
           files: injectionTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase7Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase7Review.approved) break;
-        lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
 
     ctx.log('info', `Injection testing: ${injectionTesting.vulnerabilities.length} vulnerabilities found`);
   }
+
   // ============================================================================
   // PHASE 8: XSS AND CLIENT-SIDE SECURITY TESTING
   // ============================================================================
@@ -369,6 +301,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `XSS testing: ${xssTesting.vulnerabilities.length} vulnerabilities found`);
   }
+
   // ============================================================================
   // PHASE 9: API SECURITY TESTING
   // ============================================================================
@@ -391,6 +324,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `API security: ${apiSecurityResults.vulnerabilities.length} vulnerabilities, Score: ${apiSecurityResults.apiSecurityScore}/100`);
   }
+
   // ============================================================================
   // PHASE 10: DYNAMIC APPLICATION SECURITY TESTING (DAST)
   // ============================================================================
@@ -413,6 +347,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `DAST completed: ${dastResults.vulnerabilities.length} vulnerabilities found`);
   }
+
   // ============================================================================
   // PHASE 11: CRYPTOGRAPHY AND DATA PROTECTION TESTING
   // ============================================================================
@@ -420,7 +355,7 @@ export async function process(inputs, ctx) {
   if (securityScans.includes('data-protection')) {
     ctx.log('info', 'Phase 11: Testing cryptography and data protection');
 
-    let cryptographyTesting = await ctx.task(cryptographyTestingTask, {
+    const cryptographyTesting = await ctx.task(cryptographyTestingTask, {
       projectName,
       applicationUrl,
       reconnaissance,
@@ -437,19 +372,8 @@ export async function process(inputs, ctx) {
       v.type.includes('Weak') || v.type.includes('Insecure')
     ).length;
 
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          cryptographyTesting = await ctx.task(cryptographyTestingTask, { ...{
-      projectName,
-      applicationUrl,
-      reconnaissance,
-      complianceStandards,
-      environmentSetup,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    if (weakCryptoVulns > 0) {
+      await ctx.breakpoint({
         question: `${weakCryptoVulns} weak cryptography issues detected. These compromise data security. Review and strengthen?`,
         title: 'Weak Cryptography Detected',
         context: {
@@ -459,18 +383,13 @@ export async function process(inputs, ctx) {
           ),
           cryptographyScore: cryptographyTesting.cryptographyScore,
           files: cryptographyTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
 
     ctx.log('info', `Cryptography testing: ${cryptographyTesting.vulnerabilities.length} issues, Score: ${cryptographyTesting.cryptographyScore}/100`);
   }
+
   // ============================================================================
   // PHASE 12: SECURITY CONFIGURATION AND HARDENING TESTING
   // ============================================================================
@@ -492,6 +411,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Configuration testing: ${configurationTesting.vulnerabilities.length} issues found`);
   }
+
   // ============================================================================
   // PHASE 13: DEPENDENCY AND SUPPLY CHAIN SECURITY
   // ============================================================================
@@ -513,6 +433,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Dependency scan: ${dependencyResults.vulnerabilities.length} vulnerable dependencies found`);
   }
+
   // ============================================================================
   // PHASE 14: BUSINESS LOGIC AND WORKFLOW SECURITY TESTING
   // ============================================================================
@@ -520,7 +441,7 @@ export async function process(inputs, ctx) {
   if (securityScans.includes('business-logic')) {
     ctx.log('info', 'Phase 14: Testing business logic and workflow security');
 
-    let businessLogicTesting = await ctx.task(businessLogicTestingTask, {
+    const businessLogicTesting = await ctx.task(businessLogicTestingTask, {
       projectName,
       applicationUrl,
       reconnaissance,
@@ -534,6 +455,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Business logic testing: ${businessLogicTesting.vulnerabilities.length} issues found`);
   }
+
   // ============================================================================
   // PHASE 15: PENETRATION TESTING (if enabled)
   // ============================================================================
@@ -559,19 +481,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Exploitable vulnerabilities
     const exploitableVulns = penTestResults.vulnerabilities.filter(v => v.exploitable).length;
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          businessLogicTesting = await ctx.task(businessLogicTestingTask, { ...{
-      projectName,
-      applicationUrl,
-      reconnaissance,
-      securityRequirements,
-      environmentSetup,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (exploitableVulns > 0) {
+      await ctx.breakpoint({
         question: `${exploitableVulns} exploitable vulnerabilities found during penetration testing! These can be actively exploited. Review exploitation details and remediate?`,
         title: 'Exploitable Vulnerabilities Found',
         context: {
@@ -580,23 +491,18 @@ export async function process(inputs, ctx) {
           exploitationComplexity: penTestResults.exploitationComplexity,
           recommendation: 'Fix exploitable vulnerabilities with highest priority',
           files: penTestResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 16: VULNERABILITY DEDUPLICATION AND PRIORITIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 16: Deduplicating and prioritizing vulnerabilities');
 
-  let vulnerabilityAnalysis = await ctx.task(vulnerabilityAnalysisTask, {
+  const vulnerabilityAnalysis = await ctx.task(vulnerabilityAnalysisTask, {
     projectName,
     vulnerabilities,
     securityRequirements,
@@ -619,19 +525,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Security score: ${securityScore}/100`);
 
   // Quality Gate: Critical vulnerability count
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        vulnerabilityAnalysis = await ctx.task(vulnerabilityAnalysisTask, { ...{
-    projectName,
-    vulnerabilities,
-    securityRequirements,
-    complianceStandards,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (criticalCount > acceptanceCriteria.maxCriticalVulnerabilities) {
+    await ctx.breakpoint({
       question: `${criticalCount} critical vulnerabilities exceed threshold (${acceptanceCriteria.maxCriticalVulnerabilities}). Security score: ${securityScore}/100. Review and remediate critical issues?`,
       title: 'Critical Vulnerabilities Exceed Threshold',
       context: {
@@ -642,30 +537,13 @@ export async function process(inputs, ctx) {
         topCriticalVulnerabilities: prioritizedVulnerabilities.filter(v => v.severity === 'critical').slice(0, 10),
         recommendation: 'Critical vulnerabilities must be fixed before production deployment',
         files: vulnerabilityAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Quality Gate: High vulnerability count
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        vulnerabilityAnalysis = await ctx.task(vulnerabilityAnalysisTask, { ...{
-    projectName,
-    vulnerabilities,
-    securityRequirements,
-    complianceStandards,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  if (highCount > acceptanceCriteria.maxHighVulnerabilities) {
+    await ctx.breakpoint({
       question: `${highCount} high-severity vulnerabilities exceed threshold (${acceptanceCriteria.maxHighVulnerabilities}). Review and create remediation plan?`,
       title: 'High Severity Vulnerabilities',
       context: {
@@ -675,15 +553,9 @@ export async function process(inputs, ctx) {
         securityScore,
         topHighVulnerabilities: prioritizedVulnerabilities.filter(v => v.severity === 'high').slice(0, 10),
         files: vulnerabilityAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 17: COMPLIANCE VERIFICATION
@@ -691,7 +563,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 17: Verifying compliance with security standards');
 
-  let complianceVerification = await ctx.task(complianceVerificationTask, {
+  const complianceVerification = await ctx.task(complianceVerificationTask, {
     projectName,
     complianceStandards,
     prioritizedVulnerabilities,
@@ -706,21 +578,8 @@ export async function process(inputs, ctx) {
   complianceStatus = complianceVerification.complianceStatus;
 
   // Quality Gate: Compliance requirement
-      let lastFeedback_phase17Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase17Review) {
-        complianceVerification = await ctx.task(complianceVerificationTask, { ...{
-    projectName,
-    complianceStandards,
-    prioritizedVulnerabilities,
-    securityScore,
-    sastResults,
-    dastResults,
-    apiSecurityResults,
-    outputDir
-  }, feedback: lastFeedback_phase17Review, attempt: attempt + 1 });
-      }
-  const phase17Review = await ctx.breakpoint({
+  if (acceptanceCriteria.complianceRequired && !complianceVerification.allCompliant) {
+    await ctx.breakpoint({
       question: `Compliance verification failed for: ${complianceVerification.failedStandards.join(', ')}. Compliance is required. Review gaps and remediate?`,
       title: 'Compliance Requirements Not Met',
       context: {
@@ -730,15 +589,9 @@ export async function process(inputs, ctx) {
         complianceGaps: complianceVerification.complianceGaps,
         recommendation: 'Address compliance gaps before production',
         files: complianceVerification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase17Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase17Review.approved) break;
-      lastFeedback_phase17Review = phase17Review.response || phase17Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   ctx.log('info', `Compliance: ${Object.keys(complianceStatus).length} standards checked`);
 
@@ -776,7 +629,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 19: Creating security remediation plan');
 
-  let remediationPlanning = await ctx.task(remediationPlanningTask, {
+  const remediationPlanning = await ctx.task(remediationPlanningTask, {
     projectName,
     prioritizedVulnerabilities,
     securityScore,
@@ -789,19 +642,8 @@ export async function process(inputs, ctx) {
 
   const remediationPlan = remediationPlanning.remediationPlan;
 
-    let lastFeedback_phase19Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase19Review) {
-      remediationPlanning = await ctx.task(remediationPlanningTask, { ...{
-    projectName,
-    prioritizedVulnerabilities,
-    securityScore,
-    complianceStatus,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_phase19Review, attempt: attempt + 1 });
-    }
-  const phase19Review = await ctx.breakpoint({
+  // Breakpoint: Review remediation plan
+  await ctx.breakpoint({
     question: `Remediation plan created with ${remediationPlan.totalTasks} tasks (${remediationPlan.criticalTasks} critical). Estimated effort: ${remediationPlan.estimatedEffort}. Review and approve plan?`,
     title: 'Security Remediation Plan Review',
     context: {
@@ -819,22 +661,16 @@ export async function process(inputs, ctx) {
         { path: remediationPlanning.planPath, format: 'markdown', label: 'Remediation Plan' },
         { path: remediationPlanning.taskListPath, format: 'json', label: 'Task List' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase19Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase19Review.approved) break;
-    lastFeedback_phase19Review = phase19Review.response || phase19Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 20: SECURITY GATE ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 20: Final security gate assessment');
 
-  let finalAssessment = await ctx.task(securityGateAssessmentTask, {
+  const finalAssessment = await ctx.task(securityGateAssessmentTask, {
     projectName,
     securityScore,
     prioritizedVulnerabilities,
@@ -849,20 +685,8 @@ export async function process(inputs, ctx) {
   const securityGatePassed = finalAssessment.securityGatePassed;
   const productionReady = finalAssessment.productionReady;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(securityGateAssessmentTask, { ...{
-    projectName,
-    securityScore,
-    prioritizedVulnerabilities,
-    complianceStatus,
-    acceptanceCriteria,
-    remediationPlan,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Security approval
+  await ctx.breakpoint({
     question: `Security Testing Complete for ${projectName}. Security Score: ${securityScore}/100. Gate: ${securityGatePassed ? 'PASSED' : 'FAILED'}. Production Ready: ${productionReady ? 'YES' : 'NO'}. ${finalAssessment.verdict}. Approve for deployment?`,
     title: 'Final Security Approval',
     context: {
@@ -892,15 +716,9 @@ export async function process(inputs, ctx) {
         { path: complianceVerification.reportPath, format: 'markdown', label: 'Compliance Report' },
         { path: remediationPlanning.planPath, format: 'markdown', label: 'Remediation Plan' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -982,7 +800,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

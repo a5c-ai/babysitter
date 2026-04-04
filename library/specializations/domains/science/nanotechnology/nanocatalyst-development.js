@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
   // PHASE 1: Catalyst Design and Computational Screening
   // --------------------------------------------------------------------------
 
-  let designResult = await ctx.task(catalystDesignTask, {
+  const designResult = await ctx.task(catalystDesignTask, {
     targetReaction,
     catalystType,
     performanceTargets,
@@ -80,33 +80,18 @@ export async function process(inputs, ctx) {
       recommendations: designResult.recommendations,
       screeningReport: designResult.screeningReport
     };
-    let lastFeedback_designApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_designApproval) {
-      designResult = await ctx.task(catalystDesignTask, { ...{
-    targetReaction,
-    catalystType,
-    performanceTargets,
-    supportMaterial,
-    constraints
-  }, feedback: lastFeedback_designApproval, attempt: attempt + 1 });
-    }
-  const designApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Catalyst design identified ${designResult.feasibleCandidates.length} candidates with predicted activities. Top candidate: ${designResult.topCandidate.composition}. Review computational screening results and approve synthesis?`,
     title: 'Catalyst Design Review',
     context: {
       runId: ctx.runId,
       candidates: designResult.feasibleCandidates,
       computationalPredictions: designResult.computationalResults
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_designApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (designApproval.approved) break;
-    lastFeedback_designApproval = designApproval.response || designApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // --------------------------------------------------------------------------
   // PHASE 2: Synthesis Optimization Loop
   // --------------------------------------------------------------------------
@@ -136,7 +121,7 @@ export async function process(inputs, ctx) {
     });
 
     // Evaluate synthesis quality
-    let synthesisQuality = await ctx.task(synthesisQualityTask, {
+    const synthesisQuality = await ctx.task(synthesisQualityTask, {
       iteration: synthesisIteration,
       synthesisResult,
       targetProperties: designResult.targetProperties,
@@ -152,38 +137,24 @@ export async function process(inputs, ctx) {
       characterization: synthesisResult.characterization
     };
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          synthesisQuality = await ctx.task(synthesisQualityTask, { ...{
-      iteration: synthesisIteration,
-      synthesisResult,
-      targetProperties: designResult.targetProperties,
-      history: synthesisHistory
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (!synthesisConverged && synthesisIteration < maxSynthesisIterations) {
+      await ctx.breakpoint({
         question: `Synthesis iteration ${synthesisIteration}: Quality score ${synthesisQuality.overallScore.toFixed(2)}, Reproducibility ${(synthesisQuality.reproducibility * 100).toFixed(1)}%. Continue optimization with recommended adjustments?`,
         title: 'Synthesis Optimization Checkpoint',
         context: {
           runId: ctx.runId,
           qualityDetails: synthesisQuality,
           recommendations: synthesisResult.optimizationRecommendations
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // --------------------------------------------------------------------------
   // PHASE 3: Activity and Selectivity Characterization
   // --------------------------------------------------------------------------
 
-  let activityResult = await ctx.task(activityCharacterizationTask, {
+  const activityResult = await ctx.task(activityCharacterizationTask, {
     catalyst: currentCatalyst,
     targetReaction,
     performanceTargets,
@@ -191,32 +162,17 @@ export async function process(inputs, ctx) {
   });
 
   if (activityResult.conversion < performanceTargets.conversion * 0.5) {
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        activityResult = await ctx.task(activityCharacterizationTask, { ...{
-    catalyst: currentCatalyst,
-    targetReaction,
-    performanceTargets,
-    testConditions: designResult.recommendedTestConditions
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+    // Catalyst significantly underperforms - consider alternative candidates
+    await ctx.breakpoint({
       question: `Catalyst shows low activity (${activityResult.conversion}% vs target ${performanceTargets.conversion}%). Evaluate alternative candidate or modify current design?`,
       title: 'Low Activity Alert',
       context: {
         runId: ctx.runId,
         activityData: activityResult,
         alternativeCandidates: designResult.feasibleCandidates.slice(1, 4)
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // --------------------------------------------------------------------------
   // PHASE 4: Iterative Performance Optimization
@@ -248,7 +204,7 @@ export async function process(inputs, ctx) {
     });
 
     // Re-evaluate performance
-    let newPerformance = await ctx.task(activityCharacterizationTask, {
+    const newPerformance = await ctx.task(activityCharacterizationTask, {
       catalyst: modificationResult.modifiedCatalyst,
       targetReaction,
       performanceTargets,
@@ -280,33 +236,19 @@ export async function process(inputs, ctx) {
     currentCatalyst = modificationResult.modifiedCatalyst;
     currentPerformance = newPerformance;
 
-        let lastFeedback_iterationApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval2) {
-          newPerformance = await ctx.task(activityCharacterizationTask, { ...{
-      catalyst: modificationResult.modifiedCatalyst,
-      targetReaction,
-      performanceTargets,
-      testConditions: designResult.recommendedTestConditions
-    }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
-        }
-  const iterationApproval2 = await ctx.breakpoint({
+    if (!performanceConverged && optimizationIteration < maxOptimizationIterations) {
+      await ctx.breakpoint({
         question: `Optimization iteration ${optimizationIteration}: Conversion ${newPerformance.conversion.toFixed(1)}% (target: ${performanceTargets.conversion}%), Selectivity ${newPerformance.selectivity.toFixed(1)}% (target: ${performanceTargets.selectivity}%). Continue with ${optimizationResult.nextStrategy}?`,
         title: 'Performance Optimization Checkpoint',
         context: {
           runId: ctx.runId,
           performanceData: newPerformance,
           optimizationHistory: optimizationHistory.slice(-3)
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval2.approved) break;
-        lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // --------------------------------------------------------------------------
   // PHASE 5: Reaction Mechanism Investigation
   // --------------------------------------------------------------------------
@@ -316,37 +258,23 @@ export async function process(inputs, ctx) {
     targetReaction,
     performanceData: currentPerformance,
     characterizationData: currentCatalyst.characterization
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      newPerformance = await ctx.task(activityCharacterizationTask, { ...{
-      catalyst: modificationResult.modifiedCatalyst,
-      targetReaction,
-      performanceTargets,
-      testConditions: designResult.recommendedTestConditions
-    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Mechanism study complete. Proposed pathway: ${mechanismResult.proposedMechanism.pathway}. Rate-determining step: ${mechanismResult.rateAnalysis.rds}. Review mechanistic insights?`,
     title: 'Mechanism Study Review',
     context: {
       runId: ctx.runId,
       mechanismDetails: mechanismResult,
       kineticData: mechanismResult.kineticAnalysis
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // --------------------------------------------------------------------------
   // PHASE 6: Stability Testing and Durability Assessment
   // --------------------------------------------------------------------------
 
-  let stabilityResult = await ctx.task(stabilityTestingTask, {
+  const stabilityResult = await ctx.task(stabilityTestingTask, {
     catalyst: currentCatalyst,
     targetReaction,
     stabilityTarget: performanceTargets.stability,
@@ -359,33 +287,19 @@ export async function process(inputs, ctx) {
       catalyst: currentCatalyst,
       stabilityData: stabilityResult,
       deactivationMechanisms: stabilityResult.deactivationAnalysis
-      let lastFeedback_assessmentApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_assessmentApproval) {
-        stabilityResult = await ctx.task(stabilityTestingTask, { ...{
-    catalyst: currentCatalyst,
-    targetReaction,
-    stabilityTarget: performanceTargets.stability,
-    acceleratedProtocol: true
-  }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
-      }
-  const assessmentApproval = await ctx.breakpoint({
+    });
+
+    await ctx.breakpoint({
       question: `Catalyst stability below target. Deactivation mechanisms: ${stabilityResult.deactivationAnalysis.primaryMechanism}. Implement stabilization strategy: ${stabilizationResult.recommendedStrategy}?`,
       title: 'Stability Enhancement Required',
       context: {
         runId: ctx.runId,
         stabilityData: stabilityResult,
         stabilizationOptions: stabilizationResult
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_assessmentApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (assessmentApproval.approved) break;
-      lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
-    }
-  // Apply stabilization
+      }
+    });
+
+    // Apply stabilization
     const stabilizedCatalyst = await ctx.task(catalystModificationTask, {
       catalyst: currentCatalyst,
       modifications: stabilizationResult.modifications,
@@ -394,6 +308,7 @@ export async function process(inputs, ctx) {
 
     currentCatalyst = stabilizedCatalyst.modifiedCatalyst;
   }
+
   // --------------------------------------------------------------------------
   // PHASE 7: Scale-Up Development
   // --------------------------------------------------------------------------
@@ -406,43 +321,29 @@ export async function process(inputs, ctx) {
   });
 
   // Scale-up validation
-  let scaleValidation = await ctx.task(scaleUpValidationTask, {
+  const scaleValidation = await ctx.task(scaleUpValidationTask, {
     scaleUpProtocol: scaleUpResult.protocol,
     targetScale: scaleRequirements.batchSize,
     qualitySpecifications: currentCatalyst.characterization.specifications
   });
 
-      let lastFeedback_validationApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_validationApproval) {
-        scaleValidation = await ctx.task(scaleUpValidationTask, { ...{
-    scaleUpProtocol: scaleUpResult.protocol,
-    targetScale: scaleRequirements.batchSize,
-    qualitySpecifications: currentCatalyst.characterization.specifications
-  }, feedback: lastFeedback_validationApproval, attempt: attempt + 1 });
-      }
-  const validationApproval = await ctx.breakpoint({
+  if (!scaleValidation.validated) {
+    await ctx.breakpoint({
       question: `Scale-up validation failed: ${scaleValidation.failureMode}. Review issues and approve remediation strategy?`,
       title: 'Scale-Up Validation Issue',
       context: {
         runId: ctx.runId,
         validationResults: scaleValidation,
         remediationOptions: scaleValidation.remediationStrategies
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_validationApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (validationApproval.approved) break;
-      lastFeedback_validationApproval = validationApproval.response || validationApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // --------------------------------------------------------------------------
   // PHASE 8: Process Integration and Documentation
   // --------------------------------------------------------------------------
 
-  let processDocumentation = await ctx.task(processDocumentationTask, {
+  const processDocumentation = await ctx.task(processDocumentationTask, {
     catalyst: currentCatalyst,
     synthesisProtocol: currentCatalyst.synthesisProtocol,
     performanceData: currentPerformance,
@@ -455,21 +356,9 @@ export async function process(inputs, ctx) {
 
   // --------------------------------------------------------------------------
   // FINAL REVIEW AND COMPLETION
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      processDocumentation = await ctx.task(processDocumentationTask, { ...{
-    catalyst: currentCatalyst,
-    synthesisProtocol: currentCatalyst.synthesisProtocol,
-    performanceData: currentPerformance,
-    mechanismInsights: mechanismResult,
-    stabilityProfile: stabilityResult,
-    scaleUpProtocol: scaleUpResult,
-    optimizationHistory,
-    synthesisHistory
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // --------------------------------------------------------------------------
+
+  await ctx.breakpoint({
     question: `Nanocatalyst development complete. Final performance: Conversion ${currentPerformance.conversion.toFixed(1)}%, Selectivity ${currentPerformance.selectivity.toFixed(1)}%, TOF ${currentPerformance.turnoverFrequency.toFixed(3)} s⁻¹. Approve final documentation and process package?`,
     title: 'Final Development Review',
     context: {
@@ -477,15 +366,9 @@ export async function process(inputs, ctx) {
       catalystSummary: currentCatalyst,
       performanceSummary: currentPerformance,
       documentationPackage: processDocumentation
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     optimizedCatalyst: {
@@ -535,7 +418,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -555,7 +439,8 @@ function calculateDevelopmentTime(synthesisHistory, optimizationHistory) {
   const optimizationTime = optimizationHistory.length * 1.5; // ~1.5 days per optimization
   return synthesisTime + optimizationTime;
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -25,7 +25,8 @@ export async function process(inputs, ctx) {
     hosRules = {},
     scheduleConstraints = {},
     outputDir = 'driver-scheduling-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -59,7 +60,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_phase4Review) {
         complianceValidation = await ctx.task(complianceValidationTask, { ...{ schedule: routeMatching.schedule, hosRules, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
       }
-  const phase4Review = await ctx.breakpoint({
+      const phase4Review = await ctx.breakpoint({
       question: `${complianceValidation.violations.length} potential HOS violations detected. Review and adjust schedule?`,
       title: 'HOS Compliance Review',
       context: { runId: ctx.runId, violations: complianceValidation.violations, files: complianceValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
@@ -70,9 +71,8 @@ export async function process(inputs, ctx) {
       });
       if (phase4Review.approved) break;
       lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
-
-  // PHASE 5: BREAK AND REST PLANNING
+    }
+    // PHASE 5: BREAK AND REST PLANNING
   ctx.log('info', 'Phase 5: Planning breaks and rest periods');
   const breakPlanning = await ctx.task(breakRestPlanningTask, { schedule: routeMatching.schedule, hosRules, outputDir });
   artifacts.push(...breakPlanning.artifacts);
@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       complianceReport = await ctx.task(complianceReportTask, { ...{ scheduleOptimization, complianceValidation, hosCalculation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Driver scheduling complete. ${scheduleOptimization.optimizedSchedule.length} assignments made. Compliance rate: ${complianceValidation.complianceRate}%. Approve schedule?`,
     title: 'Driver Scheduling Complete',
     context: {
@@ -125,7 +125,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/driver-scheduling-compliance', timestamp: startTime, outputDir }
   };
 }
-  // TASK DEFINITIONS
+// TASK DEFINITIONS
 export const driverAvailabilityTask = defineTask('driver-availability', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze driver availability', agent: { name: 'driver-availability-analyst', prompt: { role: 'Driver Availability Analyst', task: 'Analyze driver availability and constraints', context: args, instructions: ['Check driver status', 'Review home time requirements', 'Check certifications', 'Identify restrictions', 'Calculate available hours', 'Generate availability report'] }, outputSchema: { type: 'object', required: ['availability', 'artifacts'], properties: { availability: { type: 'array' }, restrictions: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'driver-scheduling', 'availability']
 }));

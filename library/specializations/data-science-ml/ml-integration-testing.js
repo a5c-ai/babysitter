@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Setting up and validating test environment');
-  let envSetup = await ctx.task(testEnvironmentSetupTask, {
+  const envSetup = await ctx.task(testEnvironmentSetupTask, {
     systemName,
     testEnvironment,
     components,
@@ -81,17 +81,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...envSetup.artifacts);
 
   // Quality Gate: Verify all required components are available
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        envSetup = await ctx.task(testEnvironmentSetupTask, { ...{
-    systemName,
-    testEnvironment,
-    components,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (envSetup.unavailableComponents.length > 0) {
+    await ctx.breakpoint({
       question: `${envSetup.unavailableComponents.length} component(s) unavailable: ${envSetup.unavailableComponents.join(', ')}. Continue with partial integration testing?`,
       title: 'Component Availability Warning',
       context: {
@@ -99,22 +90,16 @@ export async function process(inputs, ctx) {
         unavailableComponents: envSetup.unavailableComponents,
         availableComponents: envSetup.availableComponents,
         files: envSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: TEST DATA AND FIXTURES PREPARATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Preparing test data and fixtures');
-  let testDataPrep = await ctx.task(testDataPreparationTask, {
+  const testDataPrep = await ctx.task(testDataPreparationTask, {
     systemName,
     components,
     dataFixtures,
@@ -154,18 +139,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...healthCheckResults.flatMap(r => r.artifacts));
 
   // Quality Gate: All components must be healthy
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        testDataPrep = await ctx.task(testDataPreparationTask, { ...{
-    systemName,
-    components,
-    dataFixtures,
-    testEnvironment,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (unhealthyComponents.length > 0) {
+    await ctx.breakpoint({
       question: `${unhealthyComponents.length} component(s) failed health checks: ${unhealthyComponents.map(c => c.component).join(', ')}. Review and approve to continue?`,
       title: 'Component Health Check Failures',
       context: {
@@ -175,22 +150,16 @@ export async function process(inputs, ctx) {
           issues: c.issues
         })),
         files: unhealthyComponents.flatMap(c => c.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: INTEGRATION SCENARIO PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Planning integration test scenarios');
-  let scenarioPlanning = await ctx.task(integrationScenarioPlanningTask, {
+  const scenarioPlanning = await ctx.task(integrationScenarioPlanningTask, {
     systemName,
     components: envSetup.availableComponents,
     userScenarios: integrationScenarios,
@@ -201,19 +170,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioPlanning.artifacts);
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      scenarioPlanning = await ctx.task(integrationScenarioPlanningTask, { ...{
-    systemName,
-    components: envSetup.availableComponents,
-    userScenarios: integrationScenarios,
-    performanceRequirements,
-    targetCoverage,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review test plan
+  await ctx.breakpoint({
     question: `Integration test plan generated with ${scenarioPlanning.scenarios.length} scenarios covering ${scenarioPlanning.estimatedCoverage}% of system. Review and approve to execute?`,
     title: 'Integration Test Plan Review',
     context: {
@@ -226,15 +184,9 @@ export async function process(inputs, ctx) {
       })),
       estimatedCoverage: scenarioPlanning.estimatedCoverage,
       files: scenarioPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: UNIT INTEGRATION TESTS (COMPONENT PAIRS)
   // ============================================================================
@@ -268,19 +220,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Unit integration pass rate: ${unitIntegrationPassRate.toFixed(2)}%`);
 
   // Quality Gate: Minimum pass rate for unit integration
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        scenarioPlanning = await ctx.task(integrationScenarioPlanningTask, { ...{
-    systemName,
-    components: envSetup.availableComponents,
-    userScenarios: integrationScenarios,
-    performanceRequirements,
-    targetCoverage,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (unitIntegrationPassRate < 80) {
+    await ctx.breakpoint({
       question: `Unit integration pass rate: ${unitIntegrationPassRate.toFixed(2)}%. ${failedUnitTests.length} test(s) failed. Review failures and approve to continue?`,
       title: 'Unit Integration Test Failures',
       context: {
@@ -292,15 +233,9 @@ export async function process(inputs, ctx) {
           error: t.error
         })),
         files: failedUnitTests.flatMap(t => t.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: END-TO-END INTEGRATION TESTS
@@ -314,7 +249,7 @@ export async function process(inputs, ctx) {
   for (const scenario of e2eScenarios) {
     ctx.log('info', `Running E2E scenario: ${scenario.name}`);
 
-    let e2eResult = await ctx.task(endToEndIntegrationTestTask, {
+    const e2eResult = await ctx.task(endToEndIntegrationTestTask, {
       systemName,
       scenario,
       testData: testDataPrep.fixtures[scenario.fixtureKey],
@@ -334,19 +269,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...e2eResult.artifacts);
 
     // Quality Gate: Critical E2E scenarios must pass
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          e2eResult = await ctx.task(endToEndIntegrationTestTask, { ...{
-      systemName,
-      scenario,
-      testData: testDataPrep.fixtures[scenario.fixtureKey],
-      performanceRequirements,
-      testEnvironment,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (scenario.critical && !e2eResult.passed) {
+      await ctx.breakpoint({
         question: `Critical E2E scenario "${scenario.name}" failed: ${e2eResult.error}. Review and approve to continue?`,
         title: 'Critical E2E Test Failure',
         context: {
@@ -355,16 +279,11 @@ export async function process(inputs, ctx) {
           error: e2eResult.error,
           logs: e2eResult.logs,
           files: e2eResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   const e2ePassRate = (e2eTestResults.filter(r => r.passed).length / e2eTestResults.length) * 100;
   ctx.log('info', `E2E integration pass rate: ${e2ePassRate.toFixed(2)}%`);
 
@@ -399,19 +318,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Performance requirements must be met
   const performanceViolations = performanceResults.filter(r => !r.meetsRequirements);
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        e2eResult = await ctx.task(endToEndIntegrationTestTask, { ...{
-      systemName,
-      scenario,
-      testData: testDataPrep.fixtures[scenario.fixtureKey],
-      performanceRequirements,
-      testEnvironment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (performanceViolations.length > 0) {
+    await ctx.breakpoint({
       question: `${performanceViolations.length} performance test(s) failed to meet requirements. Review metrics and approve to continue?`,
       title: 'Performance Requirements Not Met',
       context: {
@@ -423,15 +331,9 @@ export async function process(inputs, ctx) {
           required: v.requiredValue
         })),
         files: performanceViolations.flatMap(v => v.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: DATA QUALITY AND MODEL BEHAVIOR INTEGRATION TESTS
@@ -516,6 +418,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...resilienceResult.artifacts);
   }
+
   // ============================================================================
   // PHASE 10: MONITORING AND OBSERVABILITY INTEGRATION TESTS
   // ============================================================================
@@ -543,7 +446,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Analyzing integration test coverage');
 
-  let coverageAnalysis = await ctx.task(integrationCoverageAnalysisTask, {
+  const coverageAnalysis = await ctx.task(integrationCoverageAnalysisTask, {
     systemName,
     components,
     scenarios: scenarioPlanning.scenarios,
@@ -556,19 +459,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Coverage threshold
   const actualCoverage = coverageAnalysis.overallCoverage;
-      let lastFeedback_phase11Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase11Review) {
-        coverageAnalysis = await ctx.task(integrationCoverageAnalysisTask, { ...{
-    systemName,
-    components,
-    scenarios: scenarioPlanning.scenarios,
-    testResults,
-    targetCoverage,
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-      }
-  const phase11Review = await ctx.breakpoint({
+  if (actualCoverage < targetCoverage) {
+    await ctx.breakpoint({
       question: `Integration test coverage: ${actualCoverage.toFixed(2)}%/${targetCoverage}%. Coverage target not met. Review gaps and approve to continue?`,
       title: 'Coverage Target Not Met',
       context: {
@@ -578,15 +470,9 @@ export async function process(inputs, ctx) {
         uncoveredComponents: coverageAnalysis.uncoveredComponents,
         uncoveredInteractions: coverageAnalysis.uncoveredInteractions,
         files: coverageAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase11Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase11Review.approved) break;
-      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: INTEGRATION SCORE CALCULATION
@@ -636,7 +522,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Final integration testing review');
 
-  let finalReview = await ctx.task(finalIntegrationReviewTask, {
+  const finalReview = await ctx.task(finalIntegrationReviewTask, {
     systemName,
     integrationScore,
     testResults,
@@ -651,22 +537,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...finalReview.artifacts);
 
   // Final Breakpoint: Deployment approval
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(finalIntegrationReviewTask, { ...{
-    systemName,
-    integrationScore,
-    testResults,
-    coverageAnalysis,
-    performanceResults,
-    resilienceResults,
-    monitoringTest,
-    testReport,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  const allTestsPassed = testResults.every(t => t.passed !== false);
+  await ctx.breakpoint({
     question: `Integration testing complete. Score: ${integrationScore.toFixed(2)}/100. Coverage: ${actualCoverage.toFixed(2)}%. ${finalReview.verdict}. Approve system for deployment?`,
     title: 'Final Integration Test Approval',
     context: {
@@ -689,15 +561,9 @@ export async function process(inputs, ctx) {
         { path: scoringResult.reportPath, format: 'json', label: 'Scoring Details' },
         { path: finalReview.reportPath, format: 'markdown', label: 'Final Review' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -748,7 +614,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

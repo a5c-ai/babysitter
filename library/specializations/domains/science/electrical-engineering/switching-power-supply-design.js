@@ -38,24 +38,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Select Converter Topology
-  let topologySelection = await ctx.task(topologySelectionTask, {
+  const topologySelection = await ctx.task(topologySelectionTask, {
     supplyName,
     specifications: specificationDefinition.specs,
     topology,
     constraints
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      topologySelection = await ctx.task(topologySelectionTask, { ...{
-    supplyName,
-    specifications: specificationDefinition.specs,
-    topology,
-    constraints
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review topology selection
+  await ctx.breakpoint({
     question: `Review topology selection for ${supplyName}. Selected: ${topologySelection.selectedTopology}. Proceed with magnetics design?`,
     title: 'Topology Review',
     context: {
@@ -67,15 +58,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: topologySelection
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Design Magnetic Components
   const magneticsDesign = await ctx.task(magneticsDesignTask, {
     supplyName,
@@ -92,7 +77,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Design Control Loop and Compensation
-  let controlLoopDesign = await ctx.task(controlLoopDesignTask, {
+  const controlLoopDesign = await ctx.task(controlLoopDesignTask, {
     supplyName,
     topology: topologySelection.selectedTopology,
     magnetics: magneticsDesign,
@@ -100,18 +85,8 @@ export async function process(inputs, ctx) {
     specifications: specificationDefinition.specs
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      controlLoopDesign = await ctx.task(controlLoopDesignTask, { ...{
-    supplyName,
-    topology: topologySelection.selectedTopology,
-    magnetics: magneticsDesign,
-    semiconductors: semiconductorSelection,
-    specifications: specificationDefinition.specs
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review control loop design
+  await ctx.breakpoint({
     question: `Review control loop design for ${supplyName}. Bandwidth: ${controlLoopDesign.bandwidth}. Phase margin: ${controlLoopDesign.phaseMargin}. Proceed with simulation?`,
     title: 'Control Loop Review',
     context: {
@@ -122,17 +97,11 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: controlLoopDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Simulate Steady-State and Transient Performance
-  let performanceSimulation = await ctx.task(performanceSimulationTask, {
+  const performanceSimulation = await ctx.task(performanceSimulationTask, {
     supplyName,
     topology: topologySelection.selectedTopology,
     magnetics: magneticsDesign,
@@ -142,34 +111,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Performance must meet specifications
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        performanceSimulation = await ctx.task(performanceSimulationTask, { ...{
-    supplyName,
-    topology: topologySelection.selectedTopology,
-    magnetics: magneticsDesign,
-    semiconductors: semiconductorSelection,
-    controlLoop: controlLoopDesign,
-    specifications: specificationDefinition.specs
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!performanceSimulation.meetsSpecs) {
+    await ctx.breakpoint({
       question: `Simulation shows ${performanceSimulation.failures.length} specifications not met. Review and iterate design?`,
       title: 'Performance Issues',
       context: {
         runId: ctx.runId,
         failures: performanceSimulation.failures,
         recommendations: performanceSimulation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 7: Design PCB Layout for Thermal and EMI
   const pcbLayoutGuidelines = await ctx.task(pcbLayoutGuidelinesTask, {
@@ -181,24 +133,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Test and Validate Performance
-  let testValidation = await ctx.task(testValidationTask, {
+  const testValidation = await ctx.task(testValidationTask, {
     supplyName,
     specifications: specificationDefinition.specs,
     performanceSimulation,
     pcbLayout: pcbLayoutGuidelines
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      testValidation = await ctx.task(testValidationTask, { ...{
-    supplyName,
-    specifications: specificationDefinition.specs,
-    performanceSimulation,
-    pcbLayout: pcbLayoutGuidelines
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `Switching power supply design complete for ${supplyName}. Efficiency: ${testValidation.efficiency}. Approve for production?`,
     title: 'Design Approval',
     context: {
@@ -209,15 +152,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/power-supply-design.json`, format: 'json', content: { magnetics: magneticsDesign, control: controlLoopDesign } },
         { path: `artifacts/power-supply-report.md`, format: 'markdown', content: testValidation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     supplyName,
@@ -242,7 +179,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',

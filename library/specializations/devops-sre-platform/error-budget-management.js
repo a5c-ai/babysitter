@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Validating SLO configuration and calculating error budgets');
 
-  let sloValidation = await ctx.task(sloConfigurationTask, {
+  const sloValidation = await ctx.task(sloConfigurationTask, {
     services,
     slos,
     reportingPeriod,
@@ -87,19 +87,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLO Configuration validated - ${sloValidation.validSLOs} valid SLOs across ${services.length} services`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      sloValidation = await ctx.task(sloConfigurationTask, { ...{
-    services,
-    slos,
-    reportingPeriod,
-    environment,
-    monitoringPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: SLO configuration review
+  await ctx.breakpoint({
     question: `SLO configuration validated for ${services.length} services. ${sloValidation.validSLOs} valid SLOs configured. Review SLO definitions and error budget calculations?`,
     title: 'SLO Configuration Review',
     context: {
@@ -112,15 +101,9 @@ export async function process(inputs, ctx) {
       },
       errorBudgetCalculations: sloValidation.budgetCalculations,
       files: sloValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: COLLECT OBSERVABILITY DATA
   // ============================================================================
@@ -150,7 +133,7 @@ export async function process(inputs, ctx) {
   // Calculate error budgets for each service in parallel
   const errorBudgetResults = await ctx.parallel.all(
     services.map(service => async () => {
-      let result = await ctx.task(calculateErrorBudgetTask, {
+      const result = await ctx.task(calculateErrorBudgetTask, {
         service,
         slos,
         reportingPeriod,
@@ -171,19 +154,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Low budget warning
   const criticalServices = errorBudgets.filter(eb => eb.budgetRemainingPercent < alertThresholds.budgetRemaining);
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        result = await ctx.task(calculateErrorBudgetTask, { ...{
-        service,
-        slos,
-        reportingPeriod,
-        dataCollection,
-        sloValidation,
-        outputDir
-      }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (criticalServices.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalServices.length} service(s) have less than ${alertThresholds.budgetRemaining}% error budget remaining: ${criticalServices.map(s => s.service).join(', ')}. Review budget consumption?`,
       title: 'Low Error Budget Warning',
       context: {
@@ -196,15 +168,9 @@ export async function process(inputs, ctx) {
         })),
         recommendation: 'Consider deployment freeze or reduced release velocity',
         files: criticalServices.map(s => ({ path: s.reportPath, format: 'markdown', label: `${s.service} Error Budget Report` }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: BURN RATE ANALYSIS
@@ -212,7 +178,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Analyzing error budget burn rates');
 
-  let burnRateAnalysis = await ctx.task(burnRateAnalysisTask, {
+  const burnRateAnalysis = await ctx.task(burnRateAnalysisTask, {
     services,
     errorBudgets,
     alertThresholds,
@@ -226,19 +192,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Burn rate analysis complete - ${burnRateAnalysis.fastBurnServices.length} services with fast burn rate`);
 
   // Quality Gate: Fast burn rate alert
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        burnRateAnalysis = await ctx.task(burnRateAnalysisTask, { ...{
-    services,
-    errorBudgets,
-    alertThresholds,
-    reportingPeriod,
-    dataCollection,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (burnRateAnalysis.fastBurnServices.length > 0) {
+    await ctx.breakpoint({
       question: `Fast burn rate detected! ${burnRateAnalysis.fastBurnServices.length} service(s) consuming error budget rapidly: ${burnRateAnalysis.fastBurnServices.join(', ')}. Investigate immediately?`,
       title: 'Fast Burn Rate Alert',
       context: {
@@ -248,15 +203,9 @@ export async function process(inputs, ctx) {
         projectedExhaustion: burnRateAnalysis.projectedExhaustion,
         recommendation: 'Immediate investigation required - likely ongoing incident',
         files: burnRateAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: INCIDENT CORRELATION
@@ -265,7 +214,7 @@ export async function process(inputs, ctx) {
   if (incidentCorrelation) {
     ctx.log('info', 'Phase 5: Correlating error budget consumption with incidents');
 
-    let incidentCorrelationResult = await ctx.task(incidentCorrelationTask, {
+    const incidentCorrelationResult = await ctx.task(incidentCorrelationTask, {
       services,
       errorBudgets,
       burnRateAnalysis,
@@ -279,19 +228,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Incident correlation complete - ${incidentCorrelationResult.correlatedIncidents} incidents correlated with budget consumption`);
 
     // Quality Gate: High-impact incidents review
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          incidentCorrelationResult = await ctx.task(incidentCorrelationTask, { ...{
-      services,
-      errorBudgets,
-      burnRateAnalysis,
-      reportingPeriod,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    if (incidentCorrelationResult.highImpactIncidents.length > 0) {
+      await ctx.breakpoint({
         question: `${incidentCorrelationResult.highImpactIncidents.length} high-impact incident(s) identified consuming significant error budget. Review incidents and budget impact?`,
         title: 'High-Impact Incidents Review',
         context: {
@@ -304,16 +242,11 @@ export async function process(inputs, ctx) {
             impact: inc.impact
           })),
           files: incidentCorrelationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 6: TOIL AND RELIABILITY ANALYSIS
   // ============================================================================
@@ -340,7 +273,7 @@ export async function process(inputs, ctx) {
   if (policyEnforcement) {
     ctx.log('info', 'Phase 7: Enforcing error budget policies');
 
-    let policyEnforcement = await ctx.task(errorBudgetPolicyTask, {
+    const policyEnforcement = await ctx.task(errorBudgetPolicyTask, {
       services,
       errorBudgets,
       burnRateAnalysis,
@@ -358,21 +291,8 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Policy decisions requiring approval
     const criticalDecisions = policyEnforcement.decisions.filter(d => d.requiresApproval);
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          policyEnforcement = await ctx.task(errorBudgetPolicyTask, { ...{
-      services,
-      errorBudgets,
-      burnRateAnalysis,
-      toilAnalysis,
-      alertThresholds,
-      autoFreeze,
-      stakeholders,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (criticalDecisions.length > 0) {
+      await ctx.breakpoint({
         question: `${criticalDecisions.length} critical policy decision(s) require approval: ${criticalDecisions.map(d => d.action).join(', ')}. Review and approve?`,
         title: 'Policy Decisions Requiring Approval',
         context: {
@@ -385,16 +305,11 @@ export async function process(inputs, ctx) {
             recommendation: d.recommendation
           })),
           files: policyEnforcement.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 8: STAKEHOLDER REPORTING
   // ============================================================================
@@ -423,7 +338,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating reliability improvement recommendations');
 
-  let recommendationGeneration = await ctx.task(generateRecommendationsTask, {
+  const recommendationGeneration = await ctx.task(generateRecommendationsTask, {
     services,
     errorBudgets,
     burnRateAnalysis,
@@ -441,21 +356,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Review high-priority recommendations
   const highPriorityRecs = recommendations.filter(r => r.priority === 'critical' || r.priority === 'high');
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        recommendationGeneration = await ctx.task(generateRecommendationsTask, { ...{
-    services,
-    errorBudgets,
-    burnRateAnalysis,
-    toilAnalysis,
-    incidentCorrelation: incidentCorrelation ? burnRateAnalysis : null,
-    reportingPeriod,
-    slos,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (highPriorityRecs.length > 0) {
+    await ctx.breakpoint({
       question: `${highPriorityRecs.length} high-priority recommendation(s) generated. Review and prioritize for action?`,
       title: 'Reliability Improvement Recommendations',
       context: {
@@ -469,15 +371,9 @@ export async function process(inputs, ctx) {
           effort: r.estimatedEffort
         })),
         files: recommendationGeneration.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: MONITORING AND ALERTING SETUP
@@ -523,7 +419,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating error budget documentation');
 
-  let documentation = await ctx.task(generateErrorBudgetDocumentationTask, {
+  const documentation = await ctx.task(generateErrorBudgetDocumentationTask, {
     services,
     errorBudgets,
     burnRateAnalysis,
@@ -542,25 +438,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Documentation generated - Report: ${documentation.reportPath}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(generateErrorBudgetDocumentationTask, { ...{
-    services,
-    errorBudgets,
-    burnRateAnalysis,
-    toilAnalysis,
-    policyDecisions,
-    recommendations,
-    stakeholderReporting,
-    monitoringSetup,
-    trendAnalysis,
-    slos,
-    reportingPeriod,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Error Budget Management Complete
+  await ctx.breakpoint({
     question: `Error Budget Management Complete. Average budget remaining: ${totalBudgetRemaining.toFixed(2)}%. ${criticalServices.length} service(s) below threshold. ${recommendations.length} recommendations. Approve and distribute reports?`,
     title: 'Final Error Budget Review',
     context: {
@@ -586,15 +465,9 @@ export async function process(inputs, ctx) {
         { path: documentation.executiveSummaryPath, format: 'markdown', label: 'Executive Summary' },
         ...stakeholderReporting.reports.map(r => ({ path: r.path, format: r.format, label: r.label }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const totalDuration = endTime - startTime;
 
@@ -678,7 +551,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

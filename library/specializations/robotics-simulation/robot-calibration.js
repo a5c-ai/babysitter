@@ -76,6 +76,7 @@ export async function process(inputs, ctx) {
     calibrationResults.intrinsic = intrinsicCalibration;
     if (intrinsicCalibration.issues) issues.push(...intrinsicCalibration.issues);
   }
+
   // ============================================================================
   // PHASE 3: EXTRINSIC SENSOR CALIBRATION
   // ============================================================================
@@ -95,6 +96,7 @@ export async function process(inputs, ctx) {
     calibrationResults.extrinsic = extrinsicCalibration;
     if (extrinsicCalibration.issues) issues.push(...extrinsicCalibration.issues);
   }
+
   // ============================================================================
   // PHASE 4: KINEMATIC PARAMETER CALIBRATION
   // ============================================================================
@@ -112,6 +114,7 @@ export async function process(inputs, ctx) {
     calibrationResults.kinematic = kinematicCalibration;
     if (kinematicCalibration.issues) issues.push(...kinematicCalibration.issues);
   }
+
   // ============================================================================
   // PHASE 5: IMU CALIBRATION
   // ============================================================================
@@ -129,6 +132,7 @@ export async function process(inputs, ctx) {
     calibrationResults.imu = imuCalibration;
     if (imuCalibration.issues) issues.push(...imuCalibration.issues);
   }
+
   // ============================================================================
   // PHASE 6: HAND-EYE CALIBRATION
   // ============================================================================
@@ -148,13 +152,14 @@ export async function process(inputs, ctx) {
     calibrationResults.handEye = handEyeCalibration;
     if (handEyeCalibration.issues) issues.push(...handEyeCalibration.issues);
   }
+
   // ============================================================================
   // PHASE 7: CALIBRATION VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Calibration Accuracy Validation');
 
-  let validation = await ctx.task(calibrationValidationTask, {
+  const validation = await ctx.task(calibrationValidationTask, {
     robotName,
     calibrationResults,
     calibrationTypes,
@@ -165,17 +170,8 @@ export async function process(inputs, ctx) {
   if (validation.issues) issues.push(...validation.issues);
 
   // Quality Gate: Calibration accuracy
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        validation = await ctx.task(calibrationValidationTask, { ...{
-    robotName,
-    calibrationResults,
-    calibrationTypes,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!validation.allCalibrationsPassed) {
+    await ctx.breakpoint({
       question: `Calibration validation for ${robotName} found accuracy issues. Failed: ${validation.failedCalibrations.join(', ')}. Review and recalibrate?`,
       title: 'Calibration Accuracy Concerns',
       context: {
@@ -183,15 +179,9 @@ export async function process(inputs, ctx) {
         failedCalibrations: validation.failedCalibrations,
         accuracyMetrics: validation.accuracyMetrics,
         files: validation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: CALIBRATION FILE GENERATION
@@ -214,7 +204,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Calibration Documentation and Procedures');
 
-  let documentation = await ctx.task(calibrationDocumentationTask, {
+  const documentation = await ctx.task(calibrationDocumentationTask, {
     robotName,
     calibrationResults,
     validation,
@@ -224,18 +214,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(calibrationDocumentationTask, { ...{
-    robotName,
-    calibrationResults,
-    validation,
-    fileGeneration,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Robot Calibration Complete for ${robotName}. ${validation.passedCalibrations.length}/${calibrationTypes.length} calibrations passed. Review calibration package?`,
     title: 'Robot Calibration Complete',
     context: {
@@ -250,15 +230,9 @@ export async function process(inputs, ctx) {
         { path: documentation.docPath, format: 'markdown', label: 'Calibration Report' },
         ...fileGeneration.calibrationFiles.map(f => ({ path: f.path, format: 'yaml', label: f.type }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -282,7 +256,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: DSA Process Design
-  let processDesign = await ctx.task(dsaProcessDesignTask, {
+  const processDesign = await ctx.task(dsaProcessDesignTask, {
     dsaSystem,
     targetPattern,
     substrateGuide
@@ -48,16 +48,9 @@ export async function process(inputs, ctx) {
       recommendations: processDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      processDesign = await ctx.task(dsaProcessDesignTask, { ...{
-    dsaSystem,
-    targetPattern,
-    substrateGuide
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review DSA process design
+  await ctx.breakpoint({
     question: `Review ${dsaSystem} DSA process design. Target pattern: ${targetPattern.type} with ${targetPattern.pitch}nm pitch. Approve to proceed?`,
     title: 'DSA Process Design Review',
     context: {
@@ -71,15 +64,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: processDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Substrate and Guide Preparation
   const substratePreparation = await ctx.task(substratePreparationTask, {
     substrateGuide,
@@ -115,7 +102,7 @@ export async function process(inputs, ctx) {
     });
 
     // DSA execution and characterization
-    let dsaExecution = await ctx.task(dsaExecutionTask, {
+    const dsaExecution = await ctx.task(dsaExecutionTask, {
       dsaSystem,
       targetPattern,
       annealingParams: annealingOptimization.optimizedParameters,
@@ -136,18 +123,8 @@ export async function process(inputs, ctx) {
 
     currentAnnealingParams = annealingOptimization.optimizedParameters;
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          dsaExecution = await ctx.task(dsaExecutionTask, { ...{
-      dsaSystem,
-      targetPattern,
-      annealingParams: annealingOptimization.optimizedParameters,
-      filmDeposition,
-      substratePreparation
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (defectDensity > defectTarget && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: Defect density = ${defectDensity.toFixed(4)}/um2 (target: ${defectTarget}/um2). Continue optimization?`,
         title: 'DSA Annealing Optimization Progress',
         context: {
@@ -156,18 +133,13 @@ export async function process(inputs, ctx) {
           defectDensity,
           defectTarget,
           patternQuality
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 5: Defect Analysis
-  let defectAnalysis = await ctx.task(defectAnalysisTask, {
+  const defectAnalysis = await ctx.task(defectAnalysisTask, {
     dsaSystem,
     targetPattern,
     annealingHistory,
@@ -175,17 +147,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Defect density must be acceptable
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        defectAnalysis = await ctx.task(defectAnalysisTask, { ...{
-    dsaSystem,
-    targetPattern,
-    annealingHistory,
-    defectDensity
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (defectDensity > defectTarget) {
+    await ctx.breakpoint({
       question: `Defect density ${defectDensity.toFixed(4)}/um2 exceeds target ${defectTarget}/um2 after ${iteration} iterations. Review defect reduction strategies?`,
       title: 'DSA Defect Density Warning',
       context: {
@@ -194,15 +157,9 @@ export async function process(inputs, ctx) {
         defectTarget,
         defectTypes: defectAnalysis.defectTypes,
         recommendations: defectAnalysis.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Pattern Transfer Development
   const patternTransfer = await ctx.task(patternTransferTask, {
@@ -236,7 +193,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Recipe Documentation
-  let recipeDocumentation = await ctx.task(recipeDocumentationTask, {
+  const recipeDocumentation = await ctx.task(recipeDocumentationTask, {
     dsaSystem,
     targetPattern,
     substrateGuide,
@@ -250,24 +207,8 @@ export async function process(inputs, ctx) {
     annealingHistory
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      recipeDocumentation = await ctx.task(recipeDocumentationTask, { ...{
-    dsaSystem,
-    targetPattern,
-    substrateGuide,
-    substratePreparation,
-    filmDeposition,
-    optimizedAnnealing: currentAnnealingParams,
-    patternTransfer,
-    defectAnalysis,
-    uniformityAssessment,
-    processWindow,
-    annealingHistory
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Process approval
+  await ctx.breakpoint({
     question: `DSA process development complete. Defect density: ${defectDensity.toFixed(4)}/um2. Pattern quality score: ${patternQuality}/100. Alignment: ${alignmentVerification.alignment}%. Approve process recipe?`,
     title: 'DSA Process Approval',
     context: {
@@ -280,15 +221,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/dsa-recipe.md', format: 'markdown', content: recipeDocumentation.markdown },
         { path: 'artifacts/annealing-parameters.json', format: 'json', content: currentAnnealingParams }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     processRecipe: {
@@ -320,7 +255,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const dsaProcessDesignTask = defineTask('dsa-process-design', (args, taskCtx) => ({
   kind: 'agent',

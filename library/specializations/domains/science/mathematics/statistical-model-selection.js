@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Assess Data Distribution and Structure
-  let dataAssessment = await ctx.task(dataAssessmentTask, {
+  const dataAssessment = await ctx.task(dataAssessmentTask, {
     dataDescription,
     dataCharacteristics,
     researchQuestion
@@ -46,16 +46,9 @@ export async function process(inputs, ctx) {
       recommendedModel: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      dataAssessment = await ctx.task(dataAssessmentTask, { ...{
-    dataDescription,
-    dataCharacteristics,
-    researchQuestion
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review data assessment
+  await ctx.breakpoint({
     question: `Data assessment complete. Structure: ${dataAssessment.dataStructure}, Response type: ${dataAssessment.responseType}. Correct?`,
     title: 'Data Assessment Review',
     context: {
@@ -67,15 +60,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataAssessment
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Check Model Assumptions
   const assumptionChecking = await ctx.task(assumptionCheckingTask, {
     dataAssessment,
@@ -92,7 +79,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Validate Model Diagnostics
-  let modelDiagnostics = await ctx.task(modelDiagnosticsTask, {
+  const modelDiagnostics = await ctx.task(modelDiagnosticsTask, {
     modelComparison,
     dataAssessment,
     topModels: modelComparison.rankedModels.slice(0, 3)
@@ -100,34 +87,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Check for critical diagnostic issues
   const criticalIssues = modelDiagnostics.diagnosticResults.filter(d => d.severity === 'critical');
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        modelDiagnostics = await ctx.task(modelDiagnosticsTask, { ...{
-    modelComparison,
-    dataAssessment,
-    topModels: modelComparison.rankedModels.slice(0, 3)
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Found ${criticalIssues.length} critical diagnostic issues with top models. Review alternatives?`,
       title: 'Model Diagnostic Issues',
       context: {
         runId: ctx.runId,
         criticalIssues,
         recommendation: 'Consider alternative models or data transformations'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Document Selection Rationale
-  let selectionDocumentation = await ctx.task(selectionDocumentationTask, {
+  const selectionDocumentation = await ctx.task(selectionDocumentationTask, {
     dataAssessment,
     assumptionChecking,
     modelComparison,
@@ -135,18 +108,8 @@ export async function process(inputs, ctx) {
     researchQuestion
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      selectionDocumentation = await ctx.task(selectionDocumentationTask, { ...{
-    dataAssessment,
-    assumptionChecking,
-    modelComparison,
-    modelDiagnostics,
-    researchQuestion
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Selection Complete
+  await ctx.breakpoint({
     question: `Model selection complete. Recommended: ${modelComparison.recommendedModel}. Approve selection?`,
     title: 'Model Selection Complete',
     context: {
@@ -157,15 +120,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/model-selection.json`, format: 'json', content: { modelComparison, modelDiagnostics } }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     dataDescription,
@@ -193,7 +150,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const dataAssessmentTask = defineTask('data-assessment', (args, taskCtx) => ({
   kind: 'agent',

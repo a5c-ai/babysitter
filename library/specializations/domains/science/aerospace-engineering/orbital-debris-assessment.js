@@ -19,7 +19,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_assessmentApproval) {
         collisionAnalysis = await ctx.task(collisionAnalysisTask, { ...{ projectName, orbitDefinition, spacecraftConfig }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
       }
-  const assessmentApproval = await ctx.breakpoint({
+      const assessmentApproval = await ctx.breakpoint({
       question: `Collision probability ${collisionAnalysis.probability.toExponential(2)} exceeds 1e-4. Review mitigation options?`,
       title: 'Collision Risk Warning',
       context: { runId: ctx.runId, collisionAnalysis },
@@ -30,9 +30,8 @@ export async function process(inputs, ctx) {
       });
       if (assessmentApproval.approved) break;
       lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
-    } }
-
-  const shieldingAnalysis = await ctx.task(shieldingAnalysisTask, { projectName, spacecraftConfig, riskAssessment });
+    }
+    const shieldingAnalysis = await ctx.task(shieldingAnalysisTask, { projectName, spacecraftConfig, riskAssessment });
   const deorbitPlan = await ctx.task(deorbitPlanTask, { projectName, orbitDefinition, spacecraftConfig, missionDuration });
   const mitigationPlan = await ctx.task(mitigationPlanTask, { projectName, riskAssessment, shieldingAnalysis, deorbitPlan });
   let complianceStatus = await ctx.task(debrisComplianceTask, { projectName, mitigationPlan, deorbitPlan });
@@ -41,7 +40,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       complianceStatus = await ctx.task(debrisComplianceTask, { ...{ projectName, mitigationPlan, deorbitPlan }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Debris assessment complete for ${projectName}. Compliance: ${complianceStatus.compliant ? 'Yes' : 'No'}. Approve?`,
     title: 'Debris Assessment Approval',
     context: { runId: ctx.runId, summary: { probability: collisionAnalysis.probability, deorbitTime: deorbitPlan.deorbitTime, compliant: complianceStatus.compliant } },
@@ -55,7 +54,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, collisionRisk: collisionAnalysis, mitigationPlan, complianceStatus, report, metadata: { processId: 'orbital-debris-assessment', timestamp: ctx.now() } };
 }
-
 export const debrisRiskAssessmentTask = defineTask('debris-risk-assessment', (args, taskCtx) => ({
   kind: 'agent', title: `Risk Assessment - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Orbital Debris Analyst', task: 'Assess debris environment risk', context: args,

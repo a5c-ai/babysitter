@@ -17,7 +17,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_analysisApproval) {
       environmentAnalysis = await ctx.task(environmentAnalysisTask, { ...{ projectName, productSpecification, environmentalRequirements }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
     }
-  const analysisApproval = await ctx.breakpoint({
+    const analysisApproval = await ctx.breakpoint({
     question: `Environmental tests tailored for ${projectName}. ${testTailoring.tests.length} tests identified. Proceed with sequence planning?`,
     title: 'Test Tailoring Review',
     context: { runId: ctx.runId, testTailoring },
@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_testApproval) {
         testSequence = await ctx.task(testSequenceTask, { ...{ projectName, vibrationTest, thermalTest, emiEmcTest, combinedEnvTest, testTailoring }, feedback: lastFeedback_testApproval, attempt: attempt + 1 });
       }
-  const testApproval = await ctx.breakpoint({
+      const testApproval = await ctx.breakpoint({
       question: `Preconditioning tests required before ${testSequence.preconditioningFor.length} tests. Confirm sequence?`,
       title: 'Preconditioning Review',
       context: { runId: ctx.runId, preconditioning: testSequence.preconditioningFor },
@@ -52,16 +52,15 @@ export async function process(inputs, ctx) {
       });
       if (testApproval.approved) break;
       lastFeedback_testApproval = testApproval.response || testApproval.feedback || 'Changes requested';
-    } }
-
-  const testSpecifications = await ctx.task(testSpecificationsTask, { projectName, testSequence, testTailoring });
+    }
+    const testSpecifications = await ctx.task(testSpecificationsTask, { projectName, testSequence, testTailoring });
   let complianceStatus = await ctx.task(environmentalComplianceTask, { projectName, testSpecifications, standards });
     let lastFeedback_finalApproval = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback_finalApproval) {
       complianceStatus = await ctx.task(environmentalComplianceTask, { ...{ projectName, testSpecifications, standards }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Environmental test sequence complete for ${projectName}. ${testSpecifications.length} test specs. Approve?`,
     title: 'Environmental Test Approval',
     context: { runId: ctx.runId, summary: { tests: testSpecifications.length, duration: testSequence.totalDuration, compliance: complianceStatus.compliant } },
@@ -75,7 +74,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, testSequence, testSpecifications, complianceStatus, report, metadata: { processId: 'environmental-testing-sequence', timestamp: ctx.now() } };
 }
-
 export const environmentAnalysisTask = defineTask('environment-analysis', (args, taskCtx) => ({
   kind: 'agent', title: `Environment Analysis - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Environmental Engineer', task: 'Analyze operational environment', context: args,

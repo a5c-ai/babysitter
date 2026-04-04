@@ -29,10 +29,9 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // PHASE 1: DOCUMENTATION DISCOVERY AND INVENTORY
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: 'Starting documentation testing. Discover and inventory documentation files?',
     title: 'Phase 1: Documentation Discovery',
     context: {
@@ -40,16 +39,10 @@ export async function process(inputs, ctx) {
       phase: 'discovery',
       docsPath,
       docType
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
-  let docsInventory = await ctx.task(docsInventoryTask, {
+    }
+  });
+
+  const docsInventory = await ctx.task(docsInventoryTask, {
     docsPath,
     docType,
     outputDir
@@ -65,36 +58,24 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/technical-documentation/docs-testing', timestamp: startTime }
     };
   }
+
   // ============================================================================
   // PHASE 2: STRUCTURAL VALIDATION
   // ============================================================================
 
   let structureValidation = null;
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        docsInventory = await ctx.task(docsInventoryTask, { ...{
-    docsPath,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (validateStructure) {
+    await ctx.breakpoint({
       question: `Found ${docsInventory.fileCount} documentation files. Validate document structure and formatting?`,
       title: 'Phase 2: Structural Validation',
       context: {
         runId: ctx.runId,
         phase: 'structural-validation',
         fileCount: docsInventory.fileCount
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    }    structureValidation = await ctx.task(structureValidationTask, {
+      }
+    });
+
+    structureValidation = await ctx.task(structureValidationTask, {
       docsInventory,
       docType,
       outputDir
@@ -102,34 +83,22 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...structureValidation.artifacts);
   }
+
   // ============================================================================
   // PHASE 3: CONTENT ACCURACY VERIFICATION
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      docsInventory = await ctx.task(docsInventoryTask, { ...{
-    docsPath,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: 'Validate content accuracy and completeness?',
     title: 'Phase 3: Content Accuracy Verification',
     context: {
       runId: ctx.runId,
       phase: 'accuracy-verification',
       structureIssues: structureValidation?.issueCount || 0
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
-  let accuracyVerification = await ctx.task(accuracyVerificationTask, {
+    }
+  });
+
+  const accuracyVerification = await ctx.task(accuracyVerificationTask, {
     docsInventory,
     docType,
     outputDir
@@ -142,31 +111,18 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   let codeExampleTests = null;
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        accuracyVerification = await ctx.task(accuracyVerificationTask, { ...{
-    docsInventory,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (testCodeExamples && docsInventory.codeExampleCount > 0) {
+    await ctx.breakpoint({
       question: `Found ${docsInventory.codeExampleCount} code examples. Test and validate code examples?`,
       title: 'Phase 4: Code Example Testing',
       context: {
         runId: ctx.runId,
         phase: 'code-testing',
         exampleCount: docsInventory.codeExampleCount
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    }    codeExampleTests = await ctx.task(codeExampleTestingTask, {
+      }
+    });
+
+    codeExampleTests = await ctx.task(codeExampleTestingTask, {
       docsInventory,
       docType,
       outputDir
@@ -174,36 +130,24 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...codeExampleTests.artifacts);
   }
+
   // ============================================================================
   // PHASE 5: LINK VALIDATION
   // ============================================================================
 
   let linkValidation = null;
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        accuracyVerification = await ctx.task(accuracyVerificationTask, { ...{
-    docsInventory,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (checkLinks) {
+    await ctx.breakpoint({
       question: 'Check all internal and external links for validity?',
       title: 'Phase 5: Link Validation',
       context: {
         runId: ctx.runId,
         phase: 'link-validation',
         estimatedLinks: docsInventory.estimatedLinkCount || 'unknown'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    }    linkValidation = await ctx.task(linkValidationTask, {
+      }
+    });
+
+    linkValidation = await ctx.task(linkValidationTask, {
       docsInventory,
       docType,
       outputDir
@@ -211,35 +155,23 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...linkValidation.artifacts);
   }
+
   // ============================================================================
   // PHASE 6: GRAMMAR AND LANGUAGE QUALITY
   // ============================================================================
 
   let grammarCheck = null;
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        accuracyVerification = await ctx.task(accuracyVerificationTask, { ...{
-    docsInventory,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (checkGrammar) {
+    await ctx.breakpoint({
       question: 'Check grammar, spelling, and language quality?',
       title: 'Phase 6: Grammar and Language Quality',
       context: {
         runId: ctx.runId,
         phase: 'grammar-check'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }    grammarCheck = await ctx.task(grammarCheckTask, {
+      }
+    });
+
+    grammarCheck = await ctx.task(grammarCheckTask, {
       docsInventory,
       docType,
       outputDir
@@ -247,35 +179,23 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...grammarCheck.artifacts);
   }
+
   // ============================================================================
   // PHASE 7: ACCESSIBILITY VALIDATION
   // ============================================================================
 
   let accessibilityValidation = null;
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        accuracyVerification = await ctx.task(accuracyVerificationTask, { ...{
-    docsInventory,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (validateAccessibility && (docType === 'html' || docType === 'api-docs')) {
+    await ctx.breakpoint({
       question: 'Validate documentation accessibility (WCAG compliance)?',
       title: 'Phase 7: Accessibility Validation',
       context: {
         runId: ctx.runId,
         phase: 'accessibility-validation'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }    accessibilityValidation = await ctx.task(accessibilityValidationTask, {
+      }
+    });
+
+    accessibilityValidation = await ctx.task(accessibilityValidationTask, {
       docsInventory,
       docType,
       outputDir
@@ -283,34 +203,22 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...accessibilityValidation.artifacts);
   }
+
   // ============================================================================
   // PHASE 8: COMPREHENSIVE QUALITY SCORING
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      accuracyVerification = await ctx.task(accuracyVerificationTask, { ...{
-    docsInventory,
-    docType,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: 'Calculate comprehensive documentation quality score?',
     title: 'Phase 8: Quality Scoring',
     context: {
       runId: ctx.runId,
       phase: 'quality-scoring',
       targetQuality
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
-  let qualityScore = await ctx.task(qualityScoringTask, {
+    }
+  });
+
+  const qualityScore = await ctx.task(qualityScoringTask, {
     docsInventory,
     structureValidation,
     accuracyVerification,
@@ -335,22 +243,8 @@ export async function process(inputs, ctx) {
   const highPriorityIssues = qualityScore.highPriorityIssues || [];
 
   let remediationPlan = null;
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        qualityScore = await ctx.task(qualityScoringTask, { ...{
-    docsInventory,
-    structureValidation,
-    accuracyVerification,
-    codeExampleTests,
-    linkValidation,
-    grammarCheck,
-    accessibilityValidation,
-    targetQuality,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+  if (!qualityMet || criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Quality score ${overallQuality}/${targetQuality}. ${criticalIssues.length} critical issues found. Generate remediation plan?`,
       title: 'Phase 9: Issue Remediation Planning',
       context: {
@@ -359,15 +253,10 @@ export async function process(inputs, ctx) {
         criticalIssues: criticalIssues.length,
         highPriorityIssues: highPriorityIssues.length,
         overallQuality
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    }    remediationPlan = await ctx.task(remediationPlanningTask, {
+      }
+    });
+
+    remediationPlan = await ctx.task(remediationPlanningTask, {
       qualityScore,
       structureValidation,
       accuracyVerification,
@@ -380,24 +269,12 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
   }
+
   // ============================================================================
   // PHASE 10: GENERATE COMPREHENSIVE TEST REPORT
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      qualityScore = await ctx.task(qualityScoringTask, { ...{
-    docsInventory,
-    structureValidation,
-    accuracyVerification,
-    codeExampleTests,
-    linkValidation,
-    grammarCheck,
-    accessibilityValidation,
-    targetQuality,
-    outputDir
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: 'Generate comprehensive documentation testing report?',
     title: 'Phase 10: Test Report Generation',
     context: {
@@ -410,15 +287,9 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         label: a.label || undefined
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const testReport = await ctx.task(testReportGenerationTask, {
     docsInventory,
     structureValidation,
@@ -500,7 +371,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

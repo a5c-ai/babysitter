@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing backup requirements and analyzing current state');
 
-  let assessmentResult = await ctx.task(assessBackupRequirementsTask, {
+  const assessmentResult = await ctx.task(assessBackupRequirementsTask, {
     projectName,
     backupScope,
     dataTypes,
@@ -83,23 +83,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assessment complete - Identified ${assessmentResult.backupTargets.length} backup targets, current coverage: ${assessmentResult.currentCoverage}%`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      assessmentResult = await ctx.task(assessBackupRequirementsTask, { ...{
-    projectName,
-    backupScope,
-    dataTypes,
-    rpo,
-    rto,
-    retentionDays,
-    environment,
-    cloudProvider,
-    complianceRequirements,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements review
+  await ctx.breakpoint({
     question: `Backup requirements assessed for ${projectName}. Identified ${assessmentResult.backupTargets.length} targets with RPO ${rpo}min and RTO ${rto}min. Current coverage: ${assessmentResult.currentCoverage}%. Review and approve backup scope?`,
     title: 'Backup Requirements Review',
     context: {
@@ -112,22 +97,16 @@ export async function process(inputs, ctx) {
         complianceGaps: assessmentResult.complianceGaps
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DESIGN BACKUP STRATEGY
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing comprehensive backup strategy');
 
-  let strategyResult = await ctx.task(designBackupStrategyTask, {
+  const strategyResult = await ctx.task(designBackupStrategyTask, {
     projectName,
     backupScope,
     assessmentResult,
@@ -152,26 +131,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Backup strategy designed - ${strategyResult.backupTypes.length} backup types, ${strategyResult.schedules.length} schedules`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      strategyResult = await ctx.task(designBackupStrategyTask, { ...{
-    projectName,
-    backupScope,
-    assessmentResult,
-    dataTypes,
-    rpo,
-    rto,
-    retentionDays,
-    cloudProvider,
-    backupDestination,
-    complianceRequirements,
-    encryptionRequired,
-    crossRegionReplication,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Strategy review
+  await ctx.breakpoint({
     question: `Backup strategy designed with ${strategyResult.backupTypes.length} backup types and ${strategyResult.schedules.length} schedules. Estimated daily backup: ${strategyResult.estimatedDailyBackupSize}, monthly cost: ${strategyResult.estimatedMonthlyCost}. Approve strategy?`,
     title: 'Backup Strategy Review',
     context: {
@@ -183,15 +144,9 @@ export async function process(inputs, ctx) {
         estimatedCost: strategyResult.estimatedMonthlyCost
       },
       files: strategyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: CONFIGURE BACKUP INFRASTRUCTURE
   // ============================================================================
@@ -226,7 +181,7 @@ export async function process(inputs, ctx) {
   if (dataTypes.some(dt => ['postgres', 'mysql', 'mongodb', 'redis', 'dynamodb', 'rds'].includes(dt))) {
     ctx.log('info', 'Phase 4: Implementing database backup automation');
 
-    let databaseBackupResult = await ctx.task(implementDatabaseBackupTask, {
+    const databaseBackupResult = await ctx.task(implementDatabaseBackupTask, {
       projectName,
       environment,
       dataTypes: dataTypes.filter(dt => ['postgres', 'mysql', 'mongodb', 'redis', 'dynamodb', 'rds'].includes(dt)),
@@ -247,21 +202,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Database backup configured - ${databaseBackupResult.backupJobs.length} backup jobs created`);
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        databaseBackupResult = await ctx.task(implementDatabaseBackupTask, { ...{
-      projectName,
-      environment,
-      dataTypes: dataTypes.filter(dt => ['postgres', 'mysql', 'mongodb', 'redis', 'dynamodb', 'rds'].includes(dt)),
-      strategyResult,
-      infrastructureResult,
-      rpo,
-      rto,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    // Quality Gate: Database backup verification
+    await ctx.breakpoint({
       question: `Database backup automation configured for ${databaseBackupResult.databases.length} databases. ${databaseBackupResult.backupJobs.length} backup jobs created. PITR enabled: ${databaseBackupResult.pitrEnabled}. Verify configuration?`,
       title: 'Database Backup Review',
       context: {
@@ -273,15 +215,9 @@ export async function process(inputs, ctx) {
           schedules: databaseBackupResult.schedules
         },
         files: databaseBackupResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: IMPLEMENT KUBERNETES/CONTAINER BACKUP
@@ -290,7 +226,7 @@ export async function process(inputs, ctx) {
   if (dataTypes.includes('kubernetes') || dataTypes.includes('containers')) {
     ctx.log('info', 'Phase 5: Implementing Kubernetes and container backup');
 
-    let k8sBackupResult = await ctx.task(implementKubernetesBackupTask, {
+    const k8sBackupResult = await ctx.task(implementKubernetesBackupTask, {
       projectName,
       environment,
       strategyResult,
@@ -310,20 +246,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Kubernetes backup configured - Tool: ${k8sBackupResult.backupTool}, Schedules: ${k8sBackupResult.schedules.length}`);
 
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        k8sBackupResult = await ctx.task(implementKubernetesBackupTask, { ...{
-      projectName,
-      environment,
-      strategyResult,
-      infrastructureResult,
-      backupTool,
-      cloudProvider,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    // Quality Gate: Kubernetes backup verification
+    await ctx.breakpoint({
       question: `Kubernetes backup configured using ${k8sBackupResult.backupTool}. ${k8sBackupResult.namespaces.length} namespaces, ${k8sBackupResult.schedules.length} schedules. Volume snapshots enabled: ${k8sBackupResult.volumeSnapshotsEnabled}. Verify configuration?`,
       title: 'Kubernetes Backup Review',
       context: {
@@ -335,15 +259,9 @@ export async function process(inputs, ctx) {
           volumeSnapshotsEnabled: k8sBackupResult.volumeSnapshotsEnabled
         },
         files: k8sBackupResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: IMPLEMENT VOLUME AND FILE SYSTEM BACKUP
@@ -372,6 +290,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Volume backup configured - ${volumeBackupResult.volumes.length} volumes, ${volumeBackupResult.backupJobs.length} backup jobs`);
   }
+
   // ============================================================================
   // PHASE 7: IMPLEMENT APPLICATION AND CONFIGURATION BACKUP
   // ============================================================================
@@ -428,7 +347,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Creating disaster recovery and restore plans');
 
-  let drPlanResult = await ctx.task(createDisasterRecoveryPlansTask, {
+  const drPlanResult = await ctx.task(createDisasterRecoveryPlansTask, {
     projectName,
     environment,
     backupScope,
@@ -446,23 +365,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Disaster recovery plans created - ${drPlanResult.restorePlans.length} restore scenarios documented`);
 
-    let lastFeedback_phase9Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase9Review) {
-      drPlanResult = await ctx.task(createDisasterRecoveryPlansTask, { ...{
-    projectName,
-    environment,
-    backupScope,
-    assessmentResult,
-    strategyResult,
-    implementations,
-    backupJobs,
-    rpo,
-    rto,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-    }
-  const phase9Review = await ctx.breakpoint({
+  // Quality Gate: DR plan review
+  await ctx.breakpoint({
     question: `Disaster recovery plans created for ${drPlanResult.restorePlans.length} scenarios. RTO target: ${rto}min. Review restore procedures and runbooks?`,
     title: 'Disaster Recovery Plan Review',
     context: {
@@ -474,22 +378,16 @@ export async function process(inputs, ctx) {
         scenarios: drPlanResult.scenarios
       },
       files: drPlanResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase9Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase9Review.approved) break;
-    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 10: VALIDATE BACKUP CONFIGURATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating backup configuration and coverage');
 
-  let validationResult = await ctx.task(validateBackupConfigurationTask, {
+  const validationResult = await ctx.task(validateBackupConfigurationTask, {
     projectName,
     assessmentResult,
     strategyResult,
@@ -506,22 +404,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Validation complete - Coverage: ${validationResult.backupCoverage}%, RPO compliance: ${validationResult.rpoCompliance}%`);
 
   // Quality Gate: Validation review
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        validationResult = await ctx.task(validateBackupConfigurationTask, { ...{
-    projectName,
-    assessmentResult,
-    strategyResult,
-    implementations,
-    backupJobs,
-    restorePlans,
-    rpo,
-    rto,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (validationResult.backupCoverage < 95 || validationResult.rpoCompliance < 90) {
+    await ctx.breakpoint({
       question: `Backup validation shows coverage ${validationResult.backupCoverage}% (target: 95%) and RPO compliance ${validationResult.rpoCompliance}% (target: 90%). Gaps: ${validationResult.gaps.length}. Address gaps before proceeding?`,
       title: 'Backup Validation Review',
       context: {
@@ -534,15 +418,9 @@ export async function process(inputs, ctx) {
           recommendation: 'Address critical gaps before production deployment'
         },
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: CONDUCT BACKUP AND RESTORE TESTING
@@ -580,7 +458,8 @@ export async function process(inputs, ctx) {
         outputDir
       }));
     }
-  const restoreTestResults = await ctx.parallel.all(restoreTests);
+
+    const restoreTestResults = await ctx.parallel.all(restoreTests);
 
     const testingResult = {
       testsPassed: restoreTestResults.filter(r => r.success).length,
@@ -595,22 +474,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Restore testing complete - ${testingResult.testsPassed}/${testingResult.testsTotal} tests passed`);
 
     // Quality Gate: Testing validation
-        let lastFeedback_qualityGateApproval5 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval5) {
-          validationResult = await ctx.task(validateBackupConfigurationTask, { ...{
-    projectName,
-    assessmentResult,
-    strategyResult,
-    implementations,
-    backupJobs,
-    restorePlans,
-    rpo,
-    rto,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-        }
-  const qualityGateApproval5 = await ctx.breakpoint({
+    if (testingResult.testsFailed > 0) {
+      await ctx.breakpoint({
         question: `Restore testing complete - ${testingResult.testsFailed} tests failed out of ${testingResult.testsTotal}. Review failures and remediate?`,
         title: 'Restore Testing Review',
         context: {
@@ -625,16 +490,11 @@ export async function process(inputs, ctx) {
             }))
           },
           files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval5.approved) break;
-        lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 12: COMPLIANCE AND AUDIT DOCUMENTATION
   // ============================================================================
@@ -691,7 +551,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Calculating backup readiness score and final assessment');
 
-  let scoringResult = await ctx.task(calculateBackupScoreTask, {
+  const scoringResult = await ctx.task(calculateBackupScoreTask, {
     projectName,
     backupScope,
     rpo,
@@ -711,25 +571,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Backup Readiness Score: ${backupScore}/100`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(calculateBackupScoreTask, { ...{
-    projectName,
-    backupScope,
-    rpo,
-    rto,
-    assessmentResult,
-    strategyResult,
-    implementations,
-    backupJobs,
-    restorePlans,
-    validationResult,
-    complianceResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Backup automation complete
+  await ctx.breakpoint({
     question: `Backup and Restore Automation Complete for ${projectName}. Score: ${backupScore}/100. Coverage: ${validationResult.backupCoverage}%. ${backupJobs.length} backup jobs configured. Approve for production deployment?`,
     title: 'Final Backup Automation Review',
     context: {
@@ -759,15 +602,9 @@ export async function process(inputs, ctx) {
         { path: scoringResult.summaryPath, format: 'json', label: 'Backup Score Summary' },
         { path: drPlanResult.drPlaybookPath, format: 'markdown', label: 'Disaster Recovery Playbook' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -837,7 +674,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

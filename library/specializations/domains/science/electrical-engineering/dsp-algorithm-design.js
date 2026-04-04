@@ -40,22 +40,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Develop Algorithm in Floating-Point
-  let floatingPointDevelopment = await ctx.task(floatingPointDevelopmentTask, {
+  const floatingPointDevelopment = await ctx.task(floatingPointDevelopmentTask, {
     algorithmName,
     requirements: requirementsDefinition.specifications,
     signalType
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      floatingPointDevelopment = await ctx.task(floatingPointDevelopmentTask, { ...{
-    algorithmName,
-    requirements: requirementsDefinition.specifications,
-    signalType
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review floating-point algorithm
+  await ctx.breakpoint({
     question: `Review floating-point algorithm for ${algorithmName}. Performance meets specifications: ${floatingPointDevelopment.meetsSpecs}. Proceed with validation?`,
     title: 'Algorithm Review',
     context: {
@@ -67,17 +59,11 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: floatingPointDevelopment
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Validate Algorithm Performance with Test Signals
-  let algorithmValidation = await ctx.task(algorithmValidationTask, {
+  const algorithmValidation = await ctx.task(algorithmValidationTask, {
     algorithmName,
     algorithm: floatingPointDevelopment.algorithm,
     requirements: requirementsDefinition.specifications,
@@ -85,32 +71,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Algorithm must meet specifications
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        algorithmValidation = await ctx.task(algorithmValidationTask, { ...{
-    algorithmName,
-    algorithm: floatingPointDevelopment.algorithm,
-    requirements: requirementsDefinition.specifications,
-    signalType
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!algorithmValidation.allTestsPassed) {
+    await ctx.breakpoint({
       question: `Algorithm validation failed ${algorithmValidation.failedTests.length} tests. Review and iterate algorithm design?`,
       title: 'Validation Issues',
       context: {
         runId: ctx.runId,
         failedTests: algorithmValidation.failedTests,
         recommendations: algorithmValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 4: Convert to Fixed-Point Representation
   const fixedPointConversion = await ctx.task(fixedPointConversionTask, {
@@ -121,24 +92,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Analyze Quantization Effects and Word Lengths
-  let quantizationAnalysis = await ctx.task(quantizationAnalysisTask, {
+  const quantizationAnalysis = await ctx.task(quantizationAnalysisTask, {
     algorithmName,
     fixedPointAlgorithm: fixedPointConversion.algorithm,
     floatingPointReference: floatingPointDevelopment.algorithm,
     requirements: requirementsDefinition.specifications
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      quantizationAnalysis = await ctx.task(quantizationAnalysisTask, { ...{
-    algorithmName,
-    fixedPointAlgorithm: fixedPointConversion.algorithm,
-    floatingPointReference: floatingPointDevelopment.algorithm,
-    requirements: requirementsDefinition.specifications
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review fixed-point conversion results
+  await ctx.breakpoint({
     question: `Fixed-point conversion complete for ${algorithmName}. SQNR: ${quantizationAnalysis.sqnr}. Acceptable performance?`,
     title: 'Fixed-Point Review',
     context: {
@@ -150,15 +112,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: quantizationAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Optimize for Computational Efficiency
   const computationalOptimization = await ctx.task(computationalOptimizationTask, {
     algorithmName,
@@ -176,24 +132,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Verify Implementation Against Reference
-  let implementationVerification = await ctx.task(implementationVerificationTask, {
+  const implementationVerification = await ctx.task(implementationVerificationTask, {
     algorithmName,
     implementation: platformImplementation.implementation,
     floatingPointReference: floatingPointDevelopment.algorithm,
     requirements: requirementsDefinition.specifications
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      implementationVerification = await ctx.task(implementationVerificationTask, { ...{
-    algorithmName,
-    implementation: platformImplementation.implementation,
-    floatingPointReference: floatingPointDevelopment.algorithm,
-    requirements: requirementsDefinition.specifications
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Implementation Approval
+  await ctx.breakpoint({
     question: `DSP algorithm implementation complete for ${algorithmName}. Verification ${implementationVerification.passed ? 'PASSED' : 'FAILED'}. Approve for release?`,
     title: 'Implementation Approval',
     context: {
@@ -205,15 +152,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-implementation.json`, format: 'json', content: platformImplementation.implementation },
         { path: `artifacts/dsp-report.md`, format: 'markdown', content: implementationVerification.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     algorithmName,
@@ -245,7 +186,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

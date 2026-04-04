@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
     // Select best theory from surviving hypotheses
     ctx.log('info', `Selecting best theory (iteration ${iteration})`);
-    let theorySelection = await ctx.task(selectBestTheoryTask, {
+    const theorySelection = await ctx.task(selectBestTheoryTask, {
       stressTestResults,
       constrainedHypotheses,
       observation,
@@ -118,17 +118,8 @@ export async function process(inputs, ctx) {
     // Check for convergence
     converged = theorySelection.confidenceScore >= convergenceThreshold;
 
-        let lastFeedback = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback) {
-          theorySelection = await ctx.task(selectBestTheoryTask, { ...{
-      stressTestResults,
-      constrainedHypotheses,
-      observation,
-      domain
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (!converged && iteration < iterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: Theory confidence ${theorySelection.confidenceScore}%. Continue sketching?`,
         title: `Fast Theory Sketching - Iteration ${iteration}`,
         context: {
@@ -137,16 +128,11 @@ export async function process(inputs, ctx) {
             { path: `artifacts/iteration-${iteration}-theory.json`, format: 'json' },
             { path: `artifacts/iteration-${iteration}-stress-tests.json`, format: 'json' }
           ]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // PHASE 5: EXPERIMENTS - Design discriminating experiments
   ctx.log('info', 'Phase 5: Designing experiments');
   const experimentalPlan = await ctx.task(designExperimentsTask, {

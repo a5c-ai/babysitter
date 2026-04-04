@@ -25,7 +25,8 @@ export async function process(inputs, ctx) {
     laborStandards = {},
     shiftSchedule = {},
     outputDir = 'warehouse-labor-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -68,7 +69,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
       }
-  const phase3Review = await ctx.breakpoint({
+      const phase3Review = await ctx.breakpoint({
       question: `Staffing gaps identified: ${staffingCalc.gaps.length} areas. Review and adjust?`,
       title: 'Staffing Gap Review',
       context: {
@@ -83,9 +84,8 @@ export async function process(inputs, ctx) {
       });
       if (phase3Review.approved) break;
       lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
-
-  // PHASE 4: WORKLOAD BALANCING
+    }
+    // PHASE 4: WORKLOAD BALANCING
   ctx.log('info', 'Phase 4: Balancing workloads');
   const workloadBalancing = await ctx.task(workloadBalancingTask, {
     assignments: taskAssignment.assignments,
@@ -132,7 +132,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Labor management complete. ${taskAssignment.assignments.length} tasks assigned, average productivity: ${productivityMonitoring.metrics.averageProductivity}%. Finalize?`,
     title: 'Labor Management Complete',
     context: {
@@ -165,7 +165,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/warehouse-labor-management', timestamp: startTime, outputDir }
   };
 }
-  // TASK DEFINITIONS
+// TASK DEFINITIONS
 export const workloadForecastTask = defineTask('workload-forecast', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Forecast workload',

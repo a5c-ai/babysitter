@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Scanning for vulnerabilities');
-  let vulnerabilityAssessment = await ctx.task(vulnerabilityAssessmentTask, {
+  const vulnerabilityAssessment = await ctx.task(vulnerabilityAssessmentTask, {
     projectName,
     inventory: dependencyInventory,
     securityPolicy,
@@ -67,17 +67,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...vulnerabilityAssessment.artifacts);
 
   // Quality Gate: Critical vulnerabilities
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        vulnerabilityAssessment = await ctx.task(vulnerabilityAssessmentTask, { ...{
-    projectName,
-    inventory: dependencyInventory,
-    securityPolicy,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (vulnerabilityAssessment.criticalCount > securityPolicy.maxCriticalVulnerabilities) {
+    await ctx.breakpoint({
       question: `Found ${vulnerabilityAssessment.criticalCount} critical vulnerabilities (policy allows ${securityPolicy.maxCriticalVulnerabilities}). These MUST be addressed. Review vulnerability report and prioritize remediation?`,
       title: 'Critical Security Vulnerabilities',
       context: {
@@ -85,15 +76,9 @@ export async function process(inputs, ctx) {
         projectName,
         criticalVulnerabilities: vulnerabilityAssessment.criticalVulnerabilities,
         recommendation: 'Address critical vulnerabilities immediately before proceeding'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: OUTDATED DEPENDENCY ANALYSIS
@@ -113,7 +98,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Checking license compliance');
-  let licenseCompliance = await ctx.task(licenseComplianceTask, {
+  const licenseCompliance = await ctx.task(licenseComplianceTask, {
     projectName,
     inventory: dependencyInventory,
     outputDir
@@ -122,16 +107,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...licenseCompliance.artifacts);
 
   // Quality Gate: License compliance
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        licenseCompliance = await ctx.task(licenseComplianceTask, { ...{
-    projectName,
-    inventory: dependencyInventory,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (licenseCompliance.hasBlockingIssues) {
+    await ctx.breakpoint({
       question: `Found ${licenseCompliance.blockingIssues.length} blocking license issues. These must be resolved before deployment. Review license report?`,
       title: 'License Compliance Issues',
       context: {
@@ -139,22 +116,16 @@ export async function process(inputs, ctx) {
         projectName,
         blockingIssues: licenseCompliance.blockingIssues,
         recommendation: 'Replace dependencies with incompatible licenses'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: UPDATE PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Planning dependency updates');
-  let updatePlan = await ctx.task(updatePlanningTask, {
+  const updatePlan = await ctx.task(updatePlanningTask, {
     projectName,
     inventory: dependencyInventory,
     vulnerabilityAssessment,
@@ -165,19 +136,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...updatePlan.artifacts);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      updatePlan = await ctx.task(updatePlanningTask, { ...{
-    projectName,
-    inventory: dependencyInventory,
-    vulnerabilityAssessment,
-    outdatedAnalysis,
-    licenseCompliance,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Update plan review
+  await ctx.breakpoint({
     question: `Dependency update plan ready for ${projectName}. Total updates: ${updatePlan.totalUpdates}. Breaking changes: ${updatePlan.breakingChanges}. Approve update plan?`,
     title: 'Dependency Update Plan Review',
     context: {
@@ -185,15 +145,9 @@ export async function process(inputs, ctx) {
       projectName,
       updatePlan,
       recommendation: 'Review breaking changes carefully before proceeding'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: EXECUTE UPDATES (Iterative)
   // ============================================================================
@@ -213,7 +167,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating updates');
-  let validationReport = await ctx.task(validateUpdatesTask, {
+  const validationReport = await ctx.task(validateUpdatesTask, {
     projectName,
     updateExecution,
     outputDir
@@ -222,16 +176,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...validationReport.artifacts);
 
   // Quality Gate: Validation results
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        validationReport = await ctx.task(validateUpdatesTask, { ...{
-    projectName,
-    updateExecution,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!validationReport.allTestsPassed) {
+    await ctx.breakpoint({
       question: `Validation failed for ${validationReport.failedTests} tests after dependency updates. Review failures and determine next steps?`,
       title: 'Update Validation Failed',
       context: {
@@ -239,15 +185,9 @@ export async function process(inputs, ctx) {
         projectName,
         failedTests: validationReport.failures,
         recommendation: 'Fix failing tests or rollback problematic updates'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: DOCUMENT CHANGES
@@ -312,7 +252,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Functional and Timing Requirements
-  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     designName,
     targetPlatform,
     functionalRequirements,
@@ -48,17 +48,9 @@ export async function process(inputs, ctx) {
       missingRequirements: requirementsAnalysis.missingItems
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
-    designName,
-    targetPlatform,
-    functionalRequirements,
-    timingConstraints
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review requirements
+  await ctx.breakpoint({
     question: `Review functional and timing requirements for ${designName}. Proceed with architecture design?`,
     title: 'Requirements Review',
     context: {
@@ -70,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: requirementsAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Create Block Diagrams and Architecture Specification
   const architectureDesign = await ctx.task(architectureDesignTask, {
     designName,
@@ -87,24 +73,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Write RTL Code in Verilog/VHDL/SystemVerilog
-  let rtlDevelopment = await ctx.task(rtlDevelopmentTask, {
+  const rtlDevelopment = await ctx.task(rtlDevelopmentTask, {
     designName,
     architecture: architectureDesign.architecture,
     requirements: requirementsAnalysis.finalRequirements,
     targetPlatform
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      rtlDevelopment = await ctx.task(rtlDevelopmentTask, { ...{
-    designName,
-    architecture: architectureDesign.architecture,
-    requirements: requirementsAnalysis.finalRequirements,
-    targetPlatform
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review RTL code
+  await ctx.breakpoint({
     question: `Review RTL code for ${designName}. Code follows ${rtlDevelopment.hdlLanguage} coding standards. Proceed with verification?`,
     title: 'RTL Code Review',
     context: {
@@ -116,15 +93,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: rtlDevelopment
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Develop Testbenches and Verification Plans
   const verificationPlanning = await ctx.task(verificationPlanningTask, {
     designName,
@@ -134,7 +105,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Simulate and Verify Functionality
-  let functionalSimulation = await ctx.task(functionalSimulationTask, {
+  const functionalSimulation = await ctx.task(functionalSimulationTask, {
     designName,
     rtlCode: rtlDevelopment.rtlCode,
     testbenches: verificationPlanning.testbenches,
@@ -142,17 +113,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Functional verification must pass
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        functionalSimulation = await ctx.task(functionalSimulationTask, { ...{
-    designName,
-    rtlCode: rtlDevelopment.rtlCode,
-    testbenches: verificationPlanning.testbenches,
-    verificationPlan: verificationPlanning.plan
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!functionalSimulation.allTestsPassed) {
+    await ctx.breakpoint({
       question: `Functional verification found ${functionalSimulation.failedTests.length} failing tests. Debug and fix before proceeding?`,
       title: 'Verification Failures',
       context: {
@@ -160,18 +122,12 @@ export async function process(inputs, ctx) {
         passedTests: functionalSimulation.passedTests,
         failedTests: functionalSimulation.failedTests,
         coverage: functionalSimulation.coverage
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 6: Synthesize and Analyze Timing Reports
-  let synthesisAnalysis = await ctx.task(synthesisAnalysisTask, {
+  const synthesisAnalysis = await ctx.task(synthesisAnalysisTask, {
     designName,
     rtlCode: rtlDevelopment.rtlCode,
     targetPlatform,
@@ -179,17 +135,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Timing must be met
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        synthesisAnalysis = await ctx.task(synthesisAnalysisTask, { ...{
-    designName,
-    rtlCode: rtlDevelopment.rtlCode,
-    targetPlatform,
-    timingConstraints: requirementsAnalysis.finalRequirements.timing
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!synthesisAnalysis.timingMet) {
+    await ctx.breakpoint({
       question: `Timing analysis shows violations. Worst negative slack: ${synthesisAnalysis.worstSlack}. Optimize timing?`,
       title: 'Timing Violations',
       context: {
@@ -197,15 +144,9 @@ export async function process(inputs, ctx) {
         timingReport: synthesisAnalysis.timingReport,
         violations: synthesisAnalysis.violations,
         recommendations: synthesisAnalysis.optimizationRecommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 7: Optimize for Power, Performance, and Area (PPA)
   const ppaOptimization = await ctx.task(ppaOptimizationTask, {
@@ -217,7 +158,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Generate Implementation Constraints and Documentation
-  let implementationDocumentation = await ctx.task(implementationDocumentationTask, {
+  const implementationDocumentation = await ctx.task(implementationDocumentationTask, {
     designName,
     targetPlatform,
     requirementsAnalysis,
@@ -229,22 +170,8 @@ export async function process(inputs, ctx) {
     ppaOptimization
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      implementationDocumentation = await ctx.task(implementationDocumentationTask, { ...{
-    designName,
-    targetPlatform,
-    requirementsAnalysis,
-    architectureDesign,
-    rtlDevelopment,
-    verificationPlanning,
-    functionalSimulation,
-    synthesisAnalysis,
-    ppaOptimization
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `Digital logic design complete for ${designName}. Verification ${functionalSimulation.allTestsPassed ? 'PASSED' : 'PARTIAL'}. Timing ${synthesisAnalysis.timingMet ? 'MET' : 'NOT MET'}. Approve for release?`,
     title: 'Design Approval',
     context: {
@@ -257,15 +184,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-rtl.json`, format: 'json', content: ppaOptimization.optimizedRtl },
         { path: `artifacts/design-report.md`, format: 'markdown', content: implementationDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     designName,
@@ -295,7 +216,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',

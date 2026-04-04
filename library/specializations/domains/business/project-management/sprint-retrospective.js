@@ -38,24 +38,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Previous Actions Review
-  let actionsReview = await ctx.task(previousActionsReviewTask, {
+  const actionsReview = await ctx.task(previousActionsReviewTask, {
     projectName,
     sprintNumber,
     previousActions,
     sprintData
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      actionsReview = await ctx.task(previousActionsReviewTask, { ...{
-    projectName,
-    sprintNumber,
-    previousActions,
-    sprintData
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review sprint metrics
+  await ctx.breakpoint({
     question: `Sprint ${sprintNumber} performance review complete. Velocity: ${performanceReview.actualVelocity}/${performanceReview.committedVelocity}. Previous actions: ${actionsReview.completedCount}/${actionsReview.totalActions} completed. Proceed with retrospective?`,
     title: 'Sprint Performance Review',
     context: {
@@ -69,15 +60,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: performanceReview
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: What Went Well (Successes)
   const wentWell = await ctx.task(wentWellAnalysisTask, {
     projectName,
@@ -114,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Action Item Prioritization
-  let actionPrioritization = await ctx.task(actionPrioritizationTask, {
+  const actionPrioritization = await ctx.task(actionPrioritizationTask, {
     projectName,
     sprintNumber,
     improvementIdeation,
@@ -122,32 +107,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Ensure actionable improvements
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        actionPrioritization = await ctx.task(actionPrioritizationTask, { ...{
-    projectName,
-    sprintNumber,
-    improvementIdeation,
-    teamMembers
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (actionPrioritization.prioritizedActions.length === 0) {
+    await ctx.breakpoint({
       question: `No prioritized actions identified for Sprint ${sprintNumber}. Review improvement ideas or continue?`,
       title: 'No Actions Warning',
       context: {
         runId: ctx.runId,
         ideasCount: improvementIdeation.ideas?.length || 0,
         recommendation: 'Ensure at least 1-3 concrete improvement actions'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 8: Commitment and Ownership
   const commitments = await ctx.task(commitmentOwnershipTask, {
@@ -166,7 +136,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Retrospective Report Generation
-  let retrospectiveReport = await ctx.task(retrospectiveReportTask, {
+  const retrospectiveReport = await ctx.task(retrospectiveReportTask, {
     projectName,
     sprintNumber,
     performanceReview,
@@ -180,24 +150,8 @@ export async function process(inputs, ctx) {
     appreciation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      retrospectiveReport = await ctx.task(retrospectiveReportTask, { ...{
-    projectName,
-    sprintNumber,
-    performanceReview,
-    actionsReview,
-    wentWell,
-    couldImprove,
-    rootCauseAnalysis,
-    improvementIdeation,
-    actionPrioritization,
-    commitments,
-    appreciation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Sprint ${sprintNumber} retrospective complete. Actions committed: ${commitments.actions.length}. Finalize and distribute?`,
     title: 'Retrospective Completion',
     context: {
@@ -210,15 +164,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/sprint-${sprintNumber}-retrospective.json`, format: 'json', content: retrospectiveReport },
         { path: `artifacts/sprint-${sprintNumber}-retrospective.md`, format: 'markdown', content: retrospectiveReport.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -243,7 +191,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const sprintPerformanceReviewTask = defineTask('sprint-performance-review', (args, taskCtx) => ({
   kind: 'agent',

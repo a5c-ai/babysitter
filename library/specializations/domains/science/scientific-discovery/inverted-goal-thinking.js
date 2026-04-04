@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Construct Inverted Goal
   ctx.log('info', 'Constructing inverted goal');
-  let invertedGoal = await ctx.task(constructInvertedGoalTask, {
+  const invertedGoal = await ctx.task(constructInvertedGoalTask, {
     actualGoal,
     goalAnalysis,
     domain
@@ -50,16 +50,9 @@ export async function process(inputs, ctx) {
     goalAnalysis,
     domain,
     explorationDepth
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      invertedGoal = await ctx.task(constructInvertedGoalTask, { ...{
-    actualGoal,
-    goalAnalysis,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Inverted optimization complete. Review inverted solutions before design space mapping?',
     title: 'Inverted Goal Thinking - Inverted Optimization Complete',
     context: {
@@ -68,15 +61,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/goal-analysis.json', format: 'json' },
         { path: 'artifacts/inverted-optimization.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Analyze Anti-Patterns from Inverted Solutions
   ctx.log('info', 'Analyzing anti-patterns from inverted solutions');
   const antiPatterns = await ctx.task(analyzeAntiPatternsTask, {

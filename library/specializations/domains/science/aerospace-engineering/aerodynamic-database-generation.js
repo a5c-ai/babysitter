@@ -38,39 +38,25 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Test Matrix Generation
-  let testMatrixGeneration = await ctx.task(testMatrixGenerationTask, {
+  const testMatrixGeneration = await ctx.task(testMatrixGenerationTask, {
     projectName,
     requirements: requirementsDefinition,
     envelopeDefinition
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      testMatrixGeneration = await ctx.task(testMatrixGenerationTask, { ...{
-    projectName,
-    requirements: requirementsDefinition,
-    envelopeDefinition
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review test matrix
+  await ctx.breakpoint({
     question: `Test matrix generated with ${testMatrixGeneration.totalPoints} data points for ${projectName}. Approve for data generation?`,
     title: 'Test Matrix Review',
     context: {
       runId: ctx.runId,
       testMatrix: testMatrixGeneration,
       estimatedComputeTime: testMatrixGeneration.estimatedComputeTime
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Data Generation (CFD/Wind Tunnel/Analytical)
-  let dataGeneration = await ctx.task(dataGenerationTask, {
+  const dataGeneration = await ctx.task(dataGenerationTask, {
     projectName,
     testMatrix: testMatrixGeneration.matrix,
     vehicleConfig,
@@ -78,32 +64,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check data coverage
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        dataGeneration = await ctx.task(dataGenerationTask, { ...{
-    projectName,
-    testMatrix: testMatrixGeneration.matrix,
-    vehicleConfig,
-    fidelityLevel
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (dataGeneration.coveragePercentage < 95) {
+    await ctx.breakpoint({
       question: `Data coverage is ${dataGeneration.coveragePercentage}% (target 95%). Address gaps or continue?`,
       title: 'Data Coverage Warning',
       context: {
         runId: ctx.runId,
         gaps: dataGeneration.dataGaps,
         recommendation: 'Consider additional CFD runs or interpolation'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 4: Data Quality Validation
   const dataValidation = await ctx.task(dataValidationTask, {
@@ -154,24 +125,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Documentation
-  let documentation = await ctx.task(databaseDocumentationTask, {
+  const documentation = await ctx.task(databaseDocumentationTask, {
     projectName,
     database: databaseIntegration,
     validation: databaseValidation,
     requirements: requirementsDefinition
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(databaseDocumentationTask, { ...{
-    projectName,
-    database: databaseIntegration,
-    validation: databaseValidation,
-    requirements: requirementsDefinition
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Database Release
+  await ctx.breakpoint({
     question: `Aerodynamic database complete for ${projectName}. Validation status: ${databaseValidation.status}. Release database?`,
     title: 'Database Release Approval',
     context: {
@@ -185,15 +147,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/aero-database.json', format: 'json', content: databaseIntegration.database },
         { path: 'artifacts/database-documentation.md', format: 'markdown', content: documentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -209,7 +165,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

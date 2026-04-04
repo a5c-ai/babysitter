@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Calculation Setup
-  let calculationSetup = await ctx.task(calculationSetupTask, {
+  const calculationSetup = await ctx.task(calculationSetupTask, {
     material,
     calculationGoals,
     computationalResources
@@ -47,16 +47,9 @@ export async function process(inputs, ctx) {
       recommendations: calculationSetup.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      calculationSetup = await ctx.task(calculationSetupTask, { ...{
-    material,
-    calculationGoals,
-    computationalResources
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review calculation setup
+  await ctx.breakpoint({
     question: `Review DFT setup for ${material.formula}. Functional: ${calculationSetup.functional}. Basis: ${calculationSetup.basisSet}. Estimated time: ${calculationSetup.estimatedTime}. Approve?`,
     title: 'DFT Calculation Setup Review',
     context: {
@@ -69,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: calculationSetup
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Structure Preparation
   const structurePreparation = await ctx.task(structurePreparationTask, {
     material,
@@ -85,75 +72,47 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Convergence Testing
-  let convergenceTests = await ctx.task(convergenceTestingTask, {
+  const convergenceTests = await ctx.task(convergenceTestingTask, {
     structurePreparation,
     calculationSetup,
     convergenceThresholds
   });
 
   // Quality Gate: Convergence must be achieved
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        convergenceTests = await ctx.task(convergenceTestingTask, { ...{
-    structurePreparation,
-    calculationSetup,
-    convergenceThresholds
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!convergenceTests.converged) {
+    await ctx.breakpoint({
       question: `Convergence issues detected: ${convergenceTests.issues.join(', ')}. Review parameters and proceed?`,
       title: 'DFT Convergence Warning',
       context: {
         runId: ctx.runId,
         convergenceTests,
         recommendations: convergenceTests.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   const calculationResults = {};
 
   // Phase 4: Geometry Optimization
   if (calculationGoals.includes('geometry-optimization')) {
-    let geometryOptimization = await ctx.task(geometryOptimizationTask, {
+    const geometryOptimization = await ctx.task(geometryOptimizationTask, {
       structurePreparation,
       calculationSetup,
       convergenceTests
     });
     calculationResults.geometryOptimization = geometryOptimization;
 
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        geometryOptimization = await ctx.task(geometryOptimizationTask, { ...{
-      structurePreparation,
-      calculationSetup,
-      convergenceTests
-    }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+    // Breakpoint: Review optimized structure
+    await ctx.breakpoint({
       question: `Geometry optimization complete. Final energy: ${geometryOptimization.totalEnergy} eV. ${geometryOptimization.converged ? 'Converged' : 'Not converged'}. Continue?`,
       title: 'Geometry Optimization Review',
       context: {
         runId: ctx.runId,
         optimizedStructure: geometryOptimization.optimizedStructure,
         energyConvergence: geometryOptimization.energyConvergence
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Electronic Structure Analysis
   if (calculationGoals.includes('electronic-structure')) {
@@ -164,6 +123,7 @@ export async function process(inputs, ctx) {
     });
     calculationResults.electronicStructure = electronicStructure;
   }
+
   // Phase 6: Optical Property Calculation
   if (calculationGoals.includes('optical-properties')) {
     const opticalProperties = await ctx.task(opticalPropertyTask, {
@@ -173,6 +133,7 @@ export async function process(inputs, ctx) {
     });
     calculationResults.opticalProperties = opticalProperties;
   }
+
   // Phase 7: Thermodynamic Stability Assessment
   if (calculationGoals.includes('thermodynamic-stability')) {
     const thermodynamicStability = await ctx.task(thermodynamicStabilityTask, {
@@ -182,8 +143,9 @@ export async function process(inputs, ctx) {
     });
     calculationResults.thermodynamicStability = thermodynamicStability;
   }
+
   // Phase 8: Property Prediction Summary
-  let propertyPredictions = await ctx.task(propertyPredictionTask, {
+  const propertyPredictions = await ctx.task(propertyPredictionTask, {
     calculationResults,
     material,
     calculationGoals
@@ -198,34 +160,21 @@ export async function process(inputs, ctx) {
       material
     });
 
-        let lastFeedback_phase9Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase9Review) {
-          propertyPredictions = await ctx.task(propertyPredictionTask, { ...{
-    calculationResults,
-    material,
-    calculationGoals
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-        }
-  const phase9Review = await ctx.breakpoint({
+    if (!validation.agreementAcceptable) {
+      await ctx.breakpoint({
         question: `Theory-experiment discrepancy detected. Max deviation: ${validation.maxDeviation}. Review results?`,
         title: 'Validation Warning',
         context: {
           runId: ctx.runId,
           validation,
           recommendations: validation.recommendations
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase9Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase9Review.approved) break;
-        lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 10: Report Generation
-  let calculationReport = await ctx.task(reportGenerationTask, {
+  const calculationReport = await ctx.task(reportGenerationTask, {
     material,
     calculationSetup,
     convergenceTests,
@@ -234,19 +183,8 @@ export async function process(inputs, ctx) {
     validation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      calculationReport = await ctx.task(reportGenerationTask, { ...{
-    material,
-    calculationSetup,
-    convergenceTests,
-    calculationResults,
-    propertyPredictions,
-    validation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Results approval
+  await ctx.breakpoint({
     question: `DFT calculations complete for ${material.formula}. ${Object.keys(calculationResults).length} calculation types completed. Approve results?`,
     title: 'DFT Calculation Results Approval',
     context: {
@@ -257,15 +195,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/dft-report.md', format: 'markdown', content: calculationReport.markdown },
         { path: 'artifacts/calculation-results.json', format: 'json', content: calculationResults }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     calculationResults,
@@ -280,7 +212,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const calculationSetupTask = defineTask('calculation-setup', (args, taskCtx) => ({
   kind: 'agent',

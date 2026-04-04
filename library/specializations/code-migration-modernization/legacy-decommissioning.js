@@ -36,32 +36,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Legacy Decommissioning for ${projectName}`);
 
   // Pre-flight check
-    let lastFeedback_stepApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      // No preceding task identified for re-run with feedback
-      const stepApproval = await ctx.breakpoint({
+  if (!migrationComplete) {
+    await ctx.breakpoint({
       question: `Migration not marked complete for ${projectName}. Are you sure you want to proceed with decommissioning?`,
       title: 'Migration Not Complete Warning',
       context: {
         runId: ctx.runId,
         projectName,
         recommendation: 'Ensure migration is fully validated before decommissioning'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_stepApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (stepApproval.approved) break;
-      lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
-    }
+      }
+    });
   }
+
   // ============================================================================
   // PHASE 1: DECOMMISSION PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Planning decommissioning');
-  let decommissionPlan = await ctx.task(decommissionPlanningTask, {
+  const decommissionPlan = await ctx.task(decommissionPlanningTask, {
     projectName,
     legacySystem,
     retentionPolicy,
@@ -70,17 +62,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...decommissionPlan.artifacts);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      decommissionPlan = await ctx.task(decommissionPlanningTask, { ...{
-    projectName,
-    legacySystem,
-    retentionPolicy,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Breakpoint: Plan approval
+  await ctx.breakpoint({
     question: `Decommission plan ready for ${projectName}. System: ${legacySystem.name}. Data to archive: ${decommissionPlan.dataToArchive}. Approve plan?`,
     title: 'Decommission Plan Review',
     context: {
@@ -88,15 +71,9 @@ export async function process(inputs, ctx) {
       projectName,
       decommissionPlan,
       recommendation: 'Review with stakeholders before proceeding'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DATA ARCHIVAL
   // ============================================================================
@@ -158,7 +135,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Creating compliance documentation');
-  let complianceDocumentation = await ctx.task(complianceDocumentationTask, {
+  const complianceDocumentation = await ctx.task(complianceDocumentationTask, {
     projectName,
     legacySystem,
     dataArchival,
@@ -170,20 +147,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...complianceDocumentation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      complianceDocumentation = await ctx.task(complianceDocumentationTask, { ...{
-    projectName,
-    legacySystem,
-    dataArchival,
-    accessRemoval,
-    infrastructureCleanup,
-    retentionPolicy,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Legacy decommissioning complete for ${projectName}. Data archived: ${dataArchival.archived}. Infrastructure cleaned: ${infrastructureCleanup.cleaned}. Compliance documented. Approve?`,
     title: 'Legacy Decommissioning Complete',
     context: {
@@ -196,15 +161,9 @@ export async function process(inputs, ctx) {
         infrastructureCleaned: infrastructureCleanup.cleaned,
         complianceComplete: complianceDocumentation.complete
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -225,7 +184,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

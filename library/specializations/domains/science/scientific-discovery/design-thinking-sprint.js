@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: DEFINE - Framing the problem');
-  let definePhase = await ctx.task(defineTask, {
+  const definePhase = await ctx.task(definePhaseTask, {
     challenge,
     userInsights: empathizePhase.insights,
     journeyMaps: journeyMapping.journeyMaps,
@@ -79,18 +79,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...definePhase.artifacts);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      definePhase = await ctx.task(defineTask, { ...{
-    challenge,
-    userInsights: empathizePhase.insights,
-    journeyMaps: journeyMapping.journeyMaps,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review problem definition
+  await ctx.breakpoint({
     question: `Problem statement: "${definePhase.problemStatement}". Point of View established for ${users.length} user types. Approve before ideation?`,
     title: 'Problem Definition Review',
     context: {
@@ -107,15 +97,9 @@ export async function process(inputs, ctx) {
         keyInsights: empathizePhase.keyInsights?.length || 0,
         painPoints: journeyMapping.painPoints?.length || 0
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: IDEATE - Divergent Thinking
   // ============================================================================
@@ -234,7 +218,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Scoring sprint quality');
-  let qualityScore = await ctx.task(sprintQualityScoringTask, {
+  const qualityScore = await ctx.task(sprintQualityScoringTask, {
     empathizePhase,
     definePhase,
     ideatePhase,
@@ -247,19 +231,8 @@ export async function process(inputs, ctx) {
 
   const validationMet = testAnalysis.validationScore >= minimumValidationScore;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualityScore = await ctx.task(sprintQualityScoringTask, { ...{
-    empathizePhase,
-    definePhase,
-    ideatePhase,
-    prototypePhase,
-    testAnalysis,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final breakpoint
+  await ctx.breakpoint({
     question: `Design Sprint complete. Prototype validation score: ${testAnalysis.validationScore}/100. ${validationMet ? 'Concept validated!' : 'Iteration needed.'} Sprint quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Design Sprint Approval',
     context: {
@@ -278,15 +251,9 @@ export async function process(inputs, ctx) {
         validationMet,
         qualityScore: qualityScore.overallScore
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -340,7 +307,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -456,7 +424,7 @@ export const journeyMappingTask = defineTask('journey-mapping', (args, taskCtx) 
   labels: ['agent', 'design-thinking', 'journey-mapping']
 }));
 
-export const defineTask = defineTask('define', (args, taskCtx) => ({
+export const definePhaseTask = defineTask('define', (args, taskCtx) => ({
   kind: 'agent',
   title: 'DEFINE - Frame the problem',
   skill: { name: 'hypothesis-generator' },

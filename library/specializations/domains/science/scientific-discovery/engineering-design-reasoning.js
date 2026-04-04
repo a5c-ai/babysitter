@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Concept Evaluation and Selection
-  let conceptEvaluation = await ctx.task(evaluateConceptsTask, {
+  const conceptEvaluation = await ctx.task(evaluateConceptsTask, {
     concepts: conceptGeneration.generatedConcepts,
     evaluationCriteria: requirementsAnalysis.evaluationCriteria,
     constraints: constraintAnalysis.activeConstraints,
@@ -55,28 +55,13 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Concept Viability
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        conceptEvaluation = await ctx.task(evaluateConceptsTask, { ...{
-    concepts: conceptGeneration.generatedConcepts,
-    evaluationCriteria: requirementsAnalysis.evaluationCriteria,
-    constraints: constraintAnalysis.activeConstraints,
-    weightings: inputs.requirements?.priorityWeights
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint('concept-revision-required', {
+  if (conceptEvaluation.bestConcept.feasibilityScore < 0.5) {
+    await ctx.breakpoint('concept-revision-required', {
       message: 'No sufficiently feasible concept found',
       evaluationResults: conceptEvaluation.rankings,
-      suggestedIterations: conceptEvaluation.improvementDirections,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      suggestedIterations: conceptEvaluation.improvementDirections
+    });
+  }
 
   // Phase 6: Embodiment Design
   const embodimentDesign = await ctx.task(developEmbodimentTask, {
@@ -104,7 +89,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Risk and Failure Mode Analysis
-  let riskAnalysis = await ctx.task(analyzeDesignRisksTask, {
+  const riskAnalysis = await ctx.task(analyzeDesignRisksTask, {
     designSolution: detailDesign,
     operatingConditions: inputs.context?.operatingConditions,
     safetyRequirements: inputs.requirements?.safety,
@@ -112,28 +97,13 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Risk Acceptability
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        riskAnalysis = await ctx.task(analyzeDesignRisksTask, { ...{
-    designSolution: detailDesign,
-    operatingConditions: inputs.context?.operatingConditions,
-    safetyRequirements: inputs.requirements?.safety,
-    reliabilityTargets: inputs.requirements?.reliability
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint('risk-mitigation-required', {
+  if (riskAnalysis.unacceptableRisks.length > 0) {
+    await ctx.breakpoint('risk-mitigation-required', {
       message: 'Design has unacceptable risk levels',
       criticalRisks: riskAnalysis.unacceptableRisks,
-      mitigationOptions: riskAnalysis.mitigationStrategies,
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      mitigationOptions: riskAnalysis.mitigationStrategies
+    });
+  }
 
   // Phase 10: Validation Planning
   const validationPlan = await ctx.task(planValidationTask, {

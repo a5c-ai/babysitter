@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Mixed-Signal Architecture and Partitioning
-  let architectureDefinition = await ctx.task(architectureDefinitionTask, {
+  const architectureDefinition = await ctx.task(architectureDefinitionTask, {
     designName,
     converterType,
     specifications,
@@ -48,17 +48,9 @@ export async function process(inputs, ctx) {
       issues: architectureDefinition.issues
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      architectureDefinition = await ctx.task(architectureDefinitionTask, { ...{
-    designName,
-    converterType,
-    specifications,
-    constraints
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review architecture partitioning
+  await ctx.breakpoint({
     question: `Review mixed-signal architecture for ${designName}. Analog-digital partitioning defined. Proceed?`,
     title: 'Architecture Review',
     context: {
@@ -70,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: architectureDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Specify Analog and Digital Block Requirements
   const blockSpecification = await ctx.task(blockSpecificationTask, {
     designName,
@@ -95,24 +81,15 @@ export async function process(inputs, ctx) {
     constraints
   });
 
-  let digitalDesign = await ctx.task(digitalBackendDesignTask, {
+  const digitalDesign = await ctx.task(digitalBackendDesignTask, {
     designName,
     blockSpecs: blockSpecification.digitalBlocks,
     architecture: architectureDefinition.architecture,
     constraints
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      digitalDesign = await ctx.task(digitalBackendDesignTask, { ...{
-    designName,
-    blockSpecs: blockSpecification.digitalBlocks,
-    architecture: architectureDefinition.architecture,
-    constraints
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review analog and digital designs
+  await ctx.breakpoint({
     question: `Review analog front-end and digital backend designs for ${designName}. Proceed with noise analysis?`,
     title: 'Block Design Review',
     context: {
@@ -123,17 +100,11 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase3-analog.json`, format: 'json', content: analogDesign },
         { path: `artifacts/phase3-digital.json`, format: 'json', content: digitalDesign }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Analyze Noise Coupling and Isolation Strategies
-  let noiseAnalysis = await ctx.task(noiseAnalysisTask, {
+  const noiseAnalysis = await ctx.task(noiseAnalysisTask, {
     designName,
     analogDesign,
     digitalDesign,
@@ -141,32 +112,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Noise coupling must be acceptable
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        noiseAnalysis = await ctx.task(noiseAnalysisTask, { ...{
-    designName,
-    analogDesign,
-    digitalDesign,
-    architecture: architectureDefinition.architecture
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (noiseAnalysis.criticalNoiseIssues && noiseAnalysis.criticalNoiseIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Noise analysis found ${noiseAnalysis.criticalNoiseIssues.length} critical issues. Review and approve mitigation?`,
       title: 'Noise Coupling Issues',
       context: {
         runId: ctx.runId,
         noiseIssues: noiseAnalysis.criticalNoiseIssues,
         mitigationStrategies: noiseAnalysis.mitigationStrategies
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 5: Simulate Mixed-Signal Interactions
   const mixedSignalSimulation = await ctx.task(mixedSignalSimulationTask, {
@@ -178,7 +134,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Verify Timing at Analog-Digital Interfaces
-  let interfaceTimingVerification = await ctx.task(interfaceTimingVerificationTask, {
+  const interfaceTimingVerification = await ctx.task(interfaceTimingVerificationTask, {
     designName,
     analogDesign,
     digitalDesign,
@@ -186,32 +142,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Interface timing must be verified
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        interfaceTimingVerification = await ctx.task(interfaceTimingVerificationTask, { ...{
-    designName,
-    analogDesign,
-    digitalDesign,
-    simulationResults: mixedSignalSimulation.results
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!interfaceTimingVerification.timingVerified) {
+    await ctx.breakpoint({
       question: `Interface timing verification found issues at ${interfaceTimingVerification.failingInterfaces.length} interfaces. Address timing issues?`,
       title: 'Interface Timing Issues',
       context: {
         runId: ctx.runId,
         failingInterfaces: interfaceTimingVerification.failingInterfaces,
         recommendations: interfaceTimingVerification.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 7: Plan Floor Placement for Noise Isolation
   const floorplanning = await ctx.task(floorplanningTask, {
@@ -223,7 +164,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Document Integration and Test Requirements
-  let integrationDocumentation = await ctx.task(integrationDocumentationTask, {
+  const integrationDocumentation = await ctx.task(integrationDocumentationTask, {
     designName,
     converterType,
     architectureDefinition,
@@ -236,23 +177,8 @@ export async function process(inputs, ctx) {
     floorplanning
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      integrationDocumentation = await ctx.task(integrationDocumentationTask, { ...{
-    designName,
-    converterType,
-    architectureDefinition,
-    blockSpecification,
-    analogDesign,
-    digitalDesign,
-    noiseAnalysis,
-    mixedSignalSimulation,
-    interfaceTimingVerification,
-    floorplanning
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `Mixed-signal design complete for ${designName}. Simulation shows ENOB=${mixedSignalSimulation.measuredENOB}. Approve for integration?`,
     title: 'Design Approval',
     context: {
@@ -264,15 +190,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-design.json`, format: 'json', content: { analogDesign, digitalDesign } },
         { path: `artifacts/integration-report.md`, format: 'markdown', content: integrationDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     designName,
@@ -301,7 +221,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const architectureDefinitionTask = defineTask('architecture-definition', (args, taskCtx) => ({
   kind: 'agent',

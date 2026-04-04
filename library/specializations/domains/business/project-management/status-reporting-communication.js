@@ -31,23 +31,15 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Data Collection and Validation
-  let dataCollection = await ctx.task(dataCollectionTask, {
+  const dataCollection = await ctx.task(dataCollectionTask, {
     projectName,
     projectData,
     reportingPeriod
   });
 
   // Quality Gate: Sufficient data for reporting
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        dataCollection = await ctx.task(dataCollectionTask, { ...{
-    projectName,
-    projectData,
-    reportingPeriod
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (!dataCollection.isComplete || dataCollection.completeness < 70) {
+    await ctx.breakpoint({
       question: `Data collection only ${dataCollection.completeness}% complete for ${projectName}. Proceed with available data or gather more?`,
       title: 'Data Completeness Warning',
       context: {
@@ -55,35 +47,20 @@ export async function process(inputs, ctx) {
         completeness: dataCollection.completeness,
         missingData: dataCollection.missingItems,
         recommendation: 'Gather missing data for accurate reporting'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 2: Progress Analysis
-  let progressAnalysis = await ctx.task(progressAnalysisTask, {
+  const progressAnalysis = await ctx.task(progressAnalysisTask, {
     projectName,
     dataCollection,
     previousReports,
     reportingPeriod
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      progressAnalysis = await ctx.task(progressAnalysisTask, { ...{
-    projectName,
-    dataCollection,
-    previousReports,
-    reportingPeriod
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review progress analysis
+  await ctx.breakpoint({
     question: `Progress analysis complete for ${projectName}. Overall health: ${progressAnalysis.overallHealth}. Review before generating reports?`,
     title: 'Progress Analysis Review',
     context: {
@@ -97,15 +74,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: progressAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Variance Analysis
   const varianceAnalysis = await ctx.task(varianceAnalysisTask, {
     projectName,
@@ -168,7 +139,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Compilation and Distribution Plan
-  let reportCompilation = await ctx.task(reportCompilationTask, {
+  const reportCompilation = await ctx.task(reportCompilationTask, {
     projectName,
     executiveSummary,
     detailedReport,
@@ -181,19 +152,8 @@ export async function process(inputs, ctx) {
   const completenessScore = reportCompilation.completenessScore || 0;
   const ready = completenessScore >= 80;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportCompilation = await ctx.task(reportCompilationTask, { ...{
-    projectName,
-    executiveSummary,
-    detailedReport,
-    dashboard,
-    stakeholderCommunications,
-    reportingPeriod
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Status reporting complete for ${projectName} - ${reportingPeriod}. Health: ${progressAnalysis.overallHealth}. Reports ready for distribution?`,
     title: 'Status Report Distribution Approval',
     context: {
@@ -206,15 +166,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/status-report-${reportingPeriod}.json`, format: 'json', content: detailedReport },
         { path: `artifacts/status-report-${reportingPeriod}.md`, format: 'markdown', content: reportCompilation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -249,7 +203,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',

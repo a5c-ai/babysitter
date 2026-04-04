@@ -24,71 +24,44 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Define Cloud Strategy
   ctx.log('Phase 1: Defining cloud strategy...');
-  let strategyResult = await ctx.task(defineCloudStrategyTask, {
+  const strategyResult = await ctx.task(defineCloudStrategyTask, {
     projectName,
     requirements,
     cloudProviders
   });
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      strategyResult = await ctx.task(defineCloudStrategyTask, { ...{
-    projectName,
-    requirements,
-    cloudProviders
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  results.phases.push({ phase: 1, name: 'Cloud Strategy', result: strategyResult });
+
+  await ctx.breakpoint({
     question: 'Review cloud strategy and approach. Proceed with provider selection?',
     title: 'Cloud Strategy Review',
     context: {
       runId: ctx.runId,
       strategy: strategyResult,
       files: [{ path: `artifacts/cloud-strategy.md`, format: 'markdown' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Select Cloud Provider
   ctx.log('Phase 2: Selecting cloud provider...');
-  let providerResult = await ctx.task(selectCloudProviderTask, {
+  const providerResult = await ctx.task(selectCloudProviderTask, {
     projectName,
     requirements,
     strategy: strategyResult,
     candidates: cloudProviders
   });
   results.phases.push({ phase: 2, name: 'Provider Selection', result: providerResult });
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      providerResult = await ctx.task(selectCloudProviderTask, { ...{
-    projectName,
-    requirements,
-    strategy: strategyResult,
-    candidates: cloudProviders
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  results.selectedProvider = providerResult.selectedProvider;
+
+  await ctx.breakpoint({
     question: `Selected: ${providerResult.selectedProvider}. Proceed with architecture design?`,
     title: 'Provider Selection Review',
     context: {
       runId: ctx.runId,
       provider: providerResult,
       files: [{ path: `artifacts/provider-selection.md`, format: 'markdown' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Parallel Architecture Design (Compute, Data, Network)
   ctx.log('Phase 3: Designing architecture components in parallel...');
   const [computeResult, dataResult, networkResult] = await ctx.parallel.all([
@@ -116,17 +89,9 @@ export async function process(inputs, ctx) {
     compute: computeResult,
     data: dataResult,
     network: networkResult
-    let lastFeedback_designApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_designApproval) {
-      providerResult = await ctx.task(selectCloudProviderTask, { ...{
-    projectName,
-    requirements,
-    strategy: strategyResult,
-    candidates: cloudProviders
-  }, feedback: lastFeedback_designApproval, attempt: attempt + 1 });
-    }
-  const designApproval = await ctx.breakpoint({
+  }});
+
+  await ctx.breakpoint({
     question: 'Review compute, data, and network architecture. Proceed with security and compliance?',
     title: 'Architecture Components Review',
     context: {
@@ -137,18 +102,12 @@ export async function process(inputs, ctx) {
         { path: `artifacts/data-architecture.md`, format: 'markdown' },
         { path: `artifacts/network-architecture.md`, format: 'markdown' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_designApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (designApproval.approved) break;
-    lastFeedback_designApproval = designApproval.response || designApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Security and Compliance Planning
   ctx.log('Phase 4: Planning security and compliance...');
-  let securityResult = await ctx.task(planSecurityComplianceTask, {
+  const securityResult = await ctx.task(planSecurityComplianceTask, {
     projectName,
     requirements,
     provider: providerResult.selectedProvider,
@@ -157,34 +116,18 @@ export async function process(inputs, ctx) {
     network: networkResult
   });
   results.phases.push({ phase: 4, name: 'Security & Compliance', result: securityResult });
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      securityResult = await ctx.task(planSecurityComplianceTask, { ...{
-    projectName,
-    requirements,
-    provider: providerResult.selectedProvider,
-    compute: computeResult,
-    data: dataResult,
-    network: networkResult
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  results.security = securityResult;
+
+  await ctx.breakpoint({
     question: 'Review security and compliance design. Proceed with HA design?',
     title: 'Security Review',
     context: {
       runId: ctx.runId,
       security: securityResult,
       files: [{ path: `artifacts/security-design.md`, format: 'markdown' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: High Availability Design
   ctx.log('Phase 5: Designing high availability...');
   const haResult = await ctx.task(designHighAvailabilityTask, {
@@ -201,7 +144,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Cost Optimization
   ctx.log('Phase 6: Optimizing costs...');
-  let costResult = await ctx.task(optimizeCostsTask, {
+  const costResult = await ctx.task(optimizeCostsTask, {
     projectName,
     requirements,
     provider: providerResult.selectedProvider,
@@ -212,21 +155,9 @@ export async function process(inputs, ctx) {
     ha: haResult
   });
   results.phases.push({ phase: 6, name: 'Cost Optimization', result: costResult });
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      costResult = await ctx.task(optimizeCostsTask, { ...{
-    projectName,
-    requirements,
-    provider: providerResult.selectedProvider,
-    compute: computeResult,
-    data: dataResult,
-    network: networkResult,
-    security: securityResult,
-    ha: haResult
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  results.cost = costResult;
+
+  await ctx.breakpoint({
     question: 'Review HA design and cost estimates. Proceed with IaC generation?',
     title: 'HA & Cost Review',
     context: {
@@ -237,15 +168,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/ha-design.md`, format: 'markdown' },
         { path: `artifacts/cost-estimate.md`, format: 'markdown' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 7: Infrastructure as Code Generation
   ctx.log('Phase 7: Creating Infrastructure as Code...');
   const iacResult = await ctx.task(createInfrastructureAsCodeTask, {
@@ -262,7 +187,7 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Quality Validation
   ctx.log('Phase 8: Validating architecture quality...');
-  let qualityResult = await ctx.task(validateArchitectureQualityTask, {
+  const qualityResult = await ctx.task(validateArchitectureQualityTask, {
     projectName,
     requirements,
     targetQuality,
@@ -281,27 +206,8 @@ export async function process(inputs, ctx) {
   results.phases.push({ phase: 8, name: 'Quality Validation', result: qualityResult });
   results.qualityScore = qualityResult.score;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualityResult = await ctx.task(validateArchitectureQualityTask, { ...{
-    projectName,
-    requirements,
-    targetQuality,
-    architecture: {
-      strategy: strategyResult,
-      provider: providerResult,
-      compute: computeResult,
-      data: dataResult,
-      network: networkResult,
-      security: securityResult,
-      ha: haResult,
-      cost: costResult,
-      iac: iacResult
-    }
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Review
+  await ctx.breakpoint({
     question: `Architecture quality: ${qualityResult.score}/${targetQuality}. Approve final architecture?`,
     title: 'Final Architecture Review',
     context: {
@@ -312,15 +218,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/cloud-architecture-diagram.md`, format: 'markdown' },
         { path: `artifacts/final-architecture-report.md`, format: 'markdown' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: qualityResult.score >= targetQuality,
     processSlug: 'cloud-architecture-design',

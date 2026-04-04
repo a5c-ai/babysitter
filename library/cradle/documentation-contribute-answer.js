@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Gathering documentation answer details');
 
-  let details = await ctx.task(gatherAnswerDetailsTask, {
+  const details = await ctx.task(gatherAnswerDetailsTask, {
     questionUrl,
     questionTitle,
     answerContent,
@@ -62,41 +62,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Forking repository');
 
-  let forkLastFeedback = null;
-  for (let forkAttempt = 0; forkAttempt < 3; forkAttempt++) {
-    if (forkLastFeedback) {
-      details = await ctx.task(gatherAnswerDetailsTask, {
-        questionUrl,
-        questionTitle,
-        answerContent,
-        docSection,
-        additionalContext,
-        feedback: forkLastFeedback,
-        attempt: forkAttempt + 1
-      });
-    }
-    const forkApproval = await ctx.breakpoint({
-      question: [
-          'To submit your documentation answer, we need to fork the a5c-ai/babysitter repository to your GitHub account.',
-          '',
-          `**Question:** ${details.questionTitle}`,
-          `**Target section:** ${details.docSection}`,
-          `**Existing docs found:** ${docSearch.existingDocs.length} relevant file(s)`,
-          `**Action:** ${docSearch.existingDocs.length > 0 ? 'Update existing documentation' : 'Add new documentation'}`,
-          '',
-          'Approve to fork the repository, or request changes.'
-        ].join('\n'),
-      previousFeedback: forkLastFeedback || undefined,
-      attempt: forkAttempt > 0 ? forkAttempt + 1 : undefined,
-      title: 'Fork a5c-ai/babysitter?',
-      options: ['Approve', 'Request changes'],
-      expert: 'owner',
-      tags: ['approval-gate', 'fork'],
-      context: { runId: ctx.runId }
-    });
-    if (forkApproval.approved) break;
-    forkLastFeedback = forkApproval.response || forkApproval.feedback || 'Changes requested';
-  }
+  await ctx.breakpoint({
+    question: [
+      'To submit your documentation answer, we need to fork the a5c-ai/babysitter repository to your GitHub account.',
+      '',
+      `**Question:** ${details.questionTitle}`,
+      `**Target section:** ${details.docSection}`,
+      `**Existing docs found:** ${docSearch.existingDocs.length} relevant file(s)`,
+      `**Action:** ${docSearch.existingDocs.length > 0 ? 'Update existing documentation' : 'Add new documentation'}`,
+      '',
+      'Approve to fork the repository, or reject to cancel.'
+    ].join('\n'),
+    title: 'Fork a5c-ai/babysitter?',
+    context: { runId: ctx.runId }
+  });
 
   const fork = await ctx.task(forkRepoTask, {
     targetRepo: 'a5c-ai/babysitter'
@@ -111,15 +90,13 @@ export async function process(inputs, ctx) {
   const starStatus = await ctx.task(checkStarTask, { targetRepo: 'a5c-ai/babysitter' });
 
   if (!starStatus.isStarred) {
-    const starApproval = await ctx.breakpoint({
+    await ctx.breakpoint({
       question: 'Would you like to star the a5c-ai/babysitter repository to show your support?',
       title: 'Star repository?',
       context: { runId: ctx.runId }
     });
 
-    if (starApproval.approved) {
-      await ctx.task(starRepoTask, { targetRepo: 'a5c-ai/babysitter' });
-    }
+    await ctx.task(starRepoTask, { targetRepo: 'a5c-ai/babysitter' });
   }
 
   // ============================================================================
@@ -175,56 +152,21 @@ export async function process(inputs, ctx) {
 
   const formatStatus = verification.passed ? 'PASSED' : 'ISSUES FOUND';
 
-  let reviewLastFeedback = null;
-  let currentDocWrite = docWrite;
-  let currentVerification = verification;
-  let currentFormatStatus = formatStatus;
-  for (let reviewAttempt = 0; reviewAttempt < 3; reviewAttempt++) {
-    if (reviewLastFeedback) {
-      currentDocWrite = await ctx.task(writeDocumentationTask, {
-        questionTitle: details.questionTitle,
-        questionUrl: details.questionUrl,
-        answerContent: details.answerContent,
-        docSection: details.docSection,
-        existingDocs: docSearch.existingDocs,
-        targetFiles: docSearch.targetFiles,
-        forkOwner: fork.forkOwner,
-        branchName,
-        feedback: reviewLastFeedback,
-        attempt: reviewAttempt + 1
-      });
-      currentVerification = await ctx.task(verifyDocsFormattingTask, {
-        filesChanged: currentDocWrite.filesChanged,
-        forkOwner: fork.forkOwner,
-        branchName
-      });
-      currentFormatStatus = currentVerification.passed ? 'PASSED' : 'ISSUES FOUND';
-    }
-    const reviewApproval = await ctx.breakpoint({
-      question: [
-          'Please review the documentation changes before submitting the PR.',
-          '',
-          `**Question:** ${details.questionTitle}`,
-          `**Section:** ${details.docSection}`,
-          `**Files changed:** ${currentDocWrite.filesChanged.join(', ')}`,
-          `**Formatting check:** ${currentFormatStatus}`,
-          currentVerification.issues.length > 0 ? `**Issues:** ${currentVerification.issues.join('; ')}` : '',
-          '',
-          'Approve to submit the PR, or request changes.'
-        ],
-
-        previousFeedback: reviewLastFeedback || undefined,
-
-        attempt: reviewAttempt > 0 ? reviewAttempt + 1 : undefined,.filter(Boolean).join('\n'),
-      title: 'Review documentation changes',
-      options: ['Approve', 'Request changes'],
-      expert: 'owner',
-      tags: ['approval-gate', 'review'],
-      context: { runId: ctx.runId }
-    });
-    if (reviewApproval.approved) break;
-    reviewLastFeedback = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+  await ctx.breakpoint({
+    question: [
+      'Please review the documentation changes before submitting the PR.',
+      '',
+      `**Question:** ${details.questionTitle}`,
+      `**Section:** ${details.docSection}`,
+      `**Files changed:** ${docWrite.filesChanged.join(', ')}`,
+      `**Formatting check:** ${formatStatus}`,
+      verification.issues.length > 0 ? `**Issues:** ${verification.issues.join('; ')}` : '',
+      '',
+      'Approve to submit the PR, or reject to make further changes.'
+    ].filter(Boolean).join('\n'),
+    title: 'Review documentation changes',
+    context: { runId: ctx.runId }
+  });
 
   // ============================================================================
   // PHASE 9: SUBMIT PR
@@ -232,21 +174,11 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Submitting pull request');
 
-  let submitLastFeedback = null;
-  for (let submitAttempt = 0; submitAttempt < 3; submitAttempt++) {
-    const submitApproval = await ctx.breakpoint({
-      question: 'Ready to submit the documentation pull request to a5c-ai/babysitter?',
-      previousFeedback: submitLastFeedback || undefined,
-      attempt: submitAttempt > 0 ? submitAttempt + 1 : undefined,
-      title: 'Submit PR?',
-      options: ['Approve', 'Request changes'],
-      expert: 'owner',
-      tags: ['approval-gate', 'submit'],
-      context: { runId: ctx.runId }
-    });
-    if (submitApproval.approved) break;
-    submitLastFeedback = submitApproval.response || submitApproval.feedback || 'Changes requested';
-  }
+  await ctx.breakpoint({
+    question: 'Ready to submit the documentation pull request to a5c-ai/babysitter?',
+    title: 'Submit PR?',
+    context: { runId: ctx.runId }
+  });
 
   const pr = await ctx.task(submitPrTask, {
     forkOwner: fork.forkOwner,

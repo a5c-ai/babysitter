@@ -60,21 +60,14 @@ export async function process(inputs, ctx) {
       appName, platforms, framework, testingFrameworks, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Testing strategy complete for ${appName}. Ready to execute test suites?`,
     title: 'Testing Strategy Review',
-    context: { runId: ctx.runId, appName, platforms, testingFrameworks },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, platforms, testingFrameworks }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,

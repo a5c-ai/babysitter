@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing target build system');
-  let targetDesign = await ctx.task(targetBuildDesignTask, {
+  const targetDesign = await ctx.task(targetBuildDesignTask, {
     projectName,
     buildAnalysis,
     targetBuildSystem,
@@ -64,18 +64,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetDesign.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      targetDesign = await ctx.task(targetBuildDesignTask, { ...{
-    projectName,
-    buildAnalysis,
-    targetBuildSystem,
-    cicdRequirements,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Build design review
+  await ctx.breakpoint({
     question: `Target build design complete for ${projectName}. Tool: ${targetBuildSystem}. Expected build time improvement: ${targetDesign.expectedImprovement}. Approve design?`,
     title: 'Build System Design Review',
     context: {
@@ -83,15 +73,9 @@ export async function process(inputs, ctx) {
       projectName,
       targetDesign,
       recommendation: 'Review build structure and dependencies'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: BUILD SCRIPT MIGRATION
   // ============================================================================
@@ -127,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Validating build');
-  let buildValidation = await ctx.task(buildValidationTask, {
+  const buildValidation = await ctx.task(buildValidationTask, {
     projectName,
     buildMigration,
     dependencyManagement,
@@ -137,17 +121,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...buildValidation.artifacts);
 
   // Quality Gate: Build success
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        buildValidation = await ctx.task(buildValidationTask, { ...{
-    projectName,
-    buildMigration,
-    dependencyManagement,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!buildValidation.buildSuccess) {
+    await ctx.breakpoint({
       question: `Build validation failed for ${projectName}. Errors: ${buildValidation.errors.length}. Review and fix build issues?`,
       title: 'Build Validation Failed',
       context: {
@@ -155,15 +130,9 @@ export async function process(inputs, ctx) {
         projectName,
         errors: buildValidation.errors,
         recommendation: 'Fix build errors before CI/CD setup'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: CI/CD INTEGRATION
@@ -184,7 +153,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Optimizing build performance');
-  let performanceOptimization = await ctx.task(buildPerformanceOptimizationTask, {
+  const performanceOptimization = await ctx.task(buildPerformanceOptimizationTask, {
     projectName,
     buildMigration,
     buildValidation,
@@ -193,17 +162,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...performanceOptimization.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      performanceOptimization = await ctx.task(buildPerformanceOptimizationTask, { ...{
-    projectName,
-    buildMigration,
-    buildValidation,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Build system modernization complete for ${projectName}. Build time: ${performanceOptimization.currentBuildTime} (was ${buildAnalysis.buildTime}). CI/CD ready: ${cicdIntegration.ready}. Approve?`,
     title: 'Build Modernization Complete',
     context: {
@@ -215,15 +175,9 @@ export async function process(inputs, ctx) {
         buildTimeImprovement: performanceOptimization.improvement,
         cicdReady: cicdIntegration.ready
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -254,7 +208,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

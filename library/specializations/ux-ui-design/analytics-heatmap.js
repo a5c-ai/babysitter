@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Defining analytics requirements and tracking strategy');
-  let analyticsStrategy = await ctx.task(analyticsStrategyTask, {
+  const analyticsStrategy = await ctx.task(analyticsStrategyTask, {
     projectName,
     websiteUrl,
     analyticsTools,
@@ -74,24 +74,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Strategy completeness
   const strategyCompleteness = analyticsStrategy.completenessScore || 0;
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        analyticsStrategy = await ctx.task(analyticsStrategyTask, { ...{
-    projectName,
-    websiteUrl,
-    analyticsTools,
-    trackingGoals,
-    businessMetrics,
-    conversionFunnels,
-    keyPages,
-    userSegments,
-    trackingDuration,
-    privacyCompliance,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (strategyCompleteness < 70) {
+    await ctx.breakpoint({
       question: `Analytics strategy completeness: ${strategyCompleteness}/100 (below threshold of 70). Review strategy and approve to continue?`,
       title: 'Analytics Strategy Review',
       context: {
@@ -100,22 +84,16 @@ export async function process(inputs, ctx) {
         trackingPlan: analyticsStrategy.trackingPlan,
         missingElements: analyticsStrategy.missingElements,
         recommendation: 'Consider defining more specific tracking goals and user segments'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: ANALYTICS TOOL SETUP AND INTEGRATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Setting up and integrating analytics tools');
-  let toolSetup = await ctx.task(analyticsToolSetupTask, {
+  const toolSetup = await ctx.task(analyticsToolSetupTask, {
     projectName,
     websiteUrl,
     analyticsTools: analyticsStrategy.selectedTools,
@@ -127,19 +105,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...toolSetup.artifacts);
 
   // Quality Gate: Tool integration status
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        toolSetup = await ctx.task(analyticsToolSetupTask, { ...{
-    projectName,
-    websiteUrl,
-    analyticsTools: analyticsStrategy.selectedTools,
-    trackingPlan: analyticsStrategy.trackingPlan,
-    privacyCompliance,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!toolSetup.allToolsIntegrated) {
+    await ctx.breakpoint({
       question: `${toolSetup.integratedTools.length}/${analyticsStrategy.selectedTools.length} analytics tools integrated successfully. Integration issues detected. Review and continue?`,
       title: 'Tool Integration Status',
       context: {
@@ -148,15 +115,9 @@ export async function process(inputs, ctx) {
         failedTools: toolSetup.failedTools,
         integrationIssues: toolSetup.integrationIssues,
         files: toolSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: EVENT TRACKING IMPLEMENTATION
@@ -229,7 +190,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating analytics data collection and quality');
-  let dataValidation = await ctx.task(dataCollectionValidationTask, {
+  const dataValidation = await ctx.task(dataCollectionValidationTask, {
     projectName,
     websiteUrl,
     toolSetup,
@@ -244,21 +205,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Data quality
   const dataQualityScore = dataValidation.qualityScore;
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        dataValidation = await ctx.task(dataCollectionValidationTask, { ...{
-    projectName,
-    websiteUrl,
-    toolSetup,
-    eventTracking,
-    heatmapConfig,
-    sessionRecording,
-    funnelTracking,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (dataQualityScore < 80) {
+    await ctx.breakpoint({
       question: `Data collection quality score: ${dataQualityScore}/100 (below threshold of 80). Data quality issues detected. Review and continue or fix issues?`,
       title: 'Data Quality Gate',
       context: {
@@ -268,31 +216,12 @@ export async function process(inputs, ctx) {
         missingData: dataValidation.missingDataPoints,
         recommendation: 'Address critical data quality issues before proceeding with analysis',
         files: dataValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      dataValidation = await ctx.task(dataCollectionValidationTask, { ...{
-    projectName,
-    websiteUrl,
-    toolSetup,
-    eventTracking,
-    heatmapConfig,
-    sessionRecording,
-    funnelTracking,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Breakpoint: Data collection period
+  await ctx.breakpoint({
     question: `Analytics tools configured and validated. Data collection period: ${trackingDuration}. Proceed to data collection phase? (Note: In production, wait for sufficient data before analysis)`,
     title: 'Begin Data Collection Phase',
     context: {
@@ -311,21 +240,15 @@ export async function process(inputs, ctx) {
         funnelsConfigured: funnelTracking.configuredFunnels.length,
         dataQualityScore
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: HEATMAP DATA COLLECTION AND GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Collecting heatmap data and generating visualizations');
-  let heatmapGeneration = await ctx.task(heatmapGenerationTask, {
+  const heatmapGeneration = await ctx.task(heatmapGenerationTask, {
     projectName,
     websiteUrl,
     heatmapConfig,
@@ -337,18 +260,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Sample size
   const sampleSizeAdequate = heatmapGeneration.totalSessions >= minimumSampleSize;
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        heatmapGeneration = await ctx.task(heatmapGenerationTask, { ...{
-    projectName,
-    websiteUrl,
-    heatmapConfig,
-    minimumSampleSize,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (!sampleSizeAdequate) {
+    await ctx.breakpoint({
       question: `Heatmap sample size: ${heatmapGeneration.totalSessions} sessions (minimum: ${minimumSampleSize}). Sample size below threshold. Continue with available data or extend collection period?`,
       title: 'Heatmap Sample Size Review',
       context: {
@@ -357,15 +270,9 @@ export async function process(inputs, ctx) {
         minimumSampleSize,
         sessionsByPage: heatmapGeneration.sessionsByPage,
         recommendation: 'Larger sample sizes provide more reliable insights'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: HEATMAP ANALYSIS (PARALLEL)
@@ -556,7 +463,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 18: Scoring analysis quality and validating insights');
-  let qualityScoring = await ctx.task(qualityScoringTask, {
+  const qualityScoring = await ctx.task(qualityScoringTask, {
     projectName,
     analyticsStrategy,
     heatmapGeneration,
@@ -576,25 +483,8 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityScoring.overallQualityScore;
   const qualityMet = qualityScore >= qualityScoreTarget;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualityScoring = await ctx.task(qualityScoringTask, { ...{
-    projectName,
-    analyticsStrategy,
-    heatmapGeneration,
-    heatmapInsights,
-    sessionAnalysis,
-    funnelAnalysis,
-    behaviorPatterns,
-    optimizationRecommendations,
-    insightsReport,
-    qualityScoreTarget,
-    minimumSampleSize,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Analysis Review and Approval
+  await ctx.breakpoint({
     question: `Analytics Integration and Heatmap Analysis complete for ${projectName}. Quality Score: ${qualityScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need additional data or refinement.'} Review insights and approve?`,
     title: 'Final Analytics Review',
     context: {
@@ -617,15 +507,9 @@ export async function process(inputs, ctx) {
         totalRecommendations: optimizationRecommendations.recommendations.length,
         abTestsPlanned: abTestPlanning.plannedTests.length
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -720,7 +604,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

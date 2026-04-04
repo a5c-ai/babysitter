@@ -40,30 +40,21 @@ export async function process(inputs, ctx) {
   const frameworkSetup = await ctx.task(setupUiTestFrameworkTask, { projectName, framework, uiTestFramework, outputDir });
   artifacts.push(...frameworkSetup.artifacts);
 
-  let componentTesting = await ctx.task(setupComponentTestingTask, { projectName, framework, uiTestFramework, outputDir });
+  const componentTesting = await ctx.task(setupComponentTestingTask, { projectName, framework, uiTestFramework, outputDir });
   artifacts.push(...componentTesting.artifacts);
 
   let visualRegression = null;
   if (visualRegressionEnabled) {
     visualRegression = await ctx.task(setupVisualRegressionTask, { projectName, uiTestFramework, outputDir });
     artifacts.push(...visualRegression.artifacts);
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      componentTesting = await ctx.task(setupComponentTestingTask, { ...{ projectName, framework, uiTestFramework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `UI testing configured with ${uiTestFramework}. Visual regression: ${visualRegressionEnabled ? 'enabled' : 'disabled'}. Review?`,
     title: 'UI Testing Setup Review',
-    context: { runId: ctx.runId, uiTestFramework, visualRegressionEnabled },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, uiTestFramework, visualRegressionEnabled }
+  });
+
   const pageObjects = await ctx.task(createPageObjectsTask, { projectName, framework, uiTestFramework, outputDir });
   artifacts.push(...pageObjects.artifacts);
 

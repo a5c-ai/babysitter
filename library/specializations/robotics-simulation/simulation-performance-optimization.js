@@ -93,6 +93,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...parallelSimulation.artifacts);
   }
+
   // ============================================================================
   // PHASE 5: GPU ACCELERATION
   // ============================================================================
@@ -108,6 +109,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...gpuAccelerationSetup.artifacts);
   }
+
   // ============================================================================
   // PHASE 6: SENSOR RATE OPTIMIZATION
   // ============================================================================
@@ -137,13 +139,14 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...headlessConfig.artifacts);
   }
+
   // ============================================================================
   // PHASE 8: PERFORMANCE BENCHMARKING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Performance Benchmarking');
 
-  let benchmarking = await ctx.task(performanceBenchmarkingTask, {
+  const benchmarking = await ctx.task(performanceBenchmarkingTask, {
     simulationPath,
     targetRTF,
     parallelInstances,
@@ -156,20 +159,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarking.artifacts);
 
   // Quality Gate: Performance targets
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        benchmarking = await ctx.task(performanceBenchmarkingTask, { ...{
-    simulationPath,
-    targetRTF,
-    parallelInstances,
-    collisionOptimization,
-    lodRendering,
-    sensorOptimization,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (benchmarking.achievedRTF < targetRTF * 0.9) {
+    await ctx.breakpoint({
       question: `Performance target not met. Achieved RTF: ${benchmarking.achievedRTF}, Target: ${targetRTF}. Review optimizations?`,
       title: 'Performance Target Review',
       context: {
@@ -178,30 +169,12 @@ export async function process(inputs, ctx) {
         targetRTF,
         bottlenecks: benchmarking.remainingBottlenecks,
         files: benchmarking.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      benchmarking = await ctx.task(performanceBenchmarkingTask, { ...{
-    simulationPath,
-    targetRTF,
-    parallelInstances,
-    collisionOptimization,
-    lodRendering,
-    sensorOptimization,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Simulation Optimization Complete. RTF: ${benchmarking.achievedRTF} (target: ${targetRTF}). Performance improvement: ${benchmarking.improvement}%. Review optimization package?`,
     title: 'Simulation Optimization Complete',
     context: {
@@ -215,15 +188,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: benchmarking.reportPath, format: 'markdown', label: 'Benchmark Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -251,7 +218,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

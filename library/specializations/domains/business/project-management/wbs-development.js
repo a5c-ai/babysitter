@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Scope Analysis and Decomposition Strategy
-  let decompositionStrategy = await ctx.task(decompositionStrategyTask, {
+  const decompositionStrategy = await ctx.task(decompositionStrategyTask, {
     projectName,
     scopeStatement,
     deliverables,
@@ -49,18 +49,9 @@ export async function process(inputs, ctx) {
       wbs: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      decompositionStrategy = await ctx.task(decompositionStrategyTask, { ...{
-    projectName,
-    scopeStatement,
-    deliverables,
-    decompositionApproach,
-    existingTemplates
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review decomposition strategy
+  await ctx.breakpoint({
     question: `Review WBS decomposition strategy for ${projectName}. Approach: ${decompositionStrategy.approach}. Proceed with decomposition?`,
     title: 'WBS Strategy Review',
     context: {
@@ -73,15 +64,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: decompositionStrategy
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Level 1 Decomposition (Major Deliverables/Phases)
   const level1Decomposition = await ctx.task(level1DecompositionTask, {
     projectName,
@@ -106,37 +91,23 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Work packages must be estimable (8-80 rule)
-  let workPackageValidation = await ctx.task(workPackageValidationTask, {
+  const workPackageValidation = await ctx.task(workPackageValidationTask, {
     projectName,
     detailedDecomposition,
     constraints
   });
 
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        workPackageValidation = await ctx.task(workPackageValidationTask, { ...{
-    projectName,
-    detailedDecomposition,
-    constraints
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (workPackageValidation.invalidPackages?.length > 0) {
+    await ctx.breakpoint({
       question: `${workPackageValidation.invalidPackages.length} work packages need refinement (too large or too small). Review and adjust?`,
       title: 'Work Package Validation Warning',
       context: {
         runId: ctx.runId,
         invalidPackages: workPackageValidation.invalidPackages,
         recommendation: 'Further decompose large packages or consolidate small ones'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: WBS Dictionary Development
   const wbsDictionary = await ctx.task(wbsDictionaryDevelopmentTask, {
@@ -177,7 +148,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: WBS Documentation Generation
-  let wbsDocumentation = await ctx.task(wbsDocumentationTask, {
+  const wbsDocumentation = await ctx.task(wbsDocumentationTask, {
     projectName,
     decompositionStrategy,
     detailedDecomposition,
@@ -192,21 +163,8 @@ export async function process(inputs, ctx) {
   const completenessScore = wbsDocumentation.completenessScore || 0;
   const ready = completenessScore >= 80 && wbsValidation.isValid;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      wbsDocumentation = await ctx.task(wbsDocumentationTask, { ...{
-    projectName,
-    decompositionStrategy,
-    detailedDecomposition,
-    wbsDictionary,
-    workPackageDefinitions,
-    integrationAnalysis,
-    controlAccounts,
-    wbsValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `WBS development complete for ${projectName}. Elements: ${detailedDecomposition.totalElements}, Work Packages: ${workPackageDefinitions.workPackages.length}. Completeness: ${completenessScore}/100. Approve?`,
     title: 'WBS Approval Review',
     context: {
@@ -220,15 +178,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/wbs-dictionary.json`, format: 'json', content: wbsDictionary },
         { path: `artifacts/wbs-document.md`, format: 'markdown', content: wbsDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -261,7 +213,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const decompositionStrategyTask = defineTask('decomposition-strategy', (args, taskCtx) => ({
   kind: 'agent',

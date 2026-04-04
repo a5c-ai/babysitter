@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Extracting terminology from documentation and codebase');
 
-  let terminologyExtraction = await ctx.task(terminologyExtractionTask, {
+  const terminologyExtraction = await ctx.task(terminologyExtractionTask, {
     projectName,
     documentationPath,
     docInventory,
@@ -123,22 +123,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Extracted ${termCount} terms from documentation`);
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      terminologyExtraction = await ctx.task(terminologyExtractionTask, { ...{
-    projectName,
-    documentationPath,
-    docInventory,
-    terminologyScope,
-    includeAbbreviations,
-    includeAcronyms,
-    includeProductNames,
-    styleGuide,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review extracted terminology
+  await ctx.breakpoint({
     question: `Extracted ${termCount} terms (${terminologyExtraction.productTerms} product, ${terminologyExtraction.technicalTerms} technical). Review terminology extraction and approve to continue?`,
     title: 'Terminology Extraction Review',
     context: {
@@ -151,15 +137,9 @@ export async function process(inputs, ctx) {
       acronyms: terminologyExtraction.acronymCount,
       topTerms: terminologyExtraction.topTermsByFrequency.slice(0, 20),
       files: terminologyExtraction.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: EXISTING GLOSSARY INTEGRATION
   // ============================================================================
@@ -183,13 +163,14 @@ export async function process(inputs, ctx) {
     ctx.log('info', 'Phase 3: No existing glossary provided, creating new terminology database');
     existingTerms = extractedTerms;
   }
+
   // ============================================================================
   // PHASE 4: TERMINOLOGY NORMALIZATION AND STANDARDIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Normalizing and standardizing terminology');
 
-  let normalization = await ctx.task(terminologyNormalizationTask, {
+  const normalization = await ctx.task(terminologyNormalizationTask, {
     projectName,
     terms: existingTerms,
     styleGuide,
@@ -204,19 +185,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Duplicate terms check
   const duplicateTerms = normalization.duplicateTerms.length;
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        normalization = await ctx.task(terminologyNormalizationTask, { ...{
-    projectName,
-    terms: existingTerms,
-    styleGuide,
-    caseSensitive,
-    languages,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (duplicateTerms > acceptanceCriteria.maxDuplicateTerms) {
+    await ctx.breakpoint({
       question: `Found ${duplicateTerms} duplicate or conflicting terms (limit: ${acceptanceCriteria.maxDuplicateTerms}). Review conflicts and decide resolution strategy?`,
       title: 'Duplicate Terms Quality Gate',
       context: {
@@ -225,15 +195,9 @@ export async function process(inputs, ctx) {
         conflicts: normalization.conflicts,
         recommendations: normalization.resolutionRecommendations,
         files: normalization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: GLOSSARY GENERATION (PARALLEL)
@@ -281,7 +245,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Running consistency checks across all documentation');
 
-  let consistencyCheck = await ctx.task(consistencyCheckingTask, {
+  const consistencyCheck = await ctx.task(consistencyCheckingTask, {
     projectName,
     documentationPath,
     docInventory,
@@ -301,20 +265,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Consistency check complete: ${consistencyScore.toFixed(1)}% consistent, ${violations.length} violations found`);
 
   // Quality Gate: Consistency score
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        consistencyCheck = await ctx.task(consistencyCheckingTask, { ...{
-    projectName,
-    documentationPath,
-    docInventory,
-    terminologyDatabase,
-    caseSensitive,
-    styleGuide,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (consistencyScore < acceptanceCriteria.minConsistencyScore) {
+    await ctx.breakpoint({
       question: `Consistency score: ${consistencyScore.toFixed(1)}% (target: ${acceptanceCriteria.minConsistencyScore}%). Found ${violations.length} violations. Review consistency report and decide to fix or proceed?`,
       title: 'Consistency Score Quality Gate',
       context: {
@@ -327,31 +279,13 @@ export async function process(inputs, ctx) {
         topViolations: violations.slice(0, 20),
         affectedFiles: consistencyCheck.affectedFiles,
         files: consistencyCheck.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Quality Gate: Maximum violations
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        consistencyCheck = await ctx.task(consistencyCheckingTask, { ...{
-    projectName,
-    documentationPath,
-    docInventory,
-    terminologyDatabase,
-    caseSensitive,
-    styleGuide,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (violations.length > acceptanceCriteria.maxViolations) {
+    await ctx.breakpoint({
       question: `Found ${violations.length} violations (limit: ${acceptanceCriteria.maxViolations}). Auto-fix available: ${autoFix}. Review violations and decide to fix or proceed?`,
       title: 'Violations Threshold Quality Gate',
       context: {
@@ -362,15 +296,9 @@ export async function process(inputs, ctx) {
         violationsByType: consistencyCheck.violationsByType,
         criticalViolations: violations.filter(v => v.severity === 'critical').length,
         files: consistencyCheck.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: AUTOMATED VIOLATION FIXING (OPTIONAL)
@@ -412,6 +340,7 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Post-fix consistency score: ${postFixCheck.consistencyScore.toFixed(1)}%`);
     }
   }
+
   // ============================================================================
   // PHASE 8: VALE RULES GENERATION (FOR CI/CD INTEGRATION)
   // ============================================================================
@@ -432,13 +361,14 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Generated ${valeRules.rulesCount} Vale rules for automated checking`);
   }
+
   // ============================================================================
   // PHASE 9: TERM COVERAGE ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Analyzing term coverage across documentation');
 
-  let coverageAnalysis = await ctx.task(termCoverageAnalysisTask, {
+  const coverageAnalysis = await ctx.task(termCoverageAnalysisTask, {
     projectName,
     documentationPath,
     docInventory,
@@ -451,18 +381,8 @@ export async function process(inputs, ctx) {
   const termCoverage = coverageAnalysis.coveragePercentage;
 
   // Quality Gate: Term coverage
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        coverageAnalysis = await ctx.task(termCoverageAnalysisTask, { ...{
-    projectName,
-    documentationPath,
-    docInventory,
-    terminologyDatabase,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+  if (termCoverage < acceptanceCriteria.requiredTermCoverage) {
+    await ctx.breakpoint({
       question: `Term coverage: ${termCoverage.toFixed(1)}% (target: ${acceptanceCriteria.requiredTermCoverage}%). ${coverageAnalysis.missingTerms.length} terms not found in documentation. Review coverage report and decide to enhance or proceed?`,
       title: 'Term Coverage Quality Gate',
       context: {
@@ -474,15 +394,9 @@ export async function process(inputs, ctx) {
         underutilizedTerms: coverageAnalysis.underutilizedTerms,
         recommendations: coverageAnalysis.recommendations,
         files: coverageAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: STYLE GUIDE COMPLIANCE VALIDATION
@@ -549,7 +463,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating comprehensive terminology management reports');
 
-  let reportGeneration = await ctx.task(reportGenerationTask, {
+  const reportGeneration = await ctx.task(reportGenerationTask, {
     projectName,
     terminologyDatabase,
     glossary,
@@ -567,26 +481,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportGeneration.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportGeneration = await ctx.task(reportGenerationTask, { ...{
-    projectName,
-    terminologyDatabase,
-    glossary,
-    consistencyReport,
-    violations,
-    coverageAnalysis,
-    styleValidation,
-    synonymMapping,
-    qualityScore,
-    fixResults,
-    valeRules,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete terminology management
+  await ctx.breakpoint({
     question: `Terminology management complete for ${projectName}. Quality score: ${qualityScore}/100, Consistency: ${consistencyScore.toFixed(1)}%, Coverage: ${termCoverage.toFixed(1)}%, Violations: ${violations.length}. Review final reports and approve?`,
     title: 'Final Terminology Management Review',
     context: {
@@ -625,15 +521,9 @@ export async function process(inputs, ctx) {
         autoFixEnabled: autoFix,
         fixedCount: fixResults ? fixResults.fixedCount : 0
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -723,7 +613,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

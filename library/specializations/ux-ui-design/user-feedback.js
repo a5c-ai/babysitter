@@ -96,6 +96,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...inAppImplementation.artifacts);
   }
+
   // ============================================================================
   // PHASE 4: SURVEY DESIGN AND DEPLOYMENT
   // ============================================================================
@@ -116,6 +117,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...surveyDeployment.artifacts);
   }
+
   // ============================================================================
   // PHASE 5: NPS MEASUREMENT IMPLEMENTATION
   // ============================================================================
@@ -137,7 +139,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Implementing CSAT measurement');
-  let csatMeasurement = await ctx.task(csatMeasurementTask, {
+  const csatMeasurement = await ctx.task(csatMeasurementTask, {
     projectName,
     productName,
     feedbackStrategy,
@@ -148,19 +150,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...csatMeasurement.artifacts);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      csatMeasurement = await ctx.task(csatMeasurementTask, { ...{
-    projectName,
-    productName,
-    feedbackStrategy,
-    csatTarget,
-    collectionPeriod,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Breakpoint: Review feedback collection setup
+  await ctx.breakpoint({
     question: `Feedback collection channels configured for ${productName}. Review setup before data collection?`,
     title: 'Feedback Channel Setup Review',
     context: {
@@ -179,21 +170,15 @@ export async function process(inputs, ctx) {
         npsTarget,
         csatTarget
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: FEEDBACK DATA COLLECTION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Collecting feedback data from all channels');
-  let feedbackCollection = await ctx.task(feedbackCollectionTask, {
+  const feedbackCollection = await ctx.task(feedbackCollectionTask, {
     projectName,
     productName,
     feedbackStrategy,
@@ -211,24 +196,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Minimum response threshold
   const totalResponses = feedbackCollection.totalResponses || 0;
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        feedbackCollection = await ctx.task(feedbackCollectionTask, { ...{
-    projectName,
-    productName,
-    feedbackStrategy,
-    channelSetup,
-    inAppImplementation,
-    surveyDeployment,
-    npsMeasurement,
-    csatMeasurement,
-    collectionPeriod,
-    minimumResponses,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (totalResponses < minimumResponses) {
+    await ctx.breakpoint({
       question: `Only ${totalResponses} responses collected (target: ${minimumResponses}). Continue with analysis or extend collection period?`,
       title: 'Response Volume Warning',
       context: {
@@ -237,15 +206,9 @@ export async function process(inputs, ctx) {
         minimumResponses,
         responseRate: feedbackCollection.responseRate,
         recommendation: 'Consider extending collection period or promoting feedback channels more actively'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: SENTIMENT ANALYSIS
@@ -262,6 +225,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...sentimentAnalysis.artifacts);
   }
+
   // ============================================================================
   // PHASE 9: FEEDBACK SYNTHESIS AND CATEGORIZATION
   // ============================================================================
@@ -347,6 +311,7 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...recommendations.artifacts);
   }
+
   // ============================================================================
   // PHASE 14: FEEDBACK REPORT GENERATION
   // ============================================================================
@@ -376,7 +341,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 15: Evaluating feedback analysis quality');
-  let qualityScore = await ctx.task(feedbackQualityScoringTask, {
+  const qualityScore = await ctx.task(feedbackQualityScoringTask, {
     projectName,
     productName,
     feedbackCollection,
@@ -393,23 +358,8 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= targetQualityScore;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      qualityScore = await ctx.task(feedbackQualityScoringTask, { ...{
-    projectName,
-    productName,
-    feedbackCollection,
-    feedbackSynthesis,
-    insightGeneration,
-    recommendations,
-    feedbackReport,
-    targetQualityScore,
-    minimumResponses,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review feedback analysis results
+  await ctx.breakpoint({
     question: `User Feedback Analysis complete for ${productName}. Quality Score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Review findings?`,
     title: 'Feedback Analysis Review',
     context: {
@@ -432,15 +382,9 @@ export async function process(inputs, ctx) {
         criticalIssues: feedbackPrioritization.criticalIssues.length,
         topThemes: feedbackSynthesis.themes.slice(0, 5).map(t => t.theme)
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -526,7 +470,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Identifying user journeys and critical services');
 
-  let userJourneyResult = await ctx.task(identifyUserJourneysTask, {
+  const userJourneyResult = await ctx.task(identifyUserJourneysTask, {
     projectName,
     services,
     businessCriticalFlows,
@@ -77,18 +77,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `User Journeys Identified - Critical Journeys: ${userJourneyResult.criticalJourneys.length}, Services Mapped: ${userJourneyResult.serviceMappings.length}`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      userJourneyResult = await ctx.task(identifyUserJourneysTask, { ...{
-    projectName,
-    services,
-    businessCriticalFlows,
-    stakeholders,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: User journey review
+  await ctx.breakpoint({
     question: `User journeys identified for ${projectName}. Found ${userJourneyResult.criticalJourneys.length} critical journeys. Review and confirm these represent user-facing functionality?`,
     title: 'User Journey Review',
     context: {
@@ -97,22 +87,16 @@ export async function process(inputs, ctx) {
       serviceMappings: userJourneyResult.serviceMappings.slice(0, 10),
       recommendation: 'Ensure all business-critical user flows are captured',
       files: userJourneyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DEFINE SERVICE LEVEL INDICATORS (SLIs)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Defining Service Level Indicators (SLIs)');
 
-  let sliDefinitionResult = await ctx.task(defineSLIsTask, {
+  const sliDefinitionResult = await ctx.task(defineSLIsTask, {
     projectName,
     services,
     userJourneyResult,
@@ -129,22 +113,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLIs Defined - Total: ${sliDefinitionResult.slis.length}, Availability SLIs: ${sliDefinitionResult.availabilitySLIs}, Latency SLIs: ${sliDefinitionResult.latencySLIs}`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      sliDefinitionResult = await ctx.task(defineSLIsTask, { ...{
-    projectName,
-    services,
-    userJourneyResult,
-    targetAvailability,
-    targetLatencyP95,
-    targetLatencyP99,
-    targetErrorRate,
-    monitoringPlatform,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: SLI definition review
+  await ctx.breakpoint({
     question: `${sliDefinitionResult.slis.length} SLIs defined for ${projectName}. Availability: ${sliDefinitionResult.availabilitySLIs}, Latency: ${sliDefinitionResult.latencySLIs}, Error Rate: ${sliDefinitionResult.errorRateSLIs}. Review SLI definitions?`,
     title: 'SLI Definition Review',
     context: {
@@ -158,22 +128,16 @@ export async function process(inputs, ctx) {
       },
       topSLIs: sliDefinitionResult.slis.slice(0, 10),
       files: sliDefinitionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: SET SERVICE LEVEL OBJECTIVES (SLOs)
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Setting Service Level Objectives (SLOs)');
 
-  let sloDefinitionResult = await ctx.task(setSLOsTask, {
+  const sloDefinitionResult = await ctx.task(setSLOsTask, {
     projectName,
     services,
     slis: sliDefinitionResult.slis,
@@ -191,23 +155,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLOs Set - Total: ${sloDefinitionResult.slos.length}, Critical SLOs: ${sloDefinitionResult.criticalSLOs.length}`);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      sloDefinitionResult = await ctx.task(setSLOsTask, { ...{
-    projectName,
-    services,
-    slis: sliDefinitionResult.slis,
-    targetAvailability,
-    targetLatencyP95,
-    targetLatencyP99,
-    targetErrorRate,
-    errorBudgetWindow,
-    stakeholders,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: SLO target review
+  await ctx.breakpoint({
     question: `${sloDefinitionResult.slos.length} SLOs defined with targets. Critical SLOs: ${sloDefinitionResult.criticalSLOs.length}. Are these targets achievable and aligned with business needs?`,
     title: 'SLO Target Review',
     context: {
@@ -217,15 +166,9 @@ export async function process(inputs, ctx) {
       averageTarget: sloDefinitionResult.averageTarget,
       recommendation: 'Ensure SLO targets are ambitious but achievable',
       files: sloDefinitionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: CALCULATE ERROR BUDGETS
   // ============================================================================
@@ -250,7 +193,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing SLI measurement and data collection');
 
-  let sliImplementationResult = await ctx.task(implementSLIMeasurementTask, {
+  const sliImplementationResult = await ctx.task(implementSLIMeasurementTask, {
     projectName,
     services,
     slis: sliDefinitionResult.slis,
@@ -264,19 +207,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `SLI Measurement Implemented - Queries: ${sliImplementationResult.queries.length}, Data Sources: ${sliImplementationResult.dataSources.length}`);
 
   // Quality Gate: SLI measurement verification
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        sliImplementationResult = await ctx.task(implementSLIMeasurementTask, { ...{
-    projectName,
-    services,
-    slis: sliDefinitionResult.slis,
-    monitoringPlatform,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!sliImplementationResult.allSLIsImplemented) {
+    await ctx.breakpoint({
       question: `SLI measurement implementation incomplete. ${sliImplementationResult.unimplementedSLIs.length} SLIs missing measurement. Address before proceeding?`,
       title: 'SLI Measurement Verification',
       context: {
@@ -286,15 +218,9 @@ export async function process(inputs, ctx) {
         unimplementedSLIs: sliImplementationResult.unimplementedSLIs,
         recommendation: 'All SLIs should have measurement queries defined',
         files: sliImplementationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: CREATE SLO DASHBOARDS
@@ -302,7 +228,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating SLO dashboards');
 
-  let dashboardResult = await ctx.task(createSLODashboardsTask, {
+  const dashboardResult = await ctx.task(createSLODashboardsTask, {
     projectName,
     services,
     slis: sliDefinitionResult.slis,
@@ -317,21 +243,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLO Dashboards Created - Dashboards: ${dashboardResult.dashboards.length}, Panels: ${dashboardResult.totalPanels}`);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      dashboardResult = await ctx.task(createSLODashboardsTask, { ...{
-    projectName,
-    services,
-    slis: sliDefinitionResult.slis,
-    slos: sloDefinitionResult.slos,
-    errorBudgets: errorBudgetResult.errorBudgets,
-    dashboardTool,
-    monitoringPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Quality Gate: Dashboard review
+  await ctx.breakpoint({
     question: `${dashboardResult.dashboards.length} SLO dashboards created. Review dashboards: ${dashboardResult.dashboards.map(d => d.name).join(', ')}`,
     title: 'SLO Dashboard Review',
     context: {
@@ -343,22 +256,16 @@ export async function process(inputs, ctx) {
         url: d.url
       })),
       files: dashboardResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: IMPLEMENT SLO ALERTING
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Implementing SLO alerting');
 
-  let alertingResult = await ctx.task(implementSLOAlertingTask, {
+  const alertingResult = await ctx.task(implementSLOAlertingTask, {
     projectName,
     slos: sloDefinitionResult.slos,
     errorBudgets: errorBudgetResult.errorBudgets,
@@ -372,20 +279,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLO Alerting Implemented - Alerts: ${alertingResult.alerts.length}, Burn Rate Alerts: ${alertingResult.burnRateAlerts.length}`);
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      alertingResult = await ctx.task(implementSLOAlertingTask, { ...{
-    projectName,
-    slos: sloDefinitionResult.slos,
-    errorBudgets: errorBudgetResult.errorBudgets,
-    sloViolationThreshold,
-    monitoringPlatform,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  // Quality Gate: Alerting configuration review
+  await ctx.breakpoint({
     question: `SLO alerting configured with ${alertingResult.alerts.length} alert rules. Burn rate alerts: ${alertingResult.burnRateAlerts.length}. Test alerts?`,
     title: 'SLO Alerting Review',
     context: {
@@ -399,22 +294,16 @@ export async function process(inputs, ctx) {
       },
       topAlerts: alertingResult.alerts.slice(0, 10),
       files: alertingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: DEFINE ERROR BUDGET POLICY
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Defining error budget policy');
 
-  let policyResult = await ctx.task(defineErrorBudgetPolicyTask, {
+  const policyResult = await ctx.task(defineErrorBudgetPolicyTask, {
     projectName,
     slos: sloDefinitionResult.slos,
     errorBudgets: errorBudgetResult.errorBudgets,
@@ -428,19 +317,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Error Budget Policy Defined - Policy Levels: ${policyResult.policyLevels}, Actions: ${policyResult.actions.length}`);
 
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      policyResult = await ctx.task(defineErrorBudgetPolicyTask, { ...{
-    projectName,
-    slos: sloDefinitionResult.slos,
-    errorBudgets: errorBudgetResult.errorBudgets,
-    stakeholders,
-    reviewCycle,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  // Quality Gate: Error budget policy review
+  await ctx.breakpoint({
     question: `Error budget policy defined with ${policyResult.policyLevels} levels and ${policyResult.actions.length} actions. Review policy: When budget < 50%, ${policyResult.policy.level50Action}. When budget < 10%, ${policyResult.policy.level10Action}`,
     title: 'Error Budget Policy Review',
     context: {
@@ -452,15 +330,9 @@ export async function process(inputs, ctx) {
         reviewCycle: policyResult.reviewCycle
       },
       files: policyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 9: CREATE SLO REPORTING AND TRACKING
   // ============================================================================
@@ -489,7 +361,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Validating SLO implementation');
 
-  let validationResult = await ctx.task(validateSLOImplementationTask, {
+  const validationResult = await ctx.task(validateSLOImplementationTask, {
     projectName,
     slis: sliDefinitionResult.slis,
     slos: sloDefinitionResult.slos,
@@ -504,20 +376,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Validation Complete - Coverage: ${validationResult.coverage}%, Issues: ${validationResult.issues.length}`);
 
   // Quality Gate: Validation review
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        validationResult = await ctx.task(validateSLOImplementationTask, { ...{
-    projectName,
-    slis: sliDefinitionResult.slis,
-    slos: sloDefinitionResult.slos,
-    sliImplementation: sliImplementationResult,
-    dashboards: dashboardResult.dashboards,
-    alerts: alertingResult.alerts,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (validationResult.issues.length > 0) {
+    await ctx.breakpoint({
       question: `SLO implementation validation found ${validationResult.issues.length} issues. Coverage: ${validationResult.coverage}%. Review and address issues?`,
       title: 'SLO Validation Review',
       context: {
@@ -530,15 +390,9 @@ export async function process(inputs, ctx) {
         },
         issues: validationResult.issues,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: CONDUCT BASELINE MEASUREMENT
@@ -546,7 +400,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Conducting baseline measurement');
 
-  let baselineResult = await ctx.task(conductBaselineMeasurementTask, {
+  const baselineResult = await ctx.task(conductBaselineMeasurementTask, {
     projectName,
     slis: sliDefinitionResult.slis,
     slos: sloDefinitionResult.slos,
@@ -559,19 +413,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Baseline Measurement Complete - Period: ${baselineResult.measurementPeriod} days, SLO Compliance: ${baselineResult.overallCompliance}%`);
 
-    let lastFeedback_phase11Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase11Review) {
-      baselineResult = await ctx.task(conductBaselineMeasurementTask, { ...{
-    projectName,
-    slis: sliDefinitionResult.slis,
-    slos: sloDefinitionResult.slos,
-    sliImplementation: sliImplementationResult,
-    measurementPeriod: 7, // days
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-    }
-  const phase11Review = await ctx.breakpoint({
+  // Quality Gate: Baseline review
+  await ctx.breakpoint({
     question: `Baseline measurement complete over ${baselineResult.measurementPeriod} days. Overall SLO compliance: ${baselineResult.overallCompliance}%. ${baselineResult.slosViolated} SLOs violated. Review baseline data?`,
     title: 'Baseline Measurement Review',
     context: {
@@ -586,15 +429,9 @@ export async function process(inputs, ctx) {
       violatedSLOs: baselineResult.violatedSLOs,
       recommendation: baselineResult.recommendation,
       files: baselineResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase11Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase11Review.approved) break;
-    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 12: GENERATE DOCUMENTATION AND TRAINING
   // ============================================================================
@@ -626,7 +463,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Calculating SLO maturity score');
 
-  let scoringResult = await ctx.task(calculateSLOMaturityScoreTask, {
+  const scoringResult = await ctx.task(calculateSLOMaturityScoreTask, {
     projectName,
     sliDefinitionResult,
     sloDefinitionResult,
@@ -646,25 +483,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SLO Maturity Score: ${sloScore}/100 - Level: ${scoringResult.maturityLevel}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(calculateSLOMaturityScoreTask, { ...{
-    projectName,
-    sliDefinitionResult,
-    sloDefinitionResult,
-    errorBudgetResult,
-    sliImplementationResult,
-    dashboardResult,
-    alertingResult,
-    policyResult,
-    reportingResult,
-    validationResult,
-    baselineResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: SLO/SLI tracking setup complete
+  await ctx.breakpoint({
     question: `SLO/SLI Definition and Tracking Complete for ${projectName}. Maturity Score: ${sloScore}/100 (${scoringResult.maturityLevel}). ${slos.length} SLOs defined, ${slis.length} SLIs tracked. Baseline compliance: ${baselineResult.overallCompliance}%. Approve for production use?`,
     title: 'Final SLO/SLI Setup Review',
     context: {
@@ -703,15 +523,9 @@ export async function process(inputs, ctx) {
         { path: scoringResult.summaryPath, format: 'json', label: 'SLO Maturity Score Summary' },
         { path: dashboardResult.dashboardsConfigPath, format: 'json', label: 'SLO Dashboards Configuration' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -797,7 +611,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

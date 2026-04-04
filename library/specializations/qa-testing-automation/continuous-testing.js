@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing current testing and CI/CD state');
 
-  let currentStateAssessment = await ctx.task(assessCurrentStateTask, {
+  const currentStateAssessment = await ctx.task(assessCurrentStateTask, {
     projectPath,
     repositoryUrl,
     cicdPlatform,
@@ -110,17 +110,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...currentStateAssessment.artifacts);
 
   // Quality Gate: Minimum baseline assessment
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        currentStateAssessment = await ctx.task(assessCurrentStateTask, { ...{
-    projectPath,
-    repositoryUrl,
-    cicdPlatform,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (currentStateAssessment.maturityScore < 30) {
+    await ctx.breakpoint({
       question: `Current testing maturity score: ${currentStateAssessment.maturityScore}/100. Very low baseline. Review assessment and approve to continue with implementation?`,
       title: 'Low Testing Maturity Warning',
       context: {
@@ -129,15 +120,9 @@ export async function process(inputs, ctx) {
         gaps: currentStateAssessment.gaps,
         recommendation: 'Consider starting with foundational test automation before full continuous testing pipeline',
         files: currentStateAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: TEST INFRASTRUCTURE SETUP
@@ -145,7 +130,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Setting up test infrastructure and frameworks');
 
-  let testInfrastructure = await ctx.task(setupTestInfrastructureTask, {
+  const testInfrastructure = await ctx.task(setupTestInfrastructureTask, {
     projectPath,
     testStrategy,
     parallelization,
@@ -156,18 +141,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...testInfrastructure.artifacts);
 
   // Quality Gate: Infrastructure readiness
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        testInfrastructure = await ctx.task(setupTestInfrastructureTask, { ...{
-    projectPath,
-    testStrategy,
-    parallelization,
-    currentState: currentStateAssessment,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!testInfrastructure.allFrameworksConfigured) {
+    await ctx.breakpoint({
       question: `Test infrastructure setup incomplete. ${testInfrastructure.configuredFrameworks.length}/${testInfrastructure.requiredFrameworks.length} frameworks configured. Review and approve to proceed?`,
       title: 'Infrastructure Setup Review',
       context: {
@@ -175,15 +150,9 @@ export async function process(inputs, ctx) {
         configured: testInfrastructure.configuredFrameworks,
         missing: testInfrastructure.missingFrameworks,
         files: testInfrastructure.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: PARALLEL TEST STRATEGY DESIGN
@@ -191,7 +160,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing comprehensive test strategy and test pyramid');
 
-  let testStrategyDesign = await ctx.task(designTestStrategyTask, {
+  const testStrategyDesign = await ctx.task(designTestStrategyTask, {
     projectPath,
     testStrategy,
     currentState: currentStateAssessment,
@@ -204,19 +173,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Strategy completeness
   const strategyCompleteness = testStrategyDesign.completenessScore;
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        testStrategyDesign = await ctx.task(designTestStrategyTask, { ...{
-    projectPath,
-    testStrategy,
-    currentState: currentStateAssessment,
-    infrastructure: testInfrastructure,
-    qualityGates,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (strategyCompleteness < 70) {
+    await ctx.breakpoint({
       question: `Test strategy completeness: ${strategyCompleteness}%. Below 70% threshold. Review strategy gaps and approve?`,
       title: 'Test Strategy Completeness Review',
       context: {
@@ -225,15 +183,9 @@ export async function process(inputs, ctx) {
         coverage: testStrategyDesign.testPyramid,
         gaps: testStrategyDesign.gaps,
         files: testStrategyDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: PARALLEL CI/CD PIPELINE CONFIGURATION
@@ -295,7 +247,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing quality gates at each stage');
 
-  let qualityGatesImpl = await ctx.task(implementQualityGatesTask, {
+  const qualityGatesImpl = await ctx.task(implementQualityGatesTask, {
     projectPath,
     qualityGates,
     testStrategy,
@@ -312,24 +264,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityGatesImpl.artifacts);
 
   // Quality Gate: Quality gates configuration
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        qualityGatesImpl = await ctx.task(implementQualityGatesTask, { ...{
-    projectPath,
-    qualityGates,
-    testStrategy,
-    pipelineStages: {
-      preCommit: preCommitConfig,
-      commit: commitStageConfig,
-      acceptance: acceptanceStageConfig,
-      production: productionStageConfig
-    },
-    cicdPlatform,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (qualityGatesImpl.gatesConfigured < qualityGatesImpl.totalGates) {
+    await ctx.breakpoint({
       question: `${qualityGatesImpl.gatesConfigured}/${qualityGatesImpl.totalGates} quality gates configured. Review missing gates and approve?`,
       title: 'Quality Gates Configuration Review',
       context: {
@@ -338,15 +274,9 @@ export async function process(inputs, ctx) {
         missing: qualityGatesImpl.missingGates,
         blocking: qualityGatesImpl.blockingGates,
         files: qualityGatesImpl.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: PARALLEL TEST TYPE IMPLEMENTATION
@@ -435,24 +365,8 @@ export async function process(inputs, ctx) {
   );
 
   // Quality Gate: Security testing must be configured if blocking
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        qualityGatesImpl = await ctx.task(implementQualityGatesTask, { ...{
-    projectPath,
-    qualityGates,
-    testStrategy,
-    pipelineStages: {
-      preCommit: preCommitConfig,
-      commit: commitStageConfig,
-      acceptance: acceptanceStageConfig,
-      production: productionStageConfig
-    },
-    cicdPlatform,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (qualityGates.securityScan === 'blocking' && !securityTesting.configured) {
+    await ctx.breakpoint({
       question: `Security testing marked as blocking but not configured. This is a critical gap. Review and decide to proceed or fix?`,
       title: 'Security Testing Configuration Missing',
       context: {
@@ -460,15 +374,9 @@ export async function process(inputs, ctx) {
         securityConfig: securityTesting,
         recommendation: 'Configure security scanning tools before proceeding to production',
         files: securityTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: TEST EXECUTION AND VALIDATION
@@ -476,7 +384,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Validating pipeline with initial test execution');
 
-  let pipelineValidation = await ctx.task(validatePipelineTask, {
+  const pipelineValidation = await ctx.task(validatePipelineTask, {
     projectPath,
     cicdPlatform,
     pipelineStages: {
@@ -502,31 +410,8 @@ export async function process(inputs, ctx) {
   const validationPassRate = pipelineValidation.passRate;
 
   // Quality Gate: Initial pipeline validation
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        pipelineValidation = await ctx.task(validatePipelineTask, { ...{
-    projectPath,
-    cicdPlatform,
-    pipelineStages: {
-      preCommit: preCommitConfig,
-      commit: commitStageConfig,
-      acceptance: acceptanceStageConfig,
-      production: productionStageConfig
-    },
-    testImplementations: {
-      unit: unitTestsImpl,
-      integration: integrationTestsImpl,
-      api: apiTestsImpl,
-      e2e: e2eTestsImpl,
-      performance: performanceTesting,
-      security: securityTesting
-    },
-    qualityGates,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (validationPassRate < 70) {
+    await ctx.breakpoint({
       question: `Pipeline validation pass rate: ${validationPassRate}%. Below 70% threshold. Review failures and approve to continue debugging?`,
       title: 'Pipeline Validation Results',
       context: {
@@ -537,15 +422,9 @@ export async function process(inputs, ctx) {
         failed: pipelineValidation.failedStages,
         failures: pipelineValidation.failures,
         files: pipelineValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: FEEDBACK MECHANISMS AND NOTIFICATIONS
@@ -621,7 +500,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Optimizing parallel test execution');
 
-  let parallelOptimization = await ctx.task(optimizeParallelExecutionTask, {
+  const parallelOptimization = await ctx.task(optimizeParallelExecutionTask, {
     projectPath,
     parallelization,
     testImplementations: {
@@ -639,23 +518,8 @@ export async function process(inputs, ctx) {
   const optimizedBuildTime = parallelOptimization.buildTime;
 
   // Quality Gate: Build time performance
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        parallelOptimization = await ctx.task(optimizeParallelExecutionTask, { ...{
-    projectPath,
-    parallelization,
-    testImplementations: {
-      unit: unitTestsImpl,
-      integration: integrationTestsImpl,
-      api: apiTestsImpl,
-      e2e: e2eTestsImpl
-    },
-    qualityGates,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (optimizedBuildTime > qualityGates.buildTime) {
+    await ctx.breakpoint({
       question: `Optimized build time: ${optimizedBuildTime}s exceeds target: ${qualityGates.buildTime}s. Review optimization opportunities and approve?`,
       title: 'Build Time Performance Review',
       context: {
@@ -665,15 +529,9 @@ export async function process(inputs, ctx) {
         bottlenecks: parallelOptimization.bottlenecks,
         recommendations: parallelOptimization.recommendations,
         files: parallelOptimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: SHIFT-RIGHT TESTING (PRODUCTION MONITORING)
@@ -726,7 +584,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Running final end-to-end pipeline execution');
 
-  let finalExecution = await ctx.task(executeFinalPipelineTask, {
+  const finalExecution = await ctx.task(executeFinalPipelineTask, {
     projectPath,
     cicdPlatform,
     repositoryUrl,
@@ -740,17 +598,8 @@ export async function process(inputs, ctx) {
   const finalBuildTime = finalExecution.buildTime;
 
   // Quality Gate: Final execution metrics
-      let lastFeedback_phase16Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase16Review) {
-        finalExecution = await ctx.task(executeFinalPipelineTask, { ...{
-    projectPath,
-    cicdPlatform,
-    repositoryUrl,
-    outputDir
-  }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
-      }
-  const phase16Review = await ctx.breakpoint({
+  if (finalPassRate < qualityGates.passRate) {
+    await ctx.breakpoint({
       question: `Final pipeline pass rate: ${finalPassRate}%. Target: ${qualityGates.passRate}%. Below acceptance criteria. Review and decide to proceed or iterate?`,
       title: 'Final Pipeline Execution Review',
       context: {
@@ -762,28 +611,13 @@ export async function process(inputs, ctx) {
         buildTime: finalBuildTime,
         recommendation: 'Consider additional test stabilization or adjust quality gates',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase16Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase16Review.approved) break;
-      lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Quality Gate: Test coverage
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        finalExecution = await ctx.task(executeFinalPipelineTask, { ...{
-    projectPath,
-    cicdPlatform,
-    repositoryUrl,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (finalCoverage < qualityGates.coverage) {
+    await ctx.breakpoint({
       question: `Test coverage: ${finalCoverage}%. Target: ${qualityGates.coverage}%. Coverage gap exists. Approve to proceed or add more tests?`,
       title: 'Test Coverage Quality Gate',
       context: {
@@ -793,15 +627,9 @@ export async function process(inputs, ctx) {
         uncoveredAreas: finalExecution.uncoveredAreas,
         recommendation: 'Add tests for uncovered critical paths or adjust coverage target',
         files: finalExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 17: CONTINUOUS IMPROVEMENT SETUP
@@ -828,7 +656,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Computing continuous testing maturity score');
 
-  let finalAssessment = await ctx.task(computeFinalAssessmentTask, {
+  const finalAssessment = await ctx.task(computeFinalAssessmentTask, {
     projectPath,
     currentState: currentStateAssessment,
     testInfrastructure,
@@ -868,42 +696,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Continuous Testing Maturity Score: ${continuousTestingScore}/100`);
   ctx.log('info', `Pipeline Pass Rate: ${finalPassRate}%, Coverage: ${finalCoverage}%`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(computeFinalAssessmentTask, { ...{
-    projectPath,
-    currentState: currentStateAssessment,
-    testInfrastructure,
-    testStrategyDesign,
-    pipelineStages: {
-      preCommit: preCommitConfig,
-      commit: commitStageConfig,
-      acceptance: acceptanceStageConfig,
-      production: productionStageConfig
-    },
-    qualityGates: qualityGatesImpl,
-    testImplementations: {
-      unit: unitTestsImpl,
-      integration: integrationTestsImpl,
-      api: apiTestsImpl,
-      e2e: e2eTestsImpl,
-      performance: performanceTesting,
-      security: securityTesting
-    },
-    pipelineValidation,
-    feedbackMechanisms,
-    monitoringSetup,
-    flakinessManagement,
-    parallelOptimization,
-    shiftRightTesting,
-    finalExecution,
-    continuousImprovement,
-    qualityGates,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Continuous Testing Pipeline Approval
+  await ctx.breakpoint({
     question: `Continuous Testing Pipeline Complete. Maturity Score: ${continuousTestingScore}/100, Pass Rate: ${finalPassRate}%, Coverage: ${finalCoverage}%. Approve pipeline for production use?`,
     title: 'Final Continuous Testing Pipeline Review',
     context: {
@@ -930,15 +724,9 @@ export async function process(inputs, ctx) {
         { path: finalExecution.reportPath, format: 'html', label: 'Pipeline Execution Report' },
         { path: documentation.onboardingGuidePath, format: 'markdown', label: 'Onboarding Guide' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -1036,7 +824,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

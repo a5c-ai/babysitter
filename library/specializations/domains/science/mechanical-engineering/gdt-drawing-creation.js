@@ -39,24 +39,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Datum Selection Strategy
-  let datumStrategy = await ctx.task(datumStrategyTask, {
+  const datumStrategy = await ctx.task(datumStrategyTask, {
     projectName,
     partDescription,
     functionalAnalysis: functionalAnalysis.analysis,
     standard
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      datumStrategy = await ctx.task(datumStrategyTask, { ...{
-    projectName,
-    partDescription,
-    functionalAnalysis: functionalAnalysis.analysis,
-    standard
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review datum selection
+  await ctx.breakpoint({
     question: `Review datum selection for ${projectName}. Are datums properly aligned with functional requirements?`,
     title: 'Datum Selection Review',
     context: {
@@ -68,15 +59,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: datumStrategy
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: GD&T Feature Control Frames
   const featureControlFrames = await ctx.task(featureControlFramesTask, {
     projectName,
@@ -94,7 +79,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Stack-Up Analysis
-  let stackUpAnalysis = await ctx.task(stackUpAnalysisTask, {
+  const stackUpAnalysis = await ctx.task(stackUpAnalysisTask, {
     projectName,
     toleranceAllocation: toleranceAllocation.tolerances,
     functionalRequirements,
@@ -102,32 +87,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Stack-up must be within limits
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        stackUpAnalysis = await ctx.task(stackUpAnalysisTask, { ...{
-    projectName,
-    toleranceAllocation: toleranceAllocation.tolerances,
-    functionalRequirements,
-    datumStrategy: datumStrategy.datums
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (stackUpAnalysis.worstCaseResult > stackUpAnalysis.allowableGap) {
+    await ctx.breakpoint({
       question: `Stack-up analysis shows worst case ${stackUpAnalysis.worstCaseResult} exceeds allowable ${stackUpAnalysis.allowableGap}. Review tolerance allocation?`,
       title: 'Stack-Up Warning',
       context: {
         runId: ctx.runId,
         stackUpAnalysis,
         recommendation: 'Consider tightening critical tolerances or revising design'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Drawing View Selection
   const viewSelection = await ctx.task(viewSelectionTask, {
@@ -162,7 +132,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Drawing Specification Document
-  let drawingSpec = await ctx.task(drawingSpecTask, {
+  const drawingSpec = await ctx.task(drawingSpecTask, {
     projectName,
     partDescription,
     standard,
@@ -177,25 +147,8 @@ export async function process(inputs, ctx) {
     validationChecklist
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      drawingSpec = await ctx.task(drawingSpecTask, { ...{
-    projectName,
-    partDescription,
-    standard,
-    functionalAnalysis,
-    datumStrategy,
-    featureControlFrames,
-    toleranceAllocation,
-    stackUpAnalysis,
-    viewSelection,
-    dimensionLayout,
-    notesSpec,
-    validationChecklist
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Drawing Specification Approval
+  await ctx.breakpoint({
     question: `Drawing Specification Complete for ${projectName}. Approve to proceed with drawing creation?`,
     title: 'Drawing Specification Approval',
     context: {
@@ -205,15 +158,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/drawing-spec.json`, format: 'json', content: drawingSpec },
         { path: `artifacts/drawing-spec.md`, format: 'markdown', content: drawingSpec.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -233,7 +180,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const functionalAnalysisTask = defineTask('functional-analysis', (args, taskCtx) => ({
   kind: 'agent',

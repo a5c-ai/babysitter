@@ -17,7 +17,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_assessmentApproval) {
       testRequirements = await ctx.task(testRequirementsTask, { ...{ projectName, testObjectives, aircraftConfiguration }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
     }
-  const assessmentApproval = await ctx.breakpoint({
+    const assessmentApproval = await ctx.breakpoint({
     question: `Test matrix developed for ${projectName}. ${testMatrix.totalPoints} test points. Proceed with test card development?`,
     title: 'Test Matrix Review',
     context: { runId: ctx.runId, testMatrix },
@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         safetyAssessment = await ctx.task(flightTestSafetyTask, { ...{ projectName, testCards, aircraftConfiguration, flightEnvelope }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `${safetyAssessment.highRiskPoints} high-risk test points identified. Review risk mitigations?`,
       title: 'Flight Test Safety Warning',
       context: { runId: ctx.runId, highRiskPoints: safetyAssessment.highRiskItems },
@@ -49,9 +49,8 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  const buildUpApproach = await ctx.task(buildUpApproachTask, { projectName, testCards, safetyAssessment });
+    }
+    const buildUpApproach = await ctx.task(buildUpApproachTask, { projectName, testCards, safetyAssessment });
   const crewBriefing = await ctx.task(crewBriefingTask, { projectName, testCards, safetyAssessment, buildUpApproach });
   let testPlan = await ctx.task(testPlanTask, { projectName, testMatrix, testCards, instrumentationPlan, safetyAssessment, buildUpApproach });
     let lastFeedback_finalApproval = null;
@@ -59,7 +58,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       testPlan = await ctx.task(testPlanTask, { ...{ projectName, testMatrix, testCards, instrumentationPlan, safetyAssessment, buildUpApproach }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Flight test plan complete for ${projectName}. ${testCards.length} test cards, ${safetyAssessment.overallRisk} overall risk. Approve?`,
     title: 'Flight Test Plan Approval',
     context: { runId: ctx.runId, summary: { testCards: testCards.length, totalPoints: testMatrix.totalPoints, overallRisk: safetyAssessment.overallRisk } },
@@ -73,7 +72,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, testPlan, testCards, safetyAssessment, report, metadata: { processId: 'flight-test-planning', timestamp: ctx.now() } };
 }
-
 export const testRequirementsTask = defineTask('test-requirements', (args, taskCtx) => ({
   kind: 'agent', title: `Test Requirements - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Flight Test Engineer', task: 'Define flight test requirements', context: args,

@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting security assessment and establishing baseline');
 
-  let assessmentResult = await ctx.task(securityAssessmentTask, {
+  const assessmentResult = await ctx.task(securityAssessmentTask, {
     projectName,
     repositoryUrl,
     scanTypes,
@@ -85,22 +85,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assessment complete - Identified ${assessmentResult.assetsCount} assets to scan, ${assessmentResult.complianceRequirements.length} compliance requirements`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      assessmentResult = await ctx.task(securityAssessmentTask, { ...{
-    projectName,
-    repositoryUrl,
-    scanTypes,
-    complianceStandards,
-    applicationUrl,
-    containerImages,
-    infrastructureAsCode,
-    environmentType,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Assessment review
+  await ctx.breakpoint({
     question: `Security assessment complete for ${projectName}. Identified ${assessmentResult.assetsCount} assets across ${assessmentResult.assetTypes.length} types. ${assessmentResult.complianceRequirements.length} compliance requirements to validate. Proceed with security scanning?`,
     title: 'Security Assessment Review',
     context: {
@@ -113,15 +99,9 @@ export async function process(inputs, ctx) {
         baselineEstablished: assessmentResult.baselineEstablished
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: STATIC APPLICATION SECURITY TESTING (SAST)
   // ============================================================================
@@ -129,7 +109,7 @@ export async function process(inputs, ctx) {
   if (scanTypes.includes('sast')) {
     ctx.log('info', 'Phase 2: Running Static Application Security Testing (SAST)');
 
-    let sastResult = await ctx.task(sastScanningTask, {
+    const sastResult = await ctx.task(sastScanningTask, {
       projectName,
       repositoryUrl,
       codeLanguages: assessmentResult.codeLanguages,
@@ -145,19 +125,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `SAST complete - Found ${sastResult.vulnerabilitiesCount} vulnerabilities (Critical: ${sastResult.critical}, High: ${sastResult.high})`);
 
     // Quality Gate: Critical SAST findings
-        let lastFeedback_qualityGateApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval) {
-          sastResult = await ctx.task(sastScanningTask, { ...{
-      projectName,
-      repositoryUrl,
-      codeLanguages: assessmentResult.codeLanguages,
-      frameworks: assessmentResult.frameworks,
-      severityThreshold,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-        }
-  const qualityGateApproval = await ctx.breakpoint({
+    if (sastResult.critical > 0) {
+      await ctx.breakpoint({
         question: `SAST scan found ${sastResult.critical} critical vulnerabilities in ${projectName}. Review findings: ${sastResult.topIssues.slice(0, 5).map(i => i.title).join(', ')}. Address critical issues before proceeding?`,
         title: 'Critical SAST Vulnerabilities Found',
         context: {
@@ -171,16 +140,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Address all critical vulnerabilities before deployment',
           files: sastResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval.approved) break;
-        lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 3: SOFTWARE COMPOSITION ANALYSIS (SCA)
   // ============================================================================
@@ -188,7 +152,7 @@ export async function process(inputs, ctx) {
   if (scanTypes.includes('sca')) {
     ctx.log('info', 'Phase 3: Running Software Composition Analysis (SCA) - dependency scanning');
 
-    let scaResult = await ctx.task(scaScanningTask, {
+    const scaResult = await ctx.task(scaScanningTask, {
       projectName,
       repositoryUrl,
       packageManagers: assessmentResult.packageManagers,
@@ -204,19 +168,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `SCA complete - Scanned ${scaResult.dependenciesCount} dependencies, found ${scaResult.vulnerabilitiesCount} vulnerabilities`);
 
     // Quality Gate: Vulnerable dependencies
-        let lastFeedback_qualityGateApproval2 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval2) {
-          scaResult = await ctx.task(scaScanningTask, { ...{
-      projectName,
-      repositoryUrl,
-      packageManagers: assessmentResult.packageManagers,
-      vulnerabilityDatabase,
-      severityThreshold,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-        }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    if (scaResult.critical > 0 || scaResult.high > 5) {
+      await ctx.breakpoint({
         question: `SCA scan found ${scaResult.vulnerabilitiesCount} vulnerable dependencies (Critical: ${scaResult.critical}, High: ${scaResult.high}). ${scaResult.patchableCount} have patches available. Review and update dependencies?`,
         title: 'Vulnerable Dependencies Found',
         context: {
@@ -231,16 +184,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Update vulnerable dependencies with available patches',
           files: scaResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval2.approved) break;
-        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 4: SECRETS DETECTION
   // ============================================================================
@@ -248,7 +196,7 @@ export async function process(inputs, ctx) {
   if (scanTypes.includes('secrets')) {
     ctx.log('info', 'Phase 4: Running secrets detection scan');
 
-    let secretsResult = await ctx.task(secretsDetectionTask, {
+    const secretsResult = await ctx.task(secretsDetectionTask, {
       projectName,
       repositoryUrl,
       scanHistory: true,
@@ -263,18 +211,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Secrets scan complete - Found ${secretsResult.secretsCount} potential secrets (High confidence: ${secretsResult.highConfidence})`);
 
     // Quality Gate: Secrets found (critical issue)
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          secretsResult = await ctx.task(secretsDetectionTask, { ...{
-      projectName,
-      repositoryUrl,
-      scanHistory: true,
-      scanCommits: 100,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (secretsResult.highConfidence > 0) {
+      await ctx.breakpoint({
         question: `CRITICAL: Secrets detection found ${secretsResult.highConfidence} high-confidence secrets in ${projectName}! Types: ${secretsResult.secretTypes.join(', ')}. Immediate action required - rotate exposed credentials!`,
         title: 'Exposed Secrets Detected - Critical',
         context: {
@@ -288,16 +226,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Immediately rotate all exposed credentials and remove from repository history',
           files: secretsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 5: CONTAINER IMAGE SECURITY SCANNING
   // ============================================================================
@@ -334,18 +267,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Container scanning complete - Scanned ${consolidatedContainerResult.imagesScanned} images, found ${consolidatedContainerResult.vulnerabilitiesCount} vulnerabilities`);
 
     // Quality Gate: Container vulnerabilities
-        let lastFeedback_qualityGateApproval4 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval4) {
-          secretsResult = await ctx.task(secretsDetectionTask, { ...{
-      projectName,
-      repositoryUrl,
-      scanHistory: true,
-      scanCommits: 100,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-        }
-  const qualityGateApproval4 = await ctx.breakpoint({
+    if (consolidatedContainerResult.critical > 0) {
+      await ctx.breakpoint({
         question: `Container scanning found ${consolidatedContainerResult.critical} critical vulnerabilities across ${consolidatedContainerResult.imagesScanned} images. Rebuild images with patched base images?`,
         title: 'Container Vulnerabilities Found',
         context: {
@@ -359,16 +282,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Update base images and rebuild containers',
           files: consolidatedContainerResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval4.approved) break;
-        lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 6: INFRASTRUCTURE AS CODE (IaC) SECURITY SCANNING
   // ============================================================================
@@ -376,7 +294,7 @@ export async function process(inputs, ctx) {
   if (scanTypes.includes('infrastructure') && infrastructureAsCode.length > 0) {
     ctx.log('info', 'Phase 6: Running Infrastructure as Code (IaC) security scanning');
 
-    let iacResult = await ctx.task(iacScanningTask, {
+    const iacResult = await ctx.task(iacScanningTask, {
       projectName,
       repositoryUrl,
       iacTypes: infrastructureAsCode,
@@ -392,19 +310,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `IaC scanning complete - Found ${iacResult.misconfigurationsCount} misconfigurations (Critical: ${iacResult.critical}, High: ${iacResult.high})`);
 
     // Quality Gate: IaC misconfigurations
-        let lastFeedback_qualityGateApproval5 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval5) {
-          iacResult = await ctx.task(iacScanningTask, { ...{
-      projectName,
-      repositoryUrl,
-      iacTypes: infrastructureAsCode,
-      complianceStandards,
-      severityThreshold,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-        }
-  const qualityGateApproval5 = await ctx.breakpoint({
+    if (iacResult.critical > 0 || iacResult.high > 5) {
+      await ctx.breakpoint({
         question: `IaC scanning found ${iacResult.misconfigurationsCount} security misconfigurations (Critical: ${iacResult.critical}, High: ${iacResult.high}). Top issues: ${iacResult.topIssues.slice(0, 5).map(i => i.title).join(', ')}. Fix configurations?`,
         title: 'IaC Security Misconfigurations',
         context: {
@@ -419,16 +326,11 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Fix critical and high-severity misconfigurations before deployment',
           files: iacResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval5.approved) break;
-        lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 7: DYNAMIC APPLICATION SECURITY TESTING (DAST)
   // ============================================================================
@@ -436,7 +338,7 @@ export async function process(inputs, ctx) {
   if (scanTypes.includes('dast') && applicationUrl) {
     ctx.log('info', 'Phase 7: Running Dynamic Application Security Testing (DAST)');
 
-    let dastResult = await ctx.task(dastScanningTask, {
+    const dastResult = await ctx.task(dastScanningTask, {
       projectName,
       applicationUrl,
       authenticationType: assessmentResult.authenticationType,
@@ -453,20 +355,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `DAST complete - Tested ${dastResult.endpointsTested} endpoints, found ${dastResult.vulnerabilitiesCount} vulnerabilities`);
 
     // Quality Gate: DAST findings
-        let lastFeedback_qualityGateApproval6 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval6) {
-          dastResult = await ctx.task(dastScanningTask, { ...{
-      projectName,
-      applicationUrl,
-      authenticationType: assessmentResult.authenticationType,
-      testCredentials: assessmentResult.testCredentials,
-      scanDepth: 'moderate', // 'light', 'moderate', 'deep'
-      severityThreshold,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
-        }
-  const qualityGateApproval6 = await ctx.breakpoint({
+    if (dastResult.critical > 0) {
+      await ctx.breakpoint({
         question: `DAST scan found ${dastResult.critical} critical runtime vulnerabilities. Issues: ${dastResult.topIssues.slice(0, 5).map(i => i.title).join(', ')}. Address before production deployment?`,
         title: 'Critical DAST Vulnerabilities',
         context: {
@@ -481,23 +371,18 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Fix critical runtime vulnerabilities',
           files: dastResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval6.approved) break;
-        lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 8: COMPLIANCE VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating compliance against security standards');
 
-  let complianceResult = await ctx.task(complianceValidationTask, {
+  const complianceResult = await ctx.task(complianceValidationTask, {
     projectName,
     complianceStandards,
     scanResults,
@@ -511,19 +396,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Compliance validation complete - ${complianceResult.passedCount}/${complianceResult.totalChecks} checks passed (${complianceResult.complianceScore}% compliant)`);
 
   // Quality Gate: Compliance validation
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        complianceResult = await ctx.task(complianceValidationTask, { ...{
-    projectName,
-    complianceStandards,
-    scanResults,
-    allVulnerabilities,
-    assessmentResult,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (complianceResult.complianceScore < 80) {
+    await ctx.breakpoint({
       question: `Compliance validation shows ${complianceResult.complianceScore}% compliance (target: 80%+). Failed standards: ${complianceResult.failedStandards.join(', ')}. ${complianceResult.failedChecks.length} checks failed. Address compliance gaps?`,
       title: 'Compliance Validation Review',
       context: {
@@ -538,15 +412,9 @@ export async function process(inputs, ctx) {
         },
         recommendation: 'Address compliance gaps to meet regulatory requirements',
         files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: VULNERABILITY DEDUPLICATION AND PRIORITIZATION
@@ -574,7 +442,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating automated remediation plan');
 
-  let remediationResult = await ctx.task(remediationPlanningTask, {
+  const remediationResult = await ctx.task(remediationPlanningTask, {
     projectName,
     prioritizedVulnerabilities: prioritizationResult.prioritizedVulnerabilities,
     scanResults,
@@ -587,19 +455,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Remediation plan generated - ${remediationResult.autoFixableCount} auto-fixable, ${remediationResult.manualFixCount} require manual fix`);
 
-    let lastFeedback_phase10Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase10Review) {
-      remediationResult = await ctx.task(remediationPlanningTask, { ...{
-    projectName,
-    prioritizedVulnerabilities: prioritizationResult.prioritizedVulnerabilities,
-    scanResults,
-    autoRemediation,
-    cicdIntegration,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-    }
-  const phase10Review = await ctx.breakpoint({
+  // Quality Gate: Remediation plan review
+  await ctx.breakpoint({
     question: `Remediation plan generated with ${remediationResult.totalActions} actions. ${remediationResult.autoFixableCount} can be auto-fixed, ${remediationResult.manualFixCount} require manual intervention. Critical: ${remediationResult.criticalActions}. Approve remediation plan?`,
     title: 'Remediation Plan Review',
     context: {
@@ -613,15 +470,9 @@ export async function process(inputs, ctx) {
         topPriorityActions: remediationResult.actions.slice(0, 15)
       },
       files: remediationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase10Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase10Review.approved) break;
-    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 11: CI/CD INTEGRATION SETUP
   // ============================================================================
@@ -643,6 +494,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `CI/CD integration complete - ${cicdIntegrationResult.securityGates.length} security gates configured`);
   }
+
   // ============================================================================
   // PHASE 12: CONTINUOUS MONITORING SETUP
   // ============================================================================
@@ -664,6 +516,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Continuous monitoring configured - Schedule: ${monitoringResult.schedule}, Channels: ${monitoringResult.channels.join(', ')}`);
   }
+
   // ============================================================================
   // PHASE 13: SECURITY REPORTING AND DASHBOARDS
   // ============================================================================
@@ -691,7 +544,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Calculating overall security score');
 
-  let scoringResult = await ctx.task(securityScoringTask, {
+  const scoringResult = await ctx.task(securityScoringTask, {
     projectName,
     scanResults,
     complianceResult,
@@ -706,20 +559,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Security Score: ${securityScore}/100 (Grade: ${scoringResult.grade})`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(securityScoringTask, { ...{
-    projectName,
-    scanResults,
-    complianceResult,
-    prioritizationResult,
-    remediationResult,
-    severityThreshold,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Security scanning complete
+  await ctx.breakpoint({
     question: `Security Scanning Complete for ${projectName}. Security Score: ${securityScore}/100 (${scoringResult.grade}). Total vulnerabilities: ${prioritizationResult.uniqueVulnerabilities} (Critical: ${prioritizationResult.criticalCount}, High: ${prioritizationResult.highCount}). Compliance: ${complianceResult.complianceScore}%. Approve for ${environmentType} deployment?`,
     title: 'Final Security Review',
     context: {
@@ -756,15 +597,9 @@ export async function process(inputs, ctx) {
         { path: complianceResult.reportPath, format: 'json', label: 'Compliance Report' },
         { path: scoringResult.scorecardPath, format: 'json', label: 'Security Scorecard' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -858,7 +693,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

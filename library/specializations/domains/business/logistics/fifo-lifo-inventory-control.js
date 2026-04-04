@@ -25,7 +25,8 @@ export async function process(inputs, ctx) {
     expirationRules = {},
     productCategories = [],
     outputDir = 'inventory-rotation-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -57,7 +58,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
       }
-  const phase2Review = await ctx.breakpoint({
+      const phase2Review = await ctx.breakpoint({
       question: `${expirationAssessment.criticalItems.length} items at critical expiration risk. Total value at risk: $${expirationAssessment.criticalValue}. Review and take action?`,
       title: 'Critical Expiration Alert',
       context: {
@@ -73,9 +74,8 @@ export async function process(inputs, ctx) {
       });
       if (phase2Review.approved) break;
       lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
-
-  // PHASE 3: ROTATION SEQUENCE DETERMINATION
+    }
+    // PHASE 3: ROTATION SEQUENCE DETERMINATION
   ctx.log('info', 'Phase 3: Determining rotation sequence');
   const rotationSequence = await ctx.task(rotationSequenceTask, {
     dateAnalysis: dateAnalysis.analysis,
@@ -145,7 +145,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Inventory rotation analysis complete. Compliance: ${complianceValidation.complianceRate}%. Expiration alerts: ${expirationAssessment.alertCount}. Approve rotation plan?`,
     title: 'Inventory Rotation Complete',
     context: {
@@ -181,7 +181,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/fifo-lifo-inventory-control', timestamp: startTime, outputDir }
   };
 }
-  // TASK DEFINITIONS
+// TASK DEFINITIONS
 export const inventoryDateAnalysisTask = defineTask('inventory-date-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze inventory dates',

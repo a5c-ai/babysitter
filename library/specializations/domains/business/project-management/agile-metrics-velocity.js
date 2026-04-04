@@ -53,6 +53,7 @@ export async function process(inputs, ctx) {
       velocityAnalysis: null
     };
   }
+
   // Phase 2: Velocity Calculation
   const velocityCalculation = await ctx.task(velocityCalculationTask, {
     teamName,
@@ -61,23 +62,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Velocity Trend Analysis
-  let velocityTrend = await ctx.task(velocityTrendAnalysisTask, {
+  const velocityTrend = await ctx.task(velocityTrendAnalysisTask, {
     teamName,
     velocityCalculation,
     sprintData
   });
 
   // Breakpoint: Review velocity trends
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        velocityTrend = await ctx.task(velocityTrendAnalysisTask, { ...{
-    teamName,
-    velocityCalculation,
-    sprintData
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (velocityTrend.trendStatus === 'declining') {
+    await ctx.breakpoint({
       question: `${teamName}'s velocity shows declining trend (${velocityTrend.trendPercentage}% over ${velocityWindow} sprints). Review potential causes and improvement actions?`,
       title: 'Velocity Trend Alert',
       context: {
@@ -87,15 +80,9 @@ export async function process(inputs, ctx) {
         averageVelocity: velocityCalculation.averageVelocity,
         trendStatus: velocityTrend.trendStatus,
         recommendation: 'Investigate root causes and consider team improvement initiatives'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 4: Sprint Burndown Analysis
   const burndownAnalysis = await ctx.task(burndownAnalysisTask, {
@@ -128,23 +115,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Commitment Reliability Analysis
-  let commitmentAnalysis = await ctx.task(commitmentReliabilityTask, {
+  const commitmentAnalysis = await ctx.task(commitmentReliabilityTask, {
     teamName,
     sprintData,
     velocityCalculation
   });
 
   // Quality Gate: Commitment reliability below threshold
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        commitmentAnalysis = await ctx.task(commitmentReliabilityTask, { ...{
-    teamName,
-    sprintData,
-    velocityCalculation
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (commitmentAnalysis.reliabilityRate < 70) {
+    await ctx.breakpoint({
       question: `${teamName}'s commitment reliability is ${commitmentAnalysis.reliabilityRate}% (threshold: 70%). This affects forecasting accuracy. Review sprint planning practices?`,
       title: 'Commitment Reliability Warning',
       context: {
@@ -152,15 +131,9 @@ export async function process(inputs, ctx) {
         reliabilityRate: commitmentAnalysis.reliabilityRate,
         averageOvercommit: commitmentAnalysis.averageOvercommit,
         recommendation: 'Consider implementing commitment-based planning improvements'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 9: Predictability Analysis
   const predictabilityAnalysis = await ctx.task(predictabilityAnalysisTask, {
@@ -200,7 +173,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 13: Metrics Dashboard Generation
-  let metricsDashboard = await ctx.task(metricsDashboardTask, {
+  const metricsDashboard = await ctx.task(metricsDashboardTask, {
     teamName,
     reportingPeriod,
     velocityCalculation,
@@ -216,26 +189,8 @@ export async function process(inputs, ctx) {
     improvementRecommendations
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      metricsDashboard = await ctx.task(metricsDashboardTask, { ...{
-    teamName,
-    reportingPeriod,
-    velocityCalculation,
-    velocityTrend,
-    burndownAnalysis,
-    burnupAnalysis,
-    flowMetrics,
-    capacityAnalysis,
-    commitmentAnalysis,
-    predictabilityAnalysis,
-    releaseForecasting,
-    qualityMetrics,
-    improvementRecommendations
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Metrics Review
+  await ctx.breakpoint({
     question: `Agile metrics analysis complete for ${teamName}. Average Velocity: ${velocityCalculation.averageVelocity} SP, Predictability: ${predictabilityAnalysis.predictabilityScore}%. Approve metrics report?`,
     title: 'Agile Metrics Review',
     context: {
@@ -246,15 +201,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/agile-metrics-dashboard.json`, format: 'json', content: metricsDashboard },
         { path: `artifacts/agile-metrics-report.md`, format: 'markdown', content: metricsDashboard.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     teamName,
@@ -309,7 +258,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const sprintDataValidationTask = defineTask('sprint-data-validation', (args, taskCtx) => ({
   kind: 'agent',

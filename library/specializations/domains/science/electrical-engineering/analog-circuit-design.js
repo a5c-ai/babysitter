@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Circuit Specifications and Performance Requirements
-  let specificationAnalysis = await ctx.task(specificationAnalysisTask, {
+  const specificationAnalysis = await ctx.task(specificationAnalysisTask, {
     circuitName,
     circuitType,
     specifications,
@@ -48,17 +48,9 @@ export async function process(inputs, ctx) {
       recommendations: specificationAnalysis.recommendations
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      specificationAnalysis = await ctx.task(specificationAnalysisTask, { ...{
-    circuitName,
-    circuitType,
-    specifications,
-    constraints
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review specifications before proceeding
+  await ctx.breakpoint({
     question: `Review circuit specifications for ${circuitName}. Are the requirements correctly captured and feasible?`,
     title: 'Specification Review',
     context: {
@@ -71,15 +63,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: specificationAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Select Appropriate Circuit Topology and Architecture
   const topologySelection = await ctx.task(topologySelectionTask, {
     circuitName,
@@ -89,24 +75,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Calculate Component Values and Operating Points
-  let componentCalculation = await ctx.task(componentCalculationTask, {
+  const componentCalculation = await ctx.task(componentCalculationTask, {
     circuitName,
     topology: topologySelection.selectedTopology,
     specifications: specificationAnalysis.finalSpecifications,
     constraints
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      componentCalculation = await ctx.task(componentCalculationTask, { ...{
-    circuitName,
-    topology: topologySelection.selectedTopology,
-    specifications: specificationAnalysis.finalSpecifications,
-    constraints
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review component values before simulation
+  await ctx.breakpoint({
     question: `Review calculated component values for ${circuitName}. Proceed with SPICE simulation?`,
     title: 'Component Values Review',
     context: {
@@ -119,15 +96,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: componentCalculation
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Create Schematic and SPICE Simulation Model
   const schematicCreation = await ctx.task(schematicCreationTask, {
     circuitName,
@@ -137,7 +108,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Simulate Across Temperature, Voltage, and Process Variations
-  let cornerSimulation = await ctx.task(cornerSimulationTask, {
+  const cornerSimulation = await ctx.task(cornerSimulationTask, {
     circuitName,
     schematic: schematicCreation.schematic,
     spiceModel: schematicCreation.spiceModel,
@@ -146,33 +117,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check if corner simulations pass
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        cornerSimulation = await ctx.task(cornerSimulationTask, { ...{
-    circuitName,
-    schematic: schematicCreation.schematic,
-    spiceModel: schematicCreation.spiceModel,
-    specifications: specificationAnalysis.finalSpecifications,
-    constraints
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (cornerSimulation.failedCorners && cornerSimulation.failedCorners.length > 0) {
+    await ctx.breakpoint({
       question: `Corner simulations failed for ${cornerSimulation.failedCorners.length} conditions. Review failures and approve optimization approach?`,
       title: 'Corner Simulation Failures',
       context: {
         runId: ctx.runId,
         failedCorners: cornerSimulation.failedCorners,
         recommendations: cornerSimulation.optimizationRecommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 6: Optimize for Performance Metrics
   const performanceOptimization = await ctx.task(performanceOptimizationTask, {
@@ -184,7 +139,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Validate Design Against Specifications
-  let designValidation = await ctx.task(designValidationTask, {
+  const designValidation = await ctx.task(designValidationTask, {
     circuitName,
     optimizedDesign: performanceOptimization.optimizedDesign,
     specifications: specificationAnalysis.finalSpecifications,
@@ -192,17 +147,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Design must meet all critical specifications
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        designValidation = await ctx.task(designValidationTask, { ...{
-    circuitName,
-    optimizedDesign: performanceOptimization.optimizedDesign,
-    specifications: specificationAnalysis.finalSpecifications,
-    simulationResults: performanceOptimization.finalSimulationResults
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!designValidation.allSpecsMet) {
+    await ctx.breakpoint({
       question: `Design validation shows ${designValidation.failedSpecs.length} specifications not met. Accept with waivers or iterate design?`,
       title: 'Design Validation Warning',
       context: {
@@ -210,18 +156,12 @@ export async function process(inputs, ctx) {
         metSpecs: designValidation.metSpecs,
         failedSpecs: designValidation.failedSpecs,
         recommendations: designValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 8: Document Design Decisions and Analysis Results
-  let designDocumentation = await ctx.task(designDocumentationTask, {
+  const designDocumentation = await ctx.task(designDocumentationTask, {
     circuitName,
     circuitType,
     specificationAnalysis,
@@ -232,21 +172,8 @@ export async function process(inputs, ctx) {
     constraints
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      designDocumentation = await ctx.task(designDocumentationTask, { ...{
-    circuitName,
-    circuitType,
-    specificationAnalysis,
-    topologySelection,
-    componentCalculation,
-    performanceOptimization,
-    designValidation,
-    constraints
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `Analog circuit design complete for ${circuitName}. All specifications ${designValidation.allSpecsMet ? 'MET' : 'PARTIALLY MET'}. Approve design for release?`,
     title: 'Design Approval',
     context: {
@@ -258,15 +185,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-schematic.json`, format: 'json', content: performanceOptimization.optimizedDesign },
         { path: `artifacts/design-report.md`, format: 'markdown', content: designDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     circuitName,
@@ -293,7 +214,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const specificationAnalysisTask = defineTask('specification-analysis', (args, taskCtx) => ({
   kind: 'agent',

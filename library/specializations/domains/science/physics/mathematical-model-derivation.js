@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: System Definition and Degrees of Freedom
-  let systemDefinition = await ctx.task(systemDefinitionTask, {
+  const systemDefinition = await ctx.task(systemDefinitionTask, {
     systemName,
     physicalDomain,
     degreesOfFreedom,
@@ -48,17 +48,9 @@ export async function process(inputs, ctx) {
       mathematicalModel: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      systemDefinition = await ctx.task(systemDefinitionTask, { ...{
-    systemName,
-    physicalDomain,
-    degreesOfFreedom,
-    constraints
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review system definition
+  await ctx.breakpoint({
     question: `Review system definition for ${systemName}. Are the generalized coordinates and constraints correctly identified?`,
     title: 'System Definition Review',
     context: {
@@ -71,15 +63,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: systemDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Lagrangian/Hamiltonian Formulation
   const formulation = await ctx.task(formulationTask, {
     systemName,
@@ -88,22 +74,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Symmetry and Conservation Law Analysis
-  let symmetryAnalysis = await ctx.task(symmetryAnalysisTask, {
+  const symmetryAnalysis = await ctx.task(symmetryAnalysisTask, {
     systemName,
     formulation,
     systemDefinition
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      symmetryAnalysis = await ctx.task(symmetryAnalysisTask, { ...{
-    systemName,
-    formulation,
-    systemDefinition
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review symmetries and conservation laws
+  await ctx.breakpoint({
     question: `Review identified symmetries for ${systemName}. Are all relevant conservation laws derived?`,
     title: 'Symmetry Analysis Review',
     context: {
@@ -115,15 +93,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: symmetryAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Equations of Motion Derivation
   const equationsOfMotion = await ctx.task(equationsOfMotionTask, {
     systemName,
@@ -140,7 +112,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Limiting Case Validation
-  let limitingCaseValidation = await ctx.task(limitingCaseValidationTask, {
+  const limitingCaseValidation = await ctx.task(limitingCaseValidationTask, {
     systemName,
     equationsOfMotion,
     approximations,
@@ -149,35 +121,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Must pass limiting case validation
   const validationPassed = limitingCaseValidation.allCasesPassed;
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        limitingCaseValidation = await ctx.task(limitingCaseValidationTask, { ...{
-    systemName,
-    equationsOfMotion,
-    approximations,
-    knownLimits
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!validationPassed) {
+    await ctx.breakpoint({
       question: `Limiting case validation failed for ${systemName}. Review failed cases and decide whether to proceed.`,
       title: 'Validation Warning',
       context: {
         runId: ctx.runId,
         failedCases: limitingCaseValidation.failedCases,
         recommendation: 'Review derivation for errors or document known limitations'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Documentation Generation
-  let documentation = await ctx.task(documentationTask, {
+  const documentation = await ctx.task(documentationTask, {
     systemName,
     physicalDomain,
     systemDefinition,
@@ -188,21 +145,8 @@ export async function process(inputs, ctx) {
     limitingCaseValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(documentationTask, { ...{
-    systemName,
-    physicalDomain,
-    systemDefinition,
-    formulation,
-    symmetryAnalysis,
-    equationsOfMotion,
-    approximations,
-    limitingCaseValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Model Approval
+  await ctx.breakpoint({
     question: `Mathematical model derivation complete for ${systemName}. Approve model for publication/use?`,
     title: 'Model Derivation Approval',
     context: {
@@ -213,15 +157,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/mathematical-model.json`, format: 'json', content: documentation.modelDocument },
         { path: `artifacts/derivation-notebook.md`, format: 'markdown', content: documentation.derivationNotebook }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     systemName,
@@ -246,7 +184,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const systemDefinitionTask = defineTask('system-definition', (args, taskCtx) => ({
   kind: 'agent',

@@ -95,13 +95,14 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // ============================================================================
   // PHASE 2: DATA MAPPING AND INVENTORY
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Conducting data mapping and inventory (Article 30)');
 
-  let dataMapping = await ctx.task(dataMappingTask, {
+  const dataMapping = await ctx.task(dataMappingTask, {
     organization,
     scope,
     dataProcessingActivities,
@@ -115,19 +116,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Data Mapping Complete - Processing Activities: ${dataMapping.processingActivities.length}, Data Categories: ${dataMapping.dataCategories.length}, Data Subjects: ${dataMapping.dataSubjectCategories.length}`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      dataMapping = await ctx.task(dataMappingTask, { ...{
-    organization,
-    scope,
-    dataProcessingActivities,
-    assessmentDepth,
-    controllerType: scopeAssessment.controllerType,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Data mapping review
+  await ctx.breakpoint({
     question: `Data mapping identified ${dataMapping.processingActivities.length} processing activities, ${dataMapping.dataCategories.length} data categories, and ${dataMapping.dataSubjectCategories.length} data subject categories. Review completeness before proceeding?`,
     title: 'Data Mapping Review',
     context: {
@@ -141,15 +131,9 @@ export async function process(inputs, ctx) {
       thirdPartyProcessors: dataMapping.thirdPartyProcessors.length,
       recommendation: 'Verify all processing activities and personal data types are captured',
       files: dataMapping.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: LEGAL BASIS ASSESSMENT (ARTICLE 6)
   // ============================================================================
@@ -193,7 +177,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Assessing data subject rights implementation (Articles 12-23)');
 
-  let dataSubjectRights = await ctx.task(dataSubjectRightsTask, {
+  const dataSubjectRights = await ctx.task(dataSubjectRightsTask, {
     organization,
     dataMapping,
     assessmentDepth,
@@ -206,17 +190,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Data Subject Rights Assessment Complete - Rights Implemented: ${dataSubjectRights.rightsImplemented.length}/8, Implementation Score: ${dataSubjectRights.implementationScore}%`);
 
   // Quality Gate: Data subject rights review
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        dataSubjectRights = await ctx.task(dataSubjectRightsTask, { ...{
-    organization,
-    dataMapping,
-    assessmentDepth,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (dataSubjectRights.criticalGaps.length > 0) {
+    await ctx.breakpoint({
       question: `Critical gaps found in data subject rights implementation: ${dataSubjectRights.criticalGaps.join(', ')}. These are mandatory GDPR requirements. Review and address?`,
       title: 'Critical GDPR Rights Gaps Detected',
       context: {
@@ -228,15 +203,9 @@ export async function process(inputs, ctx) {
         implementationScore: dataSubjectRights.implementationScore,
         recommendation: 'All eight data subject rights must be implemented for GDPR compliance',
         files: dataSubjectRights.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: DATA PROTECTION IMPACT ASSESSMENT (ARTICLE 35)
@@ -261,17 +230,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `DPIA Complete - High Risk Activities: ${dpiaResult.highRiskActivities.length}, DPIA Required: ${dpiaResult.dpiaRequired}, Overall Risk Level: ${dpiaResult.overallRiskLevel}`);
 
     // Quality Gate: High-risk processing review
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          dataSubjectRights = await ctx.task(dataSubjectRightsTask, { ...{
-    organization,
-    dataMapping,
-    assessmentDepth,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (dpiaResult.dpiaRequired && dpiaResult.overallRiskLevel === 'high') {
+      await ctx.breakpoint({
         question: `High-risk data processing identified requiring mandatory DPIA. Risk level: ${dpiaResult.overallRiskLevel}. Activities: ${dpiaResult.highRiskActivities.length}. Prior consultation with DPA may be required. Review DPIA findings?`,
         title: 'High-Risk Processing - DPIA Required',
         context: {
@@ -284,18 +244,13 @@ export async function process(inputs, ctx) {
           residualRisk: dpiaResult.residualRisk,
           recommendation: 'High-risk processing requires completed DPIA and may require prior consultation with supervisory authority',
           files: dpiaResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   } else {
     ctx.log('info', 'Phase 6: DPIA generation skipped - no high-risk processing identified');
   }
+
   // ============================================================================
   // PHASE 7: SECURITY MEASURES ASSESSMENT (ARTICLE 32)
   // ============================================================================
@@ -360,7 +315,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Assessing international data transfers (Chapter V)');
 
-  let dataTransfers = await ctx.task(dataTransfersTask, {
+  const dataTransfers = await ctx.task(dataTransfersTask, {
     organization,
     dataMapping,
     assessmentDepth,
@@ -373,17 +328,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Data Transfers Assessment Complete - International Transfers: ${dataTransfers.internationalTransfers.length}, Compliant: ${dataTransfers.transfersCompliant}`);
 
   // Quality Gate: International transfers review
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        dataTransfers = await ctx.task(dataTransfersTask, { ...{
-    organization,
-    dataMapping,
-    assessmentDepth,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (dataTransfers.internationalTransfers.length > 0 && !dataTransfers.transfersCompliant) {
+    await ctx.breakpoint({
       question: `Non-compliant international data transfers detected. Transfers to: ${dataTransfers.nonCompliantDestinations.join(', ')}. Transfer mechanisms: ${dataTransfers.inadequateMechanisms.join(', ')}. This is a critical GDPR violation. Review and remediate?`,
       title: 'Non-Compliant International Data Transfers',
       context: {
@@ -395,15 +341,9 @@ export async function process(inputs, ctx) {
         inadequateMechanisms: dataTransfers.inadequateMechanisms,
         recommendation: 'All international data transfers must have valid legal mechanisms (adequacy decision, SCCs, BCRs, etc.)',
         files: dataTransfers.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: RECORDS OF PROCESSING ACTIVITIES (ARTICLE 30)
@@ -466,7 +406,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Conducting comprehensive gap analysis and compliance scoring');
 
-  let gapAnalysis = await ctx.task(gapAnalysisTask, {
+  const gapAnalysis = await ctx.task(gapAnalysisTask, {
     organization,
     scopeAssessment,
     dataMapping,
@@ -494,29 +434,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Gap Analysis Complete - Compliance Score: ${complianceScore}%, Critical Gaps: ${gapAnalysis.criticalGaps.length}, High Priority Gaps: ${gapAnalysis.highPriorityGaps.length}`);
 
   // Quality Gate: Critical gaps review
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
-    organization,
-    scopeAssessment,
-    dataMapping,
-    legalBasis,
-    consentManagement,
-    dataSubjectRights,
-    dpiaResult,
-    securityMeasures,
-    breachNotification,
-    dpoAssessment,
-    dataTransfers,
-    processingRecords,
-    privacyByDesign,
-    processorCompliance,
-    assessmentDepth,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  if (gapAnalysis.criticalGaps.length > 0) {
+    await ctx.breakpoint({
       question: `${gapAnalysis.criticalGaps.length} critical GDPR compliance gaps identified. These pose significant regulatory risk and potential fines. Review critical gaps and remediation plan?`,
       title: 'Critical GDPR Compliance Gaps Detected',
       context: {
@@ -530,15 +449,9 @@ export async function process(inputs, ctx) {
         estimatedFineRisk: gapAnalysis.estimatedFineRisk,
         recommendation: 'Address critical gaps immediately to reduce regulatory risk',
         files: gapAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 15: REMEDIATION ROADMAP GENERATION
@@ -566,7 +479,7 @@ export async function process(inputs, ctx) {
   if (includeDocumentation) {
     ctx.log('info', 'Phase 16: Generating comprehensive compliance documentation');
 
-    let documentation = await ctx.task(documentationGenerationTask, {
+    const documentation = await ctx.task(documentationGenerationTask, {
       organization,
       scopeAssessment,
       dataMapping,
@@ -593,32 +506,9 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Documentation Generated - Report: ${documentation.reportPath}, Policy Templates: ${documentation.policyTemplates.length}`);
   }
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(documentationGenerationTask, { ...{
-      organization,
-      scopeAssessment,
-      dataMapping,
-      legalBasis,
-      consentManagement,
-      dataSubjectRights,
-      dpiaResult,
-      securityMeasures,
-      breachNotification,
-      dpoAssessment,
-      dataTransfers,
-      processingRecords,
-      privacyByDesign,
-      processorCompliance,
-      gapAnalysis,
-      remediationRoadmap,
-      complianceScore,
-      overallVerdict,
-      outputDir
-    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+
+  // Final Breakpoint: GDPR Compliance Assessment Complete
+  await ctx.breakpoint({
     question: `GDPR Compliance Assessment Complete for ${organization}. Overall Compliance Score: ${complianceScore}%, Verdict: ${overallVerdict}. Critical Gaps: ${gapAnalysis.criticalGaps.length}, Total Recommendations: ${remediationRoadmap.totalActions}. Review assessment and approve remediation plan?`,
     title: 'GDPR Compliance Assessment Complete',
     context: {
@@ -663,15 +553,9 @@ export async function process(inputs, ctx) {
         { path: remediationRoadmap.roadmapPath, format: 'markdown', label: 'Remediation Roadmap' },
         { path: gapAnalysis.gapAnalysisPath, format: 'markdown', label: 'Gap Analysis' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -787,7 +671,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

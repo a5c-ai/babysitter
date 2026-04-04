@@ -49,23 +49,16 @@ export async function process(inputs, ctx) {
       hybridSystemDesign: null
     };
   }
+
   // Phase 2: Operating Mode Definition
-  let operatingModes = await ctx.task(operatingModesTask, {
+  const operatingModes = await ctx.task(operatingModesTask, {
     projectName,
     architectureDefinition,
     hybridArchitecture
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      operatingModes = await ctx.task(operatingModesTask, { ...{
-    projectName,
-    architectureDefinition,
-    hybridArchitecture
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Operating modes review
+  await ctx.breakpoint({
     question: `Review operating modes for ${projectName}. ${operatingModes.modes?.length || 0} modes defined. Approve mode definitions?`,
     title: 'Operating Modes Review',
     context: {
@@ -77,15 +70,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: operatingModes
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Energy Management Strategy Development
   const energyManagement = await ctx.task(energyManagementTask, {
     projectName,
@@ -119,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Fuel Economy and Emissions Validation
-  let emissionsValidation = await ctx.task(emissionsValidationTask, {
+  const emissionsValidation = await ctx.task(emissionsValidationTask, {
     projectName,
     energyManagement,
     drivabilityCalibration,
@@ -127,35 +114,20 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Emissions targets
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        emissionsValidation = await ctx.task(emissionsValidationTask, { ...{
-    projectName,
-    energyManagement,
-    drivabilityCalibration,
-    targetEmissions
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (emissionsValidation.targetsMet === false) {
+    await ctx.breakpoint({
       question: `Emissions targets not met for ${projectName}. CO2: ${emissionsValidation.actualEmissions?.co2} vs target ${targetEmissions.co2}. Review optimization options?`,
       title: 'Emissions Target Warning',
       context: {
         runId: ctx.runId,
         emissionsValidation,
         recommendation: 'Optimize energy management strategy or component sizing'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 8: System Documentation
-  let systemDocumentation = await ctx.task(systemDocumentationTask, {
+  const systemDocumentation = await ctx.task(systemDocumentationTask, {
     projectName,
     architectureDefinition,
     operatingModes,
@@ -166,21 +138,8 @@ export async function process(inputs, ctx) {
     emissionsValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      systemDocumentation = await ctx.task(systemDocumentationTask, { ...{
-    projectName,
-    architectureDefinition,
-    operatingModes,
-    energyManagement,
-    componentIntegration,
-    modeTransition,
-    drivabilityCalibration,
-    emissionsValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design approval
+  await ctx.breakpoint({
     question: `Hybrid Powertrain Integration complete for ${projectName}. Projected CO2: ${emissionsValidation.actualEmissions?.co2} g/km. Approve design?`,
     title: 'Hybrid Powertrain Design Approval',
     context: {
@@ -191,15 +150,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/hybrid-system-design.json`, format: 'json', content: systemDocumentation },
         { path: `artifacts/energy-management.json`, format: 'json', content: energyManagement }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -218,7 +171,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const architectureDefinitionTask = defineTask('architecture-definition', (args, taskCtx) => ({
   kind: 'agent',

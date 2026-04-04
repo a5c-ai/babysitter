@@ -37,35 +37,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: QRNG Circuit Design');
 
-  let circuitResult = await ctx.task(qrngCircuitDesignTask, {
+  const circuitResult = await ctx.task(qrngCircuitDesignTask, {
     throughput,
     framework
   });
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      circuitResult = await ctx.task(qrngCircuitDesignTask, { ...{
-    throughput,
-    framework
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  artifacts.push(...(circuitResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `QRNG circuit designed. Qubits: ${circuitResult.qubitCount}, Bits per circuit: ${circuitResult.bitsPerCircuit}. Proceed with randomness extraction?`,
     title: 'QRNG Circuit Review',
     context: {
       runId: ctx.runId,
       circuit: circuitResult,
       files: (circuitResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: RANDOMNESS EXTRACTION
   // ============================================================================
@@ -102,72 +90,47 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: NIST Statistical Testing');
 
-  let nistTestResult = await ctx.task(nistStatisticalTestingTask, {
+  const nistTestResult = await ctx.task(nistStatisticalTestingTask, {
     qrng: implementationResult,
     sampleSize: Math.max(1000000, throughput * 10)
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      nistTestResult = await ctx.task(nistStatisticalTestingTask, { ...{
-    qrng: implementationResult,
-    sampleSize: Math.max(1000000, throughput * 10)
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  artifacts.push(...(nistTestResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `NIST testing complete. Tests passed: ${nistTestResult.passedTests}/${nistTestResult.totalTests}. P-values healthy: ${nistTestResult.pValuesHealthy}. Review test results?`,
     title: 'NIST Test Results Review',
     context: {
       runId: ctx.runId,
       nistResults: nistTestResult,
       files: (nistTestResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: RANDOMNESS QUALITY VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Randomness Quality Validation');
 
-  let qualityResult = await ctx.task(randomnessQualityValidationTask, {
+  const qualityResult = await ctx.task(randomnessQualityValidationTask, {
     qrng: implementationResult,
     nistResults: nistTestResult
   });
 
   artifacts.push(...(qualityResult.artifacts || []));
 
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        qualityResult = await ctx.task(randomnessQualityValidationTask, { ...{
-    qrng: implementationResult,
-    nistResults: nistTestResult
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!qualityResult.qualityPassed) {
+    await ctx.breakpoint({
       question: `Randomness quality below threshold. Entropy rate: ${qualityResult.entropyRate}. Address issues or accept with warnings?`,
       title: 'Quality Warning',
       context: {
         runId: ctx.runId,
         quality: qualityResult,
         files: (qualityResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: CRYPTOGRAPHIC INTEGRATION
@@ -189,7 +152,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Security Properties Documentation');
 
-  let securityResult = await ctx.task(securityPropertiesDocumentationTask, {
+  const securityResult = await ctx.task(securityPropertiesDocumentationTask, {
     qrng: implementationResult,
     nistResults: nistTestResult,
     qualityResults: qualityResult,
@@ -197,18 +160,9 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      securityResult = await ctx.task(securityPropertiesDocumentationTask, { ...{
-    qrng: implementationResult,
-    nistResults: nistTestResult,
-    qualityResults: qualityResult,
-    integration: integrationResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  artifacts.push(...(securityResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `QRNG implementation complete. Throughput: ${implementationResult.achievedThroughput} bps, NIST tests: ${nistTestResult.passedTests}/${nistTestResult.totalTests}. Approve implementation?`,
     title: 'QRNG Implementation Complete',
     context: {
@@ -220,15 +174,9 @@ export async function process(inputs, ctx) {
         qualityPassed: qualityResult.qualityPassed
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
 
   return {
@@ -267,7 +215,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

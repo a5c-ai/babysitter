@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Star Allele Calling');
 
-  let starAlleleResult = await ctx.task(starAlleleCallingTask, {
+  const starAlleleResult = await ctx.task(starAlleleCallingTask, {
     projectName,
     sampleId,
     pgxVariants: extractionResult.pgxVariants,
@@ -79,18 +79,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Star allele calling complete for ${starAlleleResult.calledGenes.length} genes`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      starAlleleResult = await ctx.task(starAlleleCallingTask, { ...{
-    projectName,
-    sampleId,
-    pgxVariants: extractionResult.pgxVariants,
-    pgxGenes,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review star allele calls
+  await ctx.breakpoint({
     question: `Star allele calling complete for ${starAlleleResult.calledGenes.length} PGx genes. Review star allele assignments?`,
     title: 'Star Allele Review',
     context: {
@@ -99,15 +89,9 @@ export async function process(inputs, ctx) {
       diplotypes: starAlleleResult.diplotypes,
       novelAlleles: starAlleleResult.novelAlleles,
       files: starAlleleResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: DIPLOTYPE TO PHENOTYPE TRANSLATION
   // ============================================================================
@@ -132,7 +116,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Drug-Gene Interaction Assessment');
 
-  let interactionResult = await ctx.task(drugGeneInteractionTask, {
+  const interactionResult = await ctx.task(drugGeneInteractionTask, {
     projectName,
     sampleId,
     phenotypes: phenotypeResult.phenotypes,
@@ -146,19 +130,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Identified ${interactionResult.interactions.length} drug-gene interactions`);
 
   // Breakpoint: Review drug interactions
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        interactionResult = await ctx.task(drugGeneInteractionTask, { ...{
-    projectName,
-    sampleId,
-    phenotypes: phenotypeResult.phenotypes,
-    drugList,
-    guidelines,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (interactionResult.highRiskInteractions.length > 0) {
+    await ctx.breakpoint({
       question: `${interactionResult.highRiskInteractions.length} high-risk drug-gene interactions identified. Review interactions before generating recommendations?`,
       title: 'High-Risk Interaction Review',
       context: {
@@ -166,15 +139,9 @@ export async function process(inputs, ctx) {
         highRiskInteractions: interactionResult.highRiskInteractions,
         moderateInteractions: interactionResult.moderateInteractions,
         files: interactionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: CLINICAL ACTIONABILITY EVALUATION
@@ -201,7 +168,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Generating Dosing Recommendations');
 
-  let dosingResult = await ctx.task(dosingRecommendationTask, {
+  const dosingResult = await ctx.task(dosingRecommendationTask, {
     projectName,
     sampleId,
     phenotypes: phenotypeResult.phenotypes,
@@ -216,20 +183,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Generated ${dosingResult.recommendations.length} dosing recommendations`);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      dosingResult = await ctx.task(dosingRecommendationTask, { ...{
-    projectName,
-    sampleId,
-    phenotypes: phenotypeResult.phenotypes,
-    interactions: interactionResult.interactions,
-    drugList,
-    guidelines,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Breakpoint: Review dosing recommendations
+  await ctx.breakpoint({
     question: `Dosing recommendations generated for ${dosingResult.recommendations.length} drugs. Review recommendations before finalizing report?`,
     title: 'Dosing Recommendations Review',
     context: {
@@ -237,22 +192,16 @@ export async function process(inputs, ctx) {
       recommendations: dosingResult.recommendations,
       alternativeDrugs: dosingResult.alternativeDrugs,
       files: dosingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: GENERATE PGX REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Generating Pharmacogenomics Report');
 
-  let reportResult = await ctx.task(generatePgxReportTask, {
+  const reportResult = await ctx.task(generatePgxReportTask, {
     projectName,
     sampleId,
     starAlleleResult,
@@ -266,22 +215,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generatePgxReportTask, { ...{
-    projectName,
-    sampleId,
-    starAlleleResult,
-    phenotypeResult,
-    interactionResult,
-    actionabilityResult,
-    dosingResult,
-    guidelines,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Report approval
+  await ctx.breakpoint({
     question: `Pharmacogenomics Report Complete for ${sampleId}. ${pgxGenotypes.length} genotypes, ${drugRecommendations.length} drug recommendations. Approve report?`,
     title: 'PGx Report Approval',
     context: {
@@ -297,15 +232,9 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'PGx Report' },
         { path: reportResult.jsonReportPath, format: 'json', label: 'Structured Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -349,7 +278,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -82,13 +82,10 @@ export async function process(inputs, ctx) {
   const result = await ctx.task(analyzeTask, {
     problem: inputs.problem,
     context: inputs.context
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({ question: 'Review quantum field theory calculation results', expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+  });
+
+  await ctx.breakpoint('Review quantum field theory calculation results');
+
   return {
     success: true,
     processType: 'Quantum Field Theory Calculations',

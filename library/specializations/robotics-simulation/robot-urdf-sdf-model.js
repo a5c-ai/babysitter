@@ -146,7 +146,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Model Validation in RViz/Gazebo');
 
-  let modelValidation = await ctx.task(modelValidationTask, {
+  const modelValidation = await ctx.task(modelValidationTask, {
     robotName,
     modelGeneration,
     urdfOrSdf,
@@ -157,17 +157,8 @@ export async function process(inputs, ctx) {
   if (modelValidation.issues) issues.push(...modelValidation.issues);
 
   // Quality Gate: Model validation
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        modelValidation = await ctx.task(modelValidationTask, { ...{
-    robotName,
-    modelGeneration,
-    urdfOrSdf,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!modelValidation.validationPassed) {
+    await ctx.breakpoint({
       question: `Model validation for ${robotName} found issues: ${modelValidation.errors.join(', ')}. Review and fix model issues?`,
       title: 'Model Validation Failed',
       context: {
@@ -175,15 +166,9 @@ export async function process(inputs, ctx) {
         errors: modelValidation.errors,
         warnings: modelValidation.warnings,
         files: modelValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: COLLISION GEOMETRY OPTIMIZATION
@@ -206,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Model Documentation');
 
-  let modelDocumentation = await ctx.task(modelDocumentationTask, {
+  const modelDocumentation = await ctx.task(modelDocumentationTask, {
     robotName,
     kinematicDesign,
     linkProperties,
@@ -218,20 +203,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modelDocumentation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      modelDocumentation = await ctx.task(modelDocumentationTask, { ...{
-    robotName,
-    kinematicDesign,
-    linkProperties,
-    jointConfiguration,
-    sensorModels,
-    modelGeneration,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Robot Model Complete for ${robotName}. Validation: ${modelValidation.validationPassed ? 'PASSED' : 'ISSUES'}. Review model package?`,
     title: 'Robot Model Complete',
     context: {
@@ -247,15 +220,9 @@ export async function process(inputs, ctx) {
         { path: modelGeneration.modelPath, format: urdfOrSdf, label: 'Robot Model' },
         { path: modelDocumentation.docPath, format: 'markdown', label: 'Documentation' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -284,7 +251,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

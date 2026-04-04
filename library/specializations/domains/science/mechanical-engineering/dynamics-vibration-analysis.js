@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Modal Analysis (Eigenvalue Problem)');
 
-  let modalResult = await ctx.task(modalAnalysisTask, {
+  const modalResult = await ctx.task(modalAnalysisTask, {
     projectName,
     modelResult,
     frequencyRange,
@@ -84,17 +84,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Modal analysis complete - ${modalResult.modeCount} modes extracted`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      modalResult = await ctx.task(modalAnalysisTask, { ...{
-    projectName,
-    modelResult,
-    frequencyRange,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review natural frequencies
+  await ctx.breakpoint({
     question: `Modal analysis complete. Found ${modalResult.modeCount} modes. Fundamental frequency: ${modalResult.fundamentalFrequency} Hz. Review mode shapes and frequencies?`,
     title: 'Modal Analysis Review',
     context: {
@@ -102,22 +93,16 @@ export async function process(inputs, ctx) {
       naturalFrequencies: modalResult.naturalFrequencies,
       effectiveMassParticipation: modalResult.massParticipation,
       files: modalResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: DAMPING CHARACTERIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Damping Characterization');
 
-  let dampingResult = await ctx.task(dampingCharacterizationTask, {
+  const dampingResult = await ctx.task(dampingCharacterizationTask, {
     projectName,
     modelResult,
     modalResult,
@@ -152,18 +137,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Harmonic analysis complete - Peak response at ${harmonicResult.peakFrequency} Hz`);
 
     // Quality Gate: Resonance near operating frequency
-        let lastFeedback_phase4Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase4Review) {
-          dampingResult = await ctx.task(dampingCharacterizationTask, { ...{
-    projectName,
-    modelResult,
-    modalResult,
-    dampingRatio,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-        }
-  const phase4Review = await ctx.breakpoint({
+    if (excitation.frequency && Math.abs(harmonicResult.peakFrequency - excitation.frequency) < excitation.frequency * 0.1) {
+      await ctx.breakpoint({
         question: `Warning: Operating frequency ${excitation.frequency} Hz is within 10% of resonance at ${harmonicResult.peakFrequency} Hz. High vibration expected. Review response and consider design changes?`,
         title: 'Resonance Warning',
         context: {
@@ -172,16 +147,11 @@ export async function process(inputs, ctx) {
           resonantFrequency: harmonicResult.peakFrequency,
           amplificationFactor: harmonicResult.amplificationFactor,
           files: harmonicResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase4Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase4Review.approved) break;
-        lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 5: TRANSIENT RESPONSE ANALYSIS
   // ============================================================================
@@ -203,6 +173,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Transient analysis complete - Max response: ${transientResult.maxResponse}`);
   }
+
   // ============================================================================
   // PHASE 6: RANDOM VIBRATION ANALYSIS
   // ============================================================================
@@ -224,6 +195,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Random vibration analysis complete - RMS response: ${randomResult.rmsResponse}`);
   }
+
   // ============================================================================
   // PHASE 7: RESPONSE SPECTRUM ANALYSIS
   // ============================================================================
@@ -244,6 +216,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Response spectrum analysis complete`);
   }
+
   // ============================================================================
   // PHASE 8: VIBRATION CRITERIA EVALUATION
   // ============================================================================
@@ -269,7 +242,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Vibration Report');
 
-  let reportResult = await ctx.task(generateVibrationReportTask, {
+  const reportResult = await ctx.task(generateVibrationReportTask, {
     projectName,
     systemType,
     modelResult,
@@ -285,24 +258,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateVibrationReportTask, { ...{
-    projectName,
-    systemType,
-    modelResult,
-    modalResult,
-    dampingResult,
-    harmonicResult,
-    transientResult,
-    randomResult,
-    spectrumResult,
-    criteriaResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Vibration Analysis Complete for ${projectName}. Fundamental frequency: ${modalResult.fundamentalFrequency} Hz. ${criteriaResult.overallStatus}. Approve analysis?`,
     title: 'Vibration Analysis Complete',
     context: {
@@ -316,15 +273,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Vibration Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -354,7 +305,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

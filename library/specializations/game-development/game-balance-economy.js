@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Balance Spreadsheets and Formulas');
 
-  let balanceSpreadsheets = await ctx.task(balanceSpreadsheetsTask, {
+  const balanceSpreadsheets = await ctx.task(balanceSpreadsheetsTask, {
     gameName,
     economyFoundation,
     progressionDesign,
@@ -93,18 +93,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...balanceSpreadsheets.artifacts);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      balanceSpreadsheets = await ctx.task(balanceSpreadsheetsTask, { ...{
-    gameName,
-    economyFoundation,
-    progressionDesign,
-    balanceTargets,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: Spreadsheet review
+  await ctx.breakpoint({
     question: `Balance spreadsheets created for ${gameName}. ${balanceSpreadsheets.sheetsCount} sheets covering ${balanceSpreadsheets.systemsCovered.join(', ')}. Review balance formulas and curves?`,
     title: 'Balance Spreadsheet Review',
     context: {
@@ -114,15 +104,9 @@ export async function process(inputs, ctx) {
       systemsCovered: balanceSpreadsheets.systemsCovered,
       keyFormulas: balanceSpreadsheets.keyFormulas,
       files: [{ path: balanceSpreadsheets.spreadsheetPath, format: 'xlsx', label: 'Balance Spreadsheet' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: ECONOMY SIMULATION
   // ============================================================================
@@ -163,7 +147,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Imbalance Identification and Analysis');
 
-  let imbalanceAnalysis = await ctx.task(imbalanceAnalysisTask, {
+  const imbalanceAnalysis = await ctx.task(imbalanceAnalysisTask, {
     gameName,
     economySimulation,
     balanceTesting,
@@ -174,18 +158,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...imbalanceAnalysis.artifacts);
 
   // Quality Gate: Critical imbalances
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        imbalanceAnalysis = await ctx.task(imbalanceAnalysisTask, { ...{
-    gameName,
-    economySimulation,
-    balanceTesting,
-    balanceTargets,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (imbalanceAnalysis.criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `${imbalanceAnalysis.criticalIssues.length} critical balance issues identified in ${gameName}. Issues: ${imbalanceAnalysis.criticalIssues.map(i => i.name).join(', ')}. Review and address before proceeding?`,
       title: 'Critical Balance Issues',
       context: {
@@ -193,15 +167,9 @@ export async function process(inputs, ctx) {
         criticalIssues: imbalanceAnalysis.criticalIssues,
         recommendations: imbalanceAnalysis.recommendations,
         files: imbalanceAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: BALANCE ITERATION
@@ -225,7 +193,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Final Balance Documentation');
 
-  let balanceDocumentation = await ctx.task(balanceDocumentationTask, {
+  const balanceDocumentation = await ctx.task(balanceDocumentationTask, {
     gameName,
     economyFoundation,
     progressionDesign,
@@ -238,21 +206,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...balanceDocumentation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      balanceDocumentation = await ctx.task(balanceDocumentationTask, { ...{
-    gameName,
-    economyFoundation,
-    progressionDesign,
-    balanceSpreadsheets,
-    economySimulation,
-    imbalanceAnalysis,
-    balanceIteration,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Game Balance and Economy Design complete for ${gameName}. Balance health score: ${balanceIteration.healthScore}/100. Ready for implementation?`,
     title: 'Balance Design Complete',
     context: {
@@ -270,15 +225,9 @@ export async function process(inputs, ctx) {
         { path: balanceDocumentation.documentPath, format: 'markdown', label: 'Balance Document' },
         { path: balanceSpreadsheets.spreadsheetPath, format: 'xlsx', label: 'Balance Spreadsheet' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -321,7 +270,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

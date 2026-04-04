@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Assigning counts and balancing workload');
 
-  let countAssignment = await ctx.task(countAssignmentTask, {
+  const countAssignment = await ctx.task(countAssignmentTask, {
     countSchedule: scheduleGeneration.schedule,
     availableCounters: inputs.availableCounters || [],
     outputDir
@@ -77,16 +77,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...countAssignment.artifacts);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      countAssignment = await ctx.task(countAssignmentTask, { ...{
-    countSchedule: scheduleGeneration.schedule,
-    availableCounters: inputs.availableCounters || [],
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: Review count schedule
+  await ctx.breakpoint({
     question: `Count schedule generated. ${scheduleGeneration.schedule.length} counts planned. Average daily counts: ${countAssignment.averageDailyCounts}. Review schedule?`,
     title: 'Count Schedule Review',
     context: {
@@ -95,15 +87,9 @@ export async function process(inputs, ctx) {
       countsByClass: scheduleGeneration.countsByClass,
       averageDailyCounts: countAssignment.averageDailyCounts,
       files: scheduleGeneration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: COUNT EXECUTION GUIDANCE
   // ============================================================================
@@ -163,13 +149,14 @@ export async function process(inputs, ctx) {
   if (recountDetermination.recountsNeeded.length > 0) {
     ctx.log('info', `${recountDetermination.recountsNeeded.length} items require recount`);
   }
+
   // ============================================================================
   // PHASE 8: ROOT CAUSE ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Analyzing variance root causes');
 
-  let rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, {
+  const rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, {
     variances: varianceCalculation.variances,
     historicalCounts,
     inventory,
@@ -179,17 +166,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...rootCauseAnalysis.artifacts);
 
   // Quality Gate: Review significant variances
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, { ...{
-    variances: varianceCalculation.variances,
-    historicalCounts,
-    inventory,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (varianceCalculation.significantVariances.length > 0) {
+    await ctx.breakpoint({
       question: `${varianceCalculation.significantVariances.length} significant variances found totaling $${varianceCalculation.totalVarianceValue}. Review root causes?`,
       title: 'Significant Variance Review',
       context: {
@@ -198,15 +176,9 @@ export async function process(inputs, ctx) {
         totalVarianceValue: varianceCalculation.totalVarianceValue,
         rootCauses: rootCauseAnalysis.topRootCauses,
         files: rootCauseAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: INVENTORY ADJUSTMENT PROCESSING
@@ -259,7 +231,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating cycle count report');
 
-  let cycleCountReport = await ctx.task(cycleCountReportTask, {
+  const cycleCountReport = await ctx.task(cycleCountReportTask, {
     countResults: countCollection.results,
     variances: varianceCalculation.variances,
     rootCauseAnalysis,
@@ -270,19 +242,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...cycleCountReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      cycleCountReport = await ctx.task(cycleCountReportTask, { ...{
-    countResults: countCollection.results,
-    variances: varianceCalculation.variances,
-    rootCauseAnalysis,
-    accuracyMetrics: accuracyMetrics.metrics,
-    correctiveActions: correctiveActions.recommendations,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Cycle counting complete. Accuracy: ${accuracyMetrics.metrics.overallAccuracy}% (Target: ${targetAccuracy}%). ${adjustmentProcessing.adjustments.length} adjustments made. Finalize?`,
     title: 'Cycle Counting Complete',
     context: {
@@ -298,15 +259,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: cycleCountReport.reportPath, format: 'markdown', label: 'Cycle Count Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -334,7 +289,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
