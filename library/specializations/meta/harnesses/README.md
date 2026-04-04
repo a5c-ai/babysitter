@@ -72,6 +72,22 @@ This directory documents the extensibility, plugin systems, and capabilities of 
 | **GitHub Copilot** | Yes | 8 | `.github/hooks/*.json` | sessionStart, preToolUse, postToolUse, agentStop, errorOccurred |
 | **Cursor** | Yes | 6+ | `.cursor/hooks.json` | beforeShellExecution, beforeMCPExecution, afterFileEdit, stop |
 
+### Session ID Persistence Between Hooks
+
+All adapters use `BABYSITTER_SESSION_ID` as the cross-harness standard env var for session identity. Each harness writes it via its own env persistence mechanism.
+
+| Harness | Env File Mechanism | Native Env Injection | Cross-Harness Var | Stdin JSON |
+|---------|-------------------|---------------------|-------------------|------------|
+| **Claude Code** | `CLAUDE_ENV_FILE` | None | `BABYSITTER_SESSION_ID` written to `CLAUDE_ENV_FILE` | `session_id` |
+| **Codex CLI** | None | `CODEX_THREAD_ID` (auto-injected) | `BABYSITTER_SESSION_ID` (env), fallback to `CODEX_THREAD_ID` | `session_id` |
+| **Gemini CLI** | None needed | `GEMINI_SESSION_ID` (auto-injected) | `BABYSITTER_SESSION_ID` (env), fallback to `GEMINI_SESSION_ID` | `session_id` |
+| **Pi / Oh My Pi** | None | `OMP_SESSION_ID` / `PI_SESSION_ID` | `BABYSITTER_SESSION_ID` (env), fallback to native | N/A (in-process) |
+| **OpenCode** | None | None | `BABYSITTER_SESSION_ID` (if set externally) | `session.created` event |
+| **GitHub Copilot** | `COPILOT_ENV_FILE` (or `CLAUDE_ENV_FILE`) | None | `BABYSITTER_SESSION_ID` written to env file | `session_id` |
+| **Cursor** | None | None | `BABYSITTER_SESSION_ID` (if set externally) | `conversation_id` |
+
+**Note:** Session state files (iteration tracking, run binding) are stored in `~/.a5c/state/` globally, independent of the env persistence mechanism above.
+
 ### MCP (Model Context Protocol) Support
 
 | Harness | MCP Support | Transports | Config Location |
@@ -164,13 +180,13 @@ The Babysitter SDK includes adapters for all 8 harnesses (`packages/sdk/src/harn
 
 | Harness | Stop Hook | Session Binding | Programmatic API |
 |---------|-----------|----------------|-----------------|
-| Claude Code | Yes (Stop event) | Yes (CLAUDE_SESSION_ID) | Yes (CLI -p mode) |
-| Codex CLI | Yes (Stop event) | Partial | Yes (CLI) |
-| Gemini CLI | Yes (AfterAgent) | Yes (GEMINI_SESSION_ID) | Yes (CLI) |
-| Pi / Oh My Pi | Yes (agent_end) | Yes (PI_SESSION_ID/OMP_SESSION_ID) | Yes (PiSessionHandle) |
-| OpenCode | Partial (via plugins) | Partial | Partial |
-| GitHub Copilot | Partial (agentStop) | No | Partial |
-| Cursor | Yes (stop hook with loop_limit) | No | Partial (CLI agent) |
+| Claude Code | Yes (Stop event) | Yes (BABYSITTER_SESSION_ID via CLAUDE_ENV_FILE) | Yes (CLI -p mode) |
+| Codex CLI | Yes (Stop event) | Yes (BABYSITTER_SESSION_ID, CODEX_THREAD_ID auto-injected) | Yes (CLI) |
+| Gemini CLI | Yes (AfterAgent) | Yes (BABYSITTER_SESSION_ID, GEMINI_SESSION_ID auto-injected) | Yes (CLI) |
+| Pi / Oh My Pi | Yes (agent_end) | Yes (BABYSITTER_SESSION_ID, PI_SESSION_ID/OMP_SESSION_ID) | Yes (PiSessionHandle) |
+| OpenCode | Partial (via plugins) | Partial (BABYSITTER_SESSION_ID if set) | Partial |
+| GitHub Copilot | Partial (agentStop) | Yes (BABYSITTER_SESSION_ID via COPILOT_ENV_FILE) | Partial |
+| Cursor | Yes (stop hook with loop_limit) | Partial (BABYSITTER_SESSION_ID if set, conversation_id via stdin) | Partial (CLI agent) |
 
 ---
 

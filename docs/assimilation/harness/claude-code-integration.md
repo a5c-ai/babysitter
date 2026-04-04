@@ -62,8 +62,8 @@ Claude Code starts session
   stdin: {session_id}   babysitter hook:run --hook-type session-start
         |                    |
         v                    v
-  Write CLAUDE_SESSION_ID   Create baseline state file
-  to CLAUDE_ENV_FILE        {stateDir}/{sessionId}.md
+  Write BABYSITTER_SESSION_ID   Create baseline state file
+  to CLAUDE_ENV_FILE            {stateDir}/{sessionId}.md
         |
         v
   [User invokes /babysit skill]
@@ -149,7 +149,7 @@ Additionally, `plugins/babysitter/hooks/hooks.json` provides a secondary hook de
 | Variable | Description |
 |----------|-------------|
 | `CLAUDE_PLUGIN_ROOT` | Absolute path to the installed plugin directory |
-| `CLAUDE_SESSION_ID` | Current session identifier |
+| `BABYSITTER_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) |
 | `CLAUDE_ENV_FILE` | Path to env file for persisting exports across hook invocations |
 
 ---
@@ -202,7 +202,7 @@ The handler performs three operations:
 
 1. **Parse stdin** -- Reads JSON input containing `{ session_id: string }`.
 
-2. **Append to CLAUDE_ENV_FILE** -- If the `CLAUDE_ENV_FILE` environment variable is set, appends `export CLAUDE_SESSION_ID="{sessionId}"` to make the session ID available to subsequent hook invocations.
+2. **Append to CLAUDE_ENV_FILE** -- If the `CLAUDE_ENV_FILE` environment variable is set, appends `export BABYSITTER_SESSION_ID="{sessionId}"` to make the session ID available to subsequent hook invocations.
 
 3. **Create baseline state file** -- Writes a session state file at `{pluginRoot}/skills/babysit/state/{sessionId}.md` with initial values:
 
@@ -327,7 +327,7 @@ babysitter run:create \
   --request req-456 \
   --prompt "Build the API" \
   --harness claude-code \
-  --session-id "${CLAUDE_SESSION_ID}" \
+  --session-id "${BABYSITTER_SESSION_ID}" \
   --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
   --json \
   --dry-run
@@ -1080,11 +1080,11 @@ interface HarnessAdapter {
 
 ### Adapter Detection
 
-The registry probes adapters in priority order. The Claude Code adapter reports active when either `CLAUDE_SESSION_ID` or `CLAUDE_ENV_FILE` is set:
+The registry probes adapters in priority order. The Claude Code adapter reports active when either `BABYSITTER_SESSION_ID` or `CLAUDE_ENV_FILE` is set:
 
 ```typescript
 isActive(): boolean {
-  return !!(process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_ENV_FILE);
+  return !!(process.env.BABYSITTER_SESSION_ID || process.env.CLAUDE_ENV_FILE);
 }
 ```
 

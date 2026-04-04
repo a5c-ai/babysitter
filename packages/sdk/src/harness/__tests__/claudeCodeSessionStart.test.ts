@@ -4,22 +4,19 @@
  * The session-start hook handler in claudeCode.ts (handleSessionStartHookImpl)
  * silently fails when:
  *   1. CLAUDE_ENV_FILE is empty → session ID not persisted
- *   2. process.env.CLAUDE_PLUGIN_ROOT not set (only args.pluginRoot) → state dir fails
- *   3. Both catch blocks only log in verbose mode → failures invisible
+ *   2. Both catch blocks only log in verbose mode → failures invisible
  *
- * These tests exercise the public interface via createClaudeCodeAdapter().handleSessionStartHook().
+ * These tests exercise the public interface via handleHookRun().
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { handleHookRun } from "../../cli/commands/hookRun";
 import type { HookRunCommandArgs } from "../../cli/commands/hookRun";
-import { createClaudeCodeAdapter } from "../claudeCode";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 import {
   getSessionFilePath,
-  readSessionFile,
 } from "../../session";
 
 // ---------------------------------------------------------------------------
@@ -77,7 +74,7 @@ let savedEnv: NodeJS.ProcessEnv;
 
 beforeEach(async () => {
   tmpDir = await makeTmpDir();
-  stateDir = path.join(tmpDir, "skills", "babysit", "state");
+  stateDir = path.join(tmpDir, "state");
   await fs.mkdir(stateDir, { recursive: true });
 
   stdoutChunks = [];
@@ -128,7 +125,7 @@ function getStderr(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Test: args.pluginRoot propagates to process.env.CLAUDE_PLUGIN_ROOT
+// Tests
 // ---------------------------------------------------------------------------
 
 describe("Claude Code session-start hook (issue #107 regressions)", () => {
@@ -183,36 +180,39 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Test: stateDir resolves from args.pluginRoot when env is empty
+  // Test: stateDir defaults to ~/.a5c/state/ when no explicit args
   // ---------------------------------------------------------------------------
 
-  it("stateDir resolves from args.pluginRoot when CLAUDE_PLUGIN_ROOT env is empty", async () => {
+  it("stateDir defaults to ~/.a5c/state/ when no explicit stateDir or pluginRoot", async () => {
     delete process.env.CLAUDE_PLUGIN_ROOT;
+    delete process.env.BABYSITTER_STATE_DIR;
+    delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
 
-    const sessionId = "statedir-resolve-test";
+    const sessionId = "global-statedir-test";
 
-    // Call with pluginRoot arg (but no stateDir arg — let it resolve)
     const code = await callWithStdin(
       JSON.stringify({ session_id: sessionId }),
       {
         hookType: "session-start",
         harness: "claude-code",
-        pluginRoot: tmpDir,
-        // No stateDir — should resolve from pluginRoot → pluginRoot/skills/babysit/state
+        // No stateDir, no pluginRoot — should resolve to ~/.a5c/state/
         json: true,
       },
     );
 
     expect(code).toBe(0);
 
-    // The handler should create the session state file in the resolved state dir
-    const expectedStateDir = path.join(tmpDir, "skills", "babysit", "state");
+    // The handler should create the session state file in ~/.a5c/state/
+    const expectedStateDir = path.join(os.homedir(), ".a5c", "state");
     const filePath = getSessionFilePath(expectedStateDir, sessionId);
     const exists = await fs
       .access(filePath)
       .then(() => true)
       .catch(() => false);
     expect(exists).toBe(true);
+
+    // Clean up
+    await fs.rm(filePath, { force: true }).catch(() => {});
   });
 
   // ---------------------------------------------------------------------------
@@ -256,7 +256,7 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
   // Test: Happy path — everything works
   // ---------------------------------------------------------------------------
 
-  it("happy path: creates session state and returns 0 when CLAUDE_ENV_FILE is set and pluginRoot resolves", async () => {
+  it("happy path: creates session state and returns 0 when CLAUDE_ENV_FILE is set", async () => {
     const envFilePath = path.join(tmpDir, "claude-env");
     await fs.writeFile(envFilePath, "");
     process.env.CLAUDE_ENV_FILE = envFilePath;
@@ -279,7 +279,7 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
 
     // Verify session ID was appended to env file
     const envContent = await fs.readFile(envFilePath, "utf8");
-    expect(envContent).toContain(`CLAUDE_SESSION_ID="${sessionId}"`);
+    expect(envContent).toContain(`BABYSITTER_SESSION_ID="${sessionId}"`);
 
     // Verify session state file was created
     const filePath = getSessionFilePath(stateDir, sessionId);

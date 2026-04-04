@@ -27,12 +27,11 @@ export function createClaudeCodeContext(
     capabilities: ['hooks', 'stop-hook', 'ask-user-question', 'task-tool', 'breakpoint-routing'],
     pluginRootVar: '${CLAUDE_PLUGIN_ROOT}',
     loopControlTerm: 'stop-hook',
-    sessionBindingFlags: '--plugin-root "${CLAUDE_PLUGIN_ROOT}"',
+    sessionBindingFlags: '',
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'CLAUDE_SESSION_ID, CLAUDE_ENV_FILE',
-    resumeFlags:
-      '--state-dir "${CLAUDE_PLUGIN_ROOT}/skills/babysit/state"',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (via CLAUDE_ENV_FILE)',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Read the SDK version from `versions.json` to ensure version compatibility:',
       '',
@@ -46,7 +45,7 @@ export function createClaudeCodeContext(
       '**Alternatively:** `CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"`',
     ].join('\n'),
     sdkVersionExpr: '$SDK_VERSION',
-    iterateFlags: '--plugin-root "${CLAUDE_PLUGIN_ROOT}"',
+    iterateFlags: '',
     hasIntentFidelityChecks: false,
     hasNonNegotiables: false,
     ...overrides,
@@ -66,13 +65,12 @@ export function createCodexContext(
     capabilities: ['hooks', 'stop-hook', 'ask-user-question', 'task-tool', 'breakpoint-routing'],
     pluginRootVar: '${CODEX_PLUGIN_ROOT}',
     loopControlTerm: 'stop-hook',
-    sessionBindingFlags:
-      '--state-dir .a5c --plugin-root "${CODEX_PLUGIN_ROOT}"',
-    hookDriven: typeof globalThis.process !== 'undefined' ? globalThis.process.platform !== 'win32' : true,
+    sessionBindingFlags: '',
+    hookDriven: true, // overridden at instruction-generation time if session-start hook hasn't run
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars:
-      'CODEX_THREAD_ID, CODEX_SESSION_ID, CODEX_ENV_FILE',
-    resumeFlags: '--state-dir .a5c',
+      'BABYSITTER_SESSION_ID, CODEX_THREAD_ID (auto-injected)',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -86,7 +84,7 @@ export function createCodexContext(
       'CLI="npx -y @a5c-ai/babysitter-sdk"',
       '```',
     ].join('\n'),
-    iterateFlags: '--plugin-root "${CODEX_PLUGIN_ROOT}"',
+    iterateFlags: '',
     hasIntentFidelityChecks: true,
     hasNonNegotiables: true,
     ...overrides,
@@ -108,11 +106,11 @@ export function createGithubCopilotContext(
     // In-turn model: agent drives orchestration loop within a single session.
     // No stop-hook available — Copilot CLI sessionEnd output is ignored.
     loopControlTerm: 'in-turn',
-    sessionBindingFlags: '--state-dir .a5c/state',
+    sessionBindingFlags: '',
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'session_id (via hook stdin JSON, if configured)',
-    resumeFlags: '--state-dir .a5c/state',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (via COPILOT_ENV_FILE or CLAUDE_ENV_FILE)',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -148,11 +146,90 @@ export function createCursorContext(
     // Stop-hook model: Cursor's stop hook returns {followup_message: "..."}
     // to auto-continue (controlled by loop_limit in hooks.json).
     loopControlTerm: 'stop-hook',
-    sessionBindingFlags: '--state-dir .a5c/state',
+    sessionBindingFlags: '',
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
-    sessionEnvVars: 'conversation_id (via hook stdin JSON)',
-    resumeFlags: '--state-dir .a5c/state',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID or conversation_id (via hook stdin JSON)',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
+ * Create a PromptContext pre-configured for Gemini CLI.
+ */
+export function createGeminiCliContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'gemini-cli',
+    harnessLabel: 'Gemini CLI',
+    capabilities: ['hooks', 'stop-hook', 'task-tool', 'breakpoint-routing'],
+    pluginRootVar: '${GEMINI_EXTENSION_PATH}',
+    loopControlTerm: 'stop-hook',
+    sessionBindingFlags: '',
+    hookDriven: true,
+    interactiveToolName: 'AskUserQuestion tool',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, GEMINI_SESSION_ID (auto-injected)',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
+ * Create a PromptContext pre-configured for OpenCode.
+ */
+export function createOpenCodeContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'opencode',
+    harnessLabel: 'OpenCode',
+    capabilities: ['task-tool', 'breakpoint-routing'],
+    pluginRootVar: '',
+    // In-turn model: OpenCode has no blocking stop hook.
+    // session.idle is fire-and-forget. Orchestration is driven in-turn
+    // by the agent itself or via the SDK loop driver.
+    loopControlTerm: 'in-turn',
+    sessionBindingFlags: '',
+    hookDriven: false,
+    interactiveToolName: '',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID (self-injected via shell.env hook)',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -182,14 +259,49 @@ export function createPiContext(
   return {
     ...COMMON_DEFAULTS,
     harness: 'pi',
-    harnessLabel: 'PI',
-    capabilities: ['loop-driver', 'ask-user-question', 'task-tool', 'breakpoint-routing', 'harness-routing'],
-    pluginRootVar: '',
-    loopControlTerm: 'loop-driver',
+    harnessLabel: 'Pi Coding Agent',
+    capabilities: ['skills', 'slash-commands', 'task-tool', 'harness-routing', 'programmatic-session'],
+    pluginRootVar: '${PI_PLUGIN_ROOT}',
+    loopControlTerm: 'skill-driven',
     sessionBindingFlags: '',
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
-    sessionEnvVars: '(auto-resolved by PI extension)',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, PI_SESSION_ID, PI_PLUGIN_ROOT',
+    resumeFlags: '',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+export function createOhMyPiContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'oh-my-pi',
+    harnessLabel: 'oh-my-pi',
+    capabilities: ['skills', 'slash-commands', 'task-tool', 'harness-routing', 'programmatic-session', 'mcp'],
+    pluginRootVar: '${OMP_PLUGIN_ROOT}',
+    loopControlTerm: 'skill-driven',
+    sessionBindingFlags: '',
+    hookDriven: false,
+    interactiveToolName: 'AskUserQuestion',
+    sessionEnvVars: 'BABYSITTER_SESSION_ID, OMP_SESSION_ID, OMP_PLUGIN_ROOT',
     resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',

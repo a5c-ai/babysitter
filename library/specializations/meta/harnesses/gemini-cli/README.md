@@ -31,15 +31,25 @@ Every Gemini CLI extension requires a `gemini-extension.json` manifest at the ro
 | `description` | `string` | Yes | Human-readable description |
 | `contextFileName` | `string` | No | Name of the project instruction file (e.g., `"GEMINI.md"`) |
 | `mcpServers` | `object` | No | MCP server configurations (keyed by server name) |
+| `settings` | `array` | No | Extension settings definitions (see Settings section) |
+| `migratedTo` | `string` | No | New repo URI if the extension has moved (redirects installs) |
 
 **Example manifest:**
 
 ```json
 {
   "name": "babysitter",
-  "version": "4.0.145",
+  "version": "4.0.153",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management",
-  "contextFileName": "GEMINI.md"
+  "contextFileName": "GEMINI.md",
+  "settings": [
+    {
+      "name": "babysitterApiKey",
+      "description": "API key for babysitter cloud services",
+      "envVar": "BABYSITTER_API_KEY",
+      "sensitive": true
+    }
+  ]
 }
 ```
 
@@ -178,11 +188,21 @@ Hooks are the primary mechanism for extensions to intercept and control the Gemi
 
 ### Hook Types
 
+Gemini CLI supports 11 hook types covering the full session and agent lifecycle:
+
 | Hook Type | When It Fires | Use Case |
 |-----------|--------------|----------|
 | `SessionStart` | When a new Gemini CLI session begins | Initialize state, install dependencies, prepare workspace |
+| `SessionEnd` | When a session ends (cleanup) | Cleanup resources, finalize state, emit metrics |
+| `BeforeAgent` | Before each agent turn starts | Inject context, modify prompts, pre-turn setup |
 | `AfterAgent` | After every agent turn completes | Orchestration loop control, session continuation/exit decisions |
+| `BeforeModel` | Before each model API call | Request modification, logging, rate limiting |
+| `AfterModel` | After each model API response | Response inspection, logging, post-processing |
+| `BeforeToolSelection` | Before the model selects tools | Constrain available tools, inject tool guidance |
 | `BeforeTool` | Before a tool is executed | Tool guards, permission checks, validation |
+| `AfterTool` | After a tool execution completes | Result inspection, logging, post-tool actions |
+| `PreCompress` | Before context compression occurs | Preserve important context, modify compression behavior |
+| `Notification` | When the agent emits a notification | User alerts, status updates, progress reporting |
 
 ### Hook Registration Fields
 
@@ -331,25 +351,47 @@ When active, follow the AfterAgent hook loop protocol.
 
 ## Distribution
 
-### Extension Gallery
+### Primary: Git Repository Install
 
-The primary distribution channel is the extension gallery at [geminicli.com/extensions](https://geminicli.com/extensions). Extensions listed in the gallery can be discovered and installed by users directly.
-
-### GitHub Repositories
-
-Extensions can be distributed as GitHub repositories and installed via:
+Extensions are distributed as **git repositories** and installed via:
 
 ```bash
+# Install from GitHub repository (primary method)
 gemini extensions install https://github.com/owner/extension-repo
+
+# Install a specific version/ref
+gemini extensions install https://github.com/owner/extension-repo --ref v2.1.0
+
+# Install from a local path (development)
+gemini extensions install /path/to/extension
 ```
 
-### npm Packages
+The `gemini-extension.json` manifest must be at the repository root.
 
-Extensions can also be packaged as npm packages with an installer script:
+### GitHub Releases with Pre-Built Archives
+
+Extensions can publish pre-built archives via GitHub Releases for faster installation. The archive naming convention is:
+
+```
+{platform}.{arch}.{name}.{extension}
+```
+
+Where platform is `linux`/`darwin`/`win32`, arch is `x64`/`arm64`, and extension is typically `tar.gz` or `zip`.
+
+### Extension Gallery
+
+The extension gallery at [geminicli.com/extensions](https://geminicli.com/extensions) provides discovery. To list an extension in the gallery, add the **`gemini-cli-extension`** topic tag to the GitHub repository. Gallery-listed extensions appear in `gemini extensions list` and are installable by name.
+
+### Repository Migration
+
+If an extension repository moves, add `"migratedTo": "https://github.com/new-owner/new-repo"` to the old repo's `gemini-extension.json`. Gemini CLI follows the redirect on install.
+
+### Secondary: npm Packages
+
+Extensions can also be packaged as npm packages for programmatic or CI/CD convenience:
 
 ```bash
 npx @scope/my-gemini-extension install
-npx @scope/my-gemini-extension install --workspace /path/to/repo
 ```
 
 ### Community Extensions
@@ -370,9 +412,18 @@ Project-level configuration is primarily done through:
 
 ### Extension Settings
 
-Extensions can define configurable settings. Sensitive values (API keys, secrets) are stored in the system keychain. Non-sensitive values are stored in the Gemini CLI configuration directory.
+Extensions define settings in the `settings` array of `gemini-extension.json`. Each setting specifies:
 
-Settings are referenced in MCP server configurations using the `{{settings.keyName}}` template syntax.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | `string` | Yes | Setting identifier (used in `{{settings.name}}` templates) |
+| `description` | `string` | Yes | Human-readable description shown during configuration |
+| `envVar` | `string` | No | Environment variable name to inject the value as |
+| `sensitive` | `boolean` | No | If `true`, stored in the system keychain (not plaintext) |
+
+Sensitive values (API keys, secrets) are stored in the system keychain. Non-sensitive values are stored in the Gemini CLI configuration directory.
+
+Settings are referenced in MCP server configurations and commands using the `{{settings.keyName}}` template syntax.
 
 ---
 
@@ -506,9 +557,15 @@ You are a repository analysis agent. Analyze the codebase structure: {{args}}
 
 | Resource | URL | Accessed |
 |----------|-----|----------|
-| Gemini CLI Repository | [github.com/google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) | 2026-04-02 |
-| Extension Gallery | [geminicli.com/extensions](https://geminicli.com/extensions) | 2026-04-02 |
-| Awesome Gemini CLI | [github.com/Piebald-AI/awesome-gemini-cli](https://github.com/Piebald-AI/awesome-gemini-cli) | 2026-04-02 |
-| Babysitter Gemini Plugin | [github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-gemini](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-gemini) | 2026-04-02 |
-| Babysitter SDK | [npmjs.com/package/@a5c-ai/babysitter-sdk](https://www.npmjs.com/package/@a5c-ai/babysitter-sdk) | 2026-04-02 |
-| Babysitter Gemini Extension (npm) | [npmjs.com/package/@a5c-ai/babysitter-gemini](https://www.npmjs.com/package/@a5c-ai/babysitter-gemini) | 2026-04-02 |
+| Gemini CLI Repository | [github.com/google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) | 2026-04-03 |
+| Extension Gallery | [geminicli.com/extensions](https://geminicli.com/extensions) | 2026-04-03 |
+| Official Docs: Extensions Overview | [geminicli.com/docs/extensions/](https://geminicli.com/docs/extensions/) | 2026-04-03 |
+| Official Docs: Writing Extensions | [geminicli.com/docs/extensions/writing-extensions/](https://geminicli.com/docs/extensions/writing-extensions/) | 2026-04-03 |
+| Official Docs: Releasing Extensions | [geminicli.com/docs/extensions/releasing/](https://geminicli.com/docs/extensions/releasing/) | 2026-04-03 |
+| Official Docs: Best Practices | [geminicli.com/docs/extensions/best-practices/](https://geminicli.com/docs/extensions/best-practices/) | 2026-04-03 |
+| Official Docs: Hooks | [geminicli.com/docs/hooks/](https://geminicli.com/docs/hooks/) | 2026-04-03 |
+| Official Docs: Writing Hooks | [geminicli.com/docs/hooks/writing-hooks/](https://geminicli.com/docs/hooks/writing-hooks/) | 2026-04-03 |
+| Awesome Gemini CLI | [github.com/Piebald-AI/awesome-gemini-cli](https://github.com/Piebald-AI/awesome-gemini-cli) | 2026-04-03 |
+| Babysitter Gemini Plugin | [github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-gemini](https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-gemini) | 2026-04-03 |
+| Babysitter SDK | [npmjs.com/package/@a5c-ai/babysitter-sdk](https://www.npmjs.com/package/@a5c-ai/babysitter-sdk) | 2026-04-03 |
+| Babysitter Gemini Extension (npm) | [npmjs.com/package/@a5c-ai/babysitter-gemini](https://www.npmjs.com/package/@a5c-ai/babysitter-gemini) | 2026-04-03 |

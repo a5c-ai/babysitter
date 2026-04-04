@@ -50,7 +50,7 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 **Status:** Verified - Well implemented
 
 **Features:**
-- ✅ Session isolation via CLAUDE_SESSION_ID
+- ✅ Session isolation via BABYSITTER_SESSION_ID
 - ✅ State file management (markdown with YAML frontmatter)
 - ✅ Argument parsing (--max-iterations, optional --run-id)
 - ✅ Comprehensive help text (--help flag)
@@ -130,7 +130,7 @@ STATE=$(echo "$RUN_STATUS" | jq -r '.state // "unknown"')
 ### ✅ babysitter-session-start-hook.sh
 **Status:** Verified - Correct implementation
 
-**Purpose:** Extract session_id and persist as CLAUDE_SESSION_ID environment variable
+**Purpose:** Extract session_id and persist as BABYSITTER_SESSION_ID environment variable
 
 **Implementation:**
 ```bash
@@ -138,7 +138,7 @@ HOOK_INPUT=$(cat)
 SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // empty')
 
 if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-  echo "export CLAUDE_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
+  echo "export BABYSITTER_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
 fi
 ```
 
@@ -204,7 +204,7 @@ jq -n \
 
 **Verification:**
 - ✅ Correctly implements stop hook API (reads stdin, outputs JSON)
-- ✅ Session isolation (uses CLAUDE_SESSION_ID)
+- ✅ Session isolation (uses BABYSITTER_SESSION_ID)
 - ✅ State persistence (markdown with YAML frontmatter)
 - ✅ Iteration tracking (increments counter)
 - ✅ Completion conditions (max iterations OR completion promise)
@@ -222,7 +222,7 @@ jq -n \
 
 **In-Session Loop (babysitter-run command):**
 1. `setup-babysitter-run.sh` creates state file
-2. `babysitter-session-start-hook.sh` sets CLAUDE_SESSION_ID
+2. `babysitter-session-start-hook.sh` sets BABYSITTER_SESSION_ID
 3. User works on task interactively
 4. `babysitter-stop-hook.sh` intercepts exit
 5. Stop hook checks completion conditions
@@ -309,7 +309,7 @@ echo '{"session_id":"test-123"}' | ./plugins/babysitter/hooks/babysitter-session
 ## 7. Security Considerations
 
 ### ✅ Session Isolation
-- State files use CLAUDE_SESSION_ID to prevent cross-session interference
+- State files use BABYSITTER_SESSION_ID to prevent cross-session interference
 - Each session has isolated state in `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md`
 
 ### ✅ Completion Proof Security

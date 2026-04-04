@@ -229,7 +229,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.s
 **Responsibilities:**
 1. Parse command-line arguments (prompt, --max-iterations, optional --run-id)
 2. Validate inputs
-3. Check CLAUDE_SESSION_ID is available
+3. Check BABYSITTER_SESSION_ID is available
 4. Create state file with YAML frontmatter and prompt
 5. Display setup message and warnings
 
@@ -256,7 +256,7 @@ EOF
 
 **State File Location:**
 ```
-$CLAUDE_PLUGIN_ROOT/state/${CLAUDE_SESSION_ID}.md
+$CLAUDE_PLUGIN_ROOT/state/${BABYSITTER_SESSION_ID}.md
 ```
 
 #### setup-babysitter-run-resume.sh
@@ -312,7 +312,7 @@ $CLAUDE_PLUGIN_ROOT/state/${CLAUDE_SESSION_ID}.md
 
 #### babysitter-session-start-hook.sh
 
-**Purpose:** Persist CLAUDE_SESSION_ID for use in setup scripts
+**Purpose:** Persist BABYSITTER_SESSION_ID for use in setup scripts
 
 **Execution:** Triggered when Claude Code session starts
 
@@ -333,11 +333,11 @@ SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // empty')
 
 # Persist to CLAUDE_ENV_FILE (provided by Claude Code)
 if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-  echo "export CLAUDE_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
+  echo "export BABYSITTER_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
 fi
 ```
 
-**Effect:** Makes `$CLAUDE_SESSION_ID` available to bash scripts in the session
+**Effect:** Makes `$BABYSITTER_SESSION_ID` available to bash scripts in the session
 
 #### babysitter-stop-hook.sh
 
@@ -395,7 +395,7 @@ Parse arguments (prompt, --max-iterations, optional --run-id)
 Validate inputs
          │
          ▼
-Check CLAUDE_SESSION_ID exists
+Check BABYSITTER_SESSION_ID exists
          │
          ▼
 Create state file: $CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md
@@ -533,7 +533,7 @@ Claude Code exits normally
 
 ### 5.1 State File Format
 
-**Location:** `$CLAUDE_PLUGIN_ROOT/state/${CLAUDE_SESSION_ID}.md`
+**Location:** `$CLAUDE_PLUGIN_ROOT/state/${BABYSITTER_SESSION_ID}.md`
 
 **Format:** Markdown with YAML frontmatter
 
@@ -949,7 +949,7 @@ fi
 ### 9.1 Session Isolation
 
 **Mechanism:**
-- Each session has unique `CLAUDE_SESSION_ID`
+- Each session has unique `BABYSITTER_SESSION_ID`
 - State file named with session ID
 - No cross-session access
 

@@ -2,9 +2,9 @@
   "name": "@a5c-ai/babysitter-pi",
   "version": "0.1.0",
   "type": "module",
-  "description": "Babysitter PI-family plugin bundle with explicit installer commands for pi and oh-my-pi plugin roots",
-  "keywords": ["pi-package", "omp", "babysitter", "orchestration", "ai-agent"],
-  "omp": {
+  "description": "Babysitter package for Pi Coding Agent",
+  "keywords": ["pi", "pi-package", "babysitter", "orchestration", "ai-agent"],
+  "pi": {
     "extensions": ["./extensions"],
     "skills": ["./skills"]
   },
@@ -15,11 +15,10 @@
     "@mariozechner/pi-coding-agent": "*"
   },
   "scripts": {
-    "test": "node --test test/integration.test.js && npx tsx --test test/harness.test.js && npx tsx --test test/tui.test.js",
-    "sync:commands": "node scripts/sync-command-docs.cjs",
+    "test": "node --test test/integration.test.js && node test/packaged-install.test.cjs",
     "test:integration": "node --test test/integration.test.js",
-    "test:harness": "npx tsx --test test/harness.test.js",
-    "test:tui": "npx tsx --test test/tui.test.js",
+    "test:packaged-install": "node test/packaged-install.test.cjs",
+    "sync:commands": "node scripts/sync-command-docs.cjs",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging"
   },
@@ -29,6 +28,9 @@
   "files": [
     "bin/",
     "package.json",
+    "versions.json",
+    "README.md",
+    "AGENTS.md",
     "extensions/",
     "skills/",
     "commands/",

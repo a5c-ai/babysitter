@@ -129,7 +129,7 @@ These variables are set by Claude Code and used by the plugin.
 
 | Variable | Description | Set By |
 |----------|-------------|--------|
-| `CLAUDE_SESSION_ID` | Current session identifier | Claude Code |
+| `BABYSITTER_SESSION_ID` | Cross-harness session identifier (written to `CLAUDE_ENV_FILE` by session-start hook) | Babysitter |
 | `CLAUDE_PLUGIN_ROOT` | Plugin installation directory | Claude Code |
 | `CLAUDE_ENV_FILE` | Path to environment persistence file | Claude Code |
 
@@ -137,11 +137,11 @@ These are automatically available in hooks and skills. Use them for session isol
 
 ```bash
 # In a hook script
-echo "Session: $CLAUDE_SESSION_ID"
+echo "Session: $BABYSITTER_SESSION_ID"
 echo "Plugin root: $CLAUDE_PLUGIN_ROOT"
 
 # State file path pattern
-STATE_FILE="${CLAUDE_PLUGIN_ROOT}/state/${CLAUDE_SESSION_ID}.md"
+STATE_FILE="${CLAUDE_PLUGIN_ROOT}/state/${BABYSITTER_SESSION_ID}.md"
 ```
 
 ---

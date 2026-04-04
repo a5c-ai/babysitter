@@ -18,8 +18,8 @@ import { beforeEach, afterEach, vi } from "vitest";
 
 // Save/restore env to prevent leaking
 const ENV_KEYS = [
-  "CLAUDE_SESSION_ID", "CLAUDE_ENV_FILE",
-  "CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_ENV_FILE", "CODEX_PLUGIN_ROOT",
+  "BABYSITTER_SESSION_ID", "CLAUDE_ENV_FILE",
+  "CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT",
   "GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD",
 ];
@@ -71,8 +71,13 @@ describe("createCustomAdapter", () => {
     expect(adapter.resolveSessionId({})).toBeUndefined();
   });
 
-  it("resolveSessionId() does NOT read from environment variables", () => {
-    process.env.CLAUDE_SESSION_ID = "should-be-ignored";
+  it("resolveSessionId() falls back to BABYSITTER_SESSION_ID env var", () => {
+    process.env.BABYSITTER_SESSION_ID = "cross-harness-session";
+    const adapter = createCustomAdapter();
+    expect(adapter.resolveSessionId({})).toBe("cross-harness-session");
+  });
+
+  it("resolveSessionId() does NOT read harness-specific env vars", () => {
     process.env.CODEX_THREAD_ID = "should-be-ignored";
     const adapter = createCustomAdapter();
     expect(adapter.resolveSessionId({})).toBeUndefined();
@@ -85,10 +90,12 @@ describe("createCustomAdapter", () => {
     expect(hint).toContain("explicit");
   });
 
-  it("resolveStateDir() defaults to .a5c", () => {
+  it("resolveStateDir() defaults to ~/.a5c/state/", () => {
     const adapter = createCustomAdapter();
     const dir = adapter.resolveStateDir({});
-    expect(dir).toContain(".a5c");
+    const os = require("node:os");
+    const path = require("node:path");
+    expect(dir).toBe(path.join(os.homedir(), ".a5c", "state"));
   });
 
   it("resolveStateDir() respects explicit stateDir", () => {

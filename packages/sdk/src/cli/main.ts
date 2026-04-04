@@ -475,7 +475,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     // Session command flags
     if (arg === "--session-id") {
       // Tolerate empty/missing value — the harness adapter can auto-detect
-      // session ID from CLAUDE_ENV_FILE or CLAUDE_SESSION_ID env var.
+      // session ID from BABYSITTER_SESSION_ID env var or CLAUDE_ENV_FILE.
       const next = rest[i + 1];
       if (next && !next.startsWith("-")) {
         parsed.sessionId = next;
@@ -1247,7 +1247,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           sessionId: "",
           error: (
             adapter.getMissingSessionIdHint?.() ??
-            "No session ID provided. Use --session-id or set CLAUDE_SESSION_ID."
+            "No session ID provided. Use --session-id or set BABYSITTER_SESSION_ID."
           ),
         };
       }

@@ -70,6 +70,16 @@ jobs:
           set -euo pipefail
           bash plugins/babysitter-cursor/test/plugin-validate.sh 2>&1 | tee artifacts/test-logs/babysitter-cursor-validate.log
 
+      - name: babysitter-pi plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-pi 2>&1 | tee artifacts/test-logs/babysitter-pi-tests.log
+
+      - name: babysitter-omp plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-omp 2>&1 | tee artifacts/test-logs/babysitter-omp-tests.log
+
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4

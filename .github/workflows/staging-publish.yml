@@ -82,6 +82,26 @@ jobs:
           set -euo pipefail
           bash plugins/babysitter-cursor/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-cursor-validate.log
 
+      - name: babysitter-gemini plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-gemini 2>&1 | tee artifacts/logs/babysitter-gemini-tests.log
+
+      - name: babysitter-pi plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-pi 2>&1 | tee artifacts/logs/babysitter-pi-tests.log
+
+      - name: babysitter-omp plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-omp 2>&1 | tee artifacts/logs/babysitter-omp-tests.log
+
+      - name: babysitter-opencode plugin tests
+        run: |
+          set -euo pipefail
+          npm test --prefix plugins/babysitter-opencode 2>&1 | tee artifacts/logs/babysitter-opencode-tests.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -131,19 +151,43 @@ jobs:
           BASE_CURSOR=$(node -e "console.log(require('./plugins/babysitter-cursor/package.json').version)")
           IFS='.' read -r CURSOR_MAJOR CURSOR_MINOR CURSOR_PATCH <<< "$BASE_CURSOR"
           CURSOR_NEXT_PATCH=$((CURSOR_PATCH + 1))
+          BASE_GEMINI=$(node -e "console.log(require('./plugins/babysitter-gemini/package.json').version)")
+          IFS='.' read -r GEMINI_MAJOR GEMINI_MINOR GEMINI_PATCH <<< "$BASE_GEMINI"
+          GEMINI_NEXT_PATCH=$((GEMINI_PATCH + 1))
+          BASE_PI=$(node -e "console.log(require('./plugins/babysitter-pi/package.json').version)")
+          IFS='.' read -r PI_MAJOR PI_MINOR PI_PATCH <<< "$BASE_PI"
+          PI_NEXT_PATCH=$((PI_PATCH + 1))
+          BASE_OMP=$(node -e "console.log(require('./plugins/babysitter-omp/package.json').version)")
+          IFS='.' read -r OMP_MAJOR OMP_MINOR OMP_PATCH <<< "$BASE_OMP"
+          OMP_NEXT_PATCH=$((OMP_PATCH + 1))
+          BASE_OPENCODE=$(node -e "console.log(require('./plugins/babysitter-opencode/package.json').version)")
+          IFS='.' read -r OPENCODE_MAJOR OPENCODE_MINOR OPENCODE_PATCH <<< "$BASE_OPENCODE"
+          OPENCODE_NEXT_PATCH=$((OPENCODE_PATCH + 1))
           SHORT_SHA=$(git rev-parse --short HEAD)
           STAGING_VERSION_SDK="${SDK_MAJOR}.${SDK_MINOR}.${SDK_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CODEX="${CODEX_MAJOR}.${CODEX_MINOR}.${CODEX_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_GITHUB="${GITHUB_MAJOR}.${GITHUB_MINOR}.${GITHUB_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CURSOR="${CURSOR_MAJOR}.${CURSOR_MINOR}.${CURSOR_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_GEMINI="${GEMINI_MAJOR}.${GEMINI_MINOR}.${GEMINI_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_PI="${PI_MAJOR}.${PI_MINOR}.${PI_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_OMP="${OMP_MAJOR}.${OMP_MINOR}.${OMP_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_OPENCODE="${OPENCODE_MAJOR}.${OPENCODE_MINOR}.${OPENCODE_NEXT_PATCH}-staging.${SHORT_SHA}"
           echo "staging_version_sdk=$STAGING_VERSION_SDK" >> "$GITHUB_OUTPUT"
           echo "staging_version_codex=$STAGING_VERSION_CODEX" >> "$GITHUB_OUTPUT"
           echo "staging_version_github=$STAGING_VERSION_GITHUB" >> "$GITHUB_OUTPUT"
           echo "staging_version_cursor=$STAGING_VERSION_CURSOR" >> "$GITHUB_OUTPUT"
+          echo "staging_version_gemini=$STAGING_VERSION_GEMINI" >> "$GITHUB_OUTPUT"
+          echo "staging_version_pi=$STAGING_VERSION_PI" >> "$GITHUB_OUTPUT"
+          echo "staging_version_omp=$STAGING_VERSION_OMP" >> "$GITHUB_OUTPUT"
+          echo "staging_version_opencode=$STAGING_VERSION_OPENCODE" >> "$GITHUB_OUTPUT"
           echo "Setting SDK staging version: $STAGING_VERSION_SDK"
           echo "Setting Codex staging version: $STAGING_VERSION_CODEX"
           echo "Setting GitHub staging version: $STAGING_VERSION_GITHUB"
           echo "Setting Cursor staging version: $STAGING_VERSION_CURSOR"
+          echo "Setting Gemini staging version: $STAGING_VERSION_GEMINI"
+          echo "Setting Pi staging version: $STAGING_VERSION_PI"
+          echo "Setting OMP staging version: $STAGING_VERSION_OMP"
+          echo "Setting OpenCode staging version: $STAGING_VERSION_OPENCODE"
           # Write prerelease version into package.json files (for npm publish)
           node -e "
             const fs = require('fs');
@@ -169,12 +213,36 @@ jobs:
             const cursorPkg = JSON.parse(fs.readFileSync(cursorPkgPath, 'utf8'));
             cursorPkg.version = '${STAGING_VERSION_CURSOR}';
             fs.writeFileSync(cursorPkgPath, JSON.stringify(cursorPkg, null, 2) + '\n');
+            const geminiPkgPath = 'plugins/babysitter-gemini/package.json';
+            const geminiPkg = JSON.parse(fs.readFileSync(geminiPkgPath, 'utf8'));
+            geminiPkg.version = '${STAGING_VERSION_GEMINI}';
+            fs.writeFileSync(geminiPkgPath, JSON.stringify(geminiPkg, null, 2) + '\n');
+            const geminiPluginPath = 'plugins/babysitter-gemini/plugin.json';
+            const geminiPlugin = JSON.parse(fs.readFileSync(geminiPluginPath, 'utf8'));
+            geminiPlugin.version = '${STAGING_VERSION_GEMINI}';
+            fs.writeFileSync(geminiPluginPath, JSON.stringify(geminiPlugin, null, 2) + '\n');
+            const geminiExtensionPath = 'plugins/babysitter-gemini/gemini-extension.json';
+            const geminiExtension = JSON.parse(fs.readFileSync(geminiExtensionPath, 'utf8'));
+            geminiExtension.version = '${STAGING_VERSION_GEMINI}';
+            fs.writeFileSync(geminiExtensionPath, JSON.stringify(geminiExtension, null, 2) + '\n');
+            const piPkgPath = 'plugins/babysitter-pi/package.json';
+            const piPkg = JSON.parse(fs.readFileSync(piPkgPath, 'utf8'));
+            piPkg.version = '${STAGING_VERSION_PI}';
+            fs.writeFileSync(piPkgPath, JSON.stringify(piPkg, null, 2) + '\n');
+            const ompPkgPath = 'plugins/babysitter-omp/package.json';
+            const ompPkg = JSON.parse(fs.readFileSync(ompPkgPath, 'utf8'));
+            ompPkg.version = '${STAGING_VERSION_OMP}';
+            fs.writeFileSync(ompPkgPath, JSON.stringify(ompPkg, null, 2) + '\n');
+            const opencodePkgPath = 'plugins/babysitter-opencode/package.json';
+            const opencodePkg = JSON.parse(fs.readFileSync(opencodePkgPath, 'utf8'));
+            opencodePkg.version = '${STAGING_VERSION_OPENCODE}';
+            fs.writeFileSync(opencodePkgPath, JSON.stringify(opencodePkg, null, 2) + '\n');
           "
           # Write sdkVersion into versions.json (separate from plugin.json to avoid
           # Claude Code's plugin validator rejecting unrecognized keys)
           node -e "
             const fs = require('fs');
-            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json']) {
+            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-omp/versions.json', 'plugins/babysitter-opencode/versions.json', 'plugins/babysitter-github/versions.json', 'plugins/babysitter-cursor/versions.json']) {
               const data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {};
               data.sdkVersion = '${STAGING_VERSION_SDK}';
               fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
@@ -186,7 +254,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json
+          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/versions.json plugins/babysitter-github/versions.json plugins/babysitter-cursor/versions.json
           if git diff --cached --quiet; then
             echo "No sdkVersion changes to commit."
           else
@@ -265,6 +333,90 @@ jobs:
           set -euo pipefail
           npm run deploy:staging
         working-directory: plugins/babysitter-cursor
+
+      - name: Inject SDK dependency into gemini package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-gemini/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            const versionsPath = 'plugins/babysitter-gemini/versions.json';
+            const versions = JSON.parse(fs.readFileSync(versionsPath, 'utf8'));
+            versions.extensionVersion = '${{ steps.version.outputs.staging_version_gemini }}';
+            fs.writeFileSync(versionsPath, JSON.stringify(versions, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-gemini package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-gemini
+
+      - name: Inject SDK dependency into pi package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-pi/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-pi package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-pi
+
+      - name: Inject SDK dependency into omp package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-omp/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-omp package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-omp
+
+      - name: Inject SDK dependency into opencode package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-opencode/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-opencode package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-opencode
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

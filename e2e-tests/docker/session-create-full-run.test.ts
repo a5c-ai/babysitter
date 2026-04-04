@@ -117,7 +117,9 @@ describeInternalHarness("harness:create-run full internal-harness run", () => {
     expect(status.state).toBe("completed");
     expect(status.completionProof).toBeTruthy();
 
-    const processFileExists = dockerExec("ls /workspace/session-create-internal/.a5c/processes/*.mjs >/dev/null 2>&1 && echo ok || echo missing").trim();
+    const processFileExists = dockerExec(
+      "find /workspace/session-create-internal/.a5c/processes -maxdepth 1 \\( -name '*.js' -o -name '*.mjs' \\) | grep -q . && echo ok || echo missing",
+    ).trim();
     expect(processFileExists).toBe("ok");
 
     const outputExists = dockerExec(`test -f ${runDir}/state/output.json && echo ok`).trim();

@@ -51,13 +51,13 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "claude-code",
     cli: "claude",
-    callerEnvVars: ["CLAUDE_SESSION_ID", "CLAUDE_ENV_FILE"],
+    callerEnvVars: ["CLAUDE_ENV_FILE"],
     capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.Mcp, Cap.HeadlessPrompt],
   },
   {
     name: "codex",
     cli: "codex",
-    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_ENV_FILE", "CODEX_PLUGIN_ROOT"],
+    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
     capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
   },
   {
@@ -72,7 +72,7 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
     name: "gemini-cli",
     cli: "gemini",
     callerEnvVars: ["GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD"],
-    capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt],
+    capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt, Cap.StopHook],
   },
   {
     name: "github-copilot",
@@ -86,20 +86,20 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "opencode",
     cli: "opencode",
-    callerEnvVars: [],
+    callerEnvVars: ["BABYSITTER_SESSION_ID", "OPENCODE_CONFIG"],
     capabilities: [Cap.HeadlessPrompt],
   },
   {
     name: "oh-my-pi",
     cli: "omp",
     callerEnvVars: ["OMP_SESSION_ID", "OMP_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp],
   },
   {
     name: "pi",
     cli: "pi",
-    callerEnvVars: ["OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+    callerEnvVars: ["PI_SESSION_ID", "PI_PLUGIN_ROOT"],
+    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt],
   },
   {
     name: "internal",

@@ -60,16 +60,15 @@ export interface PromptContext {
 
   /**
    * Environment variables the harness auto-resolves for session binding.
-   * e.g., 'CLAUDE_SESSION_ID, CLAUDE_ENV_FILE' or
-   *       'CODEX_THREAD_ID, CODEX_SESSION_ID, CODEX_ENV_FILE'
+   * e.g., 'BABYSITTER_SESSION_ID (via CLAUDE_ENV_FILE)' or
+   *       'BABYSITTER_SESSION_ID, CODEX_THREAD_ID (auto-injected)'
    */
   sessionEnvVars: string;
 
   /**
    * Extra flags for session:resume command.
-   * e.g., '--state-dir "${CLAUDE_PLUGIN_ROOT}/skills/babysit/state"'
-   *    or '--state-dir .a5c'
-   *    or '' (PI, no extra flags)
+   * Usually empty — state dir defaults to ~/.a5c/state/ globally.
+   * Only set when a harness needs an explicit override.
    */
   resumeFlags: string;
 

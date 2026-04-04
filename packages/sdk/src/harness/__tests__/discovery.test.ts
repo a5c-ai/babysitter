@@ -92,11 +92,10 @@ function stubExecFile(
 // ---------------------------------------------------------------------------
 
 const CALLER_ENV_KEYS = [
-  "CLAUDE_SESSION_ID",
+  "BABYSITTER_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
-  "CODEX_ENV_FILE",
   "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID",
   "PI_SESSION_ID",
@@ -310,10 +309,10 @@ describe("discoverHarnesses", () => {
     const results = await discoverHarnesses();
     const pi = results.find((r) => r.name === "pi");
 
-    expect(pi?.capabilities).not.toContain("programmatic");
+    expect(pi?.capabilities).toContain("programmatic");
     expect(pi?.capabilities).toContain("session-binding");
-    expect(pi?.capabilities).toContain("stop-hook");
     expect(pi?.capabilities).toContain("headless-prompt");
+    expect(pi?.capabilities).not.toContain("stop-hook");
 
     const internal = results.find((r) => r.name === "internal");
     expect(internal?.capabilities).toContain("programmatic");
@@ -331,7 +330,7 @@ describe("discoverHarnesses", () => {
   });
 
   it("does not include activeSession in results", async () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
     stubExecFile({});
 
     const results = await discoverHarnesses();
@@ -369,16 +368,6 @@ describe("detectCallerHarness", () => {
     expect(caller).toBeNull();
   });
 
-  it("detects claude-code via CLAUDE_SESSION_ID", () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
-
-    const caller = detectCallerHarness();
-
-    expect(caller).not.toBeNull();
-    expect(caller!.name).toBe("claude-code");
-    expect(caller!.matchedEnvVars).toContain("CLAUDE_SESSION_ID");
-  });
-
   it("detects claude-code via CLAUDE_ENV_FILE", () => {
     process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
 
@@ -387,6 +376,16 @@ describe("detectCallerHarness", () => {
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("claude-code");
     expect(caller!.matchedEnvVars).toContain("CLAUDE_ENV_FILE");
+  });
+
+  it("detects opencode from BABYSITTER_SESSION_ID alone", () => {
+    // OpenCode self-injects BABYSITTER_SESSION_ID via shell.env and uses it for caller detection.
+    process.env.BABYSITTER_SESSION_ID = "session-abc";
+
+    const caller = detectCallerHarness();
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("opencode");
+    expect(caller!.matchedEnvVars).toContain("BABYSITTER_SESSION_ID");
   });
 
   it("detects codex via CODEX_THREAD_ID", () => {
@@ -443,30 +442,23 @@ describe("detectCallerHarness", () => {
 
     const caller = detectCallerHarness();
 
-    // pi shares OMP_SESSION_ID with oh-my-pi in KNOWN_HARNESSES order,
-    // but PI_SESSION_ID is only on pi — so pi should not be matched
-    // unless oh-my-pi doesn't match first. Actually oh-my-pi comes before
-    // pi in the list, and PI_SESSION_ID is only on pi's spec.
-    // oh-my-pi won't match PI_SESSION_ID, so pi wins.
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("pi");
     expect(caller!.matchedEnvVars).toContain("PI_SESSION_ID");
   });
 
-  it("detects oh-my-pi via OMP_SESSION_ID (first match wins)", () => {
+  it("detects oh-my-pi via OMP_SESSION_ID", () => {
     process.env.OMP_SESSION_ID = "omp-sess-1";
 
     const caller = detectCallerHarness();
 
-    // oh-my-pi comes before pi in KNOWN_HARNESSES, and both list OMP_SESSION_ID,
-    // so oh-my-pi wins as the first match.
     expect(caller).not.toBeNull();
     expect(caller!.name).toBe("oh-my-pi");
   });
 
   it("returns only the first matching harness", () => {
     // Set env vars for multiple harnesses
-    process.env.CLAUDE_SESSION_ID = "claude-123";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
     process.env.CODEX_SESSION_ID = "codex-456";
 
     const caller = detectCallerHarness();
@@ -492,7 +484,7 @@ describe("detectCallerHarness", () => {
   });
 
   it("includes capabilities of the detected caller", () => {
-    process.env.CLAUDE_SESSION_ID = "session-abc";
+    process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
 
     const caller = detectCallerHarness();
 

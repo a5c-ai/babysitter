@@ -101,9 +101,9 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["agent", "Hello world"]);
   });
 
-  it("builds args for opencode (--prompt only)", () => {
+  it("builds args for opencode (run subcommand + positional prompt)", () => {
     const args = buildHarnessArgs("opencode", baseOptions);
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["run", "Hello world"]);
   });
 
   it("includes --model when harness supports it", () => {
@@ -134,9 +134,9 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["agent", "Hello world", "--model", "some-model"]);
   });
 
-  it("does not include --model for opencode (unsupported)", () => {
+  it("includes --model for opencode", () => {
     const args = buildHarnessArgs("opencode", { ...baseOptions, model: "some-model" });
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["run", "Hello world", "--model", "some-model"]);
   });
 
   it("keeps claude-code args stable when workspace is provided", () => {

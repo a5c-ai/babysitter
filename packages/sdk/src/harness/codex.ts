@@ -8,8 +8,8 @@
  */
 
 import * as path from "node:path";
-import { appendFileSync, readFileSync } from "node:fs";
 import { Readable } from "node:stream";
+import { getGlobalStateDir } from "../config";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import {
   getCurrentTimestamp,
@@ -47,54 +47,20 @@ function resolveCodexStateDir(args: {
   pluginRoot?: string;
 }): string {
   if (args.stateDir) return path.resolve(args.stateDir);
-  if (process.env.BABYSITTER_STATE_DIR) {
-    return path.resolve(process.env.BABYSITTER_STATE_DIR);
-  }
-
-  const pluginRoot = resolveCodexPluginRoot(args);
-  if (pluginRoot) {
-    const cwd = path.resolve(process.cwd());
-    const normalizedPluginRoot = path.resolve(pluginRoot);
-    // Workspace-local installs place ".codex" beside ".a5c", so derive from
-    // the plugin root only when that root lives under the active workspace.
-    if (
-      normalizedPluginRoot === cwd ||
-      normalizedPluginRoot.startsWith(`${cwd}${path.sep}`)
-    ) {
-      return path.resolve(normalizedPluginRoot, "..", ".a5c");
-    }
-  }
-
-  if (pluginRoot) {
-    // Global Codex installs live under "~/.codex", but Babysitter run/session
-    // state must still default to the active workspace ".a5c".
-    // Falling through here keeps global skill installs honest.
-    return path.resolve(".a5c");
-  }
-
-  // Without any explicit state binding, Codex state belongs to the current
-  // workspace, not a user-global directory.
-  return path.resolve(".a5c");
+  return getGlobalStateDir();
 }
 
 function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefined {
   if (parsed.sessionId) return parsed.sessionId;
-  // Codex injects CODEX_THREAD_ID; keep CODEX_SESSION_ID as legacy fallback.
+
+  // Cross-harness standard
+  if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+
+  // Codex-native env vars (auto-injected by Codex CLI into all hooks)
   if (process.env.CODEX_THREAD_ID) return process.env.CODEX_THREAD_ID;
   if (process.env.CODEX_SESSION_ID) return process.env.CODEX_SESSION_ID;
 
-  const envFile = process.env.CODEX_ENV_FILE;
-  if (!envFile) return undefined;
-
-  try {
-    const content = readFileSync(envFile, "utf-8");
-    const match = content.match(
-      /(?:^|\n)\s*(?:export\s+)?(?:CODEX_THREAD_ID|CODEX_SESSION_ID)="([^"]+)"/,
-    );
-    return match?.[1] || undefined;
-  } catch {
-    return undefined;
-  }
+  return undefined;
 }
 
 function readStdin(): Promise<string> {
@@ -217,21 +183,7 @@ async function handleCodexSessionStartHookImpl(
     return 0;
   }
 
-  const envFile = process.env.CODEX_ENV_FILE;
-  if (envFile) {
-    try {
-      appendFileSync(
-        envFile,
-        `export CODEX_THREAD_ID="${sessionId}"\nexport CODEX_SESSION_ID="${sessionId}"\n`,
-      );
-    } catch {
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Failed to write to CODEX_ENV_FILE: ${envFile}\n`,
-        );
-      }
-    }
-  }
+  // Codex auto-injects CODEX_THREAD_ID into all hooks — no env file write needed.
 
   const stateDir = resolveCodexStateDir({
     stateDir: args.stateDir,
@@ -355,9 +307,9 @@ export function createCodexAdapter(): HarnessAdapter {
 
     isActive(): boolean {
       return !!(
+        process.env.BABYSITTER_SESSION_ID ||
         process.env.CODEX_THREAD_ID ||
         process.env.CODEX_SESSION_ID ||
-        process.env.CODEX_ENV_FILE ||
         process.env.CODEX_PLUGIN_ROOT
       );
     },

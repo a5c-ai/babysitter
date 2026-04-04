@@ -30,7 +30,7 @@ Determine:
 1. **Target audience** — who will use this extension and in what Gemini CLI workflows
 2. **Component inventory** — which Gemini CLI extension components are needed:
    - Skills (skill definitions in skills/ directory)
-   - Hooks (hooks.json with SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse)
+   - Hooks (hooks.json with SessionStart, SessionEnd, BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification)
    - Commands (command definitions in commands/ directory)
    - Context file (GEMINI.md — persistent context injected into every conversation)
 3. **Extension configuration** — what settings the extension needs:
@@ -55,8 +55,8 @@ Gemini CLI extension structure reference:
     <skill-name>/
       SKILL.md           # Skill definition
   commands/
-    <command-name>/
-      COMMAND.md         # Command definition
+    <group-name>/
+      <command-name>.toml  # Command definition (TOML format)
   package.json           # npm package metadata (for GitHub distribution)
   versions.json          # Version history tracking
 \`\`\`
@@ -202,27 +202,33 @@ Create hooks.json following the Gemini CLI hook format:
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "./hooks/<script>.sh" }
+          { "name": "my-init", "type": "command", "command": "bash \\"\${extensionPath}/hooks/session-start.sh\\"", "timeout": 30000 }
         ]
       }
     ],
-    "UserPromptSubmit": [...],
-    "Stop": [...],
-    "PreToolUse": [...],
-    "PostToolUse": [...]
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "name": "my-loop", "type": "command", "command": "bash \\"\${extensionPath}/hooks/after-agent.sh\\"", "timeout": 30000 }
+        ]
+      }
+    ],
+    "BeforeTool": [...],
+    "AfterTool": [...]
   }
 }
 \`\`\`
-Valid hook types: SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse.
+Valid hook types (11 total): SessionStart, SessionEnd, BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeToolSelection, BeforeTool, AfterTool, PreCompress, Notification.
 Each hook script must be a standalone executable that:
-- Reads environment context (GEMINI_SESSION_ID, workspace path, etc.)
-- Performs its action
-- Outputs any context to inject back into the conversation (via stdout)
-- Exits with appropriate status code
+- Receives JSON input via stdin (fields vary by hook type)
+- Outputs JSON decision on stdout: \`{}\` (allow), \`{"decision":"block","reason":"...","systemMessage":"..."}\` (continue), \`{"decision":"deny"}\` (retry)
+- Exit code 0 = success (stdout parsed as JSON), exit code 2 = system block
+- Stderr is for debug/log output only, never parsed by Gemini CLI
+- Environment variables available: GEMINI_SESSION_ID, GEMINI_PROJECT_DIR, GEMINI_CWD, GEMINI_EXTENSION_PATH
 
-### Commands (commands/<name>/COMMAND.md)
+### Commands (commands/<group>/<name>.toml)
 Each command definition includes:
 - Command name (used as slash command in Gemini CLI)
 - Description and usage instructions
@@ -243,7 +249,7 @@ Implement ALL components. Each file must be complete, well-structured, and compa
       instructions: [
         'Implement every skill as a complete SKILL.md',
         'Create hooks.json and all hook shell scripts',
-        'Write command COMMAND.md files',
+        'Write command TOML command files',
         'Update GEMINI.md with full component documentation',
         'Ensure compatibility with Gemini CLI tool use patterns',
         'Return list of all implemented files'
@@ -298,7 +304,7 @@ Run these validation checks:
    - Instructions are compatible with Gemini CLI capabilities
    - No references to tools or features Gemini CLI does not support
 
-5. **Command validation** — commands/<name>/COMMAND.md:
+5. **Command validation** — commands/<group>/<name>.toml:
    - Each has name, description, and instructions
    - No duplicate command names
    - Parameters are clearly documented
@@ -309,7 +315,7 @@ Run these validation checks:
    - Keywords include "gemini-cli" or "gemini-extension"
 
 7. **Installation compatibility**:
-   - Extension can be installed via: gemini extensions install --from-github <repo>
+   - Extension can be installed via: gemini extensions install https://github.com/<owner>/<repo>
    - All paths are relative and portable
 
 Return a structured validation report.`,
@@ -382,7 +388,7 @@ Gemini CLI extensions are distributed primarily via GitHub and the Gemini extens
 
 1. **GitHub distribution setup**:
    - Verify the extension can be installed with:
-     \`gemini extensions install --from-github <owner>/${args.pluginName}\`
+     \`gemini extensions install https://github.com/<owner>/${args.pluginName}\`
    - Ensure gemini-extension.json is at the repository root
    - Create .gitignore excluding dev artifacts
    - Create GitHub Actions workflow for release automation:
@@ -413,12 +419,12 @@ Gemini CLI extensions are distributed primarily via GitHub and the Gemini extens
        "repository": "https://github.com/${args.author || 'unknown'}/${args.pluginName}",
        "categories": [],
        "screenshots": [],
-       "installCommand": "gemini extensions install --from-github ${args.author || 'unknown'}/${args.pluginName}"
+       "installCommand": "gemini extensions install https://github.com/${args.author || 'unknown'}/${args.pluginName}"
      }
      \`\`\`
 
 3. **Create install.md** — installation instructions:
-   - Primary: \`gemini extensions install --from-github <owner>/${args.pluginName}\`
+   - Primary: \`gemini extensions install https://github.com/<owner>/${args.pluginName}\`
    - Manual: clone repo, copy to Gemini CLI extensions directory
    - Post-install: verify with \`gemini extensions list\`
    - Configuration steps (environment variables, etc.)

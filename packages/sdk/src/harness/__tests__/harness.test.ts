@@ -20,7 +20,7 @@ import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
 import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
-import { createPiAdapter, installPiFamilyPlugin } from "../pi";
+import { createPiAdapter, installPiPlugin } from "../pi";
 import { createOhMyPiAdapter } from "../ohMyPi";
 import { createNullAdapter } from "../nullAdapter";
 import {
@@ -37,17 +37,18 @@ import {
 // ---------------------------------------------------------------------------
 
 const ENV_KEYS = [
-  "CLAUDE_SESSION_ID",
+  "BABYSITTER_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CLAUDE_PLUGIN_ROOT",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
-  "CODEX_ENV_FILE",
   "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID",
   "PI_SESSION_ID",
   "OMP_PLUGIN_ROOT",
   "PI_PLUGIN_ROOT",
+  "BABYSITTER_STATE_DIR",
+  "BABYSITTER_GLOBAL_STATE_DIR",
 ];
 let savedEnv: Record<string, string | undefined>;
 
@@ -87,8 +88,8 @@ describe("ClaudeCodeAdapter", () => {
       expect(adapter.isActive()).toBe(false);
     });
 
-    it("returns true when CLAUDE_SESSION_ID is set", () => {
-      process.env.CLAUDE_SESSION_ID = "test-session";
+    it("returns true when BABYSITTER_SESSION_ID is set", () => {
+      process.env.BABYSITTER_SESSION_ID = "test-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.isActive()).toBe(true);
     });
@@ -102,13 +103,13 @@ describe("ClaudeCodeAdapter", () => {
 
   describe("resolveSessionId", () => {
     it("returns parsed.sessionId first", () => {
-      process.env.CLAUDE_SESSION_ID = "env-session";
+      process.env.BABYSITTER_SESSION_ID = "env-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.resolveSessionId({ sessionId: "explicit" })).toBe("explicit");
     });
 
-    it("falls back to CLAUDE_SESSION_ID env", () => {
-      process.env.CLAUDE_SESSION_ID = "env-session";
+    it("falls back to BABYSITTER_SESSION_ID env", () => {
+      process.env.BABYSITTER_SESSION_ID = "env-session";
       const adapter = createClaudeCodeAdapter();
       expect(adapter.resolveSessionId({})).toBe("env-session");
     });
@@ -125,24 +126,17 @@ describe("ClaudeCodeAdapter", () => {
       expect(adapter.resolveStateDir({ stateDir: "/custom/state" })).toBe(path.resolve("/custom/state"));
     });
 
-    it("derives from pluginRoot arg", () => {
-      const adapter = createClaudeCodeAdapter();
-      const result = adapter.resolveStateDir({ pluginRoot: "/plugins/babysitter" });
-      expect(result).toContain("skills");
-      expect(result).toContain("state");
-    });
-
-    it("derives from CLAUDE_PLUGIN_ROOT env", () => {
-      process.env.CLAUDE_PLUGIN_ROOT = "/env/plugin";
+    it("defaults to ~/.a5c/state/ when nothing is set", () => {
       const adapter = createClaudeCodeAdapter();
       const result = adapter.resolveStateDir({});
-      expect(result).toContain("skills");
-      expect(result).toContain("state");
+      expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
 
-    it("returns undefined when nothing is set", () => {
+    it("respects BABYSITTER_STATE_DIR env var", () => {
+      process.env.BABYSITTER_STATE_DIR = "/custom/global/state";
       const adapter = createClaudeCodeAdapter();
-      expect(adapter.resolveStateDir({})).toBeUndefined();
+      const result = adapter.resolveStateDir({});
+      expect(result).toBe(path.resolve("/custom/global/state"));
     });
   });
 
@@ -222,27 +216,9 @@ describe("CodexAdapter", () => {
       expect(adapter.resolveStateDir({ stateDir: "/custom/state" })).toBe(path.resolve("/custom/state"));
     });
 
-    it("defaults to .a5c when no values are provided", () => {
+    it("defaults to ~/.a5c/state/ when no values are provided", () => {
       const adapter = createCodexAdapter();
-      expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
-    });
-
-    it("keeps session state in the active workspace when pluginRoot is global CODEX_HOME", async () => {
-      const adapter = createCodexAdapter();
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-state-dir-test-"));
-      const originalCwd = process.cwd();
-      try {
-        process.chdir(tmpDir);
-        const realCwd = require("node:fs").realpathSync(process.cwd());
-        expect(
-          adapter.resolveStateDir({
-            pluginRoot: path.join(os.homedir(), ".codex"),
-          }),
-        ).toBe(path.join(realCwd, ".a5c"));
-      } finally {
-        process.chdir(originalCwd);
-        await fs.rm(tmpDir, { recursive: true, force: true });
-      }
+      expect(adapter.resolveStateDir({})).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
   });
 
@@ -278,12 +254,20 @@ describe("CodexAdapter", () => {
 // ---------------------------------------------------------------------------
 
 describe("PiAdapter", () => {
-  it("derives oh-my-pi state dir from .omp plugin roots", () => {
+  it("defaults state dir to ~/.a5c/state/", () => {
     const adapter = createPiAdapter();
-    const result = adapter.resolveStateDir({
-      pluginRoot: "/workspace/.omp/plugins/babysitter",
-    });
-    expect(result).toBe(path.resolve("/workspace/.omp/plugins/.a5c"));
+    const result = adapter.resolveStateDir({});
+    expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
+  });
+
+  it("only activates for PI-scoped env vars", () => {
+    process.env.OMP_SESSION_ID = "omp-session";
+    const adapter = createPiAdapter();
+    expect(adapter.isActive()).toBe(false);
+
+    process.env.PI_SESSION_ID = "pi-session";
+    expect(adapter.isActive()).toBe(true);
+    expect(adapter.supportsHookType?.("stop")).toBe(false);
   });
 });
 
@@ -295,24 +279,27 @@ describe("OhMyPiAdapter", () => {
 
     process.env.OMP_SESSION_ID = "omp-session";
     expect(adapter.isActive()).toBe(true);
+    expect(adapter.supportsHookType?.("stop")).toBe(false);
   });
 
-  it("reuses the unified babysitter install root for existing oh-my-pi plugins", async () => {
-    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "omp-plugin-install-test-"));
-    const targetDir = path.join(workspace, ".omp", "plugins", "babysitter");
+  it("uses the oh-my-pi specific prompt context", () => {
+    const adapter = createOhMyPiAdapter();
+    const context = adapter.getPromptContext?.();
+    expect(context?.harness).toBe("oh-my-pi");
+    expect(context?.pluginRootVar).toBe("${OMP_PLUGIN_ROOT}");
+  });
+});
 
-    try {
-      await fs.mkdir(targetDir, { recursive: true });
-      const result = await installPiFamilyPlugin({
-        harness: "oh-my-pi",
-        options: { workspace },
-      });
-
-      expect(result.location).toBe(targetDir);
-      expect(result.warning).toContain("already installed");
-    } finally {
-      await fs.rm(workspace, { recursive: true, force: true });
-    }
+describe("Pi install helpers", () => {
+  it("returns an npx-based dry-run install command", async () => {
+    const result = await installPiPlugin({
+      workspace: "/tmp/project",
+      dryRun: true,
+      json: true,
+      verbose: false,
+    });
+    expect(result.dryRun).toBe(true);
+    expect(result.command).toContain("@a5c-ai/babysitter-pi");
   });
 });
 
@@ -400,7 +387,7 @@ describe("Registry", () => {
     });
 
     it("returns claude-code adapter when env vars are set", () => {
-      process.env.CLAUDE_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       const adapter = detectAdapter();
       expect(adapter.name).toBe("claude-code");
     });
@@ -413,7 +400,7 @@ describe("Registry", () => {
 
   describe("singleton lifecycle", () => {
     it("getAdapter auto-detects on first call", () => {
-      process.env.CLAUDE_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       const adapter = getAdapter();
       expect(adapter.name).toBe("claude-code");
     });
@@ -436,7 +423,7 @@ describe("Registry", () => {
       expect(a1.name).toBe("custom");
 
       // Set env and reset → should re-detect
-      process.env.CLAUDE_SESSION_ID = "session-123";
+      process.env.CLAUDE_ENV_FILE = "/tmp/.claude-env";
       resetAdapter();
       const a2 = getAdapter();
       expect(a2.name).toBe("claude-code");
@@ -763,8 +750,8 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     // Verify the current session file exists
     expect(await sessionFileExists(filePath)).toBe(true);
 
-    // Set CLAUDE_SESSION_ID to the current session (simulating env after /clear)
-    process.env.CLAUDE_SESSION_ID = currentSessionId;
+    // Set BABYSITTER_SESSION_ID to the current session (simulating env after /clear)
+    process.env.BABYSITTER_SESSION_ID = currentSessionId;
 
     // Create a proper run so the hook can determine run state
     await createMinimalRun(runId);
@@ -798,7 +785,7 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     const envSessionId = "env-session-also-unknown";
 
     // No session files exist for either ID
-    process.env.CLAUDE_SESSION_ID = envSessionId;
+    process.env.BABYSITTER_SESSION_ID = envSessionId;
 
     const adapter = createClaudeCodeAdapter();
     const hookPayload = JSON.stringify({ session_id: staleSessionId });
@@ -818,7 +805,7 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     expect(stdout.trim()).toBe("{}");
   });
 
-  it("uses CLAUDE_ENV_FILE fallback when CLAUDE_SESSION_ID is not set", async () => {
+  it("uses CLAUDE_ENV_FILE fallback when BABYSITTER_SESSION_ID is not set", async () => {
     const staleSessionId = "stale-from-payload";
     const currentSessionId = "session-from-env-file";
     const runId = "test-run-002";
@@ -830,9 +817,9 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     // Create a proper run
     await createMinimalRun(runId);
 
-    // Set CLAUDE_ENV_FILE instead of CLAUDE_SESSION_ID
-    delete process.env.CLAUDE_SESSION_ID;
-    writeFileSync(envFilePath, `export CLAUDE_SESSION_ID="${currentSessionId}"\n`, "utf-8");
+    // Set CLAUDE_ENV_FILE instead of BABYSITTER_SESSION_ID
+    delete process.env.BABYSITTER_SESSION_ID;
+    writeFileSync(envFilePath, `export BABYSITTER_SESSION_ID="${currentSessionId}"\n`, "utf-8");
     process.env.CLAUDE_ENV_FILE = envFilePath;
 
     const adapter = createClaudeCodeAdapter();

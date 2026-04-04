@@ -93,7 +93,7 @@ const sdkHarnessCore = [
  *   name: string (readonly)
  *   isActive(): boolean                    — env var detection
  *   resolveSessionId(parsed): string|undefined  — explicit arg → env vars → env file → undefined
- *   resolveStateDir(args): string|undefined     — explicit arg → BABYSITTER_STATE_DIR → plugin root → .a5c
+ *   resolveStateDir(args): string|undefined     — explicit arg → BABYSITTER_STATE_DIR → ~/.a5c/state/ (global)
  *   resolvePluginRoot(args): string|undefined   — args or harness-specific env vars
  *   bindSession(opts: SessionBindOptions): Promise<SessionBindResult>  — run:create → state file
  *   handleStopHook(args: HookHandlerArgs): Promise<number>            — approve/block decision
@@ -111,6 +111,19 @@ const sdkHarnessCore = [
  *   installHarness?(options): Promise<HarnessInstallResult>   — install the CLI itself
  *   installPlugin?(options): Promise<HarnessInstallResult>    — install the babysitter plugin
  *   getPromptContext?(opts?: {interactive?}): PromptContext   — harness-specific prompt config
+ *
+ * ENV PERSISTENCE MECHANISMS (session-start → stop hook):
+ *   All adapters use BABYSITTER_SESSION_ID as the cross-harness standard env var.
+ *   Session-start hooks persist it via TWO independent mechanisms:
+ *   1. Env file injection (harness-specific) — writes BABYSITTER_SESSION_ID to env file
+ *      so subsequent hooks (stop, pre-tool-use) receive it as an env var.
+ *      - Claude Code: CLAUDE_ENV_FILE → writes "export BABYSITTER_SESSION_ID=..."
+ *      - Codex: NO env file — CODEX_THREAD_ID auto-injected by Codex CLI natively
+ *      - Gemini CLI: NO env file — GEMINI_SESSION_ID auto-injected by Gemini CLI natively
+ *      - Cursor: NO env file — conversation_id comes only via hook stdin JSON
+ *      - GitHub Copilot: COPILOT_ENV_FILE (or CLAUDE_ENV_FILE fallback) → writes "export BABYSITTER_SESSION_ID=..."
+ *   2. State file (universal) — writes ~/.a5c/state/<sessionId>.md with YAML frontmatter
+ *      for iteration tracking, run binding, and lifecycle management.
  *
  * CROSS-CUTTING CONCERNS the adapter may integrate with:
  *   - Session state (session.ts): readSessionFile, writeSessionFile, updateSessionState,
@@ -159,11 +172,17 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
 
         // ── Study ALL reference adapter implementations ──
         'Read claudeCode.ts (1200+ lines) as the canonical reference — understand how it implements: session-start hook (env file creation, state file baseline, skill discovery context injection, compression of session-start output via density filter), stop hook (journal replay, completion proof validation, pending effect inspection, approve/block decision), bindSession (state file creation with run association), installPlugin (filesystem operations to register with Claude), getPromptContext (createClaudeCodeContext factory).',
-        'Read codex.ts — understand multi-format hooks.json support, Windows auto-detection for hookDriven flag, CODEX_THREAD_ID/CODEX_SESSION_ID/CODEX_ENV_FILE resolution chain, supportsHookType whitelist, getMissingSessionIdHint.',
+        'Read codex.ts — understand multi-format hooks.json support, Windows auto-detection for hookDriven flag, BABYSITTER_SESSION_ID/CODEX_THREAD_ID resolution chain (CODEX_THREAD_ID auto-injected by Codex, no env file), supportsHookType whitelist, getMissingSessionIdHint.',
         'Read pi.ts — understand the PI-specific adapter: PI_SESSION_ID/PI_PLUGIN_ROOT env vars, in-process model, loop-driver, programmatic delegation to piWrapper.ts.',
         'Read ohMyPi.ts — understand how it differs from pi.ts: OMP_SESSION_ID/OMP_PLUGIN_ROOT env vars, omp CLI, its own discovery entry.',
         'Read geminiCli.ts (960+ lines) — understand AfterAgent as primary continuation hook (not Stop), GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars, session-start context generation with compression.',
         'Read nullAdapter.ts and customAdapter.ts — understand the fallback patterns, how customAdapter returns autoResolvesSessionId=false and supportsHookType=false.',
+
+        // ── Study env persistence between hooks ──
+        'Understand the TWO independent persistence mechanisms in session-start hooks:',
+        '  1. ENV FILE INJECTION (BABYSITTER_SESSION_ID, cross-harness standard): session-start hook writes BABYSITTER_SESSION_ID to the harness env file. Claude Code uses CLAUDE_ENV_FILE, GitHub Copilot uses COPILOT_ENV_FILE or CLAUDE_ENV_FILE fallback. Codex auto-injects CODEX_THREAD_ID natively (no env file needed). Gemini CLI auto-injects GEMINI_SESSION_ID natively. Cursor has NO env file (conversation_id via stdin JSON only).',
+        '  2. STATE FILE (universal, ~/.a5c/state/): writes <sessionId>.md with YAML frontmatter for iteration tracking, run binding, and lifecycle management. Uses getGlobalStateDir() from config/defaults.ts. State dir is NEVER derived from plugin root.',
+        'When researching the target harness, determine: does it provide an env file mechanism? Does it auto-inject session ID into hook subprocesses? Or does it only pass session ID via stdin JSON? This determines which persistence pattern the adapter should use.',
 
         // ── Study the discovery subsystem (two mechanisms) ──
         'Read discovery.ts thoroughly — understand BOTH discovery mechanisms:',
@@ -263,7 +282,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'For each HarnessAdapter method (both required and optional), document how it should be implemented for this harness:',
         '  - isActive(): which env vars to check (these are also the callerEnvVars for detectCallerHarness)',
         '  - resolveSessionId(): full resolution chain specific to this harness (explicit arg → env vars → env file → undefined)',
-        '  - resolveStateDir(): where state files should live (plugin root + "/skills/babysit/state" or equivalent)',
+        '  - resolveStateDir(): where state files should live (defaults to ~/.a5c/state/ via getGlobalStateDir())',
         '  - resolvePluginRoot(): how the plugin root is determined (env var name, or arg)',
         '  - bindSession(): how to create state file and associate run with session',
         '  - handleStopHook(): what the stop hook receives/returns, how it validates completion proof via resolveCompletionProof, or equivalent mechanism if no stop-hook exists',
@@ -284,7 +303,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'Document the priority order this adapter should have in registry.ts knownAdapters relative to existing adapters.',
         'Return structured findings that implementation tasks can act on without guessing.',
       ],
-      outputFormat: 'JSON with distribution, envVars, hookModel (including exact hook type names, which hooks control flow, hooks config format with schema version and entry fields), loopMechanism, discoverySpec, invokerSpec, pluginLayout (including manifest location and format), adapterMethodMap, sessionManagement, compressionSupport, programmaticApi, capabilities, promptContextFactory, registryPriority, installMethod (including CLI commands and storage paths), officialDocsUrls, risks',
+      outputFormat: 'JSON with distribution, envVars, hookModel (including exact hook type names, which hooks control flow, hooks config format with schema version and entry fields), loopMechanism, discoverySpec, invokerSpec, pluginLayout (including manifest location and format), adapterMethodMap, envPersistence, sessionManagement, compressionSupport, programmaticApi, capabilities, promptContextFactory, registryPriority, installMethod (including CLI commands and storage paths), officialDocsUrls, risks',
     },
     outputSchema: {
       type: 'object',
@@ -318,6 +337,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         },
         pluginLayout: { type: 'object', description: 'Expected plugin directory structure: manifest file location and format (verified from official docs), allowed manifest directories, manifest fields and validation rules' },
         adapterMethodMap: { type: 'object', description: 'How each HarnessAdapter method (required + optional) maps to this harness' },
+        envPersistence: { type: 'object', description: 'How the harness persists session ID between hooks: env file mechanism (like CLAUDE_ENV_FILE), native env var injection (like GEMINI_SESSION_ID), or stdin-only (like Cursor conversation_id). Determines session-start hook implementation.' },
         sessionManagement: { type: 'object', description: 'Session state lifecycle: creation, persistence, iteration timing, isIterationTooFast' },
         compressionSupport: { type: 'object', description: 'Whether/how to integrate compression for session-start context and process library caching' },
         programmaticApi: { type: 'object', description: 'PiWrapper-style programmatic session API: whether it exists, API shape, or null' },
@@ -378,8 +398,8 @@ export const implementAdapterTask = defineTask('implement-adapter', (args, taskC
 
         // ── Required methods ──
         'Implement isActive(): check the harness-specific environment variables identified in research.',
-        'Implement resolveSessionId(parsed): follow the standard chain: explicit arg → harness-specific env vars (e.g. HARNESS_SESSION_ID) → env file parsing → undefined. Use the pattern from claudeCode.ts (CLAUDE_SESSION_ID → CLAUDE_ENV_FILE parsing).',
-        'Implement resolveStateDir(args): explicit arg → BABYSITTER_STATE_DIR env → plugin root + "/skills/babysit/state" (or equivalent) → default ".a5c".',
+        'Implement resolveSessionId(parsed): follow the standard chain: explicit arg → BABYSITTER_SESSION_ID (cross-harness standard) → harness-native env vars (e.g. CODEX_THREAD_ID, GEMINI_SESSION_ID) → env file parsing for BABYSITTER_SESSION_ID → undefined.',
+        'Implement resolveStateDir(args): explicit arg → getGlobalStateDir() (resolves BABYSITTER_STATE_DIR → BABYSITTER_GLOBAL_STATE_DIR → ~/.a5c/state/). Do NOT derive state dir from plugin root.',
         'Implement resolvePluginRoot(args): explicit arg → harness-specific env var (e.g. HARNESS_PLUGIN_ROOT) → undefined.',
         'Implement bindSession(opts: SessionBindOptions): create or update the session state file with run association. Use writeSessionFile from session.ts. Return SessionBindResult with harness name, sessionId, stateFile path.',
         'Implement handleStopHook(args: HookHandlerArgs): read JSON from stdin, load session state, replay journal to check for completion proof and pending effects, return approve/block JSON to stdout. Integrate with resolveCompletionProof from cli/completionProof.ts.',
@@ -850,7 +870,7 @@ export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, ta
         '  - Test name property returns correct adapter name',
         '  - Test isActive() returns true when harness-specific env vars are set, false otherwise',
         '  - Test resolveSessionId() with: explicit arg (highest priority), harness-specific env vars, env file fallback, undefined when nothing set',
-        '  - Test resolveStateDir() with: explicit arg, BABYSITTER_STATE_DIR env, plugin root fallback, default .a5c',
+        '  - Test resolveStateDir() with: explicit arg, BABYSITTER_STATE_DIR env override, default ~/.a5c/state/',
         '  - Test resolvePluginRoot() with: explicit arg, harness-specific plugin root env var',
         '  - Test findHookDispatcherPath() locates the hook dispatcher from startCwd',
         '  - Test autoResolvesSessionId() returns expected value',
@@ -1015,7 +1035,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         '  - Import pattern: import { buildImage, dockerExec, PLUGIN_DIR, startContainer, stopContainer } from helpers module',
 
         'Read e2e-tests/docker/stop-hook.test.ts thoroughly — this is the template for stop hook tests. Understand:',
-        '  - Constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (PLUGIN_DIR/skills/babysit/state), LOG_DIR, HOOK_ENV (CLAUDE_PLUGIN_ROOT, BABYSITTER_LOG_DIR, CLI vars)',
+        '  - Constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (~/.a5c/state/ via getGlobalStateDir()), LOG_DIR, HOOK_ENV (CLAUDE_PLUGIN_ROOT, BABYSITTER_LOG_DIR, CLI vars)',
         '  - beforeAll: buildImage + startContainer + mkdir STATE_DIR and LOG_DIR, 300_000 timeout',
         '  - afterAll: stopContainer()',
         '  - afterEach: rm -rf STATE_DIR/*, LOG_DIR/*, and temp files for test isolation',
@@ -1157,7 +1177,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         `Create e2e-tests/docker/${args.adapterName}-stop-hook.test.ts following the stop-hook.test.ts template. The file MUST:`,
         `  - Import build, start, stop, dockerExec (and dockerExecSafe if needed) from ./helpers-${args.adapterName}`,
         '  - Import PLUGIN_DIR/SKILL_DIR from the helpers module',
-        '  - Define constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (PLUGIN_DIR/skills/babysit/state), LOG_DIR (/tmp/hook-test-logs), HOOK_ENV (plugin root, log dir, CLI vars)',
+        '  - Define constants: HOOK path (PLUGIN_DIR/hooks/<stop-hook-script>.sh), STATE_DIR (~/.a5c/state/ via getGlobalStateDir()), LOG_DIR (/tmp/hook-test-logs), HOOK_ENV (plugin root, log dir, CLI vars)',
         '  - beforeAll: buildImage(ROOT) + startContainer() + mkdir STATE_DIR LOG_DIR, timeout 300_000',
         '  - afterAll: stopContainer()',
         '  - afterEach: rm -rf STATE_DIR/*, LOG_DIR/*, and all /tmp/hook-test-* temp files for test isolation',

@@ -37,11 +37,11 @@ continue. Running multiple iterations in a single session turn bypasses the hook
 loop and breaks the orchestration model.
 {{/hookDriven}}
 {{^hookDriven}}
-CRITICAL RULE: After run:create and after each effect is posted, you MUST finish
-your turn and return control. Do NOT proceed to the next run:iterate in the same
-agent turn. The {{loopControlTerm}} will call you back to continue. Running multiple
-iterations in a single agent turn bypasses the loop and breaks the orchestration
-model.
+CRITICAL RULE: Hooks are NOT available in this environment. You MUST drive the
+orchestration loop yourself in-turn: after run:create, keep calling run:iterate,
+performing effects, and posting results in the same session until the run reaches
+a terminal state or you need explicit user input for a breakpoint. Do NOT stop
+and wait for a hook callback -- it will never arrive.
 {{/hookDriven}}
 
 CRITICAL RULE: NEVER use `kind: 'node'` in generated process files. All tasks

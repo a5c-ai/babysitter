@@ -238,7 +238,7 @@ All fields are optional. Only `description` is recommended.
 | `$ARGUMENTS`           | All arguments passed when invoking the skill.                              |
 | `$ARGUMENTS[N]`        | Specific argument by 0-based index.                                        |
 | `$N`                   | Shorthand for `$ARGUMENTS[N]` (e.g., `$0`, `$1`).                         |
-| `${CLAUDE_SESSION_ID}` | Current session ID.                                                        |
+| `${BABYSITTER_SESSION_ID}` | Current session ID.                                                        |
 | `${CLAUDE_SKILL_DIR}`  | Directory containing the skill's SKILL.md.                                 |
 
 If `$ARGUMENTS` is not present in the content, arguments are appended as `ARGUMENTS: <value>`.

@@ -244,6 +244,7 @@ export async function process(inputs, ctx) {
     async () => ctx.task(writePluginTestsTask, {
       projectDir,
       harnessName,
+      adapterName,
       pluginDir,
       research,
       integrationFiles,

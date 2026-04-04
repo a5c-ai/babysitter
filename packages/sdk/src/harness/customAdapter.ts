@@ -11,6 +11,7 @@
  */
 
 import * as path from "node:path";
+import { getGlobalStateDir } from "../config";
 import type {
   HarnessAdapter,
   SessionBindOptions,
@@ -33,13 +34,15 @@ export function createCustomAdapter(): HarnessAdapter {
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
-      // No env var fallbacks — the session ID must be explicitly provided.
-      return parsed.sessionId;
+      if (parsed.sessionId) return parsed.sessionId;
+      // Cross-harness standard env var as fallback for custom adapters
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+      return undefined;
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {
       if (args.stateDir) return path.resolve(args.stateDir);
-      return path.resolve(".a5c");
+      return getGlobalStateDir();
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {

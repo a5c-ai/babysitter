@@ -6,6 +6,9 @@
  * scattered magic numbers and strings.
  */
 
+import * as path from "node:path";
+import * as os from "node:os";
+
 /**
  * Log level type for SDK logging configuration
  */
@@ -201,6 +204,26 @@ export const DEFAULTS: Readonly<BabysitterConfig> = {
    */
   largeResultPreviewLimit: 1024 * 1024,
 } as const;
+
+/**
+ * Returns the global babysitter state directory (~/.a5c/state/).
+ *
+ * All harness adapters use this as the canonical default location for session
+ * state files. The directory is user-global (not workspace-relative or
+ * plugin-root-relative) so session state is discoverable regardless of the
+ * execution context (hook subprocess, Bash tool, CLI invocation, etc.).
+ *
+ * Override: set BABYSITTER_STATE_DIR to use a different path.
+ */
+export function getGlobalStateDir(): string {
+  if (process.env.BABYSITTER_STATE_DIR) {
+    return path.resolve(process.env.BABYSITTER_STATE_DIR);
+  }
+  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
+    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
+    : path.join(os.homedir(), ".a5c");
+  return path.join(globalRoot, "state");
+}
 
 /**
  * Valid log levels for validation

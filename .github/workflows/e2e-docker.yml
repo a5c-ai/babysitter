@@ -9,8 +9,21 @@ on:
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
-      - 'plugins/pi/**'
+      - 'plugins/babysitter-gemini/**'
+      - 'plugins/babysitter-pi/**'
+      - 'plugins/babysitter-omp/**'
       - 'e2e-tests/**'
+      - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/Dockerfile.pi'
+      - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/helpers-pi.ts'
+      - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/gemini-cli-structural.test.ts'
+      - 'e2e-tests/docker/pi-structural.test.ts'
+      - 'e2e-tests/docker/pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
       - '.github/workflows/e2e-docker.yml'
   push:
     branches:
@@ -23,8 +36,21 @@ on:
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
       - 'plugins/babysitter-codex/**'
-      - 'plugins/pi/**'
+      - 'plugins/babysitter-gemini/**'
+      - 'plugins/babysitter-pi/**'
+      - 'plugins/babysitter-omp/**'
       - 'e2e-tests/**'
+      - 'e2e-tests/docker/Dockerfile.gemini-cli'
+      - 'e2e-tests/docker/Dockerfile.pi'
+      - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/helpers-gemini-cli.ts'
+      - 'e2e-tests/docker/helpers-pi.ts'
+      - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/gemini-cli-structural.test.ts'
+      - 'e2e-tests/docker/pi-structural.test.ts'
+      - 'e2e-tests/docker/pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
+      - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
 
@@ -46,11 +72,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Free runner disk space
+        run: |
+          set -euo pipefail
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/miniconda
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          docker system prune -af || true
+          df -h
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: |
@@ -74,24 +112,23 @@ jobs:
             --outputFile.json=e2e-artifacts/test-results-structural.json \
             e2e-tests/docker/structural.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
-            e2e-tests/docker/pi-harness.test.ts \
-            e2e-tests/docker/pi-secure-sandbox.test.ts \
-            e2e-tests/docker/pi-workflow.test.ts \
-            2>&1 | tee e2e-artifacts/structural-tests.log
+            e2e-tests/docker/pi-structural.test.ts \
+            e2e-tests/docker/pi-stop-hook.test.ts \
+            e2e-tests/docker/oh-my-pi-structural.test.ts \
+            e2e-tests/docker/oh-my-pi-stop-hook.test.ts \
+            e2e-tests/docker/gemini-cli-structural.test.ts
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
 
-      - name: Run Pi workflow tests with Azure OpenAI (gated on configured provider)
+      - name: Run provider-gated full-run tests with Azure OpenAI
         if: ${{ env.AZURE_OPENAI_API_KEY != '' && env.AZURE_OPENAI_PROJECT_NAME != '' }}
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
-            --outputFile.json=e2e-artifacts/test-results-pi-azure.json \
-            e2e-tests/docker/pi-workflow.test.ts \
-            e2e-tests/docker/session-create-full-run.test.ts \
-            2>&1 | tee e2e-artifacts/pi-azure-tests.log
+            --outputFile.json=e2e-artifacts/test-results-provider-full-run.json \
+            e2e-tests/docker/session-create-full-run.test.ts
 
       - name: Upload test artifacts
         if: always()
@@ -133,12 +170,25 @@ jobs:
         if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
         uses: actions/checkout@v4
 
+      - name: Free runner disk space
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        run: |
+          set -euo pipefail
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/miniconda
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          docker system prune -af || true
+          df -h
+
       - name: Setup Node.js
         if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
@@ -164,8 +214,7 @@ jobs:
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-codex.json \
-            e2e-tests/docker/codex-full-run.test.ts \
-            2>&1 | tee e2e-artifacts/codex-docker-e2e.log
+            e2e-tests/docker/codex-full-run.test.ts
 
       - name: Upload Codex test artifacts
         if: always()
