@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-cursor",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Babysitter orchestration plugin for Cursor IDE with SDK-managed process-library bootstrapping and in-turn iteration model",
   "scripts": {
     "test": "node scripts/sync-command-surfaces.js --check",

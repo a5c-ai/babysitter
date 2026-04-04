@@ -1,12 +1,22 @@
 {
   "name": "@a5c-ai/babysitter-omp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Babysitter package for oh-my-pi",
-  "keywords": ["oh-my-pi", "omp", "babysitter", "orchestration", "ai-agent"],
+  "keywords": [
+    "oh-my-pi",
+    "omp",
+    "babysitter",
+    "orchestration",
+    "ai-agent"
+  ],
   "omp": {
-    "extensions": ["./extensions"],
-    "skills": ["./skills"]
+    "extensions": [
+      "./extensions"
+    ],
+    "skills": [
+      "./skills"
+    ]
   },
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "^0.0.180"

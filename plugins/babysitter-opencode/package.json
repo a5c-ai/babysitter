@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-opencode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Babysitter orchestration plugin for OpenCode with SDK-managed process-library bootstrapping and in-turn iteration model",
   "scripts": {
     "test": "node test/integration.test.js",
