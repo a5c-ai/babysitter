@@ -28,12 +28,12 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 - [What is Babysitter?](#what-is-babysitter)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Plugins](#plugins)
 - [First Steps](#first-steps)
 - [Quick Start](#quick-start)
 - [Harness CLI Wrappers](#harness-cli-wrappers)
 - [How It Works](#how-it-works)
 - [Why Babysitter?](#why-babysitter)
+- [Plugins](#plugins)
 - [Compression](#compression)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
@@ -162,20 +162,6 @@ babysitter harness:call --harness internal --prompt "run lint and tests" --works
 The internal harness uses the SDK's built-in Pi execution engine directly. It supports all capabilities (Programmatic, SessionBinding, StopHook, HeadlessPrompt) and requires no external CLI.
 
 During process execution, the internal harness can **delegate tasks to any discovered installed harness** via the invoker. A process running under `--harness internal` can spawn subagent tasks that execute through Claude Code, Codex, Gemini CLI, or any other harness found on the system -- the SDK discovers available harness CLIs at runtime and routes task execution accordingly. This means you can orchestrate a multi-agent workflow from a single headless entry point, with different tasks delegated to whichever harness is best suited for them.
-
----
-
-## Plugins
-
-Babysitter has its own plugin system -- and it works differently from what you might expect. A babysitter plugin is not a code module with extension points. It's a **set of natural language instructions** (markdown files) or **deterministic coded processes** (JS files) that an AI agent reads and executes. The SDK stores, versions, and distributes the instructions. The AI agent is the runtime.
-
-This means a plugin can do anything an AI agent can do: install npm packages, generate CI/CD pipelines, set up git hooks, create Terraform configs, modify your linter rules, copy babysitter processes into your project, and interview you about your preferences along the way.
-
-The official marketplace includes plugins for **security** (gitleaks, ESLint security rules, audit processes), **testing** (Vitest/Playwright/pytest setup, coverage gates, TDD processes), **deployment** (Terraform, Helm, Dockerfiles, multi-environment pipelines), **themes** (sound effects, design systems, conversational personality), **CI/CD** (GitHub Actions workflows), and **rate limiting** (exponential backoff hooks).
-
-To manage plugins, use the `/babysitter:plugins` command inside your harness (or `babysitter harness:plugins` from the CLI). The agent reads the plugin's install instructions, interviews you, analyzes your project, and executes the setup -- all within a babysitter orchestration run.
-
-See the full [Plugins documentation](docs/plugins.md) for details on how installs work, the marketplace format, creating your own plugins, and the migration system.
 
 ---
 
@@ -389,6 +375,21 @@ It executes processes using the SDK's built-in engine, supports all effect types
 | Ad-hoc workflow | Deterministic, code-defined processes |
 
 **Key differentiators:** Process enforcement, deterministic replay, quality convergence, human-in-the-loop breakpoints, and parallel execution.
+
+---
+
+
+## Plugins
+
+Babysitter has its own plugin system -- and it works differently from what you might expect. A babysitter plugin is not a code module with extension points. It's a **set of natural language instructions** (markdown files) or **deterministic coded processes** (JS files) that an AI agent reads and executes. The SDK stores, versions, and distributes the instructions. The AI agent is the runtime.
+
+This means a plugin can do anything an AI agent can do: install npm packages, generate CI/CD pipelines, set up git hooks, create Terraform configs, modify your linter rules, copy babysitter processes into your project, and interview you about your preferences along the way.
+
+The official marketplace includes plugins for **security** (gitleaks, ESLint security rules, audit processes), **testing** (Vitest/Playwright/pytest setup, coverage gates, TDD processes), **deployment** (Terraform, Helm, Dockerfiles, multi-environment pipelines), **themes** (sound effects, design systems, conversational personality), **CI/CD** (GitHub Actions workflows), and **rate limiting** (exponential backoff hooks).
+
+To manage plugins, use the `/babysitter:plugins` command inside your harness (or `babysitter harness:plugins` from the CLI). The agent reads the plugin's install instructions, interviews you, analyzes your project, and executes the setup -- all within a babysitter orchestration run.
+
+See the full [Plugins documentation](docs/plugins.md) for details on how installs work, the marketplace format, creating your own plugins, and the migration system.
 
 ---
 
