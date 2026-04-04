@@ -25,6 +25,9 @@ plugins/babysitter-opencode/
     tool-execute-after.js   Post-tool-use hook
   skills/
     babysit/SKILL.md     Core orchestration skill
+    accomplish-status/SKILL.md  Run status reporting for Accomplish
+  accomplish-skills/
+    babysitter/SKILL.md  Bundled skill in Accomplish format
   plugin.json            Plugin manifest
   versions.json          SDK version tracking
 ```
@@ -83,11 +86,34 @@ Or from a specific workspace:
 babysitter-opencode uninstall --workspace /path/to/project
 ```
 
+### Method 4: Accomplish AI (auto-detected)
+
+When [Accomplish](https://github.com/accomplish-ai/accomplish) is installed,
+the installer automatically detects it and copies the plugin into Accomplish's
+OpenCode config directory (`<userDataPath>/opencode/plugins/babysitter/`).
+
+```bash
+# Auto-detects Accomplish during standard install
+npm install -g @a5c-ai/babysitter-opencode
+
+# Or target Accomplish explicitly
+babysitter-opencode install --accomplish
+
+# Install to both standalone OpenCode and Accomplish
+babysitter-opencode install --global --accomplish
+```
+
+Accomplish stores OpenCode config at platform-specific locations:
+- **macOS**: `~/Library/Application Support/Accomplish/opencode/`
+- **Windows**: `%APPDATA%/Accomplish/opencode/`
+- **Linux**: `~/.config/Accomplish/opencode/`
+
 ## CLI Reference
 
 ```
 babysitter-opencode install [--global]            Install plugin globally
 babysitter-opencode install --workspace [path]    Install into workspace
+babysitter-opencode install --accomplish          Install into Accomplish data dir
 babysitter-opencode uninstall [--global]          Uninstall plugin globally
 babysitter-opencode uninstall --workspace [path]  Uninstall from workspace
 babysitter-opencode sync                          Sync command surfaces
@@ -127,6 +153,24 @@ natively provide them:
 - `BABYSITTER_RUNS_DIR` -- Runs directory path
 - `OPENCODE_PLUGIN_ROOT` -- Plugin root directory
 
+### Accomplish Integration
+
+When running inside [Accomplish](https://github.com/accomplish-ai/accomplish), OpenCode is spawned as a subprocess with
+additional environment variables. The babysitter adapter detects these
+automatically:
+
+- `ACCOMPLISH_TASK_ID` -- Accomplish task identifier (primary correlation key)
+- `OPENCODE_CONFIG_DIR` -- Path to Accomplish's OpenCode config directory
+- `OPENCODE_CONFIG` -- Path to the generated `opencode.json`
+
+The adapter writes `accomplishTaskId` into session state metadata for
+correlation. The `accomplish-status` skill writes run status JSON to
+`<OPENCODE_CONFIG_DIR>/run-status/<runId>.json` for file-based IPC.
+
+Breakpoints are resolved conversationally: when a breakpoint is pending, the
+agent uses Accomplish's `ask-user-question` MCP tool to prompt the user, then
+posts the result via `babysitter task:post`.
+
 ### Configuration Environment Variables
 
 | Variable | Default | Description |
@@ -137,6 +181,8 @@ natively provide them:
 | `BABYSITTER_OPENCODE_MARKETPLACE_PATH` | `~/.agents/plugins/marketplace.json` | Marketplace file |
 | `BABYSITTER_SDK_CLI` | (auto-detected) | Path to SDK CLI entry |
 | `BABYSITTER_GLOBAL_STATE_DIR` | `~/.a5c` | Global state directory |
+| `ACCOMPLISH_TASK_ID` | -- | Set by Accomplish when spawning OpenCode |
+| `OPENCODE_CONFIG_DIR` | -- | Accomplish's OpenCode config directory |
 
 ## Verification
 

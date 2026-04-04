@@ -25,6 +25,7 @@
  */
 
 import * as path from "node:path";
+import * as os from "node:os";
 import { existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
@@ -509,6 +510,7 @@ async function bindSessionImpl(
 
   // Create new session state with run associated
   const nowTs = getCurrentTimestamp();
+  const accomplishTaskId = process.env.ACCOMPLISH_TASK_ID;
   const state: SessionState = {
     active: true,
     iteration: 1,
@@ -517,6 +519,7 @@ async function bindSessionImpl(
     startedAt: nowTs,
     lastIterationAt: nowTs,
     iterationTimes: [],
+    ...(accomplishTaskId ? { metadata: { accomplishTaskId } } : {}),
   };
 
   try {
@@ -555,6 +558,49 @@ function installOpenCodePlugin(
 }
 
 // ---------------------------------------------------------------------------
+// Accomplish AI data directory resolution
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns candidate Accomplish AI data directories for the current platform.
+ *
+ * Accomplish is an Electron desktop app that spawns OpenCode as a subprocess.
+ * When running inside Accomplish, plugin bundles are stored under the
+ * platform-specific application data directory.
+ */
+function getAccomplishDataDirs(): string[] {
+  const dirs: string[] = [];
+
+  // Derive from OPENCODE_CONFIG_DIR if set (parent is the Accomplish data dir)
+  const configDir = process.env.OPENCODE_CONFIG_DIR;
+  if (configDir) {
+    const parent = path.dirname(configDir);
+    if (parent && parent !== configDir) {
+      dirs.push(parent);
+    }
+  }
+
+  const home = os.homedir();
+  const platform = process.platform;
+
+  if (platform === "darwin") {
+    dirs.push(path.join(home, "Library", "Application Support", "Accomplish"));
+  } else if (platform === "win32") {
+    if (process.env.APPDATA) {
+      dirs.push(path.join(process.env.APPDATA, "Accomplish"));
+    }
+    if (process.env.LOCALAPPDATA) {
+      dirs.push(path.join(process.env.LOCALAPPDATA, "Accomplish"));
+    }
+  } else {
+    // Linux and other Unix-like
+    dirs.push(path.join(home, ".config", "Accomplish"));
+  }
+
+  return dirs;
+}
+
+// ---------------------------------------------------------------------------
 // Adapter factory
 // ---------------------------------------------------------------------------
 
@@ -566,9 +612,11 @@ export function createOpenCodeAdapter(): HarnessAdapter {
       // OpenCode does NOT inject distinctive env vars into plugin subprocesses.
       // The babysitter plugin's shell.env hook self-injects BABYSITTER_SESSION_ID.
       // OPENCODE_CONFIG is a real OpenCode env var that indicates OpenCode context.
+      // ACCOMPLISH_TASK_ID is set when running inside the Accomplish AI desktop app.
       return !!(
         process.env.BABYSITTER_SESSION_ID ||
-        process.env.OPENCODE_CONFIG
+        process.env.OPENCODE_CONFIG ||
+        process.env.ACCOMPLISH_TASK_ID
       );
     },
 
@@ -631,10 +679,28 @@ export function createOpenCodeAdapter(): HarnessAdapter {
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {
-      const root =
-        args.pluginRoot ||
-        process.env.OPENCODE_PLUGIN_ROOT;
-      return root ? path.resolve(root) : undefined;
+      // 1. Explicit arg (highest priority)
+      if (args.pluginRoot) return path.resolve(args.pluginRoot);
+
+      // 2. OPENCODE_PLUGIN_ROOT env var
+      if (process.env.OPENCODE_PLUGIN_ROOT) {
+        return path.resolve(process.env.OPENCODE_PLUGIN_ROOT);
+      }
+
+      // 3. OPENCODE_CONFIG_DIR env var → <configDir>/plugins/babysitter/
+      const configDir = process.env.OPENCODE_CONFIG_DIR;
+      if (configDir) {
+        const candidate = path.resolve(configDir, "plugins", "babysitter");
+        if (existsSync(candidate)) return candidate;
+      }
+
+      // 4. Platform-specific Accomplish data dirs → <dataDir>/opencode/plugins/babysitter/
+      for (const dataDir of getAccomplishDataDirs()) {
+        const candidate = path.join(dataDir, "opencode", "plugins", "babysitter");
+        if (existsSync(candidate)) return candidate;
+      }
+
+      return undefined;
     },
 
     bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
@@ -663,6 +729,14 @@ export function createOpenCodeAdapter(): HarnessAdapter {
         if (existsSync(tsCandidate)) return tsCandidate;
 
         current = path.dirname(current);
+      }
+
+      // Fallback: check Accomplish AI data directories
+      // Derive from OPENCODE_CONFIG_DIR first, then platform-specific paths
+      const accomplishDirs = getAccomplishDataDirs();
+      for (const dataDir of accomplishDirs) {
+        const candidate = path.join(dataDir, "opencode", "plugins", "babysitter", "index.js");
+        if (existsSync(candidate)) return candidate;
       }
 
       return null;

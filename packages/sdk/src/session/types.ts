@@ -21,6 +21,8 @@ export interface SessionState {
   lastIterationAt: string;
   /** Array of recent iteration durations in seconds (last 3) */
   iterationTimes: number[];
+  /** Optional key-value metadata (e.g. external correlation IDs) */
+  metadata?: Record<string, string>;
 }
 
 /**
