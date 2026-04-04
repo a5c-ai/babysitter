@@ -21,17 +21,17 @@ If no issues are found, report that there are no open issues assigned to `a5c-ag
 
 ### Step 2: Present Issues
 
-Display the list of open issues to the user with their number, title, labels, and URL. Ask the user which issue(s) to work on, or whether to process all of them.
+Display the list of open issues to the user with their number, title, labels, and URL. 
 
 ### Step 3: Orchestrate via Babysitter
 
-For each selected issue, invoke the `babysitter:call` skill with a prompt that includes the issue URL and context:
+For each issue, invoke the `babysitter:yolo` skill with a prompt that includes the issue URL and context:
 
 ```
-/babysitter:call work on this GitHub issue: <issue_url>
+/babysitter:yolo work on this GitHub issue: <issue_url>
 ```
 
-If multiple issues are selected, process them sequentially -- complete one before starting the next. Present a summary after each issue is processed.
+If multiple issues are selected, process them sequentially -- complete one before starting the next. Present a summary after each issue is processed. as part of the process, create a new branch from staging named `issue-<number>` and push commits to that branch. then create a pull request against staging with a meaningful name and a description of the work done (with link to the original issue). if the issue has a "bug" label, prioritize fixing the bug and include details about the bug and how it was fixed in the pull request description.
 
 ### Step 4: Summary
 
@@ -41,4 +41,4 @@ After all selected issues have been processed, provide a summary of what was don
 
 - Only issues assigned to `a5c-agent` are fetched. Other assignees are ignored.
 - The `gh` CLI must be authenticated. If authentication fails, prompt the user to run `gh auth login`.
-- Each issue is handed off to `/babysitter:call` which handles the actual implementation work.
+- Each issue is handed off to `/babysitter:yolo` which handles the actual implementation work.
