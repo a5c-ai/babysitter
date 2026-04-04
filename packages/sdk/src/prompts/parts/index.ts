@@ -10,6 +10,7 @@ export { renderUserProfile } from './userProfile';
 export { renderProcessCreation } from './processCreation';
 export { renderIntentFidelityChecks } from './intentFidelityChecks';
 export { renderRunCreation } from './runCreation';
+export { renderRunOverlapDetection } from './runOverlapDetection';
 export { renderIteration } from './iteration';
 export { renderEffects } from './effects';
 export { renderBreakpointHandling } from './breakpointHandling';

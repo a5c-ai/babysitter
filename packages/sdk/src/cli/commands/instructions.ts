@@ -55,7 +55,7 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     promptType: "babysit-skill",
     partsIncluded: [
       "non-negotiables", "dependencies", "interview", "user-profile",
-      "process-creation", "intent-fidelity-checks", "run-creation",
+      "process-creation", "intent-fidelity-checks", "run-overlap-detection", "run-creation",
       "iteration", "effects", "breakpoint-handling", "results-posting",
       "loop-control", "completion-proof", "task-kinds", "task-examples",
       "quick-reference", "recovery", "process-guidelines", "critical-rules",
@@ -75,7 +75,7 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     fn: composeOrchestrationPrompt,
     promptType: "orchestrate",
     partsIncluded: [
-      "run-creation", "iteration", "effects", "breakpoint-handling",
+      "run-overlap-detection", "run-creation", "iteration", "effects", "breakpoint-handling",
       "results-posting", "loop-control", "completion-proof",
       "quick-reference", "recovery", "critical-rules",
     ],

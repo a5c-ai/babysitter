@@ -616,6 +616,184 @@ export async function process(inputs, ctx) {
 
 ---
 
+### `ts-check`
+
+Provides a hard shell gate for TypeScript compilation correctness via `tsc --noEmit`. Unlike soft agent-prompt-based checks — where an agent can reason its way around a failing typecheck or simply note the errors and continue — this module enforces compilation via a shell task with `expectedExitCode: 0`. The harness cannot satisfy the task with anything other than a zero exit code from the compiler. It is a non-negotiable quality gate.
+
+The module exposes three surfaces:
+- **`tsCheckTask`** — standalone `defineTask` descriptor (kind: `'shell'`) for direct use with `ctx.task()`.
+- **`createTsCheck(config)`** — factory that builds a shell check task and an agent report task, parameterized by project directory, tsconfig path, and compiler flags.
+- **`executeTsCheck(ctx, config)`** — convenience wrapper that runs the check, parses tsc output into structured error records, and returns a comprehensive result object.
+
+**Import**
+
+```js
+import { tsCheckTask, createTsCheck, executeTsCheck } from './index.js';
+// or directly:
+import { tsCheckTask, createTsCheck, executeTsCheck } from './ts-check.js';
+```
+
+**`tsCheckTask` — standalone task**
+
+A single `defineTask` descriptor that runs `tsc --noEmit` as a hard compilation gate. Use when you want a one-off typecheck without factory configuration.
+
+Expected args:
+
+```js
+{
+  projectDir?:    string,    // Working directory for the compiler (default: current directory)
+  tsconfigPath?:  string,    // Path to tsconfig.json (default: 'tsconfig.json')
+  strict?:        boolean,   // Pass --strict flag (default: false)
+  incremental?:   boolean,   // Pass --incremental flag (default: false)
+  extraFlags?:    string[],  // Additional tsc flags (default: [])
+}
+```
+
+```js
+const result = await ctx.task(tsCheckTask, {
+  projectDir: 'packages/sdk',
+  tsconfigPath: 'tsconfig.json',
+});
+```
+
+**`createTsCheck(config)` — factory**
+
+Creates two babysitter task definitions that can be dispatched individually via `ctx.task()`:
+
+- **`checkTask`** (kind: `'shell'`) — runs `tsc --noEmit` with the specified configuration. Uses `expectedExitCode: 0` to enforce a hard compilation gate.
+- **`reportTask`** (kind: `'agent'`) — analyzes raw tsc output and produces a structured diagnostic report with error categorization and remediation suggestions.
+
+Both descriptors carry no shared mutable state and are safe to reuse across convergence loop iterations.
+
+```js
+function createTsCheck(config: TsCheckConfig): {
+  checkTask:  TaskDef,  // shell task — runs tsc --noEmit as a hard gate
+  reportTask: TaskDef,  // agent task — categorizes errors and suggests remediations
+}
+```
+
+**`TsCheckConfig` options**
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `projectDir` | `string` | no | current directory | Working directory for the compiler. |
+| `tsconfigPath` | `string` | no | `'tsconfig.json'` | Path to the tsconfig file, relative to `projectDir`. |
+| `strict` | `boolean` | no | `false` | Whether to pass `--strict` to tsc. |
+| `incremental` | `boolean` | no | `false` | Whether to pass `--incremental` to tsc. |
+| `extraFlags` | `string[]` | no | `[]` | Additional flags to pass to tsc verbatim. |
+| `timeout` | `number` | no | `120000` | Maximum execution time in milliseconds. |
+
+**`reportTask` output schema**
+
+```js
+{
+  totalErrors:  number,
+  categories:   Record<string, number>,  // e.g. { "type mismatch": 4, "import resolution": 2 }
+  topErrors:    Array<{ file: string, line: number, code: string, message: string }>,
+  suggestions:  string[],
+  summary:      string
+}
+```
+
+**`executeTsCheck(ctx, config)` — convenience wrapper**
+
+Runs the compilation check, catches failures, parses tsc output into structured error records, and returns a unified result. Does **not** throw on compilation failure — it captures the failure and returns `{ passed: false, ... }` so the caller can decide how to proceed (fix-and-retry loop, breakpoint, abort).
+
+```js
+async function executeTsCheck(
+  ctx:    ProcessContext,
+  config: TsCheckConfig
+): Promise<{
+  passed:     boolean,    // true when tsc exits with code 0
+  exitCode:   number,     // actual compiler exit code
+  errorCount: number,     // number of parsed diagnostic errors
+  errors:     TscError[], // structured error records
+  output:     string,     // raw combined stdout+stderr
+  summary:    string      // human-readable one-line result
+}>
+```
+
+`TscError` shape:
+
+```js
+{
+  file:    string,  // source file path relative to projectDir
+  line:    number,  // 1-based line number
+  column:  number,  // 1-based column number
+  code:    string,  // TypeScript error code, e.g. 'TS2322'
+  message: string   // human-readable error description
+}
+```
+
+**Usage — standalone task**
+
+```js
+import { tsCheckTask } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await ctx.task(tsCheckTask, {
+    projectDir: 'packages/sdk',
+  });
+}
+```
+
+**Usage — factory approach (manual control)**
+
+```js
+import { createTsCheck } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const { checkTask, reportTask } = createTsCheck({
+    projectDir: 'packages/sdk',
+    strict: true,
+    timeout: 180000,
+  });
+
+  const checkResult = await ctx.task(checkTask, {});
+
+  if (checkResult.exitCode !== 0) {
+    const report = await ctx.task(reportTask, { tscOutput: checkResult });
+    // report.suggestions contains actionable remediation steps
+  }
+}
+```
+
+**Usage — convenience approach**
+
+```js
+import { executeTsCheck } from '../shared/index.js';
+
+export async function process(inputs, ctx) {
+  const result = await executeTsCheck(ctx, {
+    projectDir: 'packages/sdk',
+    strict: true,
+  });
+
+  if (!result.passed) {
+    // Feed structured errors into a fix-and-retry convergence loop
+    const response = await ctx.breakpoint({
+      message: `TypeScript compilation failed.\n${result.summary}\n\nErrors:\n${result.errors.map(e => `  ${e.file}:${e.line} ${e.code}: ${e.message}`).join('\n')}`,
+      options: ['fix errors and retry', 'defer', 'abort'],
+      previousFeedback: inputs.previousFeedback,
+    });
+  }
+
+  return result;
+}
+```
+
+**Why this matters: hard gates vs. soft checks**
+
+Agent-prompt-based TypeScript checks are inherently soft: an agent can acknowledge errors, note them as "minor", decide they are pre-existing, or simply continue. There is no enforcement mechanism. A shell task with `expectedExitCode: 0` cannot be reasoned around — the harness must execute `tsc --noEmit` and the task only resolves successfully when the compiler exits cleanly. This makes `ts-check` appropriate for:
+
+- Quality gates in convergence loops that must not complete with type errors.
+- CI-equivalent checks within orchestrated processes.
+- Pre-merge or pre-deploy verification phases where compilation correctness is non-negotiable.
+
+For exploratory or diagnostic contexts where you want to *know* about errors without blocking progress, use `executeTsCheck` (which captures failures without throwing) and feed the structured errors into a breakpoint or retry loop.
+
+---
+
 ## API Reference
 
 | Export | Module | Type | Description |
@@ -632,5 +810,8 @@ export async function process(inputs, ctx) {
 | `createVisualSmokeTest` | `playwright-visual-smoke` | `function` | Factory that returns two `defineTask` descriptors for the Playwright shell task and report agent task |
 | `executeVisualSmokeTest` | `playwright-visual-smoke` | `async function` | Convenience wrapper that drives the full visual smoke test sequence and returns a unified result |
 | `playwrightVisualSmokeTask` | `playwright-visual-smoke` | `TaskDef` | Standalone `defineTask` for direct `ctx.task()` usage without factory instantiation |
+| `tsCheckTask` | `ts-check` | `TaskDef` | Standalone shell `defineTask` that runs `tsc --noEmit` as a hard compilation gate |
+| `createTsCheck` | `ts-check` | `function` | Factory that returns a shell `checkTask` and an agent `reportTask` for TypeScript compilation checking |
+| `executeTsCheck` | `ts-check` | `async function` | Convenience wrapper that runs the compilation check and returns a structured result with parsed errors |
 
 All exports are available from `./index.js` (the preferred import path) or from the individual module files.

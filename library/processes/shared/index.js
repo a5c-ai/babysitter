@@ -10,3 +10,4 @@ export { completenessGateTask, evaluateCompleteness, checkCompleteness } from '.
 export { costAggregationTask, aggregateCosts } from './cost-aggregation.js';
 export { createTddTriplet, executeTddTriplet } from './tdd-triplet.js';
 export { createVisualSmokeTest, executeVisualSmokeTest, playwrightVisualSmokeTask } from './playwright-visual-smoke.js';
+export { tsCheckTask, createTsCheck, executeTsCheck } from './ts-check.js';

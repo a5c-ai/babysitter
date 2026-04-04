@@ -70,6 +70,7 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderUserProfile(ctx),
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),
@@ -107,6 +108,7 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
  */
 export function composeOrchestrationPrompt(ctx: PromptContext): string {
   return joinNonEmpty([
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),

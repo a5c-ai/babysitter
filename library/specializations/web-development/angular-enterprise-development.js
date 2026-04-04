@@ -157,6 +157,9 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingSetup.artifacts);
 
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
+
     let lastFeedback = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback) {
@@ -552,6 +555,8 @@ export const testingSetupTask = defineTask('angular-testing', (args, taskCtx) =>
   },
   labels: ['web', 'angular', 'testing']
 }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const documentationTask = defineTask('angular-documentation', (args, taskCtx) => ({
   kind: 'agent',

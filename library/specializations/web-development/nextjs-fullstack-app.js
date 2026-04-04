@@ -152,6 +152,9 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...clientComponents.artifacts);
 
+  // TypeScript hard gate (issue #65)
+  const tsCheck = await ctx.task(tsCheckTask, { projectName });
+
   // Cache-bust verification protocol (issue #89) - Next.js specific (.next + Turbopack HMR cache)
   const cacheBustResult = await ctx.task(cacheBustVerificationTask, { projectName, outputDir });
   artifacts.push(...(cacheBustResult.artifacts || []));
@@ -616,6 +619,8 @@ export const deploymentConfigTask = defineTask('deployment-config', (args, taskC
   },
   labels: ['web', 'nextjs', 'deployment', 'vercel']
 }));
+
+export const tsCheckTask = defineTask('typescript-check', (args, taskCtx) => ({ kind: 'shell', title: 'TypeScript compilation check', shell: { command: 'npx tsc --noEmit 2>&1', expectedExitCode: 0, timeout: 120000 }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['typescript', 'compilation', 'hard-gate'] }));
 
 export const cacheBustVerificationTask = defineTask('cache-bust-verification', (args, taskCtx) => ({ kind: 'shell', title: `Cache Bust Verification - ${args.projectName}`, shell: { command: 'rm -rf .next .next/cache node_modules/.cache 2>/dev/null; echo "Next.js cache cleared (including Turbopack HMR cache) at $(date +%s)"' }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['web', 'nextjs', 'cache-bust'] }));
 
