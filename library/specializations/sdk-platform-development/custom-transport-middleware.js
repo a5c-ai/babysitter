@@ -35,14 +35,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, transportTypes, middlewareFeatures, protocolSupport } = inputs;
 
-  ctx.log.info('Starting custom transport and middleware implementation', {
+  ctx.log('info','Starting custom transport and middleware implementation', {
     sdkName,
     languages,
     transportTypes
   });
 
   // Phase 1: Transport Architecture Design
-  ctx.log.info('Phase 1: Designing transport architecture');
+  ctx.log('info','Phase 1: Designing transport architecture');
   const transportArchitecture = await ctx.task(transportArchitectureDesignTask, {
     sdkName,
     languages,
@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Middleware System Implementation
-  ctx.log.info('Phase 2: Implementing middleware system');
+  ctx.log('info','Phase 2: Implementing middleware system');
   const middlewareSystem = await ctx.task(middlewareSystemImplementationTask, {
     sdkName,
     languages,
@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Built-in Middleware Creation
-  ctx.log.info('Phase 3: Creating built-in middleware');
+  ctx.log('info','Phase 3: Creating built-in middleware');
   const builtInMiddleware = await ctx.task(builtInMiddlewareCreationTask, {
     sdkName,
     languages,
@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Custom Transport Implementation
-  ctx.log.info('Phase 4: Implementing custom transports');
+  ctx.log('info','Phase 4: Implementing custom transports');
   const customTransports = await ctx.task(customTransportImplementationTask, {
     sdkName,
     languages,
@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Transport Testing and Documentation
-  ctx.log.info('Phase 5: Creating testing and documentation');
+  ctx.log('info','Phase 5: Creating testing and documentation');
   let testingDocs = await ctx.task(transportTestingDocsTask, {
     sdkName,
     languages,
@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Custom transport and middleware implementation completed');
+  }  ctx.log('info','Custom transport and middleware implementation completed');
 
   return {
     transportArchitecture: transportArchitecture.result,

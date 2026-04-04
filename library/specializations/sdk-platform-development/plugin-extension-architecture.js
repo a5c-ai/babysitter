@@ -35,14 +35,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, extensionPoints, pluginTypes, securityRequirements } = inputs;
 
-  ctx.log.info('Starting plugin and extension architecture design', {
+  ctx.log('info','Starting plugin and extension architecture design', {
     sdkName,
     languages,
     extensionPoints
   });
 
   // Phase 1: Plugin Architecture Design
-  ctx.log.info('Phase 1: Designing plugin architecture');
+  ctx.log('info','Phase 1: Designing plugin architecture');
   const pluginArchitecture = await ctx.task(pluginArchitectureDesignTask, {
     sdkName,
     languages,
@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Extension Points Definition
-  ctx.log.info('Phase 2: Defining extension points');
+  ctx.log('info','Phase 2: Defining extension points');
   const extensionPointsDesign = await ctx.task(extensionPointsDefinitionTask, {
     sdkName,
     languages,
@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Hook System Implementation
-  ctx.log.info('Phase 3: Implementing hook system');
+  ctx.log('info','Phase 3: Implementing hook system');
   const hookSystem = await ctx.task(hookSystemImplementationTask, {
     sdkName,
     languages,
@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Plugin Security
-  ctx.log.info('Phase 4: Implementing plugin security');
+  ctx.log('info','Phase 4: Implementing plugin security');
   const pluginSecurity = await ctx.task(pluginSecurityImplementationTask, {
     sdkName,
     languages,
@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Plugin Registry and Discovery
-  ctx.log.info('Phase 5: Creating plugin registry');
+  ctx.log('info','Phase 5: Creating plugin registry');
   let pluginRegistry = await ctx.task(pluginRegistryCreationTask, {
     sdkName,
     languages,
@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Plugin and extension architecture design completed');
+  }  ctx.log('info','Plugin and extension architecture design completed');
 
   return {
     pluginArchitecture: pluginArchitecture.result,

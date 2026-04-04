@@ -35,14 +35,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, logLevels, logSinks, diagnosticFeatures } = inputs;
 
-  ctx.log.info('Starting logging and diagnostics implementation', {
+  ctx.log('info','Starting logging and diagnostics implementation', {
     sdkName,
     languages,
     logLevels
   });
 
   // Phase 1: Logging Framework Design
-  ctx.log.info('Phase 1: Designing logging framework');
+  ctx.log('info','Phase 1: Designing logging framework');
   const loggingFramework = await ctx.task(loggingFrameworkDesignTask, {
     sdkName,
     languages,
@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Log Sink Implementation
-  ctx.log.info('Phase 2: Implementing log sinks');
+  ctx.log('info','Phase 2: Implementing log sinks');
   const logSinkImplementation = await ctx.task(logSinkImplementationTask, {
     sdkName,
     languages,
@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Structured Logging Setup
-  ctx.log.info('Phase 3: Setting up structured logging');
+  ctx.log('info','Phase 3: Setting up structured logging');
   const structuredLogging = await ctx.task(structuredLoggingSetupTask, {
     sdkName,
     languages,
@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Diagnostic Tools Creation
-  ctx.log.info('Phase 4: Creating diagnostic tools');
+  ctx.log('info','Phase 4: Creating diagnostic tools');
   const diagnosticTools = await ctx.task(diagnosticToolsCreationTask, {
     sdkName,
     languages,
@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Configuration System
-  ctx.log.info('Phase 5: Implementing configuration system');
+  ctx.log('info','Phase 5: Implementing configuration system');
   let configSystem = await ctx.task(loggingConfigurationTask, {
     sdkName,
     languages,
@@ -107,7 +107,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Logging and diagnostics implementation completed');
+  }  ctx.log('info','Logging and diagnostics implementation completed');
 
   return {
     loggingFramework: {
