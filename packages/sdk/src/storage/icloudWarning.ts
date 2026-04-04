@@ -26,7 +26,8 @@ function isICloudDrivePath(candidatePath: string): boolean {
 
 async function resolveExistingAncestorRealPath(inputPath: string): Promise<string | undefined> {
   let current = path.resolve(inputPath);
-  while (true) {
+  let reachedFilesystemRoot = false;
+  while (!reachedFilesystemRoot) {
     try {
       return await fs.realpath(current);
     } catch (error) {
@@ -36,11 +37,13 @@ async function resolveExistingAncestorRealPath(inputPath: string): Promise<strin
       }
       const parent = path.dirname(current);
       if (parent === current) {
-        return undefined;
+        reachedFilesystemRoot = true;
+      } else {
+        current = parent;
       }
-      current = parent;
     }
   }
+  return undefined;
 }
 
 export async function detectICloudDrivePath(inputPath: string): Promise<string | undefined> {
