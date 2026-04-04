@@ -71,6 +71,22 @@ claude plugin install --scope user babysitter@a5c.ai
 
 Restart Claude Code, then type `/skills` to verify "babysit" appears.
 
+Claude Cowork can install the same plugin. For a personal install from this
+repo's Claude marketplace:
+
+1. Open Claude Desktop and switch to the `Cowork` tab.
+2. Click `Customize` in the left sidebar.
+3. Click `Browse plugins`.
+4. Select `Personal`.
+5. Click `+`, then choose `Add marketplace from GitHub`.
+6. Enter `https://github.com/a5c-ai/babysitter`.
+7. Install the `Babysitter` plugin from that marketplace.
+
+For Team and Enterprise org-managed installs, owners can add plugins through
+`Organization settings > Plugins`. GitHub-synced organization marketplaces
+require a private or internal GitHub repository, so use a private/internal fork
+of this repo for that flow, or upload plugin ZIPs manually.
+
 [Plugin README](plugins/babysitter/README.md)
 
 ### Codex CLI (Beta)
