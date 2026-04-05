@@ -289,8 +289,14 @@ jobs:
             echo "No sdkVersion changes to commit."
           else
             git commit -m "chore: set sdkVersion to ${{ steps.version.outputs.staging_version_sdk }} [skip staging]"
-            git pull --rebase --autostash origin staging
-            git push origin HEAD:staging
+            if git push origin HEAD:staging 2>/dev/null; then
+              echo "sdkVersion committed and pushed."
+            elif git pull --rebase --autostash origin staging 2>/dev/null && git push origin HEAD:staging 2>/dev/null; then
+              echo "sdkVersion committed after rebase."
+            else
+              echo "::warning::Could not push sdkVersion commit (concurrent run conflict). Skipping — npm publish already succeeded."
+              git rebase --abort 2>/dev/null || true
+            fi
           fi
 
       - name: Build SDK

@@ -177,8 +177,14 @@ jobs:
           else
             TARGET_BRANCH=${BRANCH_NAME:-${GITHUB_REF##*/}}
             git commit -m "chore(release): v${{ steps.bump.outputs.version }} [skip release]"
-            git pull --rebase --autostash origin $TARGET_BRANCH
-            git push origin HEAD:$TARGET_BRANCH
+            if git push origin HEAD:$TARGET_BRANCH 2>/dev/null; then
+              echo "Release metadata committed and pushed."
+            elif git pull --rebase --autostash origin $TARGET_BRANCH 2>/dev/null && git push origin HEAD:$TARGET_BRANCH 2>/dev/null; then
+              echo "Release metadata committed after rebase."
+            else
+              echo "::warning::Could not push release metadata commit (concurrent conflict). Skipping — publish already succeeded."
+              git rebase --abort 2>/dev/null || true
+            fi
           fi
 
       - name: Build SDK package
