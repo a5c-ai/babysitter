@@ -123,19 +123,42 @@ export function orchestratorTask<TArgs = JsonRecord, TResult = unknown>(
   return defineTask<TArgs, TResult>(
     id,
     async (args, ctx) => {
-      const [title, description, helperLabels, metadata, payload, resumeCommand] = await Promise.all([
+      const [title, description, helperLabels, metadata, payload, resumeCommand, executionMode, modelPhase, parallelism, subtasks] = await Promise.all([
         resolveOptionalValue(options.title, args, ctx),
         resolveOptionalValue(options.description, args, ctx),
         resolveLabelList(options.labels, args, ctx),
         resolveMetadata(options.metadata, args, ctx),
         resolvePayload(options.payload, args, ctx),
         resolveOptionalValue(options.resumeCommand, args, ctx),
+        resolveOptionalValue(options.executionMode, args, ctx),
+        resolveOptionalValue(options.modelPhase, args, ctx),
+        resolveNumber(options.parallelism, args, ctx),
+        resolveJsonRecordArray(options.subtasks, args, ctx),
       ]);
 
       const labels = mergeLabels(ctx, helperLabels, DEFAULT_ORCHESTRATOR_LABEL);
-      const orchestrator = buildOrchestratorOptions(payload ?? pickJsonRecord(args), resumeCommand);
+      const orchestrator = buildOrchestratorOptions(
+        payload ?? pickJsonRecord(args),
+        resumeCommand,
+        executionMode,
+        modelPhase,
+        parallelism,
+        subtasks
+      );
       const mergedMetadata = ensureMetadata(metadata);
       mergedMetadata.orchestratorTask = true;
+      if (executionMode) {
+        mergedMetadata.executionMode = executionMode;
+      }
+      if (modelPhase) {
+        mergedMetadata.modelPhase = modelPhase;
+      }
+      if (typeof parallelism === "number") {
+        mergedMetadata.parallelism = parallelism;
+      }
+      if (subtasks?.length) {
+        mergedMetadata.subtaskCount = subtasks.length;
+      }
       const resolvedTitle = title ?? ctx.label ?? labels?.[0] ?? DEFAULT_ORCHESTRATOR_LABEL;
 
       return {
@@ -309,6 +332,21 @@ async function resolvePayload<TArgs>(
   return { ...value };
 }
 
+async function resolveJsonRecordArray<TArgs>(
+  source: TaskValueOrFactory<TArgs, JsonRecord[] | undefined> | undefined,
+  args: TArgs,
+  ctx: TaskBuildContext
+): Promise<JsonRecord[] | undefined> {
+  const value = await resolveOptionalValue(source, args, ctx);
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const records = value
+    .filter((item): item is JsonRecord => isJsonRecord(item))
+    .map((item) => ({ ...item }));
+  return records.length ? records : undefined;
+}
+
 function isFactory<TArgs, TValue>(value: TaskValueOrFactory<TArgs, TValue>): value is TaskValueFactory<TArgs, TValue> {
   return typeof value === "function";
 }
@@ -448,13 +486,32 @@ function buildBreakpointOptions(payload: unknown, confirmationRequired?: boolean
   return breakpoint;
 }
 
-function buildOrchestratorOptions(payload?: JsonRecord, resumeCommand?: string): OrchestratorTaskOptions {
+function buildOrchestratorOptions(
+  payload?: JsonRecord,
+  resumeCommand?: string,
+  executionMode?: OrchestratorTaskOptions["executionMode"],
+  modelPhase?: OrchestratorTaskOptions["modelPhase"],
+  parallelism?: number,
+  subtasks?: JsonRecord[]
+): OrchestratorTaskOptions {
   const orchestrator: OrchestratorTaskOptions = {};
   if (payload) {
     orchestrator.payload = payload;
   }
   if (resumeCommand) {
     orchestrator.resumeCommand = resumeCommand;
+  }
+  if (executionMode) {
+    orchestrator.executionMode = executionMode;
+  }
+  if (modelPhase) {
+    orchestrator.modelPhase = modelPhase;
+  }
+  if (typeof parallelism === "number") {
+    orchestrator.parallelism = parallelism;
+  }
+  if (subtasks?.length) {
+    orchestrator.subtasks = subtasks;
   }
   return orchestrator;
 }

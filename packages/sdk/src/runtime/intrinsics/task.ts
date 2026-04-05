@@ -18,6 +18,7 @@ import { ReplayCursor } from "../replay/replayCursor";
 import {
   DefinedTask,
   EffectAction,
+  EffectExecutionHints,
   EffectRecord,
   EffectSchedulerHints,
   ProcessLogger,
@@ -29,6 +30,8 @@ import { emitRuntimeMetric } from "../instrumentation";
 import { createTaskBuildContext } from "../../tasks/context";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
+import { resolveExecutionStrategy } from "../executionStrategy";
+import { resolveActiveHarnessName } from "../capabilityReport";
 
 export interface TaskIntrinsicContext {
   runId: string;
@@ -214,6 +217,7 @@ async function ensureTaskDefinition(runDir: string, record: EffectRecord): Promi
 
 function buildEffectAction(record: EffectRecord, taskDef: TaskDef): EffectAction {
   const schedulerHints = deriveSchedulerHints(taskDef);
+  const executionHints = deriveExecutionHints(taskDef);
   return {
     effectId: record.effectId,
     invocationKey: record.invocationKey,
@@ -227,6 +231,7 @@ function buildEffectAction(record: EffectRecord, taskDef: TaskDef): EffectAction
     inputsRef: record.inputsRef,
     requestedAt: record.requestedAt,
     schedulerHints,
+    executionHints,
   };
 }
 
@@ -237,6 +242,19 @@ function deriveSchedulerHints(taskDef: TaskDef): EffectSchedulerHints | undefine
     hints.sleepUntilEpochMs = sleepHint;
   }
   return Object.keys(hints).length ? hints : undefined;
+}
+
+function deriveExecutionHints(taskDef: TaskDef): EffectExecutionHints | undefined {
+  const strategy = resolveExecutionStrategy({ taskDef, harness: resolveActiveHarnessName() });
+  return {
+    requestedMode: strategy.requestedMode,
+    effectiveMode: strategy.effectiveMode,
+    reason: strategy.reason,
+    modelPhase: strategy.modelRoute.phase,
+    model: strategy.modelRoute.model,
+    parallelism: strategy.parallelism,
+    subtaskCount: strategy.subtaskCount,
+  };
 }
 
 function extractSleepTarget(taskDef: TaskDef): number | undefined {

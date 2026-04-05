@@ -101,6 +101,32 @@ describe("task kind helpers", () => {
         orchestratorTask: true,
       });
     });
+
+    it("includes execution strategy fields for subagent fan-out", async () => {
+      const helper = orchestratorTask("fixtures.orchestrator.subagent", {
+        payload: () => orchestratorKindFixtures.payload,
+        executionMode: () => "subagent",
+        modelPhase: () => "interactive",
+        parallelism: () => 3,
+        subtasks: () => [{ title: "plan" }, { title: "review" }],
+      });
+      const ctx = createTestBuildContext();
+      const def = await helper.build(orchestratorKindFixtures.payload, ctx);
+
+      expect(def.orchestratorTask).toMatchObject({
+        executionMode: "subagent",
+        modelPhase: "interactive",
+        parallelism: 3,
+        subtasks: [{ title: "plan" }, { title: "review" }],
+      });
+      expect(def.metadata).toMatchObject({
+        orchestratorTask: true,
+        executionMode: "subagent",
+        modelPhase: "interactive",
+        parallelism: 3,
+        subtaskCount: 2,
+      });
+    });
   });
 
   describe("sleepTask", () => {

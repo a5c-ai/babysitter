@@ -75,6 +75,12 @@ Codex support is available as a dedicated plugin bundle in:
 
 It includes Codex hook wiring, slash command dispatch, and orchestration harness scripts compatible with the Babysitter SDK.
 
+Shared Codex runtime policy now lives in `packages/sdk`, including:
+- harness capability reporting
+- shared model routing defaults for plan/interactive/execute/review/fix phases
+- execution strategy resolution for local, subagent, and future cloud modes
+- local subagent fan-out metadata for `orchestrator_task`
+
 ---
 
 ## Quick Start

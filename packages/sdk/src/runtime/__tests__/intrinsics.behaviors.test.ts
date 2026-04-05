@@ -172,4 +172,33 @@ describe("orchestrator task intrinsic", () => {
       return true;
     });
   });
+
+  test("captures subagent routing hints and subtask metadata", async () => {
+    const { runDir, runId } = await createTestRun(tmpRoot);
+    const context = await buildTaskContext(runDir, runId);
+    const subtasks = [{ title: "plan" }, { title: "execute" }];
+    await expect(
+      runOrchestratorTaskIntrinsic(
+        { op: "fanout" },
+        context,
+        { executionMode: "subagent", modelPhase: "interactive", parallelism: 2, subtasks }
+      )
+    ).rejects.toSatisfy((error) => {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      const action = (error as EffectRequestedError).action;
+      expect(action.taskDef.orchestratorTask).toMatchObject({
+        executionMode: "subagent",
+        modelPhase: "interactive",
+        parallelism: 2,
+        subtasks,
+      });
+      expect(action.taskDef.metadata).toMatchObject({
+        executionMode: "subagent",
+        modelPhase: "interactive",
+        parallelism: 2,
+        subtaskCount: 2,
+      });
+      return true;
+    });
+  });
 });

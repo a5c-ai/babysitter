@@ -1,9 +1,15 @@
 import type { JsonRecord, RunMetadata } from "../storage/types";
 import type { DefinedTask, TaskDef, TaskInvokeOptions } from "../tasks/types";
 import type { StateCacheJournalHead } from "./replay/stateCache";
+import type { HarnessCapabilityReport } from "./capabilityReport";
+import type { ExecutionMode } from "./executionStrategy";
+import type { ModelPhase } from "./modelRouting";
 
 export type { DefinedTask, TaskBuildContext, TaskDef, TaskInvokeOptions } from "../tasks/types";
 export type { StateCacheJournalHead } from "./replay/stateCache";
+export type { HarnessCapabilityReport } from "./capabilityReport";
+export type { ExecutionMode } from "./executionStrategy";
+export type { ModelPhase } from "./modelRouting";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ProcessLogger = (...args: any[]) => void;
@@ -43,6 +49,16 @@ export interface EffectSchedulerHints {
   sleepUntilEpochMs?: number;
 }
 
+export interface EffectExecutionHints {
+  requestedMode: ExecutionMode;
+  effectiveMode: ExecutionMode;
+  reason: string;
+  modelPhase: ModelPhase;
+  model: string;
+  parallelism?: number;
+  subtaskCount?: number;
+}
+
 export interface EffectAction {
   effectId: string;
   invocationKey: string;
@@ -56,6 +72,7 @@ export interface EffectAction {
   inputsRef?: string;
   requestedAt?: string;
   schedulerHints?: EffectSchedulerHints;
+  executionHints?: EffectExecutionHints;
 }
 
 export interface CreateRunOptions {
@@ -127,6 +144,9 @@ export interface IterationMetadata {
   stateRebuildReason?: string | null;
   pendingEffectsByKind?: Record<string, number>;
   journalHead?: StateCacheJournalHead | null;
+  harnessCapabilities?: HarnessCapabilityReport;
+  routedModelsByPhase?: Partial<Record<ModelPhase, string>>;
+  pendingEffectsByMode?: Partial<Record<ExecutionMode, number>>;
 }
 
 export type IterationResult =

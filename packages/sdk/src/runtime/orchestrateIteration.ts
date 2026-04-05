@@ -23,6 +23,8 @@ import {
 import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { callRuntimeHook } from "./hooks/runtime";
+import { detectHarnessCapabilities, resolveActiveHarnessName } from "./capabilityReport";
+import { summarizeModelRoutes } from "./modelRouting";
 
 type ProcessFunction = (inputs: unknown, ctx: ProcessContext, extra?: unknown) => Promise<unknown>;
 // Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
@@ -107,10 +109,11 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       const waiting = asWaitingResult(error);
       if (waiting) {
         finalStatus = waiting.status;
+        const nextActions = annotateWaitingActions(waiting.nextActions);
         return {
           status: "waiting",
-          nextActions: annotateWaitingActions(waiting.nextActions),
-          metadata: createIterationMetadata(engine),
+          nextActions,
+          metadata: createIterationMetadataWithActions(engine, nextActions),
         };
       }
       const failure = serializeUnknownError(error);
@@ -315,11 +318,40 @@ function mergeSchedulerHints(
 }
 
 function createIterationMetadata(engine: ReplayEngine): IterationMetadata {
+  return createIterationMetadataWithActions(engine);
+}
+
+function createIterationMetadataWithActions(
+  engine: ReplayEngine,
+  actions: EffectAction[] = []
+): IterationMetadata {
+  const harnessName = resolveActiveHarnessName();
+  const routedModelsByPhase = summarizeModelRoutes(
+    actions
+      .filter((action) => action.executionHints)
+      .map((action) => ({
+        phase: action.executionHints!.modelPhase,
+        model: action.executionHints!.model,
+        source: "default" as const,
+      }))
+  );
+  const pendingEffectsByMode = actions.reduce<Partial<Record<"local" | "subagent" | "cloud", number>>>(
+    (acc, action) => {
+      const mode = action.executionHints?.effectiveMode;
+      if (!mode) return acc;
+      acc[mode] = (acc[mode] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
   return {
     stateVersion: engine.stateCache?.stateVersion,
     pendingEffectsByKind: engine.stateCache?.pendingEffectsByKind,
     journalHead: engine.stateCache?.journalHead ?? null,
     stateRebuilt: Boolean(engine.stateRebuild),
     stateRebuildReason: engine.stateRebuild?.reason ?? null,
+    harnessCapabilities: detectHarnessCapabilities(harnessName),
+    routedModelsByPhase,
+    pendingEffectsByMode: Object.keys(pendingEffectsByMode).length ? pendingEffectsByMode : undefined,
   };
 }

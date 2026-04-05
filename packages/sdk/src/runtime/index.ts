@@ -39,3 +39,7 @@ export type {
 export { hashInvocationKey } from "./invocation";
 export { EffectRequestedError, EffectPendingError, ParallelPendingError, RunFailedError } from "./exceptions";
 export { replaySchemaVersion } from "./constants";
+export { detectHarnessCapabilities } from "./capabilityReport";
+export { resolveModelPhase, resolveModelRoute, summarizeModelRoutes } from "./modelRouting";
+export { resolveExecutionStrategy } from "./executionStrategy";
+export { createDispatchEnvelope } from "./strategyDispatch";

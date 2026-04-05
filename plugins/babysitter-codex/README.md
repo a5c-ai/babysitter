@@ -12,6 +12,7 @@ This project was created by Babysitter already running on Codex.
 - Yolo mode for non-interactive auto-approval
 - Compatibility mode for SDK builds that expose only core run/task commands
 - Deterministic per-run trace log at `<runDir>/run-trace.jsonl`
+- Shared SDK runtime routing for model policy, capability detection, and execution strategy metadata
 
 ## Version Control Documentation
 

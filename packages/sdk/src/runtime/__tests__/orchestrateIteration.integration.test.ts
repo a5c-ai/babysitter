@@ -23,7 +23,25 @@ function writeProcessFile(dir: string, filename: string) {
   const echoTask = {
     id: "echo-task",
     async build(args) {
-      return { kind: "node", title: "echo", metadata: args };
+      return {
+        kind: "orchestrator_task",
+        title: "echo",
+        metadata: {
+          value: args.value,
+          orchestratorTask: true,
+          executionMode: "subagent",
+          modelPhase: "interactive",
+          parallelism: 2,
+          subtaskCount: 2,
+        },
+        orchestratorTask: {
+          payload: { value: args.value },
+          executionMode: "subagent",
+          modelPhase: "interactive",
+          parallelism: 2,
+          subtasks: [{ title: "plan" }, { title: "execute" }],
+        },
+      };
     }
   };
 
@@ -58,7 +76,21 @@ describe("orchestrateIteration integration", () => {
     }
 
     const action = firstIteration.nextActions[0];
-    expect(action.kind).toBe("node");
+    expect(action.kind).toBe("orchestrator_task");
+    expect(action.executionHints).toMatchObject({
+      requestedMode: "subagent",
+      effectiveMode: "subagent",
+      modelPhase: "interactive",
+      model: "gpt-5.3-codex-spark",
+      parallelism: 2,
+      subtaskCount: 2,
+    });
+    expect(firstIteration.metadata?.routedModelsByPhase).toEqual({
+      interactive: "gpt-5.3-codex-spark",
+    });
+    expect(firstIteration.metadata?.pendingEffectsByMode).toEqual({
+      subagent: 1,
+    });
 
     await commitEffectResult({
       runDir,
@@ -105,6 +137,7 @@ describe("orchestrateIteration integration", () => {
     if (waitingResult.status !== "waiting") {
       throw new Error("Expected waiting status");
     }
+    expect(waitingResult.metadata?.pendingEffectsByMode).toEqual({ subagent: 1 });
 
     await commitEffectResult({
       runDir,

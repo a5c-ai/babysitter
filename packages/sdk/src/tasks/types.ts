@@ -29,6 +29,10 @@ export interface BreakpointTaskOptions {
 export interface OrchestratorTaskOptions {
   payload?: JsonRecord;
   resumeCommand?: string;
+  executionMode?: "local" | "subagent" | "cloud";
+  modelPhase?: "plan" | "interactive" | "execute" | "review" | "fix";
+  parallelism?: number;
+  subtasks?: JsonRecord[];
 }
 
 export interface SleepTaskOptions {
@@ -159,6 +163,10 @@ export interface OrchestratorTaskDefinitionOptions<TArgs = JsonRecord> {
   metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
   payload?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
   resumeCommand?: TaskValueOrFactory<TArgs, string | undefined>;
+  executionMode?: TaskValueOrFactory<TArgs, OrchestratorTaskOptions["executionMode"] | undefined>;
+  modelPhase?: TaskValueOrFactory<TArgs, OrchestratorTaskOptions["modelPhase"] | undefined>;
+  parallelism?: TaskValueOrFactory<TArgs, number | undefined>;
+  subtasks?: TaskValueOrFactory<TArgs, JsonRecord[] | undefined>;
 }
 
 export interface SleepTaskBuilderArgs {
