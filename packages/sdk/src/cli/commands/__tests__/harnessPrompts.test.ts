@@ -75,7 +75,7 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("Define at least one task with `defineTask(...)`");
     expect(prompt).toContain("NEVER use `node` kind");
     expect(prompt).toContain("kind: 'agent'");
-    expect(prompt).toContain("Default for all tasks");
+    expect(prompt).toContain("Default for reasoning tasks");
     expect(prompt).toContain("await ctx.task(");
     expect(prompt).toContain("DefinedTask created via `defineTask(...)`");
     expect(prompt).toContain("do not reference Node's global process object as `process.*`");
