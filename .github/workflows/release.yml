@@ -177,6 +177,7 @@ jobs:
           else
             TARGET_BRANCH=${BRANCH_NAME:-${GITHUB_REF##*/}}
             git commit -m "chore(release): v${{ steps.bump.outputs.version }} [skip release]"
+            git pull --rebase origin $TARGET_BRANCH
             git push origin HEAD:$TARGET_BRANCH
           fi
 

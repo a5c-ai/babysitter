@@ -289,6 +289,7 @@ jobs:
             echo "No sdkVersion changes to commit."
           else
             git commit -m "chore: set sdkVersion to ${{ steps.version.outputs.staging_version_sdk }} [skip staging]"
+            git pull --rebase origin staging
             git push origin HEAD:staging
           fi
 
