@@ -178,22 +178,22 @@ export async function resolveEffect(
     if (piSession) {
       const bashCommand = [command, ...shellArgs.map(shellQuoteArg)].join(" ");
       const bashResult = await piSession.executeBash(bashCommand);
+      const ok = bashResult.exitCode === 0;
       return {
-        status: bashResult.exitCode === 0 ? "ok" : "error",
-        value: bashResult.exitCode === 0 ? bashResult.output : undefined,
-        error: bashResult.exitCode === 0
-          ? undefined
-          : new Error(`Shell command exited with code ${bashResult.exitCode ?? "null"}: ${bashResult.output}`),
+        status: "ok" as const,
+        value: ok
+          ? bashResult.output
+          : { success: false, exitCode: bashResult.exitCode ?? 1, stdout: bashResult.output, stderr: "", error: `Shell command exited with code ${bashResult.exitCode ?? "null"}: ${bashResult.output}` },
         stdout: bashResult.output,
       };
     }
     const shellResult = await execShellEffect(command, shellArgs, cwd);
+    const shellOk = shellResult.exitCode === 0;
     return {
-      status: shellResult.exitCode === 0 ? "ok" : "error",
-      value: shellResult.exitCode === 0 ? shellResult.stdout : undefined,
-      error: shellResult.exitCode === 0
-        ? undefined
-        : new Error(`Shell command exited with code ${shellResult.exitCode}: ${shellResult.stderr}`),
+      status: "ok" as const,
+      value: shellOk
+        ? shellResult.stdout
+        : { success: false, exitCode: shellResult.exitCode, stdout: shellResult.stdout, stderr: shellResult.stderr, error: `Shell command exited with code ${shellResult.exitCode}: ${shellResult.stderr}` },
       stdout: shellResult.stdout,
       stderr: shellResult.stderr,
     };

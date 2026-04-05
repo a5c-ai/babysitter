@@ -230,6 +230,47 @@ describe("runTaskIntrinsic", () => {
     ).rejects.toThrow(RunFailedError);
   });
 
+  test("returns success:false shell result without throwing", async () => {
+    const { runDir, runId } = await createRun("run-shell-fail");
+    const context = await buildContext(runDir, runId);
+
+    let effectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 7 },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      effectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    // Simulate a shell task that failed but was posted as ok with structured failure value
+    const failureValue = {
+      success: false,
+      exitCode: 1,
+      stdout: "",
+      stderr: "SyntaxError: Invalid regular expression",
+      error: "Shell command exited with code 1: SyntaxError: Invalid regular expression",
+    };
+    await commitEffectResult({
+      runDir,
+      effectId,
+      result: { status: "ok", value: failureValue },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    // The process gets the failure value back instead of the run crashing
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 7 },
+        context: replayCtx,
+      })
+    ).resolves.toEqual(failureValue);
+  });
+
   test("provides TaskBuildContext metadata and records registry entries", async () => {
     const { runDir, runId } = await createRun("run-task-ctx");
     const context = await buildContext(runDir, runId);
