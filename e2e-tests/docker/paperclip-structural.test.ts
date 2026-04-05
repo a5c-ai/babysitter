@@ -84,18 +84,6 @@ describe("Paperclip plugin structural tests", () => {
   });
 
   test("delegating adapter maps Paperclip adapter types correctly", () => {
-    // Verify the adapter type map is importable and correct
-    const result = dockerExec(
-      `node -e "
-        const types = require('${PAPERCLIP_PLUGIN_DIR}/src/types.ts');
-      " 2>&1 || node -e "
-        const fs = require('fs');
-        const content = fs.readFileSync('${PAPERCLIP_PLUGIN_DIR}/src/types.ts', 'utf-8');
-        const match = content.match(/claude_local:\\s*\\"([^"]+)\\"/);
-        console.log(match ? match[1] : 'NOT_FOUND');
-      "`
-    ).trim();
-    // The TypeScript source won't run directly, but we can grep for the mapping
     const typesContent = dockerExec(
       `cat ${PAPERCLIP_PLUGIN_DIR}/src/types.ts`
     );
@@ -108,7 +96,8 @@ describe("Paperclip plugin structural tests", () => {
 describe("Paperclip plugin babysitter CLI integration", () => {
   test("harness:discover returns JSON list of harnesses", () => {
     const raw = dockerExec("babysitter harness:discover --json").trim();
-    const harnesses = JSON.parse(raw);
+    const result = JSON.parse(raw);
+    const harnesses = result.installed;
     expect(Array.isArray(harnesses)).toBe(true);
     expect(harnesses.length).toBeGreaterThan(0);
     // Should have at least claude-code in the known list
@@ -210,7 +199,8 @@ PROCEOF`);
     const tasksRaw = dockerExec(
       `cd /workspace && babysitter task:list .a5c/runs/${runId} --pending --json`
     ).trim();
-    const tasks = JSON.parse(tasksRaw);
+    const tasksResult = JSON.parse(tasksRaw);
+    const tasks = tasksResult.tasks;
     expect(tasks.length).toBe(1);
     expect(tasks[0].kind).toBe("breakpoint");
 
