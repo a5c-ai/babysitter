@@ -75,8 +75,11 @@ specified:
   - Integrate/link the main pages (or entry points) with functionality created
     for every phase of the development process
   - Quality gated iterative and convergent development/refinement loops
-  - Test driven -- where quality gates can use executable tools, scripts, and
-    tests to verify accuracy and completeness
+  - Test driven -- where quality gates use `kind: 'shell'` tasks with
+    `expectedExitCode` for deterministic verification (compilation, linting,
+    test suites, grep checks, dependency availability, runtime smoke tests).
+    Reserve `kind: 'agent'` for subjective assessment only (code review,
+    architecture evaluation, UX quality)
   - Integration phases for each new functionality in every milestone
   - Where relevant -- beautiful and polished UX with pixel-perfect verification
   - Accurate and complete implementation of the user request

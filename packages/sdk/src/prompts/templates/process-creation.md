@@ -55,7 +55,14 @@ After the process is created and before creating the run:
 - wrong: skipping repo/process-library research before writing the process
 - wrong: bypassing the orchestration model with helper scripts or inline logic
 - wrong: using `kind: 'node'` in generated tasks
-- correct: use `agent` or `skill` tasks for reasoning work, with `shell` only
-  for existing CLIs, tests, linters, git, or builds
+- wrong: using `kind: 'agent'` for deterministic verification (compilation,
+  linting, test execution, grep checks, dependency validation) -- these MUST
+  use `kind: 'shell'` with `expectedExitCode` for binary pass/fail enforcement
+- correct: use `agent` or `skill` tasks for reasoning work (planning, code
+  review, architecture assessment, subjective evaluation)
+- correct: use `shell` tasks for all objectively verifiable checks (tsc, eslint,
+  vitest, grep, dependency imports, runtime smoke tests)
 - correct: include verification loops, refinement loops, quality gates, and
   breakpoints where appropriate
+- correct: pair shell verification gates with agent analysis tasks (shell runs
+  the check, agent interprets failures and suggests fixes)
