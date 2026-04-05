@@ -42,4 +42,4 @@ After all open a5c-assigned issues have been processed, provide a summary of wha
 - Only issues assigned to `a5c-agent` are fetched. Other assignees are ignored.
 - The `gh` CLI must be authenticated. If authentication fails, prompt the user to run `gh auth login`.
 - Each issue is handed off to `/babysitter:yolo` which handles the actual implementation work.
-- the entire workflow should be without any user interaction or breakpoints in the run, allowing for a seamless babysitting experience.
+- the entire workflow should be without any user interaction or breakpoints in the run, allowing for a seamless babysitting experience. do not let the user select which issues to work on -- just process all open a5c-assigned issues sequentially.
