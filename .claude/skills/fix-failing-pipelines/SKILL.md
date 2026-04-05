@@ -84,3 +84,4 @@ After all failing workflows have been addressed, provide a summary:
 - Each fix is handed off to `/babysitter:yolo` which handles the actual implementation work non-interactively.
 - Fixes are committed directly to `staging` -- no feature branches or PRs for pipeline fixes.
 - The entire workflow should be without any user interaction or breakpoints in the run, allowing for seamless pipeline repair.
+- if you fixed it, wait for the new run to be completed and check if it succeeded. if it failed again, iterate on the fix until it succeeds.
