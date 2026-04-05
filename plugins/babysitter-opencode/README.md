@@ -39,7 +39,7 @@ plugins/babysitter-opencode/
 Install the Babysitter SDK CLI:
 
 ```bash
-npm install -g @a5c-ai/babysitter
+npm install -g @a5c-ai/babysitter-sdk
 ```
 
 ### Method 1: npm global install (recommended)
@@ -57,10 +57,10 @@ To install into a specific workspace:
 babysitter-opencode install --workspace /path/to/project
 ```
 
-### Method 2: Babysitter plugin manager
+### Method 2: Babysitter harness install
 
 ```bash
-babysitter plugin:install babysitter-opencode
+babysitter harness:install-plugin opencode
 ```
 
 ### Method 3: Manual copy
