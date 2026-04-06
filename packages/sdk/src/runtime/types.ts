@@ -14,7 +14,15 @@ export interface BreakpointRoutingOptions {
   expert?: string | string[];
   tags?: string[];
   strategy?: BreakpointStrategy;
+  /** Canonical breakpoint identity for cross-run/cross-process matching. Dotted namespace, kebab-case. */
+  breakpointId?: string;
+  /** Auto-approve after N consecutive approvals (-1 = disabled, default). */
+  autoApproveAfterN?: number;
+  /** Whether to present "Always Approve" option to the user (default true). */
+  presentAlwaysApprove?: boolean;
 }
+
+// AutoApprovalResult is defined in breakpoints/types.ts and re-exported from breakpoints/index.ts
 
 export interface BreakpointResult {
   approved: boolean;

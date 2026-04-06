@@ -30,9 +30,12 @@ const breakpointTask: DefinedTask<BreakpointArgs, BreakpointResult> = {
         payload: args?.payload,
         requestedAt: args.requestedAt,
         label: args.label,
+        breakpointId: args.breakpointId,
         expert: args.expert,
         tags: args.tags,
         strategy: args.strategy,
+        autoApproveAfterN: args.autoApproveAfterN,
+        presentAlwaysApprove: args.presentAlwaysApprove,
       },
     };
   },
@@ -44,6 +47,7 @@ export async function runBreakpointIntrinsic<T = unknown>(
   options?: TaskInvokeOptions & BreakpointRoutingOptions
 ): Promise<BreakpointResult> {
   const label = deriveBreakpointLabel(payload, options?.label);
+  const breakpointId = options?.breakpointId ?? slugifyBreakpointId(label);
 
   // In non-interactive mode, auto-approve breakpoints without dispatching a task.
   const ctx = context as Partial<InternalProcessContext>;
@@ -86,9 +90,12 @@ export async function runBreakpointIntrinsic<T = unknown>(
       payload,
       label,
       requestedAt: context.now().toISOString(),
+      breakpointId,
       expert: options?.expert,
       tags: options?.tags,
       strategy: options?.strategy,
+      autoApproveAfterN: options?.autoApproveAfterN,
+      presentAlwaysApprove: options?.presentAlwaysApprove,
     },
     invokeOptions,
     context,
@@ -106,4 +113,17 @@ function deriveBreakpointLabel(payload: unknown, provided?: string): string {
     }
   }
   return DEFAULT_BREAKPOINT_LABEL;
+}
+
+/**
+ * Derive a canonical breakpointId from a human-readable title.
+ * Lowercase, replace spaces and special characters with hyphens, collapse runs.
+ */
+export function slugifyBreakpointId(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-")
+    || "breakpoint";
 }
