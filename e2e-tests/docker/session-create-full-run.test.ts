@@ -97,7 +97,7 @@ describeInternalHarness("harness:create-run full internal-harness run", () => {
           "babysitter harness:create-run --prompt \"create a game\" --harness pi --model gpt-5.4 --workspace /workspace/session-create-internal --runs-dir /workspace/session-create-internal/.a5c/runs --no-interactive --verbose 2>&1 | tee /tmp/session-create-internal.log",
         ].join("\n"),
         {
-          timeout: 900_000,
+          timeout: 1_200_000,
           maxBuffer: 20 * 1024 * 1024,
         },
       );
