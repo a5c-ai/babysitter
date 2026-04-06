@@ -25,6 +25,12 @@ Complete reference documentation for the Babysitter command-line interface (SDK 
   - [task:list](#tasklist)
   - [task:show](#taskshow)
   - [task:post](#taskpost)
+- [Breakpoint Rule Commands](#breakpoint-rule-commands)
+  - [breakpoint:approve-rule](#breakpointapprove-rule)
+  - [breakpoint:remove-rule](#breakpointremove-rule)
+  - [breakpoint:list-rules](#breakpointlist-rules)
+  - [breakpoint:should-auto-approve](#breakpointshould-auto-approve)
+  - [breakpoint:history](#breakpointhistory)
 - [Exit Codes](#exit-codes)
 - [Output Formats](#output-formats)
 - [Examples](#examples)
@@ -843,8 +849,76 @@ babysitter task:post <runId> <effectId> --status ok --value <file> --json
 
 ---
 
+---
+
+## Breakpoint Rule Commands
+
+Commands for managing breakpoint auto-approval rules. Rules are stored at `~/.a5c/breakpoint-approvals/rules.json`.
+
+### breakpoint:approve-rule
+
+Add or update an auto-approval rule.
+
+```bash
+babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
+```
+
+| Argument/Flag | Required | Description |
+|---------------|----------|-------------|
+| `<pattern>` | Yes | Pattern to match breakpointIds. Supports glob (`confirm.*`) and attribute predicates (`*.review(tags contains 'design')`). |
+| `--action` | No | Rule action: `auto-approve` (default) or `never-auto-approve`. |
+| `--source` | No | Who created the rule (e.g., `cli`, `agent`, `analyze-history`). |
+| `--note` | No | Human-readable note about why this rule exists. |
+| `--json` | No | Emit JSON output. |
+
+### breakpoint:remove-rule
+
+Remove an auto-approval rule by ID.
+
+```bash
+babysitter breakpoint:remove-rule <ruleId> [--json]
+```
+
+### breakpoint:list-rules
+
+List all configured auto-approval rules.
+
+```bash
+babysitter breakpoint:list-rules [--json]
+```
+
+### breakpoint:should-auto-approve
+
+Check whether a breakpoint should be auto-approved given current rules.
+
+```bash
+babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--tags` | Comma-separated list of tags to evaluate against rules. |
+| `--expert` | Expert identifier to evaluate against rules. |
+
+### breakpoint:history
+
+View breakpoint approval history from run journals.
+
+```bash
+babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--breakpoint-id` | Filter history to a specific breakpointId. |
+| `--runs-dir` | Override runs directory (default: `.a5c/runs`). |
+| `--limit` | Maximum number of entries to display (default: 50). |
+
+---
+
 ## Related Documentation
 
+- [Breakpoints Feature Guide](../features/breakpoints.md) - Breakpoint usage, auto-approval rules, and patterns
 - [Glossary](./glossary.md) - Term definitions
 - [Configuration Reference](./configuration.md) - Environment variables and settings
 - [Troubleshooting](./troubleshooting.md) - Common issues and solutions

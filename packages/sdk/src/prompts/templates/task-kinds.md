@@ -13,7 +13,7 @@ build tools), `breakpoint` (human approval), and `sleep` (time gates).
 | `shell` | Shell command | Local shell process | **Deterministic verification** (compilation, linting, tests, grep, dependency checks, smoke tests) AND running existing CLI tools, git, builds. The orchestrating agent must execute it intentionally and post the result |
 | `agent` | LLM agent | Agent runtime | **Default for reasoning tasks** -- planning, implementation, analysis, scoring, debugging, code writing, research. Also for **subjective verification** (code review, architecture assessment, UX evaluation) |
 | `skill` | {{skillSystemLabel}} | Skill system | When a matching installed skill exists (preferred over agent when available) |
-| `breakpoint` | Human approval | UI/CLI | Decision gates requiring user input |
+| `breakpoint` | Human approval | UI/CLI | Decision gates requiring user input. May include pre-computed `autoApproval` field with `{ recommended, reason, matchedRule?, consecutiveApprovals? }` for harness-mediated auto-approval. |
 | `sleep` | Time gate | Scheduler | Time-based pauses |
 
 ### Shell vs Agent for Verification Tasks

@@ -219,6 +219,9 @@ Claude: Plan approved. Proceeding with implementation...
 | `strategy` | string | No | Resolution strategy: `'single'` (default), `'first-response-wins'`, `'collect-all'`, or `'quorum'` |
 | `previousFeedback` | string | No | Feedback from a prior rejection (used for retry context) |
 | `attempt` | number | No | Current retry attempt number |
+| `breakpointId` | string | No | Canonical identity for cross-run/cross-process matching. Dotted namespace, kebab-case (e.g., `confirm.star-repo`). Auto-derived from title via slugification if not provided. |
+| `autoApproveAfterN` | number | No | Auto-approve after N consecutive approvals for this breakpointId. Default: `-1` (disabled). |
+| `presentAlwaysApprove` | boolean | No | Whether to present an "Always Approve" option to the user. Default: `true`. |
 
 ### Breakpoint Routing
 
@@ -444,6 +447,110 @@ export async function process(inputs, ctx) {
 6. **Ensure Files Exist**: Write context files before calling the breakpoint
 7. **Use Routing for Team Workflows**: Set `expert` and `strategy` to direct breakpoints to the right people
 8. **Never Fail on Rejection**: Use the robust rejection pattern to retry with feedback instead of failing the process
+
+---
+
+## Auto-Approval Rules
+
+Breakpoint auto-approval lets you configure rules to automatically approve recurring breakpoints based on patterns, reducing repetitive manual approvals while maintaining control over critical decisions.
+
+### How It Works
+
+1. When a breakpoint effect is dispatched, the SDK evaluates rules from `~/.a5c/breakpoint-approvals/rules.json`
+2. A pre-computed `autoApproval` field is written to `task.json` with the recommendation
+3. The harness reads `autoApproval.recommended` and can auto-approve without prompting
+
+### Precedence (highest wins)
+
+| Priority | Source | Description |
+|----------|--------|-------------|
+| 1 | `never-auto-approve` rule | Explicit block — always prompt |
+| 2 | Profile `alwaysBreakOn` tags | Tags configured in user profile that always require manual approval |
+| 3 | `auto-approve` rule | Explicit allow — skip the prompt |
+| 4 | `autoApproveAfterN` threshold | Auto-approve after N consecutive manual approvals |
+| 5 | Prompt (default) | No matching rule — ask the user |
+
+### Managing Rules via CLI
+
+```bash
+# Add an auto-approve rule for all "confirm.*" breakpoints
+babysitter breakpoint:approve-rule "confirm.*" --note "Routine confirmations"
+
+# Add a never-auto-approve rule for production deployments
+babysitter breakpoint:approve-rule "gate.deploy-production" --action never-auto-approve --note "Always review prod deploys"
+
+# Add a rule with attribute predicates
+babysitter breakpoint:approve-rule "*.review(tags contains 'design')" --note "Auto-approve design reviews"
+
+# List all rules
+babysitter breakpoint:list-rules
+
+# Check if a breakpoint should auto-approve
+babysitter breakpoint:should-auto-approve "confirm.star-repo" --json
+
+# View breakpoint approval history
+babysitter breakpoint:history --limit 20
+
+# Remove a rule
+babysitter breakpoint:remove-rule <rule-id>
+```
+
+### Pattern Syntax
+
+Patterns match against `breakpointId` values with optional attribute predicates:
+
+| Pattern | Matches |
+|---------|---------|
+| `confirm.*` | Any breakpointId starting with `confirm.` |
+| `*.review` | Any breakpointId ending with `.review` |
+| `gate.deploy-production` | Exact match |
+| `*.review(tags contains 'design')` | Matching IDs where tags include "design" |
+| `gate.*(tags contains 'prerequisites' AND expert = 'owner')` | Matching IDs with both tag and expert conditions |
+
+### Using Auto-Approval in Processes
+
+```javascript
+// Breakpoint with explicit ID and auto-approve threshold
+await ctx.breakpoint({
+  question: 'Confirm repository star?',
+  title: 'Star Repository',
+  breakpointId: 'confirm.star-repo',        // Canonical cross-run identity
+  autoApproveAfterN: 3,                      // Auto-approve after 3 consecutive approvals
+  presentAlwaysApprove: true,                // Show "Always Approve" option
+  tags: ['routine', 'github'],
+});
+
+// breakpointId is auto-derived from title if not provided:
+// title "Review Design Document" → breakpointId "review-design-document"
+await ctx.breakpoint({
+  question: 'Review the design?',
+  title: 'Review Design Document',
+  tags: ['design'],
+});
+```
+
+### Pre-Computed autoApproval in task.json
+
+When a breakpoint effect is written to disk, the SDK evaluates rules and writes the result to `task.json`:
+
+```json
+{
+  "kind": "breakpoint",
+  "title": "Star Repository",
+  "metadata": {
+    "breakpointId": "confirm.star-repo",
+    "tags": ["routine", "github"]
+  },
+  "autoApproval": {
+    "recommended": true,
+    "reason": "Matched auto-approve rule: rule-a1b2c3d4",
+    "matchedRule": "rule-a1b2c3d4",
+    "consecutiveApprovals": 5
+  }
+}
+```
+
+The harness can read `autoApproval.recommended` directly from task.json without calling the CLI.
 
 ---
 

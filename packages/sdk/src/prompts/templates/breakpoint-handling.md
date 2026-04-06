@@ -90,7 +90,43 @@ for (let attempt = 0; attempt < 3; attempt++) {
 ```
 {{/cap.breakpoint-routing}}
 
-##### 5.1.2 Non-interactive mode
+##### 5.1.2 Auto-Approval Mode
+
+Breakpoint tasks may include a pre-computed `autoApproval` field in task.json:
+
+```json
+{
+  "autoApproval": {
+    "recommended": true,
+    "reason": "Matched auto-approve rule: rule-a1b2c3d4",
+    "matchedRule": "rule-a1b2c3d4",
+    "consecutiveApprovals": 5
+  }
+}
+```
+
+When `autoApproval.recommended` is `true`, the harness MAY auto-approve the
+breakpoint without prompting the user. The `reason` field explains why.
+
+Alternatively, use the CLI to check at runtime:
+
+```bash
+$CLI breakpoint:should-auto-approve <breakpointId> --tags <csv> --expert <expert> --json
+```
+
+**Important:** `never-auto-approve` rules and profile `alwaysBreakOn` tags
+always override auto-approval. If `autoApproval.recommended` is `false`, always
+prompt the user.
+
+**Breakpoint auto-approval options in `ctx.breakpoint()`:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `breakpointId` | `string` | Canonical identity (dotted namespace, kebab-case). Auto-derived from title if omitted. |
+| `autoApproveAfterN` | `number` | Auto-approve after N consecutive approvals. `-1` = disabled (default). |
+| `presentAlwaysApprove` | `boolean` | Show "Always Approve" option to user. Default: `true`. |
+
+##### 5.1.3 Non-interactive mode
 
 When the run was created with `--non-interactive`, breakpoints are auto-approved
 at the runtime level and never appear as pending effects. No orchestrator action

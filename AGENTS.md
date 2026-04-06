@@ -119,6 +119,13 @@ babysitter log --type <process|hook|cli> --message <msg> [--run-id <id>] [--labe
 babysitter hook:log --hook-type <type> --log-file <path> [--json]
 babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
 
+# Breakpoint Auto-Approval
+babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
+babysitter breakpoint:remove-rule <ruleId> [--json]
+babysitter breakpoint:list-rules [--json]
+babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
+babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
+
 # Instruction Generation
 babysitter instructions:babysit-skill --harness <name> [--interactive|--no-interactive] [--json]
 babysitter instructions:process-create --harness <name> [--interactive|--no-interactive] [--json]

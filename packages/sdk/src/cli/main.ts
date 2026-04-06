@@ -67,6 +67,8 @@ import {
 } from "./commands/harnessInstall";
 import { handleInstructionsCommand } from "./commands/instructions";
 import type { InstructionsCommandArgs } from "./commands/instructions";
+import { handleBreakpointCommand } from "./commands/breakpointRules";
+import type { BreakpointCommandArgs } from "./commands/breakpointRules";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
 import { renderCommandTemplate } from "../prompts";
@@ -158,6 +160,11 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter instructions:orchestrate --harness <name> [--interactive|--no-interactive] [--json]
   babysitter instructions:breakpoint-handling --harness <name> [--interactive|--no-interactive] [--json]
   babysitter mcp:serve [--json]
+  babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
+  babysitter breakpoint:remove-rule <ruleId> [--json]
+  babysitter breakpoint:list-rules [--json]
+  babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
+  babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
@@ -284,6 +291,15 @@ interface ParsedArgs {
   anycliMcp?: boolean;
   anycliAuthFile?: string;
   anycliTransport?: string;
+  // breakpoint command flags
+  breakpointPattern?: string;
+  breakpointRuleId?: string;
+  breakpointIdArg?: string;
+  breakpointAction?: string;
+  breakpointSource?: string;
+  breakpointNote?: string;
+  breakpointTags?: string;
+  breakpointExpert?: string;
 }
 
 interface ActionSummary {
@@ -695,6 +711,27 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.keepDays = parsePositiveInteger(raw, "--keep-days");
       continue;
     }
+    // breakpoint command flags
+    if (arg === "--action") {
+      parsed.breakpointAction = expectFlagValue(rest, ++i, "--action");
+      continue;
+    }
+    if (arg === "--note") {
+      parsed.breakpointNote = expectFlagValue(rest, ++i, "--note");
+      continue;
+    }
+    if (arg === "--tags") {
+      parsed.breakpointTags = expectFlagValue(rest, ++i, "--tags");
+      continue;
+    }
+    if (arg === "--expert") {
+      parsed.breakpointExpert = expectFlagValue(rest, ++i, "--expert");
+      continue;
+    }
+    if (arg === "--breakpoint-id") {
+      parsed.breakpointIdArg = expectFlagValue(rest, ++i, "--breakpoint-id");
+      continue;
+    }
     // tokens:stats / cost:stats flags
     if (arg === "--all") {
       parsed.tokensAll = true;
@@ -747,6 +784,12 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.compressionSetValue = value;
   } else if (parsed.command === "compress-output") {
     parsed.compressOutputArgs = positionals;
+  } else if (parsed.command === "breakpoint:approve-rule") {
+    [parsed.breakpointPattern] = positionals;
+  } else if (parsed.command === "breakpoint:remove-rule") {
+    [parsed.breakpointRuleId] = positionals;
+  } else if (parsed.command === "breakpoint:should-auto-approve") {
+    [parsed.breakpointIdArg] = positionals;
   } else if (
     parsed.command === "harness:invoke" ||
     parsed.command === "harness:install" ||
@@ -2321,6 +2364,11 @@ const VALID_COMMANDS = [
   "compression:set",
   "compression:reset",
   "compress-output",
+  "breakpoint:approve-rule",
+  "breakpoint:remove-rule",
+  "breakpoint:list-rules",
+  "breakpoint:should-auto-approve",
+  "breakpoint:history",
   "version",
 ];
 
@@ -2841,6 +2889,25 @@ export function createBabysitterCli() {
             json: parsed.json,
           };
           return await handleInstructionsCommand(instructionsArgs);
+        }
+        // Breakpoint commands
+        if (parsed.command?.startsWith("breakpoint:")) {
+          const subcommand = parsed.command.split(":")[1];
+          const bpArgs: BreakpointCommandArgs = {
+            subcommand,
+            pattern: parsed.breakpointPattern,
+            ruleId: parsed.breakpointRuleId,
+            breakpointId: parsed.breakpointIdArg,
+            action: parsed.breakpointAction,
+            source: parsed.breakpointSource ?? parsed.logSource,
+            note: parsed.breakpointNote,
+            tags: parsed.breakpointTags,
+            expert: parsed.breakpointExpert,
+            runsDir: parsed.runsDir,
+            limit: parsed.limit,
+            json: parsed.json,
+          };
+          return await handleBreakpointCommand(bpArgs);
         }
         // Profile commands
         if (

@@ -30,6 +30,9 @@ import { createTaskBuildContext } from "../../tasks/context";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
+import { readRules } from "../../breakpoints/rules";
+import { evaluateAutoApproval } from "../../breakpoints/evaluator";
+
 
 export interface TaskIntrinsicContext {
   runId: string;
@@ -121,6 +124,26 @@ async function requestNewEffect<TArgs, TResult>(
   const taskDef = await Promise.resolve(options.task.build(options.args, buildCtx));
   if (!taskDef || typeof taskDef.kind !== "string") {
     throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
+  }
+  // Pre-compute autoApproval for breakpoint effects
+  if (taskDef.kind === "breakpoint") {
+    try {
+      const meta = taskDef.metadata as Record<string, unknown> | undefined;
+      const breakpointId = meta?.breakpointId as string | undefined;
+      if (breakpointId) {
+        const rules = await readRules();
+        const autoApproval = evaluateAutoApproval({
+          breakpointId,
+          tags: meta?.tags as string[] | undefined,
+          expert: meta?.expert as string | undefined,
+          rules,
+          autoApproveAfterN: meta?.autoApproveAfterN as number | undefined,
+        });
+        (taskDef as Record<string, unknown>).autoApproval = autoApproval;
+      }
+    } catch {
+      // Non-critical: skip autoApproval if evaluation fails
+    }
   }
   const { taskRef: taskDefRef, inputsRef } = await serializeAndWriteTaskDefinition({
     runDir: options.context.runDir,

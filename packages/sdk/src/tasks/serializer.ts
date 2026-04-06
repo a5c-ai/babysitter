@@ -68,6 +68,7 @@ export interface SerializedTaskDefinition extends JsonRecord {
   orchestratorTask?: JsonRecord;
   sleep?: JsonRecord;
   metadata?: JsonRecord;
+  autoApproval?: JsonRecord;
 }
 
 export async function serializeAndWriteTaskDefinition(

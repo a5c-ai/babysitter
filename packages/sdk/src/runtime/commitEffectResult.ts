@@ -12,6 +12,7 @@ import { toSerializedEffectError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { globalTaskRegistry } from "../tasks/registry";
 import { serializeAndWriteTaskResult } from "../tasks/serializer";
+import { readTaskDefinition } from "../storage/tasks";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -44,6 +45,17 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
     const stderrRef = resultPayload.stderrRef ?? writtenStderrRef;
     const eventError = resultPayload.status === "error" ? resultPayload.error : undefined;
 
+    // Enrich breakpoint EFFECT_RESOLVED events with breakpointId from task metadata
+    let breakpointId: string | undefined;
+    if (record.kind === "breakpoint" || record.taskId === "__sdk.breakpoint") {
+      try {
+        const taskDef = await readTaskDefinition(options.runDir, options.effectId);
+        breakpointId = (taskDef?.metadata as Record<string, unknown> | undefined)?.breakpointId as string | undefined;
+      } catch {
+        // Non-critical: skip enrichment if task.json is unreadable
+      }
+    }
+
     const resolvedEvent = await appendEvent({
       runDir: options.runDir,
       eventType: "EFFECT_RESOLVED",
@@ -56,6 +68,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
         stderrRef,
         startedAt: resultPayload.startedAt,
         finishedAt: resultPayload.finishedAt,
+        ...(breakpointId ? { breakpointId } : {}),
       },
     });
     globalTaskRegistry.resolveEffect(options.effectId, {
