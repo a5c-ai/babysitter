@@ -30,7 +30,7 @@ Remind the user that they may want to remove the `ANTHROPIC_API_KEY` secret from
 ## Step 4: Remove from Registry
 
 ```bash
-babysitter plugin:remove-from-registry --plugin-name github-actions-cicd --project --json
+babysitter plugin:remove-from-registry --plugin-name github-actions-cicd-claude-code --project --json
 ```
 
 ## Step 5: Commit Changes

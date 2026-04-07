@@ -22,13 +22,31 @@
       "tags": ["hooks", "sound", "notifications", "ux", "claude-code"],
       "author": "a5c-ai"
     },
-    "github-actions-cicd": {
-      "name": "github-actions-cicd",
-      "description": "Set up babysitter-powered GitHub Actions workflows with triggers on issue comments, PR events, labels, schedules, and manual dispatch. Based on docs/github-actions-setup-claude-code.md.",
+    "github-actions-cicd-claude-code": {
+      "name": "github-actions-cicd-claude-code",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Claude Code using anthropics/claude-code-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
       "latestVersion": "1.0.0",
       "versions": ["1.0.0"],
-      "packagePath": "plugins/github-actions-cicd",
-      "tags": ["cicd", "github-actions", "automation", "devops", "workflows"],
+      "packagePath": "plugins/github-actions-cicd-claude-code",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "claude-code"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-codex": {
+      "name": "github-actions-cicd-codex",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Codex using openai/codex-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-codex",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "codex", "openai"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-gemini-cli": {
+      "name": "github-actions-cicd-gemini-cli",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Gemini CLI using google-github-actions/run-gemini-cli@v1. Supports API key, Vertex AI, and Workload Identity Federation auth.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-gemini-cli",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "gemini-cli", "google"],
       "author": "a5c-ai"
     },
     "rate-limit-handler": {

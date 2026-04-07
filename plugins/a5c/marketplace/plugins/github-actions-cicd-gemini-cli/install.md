@@ -1,6 +1,6 @@
-# GitHub Actions CI/CD — Install Instructions
+# GitHub Actions CI/CD (Gemini CLI) — Install Instructions
 
-Set up babysitter-powered GitHub Actions workflows that trigger on issue comments, PR events, and other git events. Based on the [official GitHub Actions setup guide](https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-claude-code.md).
+Set up babysitter-powered GitHub Actions workflows using [Google's Gemini CLI Action](https://github.com/google-github-actions/run-gemini-cli) that trigger on issue comments, PR events, and other git events. Based on the [official GitHub Actions setup guide for Gemini CLI](https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-gemini-cli.md).
 
 ## Step 1: Interview the User
 
@@ -8,7 +8,7 @@ Ask which workflow triggers and templates to install:
 
 ### Trigger Types
 
-1. **Issue Comment Handler** (recommended) — Responds to `@claude` mentions in issue comments and PR review comments. This is the most versatile trigger.
+1. **Issue Comment Handler** (recommended) — Responds to `@gemini` mentions in issue comments and PR review comments. This is the most versatile trigger.
 2. **PR Review Automation** — Automatically runs babysitter-orchestrated code review when PRs are opened, synchronized, or marked ready for review.
 3. **Feature Development (TDD)** — Triggers on issues labeled `feature-request`, implements features using TDD Quality Convergence methodology.
 4. **GSD Quick Tasks** — Triggers on `/gsd` commands in issue comments for rapid prototyping.
@@ -24,7 +24,7 @@ Ask the user:
 - Which branch should workflows target? (default: `main`)
 - Should workflows create PRs automatically? (default: yes)
 - What timeout should be set for workflow runs? (default: 30 minutes)
-- Should `track_progress` be enabled for babysitter runs? (default: yes)
+- Which authentication method? (API key, Vertex AI, or GCP Workload Identity Federation)
 
 ## Step 2: Create Workflow Directory
 
@@ -34,36 +34,61 @@ mkdir -p .github/workflows
 
 ## Step 3: Create Workflow Files
 
-Based on the user's selections, create the corresponding workflow YAML files. Each workflow uses the `anthropics/claude-code-action@v1` action with the babysitter plugin.
+Based on the user's selections, create the corresponding workflow YAML files. Each workflow uses the `google-github-actions/run-gemini-cli@v1` action with the babysitter SDK installed as a build step.
 
-### Common Configuration Block
+### Common Configuration Block (API Key Auth)
 
 All workflows share this core configuration:
 
 ```yaml
 steps:
   - name: Checkout repository
-    uses: actions/checkout@v6
+    uses: actions/checkout@v4
     with:
       fetch-depth: 1  # Use 0 for workflows that need git history
 
-  - name: Run Claude Code with Babysitter
-    uses: anthropics/claude-code-action@v1
+  - name: Install Babysitter SDK
+    run: npm install -g @a5c-ai/babysitter-sdk
+
+  - name: Run Gemini CLI with Babysitter
+    uses: google-github-actions/run-gemini-cli@v1
     with:
-      anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-      track_progress: true
-
-      plugin_marketplaces: |
-        https://github.com/a5c-ai/babysitter.git
-
-      plugins: |
-        babysitter@a5c.ai
+      gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
 ```
+
+### Common Configuration Block (GCP Workload Identity Federation)
+
+For production workloads without stored secrets:
+
+```yaml
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Authenticate to Google Cloud
+    uses: google-github-actions/auth@v2
+    with:
+      workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+  - name: Install Babysitter SDK
+    run: npm install -g @a5c-ai/babysitter-sdk
+
+  - name: Run Gemini CLI with Babysitter
+    uses: google-github-actions/run-gemini-cli@v1
+    with:
+      gcp_workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      gcp_project_id: ${{ vars.GCP_PROJECT_ID }}
+      gcp_service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      use_vertex_ai: "true"
+```
+
+**Note:** Unlike Claude Code, Gemini CLI does not have a native plugin marketplace. The babysitter CLI is installed via npm as a build step and is then available to Gemini during execution. Prompts should instruct Gemini that the `babysitter` CLI is available.
 
 ### Workflow: Issue Comment Handler (`babysitter-issue-comment.yml`)
 
 ```yaml
-name: Claude Code with Babysitter
+name: Gemini CLI with Babysitter
 
 on:
   issue_comment:
@@ -72,42 +97,37 @@ on:
     types: [created]
   issues:
     types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
 
 jobs:
-  claude:
+  gemini:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@gemini')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@gemini')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@gemini'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Run Claude Code with Babysitter
-        uses: anthropics/claude-code-action@v1
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
+      - name: Run Gemini CLI with Babysitter
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
 ```
 
 ### Workflow: PR Review (`babysitter-pr-review.yml`)
 
 ```yaml
-name: Babysitter PR Review
+name: Babysitter PR Review (Gemini)
 
 on:
   pull_request:
@@ -119,24 +139,22 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter PR Review
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call orchestrate a thorough code review using TDD Quality Convergence methodology.
+            You have the babysitter CLI available for orchestration.
+            Orchestrate a thorough code review using TDD Quality Convergence methodology.
 
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -146,17 +164,12 @@ jobs:
             - Security vulnerabilities
             - Performance implications
             - Test coverage
-
-            Generate a structured review report with:
-            - Summary of changes
-            - Issues found (critical, warning, info)
-            - Recommendations
 ```
 
 ### Workflow: Feature Development TDD (`babysitter-feature-tdd.yml`)
 
 ```yaml
-name: Babysitter TDD Feature
+name: Babysitter TDD Feature (Gemini)
 
 on:
   issues:
@@ -171,24 +184,22 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter TDD
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call implement the feature described in this issue using TDD Quality Convergence methodology.
+            You have the babysitter CLI available for orchestration.
+            Implement the feature described in issue #${{ github.event.issue.number }} using TDD Quality Convergence methodology.
 
             REPO: ${{ github.repository }}
             ISSUE NUMBER: ${{ github.event.issue.number }}
@@ -205,7 +216,7 @@ jobs:
 ### Workflow: GSD Quick Tasks (`babysitter-gsd.yml`)
 
 ```yaml
-name: Babysitter GSD
+name: Babysitter GSD (Gemini)
 
 on:
   issue_comment:
@@ -220,25 +231,22 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter GSD
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_non_write_users: "*"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call use GSD methodology for the following task:
+            You have the babysitter CLI available.
+            Use GSD methodology for the following task:
 
             ${{ github.event.comment.body }}
 
@@ -248,7 +256,7 @@ jobs:
 ### Workflow: Spec-Driven Development (`babysitter-spec-kit.yml`)
 
 ```yaml
-name: Babysitter Spec-Kit
+name: Babysitter Spec-Kit (Gemini)
 
 on:
   workflow_dispatch:
@@ -265,24 +273,22 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter Spec-Kit
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call implement the specification at ${{ inputs.spec_file }} using Spec-Kit methodology.
+            You have the babysitter CLI available for orchestration.
+            Implement the specification at ${{ inputs.spec_file }} using Spec-Kit methodology.
 
             Follow the spec-driven approach:
             1. Parse and validate the specification
@@ -294,7 +300,7 @@ jobs:
 ### Workflow: Security Scanning (`babysitter-security.yml`)
 
 ```yaml
-name: Babysitter Security Setup
+name: Babysitter Security Setup (Gemini)
 
 on:
   workflow_dispatch:
@@ -309,24 +315,22 @@ jobs:
       contents: write
       pull-requests: write
       security-events: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter SAST Pipeline
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call use specializations/security-compliance/sast-pipeline process.
+            You have the babysitter CLI available for orchestration.
+            Use the security-compliance/sast-pipeline process.
 
             REPO: ${{ github.repository }}
 
@@ -341,7 +345,7 @@ jobs:
 ### Workflow: Incident Response (`babysitter-incident-response.yml`)
 
 ```yaml
-name: Babysitter Incident Response
+name: Babysitter Incident Response (Gemini)
 
 on:
   issues:
@@ -355,24 +359,22 @@ jobs:
     permissions:
       contents: read
       issues: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter Incident Response
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call use specializations/devops-sre-platform/incident-response process.
+            You have the babysitter CLI available for orchestration.
+            Use the devops-sre-platform/incident-response process.
 
             REPO: ${{ github.repository }}
             INCIDENT ISSUE: ${{ github.event.issue.number }}
@@ -389,7 +391,7 @@ jobs:
 ### Workflow: Architecture Documentation (`babysitter-arch-docs.yml`)
 
 ```yaml
-name: Babysitter Architecture Docs
+name: Babysitter Architecture Docs (Gemini)
 
 on:
   workflow_dispatch:
@@ -405,24 +407,22 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Install Babysitter SDK
+        run: npm install -g @a5c-ai/babysitter-sdk
+
       - name: Run Babysitter Architecture Documentation
-        uses: anthropics/claude-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          track_progress: true
-          plugin_marketplaces: |
-            https://github.com/a5c-ai/babysitter.git
-          plugins: |
-            babysitter@a5c.ai
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
-            /babysitter:call use specializations/technical-documentation/arch-docs-c4 process.
+            You have the babysitter CLI available for orchestration.
+            Use the technical-documentation/arch-docs-c4 process.
 
             REPO: ${{ github.repository }}
 
@@ -438,28 +438,38 @@ jobs:
 
 ## Step 4: Configure GitHub Secrets
 
-Instruct the user to add the following secret to their repository (Settings > Secrets and variables > Actions):
+Instruct the user to add the appropriate secret to their repository (Settings > Secrets and variables > Actions):
 
-- **`ANTHROPIC_API_KEY`** — Their Anthropic API key for Claude Code
+### API Key Authentication
+- **`GEMINI_API_KEY`** — Their Google Gemini API key
 
-If not already configured, guide them to:
+### GCP Workload Identity Federation (recommended for production)
+No secrets needed. Instead, configure repository variables:
+- **`GCP_WORKLOAD_IDENTITY_PROVIDER`** — Workload Identity Provider resource name
+- **`GCP_PROJECT_ID`** — GCP project ID
+- **`GCP_SERVICE_ACCOUNT`** — Service account email
+
+Ensure the job has `id-token: write` permission for WIF.
+
+If using API key auth, guide them to:
 1. Go to `https://github.com/<owner>/<repo>/settings/secrets/actions`
 2. Click "New repository secret"
-3. Name: `ANTHROPIC_API_KEY`
-4. Value: their Anthropic API key
+3. Name: `GEMINI_API_KEY`
+4. Value: their Gemini API key
 
 ## Step 5: Configure Environment Variables (Optional)
 
 Create a `.github/babysitter.env` reference file documenting available environment variables:
 
 ```
-# Babysitter Configuration for GitHub Actions
+# Babysitter Configuration for GitHub Actions (Gemini CLI)
 # Set these as env vars in your workflow YAML
 
 # BABYSITTER_RUNS_DIR=.a5c/runs         # Runs directory (default: .a5c/runs)
 # BABYSITTER_MAX_ITERATIONS=100          # Max iterations per run (default: 256)
 # BABYSITTER_QUALITY_THRESHOLD=85        # Quality gate threshold (default: 80)
 # BABYSITTER_LOG_LEVEL=debug             # Log level: info|debug|warn|error
+# BABYSITTER_EXTENSION_PATH=/usr/local/lib/node_modules/@a5c-ai/babysitter-gemini  # Gemini extension path
 ```
 
 ## Step 6: Add Artifact Preservation
@@ -478,7 +488,7 @@ Add a workflow step to preserve babysitter run artifacts for debugging. Instruct
 ## Step 7: Register Plugin
 
 ```bash
-babysitter plugin:update-registry --plugin-name github-actions-cicd --plugin-version 1.0.0 --marketplace-name marketplace --project --json
+babysitter plugin:update-registry --plugin-name github-actions-cicd-gemini-cli --plugin-version 1.0.0 --marketplace-name marketplace --project --json
 ```
 
 ## Step 8: Verify Setup
@@ -486,10 +496,10 @@ babysitter plugin:update-registry --plugin-name github-actions-cicd --plugin-ver
 After creating the workflow files:
 
 1. Commit and push the `.github/workflows/` changes
-2. Test the issue comment handler by creating an issue with `@claude` in the body
+2. Test the issue comment handler by creating an issue with `@gemini` in the body
 3. Verify the workflow triggers in the Actions tab
-4. Check that babysitter plugin loads correctly in the action logs
+4. Check that babysitter SDK is installed correctly in the action logs
 
 ## Reference
 
-Full documentation: [https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-claude-code.md](https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-claude-code.md)
+Full documentation: [https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-gemini-cli.md](https://github.com/a5c-ai/babysitter/blob/main/docs/github-actions-setup-gemini-cli.md)
