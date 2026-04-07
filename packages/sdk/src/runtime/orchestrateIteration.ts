@@ -13,6 +13,7 @@ import {
   ParallelPendingError,
   RunFailedError,
 } from "./exceptions";
+import { validateAgainstSchema } from "./schemaValidator";
 import {
   IterationMetadata,
   IterationResult,
@@ -72,6 +73,17 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       const output = await withProcessContext(engine.internalContext, () =>
         processFn(inputs, engine.context, options.context)
       );
+      // Validate output against outputSchema if present (warn only, don't throw)
+      const runMeta = engine.metadata as Record<string, unknown> | undefined;
+      const outputSchema = runMeta?.outputSchema as Record<string, unknown> | undefined;
+      if (outputSchema) {
+        const validation = validateAgainstSchema(output, outputSchema);
+        if (!validation.valid) {
+          console.warn(
+            `[babysitter] Output schema validation warning: ${validation.errors.join("; ")}`,
+          );
+        }
+      }
       const outputRef = await writeRunOutput(options.runDir, output);
 
       // Compute cost stats for run completion

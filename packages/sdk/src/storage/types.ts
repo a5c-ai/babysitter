@@ -19,6 +19,8 @@ export interface RunMetadata extends JsonRecord {
   createdAt: string;
   completionProof?: string;
   prompt?: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface CreateRunDirOptions {
@@ -37,6 +39,8 @@ export interface CreateRunDirOptions {
   inputs?: unknown;
   extraMetadata?: Record<string, unknown>;
   prompt?: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface AppendEventOptions {

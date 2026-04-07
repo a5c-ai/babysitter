@@ -96,6 +96,8 @@ export interface CreateRunOptions {
   request?: string;
   prompt?: string;
   inputs?: unknown;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
   processRevision?: string;
   layoutVersion?: string;
   metadata?: JsonRecord;

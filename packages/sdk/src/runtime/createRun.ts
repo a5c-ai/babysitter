@@ -8,6 +8,8 @@ import { RunEntrypointMetadata } from "../storage/types";
 import { nextUlid } from "../storage/ulids";
 import type { CreateRunOptions, CreateRunResult } from "./types";
 import { callRuntimeHook } from "./hooks/runtime";
+import { validateAgainstSchema } from "./schemaValidator";
+import { BabysitterRuntimeError } from "./exceptions";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
@@ -19,6 +21,17 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
   const providedProof =
     typeof options.metadata?.completionProof === "string" ? options.metadata.completionProof : undefined;
   const completionProof = providedProof ?? crypto.randomBytes(16).toString("hex");
+  // Validate inputs against inputSchema if both are provided
+  if (options.inputSchema && options.inputs !== undefined) {
+    const validation = validateAgainstSchema(options.inputs, options.inputSchema);
+    if (!validation.valid) {
+      throw new BabysitterRuntimeError(
+        "InputValidationError",
+        `Input validation failed against inputSchema: ${validation.errors.join("; ")}`,
+      );
+    }
+  }
+
   const extraMetadata = {
     ...options.metadata,
     completionProof,
@@ -36,6 +49,8 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     processPath: normalizedEntrypoint.importPath,
     extraMetadata,
     prompt: options.prompt,
+    inputSchema: options.inputSchema,
+    outputSchema: options.outputSchema,
   });
 
   let lockAcquired = false;
