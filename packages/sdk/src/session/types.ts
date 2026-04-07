@@ -13,8 +13,10 @@ export interface SessionState {
   iteration: number;
   /** Maximum allowed iterations (0 = unlimited) */
   maxIterations: number;
-  /** Associated run ID (empty string if not yet associated) */
+  /** The single currently-active run bound to this session (empty string if unbound) */
   runId: string;
+  /** Historical audit trail of all run IDs ever bound to this session, chronological (GAP-SESSION-001) */
+  runIds: string[];
   /** ISO timestamp when session started */
   startedAt: string;
   /** ISO timestamp of last iteration */
@@ -23,6 +25,17 @@ export interface SessionState {
   iterationTimes: number[];
   /** Optional key-value metadata (e.g. external correlation IDs) */
   metadata?: Record<string, string>;
+}
+
+/**
+ * Accumulated context shared across runs within a session (GAP-SESSION-001).
+ * Persisted as a JSON file alongside the session state file.
+ */
+export interface SessionContext {
+  /** Accumulated notes from across runs */
+  notes: string[];
+  /** Shared knowledge key-value pairs accumulated across runs */
+  sharedKnowledge: Record<string, string>;
 }
 
 /**

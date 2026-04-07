@@ -49,6 +49,7 @@ describe('session:check-iteration', () => {
       iteration: 1,
       maxIterations: 256,
       runId: 'run-abc',
+      runIds: [],
       startedAt: '2026-01-01T00:00:00Z',
       lastIterationAt: '2026-01-01T00:00:00Z',
       iterationTimes: [],

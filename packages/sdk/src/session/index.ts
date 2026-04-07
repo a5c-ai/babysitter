@@ -7,6 +7,7 @@
 export type {
   SessionState,
   SessionFile,
+  SessionContext,
   SessionInitOptions,
   SessionAssociateOptions,
   SessionResumeOptions,
@@ -43,4 +44,13 @@ export {
   isoToEpochSeconds,
   updateIterationTimes,
   isIterationTooFast,
+  addRunToSession,
+  getSessionRuns,
 } from './write';
+
+// Context persistence (GAP-SESSION-001)
+export {
+  getSessionContextPath,
+  getSessionContext,
+  updateSessionContext,
+} from './context';

@@ -199,6 +199,7 @@ async function handleCodexSessionStartHookImpl(
         iteration: 1,
         maxIterations: 256,
         runId: "",
+        runIds: [],
         startedAt: nowTs,
         lastIterationAt: nowTs,
         iterationTimes: [],
