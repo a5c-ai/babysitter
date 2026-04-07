@@ -1,7 +1,7 @@
 /**
  * Reusable agentic tool definitions for Pi sessions.
  *
- * Provides a factory that builds a standard set of 17 tools (file ops,
+ * Provides a factory that builds a standard set of 16 tools (file ops,
  * execution, browser/web, user interaction, utilities) that can be
  * injected into any Pi session via `PiSessionOptions.customTools`.
  *
@@ -415,6 +415,25 @@ export function createAgenticToolDefinitions(
         multiline: Type.Optional(
           Type.Boolean({ description: "Enable multiline mode" }),
         ),
+        output_mode: Type.Optional(
+          Type.Union([
+            Type.Literal("content"),
+            Type.Literal("files_with_matches"),
+            Type.Literal("count"),
+          ], { description: "Output mode: 'content' (matching lines), 'files_with_matches' (file paths, default), 'count' (match counts)" }),
+        ),
+        before_context: Type.Optional(
+          Type.Number({ description: "Lines before each match (rg -B)" }),
+        ),
+        after_context: Type.Optional(
+          Type.Number({ description: "Lines after each match (rg -A)" }),
+        ),
+        line_numbers: Type.Optional(
+          Type.Boolean({ description: "Show line numbers in content mode (default true)" }),
+        ),
+        head_limit: Type.Optional(
+          Type.Number({ description: "Max output lines (default 250)" }),
+        ),
       }),
       execute: async (
         _toolCallId: string,
@@ -423,15 +442,32 @@ export function createAgenticToolDefinitions(
         const searchPath = params.path
           ? resolveSafe(workspace, String(params.path))
           : workspace;
-        const args: string[] = [
-          "--no-heading",
-          "--line-number",
-          "--color",
-          "never",
-        ];
+        const mode = (params.output_mode as string) ?? "files_with_matches";
+        const args: string[] = ["--color", "never"];
+
+        if (mode === "files_with_matches") {
+          args.push("-l");
+        } else if (mode === "count") {
+          args.push("-c");
+        } else {
+          // content mode
+          args.push("--no-heading");
+          if (params.line_numbers === false) {
+            args.push("--no-line-number");
+          } else {
+            args.push("--line-number");
+          }
+          if (params.before_context != null) args.push("-B", String(params.before_context));
+          if (params.after_context != null) args.push("-A", String(params.after_context));
+        }
+
         if (params.i) args.push("-i");
         if (params.multiline) args.push("-U", "--multiline-dotall");
-        if (params.context) args.push("-C", String(params.context));
+        const hasSplitContext =
+          params.before_context != null || params.after_context != null;
+        if (mode === "content" && params.context != null && !hasSplitContext) {
+          args.push("-C", String(params.context));
+        }
         if (params.glob) args.push("--glob", String(params.glob));
         if (params.type) args.push("--type", String(params.type));
         args.push("--", String(params.pattern), searchPath);
@@ -441,12 +477,21 @@ export function createAgenticToolDefinitions(
           timeout: DEFAULT_SEARCH_TIMEOUT,
         });
         let output = result.stdout;
+
+        // Apply head_limit (default 250, 0 = unlimited) before offset/limit
+        const rawHeadLimit = params.head_limit as number | undefined;
+        const headLimit = rawHeadLimit === 0 ? Infinity : (rawHeadLimit ?? 250);
+        const lines = output.split("\n");
+        const headLimited = lines.slice(0, headLimit);
+
         if (params.offset || params.limit) {
-          const lines = output.split("\n");
           const off = (params.offset as number) ?? 0;
           const lim = (params.limit as number) ?? 250;
-          output = lines.slice(off, off + lim).join("\n");
+          output = headLimited.slice(off, off + lim).join("\n");
+        } else {
+          output = headLimited.join("\n");
         }
+
         if (!output.trim() && result.exitCode !== 0 && result.stderr) {
           return errorResult(result.stderr.trim());
         }
