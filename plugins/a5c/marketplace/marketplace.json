@@ -49,6 +49,15 @@
       "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "gemini-cli", "google"],
       "author": "a5c-ai"
     },
+    "github-actions-cicd-babysitter": {
+      "name": "github-actions-cicd-babysitter",
+      "description": "Set up babysitter-powered GitHub Actions workflows using the official harness-agnostic Babysitter Action (a5c-ai/babysitter@main). Supports pi, claude-code, codex, gemini-cli, and more through a single action with multi-provider credential handling.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-babysitter",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "harness-agnostic", "multi-provider"],
+      "author": "a5c-ai"
+    },
     "rate-limit-handler": {
       "name": "rate-limit-handler",
       "description": "Automatically retry Claude Code sessions on Anthropic subscription rate limits. Uses claude-auto-retry to detect rate limit messages, parse reset times, wait for cooldown, and send a continuation message via tmux.",
