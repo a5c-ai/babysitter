@@ -31,6 +31,23 @@ import type { EffectAction, IterationResult } from "../../runtime/types";
 import type { CompressionConfig } from "../../compression/config";
 import type { HarnessPromptContext } from "./harnessPrompts";
 
+// ── Output Mode ─────────────────────────────────────────────────────
+
+/**
+ * Controls how harness commands render output and interact with the user.
+ * - "cli": ANSI-colored output to stderr, interactive readline prompts (default)
+ * - "json": Structured JSON to stdout, no ANSI, no interactive prompts
+ * - "tui": Silent — TUI manages its own display and interaction; harness
+ *   commands should not write to stderr or create readline interfaces
+ */
+export type OutputMode = "cli" | "json" | "tui";
+
+/** Derive OutputMode from legacy flags + explicit override. */
+export function resolveOutputMode(json: boolean, outputMode?: OutputMode): OutputMode {
+  if (outputMode) return outputMode;
+  return json ? "json" : "cli";
+}
+
 // ── Exported Types ───────────────────────────────────────────────────
 
 export interface HarnessCreateRunArgs {
@@ -47,6 +64,7 @@ export interface HarnessCreateRunArgs {
   existingRunId?: string;
   existingRunDir?: string;
   planOnly?: boolean;
+  outputMode?: OutputMode;
 }
 
 /** @deprecated Use HarnessCreateRunArgs instead */
@@ -231,8 +249,9 @@ export function stringifyForVerboseLog(value: unknown, maxChars: number = VERBOS
   }
 }
 
-export function writeVerboseLine(enabled: boolean, json: boolean, message: string): void {
-  if (!json && enabled) {
+export function writeVerboseLine(enabled: boolean, json: boolean, message: string, outputMode?: OutputMode): void {
+  const mode = resolveOutputMode(json, outputMode);
+  if (mode === "cli" && enabled) {
     process.stderr.write(`${DIM}${message}${RESET}\n`);
   }
 }
@@ -243,8 +262,10 @@ export function writeVerboseBlock(
   label: string,
   value: unknown,
   maxChars: number = VERBOSE_LOG_LIMIT,
+  outputMode?: OutputMode,
 ): void {
-  if (json || !enabled) {
+  const mode = resolveOutputMode(json, outputMode);
+  if (mode !== "cli" || !enabled) {
     return;
   }
   process.stderr.write(
@@ -256,8 +277,14 @@ export function emitProgress(
   payload: ProgressPayload,
   json: boolean,
   verbose: boolean,
+  outputMode?: OutputMode,
 ): void {
-  if (json) {
+  const mode = resolveOutputMode(json, outputMode);
+
+  // TUI mode: harness commands are silent — TUI manages its own display
+  if (mode === "tui") return;
+
+  if (mode === "json") {
     console.log(JSON.stringify(payload, null, 2));
     return;
   }
@@ -420,7 +447,11 @@ export function askLine(
 
 export async function readInteractivePrompt(
   rl: readline.Interface,
+  outputMode?: OutputMode,
 ): Promise<string | null> {
+  // In TUI mode, the TUI manages its own prompt UI — never use readline here
+  if (outputMode === "tui") return null;
+
   process.stderr.write("\n");
   process.stderr.write(
     `${BOLD}${CYAN}babysitter harness:create-run${RESET}\n`,

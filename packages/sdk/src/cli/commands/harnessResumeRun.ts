@@ -39,6 +39,7 @@ export interface SessionResumeArgs {
   json: boolean;
   verbose: boolean;
   interactive?: boolean;
+  outputMode?: import("./harnessUtils").OutputMode;
 }
 
 interface RunSummary {
@@ -178,8 +179,8 @@ async function assessRun(runDir: string): Promise<{
 // Verbose / progress helpers
 // ---------------------------------------------------------------------------
 
-function writeVerboseLine(enabled: boolean, json: boolean, message: string): void {
-  if (!json && enabled) {
+function writeVerboseLine(enabled: boolean, json: boolean, message: string, outputMode?: string): void {
+  if (!json && enabled && outputMode !== "tui") {
     process.stderr.write(`${DIM}${message}${RESET}\n`);
   }
 }
@@ -190,8 +191,9 @@ function writeVerboseBlock(
   label: string,
   value: unknown,
   maxChars: number = VERBOSE_LOG_LIMIT,
+  outputMode?: string,
 ): void {
-  if (json || !enabled) {
+  if (json || !enabled || outputMode === "tui") {
     return;
   }
   let raw: string;
@@ -294,11 +296,12 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
     interactive = true,
   } = args;
 
+  const outputMode = args.outputMode;
   const writeVerbose = (message: string): void => {
-    writeVerboseLine(verbose, json, message);
+    writeVerboseLine(verbose, json, message, outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
-    writeVerboseBlock(verbose, json, label, value, maxChars);
+    writeVerboseBlock(verbose, json, label, value, maxChars, outputMode);
   };
 
   // Track whether the agent has triggered a resume (set by the resume tool).
@@ -431,7 +434,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
 
           resumeTriggered = true;
 
-          if (!json) {
+          if (!json && outputMode !== "tui") {
             process.stderr.write(
               `${MAGENTA}Resuming run ${BOLD}${selectedRun.runId}${RESET}${MAGENTA}...${RESET}\n\n`,
             );
@@ -456,6 +459,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
             interactive: args.interactive,
             existingRunId: selectedRun.runId,
             existingRunDir: selectedRun.runDir,
+            outputMode,
           });
 
           return formatToolResult(
@@ -525,7 +529,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
 
     // Subscribe to stream text output to stderr in non-JSON mode
     let unsubscribe: (() => void) | null = null;
-    if (!json) {
+    if (!json && outputMode !== "tui") {
       process.stderr.write(
         `\n${BOLD}${MAGENTA}Run Discovery${RESET} ${DIM}Agent is searching for runs...${RESET}\n\n`,
       );
@@ -541,7 +545,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
     const result = await session.prompt(userPrompt, 300_000);
 
     if (unsubscribe) unsubscribe();
-    if (!json) process.stderr.write("\n");
+    if (!json && outputMode !== "tui") process.stderr.write("\n");
 
     writeVerboseData("resume agent result", {
       success: result.success,
@@ -556,7 +560,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
         process.stdout.write(
           JSON.stringify({ ok: false, error: "Resume agent failed", details: result.output }) + "\n",
         );
-      } else {
+      } else if (outputMode !== "tui") {
         process.stderr.write(`${RED}Resume agent failed:${RESET} ${result.output}\n`);
       }
       return 1;
@@ -579,7 +583,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       process.stdout.write(
         JSON.stringify({ ok: false, error: "Resume session failed", details: message }) + "\n",
       );
-    } else {
+    } else if (outputMode !== "tui") {
       process.stderr.write(`${RED}Error:${RESET} ${message}\n`);
     }
     return 1;

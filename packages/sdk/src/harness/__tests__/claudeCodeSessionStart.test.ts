@@ -275,7 +275,10 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
     );
 
     expect(code).toBe(0);
-    expect(getStdout().trim()).toBe("{}");
+    const output = JSON.parse(getStdout().trim()) as Record<string, unknown>;
+    const hookOutput = output.hookSpecificOutput as Record<string, unknown>;
+    expect(hookOutput.hookEventName).toBe("SessionStart");
+    expect(hookOutput.additionalContext).toContain(sessionId);
 
     // Verify session ID was appended to env file
     const envContent = await fs.readFile(envFilePath, "utf8");

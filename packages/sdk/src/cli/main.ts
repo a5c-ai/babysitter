@@ -1463,6 +1463,7 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
         percent: rec.progressPercent,
         label: rec.progressLabel,
       } : undefined,
+      costUsd: rec.costUsd,
     }));
     console.log(`[run:status] state=${state}`);
     console.log(renderEffectTree(effectNodes));
@@ -1975,7 +1976,10 @@ async function handleTaskList(parsed: ParsedArgs): Promise<number> {
     const progressStr = record?.progressPercent !== undefined
       ? ` [${Math.round(record.progressPercent)}%${record.currentStep ? ` ${record.currentStep}` : ""}]`
       : "";
-    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label}${progressStr} (taskId=${entry.taskId ?? "n/a"})`);
+    const costStr = record?.costUsd !== undefined
+      ? ` $${record.costUsd.toFixed(4)}`
+      : "";
+    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label}${progressStr}${costStr} (taskId=${entry.taskId ?? "n/a"})`);
   }
   return 0;
 }

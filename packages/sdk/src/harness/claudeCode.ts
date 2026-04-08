@@ -935,8 +935,14 @@ async function handleSessionStartHookImpl(
     return 1;
   }
 
-  // 6. Output empty object
-  process.stdout.write("{}\n");
+  // 6. Output session context so Claude can reference the session ID
+  const output = {
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext: `Your Claude Code session ID is: ${sessionId}`,
+    },
+  };
+  process.stdout.write(JSON.stringify(output) + "\n");
   return 0;
 }
 

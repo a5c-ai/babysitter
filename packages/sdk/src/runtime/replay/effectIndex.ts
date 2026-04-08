@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_PROGRESS";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_PROGRESS" | "COST_TRACKED";
 
 interface EffectRequestedPayload {
   effectId: string;
@@ -32,6 +32,17 @@ interface EffectResolvedPayload {
   error?: SerializedEffectError;
   stdoutRef?: string;
   stderrRef?: string;
+}
+
+interface CostTrackedPayload {
+  effectId?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheCreationInputTokens?: number;
+  cacheReadInputTokens?: number;
+  costUsd?: number;
+  model?: string;
+  taskKind?: string;
 }
 
 interface EffectProgressPayload {
@@ -87,6 +98,9 @@ export class EffectIndex {
         return;
       case "EFFECT_PROGRESS":
         this.handleEffectProgress(event);
+        return;
+      case "COST_TRACKED":
+        this.handleCostTracked(event);
         return;
       default:
         // Informational events (e.g. STOP_HOOK_INVOKED) don't affect the
@@ -246,6 +260,32 @@ export class EffectIndex {
     }
     if (typeof payload.progressEta === "string") {
       record.progressEta = payload.progressEta;
+    }
+  }
+
+  private handleCostTracked(event: JournalEvent) {
+    const payload = this.expectObject<CostTrackedPayload>(event, "COST_TRACKED");
+    const effectId = typeof payload.effectId === "string" ? payload.effectId : undefined;
+    if (!effectId) return; // Run-level cost event — no effect association
+    const record = this.byEffectId.get(effectId);
+    if (!record) return; // Unknown effect — silently ignore
+    if (typeof payload.inputTokens === "number") {
+      record.inputTokens = (record.inputTokens ?? 0) + payload.inputTokens;
+    }
+    if (typeof payload.outputTokens === "number") {
+      record.outputTokens = (record.outputTokens ?? 0) + payload.outputTokens;
+    }
+    if (typeof payload.cacheCreationInputTokens === "number") {
+      record.cacheCreationInputTokens = (record.cacheCreationInputTokens ?? 0) + payload.cacheCreationInputTokens;
+    }
+    if (typeof payload.cacheReadInputTokens === "number") {
+      record.cacheReadInputTokens = (record.cacheReadInputTokens ?? 0) + payload.cacheReadInputTokens;
+    }
+    if (typeof payload.costUsd === "number") {
+      record.costUsd = (record.costUsd ?? 0) + payload.costUsd;
+    }
+    if (typeof payload.model === "string") {
+      record.costModel = payload.model;
     }
   }
 

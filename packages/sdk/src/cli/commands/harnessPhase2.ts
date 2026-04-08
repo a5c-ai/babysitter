@@ -7,6 +7,7 @@
  */
 
 import * as path from "node:path";
+import { getGlobalStateDir } from "../../config";
 import * as readline from "node:readline";
 import { Type } from "@sinclair/typebox";
 import { invokeHarness } from "../../harness/invoker";
@@ -114,9 +115,9 @@ const EFFECT_RETRY_DELAYS_OVERRIDE = process.env.VITEST ? [0, 0, 0] : undefined;
 function subscribeVerbosePiEvents(
   session: PiSessionHandle,
   label: string,
-  opts: { verbose: boolean; json: boolean },
+  opts: { verbose: boolean; json: boolean; outputMode?: import("./harnessUtils").OutputMode },
 ): (() => void) | null {
-  if (!opts.verbose || opts.json) return null;
+  if (!opts.verbose || opts.json || opts.outputMode === "tui") return null;
 
   // We subscribe *after* the session is initialized.  If it isn't initialized
   // yet, the caller will call initialize() and this subscription will fire
@@ -655,6 +656,7 @@ export async function runOrchestrationPhase(args: {
   promptContext: SessionCreatePromptContext;
   existingRunId?: string;
   existingRunDir?: string;
+  outputMode?: import("./harnessUtils").OutputMode;
 }): Promise<number> {
   const processId = path.basename(args.processPath, path.extname(args.processPath));
   const state: OrchestrationState = {
@@ -666,11 +668,12 @@ export async function runOrchestrationPhase(args: {
   let orchestrationSession: PiSessionHandle | null = null;
   const activePiSessions = new Set<PiSessionHandle>();
   const writeVerbose = (message: string): void => {
-    writeVerboseLine(args.verbose, args.json, message);
+    writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
-    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars, args.outputMode);
   };
+
   const registerPiSession = (session: PiSessionHandle): PiSessionHandle => {
     activePiSessions.add(session);
     return session;
@@ -741,6 +744,7 @@ export async function runOrchestrationPhase(args: {
       { phase: "2", status: "started", harness: args.selectedHarnessName },
       args.json,
       args.verbose,
+      args.outputMode,
     );
 
     writeVerbose(
@@ -755,6 +759,7 @@ export async function runOrchestrationPhase(args: {
         { phase: "2", status: "resuming", runId: args.existingRunId, runDir: args.existingRunDir },
         args.json,
         args.verbose,
+        args.outputMode,
       );
     } else {
       // Create new run
@@ -780,6 +785,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
       writeVerboseData("phase2 host run_create result", created);
     }
@@ -805,7 +811,7 @@ export async function runOrchestrationPhase(args: {
       runId: state.runId,
       runDir: state.runDir,
       pluginRoot: adapter.resolvePluginRoot({}),
-      stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
+      stateDir: getGlobalStateDir(),
       runsDir: args.runsDir,
       maxIterations: args.maxIterations,
       prompt: args.prompt ?? "",
@@ -831,6 +837,7 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     writeVerboseData("phase2 host bind result", state.sessionBound);
 
@@ -864,6 +871,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
 
         for (const action of result.nextActions) {
@@ -942,6 +950,7 @@ export async function runOrchestrationPhase(args: {
               },
               args.json,
               args.verbose,
+              args.outputMode,
             );
           } finally {
             workerUnsub?.();
@@ -961,6 +970,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         return 0;
       }
@@ -992,6 +1002,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
 
         if (consecutiveProcessErrors > MAX_PROCESS_ERROR_RECOVERIES) {
@@ -1005,6 +1016,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
           return 1;
         }
@@ -1080,6 +1092,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
       return 1;
     }
@@ -1094,6 +1107,7 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     return 1;
   }
@@ -1224,6 +1238,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         writeVerboseData("phase2 tool babysitter_run_create result", result);
         return formatToolResult(result, "Run created.");
@@ -1274,7 +1289,7 @@ export async function runOrchestrationPhase(args: {
           runId: state.runId,
           runDir: state.runDir,
           pluginRoot: adapter.resolvePluginRoot({}),
-          stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
+          stateDir: getGlobalStateDir(),
           runsDir: args.runsDir,
           maxIterations: args.maxIterations,
           prompt: args.prompt ?? "",
@@ -1300,6 +1315,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         writeVerboseData("phase2 tool babysitter_bind_session result", state.sessionBound);
         return formatToolResult(state.sessionBound, "Session bound.");
@@ -1336,6 +1352,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
           return formatToolResult(state.lastIterationResult, "Iteration limit reached.");
         }
@@ -1371,6 +1388,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
         } else if (result.status === "completed") {
           emitProgress(
@@ -1382,6 +1400,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
         } else if (result.status === "process-error") {
           // Recoverable process error — no RUN_FAILED in journal.
@@ -1400,6 +1419,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
           // Roll back iteration count so the retry does not consume a slot
           state.iteration -= 1;
@@ -1422,6 +1442,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
         }
 
@@ -1929,6 +1950,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
 
         state.pendingActions.delete(params.effectId);
@@ -2016,7 +2038,7 @@ export async function runOrchestrationPhase(args: {
       );
     }
 
-    if (!args.json && args.verbose) {
+    if (!args.json && args.verbose && args.outputMode !== "tui") {
       const label = options?.label ?? "phase2";
       process.stderr.write(`\n${DIM}[${label}] agent turn${RESET}\n`);
     }
@@ -2164,12 +2186,13 @@ export async function runOrchestrationPhase(args: {
     { phase: "2", status: "started", harness: args.selectedHarnessName },
     args.json,
     args.verbose,
+    args.outputMode,
   );
 
   let unsubscribe: (() => void) | null = null;
   try {
     await orchestrationSession.initialize();
-    if (!args.json && args.verbose) {
+    if (!args.json && args.verbose && args.outputMode !== "tui") {
       unsubscribe = subscribeVerbosePiEvents(orchestrationSession, "orchestrator", args);
     }
 
@@ -2270,6 +2293,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
     }
 
@@ -2325,11 +2349,12 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     return 1;
   } finally {
     if (unsubscribe) unsubscribe();
-    if (!args.json && args.verbose) process.stderr.write("\n");
+    if (!args.json && args.verbose && args.outputMode !== "tui") process.stderr.write("\n");
   }
   } finally {
     removeShutdownHandlers();

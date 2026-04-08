@@ -16,6 +16,7 @@ export interface EffectNode {
   title: string;
   duration?: number;
   progress?: EffectNodeProgress;
+  costUsd?: number;
   children?: EffectNode[];
 }
 
@@ -46,7 +47,11 @@ function renderNode(
     progressStr = colorize(` [${pct}%${label}]`, colors.cyan);
   }
 
-  lines.push(`${prefix}${connector}${statusSym} ${kindTag} ${title}${duration}${progressStr}`);
+  const costStr = node.costUsd !== undefined
+    ? colorize(` $${node.costUsd.toFixed(4)}`, colors.yellow)
+    : "";
+
+  lines.push(`${prefix}${connector}${statusSym} ${kindTag} ${title}${duration}${progressStr}${costStr}`);
 
   const childPrefix = prefix + (isLast ? "    " : "\u2502   ");
   const children = node.children ?? [];

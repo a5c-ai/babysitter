@@ -1563,10 +1563,11 @@ async function _runExternalProcessDefinitionPhase(args: {
   verbose: boolean;
   selectedHarnessName: string;
   promptContext: SessionCreatePromptContext;
+  outputMode?: import("./harnessUtils").OutputMode;
 }): Promise<string> {
   const phaseOutputs: string[] = [];
   const writeVerbose = (message: string): void => {
-    writeVerboseLine(args.verbose, args.json, message);
+    writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
@@ -1576,6 +1577,7 @@ async function _runExternalProcessDefinitionPhase(args: {
     { phase: "1", status: "started", harness: `${args.selectedHarnessName} (headless)` },
     args.json,
     args.verbose,
+    args.outputMode,
   );
 
   writeVerbose(
@@ -1695,8 +1697,9 @@ async function _runExternalProcessDefinitionPhase(args: {
     },
     args.json,
     args.verbose,
+    args.outputMode,
   );
-  if (!args.json) {
+  if (!args.json && args.outputMode !== "tui") {
     process.stderr.write(`${GREEN}Phase 1 complete:${RESET} process=${CYAN}${report.processPath}${RESET}\n`);
   }
   return report.processPath;
@@ -1716,6 +1719,7 @@ export async function runProcessDefinitionPhase(args: {
   compressionConfig: CompressionConfig | null;
   promptContext: SessionCreatePromptContext;
   selectedHarnessName: string;
+  outputMode?: import("./harnessUtils").OutputMode;
 }): Promise<string> {
   const state: { report?: ProcessDefinitionReport } = {};
   const phaseOutputs: string[] = [];
@@ -1724,10 +1728,10 @@ export async function runProcessDefinitionPhase(args: {
     ? createReadlineAskUserQuestionUiContext(args.rl)
     : undefined;
   const writeVerbose = (message: string): void => {
-    writeVerboseLine(args.verbose, args.json, message);
+    writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
-    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars, args.outputMode);
   };
   const customTools: unknown[] = [
     {
@@ -1891,6 +1895,7 @@ export async function runProcessDefinitionPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         return formatToolResult(response, "AskUserQuestion completed.");
       },
@@ -1943,6 +1948,7 @@ export async function runProcessDefinitionPhase(args: {
     { phase: "1", status: "started", harness: "internal (agentic)" },
     args.json,
     args.verbose,
+    args.outputMode,
   );
 
   writeVerbose(
@@ -1994,7 +2000,7 @@ export async function runProcessDefinitionPhase(args: {
   try {
     await session.initialize();
     let unsubscribe: (() => void) | null = null;
-    if (!args.json) {
+    if (!args.json && args.outputMode !== "tui") {
       process.stderr.write(`${DIM}Phase 1 agent is defining the process...${RESET}\n`);
       unsubscribe = session.subscribe((event: PiSessionEvent) => {
         if (event.type === "text_delta") {
@@ -2024,7 +2030,7 @@ export async function runProcessDefinitionPhase(args: {
     phaseOutputs.push(result.output);
 
     if (unsubscribe) unsubscribe();
-    if (!args.json) process.stderr.write("\n");
+    if (!args.json && args.outputMode !== "tui") process.stderr.write("\n");
 
     if (!result.success) {
       writeVerboseData("phase1 agent failure output", result.output);
@@ -2251,6 +2257,7 @@ export async function runProcessDefinitionPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
 
     return state.report.processPath;
@@ -2274,6 +2281,7 @@ export async function runProcessDefinitionPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     throw error;
   } finally {

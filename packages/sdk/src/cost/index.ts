@@ -56,3 +56,9 @@ export {
   collectCostDataForRun,
   resolveClaudeCodeSessionDir,
 } from "./collector";
+
+export {
+  computeEffectCosts,
+  type EffectCostSummary,
+  type EffectCostResult,
+} from "./effectCost";

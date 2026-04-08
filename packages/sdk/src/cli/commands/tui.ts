@@ -521,6 +521,7 @@ async function newRunFlow(args: TuiParsedArgs): Promise<void> {
       json: false,
       verbose: args.verbose,
       interactive: true,
+      outputMode: "tui",
     });
   } catch (err) {
     process.stderr.write(`  ${RED}Failed to create run: ${(err as Error).message}${RESET}\n`);
@@ -565,6 +566,7 @@ async function resumeSessionFlow(args: TuiParsedArgs): Promise<void> {
       workspace: args.workspace ?? process.cwd(),
       json: false,
       verbose: args.verbose,
+      outputMode: "tui",
     });
   } catch (err) {
     process.stderr.write(`  ${RED}Failed to resume: ${(err as Error).message}${RESET}\n`);

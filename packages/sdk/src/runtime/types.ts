@@ -66,6 +66,13 @@ export interface EffectRecord {
   progressLabel?: string;
   currentStep?: string;
   progressEta?: string;
+  // Cost tracking (GAP-SUBOBS-003)
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheCreationInputTokens?: number;
+  cacheReadInputTokens?: number;
+  costUsd?: number;
+  costModel?: string;
 }
 
 export interface EffectSchedulerHints {
