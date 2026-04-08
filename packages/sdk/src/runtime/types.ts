@@ -61,6 +61,11 @@ export interface EffectRecord {
   stderrRef?: string;
   requestedAt?: string;
   resolvedAt?: string;
+  // Progress tracking (GAP-SUBOBS-002)
+  progressPercent?: number;
+  progressLabel?: string;
+  currentStep?: string;
+  progressEta?: string;
 }
 
 export interface EffectSchedulerHints {

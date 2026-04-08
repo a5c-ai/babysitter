@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_PROGRESS";
 
 interface EffectRequestedPayload {
   effectId: string;
@@ -32,6 +32,14 @@ interface EffectResolvedPayload {
   error?: SerializedEffectError;
   stdoutRef?: string;
   stderrRef?: string;
+}
+
+interface EffectProgressPayload {
+  effectId?: string;
+  progressPercent?: number;
+  progressLabel?: string;
+  currentStep?: string;
+  progressEta?: string;
 }
 
 export class EffectIndex {
@@ -76,6 +84,9 @@ export class EffectIndex {
         return;
       case "EFFECT_RESOLVED":
         this.handleEffectResolved(event);
+        return;
+      case "EFFECT_PROGRESS":
+        this.handleEffectProgress(event);
         return;
       default:
         // Informational events (e.g. STOP_HOOK_INVOKED) don't affect the
@@ -216,6 +227,26 @@ export class EffectIndex {
     record.stdoutRef = payload.stdoutRef ? collapseDoubledA5cRuns(payload.stdoutRef) : payload.stdoutRef;
     record.stderrRef = payload.stderrRef ? collapseDoubledA5cRuns(payload.stderrRef) : payload.stderrRef;
     record.resolvedAt = event.recordedAt;
+  }
+
+  private handleEffectProgress(event: JournalEvent) {
+    const payload = this.expectObject<EffectProgressPayload>(event, "EFFECT_PROGRESS");
+    const effectId = typeof payload.effectId === "string" ? payload.effectId : undefined;
+    if (!effectId) return; // Ignore malformed progress events silently
+    const record = this.byEffectId.get(effectId);
+    if (!record) return; // Ignore progress for unknown effects silently
+    if (typeof payload.progressPercent === "number") {
+      record.progressPercent = payload.progressPercent;
+    }
+    if (typeof payload.progressLabel === "string") {
+      record.progressLabel = payload.progressLabel;
+    }
+    if (typeof payload.currentStep === "string") {
+      record.currentStep = payload.currentStep;
+    }
+    if (typeof payload.progressEta === "string") {
+      record.progressEta = payload.progressEta;
+    }
   }
 
   private expectObject<T>(event: JournalEvent, type: string): T {

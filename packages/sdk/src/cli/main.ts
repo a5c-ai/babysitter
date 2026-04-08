@@ -1459,6 +1459,10 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
       kind: rec.kind ?? "unknown",
       status: (rec.status === "resolved_ok" || rec.status === "resolved_error" ? "completed" : rec.status === "requested" ? "pending" : "running") as StatusType,
       title: rec.taskId ?? rec.effectId,
+      progress: rec.progressPercent !== undefined ? {
+        percent: rec.progressPercent,
+        label: rec.progressLabel,
+      } : undefined,
     }));
     console.log(`[run:status] state=${state}`);
     console.log(renderEffectTree(effectNodes));
@@ -1967,7 +1971,11 @@ async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   console.log(`[task:list] ${scope}=${entries.length}`);
   for (const entry of entries) {
     const label = entry.label ? ` ${entry.label}` : "";
-    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label} (taskId=${entry.taskId ?? "n/a"})`);
+    const record = records.find((r) => r.effectId === entry.effectId);
+    const progressStr = record?.progressPercent !== undefined
+      ? ` [${Math.round(record.progressPercent)}%${record.currentStep ? ` ${record.currentStep}` : ""}]`
+      : "";
+    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label}${progressStr} (taskId=${entry.taskId ?? "n/a"})`);
   }
   return 0;
 }

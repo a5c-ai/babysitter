@@ -4,12 +4,18 @@
 import { colors, colorize } from "../colors";
 import { renderStatusSymbol, type StatusType } from "./StatusBadge";
 
+export interface EffectNodeProgress {
+  percent?: number;
+  label?: string;
+}
+
 export interface EffectNode {
   effectId: string;
   kind: string;
   status: StatusType;
   title: string;
   duration?: number;
+  progress?: EffectNodeProgress;
   children?: EffectNode[];
 }
 
@@ -33,7 +39,14 @@ function renderNode(
     ? colorize(` (${formatDuration(node.duration)})`, colors.dim)
     : "";
 
-  lines.push(`${prefix}${connector}${statusSym} ${kindTag} ${title}${duration}`);
+  let progressStr = "";
+  if (node.progress?.percent !== undefined) {
+    const pct = Math.max(0, Math.min(100, Math.round(node.progress.percent)));
+    const label = node.progress.label ? ` ${node.progress.label}` : "";
+    progressStr = colorize(` [${pct}%${label}]`, colors.cyan);
+  }
+
+  lines.push(`${prefix}${connector}${statusSym} ${kindTag} ${title}${duration}${progressStr}`);
 
   const childPrefix = prefix + (isLast ? "    " : "\u2502   ");
   const children = node.children ?? [];

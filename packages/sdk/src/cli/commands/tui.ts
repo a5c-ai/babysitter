@@ -138,6 +138,10 @@ async function getRunDetail(runDir: string) {
     status: (rec.status === "resolved_ok" || rec.status === "resolved_error"
       ? "completed" : rec.status === "requested" ? "pending" : "running") as StatusType,
     title: rec.taskId ?? rec.effectId,
+    progress: rec.progressPercent !== undefined ? {
+      percent: rec.progressPercent,
+      label: rec.progressLabel,
+    } : undefined,
   }));
 
   return { metadata, journal, state, effectNodes, pendingEffects };
