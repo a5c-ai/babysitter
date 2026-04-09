@@ -7,6 +7,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
+    "babysitter-sdk": "dist/cli/main.js",
     "babysitter": "dist/cli/main.js",
     "babysitter-mcp-server": "dist/cli/mcpServeEntry.js"
   },
