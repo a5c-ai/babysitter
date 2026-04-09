@@ -85,6 +85,36 @@ export function DashboardView({
     setSelectedIndex(clampedIndex);
   }
 
+  // Action menu handler — must be declared before any early returns so
+  // the hook call order is stable across renders (Rules of Hooks).
+  const handleAction = useCallback(
+    (action: string) => {
+      switch (action) {
+        case "details":
+          if (runs.length > 0 && runs[clampedIndex]) {
+            navDispatch({ type: "NAVIGATE_TO_RUN_DETAIL", runId: runs[clampedIndex].runId });
+          }
+          break;
+        case "session":
+          if (runs.length > 0 && runs[clampedIndex]) {
+            navDispatch({ type: "NAVIGATE_TO_SESSION", runId: runs[clampedIndex].runId });
+          }
+          break;
+        case "refresh":
+          refresh();
+          break;
+        case "quit":
+          onQuit?.();
+          break;
+        default:
+          break;
+      }
+    },
+    [runs, clampedIndex, navDispatch, refresh, onQuit],
+  );
+
+  // --- Everything below here is render logic (no more hooks) ---
+
   // Count stats
   const completedCount = runs.filter((r) => r.state === "completed").length;
   const waitingCount = runs.filter((r) => r.state === "waiting").length;
@@ -135,7 +165,7 @@ export function DashboardView({
     ),
   );
 
-  // Loading / error states
+  // Loading state
   if (loading && runs.length === 0) {
     return React.createElement(
       Box as React.ComponentType<Record<string, unknown>>,
@@ -153,6 +183,7 @@ export function DashboardView({
     );
   }
 
+  // Error state
   if (error) {
     return React.createElement(
       Box as React.ComponentType<Record<string, unknown>>,
@@ -188,33 +219,7 @@ export function DashboardView({
     );
   }
 
-  // Action menu handler (keyboard is handled above; this is for the component contract)
-  const handleAction = useCallback(
-    (action: string) => {
-      switch (action) {
-        case "details":
-          if (runs.length > 0 && runs[clampedIndex]) {
-            navDispatch({ type: "NAVIGATE_TO_RUN_DETAIL", runId: runs[clampedIndex].runId });
-          }
-          break;
-        case "session":
-          if (runs.length > 0 && runs[clampedIndex]) {
-            navDispatch({ type: "NAVIGATE_TO_SESSION", runId: runs[clampedIndex].runId });
-          }
-          break;
-        case "refresh":
-          refresh();
-          break;
-        case "quit":
-          onQuit?.();
-          break;
-        default:
-          break;
-      }
-    },
-    [runs, clampedIndex, navDispatch, refresh, onQuit],
-  );
-
+  // Normal state: run list + action menu
   return React.createElement(
     Box as React.ComponentType<Record<string, unknown>>,
     { flexDirection: "column", height: "100%" },
