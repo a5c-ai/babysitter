@@ -113,7 +113,7 @@ export interface StoredTaskResult {
   effectId: string;
   taskId: string;
   invocationKey: string;
-  status: "ok" | "error";
+  status: "ok" | "error" | "cancelled";
   result?: unknown;
   value?: unknown;
   resultRef?: string;
@@ -123,6 +123,7 @@ export interface StoredTaskResult {
     stack?: string;
     data?: unknown;
   };
+  reason?: string;
   stdoutRef?: string;
   stderrRef?: string;
   startedAt?: string;

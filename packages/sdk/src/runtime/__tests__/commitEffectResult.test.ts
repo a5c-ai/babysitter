@@ -220,6 +220,99 @@ describe("commitEffectResult", () => {
   });
 });
 
+describe("commitEffectCancellation", () => {
+  test("commitEffectCancellation function exists as a named export", async () => {
+    const mod = await import("../commitEffectResult");
+    expect((mod as Record<string, unknown>).commitEffectCancellation).toBeDefined();
+    expect(typeof (mod as Record<string, unknown>).commitEffectCancellation).toBe("function");
+  });
+
+  test("appends EFFECT_CANCELLED event", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "no longer needed",
+    });
+
+    const { buildEffectIndex: buildIdx } = await import("../replay/effectIndex");
+    const index = await buildIdx({ runDir: effect.runDir });
+    const record = index.getByEffectId(effect.effectId);
+    expect(record?.status).toBe("cancelled");
+  });
+
+  test("writes result.json with cancelled status", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    const result = await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "superseded by newer task",
+    });
+
+    expect(result.resultRef).toBeDefined();
+    const { readTaskResult } = await import("../../storage/tasks");
+    const taskResult = await readTaskResult(effect.runDir, effect.effectId);
+    expect(taskResult).toMatchObject({
+      status: "cancelled",
+      reason: "superseded by newer task",
+    });
+  });
+
+  test("rejects cancellation of non-requested effects", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const { runDir } = await createTestRun(tmpRoot);
+
+    await expect(
+      commitEffectCancellation({
+        runDir,
+        effectId: "non-existent-effect",
+        reason: "nope",
+      })
+    ).rejects.toThrow(RunFailedError);
+  });
+
+  test("accepts optional reason", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    // Should work without a reason
+    await expect(
+      commitEffectCancellation({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
+      })
+    ).resolves.toBeDefined();
+  });
+});
+
 async function requestSampleEffect() {
   const { runDir, runId } = await createTestRun(tmpRoot);
   const context = await buildTaskContext(runDir, runId);

@@ -239,7 +239,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isEffectStatus(value: unknown): value is EffectStatus {
-  return value === "requested" || value === "resolved_ok" || value === "resolved_error";
+  return value === "requested" || value === "resolved_ok" || value === "resolved_error" || value === "cancelled";
 }
 
 function isJournalHeadLike(value: unknown): value is StateCacheJournalHead {

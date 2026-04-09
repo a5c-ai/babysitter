@@ -405,6 +405,17 @@ export class EffectPendingError extends BabysitterIntrinsicError {
   }
 }
 
+export class EffectCancelledError extends BabysitterIntrinsicError {
+  constructor(
+    public readonly effectId: string,
+    public readonly reason?: string,
+  ) {
+    super("EffectCancelledError", `Effect ${effectId} cancelled${reason ? `: ${reason}` : ""}`, {
+      details: { effectId, reason },
+    });
+  }
+}
+
 export class ParallelPendingError extends BabysitterIntrinsicError {
   readonly effects: EffectAction[];
   constructor(public readonly batch: ParallelBatch) {

@@ -34,7 +34,7 @@ export interface BreakpointResult {
   [key: string]: unknown;
 }
 
-export type EffectStatus = "requested" | "resolved_ok" | "resolved_error";
+export type EffectStatus = "requested" | "resolved_ok" | "resolved_error" | "cancelled";
 
 export interface SerializedEffectError {
   name?: string;

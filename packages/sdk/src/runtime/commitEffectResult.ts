@@ -98,6 +98,68 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
   });
 }
 
+export interface CommitEffectCancellationOptions {
+  runDir: string;
+  effectId: string;
+  reason?: string;
+  logger?: import("./types").ProcessLogger;
+}
+
+export async function commitEffectCancellation(
+  options: CommitEffectCancellationOptions,
+): Promise<{ resultRef: string }> {
+  return await withRunLock(options.runDir, "runtime:commitEffectCancellation", async () => {
+    const effectIndex = await buildEffectIndex({ runDir: options.runDir });
+    const record = effectIndex.getByEffectId(options.effectId);
+
+    if (!record) {
+      throw new RunFailedError(`Unknown effectId ${options.effectId}`);
+    }
+
+    if (record.status !== "requested") {
+      throw new RunFailedError(`Effect ${options.effectId} is not requested (status=${record.status})`);
+    }
+
+    const { resultRef } = await serializeAndWriteTaskResult({
+      runDir: options.runDir,
+      effectId: options.effectId,
+      taskId: requireTaskId(record),
+      invocationKey: record.invocationKey,
+      payload: {
+        status: "cancelled",
+        reason: options.reason,
+        error: { name: "EffectCancelledError", message: options.reason ?? "Effect cancelled" },
+        metadata: { cancelled: true, reason: options.reason },
+      },
+    });
+
+    await appendEvent({
+      runDir: options.runDir,
+      eventType: "EFFECT_CANCELLED",
+      event: {
+        effectId: options.effectId,
+        reason: options.reason,
+      },
+    });
+
+    globalTaskRegistry.resolveEffect(options.effectId, {
+      status: "cancelled",
+      resultRef,
+      resolvedAt: new Date().toISOString(),
+    });
+
+    emitRuntimeMetric(options.logger, "commit.effect.cancel", {
+      effectId: options.effectId,
+      invocationKey: record.invocationKey,
+      status: "cancelled",
+      runDir: options.runDir,
+      reason: options.reason,
+    });
+
+    return { resultRef };
+  });
+}
+
 function ensureInvocationKeyMatches(options: CommitEffectResultOptions, record: EffectRecord) {
   if (!options.invocationKey) return;
   if (options.invocationKey === record.invocationKey) {

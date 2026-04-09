@@ -1,6 +1,6 @@
 export { createRun } from "./createRun";
 export { orchestrateIteration } from "./orchestrateIteration";
-export { commitEffectResult } from "./commitEffectResult";
+export { commitEffectResult, commitEffectCancellation } from "./commitEffectResult";
 export { createReplayEngine } from "./replay";
 export {
   createProcessContext,
@@ -37,5 +37,5 @@ export type {
   DerivedEffectSummary,
 } from "./replay";
 export { hashInvocationKey } from "./invocation";
-export { EffectRequestedError, EffectPendingError, ParallelPendingError, RunFailedError } from "./exceptions";
+export { EffectRequestedError, EffectPendingError, EffectCancelledError, ParallelPendingError, RunFailedError } from "./exceptions";
 export { replaySchemaVersion } from "./constants";

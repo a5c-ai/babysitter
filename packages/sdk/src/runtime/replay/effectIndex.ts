@@ -10,7 +10,7 @@ export interface BuildEffectIndexOptions {
   events?: JournalEvent[];
 }
 
-type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_PROGRESS" | "COST_TRACKED";
+type SupportedEventType = "RUN_CREATED" | "RUN_COMPLETED" | "RUN_FAILED" | "EFFECT_REQUESTED" | "EFFECT_RESOLVED" | "EFFECT_CANCELLED" | "EFFECT_PROGRESS" | "COST_TRACKED";
 
 interface EffectRequestedPayload {
   effectId: string;
@@ -32,6 +32,11 @@ interface EffectResolvedPayload {
   error?: SerializedEffectError;
   stdoutRef?: string;
   stderrRef?: string;
+}
+
+interface EffectCancelledPayload {
+  effectId: string;
+  reason?: string;
 }
 
 interface CostTrackedPayload {
@@ -95,6 +100,9 @@ export class EffectIndex {
         return;
       case "EFFECT_RESOLVED":
         this.handleEffectResolved(event);
+        return;
+      case "EFFECT_CANCELLED":
+        this.handleEffectCancelled(event);
         return;
       case "EFFECT_PROGRESS":
         this.handleEffectProgress(event);
@@ -240,6 +248,24 @@ export class EffectIndex {
     record.error = payload.error;
     record.stdoutRef = payload.stdoutRef ? collapseDoubledA5cRuns(payload.stdoutRef) : payload.stdoutRef;
     record.stderrRef = payload.stderrRef ? collapseDoubledA5cRuns(payload.stderrRef) : payload.stderrRef;
+    record.resolvedAt = event.recordedAt;
+  }
+
+  private handleEffectCancelled(event: JournalEvent) {
+    const payload = this.expectObject<EffectCancelledPayload>(event, "EFFECT_CANCELLED");
+    const effectId = this.expectString(payload.effectId, "effectId", event);
+    const record = this.byEffectId.get(effectId);
+    if (!record) {
+      throw new RunFailedError(`EFFECT_CANCELLED references unknown effectId ${effectId}`, {
+        path: event.path,
+      });
+    }
+    if (record.status !== "requested") {
+      throw new RunFailedError(`Effect ${effectId} is not requested (status=${record.status})`, {
+        path: event.path,
+      });
+    }
+    record.status = "cancelled";
     record.resolvedAt = event.recordedAt;
   }
 

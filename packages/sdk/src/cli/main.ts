@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
 import { collapseDoubledA5cRuns as _sharedCollapseDoubledA5cRuns, resolveInputPath } from "./resolveInputPath";
-import { commitEffectResult } from "../runtime/commitEffectResult";
+import { commitEffectResult, commitEffectCancellation } from "../runtime/commitEffectResult";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { readStateCache, rebuildStateCache } from "../runtime/replay/stateCache";
@@ -307,6 +307,8 @@ interface ParsedArgs {
   breakpointNote?: string;
   breakpointTags?: string;
   breakpointExpert?: string;
+  // task:cancel flags
+  cancelReason?: string;
 }
 
 interface ActionSummary {
@@ -733,6 +735,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.keepDays = parsePositiveInteger(raw, "--keep-days");
       continue;
     }
+    // task:cancel flags
+    if (arg === "--reason") {
+      parsed.cancelReason = expectFlagValue(rest, ++i, "--reason");
+      continue;
+    }
     // breakpoint command flags
     if (arg === "--action") {
       parsed.breakpointAction = expectFlagValue(rest, ++i, "--action");
@@ -764,6 +771,8 @@ function parseArgs(argv: string[]): ParsedArgs {
     positionals.push(arg);
   }
   if (parsed.command === "task:post") {
+    [parsed.runDirArg, parsed.effectId] = positionals;
+  } else if (parsed.command === "task:cancel") {
     [parsed.runDirArg, parsed.effectId] = positionals;
   } else if (parsed.command === "task:list") {
     [parsed.runDirArg] = positionals;
@@ -1943,6 +1952,45 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   return parsed.taskStatus === "ok" ? 0 : 1;
 }
 
+async function handleTaskCancel(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg || !parsed.effectId) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+
+  const index = await buildEffectIndexSafe(runDir, "task:cancel");
+  if (!index) return 1;
+  const record = index.getByEffectId(parsed.effectId);
+  if (!record) {
+    console.error(`[task:cancel] effect ${parsed.effectId} not found at ${runDir}`);
+    return 1;
+  }
+  if (record.status !== "requested") {
+    console.error(`[task:cancel] effect ${parsed.effectId} is already ${record.status}`);
+    return 1;
+  }
+
+  const result = await commitEffectCancellation({
+    runDir,
+    effectId: parsed.effectId,
+    reason: parsed.cancelReason,
+  });
+
+  if (parsed.json) {
+    console.log(
+      JSON.stringify({
+        effectId: parsed.effectId,
+        status: "cancelled",
+        resultRef: result.resultRef,
+      })
+    );
+  } else {
+    console.log(`[task:cancel] effectId=${parsed.effectId} status=cancelled resultRef=${result.resultRef}`);
+  }
+  return 0;
+}
+
 async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
     console.error(USAGE);
@@ -2356,6 +2404,7 @@ const VALID_COMMANDS = [
   "run:rebuild-state",
   "run:repair-journal",
   "task:post",
+  "task:cancel",
   "task:list",
   "task:show",
   "session:init",
@@ -2752,6 +2801,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "task:post") {
           return await handleTaskPost(parsed);
+        }
+        if (parsed.command === "task:cancel") {
+          return await handleTaskCancel(parsed);
         }
         if (parsed.command === "task:list") {
           return await handleTaskList(parsed);

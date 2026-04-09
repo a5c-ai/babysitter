@@ -110,6 +110,77 @@ export function buildLaunchSpec(
 }
 
 // ---------------------------------------------------------------------------
+// Process cancellation
+// ---------------------------------------------------------------------------
+
+/** Registry of active child processes by PID for cancellation support. */
+const activeChildren = new Map<number, { kill: (signal?: NodeJS.Signals | number) => boolean }>();
+
+/**
+ * Registers a child process for cancellation tracking.
+ * @internal
+ */
+function trackChild(child: { pid?: number; kill: (signal?: NodeJS.Signals | number) => boolean }): void {
+  if (child.pid != null) {
+    activeChildren.set(child.pid, child);
+  }
+}
+
+/**
+ * Unregisters a child process from cancellation tracking.
+ * @internal
+ */
+function untrackChild(pid: number | undefined): void {
+  if (pid != null) {
+    activeChildren.delete(pid);
+  }
+}
+
+/**
+ * Cancels a running process by PID. Sends SIGTERM first, then escalates to
+ * SIGKILL after the grace period if the process is still running.
+ *
+ * @returns `true` if the process was successfully signalled, `false` if it
+ *   had already exited.
+ */
+export function cancelRunningProcess(
+  pid: number,
+  options?: { gracePeriodMs?: number },
+): Promise<boolean> {
+  const gracePeriodMs = options?.gracePeriodMs ?? 5000;
+  const child = activeChildren.get(pid);
+
+  if (!child) {
+    // Process not tracked or already exited — try process.kill as fallback
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+      return Promise.resolve(false);
+    }
+    setTimeout(() => {
+      try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
+    }, gracePeriodMs);
+    return Promise.resolve(true);
+  }
+
+  const result = child.kill("SIGTERM");
+  if (!result) {
+    return Promise.resolve(false);
+  }
+
+  // Schedule escalation to SIGKILL after grace period
+  setTimeout(() => {
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      // Process already exited — ignore
+    }
+  }, gracePeriodMs);
+
+  return Promise.resolve(true);
+}
+
+// ---------------------------------------------------------------------------
 // Arg builder (pure function)
 // ---------------------------------------------------------------------------
 
@@ -255,6 +326,7 @@ export async function invokeHarness(
       await fs.rm(promptTempDir, { recursive: true, force: true }).catch(() => {});
     };
 
+    let trackedPid: number | undefined;
     try {
       const child = execFile(
         launch.command,
@@ -268,6 +340,7 @@ export async function invokeHarness(
           shell: launch.shell,
         },
         (error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
+          untrackChild(trackedPid);
           void cleanupPromptFile();
           const duration = Date.now() - startTime;
           const stderrStr = String(stderr);
@@ -301,6 +374,8 @@ export async function invokeHarness(
           });
         },
       );
+      trackedPid = child.pid;
+      trackChild(child);
       if (name === "codex" && process.platform !== "win32" && child.stdin) {
         child.stdin.end(options.prompt);
       }

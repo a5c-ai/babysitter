@@ -1,6 +1,6 @@
 import { JsonRecord } from "../storage/types";
 
-export type TaskStatus = "pending" | "resolved_ok" | "resolved_error";
+export type TaskStatus = "pending" | "resolved_ok" | "resolved_error" | "cancelled";
 
 export interface RegisteredTaskDefinition {
   id: string;

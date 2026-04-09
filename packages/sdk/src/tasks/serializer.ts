@@ -23,9 +23,10 @@ export interface SerializeTaskResultOptions extends TaskSerializerContext {
 }
 
 export interface TaskResultPayload {
-  status: "ok" | "error";
+  status: "ok" | "error" | "cancelled";
   result?: unknown;
   error?: SerializedErrorPayload;
+  reason?: string;
   stdout?: string;
   stderr?: string;
   stdoutRef?: string;
@@ -154,6 +155,7 @@ export async function serializeTaskResult(
     error: normalizeError(options.payload.error),
     stdoutRef: options.payload.stdoutRef,
     stderrRef: options.payload.stderrRef,
+    reason: options.payload.reason,
     startedAt: options.payload.startedAt,
     finishedAt: options.payload.finishedAt,
     metadata: options.payload.metadata ? stableClone(options.payload.metadata) : undefined,

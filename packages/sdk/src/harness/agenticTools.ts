@@ -13,6 +13,7 @@ import * as path from "node:path";
 import * as childProcess from "node:child_process";
 import { Type, type TObject } from "@sinclair/typebox";
 import { getConfig, DEFAULTS, CONFIG_ENV_VARS, type BabysitterConfig } from "../config/defaults";
+import { BackgroundProcessRegistry } from "./backgroundProcessRegistry";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -44,6 +45,10 @@ export interface AgenticToolOptions {
   askUserQuestionHandler?: (...args: unknown[]) => Promise<unknown>;
   /** Optional callback fired before each tool execution. */
   onToolUse?: (toolName: string, params: unknown) => void;
+  /** Callback fired when a background process completes. */
+  onBackgroundComplete?: (event: unknown) => void;
+  /** Maximum concurrent background processes (default 16). */
+  maxBackgroundProcesses?: number;
 }
 
 /** Standard tool result shape. */
@@ -74,6 +79,8 @@ export const AGENTIC_TOOL_NAMES: string[] = [
   "render_mermaid",
   "notebook",
   "config",
+  "background_status",
+  "background_list",
 ];
 
 const DEFAULT_BASH_TIMEOUT = 120_000;
@@ -712,6 +719,18 @@ export function createAgenticToolDefinitions(
         cwd: Type.Optional(
           Type.String({ description: "Working directory (relative to workspace)" }),
         ),
+        run_in_background: Type.Optional(
+          Type.Boolean({
+            description:
+              "Set to true to run the command in the background. Returns immediately with a backgroundTaskId.",
+          }),
+        ),
+        description: Type.Optional(
+          Type.String({
+            description:
+              "Human-readable description of the background task. Only used when run_in_background is true.",
+          }),
+        ),
       }),
       execute: async (
         _toolCallId: string,
@@ -720,6 +739,29 @@ export function createAgenticToolDefinitions(
         const cwd = params.cwd
           ? resolveSafe(workspace, String(params.cwd))
           : workspace;
+
+        // --- Background execution path ---
+        if (params.run_in_background === true) {
+          const registry = getBackgroundRegistry(options.maxBackgroundProcesses);
+          const record = registry.spawn({
+            command: String(params.command),
+            cwd,
+            env: (params.env as Record<string, string>) ?? undefined,
+            description: params.description ? String(params.description) : undefined,
+            onComplete: options.onBackgroundComplete
+              ? (evt) => options.onBackgroundComplete!(evt)
+              : undefined,
+          });
+          return jsonResult({
+            backgroundTaskId: record.backgroundTaskId,
+            status: record.status,
+            pid: record.pid,
+            command: record.command,
+            description: record.description,
+          });
+        }
+
+        // --- Synchronous execution path (unchanged) ---
         const timeout =
           (params.timeout as number) ?? DEFAULT_BASH_TIMEOUT;
         const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
@@ -1552,6 +1594,49 @@ export function createAgenticToolDefinitions(
         }
       },
     }),
+
+    // -----------------------------------------------------------------
+    // BACKGROUND PROCESS TOOLS (GAP-TOOLS-036)
+    // -----------------------------------------------------------------
+    wrap({
+      name: "background_status",
+      label: "Background Task Status",
+      description:
+        "Query the status of a background task by its backgroundTaskId. Returns the task record including status, stdout, stderr, and exit code.",
+      parameters: Type.Object({
+        backgroundTaskId: Type.String({
+          description: "The backgroundTaskId returned when launching a background task",
+        }),
+      }),
+      execute: (
+        _toolCallId: string,
+        params: Record<string, unknown>,
+      ): ToolResult => {
+        const registry = getBackgroundRegistry(options.maxBackgroundProcesses);
+        const id = String(params.backgroundTaskId);
+        const record = registry.get(id);
+        if (!record) {
+          return errorResult(`Background task not found: ${id}`);
+        }
+        return jsonResult(record);
+      },
+    }),
+
+    wrap({
+      name: "background_list",
+      label: "List Background Tasks",
+      description:
+        "List all tracked background tasks with their current status.",
+      parameters: Type.Object({}),
+      execute: (
+        _toolCallId: string,
+        _params: Record<string, unknown>,
+      ): ToolResult => {
+        const registry = getBackgroundRegistry(options.maxBackgroundProcesses);
+        const all = registry.list();
+        return jsonResult({ tasks: all });
+      },
+    }),
   ];
 
   return tools;
@@ -1578,6 +1663,16 @@ interface PuppeteerBrowser {
 }
 
 let browserInstance: PuppeteerBrowser | null = null;
+
+/** Module-level background process registry (shared across tool invocations). */
+let _backgroundRegistry: BackgroundProcessRegistry | null = null;
+
+function getBackgroundRegistry(maxConcurrent?: number): BackgroundProcessRegistry {
+  if (!_backgroundRegistry) {
+    _backgroundRegistry = new BackgroundProcessRegistry({ maxConcurrent });
+  }
+  return _backgroundRegistry;
+}
 
 /** Minimal Jupyter notebook JSON structure. */
 interface NotebookJson {

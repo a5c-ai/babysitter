@@ -53,3 +53,9 @@ export {
   type CustomToolDefinition,
   AGENTIC_TOOL_NAMES,
 } from "./agenticTools";
+
+export {
+  BackgroundProcessRegistry,
+  type BackgroundTaskRecord,
+  type BackgroundCompletionEvent,
+} from "./backgroundProcessRegistry";
