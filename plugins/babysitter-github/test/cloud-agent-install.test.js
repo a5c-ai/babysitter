@@ -8,6 +8,7 @@ const { spawnSync } = require('child_process');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const INSTALL_SCRIPT = path.join(PACKAGE_ROOT, 'bin', 'install.js');
+const MONOREPO_ROOT = path.resolve(PACKAGE_ROOT, '..', '..');
 
 function assert(condition, message) {
   if (!condition) {
@@ -47,6 +48,12 @@ function main() {
     env: {
       ...process.env,
       BABYSITTER_GLOBAL_STATE_DIR: globalStateDir,
+      // Use the monorepo itself as the process library source, with
+      // BABYSITTER_PROCESS_LIBRARY_SUBPATH pointing to the actual "library/"
+      // directory.  This avoids fabricating a fake repo and stays resilient
+      // when DEFAULT_PROCESS_LIBRARY_SUBPATH changes.
+      BABYSITTER_PROCESS_LIBRARY_REPO: MONOREPO_ROOT,
+      BABYSITTER_PROCESS_LIBRARY_SUBPATH: 'library',
     },
   });
 
