@@ -126,6 +126,9 @@ export {
 } from "./helpers.js";
 export type { StatusSection, StatusEntry } from "./helpers.js";
 
+// Keyboard help overlay
+export { formatKeyboardHelp } from "./helpers.js";
+
 // Component helpers — RunListTable
 export {
   stateSymbol,

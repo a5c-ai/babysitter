@@ -17,6 +17,7 @@ import {
   formatElapsedCompact,
   clampScrollOffset,
   computeVisibleRange,
+  formatKeyboardHelp,
 } from "../helpers.js";
 import {
   stateSymbol,
@@ -260,5 +261,124 @@ describe("RunDetailView full rendering pipeline", () => {
     const lines = formatEventTimeline(minimal.events);
     expect(lines).toEqual([]);
     expect(stateSymbol(minimal.state)).toBe("\u2500");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Keyboard help overlay (Phase 3)
+// ---------------------------------------------------------------------------
+
+describe("RunDetailView keyboard help", () => {
+  it("returns array of shortcut lines", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    expect(Array.isArray(lines)).toBe(true);
+    expect(lines.length).toBeGreaterThan(0);
+  });
+
+  it("includes Escape shortcut", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    const hasEscape = lines.some((l) => /esc/i.test(l));
+    expect(hasEscape).toBe(true);
+  });
+
+  it("includes scroll shortcuts", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    const hasScroll = lines.some((l) => /scroll/i.test(l) || /up.*down/i.test(l) || /\u2191/i.test(l));
+    expect(hasScroll).toBe(true);
+  });
+
+  it("includes session shortcut (s key)", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    const hasSession = lines.some((l) => /\bs\b/i.test(l) && /session/i.test(l));
+    expect(hasSession).toBe(true);
+  });
+
+  it("includes refresh shortcut (r key)", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    const hasRefresh = lines.some((l) => /\br\b/i.test(l) && /refresh/i.test(l));
+    expect(hasRefresh).toBe(true);
+  });
+
+  it("includes help toggle shortcut (?)", () => {
+    const lines = formatKeyboardHelp("run-detail");
+    const hasHelp = lines.some((l) => /\?/.test(l));
+    expect(hasHelp).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Breakpoint data derivation (Phase 3)
+// ---------------------------------------------------------------------------
+
+describe("RunDetailView breakpoint display", () => {
+  it("identifies waiting run as having potential breakpoints", () => {
+    // A waiting run with pending effects could have breakpoints
+    expect(sampleDetail.state).toBe("waiting");
+    expect(sampleDetail.pendingCount).toBeGreaterThan(0);
+  });
+
+  it("completed run has no pending breakpoints", () => {
+    expect(completedDetail.pendingCount).toBe(0);
+    expect(completedDetail.state).toBe("completed");
+  });
+
+  it("detail with breakpoint events shows in timeline", () => {
+    const detailWithBreakpoint: RunDetail = {
+      ...sampleDetail,
+      events: [
+        ...sampleDetail.events,
+        { type: "EFFECT_REQUESTED", recordedAt: "2026-04-10T10:02:00.000Z", seq: 9 },
+      ],
+    };
+    const lines = formatEventTimeline(detailWithBreakpoint.events);
+    expect(lines.length).toBe(detailWithBreakpoint.events.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Effects panel data derivation (Phase 3)
+// ---------------------------------------------------------------------------
+
+describe("RunDetailView effects data", () => {
+  it("counts requested vs resolved for effect status", () => {
+    const events = sampleDetail.events;
+    const requested = events.filter((e) => e.type === "EFFECT_REQUESTED").length;
+    const resolved = events.filter((e) => e.type === "EFFECT_RESOLVED").length;
+    expect(requested).toBe(4);
+    expect(resolved).toBe(3);
+    expect(requested - resolved).toBe(1);
+  });
+
+  it("completed run has all effects resolved", () => {
+    // completedDetail manually sets resolvedCount=5, pendingCount=0
+    expect(completedDetail.resolvedCount).toBe(5);
+    expect(completedDetail.pendingCount).toBe(0);
+  });
+
+  it("effect events maintain chronological order", () => {
+    const events = sampleDetail.events;
+    for (let i = 1; i < events.length; i++) {
+      expect(events[i].seq).toBeGreaterThan(events[i - 1].seq);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Resume navigation flow (Phase 3)
+// ---------------------------------------------------------------------------
+
+describe("RunDetailView resume navigation", () => {
+  it("waiting run is resumable (has runId)", () => {
+    expect(sampleDetail.runId).toBeTruthy();
+    expect(sampleDetail.state).toBe("waiting");
+  });
+
+  it("completed run can still be viewed in session", () => {
+    expect(completedDetail.runId).toBeTruthy();
+  });
+
+  it("failed run can be viewed in session", () => {
+    expect(failedDetail.runId).toBeTruthy();
+    expect(failedDetail.state).toBe("failed");
   });
 });

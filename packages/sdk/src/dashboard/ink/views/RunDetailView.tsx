@@ -25,6 +25,7 @@ import {
   formatElapsedCompact,
   clampScrollOffset,
   computeVisibleRange,
+  formatKeyboardHelp,
 } from "../helpers.js";
 import {
   stateSymbol,
@@ -61,13 +62,22 @@ export function RunDetailView({ runsDir }: RunDetailViewProps): React.JSX.Elemen
   const { detail, loading, error, refresh } = useRunDetail(runDir);
 
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [showHelp, setShowHelp] = useState(false);
 
   const eventCount = detail?.events.length ?? 0;
 
   // Keyboard navigation
   useInput(
     (input: string, key: InkKey) => {
+      if (input === "?") {
+        setShowHelp((prev) => !prev);
+        return;
+      }
       if (key.escape) {
+        if (showHelp) {
+          setShowHelp(false);
+          return;
+        }
         navDispatch({ type: "GO_BACK" });
       } else if (input === "s" && runId) {
         navDispatch({ type: "NAVIGATE_TO_SESSION", runId });
@@ -356,13 +366,38 @@ export function RunDetailView({ runsDir }: RunDetailViewProps): React.JSX.Elemen
     ),
   );
 
+  // --- Help overlay ---
+  const helpOverlay = showHelp
+    ? React.createElement(
+        Box as React.ComponentType<Record<string, unknown>>,
+        { flexDirection: "column", paddingX: 2, paddingY: 1, borderStyle: "round", borderColor: colors.primary },
+        React.createElement(
+          Text as React.ComponentType<Record<string, unknown>>,
+          { color: colors.primary, bold: true },
+          "Keyboard Shortcuts",
+        ),
+        ...formatKeyboardHelp("run-detail").map((line, idx) =>
+          React.createElement(
+            Text as React.ComponentType<Record<string, unknown>>,
+            { key: `help-${idx}`, color: colors.foreground },
+            line,
+          ),
+        ),
+        React.createElement(
+          Text as React.ComponentType<Record<string, unknown>>,
+          { color: colors.muted, dimColor: true },
+          "\n  Press ? or Esc to close",
+        ),
+      )
+    : null;
+
   // --- Full layout ---
   return React.createElement(
     Box as React.ComponentType<Record<string, unknown>>,
     { flexDirection: "column", height: "100%" },
     header,
     taskStatus,
-    timeline,
+    showHelp ? helpOverlay : timeline,
     actionBar,
   );
 }

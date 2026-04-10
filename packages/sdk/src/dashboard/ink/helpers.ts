@@ -1240,3 +1240,29 @@ export function formatEventTimeline(
     return `#${String(e.seq)}  ${time}  ${icon} ${label}`;
   });
 }
+
+// ---------------------------------------------------------------------------
+// Keyboard help overlay
+// ---------------------------------------------------------------------------
+
+/** Keyboard shortcut definitions for each view. */
+const KEYBOARD_HELP: Record<string, ReadonlyArray<readonly [string, string]>> = {
+  "run-detail": [
+    ["Esc", "Go back to dashboard"],
+    ["s", "Open session for this run"],
+    ["r", "Refresh run data"],
+    ["\u2191/\u2193", "Scroll events up/down"],
+    ["PgUp/PgDn", "Scroll one page"],
+    ["g/G", "Jump to top/bottom"],
+    ["?", "Toggle this help"],
+  ],
+};
+
+/**
+ * Return formatted keyboard help lines for a given view.
+ */
+export function formatKeyboardHelp(view: string): string[] {
+  const shortcuts = KEYBOARD_HELP[view];
+  if (!shortcuts) return [];
+  return shortcuts.map(([key, desc]) => `  ${key.padEnd(12)} ${desc}`);
+}
