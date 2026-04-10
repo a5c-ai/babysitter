@@ -17,6 +17,12 @@ import { useSession } from "../hooks/useSession.js";
 import { useTheme } from "../hooks/useTheme.js";
 import { useInk } from "../contexts/InkContext.js";
 import type { InkKey } from "../contexts/InkContext.js";
+import {
+  createInputHistory,
+  addToHistory,
+  navigateHistory,
+} from "../helpers.js";
+import type { InputHistory } from "../helpers.js";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -81,11 +87,17 @@ export function PromptBar({
 
   // Local controlled input state
   const [value, setValue] = useState<string>("");
+  // Input history for Up/Down command recall
+  const [history, setHistory] = useState<InputHistory>(() => createInputHistory());
+  // Saved input when entering history navigation (restored on Down past end)
+  const [savedInput, setSavedInput] = useState<string>("");
 
   const handleSubmit = useCallback(() => {
     const trimmed = value.trim();
     if (trimmed.length === 0) return;
     onSubmit?.(trimmed);
+    setHistory((prev) => addToHistory(prev, trimmed));
+    setSavedInput("");
     dispatch({ type: "SET_INPUT_BUFFER", text: "" });
     dispatch({ type: "SET_INPUT_ACTIVE", active: false });
     setValue("");
@@ -102,6 +114,30 @@ export function PromptBar({
         setValue("");
         dispatch({ type: "SET_INPUT_BUFFER", text: "" });
         dispatch({ type: "SET_INPUT_ACTIVE", active: false });
+      } else if (key.upArrow) {
+        // Save current input before entering history navigation
+        if (history.cursor >= history.entries.length && value.length > 0) {
+          setSavedInput(value);
+        }
+        const result = navigateHistory(history, "up");
+        setHistory(result.history);
+        if (result.entry !== null) {
+          setValue(result.entry);
+          dispatch({ type: "SET_INPUT_BUFFER", text: result.entry });
+        }
+      } else if (key.downArrow) {
+        const result = navigateHistory(history, "down");
+        setHistory(result.history);
+        if (result.entry !== null) {
+          setValue(result.entry);
+          dispatch({ type: "SET_INPUT_BUFFER", text: result.entry });
+        } else {
+          // Past end of history — restore saved input or clear
+          const restored = savedInput;
+          setValue(restored);
+          dispatch({ type: "SET_INPUT_BUFFER", text: restored });
+          setSavedInput("");
+        }
       } else if (key.backspace || key.delete) {
         setValue((prev) => prev.slice(0, -1));
         dispatch({ type: "SET_INPUT_BUFFER", text: value.slice(0, -1) });
