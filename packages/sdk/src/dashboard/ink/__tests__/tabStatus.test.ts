@@ -52,12 +52,12 @@ describe("mapRunStatusToTabPreset", () => {
     expect(mapRunStatusToTabPreset("waiting_effect")).toBe("waiting");
   });
 
-  it("maps complete status to idle preset", () => {
-    expect(mapRunStatusToTabPreset("complete")).toBe("idle");
+  it("maps complete status to completed preset", () => {
+    expect(mapRunStatusToTabPreset("complete")).toBe("completed");
   });
 
-  it("maps failed status to idle preset", () => {
-    expect(mapRunStatusToTabPreset("failed")).toBe("idle");
+  it("maps failed status to failed preset", () => {
+    expect(mapRunStatusToTabPreset("failed")).toBe("failed");
   });
 
   it("handles all RunStatus values", () => {

@@ -918,12 +918,17 @@ export function buildAlternateScreenLeave(): string {
 // Phase 7: Terminal tab status
 // ---------------------------------------------------------------------------
 
-export type TabStatusPreset = "idle" | "busy" | "waiting";
+export type TabStatusPreset = "idle" | "busy" | "waiting" | "completed" | "failed";
+
+/** Terminal bell character — emit to process.stderr to notify user. */
+export const TERMINAL_BELL = "\x07";
 
 const TAB_STATUS_COLORS: Record<TabStatusPreset, string> = {
-  idle: "0;128;0",      // green
-  busy: "255;165;0",    // orange
-  waiting: "255;255;0", // yellow
+  idle: "0;128;0",        // green
+  busy: "255;165;0",      // orange
+  waiting: "255;255;0",   // yellow
+  completed: "0;200;0",   // bright green
+  failed: "255;50;50",    // red
 };
 
 /**
@@ -945,9 +950,11 @@ export function mapRunStatusToTabPreset(status: RunStatus): TabStatusPreset {
       return "busy";
     case "waiting_effect":
       return "waiting";
-    case "idle":
     case "complete":
+      return "completed";
     case "failed":
+      return "failed";
+    case "idle":
     default:
       return "idle";
   }

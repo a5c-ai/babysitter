@@ -25,7 +25,14 @@ import { SearchBar } from "../components/SearchBar.js";
 import type { SearchBarState } from "../components/SearchBar.js";
 import { BreakpointPanel } from "../components/BreakpointPanel.js";
 import { EffectsPanel } from "../components/EffectsPanel.js";
-import { parseStreamingLine, findMatches, formatKeyboardHelp } from "../helpers.js";
+import {
+  parseStreamingLine,
+  findMatches,
+  formatKeyboardHelp,
+  TERMINAL_BELL,
+  buildTabStatusSequence,
+  mapRunStatusToTabPreset,
+} from "../helpers.js";
 import { filterMessages } from "../components/MessagePane.js";
 import type { TuiMessage, VerbosityLevel } from "../types.js";
 
@@ -285,6 +292,14 @@ export function SessionView(): React.JSX.Element {
     sessionDispatch({ type: "SET_INPUT_ACTIVE", active: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Update terminal tab color on status changes
+  React.useEffect(() => {
+    try {
+      const preset = mapRunStatusToTabPreset(sessionState.status);
+      process.stderr.write(buildTabStatusSequence(preset));
+    } catch (_e) { /* ignore — stderr may not be writable */ }
+  }, [sessionState.status]);
+
   // Escape goes back to dashboard (only when prompt input is not active)
   // Ctrl+F toggles search bar
   useInput(
@@ -495,6 +510,8 @@ export function SessionView(): React.JSX.Element {
             });
             sessionDispatch({ type: "SET_STATUS", status: "idle" });
             sessionDispatch({ type: "TURN_FINISHED" });
+            // Terminal bell to notify user response is ready
+            try { process.stderr.write(TERMINAL_BELL); } catch (_e) { /* ignore */ }
           },
           onError: (errText: string) => {
             sessionDispatch({

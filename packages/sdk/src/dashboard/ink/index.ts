@@ -190,6 +190,7 @@ export {
 export {
   buildTabStatusSequence,
   mapRunStatusToTabPreset,
+  TERMINAL_BELL,
 } from "./helpers.js";
 export type { TabStatusPreset } from "./helpers.js";
 
