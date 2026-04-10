@@ -34,7 +34,7 @@ const VISIBLE_ROWS = 15;
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stateSymbol(state: RunSummary["state"]): string {
+export function stateSymbol(state: RunSummary["state"]): string {
   switch (state) {
     case "completed": return "\u2714";
     case "failed": return "\u2718";
@@ -43,7 +43,7 @@ function stateSymbol(state: RunSummary["state"]): string {
   }
 }
 
-function stateColor(
+export function stateColor(
   state: RunSummary["state"],
   colors: { success: string; error: string; warning: string; muted: string },
 ): string {
@@ -55,22 +55,22 @@ function stateColor(
   }
 }
 
-function truncateId(id: string, max: number = 12): string {
+export function truncateId(id: string, max: number = 12): string {
   if (id.length <= max) return id;
   return id.slice(0, max);
 }
 
-function truncateProcess(processId: string, max: number = 20): string {
+export function truncateProcess(processId: string, max: number = 20): string {
   if (processId.length <= max) return processId;
   return processId.slice(0, max - 1) + "\u2026";
 }
 
-function formatTimestamp(iso: string): string {
+export function formatRelativeTimestamp(iso: string, now?: Date): string {
   if (!iso) return "???";
   try {
     const d = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
+    const ref = now ?? new Date();
+    const diffMs = ref.getTime() - d.getTime();
     if (diffMs < 60_000) return "just now";
     if (diffMs < 3600_000) return `${Math.floor(diffMs / 60_000)}m ago`;
     if (diffMs < 86400_000) return `${Math.floor(diffMs / 3600_000)}h ago`;
@@ -147,7 +147,7 @@ export function RunListTable({
       React.createElement(
         Text as React.ComponentType<Record<string, unknown>>,
         { color: colors.muted },
-        formatTimestamp(run.createdAt),
+        formatRelativeTimestamp(run.createdAt),
       ),
       run.pendingCount > 0
         ? React.createElement(

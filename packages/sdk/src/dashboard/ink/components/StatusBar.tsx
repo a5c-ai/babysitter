@@ -49,7 +49,7 @@ export function formatTokenCount(count: number): string {
   return `${m.toFixed(1)}M`;
 }
 
-function statusToIndicator(status: RunStatus): string {
+export function statusToIndicator(status: RunStatus): string {
   switch (status) {
     case "running":
       return "●";
@@ -64,7 +64,7 @@ function statusToIndicator(status: RunStatus): string {
   }
 }
 
-function statusToColor(
+export function statusToColor(
   status: RunStatus,
   colors: { success: string; warning: string; error: string; muted: string; primary: string },
 ): string {

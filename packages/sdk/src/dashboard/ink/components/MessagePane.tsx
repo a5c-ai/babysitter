@@ -28,13 +28,13 @@ import type { TuiMessage, VerbosityLevel, MessageKind } from "../types.js";
 // Verbosity filter
 // ---------------------------------------------------------------------------
 
-const VERBOSITY_ALLOWED: Record<VerbosityLevel, ReadonlySet<MessageKind>> = {
+export const VERBOSITY_ALLOWED: Record<VerbosityLevel, ReadonlySet<MessageKind>> = {
   minimal: new Set(["user", "assistant"]),
   normal: new Set(["user", "assistant", "tool_call", "subagent"]),
   verbose: new Set(["user", "assistant", "tool_call", "subagent", "system", "error"]),
 };
 
-function filterMessages(
+export function filterMessages(
   messages: readonly TuiMessage[],
   verbosity: VerbosityLevel,
 ): TuiMessage[] {

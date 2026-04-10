@@ -36,12 +36,12 @@ export interface PromptBarProps {
 // Slash commands
 // ---------------------------------------------------------------------------
 
-interface SlashCommand {
+export interface SlashCommand {
   readonly name: string;
   readonly description: string;
 }
 
-const SLASH_COMMANDS: readonly SlashCommand[] = [
+export const SLASH_COMMANDS: readonly SlashCommand[] = [
   { name: "/status", description: "Show run status" },
   { name: "/refresh", description: "Refresh run data" },
   { name: "/clear", description: "Clear messages" },
@@ -50,7 +50,7 @@ const SLASH_COMMANDS: readonly SlashCommand[] = [
   { name: "/help", description: "Show available commands" },
 ];
 
-function getSlashHints(input: string): readonly SlashCommand[] {
+export function getSlashHints(input: string): readonly SlashCommand[] {
   if (!input.startsWith("/")) return [];
   const prefix = input.toLowerCase();
   return SLASH_COMMANDS.filter((cmd) => cmd.name.startsWith(prefix));
@@ -60,7 +60,7 @@ function getSlashHints(input: string): readonly SlashCommand[] {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function countLines(text: string): number {
+export function countLines(text: string): number {
   return text.split("\n").length;
 }
 
