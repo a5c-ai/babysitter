@@ -34,3 +34,22 @@ export type {
   BatchCommitEffectResult,
   BatchCommitEffectsOutput,
 } from "./effects";
+
+export {
+  apiListBreakpoints,
+  apiShowBreakpoint,
+  apiRespondToBreakpoint,
+  apiListAutoApprovalRules,
+  apiAddAutoApprovalRule,
+  apiRemoveAutoApprovalRule,
+  apiEvaluateAutoApproval,
+} from "./breakpoints";
+
+export type {
+  ListBreakpointsOutput,
+  BreakpointSummary,
+  ShowBreakpointOutput,
+  RespondToBreakpointInput,
+  AddAutoApprovalRuleInput,
+  EvaluateAutoApprovalInput,
+} from "./breakpoints";

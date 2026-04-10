@@ -9,9 +9,10 @@ import { loadJournal, appendEvent } from "../storage/journal";
 import { readTaskDefinition, readTaskResult } from "../storage/tasks";
 import { withRunLock } from "../storage/lock";
 import { serializeAndWriteTaskResult } from "../tasks/serializer";
-import { ok, fail, pathExists } from "./utils";
+import { ok, fail, pathExists, buildBaseEffectMap } from "./utils";
 import type { ApiResult } from "./runs";
 import type { JournalEvent, JsonRecord } from "../storage/types";
+import type { BaseEffectInfo } from "./utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -112,44 +113,28 @@ interface EffectInfo {
   resolvedAt?: string;
 }
 
-function buildEffectInfoMap(events: JournalEvent[]): Map<string, EffectInfo> {
-  const effects = new Map<string, EffectInfo>();
-
-  for (const event of events) {
-    if (event.type === "EFFECT_REQUESTED") {
-      const data = event.data as Record<string, unknown>;
-      const effectId = data.effectId as string | undefined;
-      if (!effectId) continue;
-      effects.set(effectId, {
-        effectId,
-        kind: typeof data.kind === "string" ? data.kind : undefined,
-        taskId: typeof data.taskId === "string" ? data.taskId : undefined,
-        labels: Array.isArray(data.labels) ? (data.labels as string[]) : undefined,
-        status: "requested",
-        requestedAt: event.recordedAt,
-      });
-    } else if (event.type === "EFFECT_RESOLVED") {
-      const data = event.data as Record<string, unknown>;
-      const effectId = data.effectId as string | undefined;
-      if (!effectId) continue;
-      const existing = effects.get(effectId);
-      if (existing) {
-        const resultStatus = data.status as string | undefined;
-        existing.status = resultStatus === "error" ? "resolved_error" : "resolved_ok";
-        existing.resolvedAt = event.recordedAt;
-      }
-    } else if (event.type === "EFFECT_CANCELLED") {
-      const data = event.data as Record<string, unknown>;
-      const effectId = data.effectId as string | undefined;
-      if (!effectId) continue;
-      const existing = effects.get(effectId);
-      if (existing) {
-        existing.status = "cancelled";
-        existing.resolvedAt = event.recordedAt;
-      }
-    }
+function toEffectStatus(base: BaseEffectInfo): EffectStatusOutput {
+  if (base.lifecycle === "cancelled") return "cancelled";
+  if (base.lifecycle === "resolved") {
+    return base.resolvedStatus === "error" ? "resolved_error" : "resolved_ok";
   }
+  return "requested";
+}
 
+function buildEffectInfoMap(events: JournalEvent[]): Map<string, EffectInfo> {
+  const baseMap = buildBaseEffectMap(events);
+  const effects = new Map<string, EffectInfo>();
+  for (const [id, base] of baseMap) {
+    effects.set(id, {
+      effectId: base.effectId,
+      kind: base.kind,
+      taskId: base.taskId,
+      labels: base.labels,
+      status: toEffectStatus(base),
+      requestedAt: base.requestedAt,
+      resolvedAt: base.resolvedAt,
+    });
+  }
   return effects;
 }
 
