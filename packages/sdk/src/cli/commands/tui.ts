@@ -188,7 +188,7 @@ export async function handleTui(args: TuiArgs): Promise<number> {
     verbosity: args.verbosity ?? "normal",
     initialView,
     runsDir: args.runsDir,
-    harness: args.harness ?? "claude-code",
+    harness: args.harness ?? "internal",
     workspace: args.workspace ?? process.cwd(),
   });
 

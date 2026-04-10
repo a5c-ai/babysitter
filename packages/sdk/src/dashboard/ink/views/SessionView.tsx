@@ -44,14 +44,26 @@ const HARNESS_OPTIONS = [
 
 /** Models available per harness. */
 const HARNESS_MODELS: Record<string, readonly string[]> = {
-  "internal": ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"],
+  "internal": [
+    "claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001",
+    "gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex",
+    "gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash",
+  ],
   "claude-code": ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"],
-  "codex": ["o4-mini", "o3", "gpt-4.1"],
-  "pi": ["claude-sonnet-4-6", "claude-opus-4-6", "gpt-4.1", "o4-mini", "gemini-2.5-pro"],
-  "oh-my-pi": ["claude-sonnet-4-6", "claude-opus-4-6", "gpt-4.1", "o4-mini", "gemini-2.5-pro"],
-  "gemini-cli": ["gemini-2.5-pro", "gemini-2.5-flash"],
-  "github-copilot": ["gpt-4.1", "claude-sonnet-4-6"],
-  "cursor": ["claude-sonnet-4-6", "gpt-4.1"],
+  "codex": ["o4-mini", "o3", "gpt-4.1", "gpt-5.3-codex", "gpt-5.4", "gpt-5.4-mini"],
+  "pi": [
+    "claude-sonnet-4-6", "claude-opus-4-6",
+    "gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex", "gpt-4.1", "o4-mini",
+    "gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro",
+  ],
+  "oh-my-pi": [
+    "claude-sonnet-4-6", "claude-opus-4-6",
+    "gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex", "gpt-4.1", "o4-mini",
+    "gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro",
+  ],
+  "gemini-cli": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite"],
+  "github-copilot": ["gpt-5.4", "gpt-4.1", "claude-sonnet-4-6"],
+  "cursor": ["claude-sonnet-4-6", "gpt-5.4", "gpt-4.1"],
   "opencode": ["claude-sonnet-4-6", "claude-opus-4-6", "gemini-2.5-pro"],
 };
 
