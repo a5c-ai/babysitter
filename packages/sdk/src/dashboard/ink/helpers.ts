@@ -5,7 +5,17 @@
  * (StatusBar, StatusLine) to avoid duplication.
  */
 
-import type { MessageKind, ThemeColors } from "./types.js";
+import type {
+  MessageKind,
+  ThemeColors,
+  EffectKind,
+  TuiEffectStatus,
+  EffectSummary,
+  OrchestrationPhase,
+  OrchestrationStatus,
+  TokenUsage,
+} from "./types.js";
+import type { TreeNode } from "./components/primitives/Tree.js";
 
 /**
  * Truncate a run ID to at most 12 characters for display.
@@ -256,4 +266,187 @@ export function formatToolOutput(output: unknown): string[] {
   }
   const json = JSON.stringify(output, null, 2);
   return json.split("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3: Effect Visualization helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Map an effect kind to its display icon glyph.
+ */
+export function getEffectIcon(kind: EffectKind): string {
+  switch (kind) {
+    case "node":
+      return "\u2699";
+    case "breakpoint":
+      return "\u23F8";
+    case "orchestrator_task":
+      return "\u25C8";
+    case "sleep":
+      return "\u23F3";
+    default:
+      return "\u25CB";
+  }
+}
+
+/**
+ * Map a TUI effect status to a theme color key.
+ */
+export function getEffectStatusColor(status: TuiEffectStatus): string {
+  switch (status) {
+    case "pending":
+      return "warning";
+    case "resolved":
+      return "success";
+    case "failed":
+      return "error";
+    default:
+      return "muted";
+  }
+}
+
+const STATUS_ORDER: Record<TuiEffectStatus, number> = {
+  pending: 0,
+  resolved: 1,
+  failed: 2,
+};
+
+const STATUS_ICON: Record<TuiEffectStatus, string> = {
+  pending: "\u25CC",
+  resolved: "\u2713",
+  failed: "\u2717",
+};
+
+/**
+ * Convert a flat array of EffectSummary objects into TreeNode[] suitable
+ * for the Tree primitive. Produces a flat list (no children) sorted by
+ * status: pending first, then resolved, then failed.
+ */
+export function buildEffectTree(effects: EffectSummary[]): TreeNode[] {
+  const sorted = [...effects].sort(
+    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status],
+  );
+
+  return sorted.map((eff) => {
+    let label = eff.effectId;
+    if (eff.title) {
+      label += ` ${eff.title}`;
+    }
+    if (eff.elapsedMs !== undefined) {
+      label += ` ${(eff.elapsedMs / 1000).toFixed(1)}s`;
+    }
+    if (eff.error) {
+      label += ` ${eff.error}`;
+    }
+
+    return {
+      label,
+      icon: STATUS_ICON[eff.status],
+      color: getEffectStatusColor(eff.status),
+    };
+  });
+}
+
+/**
+ * Derive orchestration phase from effect statuses.
+ */
+export function derivePhase(effects: EffectSummary[]): OrchestrationPhase {
+  if (effects.length === 0) return "waiting";
+
+  const hasPending = effects.some((e) => e.status === "pending");
+  if (hasPending) return "executing";
+
+  const hasFailed = effects.some((e) => e.status === "failed");
+  if (hasFailed) return "failed";
+
+  return "complete";
+}
+
+/**
+ * Build a full OrchestrationStatus from effects and run metadata.
+ */
+export function aggregateOrchestrationStatus(opts: {
+  runId: string;
+  effects: EffectSummary[];
+  iteration?: number;
+  startedAt?: number;
+  tokenUsage?: TokenUsage;
+  cost?: number;
+  now?: number;
+}): OrchestrationStatus {
+  const { runId, effects, iteration = 0, startedAt, tokenUsage, cost, now = Date.now() } = opts;
+
+  const totalEffects = effects.length;
+  const pendingEffects = effects.filter((e) => e.status === "pending").length;
+  const resolvedEffects = effects.filter((e) => e.status === "resolved").length;
+  const phase = derivePhase(effects);
+  const elapsedMs = startedAt ? now - startedAt : 0;
+
+  return {
+    runId,
+    iteration,
+    phase,
+    totalEffects,
+    pendingEffects,
+    resolvedEffects,
+    elapsedMs,
+    ...(tokenUsage !== undefined ? { tokenUsage } : {}),
+    ...(cost !== undefined ? { cost } : {}),
+  };
+}
+
+/**
+ * Group pending effects by kind, sorting within each group by effectId.
+ */
+export function groupPendingEffects(
+  effects: EffectSummary[],
+): Map<EffectKind, EffectSummary[]> {
+  const result = new Map<EffectKind, EffectSummary[]>();
+
+  for (const eff of effects) {
+    if (eff.status !== "pending") continue;
+    let group = result.get(eff.kind);
+    if (!group) {
+      group = [];
+      result.set(eff.kind, group);
+    }
+    group.push(eff);
+  }
+
+  for (const group of result.values()) {
+    group.sort((a, b) => a.effectId.localeCompare(b.effectId));
+  }
+
+  return result;
+}
+
+/**
+ * Summary of a pending effect group for display.
+ */
+export interface PendingGroupSummary {
+  readonly kind: EffectKind;
+  readonly count: number;
+  readonly titles: string[];
+}
+
+/**
+ * Summarize grouped pending effects, sorted by count descending.
+ */
+export function summarizePendingGroups(
+  groups: Map<EffectKind, EffectSummary[]>,
+): PendingGroupSummary[] {
+  const summaries: PendingGroupSummary[] = [];
+
+  for (const [kind, effects] of groups.entries()) {
+    summaries.push({
+      kind,
+      count: effects.length,
+      titles: effects.map((e) => e.title ?? e.effectId),
+    });
+  }
+
+  summaries.sort((a, b) => b.count - a.count);
+
+  return summaries;
 }

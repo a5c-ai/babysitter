@@ -59,7 +59,17 @@ export {
   formatToolCallSummary,
   formatShellOutput,
   formatToolOutput,
+  getEffectIcon,
+  getEffectStatusColor,
+  buildEffectTree,
+  derivePhase,
+  aggregateOrchestrationStatus,
+  groupPendingEffects,
+  summarizePendingGroups,
 } from "./helpers.js";
+
+// Phase 3 types
+export type { PendingGroupSummary } from "./helpers.js";
 
 // Runtime entry point
 export { createTuiSession, type TuiSession } from "./render.js";
