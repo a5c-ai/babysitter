@@ -32,8 +32,8 @@ export function tagPart(name: string, stratum: PromptStratum, render: PromptPart
 /**
  * Map of all known prompt parts to their stratum classification.
  *
- * STABLE (7): System identity, core rules, tool definitions — rarely change.
- * RUNTIME (11): Capabilities, flags, workspace context — change per session.
+ * STABLE (11): System identity, core rules, tool definitions — rarely change.
+ * RUNTIME (12): Capabilities, flags, workspace context — change per session.
  * TURN_LOCAL (5): Interview, user profile, task-specific — change every turn.
  */
 export const PART_STRATA_MAP: Record<string, StratumTaggedPart> = {
@@ -45,6 +45,10 @@ export const PART_STRATA_MAP: Record<string, StratumTaggedPart> = {
   renderProcessGuidelines: tagPart('renderProcessGuidelines', 'stable', parts.renderProcessGuidelines),
   renderSeeAlso: tagPart('renderSeeAlso', 'stable', parts.renderSeeAlso),
   renderCompletionProof: tagPart('renderCompletionProof', 'stable', parts.renderCompletionProof),
+  renderCodingPhilosophy: tagPart('renderCodingPhilosophy', 'stable', parts.renderCodingPhilosophy),
+  renderToolPreferences: tagPart('renderToolPreferences', 'stable', parts.renderToolPreferences),
+  renderOutputEfficiency: tagPart('renderOutputEfficiency', 'stable', parts.renderOutputEfficiency),
+  renderGitSafety: tagPart('renderGitSafety', 'stable', parts.renderGitSafety),
 
   // ── Runtime stratum ──────────────────────────────────────────────────
   renderDependencies: tagPart('renderDependencies', 'runtime', parts.renderDependencies),

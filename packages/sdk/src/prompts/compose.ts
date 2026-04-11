@@ -85,6 +85,10 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderRecovery(ctx),
     parts.renderProcessGuidelines(ctx),
     parts.renderCriticalRules(ctx),
+    parts.renderCodingPhilosophy(ctx),
+    parts.renderToolPreferences(ctx),
+    parts.renderOutputEfficiency(ctx),
+    parts.renderGitSafety(ctx),
     parts.renderSeeAlso(ctx),
     parts.renderProjectInstructions(ctx),
   ]);
@@ -103,6 +107,9 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
     parts.renderParallelPhaseDetection(ctx),
     parts.renderTaskKinds(ctx),
     parts.renderTaskExamples(ctx),
+    parts.renderCodingPhilosophy(ctx),
+    parts.renderToolPreferences(ctx),
+    parts.renderGitSafety(ctx),
     parts.renderProjectInstructions(ctx),
   ]);
 }
@@ -124,6 +131,7 @@ export function composeOrchestrationPrompt(ctx: PromptContext): string {
     parts.renderQuickReference(ctx),
     parts.renderRecovery(ctx),
     parts.renderCriticalRules(ctx),
+    parts.renderOutputEfficiency(ctx),
   ]);
 }
 

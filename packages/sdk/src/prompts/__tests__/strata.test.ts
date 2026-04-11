@@ -34,17 +34,19 @@ describe('GAP-PROMPT-001: Prompt Strata Model', () => {
   });
 
   describe('PART_STRATA_MAP', () => {
-    it('contains all 23 known parts', () => {
+    it('contains all 28 known parts', () => {
       const expectedParts = [
         'renderNonNegotiables', 'renderCriticalRules', 'renderTaskKinds',
         'renderTaskExamples', 'renderProcessGuidelines', 'renderSeeAlso',
-        'renderCompletionProof', 'renderDependencies', 'renderQuickReference',
-        'renderRecovery', 'renderLoopControl', 'renderRunCreation',
-        'renderIteration', 'renderEffects', 'renderBreakpointHandling',
-        'renderResultsPosting', 'renderRunOverlapDetection',
-        'renderParallelPhaseDetection', 'renderInterview', 'renderUserProfile',
-        'renderProcessCreation', 'renderIntentFidelityChecks',
-        'renderProjectInstructions',
+        'renderCompletionProof', 'renderCodingPhilosophy', 'renderToolPreferences',
+        'renderOutputEfficiency', 'renderGitSafety', 'renderDependencies',
+        'renderQuickReference', 'renderRecovery', 'renderLoopControl',
+        'renderRunCreation', 'renderIteration', 'renderEffects',
+        'renderBreakpointHandling', 'renderResultsPosting',
+        'renderRunOverlapDetection', 'renderParallelPhaseDetection',
+        'renderParallelDispatch',
+        'renderInterview', 'renderUserProfile', 'renderProcessCreation',
+        'renderIntentFidelityChecks', 'renderProjectInstructions',
       ];
       for (const name of expectedParts) {
         expect(PART_STRATA_MAP).toHaveProperty(name);
@@ -55,7 +57,8 @@ describe('GAP-PROMPT-001: Prompt Strata Model', () => {
       const stableNames = [
         'renderNonNegotiables', 'renderCriticalRules', 'renderTaskKinds',
         'renderTaskExamples', 'renderProcessGuidelines', 'renderSeeAlso',
-        'renderCompletionProof',
+        'renderCompletionProof', 'renderCodingPhilosophy', 'renderToolPreferences',
+        'renderOutputEfficiency', 'renderGitSafety',
       ];
       for (const name of stableNames) {
         expect(PART_STRATA_MAP[name].stratum).toBe('stable');
@@ -68,6 +71,7 @@ describe('GAP-PROMPT-001: Prompt Strata Model', () => {
         'renderLoopControl', 'renderRunCreation', 'renderIteration',
         'renderEffects', 'renderBreakpointHandling', 'renderResultsPosting',
         'renderRunOverlapDetection', 'renderParallelPhaseDetection',
+        'renderParallelDispatch',
       ];
       for (const name of runtimeNames) {
         expect(PART_STRATA_MAP[name].stratum).toBe('runtime');
@@ -94,7 +98,7 @@ describe('GAP-PROMPT-001: Prompt Strata Model', () => {
   describe('getPartsForStratum', () => {
     it('returns only stable parts when stratum is stable', () => {
       const parts = getPartsForStratum('stable');
-      expect(parts.length).toBe(7);
+      expect(parts.length).toBe(11);
       expect(parts.every(p => p.stratum === 'stable')).toBe(true);
     });
 

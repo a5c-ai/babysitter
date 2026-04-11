@@ -70,4 +70,8 @@ export {
   renderProjectInstructions,
   renderRunOverlapDetection,
   renderParallelPhaseDetection,
+  renderCodingPhilosophy,
+  renderToolPreferences,
+  renderOutputEfficiency,
+  renderGitSafety,
 } from './parts';

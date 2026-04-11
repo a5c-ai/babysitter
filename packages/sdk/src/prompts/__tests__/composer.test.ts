@@ -17,6 +17,10 @@ import { renderLoopControl } from '../parts/loopControl';
 import { renderTaskKinds } from '../parts/taskKinds';
 import { renderTaskExamples } from '../parts/taskExamples';
 import { renderBreakpointHandling } from '../parts/breakpointHandling';
+import { renderCodingPhilosophy } from '../parts/codingPhilosophy';
+import { renderToolPreferences } from '../parts/toolPreferences';
+import { renderOutputEfficiency } from '../parts/outputEfficiency';
+import { renderGitSafety } from '../parts/gitSafety';
 
 // ---------------------------------------------------------------------------
 // 1. Context factories
@@ -306,6 +310,67 @@ describe('composeBreakpointPrompt', () => {
 });
 
 // ---------------------------------------------------------------------------
+// 5b. New prompt sections (GAP-PROMPT-008/009/011/012)
+// ---------------------------------------------------------------------------
+describe('new prompt sections', () => {
+  describe('composeBabysitSkillPrompt includes all 4 new sections', () => {
+    it('contains Coding Philosophy heading', () => {
+      const output = composeBabysitSkillPrompt(createClaudeCodeContext());
+      expect(output).toContain('# Coding Philosophy');
+    });
+
+    it('contains Tool Preferences heading', () => {
+      const output = composeBabysitSkillPrompt(createClaudeCodeContext());
+      expect(output).toContain('# Tool Preferences');
+    });
+
+    it('contains Output Efficiency heading', () => {
+      const output = composeBabysitSkillPrompt(createClaudeCodeContext());
+      expect(output).toContain('# Output Efficiency');
+    });
+
+    it('contains Git Operations Protocol heading', () => {
+      const output = composeBabysitSkillPrompt(createClaudeCodeContext());
+      expect(output).toContain('# Git Operations Protocol');
+    });
+  });
+
+  describe('composeProcessCreatePrompt includes codingPhilosophy, toolPreferences, gitSafety', () => {
+    it('contains Coding Philosophy heading', () => {
+      const output = composeProcessCreatePrompt(createClaudeCodeContext());
+      expect(output).toContain('# Coding Philosophy');
+    });
+
+    it('contains Tool Preferences heading', () => {
+      const output = composeProcessCreatePrompt(createClaudeCodeContext());
+      expect(output).toContain('# Tool Preferences');
+    });
+
+    it('contains Git Operations Protocol heading', () => {
+      const output = composeProcessCreatePrompt(createClaudeCodeContext());
+      expect(output).toContain('# Git Operations Protocol');
+    });
+
+    it('does NOT contain Output Efficiency heading', () => {
+      const output = composeProcessCreatePrompt(createClaudeCodeContext());
+      expect(output).not.toContain('# Output Efficiency');
+    });
+  });
+
+  describe('composeOrchestrationPrompt includes outputEfficiency', () => {
+    it('contains Output Efficiency heading', () => {
+      const output = composeOrchestrationPrompt(createClaudeCodeContext());
+      expect(output).toContain('# Output Efficiency');
+    });
+
+    it('does NOT contain Coding Philosophy heading', () => {
+      const output = composeOrchestrationPrompt(createClaudeCodeContext());
+      expect(output).not.toContain('# Coding Philosophy');
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 6. Interactive vs non-interactive
 // ---------------------------------------------------------------------------
 describe('interactive vs non-interactive', () => {
@@ -408,6 +473,102 @@ describe('individual parts', () => {
       const result = renderLoopControl(createPiContext());
       expect(result).toBe('');
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 7b. Dedicated render function tests for new prompt sections
+// ---------------------------------------------------------------------------
+describe('renderCodingPhilosophy', () => {
+  it('returns non-empty string', () => {
+    const result = renderCodingPhilosophy(createClaudeCodeContext());
+    expect(result).not.toBe('');
+  });
+
+  it('contains "premature abstraction"', () => {
+    const result = renderCodingPhilosophy(createClaudeCodeContext());
+    expect(result).toContain('premature abstraction');
+  });
+
+  it('contains "prefer editing existing files"', () => {
+    const result = renderCodingPhilosophy(createClaudeCodeContext());
+    expect(result.toLowerCase()).toContain('prefer editing existing files');
+  });
+});
+
+describe('renderToolPreferences', () => {
+  it('returns non-empty string', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).not.toBe('');
+  });
+
+  it('contains "Read"', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).toContain('Read');
+  });
+
+  it('contains "Edit"', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).toContain('Edit');
+  });
+
+  it('contains "Glob"', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).toContain('Glob');
+  });
+
+  it('contains "Grep"', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).toContain('Grep');
+  });
+
+  it('contains "read a file before editing"', () => {
+    const result = renderToolPreferences(createClaudeCodeContext());
+    expect(result).toContain('read a file before editing');
+  });
+});
+
+describe('renderOutputEfficiency', () => {
+  it('returns non-empty string', () => {
+    const result = renderOutputEfficiency(createClaudeCodeContext());
+    expect(result).not.toBe('');
+  });
+
+  it('contains "one sentence"', () => {
+    const result = renderOutputEfficiency(createClaudeCodeContext());
+    expect(result).toContain('one sentence');
+  });
+
+  it('contains "Lead with the answer"', () => {
+    const result = renderOutputEfficiency(createClaudeCodeContext());
+    expect(result).toContain('Lead with the answer');
+  });
+});
+
+describe('renderGitSafety', () => {
+  it('returns non-empty string', () => {
+    const result = renderGitSafety(createClaudeCodeContext());
+    expect(result).not.toBe('');
+  });
+
+  it('contains "NEVER update the git config"', () => {
+    const result = renderGitSafety(createClaudeCodeContext());
+    expect(result).toContain('NEVER update the git config');
+  });
+
+  it('contains "force"', () => {
+    const result = renderGitSafety(createClaudeCodeContext());
+    expect(result).toContain('force');
+  });
+
+  it('contains "--no-verify"', () => {
+    const result = renderGitSafety(createClaudeCodeContext());
+    expect(result).toContain('--no-verify');
+  });
+
+  it('contains "NEW commit"', () => {
+    const result = renderGitSafety(createClaudeCodeContext());
+    expect(result).toContain('NEW commit');
   });
 });
 

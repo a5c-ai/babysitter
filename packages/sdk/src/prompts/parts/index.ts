@@ -28,3 +28,7 @@ export { renderSeeAlso } from './seeAlso';
 export { renderNonNegotiables } from './nonNegotiables';
 export { renderProjectInstructions } from './projectInstructions';
 export { renderParallelDispatch } from './parallelDispatch';
+export { renderCodingPhilosophy } from './codingPhilosophy';
+export { renderToolPreferences } from './toolPreferences';
+export { renderOutputEfficiency } from './outputEfficiency';
+export { renderGitSafety } from './gitSafety';
