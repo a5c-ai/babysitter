@@ -69,7 +69,10 @@ export async function runTaskIntrinsic<TArgs, TResult>(
     throw new InvalidTaskDefinitionError("ctx.task requires a DefinedTask created via defineTask()");
   }
 
-  const stepId = options.context.replayCursor.nextStepId();
+  // When stableKey is provided, do NOT advance the replay cursor — all calls with
+  // the same stableKey hash to the same effect slot, preventing phantom duplicate
+  // effects from retry loops (issue #126).
+  const stepId = options.invokeOptions?.stableKey ?? options.context.replayCursor.nextStepId();
   const invocation = hashInvocationKey({
     processId: options.context.processId,
     stepId,

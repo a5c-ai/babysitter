@@ -1014,6 +1014,59 @@ export const fixPdfQualityTask = defineTask('fix-pdf-quality', (args, taskCtx) =
 
 ---
 
+## Known Anti-Patterns
+
+### Anti-Pattern: Homegrown Retry Wrappers Around ctx.task()
+
+**DO NOT** wrap `ctx.task()` in a `for`-loop retry wrapper without `stableKey`:
+
+```javascript
+// BAD — creates N pending effects instead of 1
+async function withRetry(label, fn) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    try { return await fn(); } catch (err) { lastError = err; }
+  }
+  throw lastError;
+}
+await withRetry('Phase 2', () => ctx.task(myTask, args));
+```
+
+Each `ctx.task()` call advances the internal step counter, generating a unique
+invocation key. N loop iterations = N pending effects for 1 logical task.
+This corrupts the replay journal and produces phantom effects that can never be
+resolved, eventually stalling the run.
+
+**Instead, use `stableKey`:**
+
+```javascript
+// GOOD — all retry iterations hit the same effect slot
+for (let attempt = 0; attempt < 3; attempt++) {
+  try {
+    return await ctx.task(myTask, args, { stableKey: 'phase2.my-task' });
+  } catch (err) {
+    if (attempt === 2) throw err;
+  }
+}
+```
+
+When `stableKey` is provided, the `ReplayCursor` is NOT advanced. The stable key
+is used directly as the step ID for invocation-key hashing, so every retry
+iteration resolves to the same effect slot in the index. The first call creates
+the effect; subsequent calls with the same `stableKey` either return the cached
+result (if resolved) or throw `EffectPendingError` — exactly the idempotent
+behaviour a retry loop needs.
+
+**Guidelines for `stableKey` values:**
+
+- Use dotted-namespace kebab-case unique within the process (e.g., `phase1.fetch-data`, `phase2.my-task`).
+- Do NOT incorporate loop counters or timestamps — that defeats the purpose.
+- Do NOT use `stableKey` for non-retry patterns; normal sequential `ctx.task()` calls should let the cursor advance.
+
+See issue [#126](https://github.com/a5c-ai/babysitter/issues/126).
+
+---
+
 ## Summary
 
 These five patterns extend babysitter's capabilities:
