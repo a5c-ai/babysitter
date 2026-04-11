@@ -141,6 +141,8 @@ export {
   HARNESS_RPC_SUPPORT,
   formatStreamLine,
   formatHarnessBadge,
+  computeViewportSize,
+  computeVisibleRows,
 } from "./helpers.js";
 export type { StreamingEvent, HarnessStreamingFormat, StreamingParser } from "./helpers.js";
 

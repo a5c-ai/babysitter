@@ -11,6 +11,7 @@
 import React from "react";
 import { useInk } from "../contexts/InkContext.js";
 import { useTheme } from "../hooks/useTheme.js";
+import { computeVisibleRows } from "../helpers.js";
 import type { RunSummary } from "../data/runScanner.js";
 
 // ---------------------------------------------------------------------------
@@ -27,8 +28,8 @@ export interface RunListTableProps {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Maximum number of rows visible at once. */
-const VISIBLE_ROWS = 15;
+/** Maximum number of rows visible at once (computed from terminal height). */
+const VISIBLE_ROWS = computeVisibleRows(process.stderr.rows);
 
 // ---------------------------------------------------------------------------
 // Helpers

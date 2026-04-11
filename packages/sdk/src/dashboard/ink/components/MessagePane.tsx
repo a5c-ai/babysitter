@@ -26,6 +26,7 @@ import {
   clampScrollOffset,
   computeVisibleRange,
   shouldAutoScroll,
+  computeViewportSize,
 } from "../helpers.js";
 import type { TuiMessage, VerbosityLevel, MessageKind } from "../types.js";
 
@@ -52,7 +53,7 @@ export function filterMessages(
 // ---------------------------------------------------------------------------
 
 /** Number of messages to show per "page" for scroll purposes. */
-const VIEWPORT_SIZE = 20;
+const VIEWPORT_SIZE = computeViewportSize(process.stderr.rows);
 /** How many messages PageUp/PageDown jumps. */
 const PAGE_STEP = 10;
 

@@ -1497,6 +1497,34 @@ export function getHarnessRpcSupport(harness: string): boolean {
   return HARNESS_RPC_SUPPORT[harness] === true;
 }
 
+// ---------------------------------------------------------------------------
+// Dynamic viewport sizing
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the viewport size for the message pane based on terminal height.
+ *
+ * @param terminalRows - Number of rows in the terminal (undefined defaults to 24)
+ * @param reservedRows - Rows reserved for chrome (status bar, prompt, etc), defaults to 8
+ * @returns Number of visible message rows, minimum 5
+ */
+export function computeViewportSize(terminalRows?: number, reservedRows: number = 8): number {
+  const rows = terminalRows ?? 24;
+  return Math.max(5, rows - reservedRows);
+}
+
+/**
+ * Compute the visible row count for the run list table.
+ *
+ * @param terminalRows - Number of rows in the terminal (undefined defaults to 24)
+ * @param reservedRows - Rows reserved for chrome, defaults to 6
+ * @returns Number of visible run list rows, minimum 3
+ */
+export function computeVisibleRows(terminalRows?: number, reservedRows: number = 6): number {
+  const rows = terminalRows ?? 24;
+  return Math.max(3, rows - reservedRows);
+}
+
 /**
  * Format a harness name for display in run list and detail views.
  * Returns "-" for undefined or empty harness names.
