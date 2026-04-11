@@ -34,20 +34,10 @@ Install through Cursor's marketplace UI using the repo-root
 2. Open the marketplace entry named **a5c-ai**
 3. Install the plugin named **babysitter**
 
-### Via Babysitter plugin manager
-
-This path installs the Babysitter plugin package named
-`babysitter-cursor` from the SDK marketplace, not the Cursor UI plugin
-entry:
+### Via Babysitter harness install
 
 ```bash
-babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --global
-```
-
-### Workspace installation
-
-```bash
-babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --project
+babysitter harness:install-plugin cursor
 ```
 
 If the workspace does not already have an active process-library binding, the
@@ -91,10 +81,10 @@ ln -s "$(pwd)/plugins/babysitter-cursor" ~/.cursor/plugins/local/babysitter-curs
 babysitter-cursor uninstall
 ```
 
-Or via the plugin manager:
+Or via npm:
 
 ```bash
-babysitter plugin:uninstall babysitter-cursor --global
+npm uninstall -g @a5c-ai/babysitter-cursor
 ```
 
 ## Plugin Structure (Directory Layout)
@@ -294,7 +284,7 @@ behavior within sessions.
 | `CURSOR_API_KEY` | -- | API key for headless CLI mode (required) |
 | `CURSOR_PLUGIN_ROOT` | Plugin directory | Plugin root directory |
 | `BABYSITTER_STATE_DIR` | `<cwd>/.a5c` | State directory for session data |
-| `BABYSITTER_LOG_DIR` | `<plugin>/.a5c/logs` | Log output directory |
+| `BABYSITTER_LOG_DIR` | `~/.a5c/logs` | Log output directory override; default is the user-global Babysitter log root |
 
 ### SDK Version Pinning
 
@@ -362,9 +352,7 @@ The repo-root Cursor marketplace manifest lives at `/.cursor-plugin/marketplace.
 ### User Commands
 
 ```bash
-babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/babysitter --marketplace-path plugins/a5c/marketplace/marketplace.json --global
-babysitter plugin:list-plugins --marketplace-name a5c-ai --global
-babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --global
+babysitter harness:install-plugin cursor
 ```
 
 ## Troubleshooting
@@ -378,7 +366,7 @@ session health:
 $doctor
 ```
 
-Also check log output in `<plugin-root>/.a5c/logs/`:
+Also check log output in `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/`:
 
 - `babysitter-session-start-hook.log`
 - `babysitter-stop-hook.log`

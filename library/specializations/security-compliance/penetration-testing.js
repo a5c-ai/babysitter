@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting pre-engagement activities and scoping');
 
-  let scopingResult = await ctx.task(preEngagementScopingTask, {
+  const scopingResult = await ctx.task(preEngagementScopingTask, {
     projectName,
     targetScope,
     testingType,
@@ -100,27 +100,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Scoping complete - ${scopingResult.targetsIdentified} targets, ${scopingResult.testCasesEstimated} estimated test cases`);
 
-    let lastFeedback_testApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_testApproval) {
-      scopingResult = await ctx.task(preEngagementScopingTask, { ...{
-    projectName,
-    targetScope,
-    testingType,
-    methodology,
-    approach,
-    testingDuration,
-    authorizedTesters,
-    testingWindow,
-    emergencyContact,
-    complianceRequirements,
-    exploitationDepth,
-    socialEngineeringEnabled,
-    physicalSecurityTesting,
-    outputDir
-  }, feedback: lastFeedback_testApproval, attempt: attempt + 1 });
-    }
-  const testApproval = await ctx.breakpoint({
+  // Breakpoint: Scope approval
+  await ctx.breakpoint({
     question: `Penetration test scope defined for ${projectName}. ${scopingResult.targetsIdentified} targets identified across ${scopingResult.assetTypes.length} asset types. Rules of Engagement signed: ${scopingResult.roeApproved}. Estimated duration: ${scopingResult.estimatedDuration}. Approve scope and begin testing?`,
     title: 'Penetration Test Scope Approval',
     context: {
@@ -138,15 +119,9 @@ export async function process(inputs, ctx) {
         complianceRequirements
       },
       files: scopingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_testApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (testApproval.approved) break;
-    lastFeedback_testApproval = testApproval.response || testApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: INTELLIGENCE GATHERING (RECONNAISSANCE)
   // ============================================================================
@@ -193,9 +168,10 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Automated vulnerability assessment complete - ${vulnerabilityAssessment.vulnerabilitiesFound} potential vulnerabilities (Critical: ${vulnerabilityAssessment.critical}, High: ${vulnerabilityAssessment.high})`);
   }
+
   // Manual vulnerability assessment
   if (manualTestingEnabled) {
-    let manualAssessment = await ctx.task(manualVulnerabilityAssessmentTask, {
+    const manualAssessment = await ctx.task(manualVulnerabilityAssessmentTask, {
       projectName,
       targetScope,
       reconResult,
@@ -211,23 +187,12 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Manual vulnerability assessment complete - ${manualAssessment.vulnerabilitiesFound} vulnerabilities identified (including ${manualAssessment.uniqueFindings} unique)`);
   }
+
   // Breakpoint: Review vulnerabilities before exploitation
   const criticalVulns = allVulnerabilities.filter(v => v.severity === 'critical').length;
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      manualAssessment = await ctx.task(manualVulnerabilityAssessmentTask, { ...{
-      projectName,
-      targetScope,
-      reconResult,
-      automatedFindings: vulnerabilityAssessment?.vulnerabilities || [],
-      methodology,
-      approach,
-      testingType,
-      outputDir
-    }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  const highVulns = allVulnerabilities.filter(v => v.severity === 'high').length;
+
+  await ctx.breakpoint({
     question: `Vulnerability assessment complete for ${projectName}. Found ${allVulnerabilities.length} total vulnerabilities (Critical: ${criticalVulns}, High: ${highVulns}). ${exploitationDepth === 'none' ? 'Skip' : 'Proceed with'} exploitation phase?`,
     title: 'Vulnerability Assessment Review',
     context: {
@@ -250,15 +215,9 @@ export async function process(inputs, ctx) {
         format: a.format || 'json',
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: EXPLOITATION
   // ============================================================================
@@ -266,7 +225,7 @@ export async function process(inputs, ctx) {
   if (exploitationDepth !== 'none' && allVulnerabilities.length > 0) {
     ctx.log('info', 'Phase 4: Conducting controlled exploitation of validated vulnerabilities');
 
-    let exploitationResult = await ctx.task(exploitationTask, {
+    const exploitationResult = await ctx.task(exploitationTask, {
       projectName,
       vulnerabilities: allVulnerabilities.filter(v =>
         ['critical', 'high'].includes(v.severity) && v.exploitable
@@ -283,21 +242,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Exploitation phase complete - ${exploitationResult.successfulExploits} successful exploits, ${exploitationResult.accessLevel} access achieved`);
 
     // Quality Gate: Critical exploits
-        let lastFeedback_qualityGateApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval) {
-          exploitationResult = await ctx.task(exploitationTask, { ...{
-      projectName,
-      vulnerabilities: allVulnerabilities.filter(v =>
-        ['critical', 'high'].includes(v.severity) && v.exploitable
-      ),
-      exploitationDepth,
-      targetScope,
-      scopingResult,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-        }
-  const qualityGateApproval = await ctx.breakpoint({
+    if (exploitationResult.criticalExploits > 0) {
+      await ctx.breakpoint({
         question: `CRITICAL: Successfully exploited ${exploitationResult.criticalExploits} critical vulnerabilities in ${projectName}! Achieved ${exploitationResult.accessLevel} access. Impacts: ${exploitationResult.businessImpacts.slice(0, 3).join(', ')}. Continue to post-exploitation or stop and report immediately?`,
         title: 'Critical Vulnerabilities Exploited',
         context: {
@@ -313,15 +259,9 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Consider stopping testing and reporting critical findings immediately',
           files: exploitationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval.approved) break;
-        lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
 
     // ============================================================================
     // PHASE 5: POST-EXPLOITATION
@@ -347,6 +287,7 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Skipping exploitation phase per configuration or no exploitable vulnerabilities found');
   }
+
   // ============================================================================
   // PHASE 6: WEB APPLICATION SECURITY TESTING (OWASP)
   // ============================================================================
@@ -382,6 +323,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Web application testing complete - ${consolidatedWebAppFindings.applicationsTestedCount} apps tested, ${consolidatedWebAppFindings.vulnerabilitiesFound} vulnerabilities`);
   }
+
   // ============================================================================
   // PHASE 7: API SECURITY TESTING
   // ============================================================================
@@ -402,6 +344,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `API security testing complete - ${apiTestingResult.apisTestedCount} APIs tested, ${apiTestingResult.vulnerabilitiesFound} vulnerabilities`);
   }
+
   // ============================================================================
   // PHASE 8: NETWORK PENETRATION TESTING
   // ============================================================================
@@ -424,6 +367,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Network penetration testing complete - ${networkTestingResult.networksTestedCount} networks tested, ${networkTestingResult.vulnerabilitiesFound} vulnerabilities`);
   }
+
   // ============================================================================
   // PHASE 9: CLOUD INFRASTRUCTURE SECURITY TESTING
   // ============================================================================
@@ -444,6 +388,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cloud security testing complete - ${cloudTestingResult.cloudAccountsTestedCount} accounts tested, ${cloudTestingResult.vulnerabilitiesFound} vulnerabilities`);
   }
+
   // ============================================================================
   // PHASE 10: SOCIAL ENGINEERING ASSESSMENT
   // ============================================================================
@@ -463,6 +408,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Social engineering assessment complete - ${socialEngineeringResult.campaignsExecuted} campaigns, ${socialEngineeringResult.successRate}% success rate`);
   }
+
   // ============================================================================
   // PHASE 11: COMPLIANCE VALIDATION
   // ============================================================================
@@ -483,6 +429,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Compliance validation complete - ${complianceValidationResult.requirementsMet}/${complianceValidationResult.totalRequirements} requirements met`);
   }
+
   // ============================================================================
   // PHASE 12: RISK ANALYSIS AND BUSINESS IMPACT ASSESSMENT
   // ============================================================================
@@ -528,7 +475,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Generating comprehensive penetration test report');
 
-  let reportResult = await ctx.task(penetrationTestReportTask, {
+  const reportResult = await ctx.task(penetrationTestReportTask, {
     projectName,
     scopingResult,
     reconResult,
@@ -550,26 +497,9 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // FINAL BREAKPOINT: REPORT REVIEW AND REMEDIATION TRACKING
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(penetrationTestReportTask, { ...{
-    projectName,
-    scopingResult,
-    reconResult,
-    vulnerabilities: allVulnerabilities,
-    exploitedVulnerabilities,
-    riskAnalysisResult,
-    remediationResult,
-    complianceValidationResult: complianceRequirements.length > 0 ? { requirementsMet: 0, totalRequirements: complianceRequirements.length } : null,
-    testingType,
-    methodology,
-    approach,
-    reportFormat,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // ============================================================================
+
+  await ctx.breakpoint({
     question: `Penetration test complete for ${projectName}. Security posture: ${securityPosture}. Found ${allVulnerabilities.length} vulnerabilities (Critical: ${allVulnerabilities.filter(v => v.severity === 'critical').length}, High: ${allVulnerabilities.filter(v => v.severity === 'high').length}). Successfully exploited: ${exploitedVulnerabilities.length}. ${remediationResult.recommendations.length} remediation recommendations provided. ${retestAfterRemediation ? 'Schedule retest after remediation?' : 'Finalize report and close engagement?'}`,
     title: 'Penetration Test Complete - Report Review',
     context: {
@@ -596,15 +526,9 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 15: REMEDIATION VALIDATION (IF ENABLED)
   // ============================================================================
@@ -626,6 +550,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Remediation validation plan created - ${remediationValidationResult.validationTestCases} test cases, estimated ${remediationValidationResult.estimatedRetestDuration} duration`);
   }
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -696,7 +621,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

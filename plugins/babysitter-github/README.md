@@ -226,7 +226,7 @@ active process library before the cloud agent starts working.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CLAUDE_PROJECT_DIR` | CWD | Project root directory (set by Copilot CLI) |
-| `BABYSITTER_LOG_DIR` | `<plugin>/.a5c/logs` | Log output directory |
+| `BABYSITTER_LOG_DIR` | `~/.a5c/logs` | Log output directory override; default is the user-global Babysitter log root |
 | `BABYSITTER_STATE_DIR` | `<cwd>/.a5c` | State directory for session data |
 
 ### SDK Version Pinning

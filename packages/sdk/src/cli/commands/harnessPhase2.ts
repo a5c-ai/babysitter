@@ -20,6 +20,8 @@ import {
   buildOrchestrationBootstrapPrompt,
   buildOrchestrationTurnPrompt,
 } from "./harnessPrompts";
+import { createPiContext } from "../../prompts/context";
+import { composeProcessCreatePrompt } from "../../prompts/compose";
 import {
   buildAgentPrompt,
   coerceAgentResultValue,
@@ -89,8 +91,72 @@ const PROCESS_MODULE_LOAD_RETRY_DELAYS_MS = process.env.VITEST
  */
 export const MAX_CONSECUTIVE_TIMEOUTS = 3;
 
+/**
+ * Maximum number of consecutive process-error recoveries before the
+ * orchestration run is failed.  Each recovery feeds the error back to a PI
+ * worker so it can fix the process code, but repeated failures indicate a
+ * deeper problem.
+ */
+export const MAX_PROCESS_ERROR_RECOVERIES = 5;
+
 // For tests
 const EFFECT_RETRY_DELAYS_OVERRIDE = process.env.VITEST ? [0, 0, 0] : undefined;
+
+// ── Verbose Pi Event Logging ─────────────────────────────────────────
+
+/**
+ * Subscribe to a Pi session's events and emit verbose logs for intermediate
+ * lifecycle events (tool executions, turns, messages, agent lifecycle).
+ *
+ * Returns an unsubscribe function.  No-ops when verbose is disabled or json
+ * mode is active (no stderr noise).
+ */
+function subscribeVerbosePiEvents(
+  session: PiSessionHandle,
+  label: string,
+  opts: { verbose: boolean; json: boolean; outputMode?: import("./harnessUtils").OutputMode },
+): (() => void) | null {
+  if (!opts.verbose || opts.json || opts.outputMode === "tui") return null;
+
+  // We subscribe *after* the session is initialized.  If it isn't initialized
+  // yet, the caller will call initialize() and this subscription will fire
+  // once events start flowing.
+  try {
+    return session.subscribe((event: PiSessionEvent) => {
+      const t = event.type;
+
+      if (t === "tool_execution_start") {
+        const name = (event as { name?: string }).name ?? (event as { toolName?: string }).toolName ?? "unknown";
+        process.stderr.write(`${DIM}[${label} tool:start] ${name}${RESET}\n`);
+      } else if (t === "tool_execution_end") {
+        const name = (event as { name?: string }).name ?? (event as { toolName?: string }).toolName ?? "unknown";
+        process.stderr.write(`${DIM}[${label} tool:end] ${name}${RESET}\n`);
+      } else if (t === "turn_start") {
+        process.stderr.write(`${DIM}[${label} turn:start]${RESET}\n`);
+      } else if (t === "turn_end") {
+        process.stderr.write(`${DIM}[${label} turn:end]${RESET}\n`);
+      } else if (t === "message_start") {
+        const role = (event as { role?: string; message?: { role?: string } }).role
+          ?? (event as { message?: { role?: string } }).message?.role ?? "";
+        if (role) {
+          process.stderr.write(`${DIM}[${label} message:start] role=${role}${RESET}\n`);
+        }
+      } else if (t === "agent_start") {
+        process.stderr.write(`${DIM}[${label} agent:start]${RESET}\n`);
+      } else if (t === "agent_end") {
+        process.stderr.write(`${DIM}[${label} agent:end]${RESET}\n`);
+      } else if (t === "text_delta") {
+        const text = (event as { text?: string }).text;
+        if (text) process.stderr.write(text);
+      }
+      // tool_execution_update and message_update are high-frequency streaming
+      // events; skip them to avoid drowning stderr.
+    });
+  } catch {
+    // Session not yet initialized — caller should retry after initialize().
+    return null;
+  }
+}
 
 // ── Effect Resolution ────────────────────────────────────────────────
 
@@ -178,22 +244,22 @@ export async function resolveEffect(
     if (piSession) {
       const bashCommand = [command, ...shellArgs.map(shellQuoteArg)].join(" ");
       const bashResult = await piSession.executeBash(bashCommand);
+      const ok = bashResult.exitCode === 0;
       return {
-        status: bashResult.exitCode === 0 ? "ok" : "error",
-        value: bashResult.exitCode === 0 ? bashResult.output : undefined,
-        error: bashResult.exitCode === 0
-          ? undefined
-          : new Error(`Shell command exited with code ${bashResult.exitCode ?? "null"}: ${bashResult.output}`),
+        status: "ok" as const,
+        value: ok
+          ? bashResult.output
+          : { success: false, exitCode: bashResult.exitCode ?? 1, stdout: bashResult.output, stderr: "", error: `Shell command exited with code ${bashResult.exitCode ?? "null"}: ${bashResult.output}` },
         stdout: bashResult.output,
       };
     }
     const shellResult = await execShellEffect(command, shellArgs, cwd);
+    const shellOk = shellResult.exitCode === 0;
     return {
-      status: shellResult.exitCode === 0 ? "ok" : "error",
-      value: shellResult.exitCode === 0 ? shellResult.stdout : undefined,
-      error: shellResult.exitCode === 0
-        ? undefined
-        : new Error(`Shell command exited with code ${shellResult.exitCode}: ${shellResult.stderr}`),
+      status: "ok" as const,
+      value: shellOk
+        ? shellResult.stdout
+        : { success: false, exitCode: shellResult.exitCode, stdout: shellResult.stdout, stderr: shellResult.stderr, error: `Shell command exited with code ${shellResult.exitCode}: ${shellResult.stderr}` },
       stdout: shellResult.stdout,
       stderr: shellResult.stderr,
     };
@@ -364,7 +430,8 @@ function isRetryableEffectError(error: unknown): boolean {
     lower.includes("temporarily unavailable") ||
     lower.includes("please retry") ||
     lower.includes("killed") ||
-    lower.includes("signal")
+    lower.includes("signal") ||
+    lower.includes("already processing")
   );
 }
 
@@ -588,6 +655,7 @@ export async function runOrchestrationPhase(args: {
   promptContext: SessionCreatePromptContext;
   existingRunId?: string;
   existingRunDir?: string;
+  outputMode?: import("./harnessUtils").OutputMode;
 }): Promise<number> {
   const processId = path.basename(args.processPath, path.extname(args.processPath));
   const state: OrchestrationState = {
@@ -599,11 +667,12 @@ export async function runOrchestrationPhase(args: {
   let orchestrationSession: PiSessionHandle | null = null;
   const activePiSessions = new Set<PiSessionHandle>();
   const writeVerbose = (message: string): void => {
-    writeVerboseLine(args.verbose, args.json, message);
+    writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
-    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars, args.outputMode);
   };
+
   const registerPiSession = (session: PiSessionHandle): PiSessionHandle => {
     activePiSessions.add(session);
     return session;
@@ -674,6 +743,7 @@ export async function runOrchestrationPhase(args: {
       { phase: "2", status: "started", harness: args.selectedHarnessName },
       args.json,
       args.verbose,
+      args.outputMode,
     );
 
     writeVerbose(
@@ -688,6 +758,7 @@ export async function runOrchestrationPhase(args: {
         { phase: "2", status: "resuming", runId: args.existingRunId, runDir: args.existingRunDir },
         args.json,
         args.verbose,
+        args.outputMode,
       );
     } else {
       // Create new run
@@ -713,6 +784,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
       writeVerboseData("phase2 host run_create result", created);
     }
@@ -764,8 +836,11 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     writeVerboseData("phase2 host bind result", state.sessionBound);
+
+    let consecutiveProcessErrors = 0;
 
     while (state.iteration < args.maxIterations) {
       state.iteration += 1;
@@ -780,10 +855,11 @@ export async function runOrchestrationPhase(args: {
         status: result.status,
         nextActions: result.status === "waiting" ? result.nextActions : undefined,
         output: result.status === "completed" ? result.output : undefined,
-        error: result.status === "failed" ? result.error : undefined,
+        error: (result.status === "failed" || result.status === "process-error") ? result.error : undefined,
       });
 
       if (result.status === "waiting") {
+        consecutiveProcessErrors = 0;
         emitProgress(
           {
             phase: "2",
@@ -794,11 +870,13 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
 
         for (const action of result.nextActions) {
           const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
           let workerSession: PiSessionHandle | null = null;
+          let workerUnsub: (() => void) | null = null;
           if (action.kind === "shell" || isInternalHarness(taskHarness)) {
             workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
               action,
@@ -807,12 +885,20 @@ export async function runOrchestrationPhase(args: {
             })));
           }
           const piSessionFactory = (action.kind === "shell" || isInternalHarness(taskHarness))
-            ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
-                action,
-                workspace: args.workspace,
-                model: args.model,
-              })))
+            ? () => {
+                const s = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+                  action,
+                  workspace: args.workspace,
+                  model: args.model,
+                })));
+                workerUnsub?.();
+                workerUnsub = subscribeVerbosePiEvents(s, `worker:${action.effectId.slice(-8)}`, args);
+                return s;
+              }
             : undefined;
+          if (workerSession) {
+            workerUnsub = subscribeVerbosePiEvents(workerSession, `worker:${action.effectId.slice(-8)}`, args);
+          }
           try {
             const effectResult = await resolveEffectWithRetry(
               action,
@@ -863,8 +949,10 @@ export async function runOrchestrationPhase(args: {
               },
               args.json,
               args.verbose,
+              args.outputMode,
             );
           } finally {
+            workerUnsub?.();
             await shutdownPiSession(workerSession);
           }
         }
@@ -881,8 +969,112 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         return 0;
+      }
+
+      // ── Process-error recovery ──────────────────────────────────────
+      // The process threw a non-fatal error (e.g. TypeError from user code).
+      // No RUN_FAILED was written to the journal, so we can feed the error
+      // to a PI worker, let it fix the process file, and retry.
+      if (result.status === "process-error") {
+        consecutiveProcessErrors += 1;
+        const errorMessage =
+          typeof result.error === "object" && result.error !== null && "message" in result.error
+            ? String((result.error as Record<string, unknown>).message)
+            : String(result.error);
+        const errorStack =
+          typeof result.error === "object" && result.error !== null && "stack" in result.error
+            ? String((result.error as Record<string, unknown>).stack)
+            : undefined;
+
+        emitProgress(
+          {
+            phase: "2",
+            status: "process-error-recovery",
+            iteration: state.iteration,
+            runStatus: "recovering",
+            attempt: consecutiveProcessErrors,
+            maxAttempts: MAX_PROCESS_ERROR_RECOVERIES,
+            error: errorMessage,
+          },
+          args.json,
+          args.verbose,
+          args.outputMode,
+        );
+
+        if (consecutiveProcessErrors > MAX_PROCESS_ERROR_RECOVERIES) {
+          emitProgress(
+            {
+              phase: "2",
+              status: "failed",
+              iteration: state.iteration,
+              runStatus: "failed",
+              error: `Process error recovery exhausted after ${MAX_PROCESS_ERROR_RECOVERIES} attempts. Last error: ${errorMessage}`,
+            },
+            args.json,
+            args.verbose,
+            args.outputMode,
+          );
+          return 1;
+        }
+
+        // Spawn a PI worker to fix the process file
+        const recoverySession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+          action: { effectId: "process-error-recovery", invocationKey: "", kind: "node", taskDef: { title: "Fix process error" } as EffectAction["taskDef"] },
+          workspace: args.workspace,
+          model: args.model,
+        })));
+        const recoveryUnsub = subscribeVerbosePiEvents(recoverySession, "recovery", args);
+        try {
+          writeVerbose(
+            `[phase2 recovery] Process error (attempt ${consecutiveProcessErrors}/${MAX_PROCESS_ERROR_RECOVERIES}): ${errorMessage}`,
+          );
+          // Inject process-creation guidelines so the recovery agent knows
+          // the correct patterns for defineTask, ctx.task, ctx.parallel, etc.
+          const processCreationCtx = createPiContext({ interactive: false });
+          const processCreationGuidelines = composeProcessCreatePrompt(processCreationCtx);
+
+          const recoveryPrompt = [
+            `The babysitter process at ${path.resolve(args.processPath)} threw an error during execution:`,
+            "",
+            `Error: ${errorMessage}`,
+            errorStack ? `\nStack trace:\n${errorStack}` : "",
+            "",
+            "This is a bug in the process code, not in the babysitter runtime.",
+            "Read the process file, understand the error, and fix the code so the next iteration succeeds.",
+            "",
+            "--- Process Authoring Reference ---",
+            "",
+            processCreationGuidelines,
+            "",
+            "--- End Reference ---",
+            "",
+            "Fix the process file and save it. The orchestrator will retry automatically.",
+          ].join("\n");
+
+          await promptPiWithRetry({
+            session: recoverySession,
+            message: compressInternalHarnessPrompt(recoveryPrompt, args.compressionConfig, "agent"),
+            timeout: PI_WORKER_TIMEOUT_MS,
+            label: "process-error-recovery",
+            writeVerbose,
+            writeVerboseData,
+          });
+        } catch (recoveryError: unknown) {
+          writeVerbose(
+            `[phase2 recovery] PI recovery prompt failed: ${recoveryError instanceof Error ? recoveryError.message : String(recoveryError)}`,
+          );
+        } finally {
+          recoveryUnsub?.();
+          await shutdownPiSession(recoverySession);
+        }
+
+        // Do not consume an extra iteration for the recovery — the next
+        // loop tick will re-run the (hopefully fixed) process.
+        state.iteration -= 1;
+        continue;
       }
 
       emitProgress(
@@ -899,6 +1091,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
       return 1;
     }
@@ -913,6 +1106,7 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     return 1;
   }
@@ -1043,6 +1237,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         writeVerboseData("phase2 tool babysitter_run_create result", result);
         return formatToolResult(result, "Run created.");
@@ -1119,6 +1314,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
         writeVerboseData("phase2 tool babysitter_bind_session result", state.sessionBound);
         return formatToolResult(state.sessionBound, "Session bound.");
@@ -1155,6 +1351,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
           return formatToolResult(state.lastIterationResult, "Iteration limit reached.");
         }
@@ -1173,7 +1370,7 @@ export async function runOrchestrationPhase(args: {
           status: result.status,
           nextActions: result.status === "waiting" ? result.nextActions : undefined,
           output: result.status === "completed" ? result.output : undefined,
-          error: result.status === "failed" ? result.error : undefined,
+          error: (result.status === "failed" || result.status === "process-error") ? result.error : undefined,
         });
 
         if (result.status === "waiting") {
@@ -1190,6 +1387,7 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
         } else if (result.status === "completed") {
           emitProgress(
@@ -1201,7 +1399,29 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
+        } else if (result.status === "process-error") {
+          // Recoverable process error — no RUN_FAILED in journal.
+          // Return the error to the agent so it can fix the process and retry.
+          const errorMessage =
+            typeof result.error === "object" && result.error !== null && "message" in result.error
+              ? String((result.error as Record<string, unknown>).message)
+              : String(result.error);
+          emitProgress(
+            {
+              phase: "2",
+              status: "process-error-recovery",
+              iteration: state.iteration,
+              runStatus: "recovering",
+              error: errorMessage,
+            },
+            args.json,
+            args.verbose,
+            args.outputMode,
+          );
+          // Roll back iteration count so the retry does not consume a slot
+          state.iteration -= 1;
         } else {
           const errorMessage =
             result.error instanceof Error
@@ -1221,15 +1441,31 @@ export async function runOrchestrationPhase(args: {
             },
             args.json,
             args.verbose,
+            args.outputMode,
           );
+        }
+
+        // For process-error, inject process-creation guidelines so the agent
+        // knows how to author valid process code (defineTask, ctx.parallel, etc.)
+        let processErrorExtra: Record<string, unknown> = {};
+        if (result.status === "process-error") {
+          const pCtx = createPiContext({ interactive: false });
+          processErrorExtra = {
+            recoverable: true,
+            hint: "The process code has a bug. Read the error and the process-authoring reference below, fix the process file, and call babysitter_run_iterate again.",
+            processAuthoringReference: composeProcessCreatePrompt(pCtx),
+          };
         }
 
         return formatToolResult(
           {
             iteration: state.iteration,
             ...result,
+            ...processErrorExtra,
           },
-          "Iteration completed.",
+          result.status === "process-error"
+            ? "Process error — fix the process code and retry iteration."
+            : "Iteration completed.",
         );
       },
     },
@@ -1272,12 +1508,19 @@ export async function runOrchestrationPhase(args: {
         });
         writeVerboseData("phase2 worker session options", workerSessionOptions);
         const workerSession = registerPiSession(createPiSession(workerSessionOptions));
-        const piSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
-          action,
-          workspace: args.workspace,
-          model: args.model,
-          customTools: phase2AgenticTools,
-        })));
+        const shellLabel = `shell-worker:${params.effectId.slice(-8)}`;
+        let shellUnsub = subscribeVerbosePiEvents(workerSession, shellLabel, args);
+        const piSessionFactory = () => {
+          const s = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+            action,
+            workspace: args.workspace,
+            model: args.model,
+            customTools: phase2AgenticTools,
+          })));
+          shellUnsub?.();
+          shellUnsub = subscribeVerbosePiEvents(s, shellLabel, args);
+          return s;
+        };
         try {
           const effectResult = await resolveEffectWithRetry(
             action,
@@ -1305,10 +1548,7 @@ export async function runOrchestrationPhase(args: {
             "Shell effect executed on the internal PI worker and staged for task posting.",
           );
         } finally {
-          // Note: if piSessionFactory was used for retries, the last recreated
-          // session is disposed inside resolveEffectWithRetry on the next retry
-          // or returned as currentPiSession. The original workerSession may have
-          // been disposed during retry. This dispose is a safety net.
+          shellUnsub?.();
           await shutdownPiSession(workerSession);
         }
       },
@@ -1406,13 +1646,20 @@ export async function runOrchestrationPhase(args: {
           });
           writeVerboseData("phase2 worker session options", workerSessionOptions);
           const workerSession = registerPiSession(createPiSession(workerSessionOptions));
-          const shellPiSessionFactory = () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
-            action,
-            workspace: args.workspace,
-            model: args.model,
-            customTools: phase2AgenticTools,
-            delegationConfig,
-          })));
+          const dispShellLabel = `dispatch-shell:${params.effectId.slice(-8)}`;
+          let dispShellUnsub = subscribeVerbosePiEvents(workerSession, dispShellLabel, args);
+          const shellPiSessionFactory = () => {
+            const s = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+              action,
+              workspace: args.workspace,
+              model: args.model,
+              customTools: phase2AgenticTools,
+              delegationConfig,
+            })));
+            dispShellUnsub?.();
+            dispShellUnsub = subscribeVerbosePiEvents(s, dispShellLabel, args);
+            return s;
+          };
           try {
             const effectResult = await resolveEffectWithRetry(
               action,
@@ -1441,6 +1688,7 @@ export async function runOrchestrationPhase(args: {
               "Shell effect executed on the internal PI worker and staged for task posting.",
             );
           } finally {
+            dispShellUnsub?.();
             await shutdownPiSession(workerSession);
           }
         }
@@ -1456,14 +1704,21 @@ export async function runOrchestrationPhase(args: {
           delegationConfig,
         });
         let workerSession: PiSessionHandle | null = null;
+        let dispatchUnsub: (() => void) | null = null;
+        const dispatchLabel = `dispatch:${params.effectId.slice(-8)}`;
         const dispatchPiSessionFactory = isInternalHarness(taskHarness)
-          ? () => registerPiSession(createPiSession(buildPiWorkerSessionOptions({
-              action,
-              workspace: args.workspace,
-              model: args.model,
-              customTools: phase2AgenticTools,
-              delegationConfig,
-            })))
+          ? () => {
+              const s = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+                action,
+                workspace: args.workspace,
+                model: args.model,
+                customTools: phase2AgenticTools,
+                delegationConfig,
+              })));
+              dispatchUnsub?.();
+              dispatchUnsub = subscribeVerbosePiEvents(s, dispatchLabel, args);
+              return s;
+            }
           : undefined;
         if (isInternalHarness(taskHarness)) {
           workerSession = registerPiSession(createPiSession(buildPiWorkerSessionOptions({
@@ -1473,6 +1728,7 @@ export async function runOrchestrationPhase(args: {
             customTools: phase2AgenticTools,
             delegationConfig,
           })));
+          dispatchUnsub = subscribeVerbosePiEvents(workerSession, dispatchLabel, args);
           writeVerboseData("phase2 worker session options", buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
@@ -1510,6 +1766,7 @@ export async function runOrchestrationPhase(args: {
             "Effect dispatched through the selected harness and staged for task posting.",
           );
         } finally {
+          dispatchUnsub?.();
           await shutdownPiSession(workerSession);
         }
       },
@@ -1692,6 +1949,7 @@ export async function runOrchestrationPhase(args: {
           },
           args.json,
           args.verbose,
+          args.outputMode,
         );
 
         state.pendingActions.delete(params.effectId);
@@ -1779,7 +2037,7 @@ export async function runOrchestrationPhase(args: {
       );
     }
 
-    if (!args.json && args.verbose) {
+    if (!args.json && args.verbose && args.outputMode !== "tui") {
       const label = options?.label ?? "phase2";
       process.stderr.write(`\n${DIM}[${label}] agent turn${RESET}\n`);
     }
@@ -1927,18 +2185,14 @@ export async function runOrchestrationPhase(args: {
     { phase: "2", status: "started", harness: args.selectedHarnessName },
     args.json,
     args.verbose,
+    args.outputMode,
   );
 
   let unsubscribe: (() => void) | null = null;
   try {
     await orchestrationSession.initialize();
-    if (!args.json && args.verbose) {
-      unsubscribe = orchestrationSession.subscribe((event: PiSessionEvent) => {
-        if (event.type === "text_delta") {
-          const text = (event as { text?: string }).text;
-          if (text) process.stderr.write(text);
-        }
-      });
+    if (!args.json && args.verbose && args.outputMode !== "tui") {
+      unsubscribe = subscribeVerbosePiEvents(orchestrationSession, "orchestrator", args);
     }
 
     await completeBootstrapAgentically();
@@ -1969,6 +2223,13 @@ export async function runOrchestrationPhase(args: {
             runId: state.runId,
             runDir: state.runDir,
             lastStatus: state.lastIterationResult?.status,
+            lastError: state.lastIterationResult?.status === "process-error"
+              ? (typeof state.lastIterationResult.error === "object" &&
+                  state.lastIterationResult.error !== null &&
+                  "message" in state.lastIterationResult.error
+                  ? String((state.lastIterationResult.error as Record<string, unknown>).message)
+                  : String(state.lastIterationResult.error))
+              : undefined,
             pendingEffects: describePendingActions(),
           }),
           { label: `phase2 iteration ${state.iteration + 1}` },
@@ -2031,6 +2292,7 @@ export async function runOrchestrationPhase(args: {
         },
         args.json,
         args.verbose,
+        args.outputMode,
       );
     }
 
@@ -2086,11 +2348,12 @@ export async function runOrchestrationPhase(args: {
       },
       args.json,
       args.verbose,
+      args.outputMode,
     );
     return 1;
   } finally {
     if (unsubscribe) unsubscribe();
-    if (!args.json && args.verbose) process.stderr.write("\n");
+    if (!args.json && args.verbose && args.outputMode !== "tui") process.stderr.write("\n");
   }
   } finally {
     removeShutdownHandlers();

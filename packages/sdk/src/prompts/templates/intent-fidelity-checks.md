@@ -6,7 +6,9 @@ Before calling `run:create`, verify and document in your working notes:
 2. The process structure follows library style/composition patterns rather than
    a one-off minimal flow.
 3. Quality gates exist (verification/refinement loops, integration checks,
-   and/or breakpoints appropriate for the task).
+   and/or breakpoints appropriate for the task). Objectively verifiable checks
+   (compilation, linting, tests, grep, dependencies) use `kind: 'shell'` with
+   `expectedExitCode`, not `kind: 'agent'`.
 4. Any scope reduction, simplification, or recovery tradeoff is explicitly
    approved by the user before execution.
 

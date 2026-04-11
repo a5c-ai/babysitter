@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Model Development
   ctx.log('info', 'Phase 3: Developing simulation model');
-  let modelDevelopment = await ctx.task(modelDevelopmentTask, {
+  const modelDevelopment = await ctx.task(modelDevelopmentTask, {
     scopeDefinition,
     dataCollection,
     simulationTool,
@@ -70,17 +70,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modelDevelopment.artifacts);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      modelDevelopment = await ctx.task(modelDevelopmentTask, { ...{
-    scopeDefinition,
-    dataCollection,
-    simulationTool,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Review model logic
+  await ctx.breakpoint({
     question: `Simulation model developed with ${modelDevelopment.entityCount} entities and ${modelDevelopment.processCount} processes. Review model logic before validation?`,
     title: 'Simulation Model Review',
     context: {
@@ -89,18 +80,12 @@ export async function process(inputs, ctx) {
       entityCount: modelDevelopment.entityCount,
       processCount: modelDevelopment.processCount,
       files: modelDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Task 4: Model Validation
   ctx.log('info', 'Phase 4: Validating simulation model');
-  let modelValidation = await ctx.task(modelValidationTask, {
+  const modelValidation = await ctx.task(modelValidationTask, {
     modelDevelopment,
     dataCollection,
     outputDir
@@ -108,31 +93,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modelValidation.artifacts);
 
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        modelValidation = await ctx.task(modelValidationTask, { ...{
-    modelDevelopment,
-    dataCollection,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!modelValidation.validated) {
+    await ctx.breakpoint({
       question: `Model validation failed. Issues: ${modelValidation.validationIssues.join(', ')}. Address issues before proceeding?`,
       title: 'Model Validation Issues',
       context: {
         runId: ctx.runId,
         validationResults: modelValidation,
         files: modelValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Task 5: Experiment Design
   ctx.log('info', 'Phase 5: Designing simulation experiments');
@@ -170,7 +141,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Recommendations Report
   ctx.log('info', 'Phase 8: Generating recommendations report');
-  let recommendationsReport = await ctx.task(recommendationsReportTask, {
+  const recommendationsReport = await ctx.task(recommendationsReportTask, {
     scopeDefinition,
     modelValidation,
     experimentDesign,
@@ -180,18 +151,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendationsReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      recommendationsReport = await ctx.task(recommendationsReportTask, { ...{
-    scopeDefinition,
-    modelValidation,
-    experimentDesign,
-    outputAnalysis,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Simulation analysis complete. Best scenario: ${outputAnalysis.bestScenario}. Review results and recommendations?`,
     title: 'Simulation Results Review',
     context: {
@@ -203,15 +164,9 @@ export async function process(inputs, ctx) {
         recommendations: recommendationsReport.recommendations
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -239,7 +194,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task 1: Scope Definition
+
+// Task 1: Scope Definition
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define simulation scope and objectives',

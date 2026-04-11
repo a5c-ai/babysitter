@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 $PluginRoot = if ($env:COPILOT_PLUGIN_DIR) { $env:COPILOT_PLUGIN_DIR } else { Split-Path -Parent $PSScriptRoot }
 $MarkerFile = Join-Path $PluginRoot ".babysitter-install-attempted"
 
-$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $PluginRoot ".a5c\logs" }
+$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $HOME ".a5c\logs" }
 $LogFile = Join-Path $LogDir "babysitter-session-start-hook.log"
 New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction SilentlyContinue | Out-Null
 

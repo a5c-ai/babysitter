@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining observability requirements');
 
-  let requirementsResult = await ctx.task(defineRequirementsTask, {
+  const requirementsResult = await ctx.task(defineRequirementsTask, {
     systemName,
     observabilityScope,
     slos,
@@ -74,18 +74,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Defined ${requirementsResult.metrics.length} metrics, ${requirementsResult.logEvents.length} log events, ${requirementsResult.traces.length} trace points`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      requirementsResult = await ctx.task(defineRequirementsTask, { ...{
-    systemName,
-    observabilityScope,
-    slos,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements review
+  await ctx.breakpoint({
     question: `Observability requirements defined for ${systemName}. Identified ${requirementsResult.metrics.length} metrics, ${requirementsResult.logEvents.length} log events. Review and approve?`,
     title: 'Observability Requirements Review',
     context: {
@@ -98,15 +88,9 @@ export async function process(inputs, ctx) {
       slis: requirementsResult.slis,
       coverage: requirementsResult.estimatedCoverage,
       files: requirementsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: IMPLEMENT STRUCTURED LOGGING
   // ============================================================================
@@ -114,7 +98,7 @@ export async function process(inputs, ctx) {
   if (enableLogAggregation) {
     ctx.log('info', 'Phase 2: Implementing structured logging');
 
-    let loggingResult = await ctx.task(structuredLoggingTask, {
+    const loggingResult = await ctx.task(structuredLoggingTask, {
       systemName,
       observabilityScope,
       logEvents: requirementsResult.logEvents,
@@ -133,20 +117,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Implemented structured logging in ${loggingResult.componentsInstrumented} components`);
 
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        loggingResult = await ctx.task(structuredLoggingTask, { ...{
-      systemName,
-      observabilityScope,
-      logEvents: requirementsResult.logEvents,
-      loggingStandard: 'JSON',
-      logLevels: ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'],
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+    // Quality Gate: Logging implementation review
+    await ctx.breakpoint({
       question: `Structured logging implemented in ${loggingResult.componentsInstrumented} components. Log format standardized. Review implementation?`,
       title: 'Structured Logging Review',
       context: {
@@ -158,15 +130,9 @@ export async function process(inputs, ctx) {
           coverage: loggingResult.coveragePercentage
         },
         files: loggingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: DEFINE METRICS AND SLIs
@@ -175,7 +141,7 @@ export async function process(inputs, ctx) {
   if (enableMetricsCollection) {
     ctx.log('info', 'Phase 3: Defining metrics and Service Level Indicators (SLIs)');
 
-    let metricsResult = await ctx.task(defineMetricsTask, {
+    const metricsResult = await ctx.task(defineMetricsTask, {
       systemName,
       observabilityScope,
       metrics: requirementsResult.metrics,
@@ -193,19 +159,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Defined ${metricsResult.metricsConfigured} metrics across ${metricsResult.metricTypes.length} types`);
 
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        metricsResult = await ctx.task(defineMetricsTask, { ...{
-      systemName,
-      observabilityScope,
-      metrics: requirementsResult.metrics,
-      slos,
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+    // Quality Gate: Metrics definition review
+    await ctx.breakpoint({
       question: `Metrics and SLIs defined. ${metricsResult.metricsConfigured} metrics configured including ${metricsResult.goldenSignals.length} golden signals. Review and approve?`,
       title: 'Metrics Definition Review',
       context: {
@@ -217,15 +172,9 @@ export async function process(inputs, ctx) {
           metricTypes: metricsResult.metricTypes
         },
         files: metricsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: IMPLEMENT DISTRIBUTED TRACING
@@ -234,7 +183,7 @@ export async function process(inputs, ctx) {
   if (enableDistributedTracing) {
     ctx.log('info', 'Phase 4: Implementing distributed tracing');
 
-    let tracingResult = await ctx.task(distributedTracingTask, {
+    const tracingResult = await ctx.task(distributedTracingTask, {
       systemName,
       observabilityScope,
       traces: requirementsResult.traces,
@@ -253,20 +202,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Implemented distributed tracing across ${tracingResult.servicesInstrumented} services`);
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        tracingResult = await ctx.task(distributedTracingTask, { ...{
-      systemName,
-      observabilityScope,
-      traces: requirementsResult.traces,
-      tracingStandard: 'OpenTelemetry',
-      samplingRate: 0.1, // 10% sampling
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    // Quality Gate: Tracing implementation review
+    await ctx.breakpoint({
       question: `Distributed tracing implemented across ${tracingResult.servicesInstrumented} services using ${tracingResult.tracingStandard}. Review implementation?`,
       title: 'Distributed Tracing Review',
       context: {
@@ -279,15 +216,9 @@ export async function process(inputs, ctx) {
           coverage: tracingResult.coveragePercentage
         },
         files: tracingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: CREATE DASHBOARDS
@@ -295,7 +226,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Creating observability dashboards');
 
-  let dashboardsResult = await ctx.task(createDashboardsTask, {
+  const dashboardsResult = await ctx.task(createDashboardsTask, {
     systemName,
     observabilityScope,
     metrics: metricsResult?.metricsConfigured || requirementsResult.metrics.length,
@@ -308,19 +239,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Created ${dashboardsResult.dashboards.length} dashboards`);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      dashboardsResult = await ctx.task(createDashboardsTask, { ...{
-    systemName,
-    observabilityScope,
-    metrics: metricsResult?.metricsConfigured || requirementsResult.metrics.length,
-    slis: requirementsResult.slis,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Quality Gate: Dashboard review
+  await ctx.breakpoint({
     question: `Created ${dashboardsResult.dashboards.length} observability dashboards. Dashboards include: ${dashboardsResult.dashboards.map(d => d.name).join(', ')}. Review dashboards?`,
     title: 'Dashboards Review',
     context: {
@@ -332,22 +252,16 @@ export async function process(inputs, ctx) {
         url: d.url
       })),
       files: dashboardsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: SET UP ALERTS
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Setting up alerts and notifications');
 
-  let alertingResult = await ctx.task(setupAlertsTask, {
+  const alertingResult = await ctx.task(setupAlertsTask, {
     systemName,
     slos,
     slis: requirementsResult.slis,
@@ -361,20 +275,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Configured ${alertingResult.alerts.length} alerts across ${alertingResult.severity.length} severity levels`);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      alertingResult = await ctx.task(setupAlertsTask, { ...{
-    systemName,
-    slos,
-    slis: requirementsResult.slis,
-    metrics: metricsResult?.metricsConfigured || requirementsResult.metrics.length,
-    alertingChannels,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Quality Gate: Alert configuration review
+  await ctx.breakpoint({
     question: `Configured ${alertingResult.alerts.length} alerts. Critical alerts: ${alertingResult.criticalAlerts.length}. Review alert configuration?`,
     title: 'Alert Configuration Review',
     context: {
@@ -387,22 +289,16 @@ export async function process(inputs, ctx) {
       },
       topAlerts: alertingResult.alerts.slice(0, 10),
       files: alertingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: TEST OBSERVABILITY
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Testing observability implementation');
 
-  let testingResult = await ctx.task(testObservabilityTask, {
+  const testingResult = await ctx.task(testObservabilityTask, {
     systemName,
     implementations,
     requirementsResult,
@@ -416,19 +312,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Observability testing complete - Coverage: ${testingResult.actualCoverage}%`);
 
   // Quality Gate: Testing results validation
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        testingResult = await ctx.task(testObservabilityTask, { ...{
-    systemName,
-    implementations,
-    requirementsResult,
-    targetCoverage,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (testingResult.actualCoverage < targetCoverage) {
+    await ctx.breakpoint({
       question: `Observability coverage ${testingResult.actualCoverage}% is below target ${targetCoverage}%. Gaps identified: ${testingResult.gaps.length}. Review and address gaps?`,
       title: 'Coverage Gap Review',
       context: {
@@ -440,15 +325,9 @@ export async function process(inputs, ctx) {
           recommendation: 'Address critical gaps before proceeding'
         },
         files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: CREATE RUNBOOKS
@@ -496,7 +375,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Computing observability score and final assessment');
 
-  let assessmentResult = await ctx.task(observabilityAssessmentTask, {
+  const assessmentResult = await ctx.task(observabilityAssessmentTask, {
     systemName,
     observabilityScope,
     targetCoverage,
@@ -514,23 +393,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Observability Score: ${observabilityScore}/100`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      assessmentResult = await ctx.task(observabilityAssessmentTask, { ...{
-    systemName,
-    observabilityScope,
-    targetCoverage,
-    actualCoverage: testingResult.actualCoverage,
-    implementations,
-    dashboardsCount: dashboardsResult.dashboards.length,
-    alertsCount: alertingResult.alerts.length,
-    runbooksCount: runbooksResult.runbooks.length,
-    testingResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Observability Implementation Review
+  await ctx.breakpoint({
     question: `Observability Implementation Complete for ${systemName}. Score: ${observabilityScore}/100. Coverage: ${testingResult.actualCoverage}% (Target: ${targetCoverage}%). Approve implementation?`,
     title: 'Final Observability Review',
     context: {
@@ -556,15 +420,9 @@ export async function process(inputs, ctx) {
         { path: assessmentResult.summaryPath, format: 'json', label: 'Assessment Summary' },
         { path: dashboardsResult.dashboardsConfigPath, format: 'json', label: 'Dashboards Configuration' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 11: DOCUMENTATION AND MAINTENANCE PLAN
   // ============================================================================
@@ -660,7 +518,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

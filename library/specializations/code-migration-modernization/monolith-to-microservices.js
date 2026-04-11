@@ -42,7 +42,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing business domain');
-  let domainAnalysis = await ctx.task(domainAnalysisTask, {
+  const domainAnalysis = await ctx.task(domainAnalysisTask, {
     projectName,
     monolithAccess,
     domainExperts,
@@ -51,17 +51,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...domainAnalysis.artifacts);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      domainAnalysis = await ctx.task(domainAnalysisTask, { ...{
-    projectName,
-    monolithAccess,
-    domainExperts,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Breakpoint: Domain model review
+  await ctx.breakpoint({
     question: `Domain analysis complete for ${projectName}. Bounded contexts: ${domainAnalysis.boundedContexts.length}. Review domain model before service identification?`,
     title: 'Domain Model Review',
     context: {
@@ -69,15 +60,9 @@ export async function process(inputs, ctx) {
       projectName,
       domainAnalysis,
       recommendation: 'Validate bounded contexts with domain experts'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: SERVICE IDENTIFICATION
   // ============================================================================
@@ -112,7 +97,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Defining API contracts');
-  let apiContracts = await ctx.task(apiContractDefinitionTask, {
+  const apiContracts = await ctx.task(apiContractDefinitionTask, {
     projectName,
     serviceIdentification,
     targetArchitecture,
@@ -121,17 +106,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...apiContracts.artifacts);
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      apiContracts = await ctx.task(apiContractDefinitionTask, { ...{
-    projectName,
-    serviceIdentification,
-    targetArchitecture,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: API contracts review
+  await ctx.breakpoint({
     question: `API contracts defined for ${projectName}. Services: ${serviceIdentification.candidateServices.length}. APIs: ${apiContracts.totalApis}. Approve contracts before infrastructure setup?`,
     title: 'API Contracts Review',
     context: {
@@ -139,15 +115,9 @@ export async function process(inputs, ctx) {
       projectName,
       apiContracts,
       recommendation: 'Ensure contracts are backward compatible'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: INFRASTRUCTURE SETUP
   // ============================================================================
@@ -197,7 +167,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Testing integration');
-  let integrationTesting = await ctx.task(microservicesIntegrationTestingTask, {
+  const integrationTesting = await ctx.task(microservicesIntegrationTestingTask, {
     projectName,
     serviceExtraction,
     apiContracts,
@@ -207,17 +177,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...integrationTesting.artifacts);
 
   // Quality Gate: Integration test results
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        integrationTesting = await ctx.task(microservicesIntegrationTestingTask, { ...{
-    projectName,
-    serviceExtraction,
-    apiContracts,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (!integrationTesting.allPassed) {
+    await ctx.breakpoint({
       question: `Integration tests failed for ${projectName}. Failed: ${integrationTesting.failedCount}. Review and fix failures?`,
       title: 'Integration Test Failures',
       context: {
@@ -225,22 +186,16 @@ export async function process(inputs, ctx) {
         projectName,
         failures: integrationTesting.failures,
         recommendation: 'Fix integration issues before monolith cleanup'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: MONOLITH CLEANUP
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Cleaning up monolith');
-  let monolithCleanup = await ctx.task(monolithCleanupTask, {
+  const monolithCleanup = await ctx.task(monolithCleanupTask, {
     projectName,
     serviceExtraction,
     integrationTesting,
@@ -249,17 +204,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...monolithCleanup.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      monolithCleanup = await ctx.task(monolithCleanupTask, { ...{
-    projectName,
-    serviceExtraction,
-    integrationTesting,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Microservices decomposition complete for ${projectName}. Services extracted: ${serviceExtraction.extractedCount}. Monolith reduction: ${monolithCleanup.codeReduction}%. Approve decomposition?`,
     title: 'Microservices Decomposition Complete',
     context: {
@@ -271,15 +217,9 @@ export async function process(inputs, ctx) {
         codeReduction: monolithCleanup.codeReduction,
         integrationTestsPassed: integrationTesting.allPassed
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -314,7 +254,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

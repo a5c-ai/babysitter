@@ -14,6 +14,7 @@ export interface BatchedEffectSummary {
   inputsRef?: string;
   requestedAt?: string;
   metadata?: JsonRecord;
+  parallelGroupId?: string;
 }
 
 export interface ParallelBatch {
@@ -25,10 +26,18 @@ export interface ParallelPendingPayload {
   effects: BatchedEffectSummary[];
 }
 
+export interface BuildParallelBatchOptions {
+  maxConcurrency?: number;
+  executionStrategy?: 'sequential' | 'concurrent' | 'adaptive';
+}
+
 /**
  * Deduplicates EffectAction entries by effectId while preserving order and builds summaries.
  */
-export function buildParallelBatch(actions: EffectAction[]): ParallelBatch {
+export function buildParallelBatch(
+  actions: EffectAction[],
+  options?: BuildParallelBatchOptions
+): ParallelBatch {
   const seen = new Set<string>();
   const deduped: EffectAction[] = [];
 
@@ -38,7 +47,25 @@ export function buildParallelBatch(actions: EffectAction[]): ParallelBatch {
     deduped.push(action);
   }
 
-  const annotated = assignParallelGroupHints(deduped);
+  let annotated = assignParallelGroupHints(deduped);
+
+  // Propagate maxConcurrency and executionStrategy options to schedulerHints
+  if (options?.maxConcurrency !== undefined || options?.executionStrategy !== undefined) {
+    annotated = annotated.map((action) => {
+      const extraHints: EffectSchedulerHints = {};
+      if (options.maxConcurrency !== undefined) {
+        extraHints.maxConcurrency = options.maxConcurrency;
+      }
+      if (options.executionStrategy !== undefined) {
+        extraHints.executionStrategy = options.executionStrategy;
+      }
+      return {
+        ...action,
+        schedulerHints: mergeSchedulerHints(action.schedulerHints, extraHints),
+      };
+    });
+  }
+
   const summaries = annotated.map(summarizeEffectAction);
 
   return {
@@ -48,7 +75,7 @@ export function buildParallelBatch(actions: EffectAction[]): ParallelBatch {
 }
 
 export function summarizeEffectAction(action: EffectAction): BatchedEffectSummary {
-  return {
+  const summary: BatchedEffectSummary = {
     effectId: action.effectId,
     invocationKey: action.invocationKey,
     taskId: action.taskId,
@@ -61,6 +88,12 @@ export function summarizeEffectAction(action: EffectAction): BatchedEffectSummar
     requestedAt: action.requestedAt,
     metadata: action.taskDef?.metadata,
   };
+
+  if (action.schedulerHints?.parallelGroupId) {
+    summary.parallelGroupId = action.schedulerHints.parallelGroupId;
+  }
+
+  return summary;
 }
 
 export function toParallelPendingPayload(batch: ParallelBatch): ParallelPendingPayload {
@@ -78,11 +111,16 @@ function assignParallelGroupHints(actions: EffectAction[]): EffectAction[] {
     hash.update(action.invocationKey ?? action.effectId);
     hash.update("|");
   });
-  const parallelGroupId = hash.digest("hex").slice(0, 16);
-  return actions.map((action) => ({
-    ...action,
-    schedulerHints: mergeSchedulerHints(action.schedulerHints, { parallelGroupId }),
-  }));
+  const generatedGroupId = hash.digest("hex").slice(0, 16);
+  return actions.map((action) => {
+    // Don't overwrite existing parallelGroupId
+    const existingGroupId = action.schedulerHints?.parallelGroupId;
+    const parallelGroupId = existingGroupId ?? generatedGroupId;
+    return {
+      ...action,
+      schedulerHints: mergeSchedulerHints(action.schedulerHints, { parallelGroupId }),
+    };
+  });
 }
 
 function mergeSchedulerHints(

@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Surface Chemistry Analysis
-  let surfaceAnalysis = await ctx.task(surfaceChemistryAnalysisTask, {
+  const surfaceAnalysis = await ctx.task(surfaceChemistryAnalysisTask, {
     nanomaterial,
     targetFunctionality,
     functionalizationType
@@ -48,16 +48,9 @@ export async function process(inputs, ctx) {
       recommendations: surfaceAnalysis.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      surfaceAnalysis = await ctx.task(surfaceChemistryAnalysisTask, { ...{
-    nanomaterial,
-    targetFunctionality,
-    functionalizationType
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review surface analysis
+  await ctx.breakpoint({
     question: `Surface analysis complete for ${nanomaterial.type}. Current ligand: ${nanomaterial.currentLigand}. Proceed with ${functionalizationType}?`,
     title: 'Surface Analysis Review',
     context: {
@@ -65,15 +58,9 @@ export async function process(inputs, ctx) {
       nanomaterial,
       surfaceAnalysis,
       targetFunctionality
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Functionalization Strategy Design
   const functionalizationStrategy = await ctx.task(functionalizationStrategyTask, {
     nanomaterial,
@@ -100,7 +87,7 @@ export async function process(inputs, ctx) {
     });
 
     // Surface coverage characterization
-    let coverageCharacterization = await ctx.task(coverageCharacterizationTask, {
+    const coverageCharacterization = await ctx.task(coverageCharacterizationTask, {
       functionalizedNanomaterial: functionalizationExecution.product,
       targetFunctionality,
       functionalizationType
@@ -116,61 +103,34 @@ export async function process(inputs, ctx) {
       characterization: coverageCharacterization
     });
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          coverageCharacterization = await ctx.task(coverageCharacterizationTask, { ...{
-      functionalizedNanomaterial: functionalizationExecution.product,
-      targetFunctionality,
-      functionalizationType
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (currentCoverage < targetCoverage && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: Coverage=${currentCoverage}% (target: ${targetCoverage}%). Continue optimization?`,
         title: 'Functionalization Progress',
-        context: { runId: ctx.runId, iteration, currentCoverage, targetCoverage },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        context: { runId: ctx.runId, iteration, currentCoverage, targetCoverage }
+      });
+    }
   }
+
   // Phase 4: Colloidal Stability Assessment
-  let stabilityAssessment = await ctx.task(colloidalStabilityTask, {
+  const stabilityAssessment = await ctx.task(colloidalStabilityTask, {
     functionalizedProduct,
     applicationRequirements,
     stabilityThreshold
   });
 
   // Quality Gate: Stability must meet threshold
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        stabilityAssessment = await ctx.task(colloidalStabilityTask, { ...{
-    functionalizedProduct,
-    applicationRequirements,
-    stabilityThreshold
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (stabilityAssessment.score < stabilityThreshold) {
+    await ctx.breakpoint({
       question: `Colloidal stability (${stabilityAssessment.score}%) below threshold (${stabilityThreshold}%). Review stabilization strategies?`,
       title: 'Stability Warning',
       context: {
         runId: ctx.runId,
         stabilityScore: stabilityAssessment.score,
         recommendations: stabilityAssessment.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Functional Group Quantification
   const functionalGroupQuantification = await ctx.task(functionalGroupQuantificationTask, {
@@ -188,8 +148,9 @@ export async function process(inputs, ctx) {
       targetFunctionality
     });
   }
+
   // Phase 7: Protocol Documentation
-  let protocolDocumentation = await ctx.task(functionalizationDocumentationTask, {
+  const protocolDocumentation = await ctx.task(functionalizationDocumentationTask, {
     nanomaterial,
     targetFunctionality,
     functionalizationType,
@@ -200,21 +161,8 @@ export async function process(inputs, ctx) {
     bioactivityValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      protocolDocumentation = await ctx.task(functionalizationDocumentationTask, { ...{
-    nanomaterial,
-    targetFunctionality,
-    functionalizationType,
-    functionalizationStrategy,
-    optimizationHistory,
-    stabilityAssessment,
-    functionalGroupQuantification,
-    bioactivityValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Surface functionalization complete. Coverage: ${currentCoverage}%, Stability: ${stabilityAssessment.score}%. Approve product?`,
     title: 'Functionalization Approval',
     context: {
@@ -223,15 +171,9 @@ export async function process(inputs, ctx) {
       stability: stabilityAssessment.score,
       functionalGroups: functionalGroupQuantification.summary,
       files: [{ path: 'artifacts/functionalization-protocol.md', format: 'markdown' }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     functionalizedProduct,
@@ -251,7 +193,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const surfaceChemistryAnalysisTask = defineTask('surface-chemistry-analysis', (args, taskCtx) => ({
   kind: 'agent',

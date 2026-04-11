@@ -330,9 +330,9 @@ describe("MCP Server Integration Tests", () => {
       const statusHandler = getToolHandler(server, "run_status");
       const statusResult = await statusHandler({ runId: RUN_ID, runsDir });
       const statusData = parseResult(statusResult);
-      // State is "created" because the last lifecycle event is still RUN_CREATED
-      // (no RUN_COMPLETED was emitted, but there are no more pending effects)
-      expect(statusData.state).toBe("created");
+      // State is "running" because effects have been resolved but no RUN_COMPLETED
+      // was emitted (the process has done work but hasn't finished)
+      expect(statusData.state).toBe("running");
       expect(statusData.pendingEffects).toEqual([]);
 
       // Step 5: Verify task_show returns the result

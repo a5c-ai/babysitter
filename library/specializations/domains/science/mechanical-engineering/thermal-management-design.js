@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Baseline Thermal Analysis');
 
-  let baselineResult = await ctx.task(baselineThermalTask, {
+  const baselineResult = await ctx.task(baselineThermalTask, {
     projectName,
     networkResult,
     heatSources,
@@ -97,18 +97,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Baseline analysis complete - Max temp: ${baselineResult.maxTemperature}C`);
 
   // Quality Gate: Thermal limit exceeded
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        baselineResult = await ctx.task(baselineThermalTask, { ...{
-    projectName,
-    networkResult,
-    heatSources,
-    ambientConditions,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (baselineResult.maxTemperature > constraints.maxSystemTemp) {
+    await ctx.breakpoint({
       question: `Baseline max temperature ${baselineResult.maxTemperature}C exceeds limit ${constraints.maxSystemTemp}C. Active cooling required. Review thermal map?`,
       title: 'Thermal Limit Exceeded',
       context: {
@@ -117,15 +107,9 @@ export async function process(inputs, ctx) {
         temperatureDistribution: baselineResult.temperatureDistribution,
         hotSpots: baselineResult.hotSpots,
         files: baselineResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: COOLING SOLUTION SELECTION
@@ -152,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Thermal Component Sizing');
 
-  let sizingResult = await ctx.task(componentSizingTask, {
+  const sizingResult = await ctx.task(componentSizingTask, {
     projectName,
     heatSources,
     coolingSelectionResult,
@@ -165,19 +149,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Components sized - Heat sink: ${sizingResult.heatSinkSize}, Fan: ${sizingResult.fanSize}`);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      sizingResult = await ctx.task(componentSizingTask, { ...{
-    projectName,
-    heatSources,
-    coolingSelectionResult,
-    ambientConditions,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review component sizing
+  await ctx.breakpoint({
     question: `Component sizing complete. Heat sink: ${sizingResult.heatSinkSize}, Fan: ${sizingResult.fanSpec}. Estimated junction temps within limits. Review sizing?`,
     title: 'Component Sizing Review',
     context: {
@@ -185,22 +158,16 @@ export async function process(inputs, ctx) {
       componentSizing: sizingResult.components,
       predictedTemperatures: sizingResult.predictedTemperatures,
       files: sizingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: DETAILED THERMAL SIMULATION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Detailed Thermal Simulation');
 
-  let simulationResult = await ctx.task(thermalSimulationTask, {
+  const simulationResult = await ctx.task(thermalSimulationTask, {
     projectName,
     networkResult,
     sizingResult,
@@ -215,19 +182,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Thermal margin
   const thermalMargin = constraints.maxSystemTemp - simulationResult.maxJunctionTemp;
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        simulationResult = await ctx.task(thermalSimulationTask, { ...{
-    projectName,
-    networkResult,
-    sizingResult,
-    heatSources,
-    ambientConditions,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (thermalMargin < 5) {
+    await ctx.breakpoint({
       question: `Thermal margin only ${thermalMargin.toFixed(1)}C. Consider design margin improvements. Review thermal map?`,
       title: 'Low Thermal Margin',
       context: {
@@ -236,15 +192,9 @@ export async function process(inputs, ctx) {
         maxJunctionTemp: simulationResult.maxJunctionTemp,
         temperatureMap: simulationResult.temperatureMap,
         files: simulationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: TRANSIENT THERMAL ANALYSIS
@@ -269,7 +219,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Thermal Management Report');
 
-  let reportResult = await ctx.task(generateThermalReportTask, {
+  const reportResult = await ctx.task(generateThermalReportTask, {
     projectName,
     requirementsResult,
     networkResult,
@@ -283,22 +233,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateThermalReportTask, { ...{
-    projectName,
-    requirementsResult,
-    networkResult,
-    baselineResult,
-    coolingSelectionResult,
-    sizingResult,
-    simulationResult,
-    transientResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Thermal Management Design Complete for ${projectName}. Max temp: ${simulationResult.maxJunctionTemp}C, Margin: ${thermalMargin.toFixed(1)}C. Approve design?`,
     title: 'Thermal Design Complete',
     context: {
@@ -313,15 +249,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Thermal Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -350,7 +280,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

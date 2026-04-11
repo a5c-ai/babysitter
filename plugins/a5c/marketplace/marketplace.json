@@ -22,22 +22,49 @@
       "tags": ["hooks", "sound", "notifications", "ux", "claude-code"],
       "author": "a5c-ai"
     },
-    "github-actions-cicd": {
-      "name": "github-actions-cicd",
-      "description": "Set up babysitter-powered GitHub Actions workflows with triggers on issue comments, PR events, labels, schedules, and manual dispatch. Based on docs/github-actions-setup.md.",
+    "github-actions-cicd-claude-code": {
+      "name": "github-actions-cicd-claude-code",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Claude Code using anthropics/claude-code-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
       "latestVersion": "1.0.0",
       "versions": ["1.0.0"],
-      "packagePath": "plugins/github-actions-cicd",
-      "tags": ["cicd", "github-actions", "automation", "devops", "workflows"],
+      "packagePath": "plugins/github-actions-cicd-claude-code",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "claude-code"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-codex": {
+      "name": "github-actions-cicd-codex",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Codex using openai/codex-action@v1. Triggers on issue comments, PR events, labels, schedules, and manual dispatch.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-codex",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "codex", "openai"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-gemini-cli": {
+      "name": "github-actions-cicd-gemini-cli",
+      "description": "Set up babysitter-powered GitHub Actions workflows for Gemini CLI using google-github-actions/run-gemini-cli@v1. Supports API key, Vertex AI, and Workload Identity Federation auth.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-gemini-cli",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "gemini-cli", "google"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd-babysitter": {
+      "name": "github-actions-cicd-babysitter",
+      "description": "Set up babysitter-powered GitHub Actions workflows using the official harness-agnostic Babysitter Action (a5c-ai/babysitter@main). Supports pi, claude-code, codex, gemini-cli, and more through a single action with multi-provider credential handling.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd-babysitter",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows", "harness-agnostic", "multi-provider"],
       "author": "a5c-ai"
     },
     "rate-limit-handler": {
       "name": "rate-limit-handler",
-      "description": "Configure Claude Code hooks to detect and handle API rate limit errors with exponential backoff, jitter, and automatic retry. Prevents sessions from getting stuck on rate limits.",
-      "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "description": "Automatically retry Claude Code sessions on Anthropic subscription rate limits. Uses claude-auto-retry to detect rate limit messages, parse reset times, wait for cooldown, and send a continuation message via tmux.",
+      "latestVersion": "2.0.0",
+      "versions": ["1.0.0", "2.0.0"],
       "packagePath": "plugins/rate-limit-handler",
-      "tags": ["rate-limit", "hooks", "retry", "backoff", "resilience", "claude-code"],
+      "tags": ["rate-limit", "retry", "auto-retry", "tmux", "resilience", "claude-code"],
       "author": "a5c-ai"
     },
     "project-deployment": {
@@ -106,8 +133,8 @@
     "status-line": {
       "name": "status-line",
       "description": "Add a babysitter run indicator to the Claude Code status line. Displays the current run ID when a session is associated with a babysitter run. Uses a lightweight shell script that reads session state from YAML frontmatter.",
-      "latestVersion": "1.0.0",
-      "versions": ["1.0.0"],
+      "latestVersion": "1.1.0",
+      "versions": ["1.0.0", "1.1.0"],
       "packagePath": "plugins/status-line",
       "tags": ["status-line", "ux", "claude-code", "session", "run-indicator", "observability"],
       "author": "a5c-ai"
@@ -129,6 +156,35 @@
       "packagePath": "plugins/welcome",
       "tags": ["skill", "hooks", "session-start", "dashboard", "onboarding", "ux", "project-status", "claude-code"],
       "author": "a5c-ai"
+    },
+    "llm-wiki": {
+      "name": "llm-wiki",
+      "description": "Set up a structured LLM Wiki knowledge base using Karpathy's three-layer pattern (raw sources, wiki pages, schema). Interviews you about domain, scope, and preferences, then creates the wiki directory, schema, skills (/wiki-ingest, /wiki-query, /wiki-lint), and agent instruction integration. Supports project-scoped and global wikis with optional qmd semantic search.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/llm-wiki",
+      "tags": ["wiki", "knowledge-base", "documentation", "ingest", "schema", "search", "skills", "claude-code"],
+      "author": "a5c-ai"
+    },
+    "mempalace": {
+      "name": "mempalace",
+      "description": "Install MemPalace AI memory system — mine projects and conversations into a searchable palace backed by ChromaDB. 19 MCP tools, auto-save hooks, 5 guided skills. Stores everything verbatim, makes it findable. Local only, no cloud.",
+      "latestVersion": "3.0.14",
+      "versions": ["3.0.14"],
+      "packagePath": "plugins/mempalace",
+      "tags": ["memory", "persistence", "chromadb", "mcp", "search", "mining", "conversations", "palace", "local", "rag"],
+      "author": "milla-jovovich",
+      "repository": "https://github.com/milla-jovovich/mempalace"
+    },
+    "ctx": {
+      "name": "ctx",
+      "description": "Install ctx intelligent skill and agent recommendation system. Maintains a knowledge graph of 1,450+ skills and 427 agents, scans repos to detect tech stacks, recommends relevant skills per session, monitors context mid-session, and converts large skills into micro-skill pipelines. Includes lifecycle hooks and staleness tracking.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/ctx",
+      "tags": ["skills", "agents", "discovery", "recommendations", "knowledge-graph", "context", "micro-skills", "hooks", "claude-code"],
+      "author": "stevesolun",
+      "repository": "https://github.com/stevesolun/ctx"
     }
   }
 }

@@ -15,11 +15,13 @@ import {
 } from "./paths";
 import { writeFileAtomic } from "./atomic";
 import { getClockIsoString } from "./clock";
+import { warnIfICloudDrivePath } from "./icloudWarning";
 
 const GITIGNORE_CONTENT = `state/\ntasks/*/artifacts/\nblobs/\norphaned/\n`;
 
 export async function createRunDir(options: CreateRunDirOptions) {
   const runDir = getRunDir(options.runsRoot, options.runId);
+  await warnIfICloudDrivePath(runDir);
   await fs.mkdir(runDir, { recursive: true });
   await Promise.all([
     fs.mkdir(getJournalDir(runDir), { recursive: true }),
@@ -45,6 +47,8 @@ export async function createRunDir(options: CreateRunDirOptions) {
     layoutVersion,
     createdAt,
     ...(options.prompt !== undefined ? { prompt: options.prompt } : {}),
+    ...(options.inputSchema !== undefined ? { inputSchema: options.inputSchema } : {}),
+    ...(options.outputSchema !== undefined ? { outputSchema: options.outputSchema } : {}),
   };
   if (options.extraMetadata) {
     Object.assign(metadata, options.extraMetadata);
@@ -60,7 +64,7 @@ function resolveEntrypoint(options: CreateRunDirOptions): RunEntrypointMetadata 
   if (options.entrypoint?.importPath) {
     return {
       importPath: options.entrypoint.importPath,
-      exportName: options.entrypoint.exportName ?? "process",
+      exportName: options.entrypoint.exportName,
     };
   }
   const importPath = options.processPath ?? "./process.js";

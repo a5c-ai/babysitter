@@ -45,39 +45,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Stress Spectrum Development
-  let stressSpectrum = await ctx.task(stressSpectrumTask, {
+  const stressSpectrum = await ctx.task(stressSpectrumTask, {
     projectName,
     structureAnalysis,
     loadSpectrum,
     stressConcentrations: structureAnalysis.stressConcentrations
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      stressSpectrum = await ctx.task(stressSpectrumTask, { ...{
-    projectName,
-    structureAnalysis,
-    loadSpectrum,
-    stressConcentrations: structureAnalysis.stressConcentrations
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Spectrum review
+  await ctx.breakpoint({
     question: `Review stress spectrum for ${projectName}. Max stress: ${stressSpectrum.maxStress} ksi. Proceed with fatigue analysis?`,
     title: 'Stress Spectrum Review',
     context: {
       runId: ctx.runId,
       spectrum: stressSpectrum,
       cycleCount: stressSpectrum.totalCycles
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Safe-Life Fatigue Analysis
   const safeLifeAnalysis = await ctx.task(safeLifeAnalysisTask, {
     projectName,
@@ -94,7 +79,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Crack Growth Analysis
-  let crackGrowthAnalysis = await ctx.task(crackGrowthAnalysisTask, {
+  const crackGrowthAnalysis = await ctx.task(crackGrowthAnalysisTask, {
     projectName,
     structureAnalysis,
     stressSpectrum,
@@ -103,33 +88,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Critical crack size
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        crackGrowthAnalysis = await ctx.task(crackGrowthAnalysisTask, { ...{
-    projectName,
-    structureAnalysis,
-    stressSpectrum,
-    fatigueData,
-    initialFlaw: initialFlawAssumption
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (crackGrowthAnalysis.criticalCrackSize < initialFlawAssumption.initialFlawSize * 2) {
+    await ctx.breakpoint({
       question: `Critical crack size (${crackGrowthAnalysis.criticalCrackSize}) close to initial flaw. Review structure or accept?`,
       title: 'Critical Crack Size Warning',
       context: {
         runId: ctx.runId,
         crackGrowthAnalysis,
         recommendation: 'Consider redesign or enhanced inspection'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Residual Strength Analysis
   const residualStrength = await ctx.task(residualStrengthTask, {
@@ -158,7 +127,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  let reportGeneration = await ctx.task(dtReportTask, {
+  const reportGeneration = await ctx.task(dtReportTask, {
     projectName,
     structureAnalysis,
     fatigueData,
@@ -169,21 +138,8 @@ export async function process(inputs, ctx) {
     certificationCompliance
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportGeneration = await ctx.task(dtReportTask, { ...{
-    projectName,
-    structureAnalysis,
-    fatigueData,
-    safeLifeAnalysis,
-    crackGrowthAnalysis,
-    residualStrength,
-    inspectionInterval,
-    certificationCompliance
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: DT Analysis Approval
+  await ctx.breakpoint({
     question: `DT analysis complete for ${projectName}. Safe life: ${safeLifeAnalysis.safeLife} flights. Inspection interval: ${inspectionInterval.interval} flights. Approve?`,
     title: 'DT Analysis Approval',
     context: {
@@ -197,15 +153,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/dt-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/dt-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -229,7 +179,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task definitions following the same pattern...
+
+// Task definitions following the same pattern...
 
 export const structureDefinitionTask = defineTask('structure-definition', (args, taskCtx) => ({
   kind: 'agent',

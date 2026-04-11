@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Dashboard Type: ${dashboardType}, Metrics Scope: ${metricsScope.join(', ')}`);
 
   // Phase 1: KPI Identification and North Star Metric Definition
-  let kpiIdentification = await ctx.task(kpiIdentificationTask, {
+  const kpiIdentification = await ctx.task(kpiIdentificationTask, {
     productName,
     dashboardType,
     stakeholders,
@@ -64,19 +64,9 @@ export async function process(inputs, ctx) {
       dashboard: null
     };
   }
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      kpiIdentification = await ctx.task(kpiIdentificationTask, { ...{
-    productName,
-    dashboardType,
-    stakeholders,
-    metricsScope,
-    existingMetrics,
-    targetSegments
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review KPI Framework
+  await ctx.breakpoint({
     question: `KPI framework identified with North Star Metric: "${kpiIdentification.northStarMetric.metric}". Review ${kpiIdentification.kpis.length} KPIs before proceeding with instrumentation?`,
     title: 'KPI Framework Review',
     context: {
@@ -91,15 +81,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: kpiIdentification
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Metrics Instrumentation Planning
   const instrumentationPlanning = await ctx.task(instrumentationPlanningTask, {
     productName,
@@ -110,7 +94,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Dashboard Design and UX Planning
-  let dashboardDesign = await ctx.task(dashboardDesignTask, {
+  const dashboardDesign = await ctx.task(dashboardDesignTask, {
     productName,
     dashboardType,
     kpis: kpiIdentification.kpis,
@@ -128,19 +112,9 @@ export async function process(inputs, ctx) {
       dashboard: null
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      dashboardDesign = await ctx.task(dashboardDesignTask, { ...{
-    productName,
-    dashboardType,
-    kpis: kpiIdentification.kpis,
-    northStarMetric: kpiIdentification.northStarMetric,
-    stakeholders,
-    refreshFrequency
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review Dashboard Design
+  await ctx.breakpoint({
     question: `Dashboard design complete with ${dashboardDesign.visualizations.length} visualizations across ${dashboardDesign.layout.sections.length} sections. Review design before implementing data pipeline?`,
     title: 'Dashboard Design Review',
     context: {
@@ -153,15 +127,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase3-dashboard-design.json`, format: 'json', content: dashboardDesign },
         { path: `artifacts/phase3-dashboard-mockup.md`, format: 'markdown', content: dashboardDesign.mockupMarkdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Data Pipeline Architecture
   const dataPipelineSetup = await ctx.task(dataPipelineSetupTask, {
     productName,
@@ -181,7 +149,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Alert and Anomaly Detection Configuration
-  let alertConfiguration = await ctx.task(alertConfigurationTask, {
+  const alertConfiguration = await ctx.task(alertConfigurationTask, {
     productName,
     kpis: kpiIdentification.kpis,
     northStarMetric: kpiIdentification.northStarMetric,
@@ -195,19 +163,8 @@ export async function process(inputs, ctx) {
     a => a.severity === 'critical'
   ).length;
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        alertConfiguration = await ctx.task(alertConfigurationTask, { ...{
-    productName,
-    kpis: kpiIdentification.kpis,
-    northStarMetric: kpiIdentification.northStarMetric,
-    alertThresholds,
-    stakeholders,
-    dashboardType
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (criticalMetricsWithAlerts === 0) {
+    await ctx.breakpoint({
       question: `No critical alerts configured. This may result in missing important product issues. Continue without critical alerts?`,
       title: 'Alert Configuration Warning',
       context: {
@@ -215,15 +172,9 @@ export async function process(inputs, ctx) {
         totalAlerts: alertConfiguration.alerts.length,
         criticalAlerts: criticalMetricsWithAlerts,
         recommendation: 'Add critical alerts for North Star Metric and key business metrics'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Dashboard Implementation Specification
   const implementationSpec = await ctx.task(implementationSpecTask, {
@@ -270,7 +221,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Rollout and Adoption Plan
-  let rolloutPlan = await ctx.task(rolloutPlanTask, {
+  const rolloutPlan = await ctx.task(rolloutPlanTask, {
     productName,
     dashboardType,
     stakeholders,
@@ -283,19 +234,8 @@ export async function process(inputs, ctx) {
   const readinessScore = implementationSpec.readinessScore || 0;
   const implementationReady = readinessScore >= 85;
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      rolloutPlan = await ctx.task(rolloutPlanTask, { ...{
-    productName,
-    dashboardType,
-    stakeholders,
-    implementationSpec,
-    documentation: documentationPackage,
-    testingPlan
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: Dashboard Setup Approval
+  await ctx.breakpoint({
     question: `Product Metrics Dashboard Setup Complete for ${productName}. Implementation Readiness: ${readinessScore}/100. ${implementationReady ? 'Ready for implementation!' : 'May need additional refinement.'} Approve dashboard specification for implementation?`,
     title: 'Dashboard Setup Approval',
     context: {
@@ -313,15 +253,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-implementation-guide.md`, format: 'markdown', content: documentationPackage.implementationGuide },
         { path: `artifacts/final-user-guide.md`, format: 'markdown', content: documentationPackage.userGuide }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -408,7 +342,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const kpiIdentificationTask = defineTask('kpi-identification', (args, taskCtx) => ({
   kind: 'agent',

@@ -161,6 +161,8 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
       instructions: [
         // ── PREREQUISITE: Clone babysitter repo and study existing implementations ──
         `Clone the babysitter repo (${babysitterRepo}) if not already available locally. The repo contains the complete SDK, all existing adapter implementations, and all reference plugins. This is the source of truth.`,
+        'Research the babysitter repo FIRST and do not skip that step. Before any target-harness research, build an explicit understanding of how babysitter currently models adapters, hooks, discovery, invocation, sessions, plugin packaging, tests, and CI/CD.',
+        'Treat the babysitter repo as the baseline architecture to map from. The harness-specific research happens only AFTER the babysitter side is understood in detail.',
         'BEFORE researching the target harness, study the existing Claude Code and Codex plugin implementations thoroughly:',
         '  - Read plugins/babysitter/ end-to-end: plugin.json (hooks, skills, commands), hooks/ directory (session-start, stop, pre-tool-use, user-prompt-submit shell scripts), hooks/hooks.json, skills/babysit/SKILL.md, versions.json.',
         '  - Read plugins/babysitter-codex/ end-to-end: .codex-plugin/plugin.json, hooks.json, .app.json, skills/ directory (all 16 skills), versions.json.',
@@ -1494,7 +1496,105 @@ export const createSyncScriptTask = defineTask('create-sync-script', (args, task
 }));
 
 // ---------------------------------------------------------------------------
-// PHASE 10: Verification
+// PHASE 10: Validation
+// ---------------------------------------------------------------------------
+
+export const validateAssimilationTask = defineTask('validate-assimilation', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Validate ${args.harnessName} assimilation with concrete checks`,
+  description: 'Run the concrete build, test, install, and workflow checks that prove the assimilation is operational before quality scoring',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'integration validation engineer',
+      task: `Validate the ${args.harnessName} harness assimilation by running the concrete checks implied by the implementation`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        adapterName: args.adapterName,
+        pluginDir: args.pluginDir,
+        integrationFiles: args.integrationFiles,
+      },
+      instructions: [
+        'Read the files that were created or modified and derive the concrete validation plan from the actual implementation.',
+        'Run the narrowest honest checks needed to validate the assimilation end to end. Prefer real commands over static inspection whenever practical.',
+        'Where applicable, validate: SDK type/build health, adapter unit tests, plugin syntax tests, packaged-install tests, command sync checks, workflow trigger/file-path coverage, and Docker E2E artifacts presence.',
+        'Capture failing commands, stderr/stdout summaries, and the specific files or behaviors implicated by each failure.',
+        'If a check is intentionally not runnable in the current environment, record it as skipped with the exact blocker rather than pretending it passed.',
+        'Return a machine-readable validation report that can drive a targeted fix task.',
+      ],
+      outputFormat: 'JSON with passed, checks, failures, skips, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['passed', 'checks', 'failures', 'skips', 'summary'],
+      properties: {
+        passed: { type: 'boolean' },
+        checks: { type: 'array', items: { type: 'object' } },
+        failures: { type: 'array', items: { type: 'object' } },
+        skips: { type: 'array', items: { type: 'object' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'validate'],
+}));
+
+export const fixValidationFailuresTask = defineTask('fix-validation-failures', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Fix ${args.harnessName} validation failures`,
+  description: 'Repair concrete failures found by the validation phase before rescoring overall quality',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'staff integration engineer fixing concrete validation failures',
+      task: `Fix the concrete validation failures in the ${args.harnessName} harness assimilation`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        adapterName: args.adapterName,
+        pluginDir: args.pluginDir,
+        validation: args.validation,
+        integrationFiles: args.integrationFiles,
+      },
+      instructions: [
+        'Prioritize actual failing checks over aspirational quality improvements.',
+        'Use the validation report to identify the narrowest code or config changes needed to turn failing checks green.',
+        'Preserve the intended harness architecture while fixing test, build, install, workflow, or packaging issues.',
+        'Return the files created or modified and the concrete failures addressed.',
+      ],
+      outputFormat: 'JSON with filesCreated, filesModified, failuresAddressed, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['filesCreated', 'filesModified', 'failuresAddressed', 'summary'],
+      properties: {
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        filesModified: { type: 'array', items: { type: 'string' } },
+        failuresAddressed: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'fix', 'validate'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 11: Verification
 // ---------------------------------------------------------------------------
 
 export const verifyAssimilationTask = defineTask('verify-assimilation', (args, taskCtx) => ({
@@ -1513,9 +1613,11 @@ export const verifyAssimilationTask = defineTask('verify-assimilation', (args, t
         targetQuality: args.targetQuality,
         integrationFiles: args.integrationFiles,
         research: args.research,
+        validation: args.validation,
       },
       instructions: [
         'Score each dimension 0-100: adapter completeness, plugin structure, skill fidelity, hook correctness, install/dist method, harness wrapper, README quality, adapter test coverage, plugin test coverage, CI/CD integration.',
+        'Incorporate the validation report into the score. Concrete failing checks should materially reduce the score even if the static implementation looks plausible.',
 
         // ── Adapter interface completeness ──
         'Verify the adapter implements ALL required HarnessAdapter methods: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook, handleSessionStartHook, findHookDispatcherPath.',

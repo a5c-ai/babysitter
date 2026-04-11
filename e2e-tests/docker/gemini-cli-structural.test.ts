@@ -14,7 +14,7 @@ const ROOT = path.resolve(__dirname, "../..");
 beforeAll(() => {
   buildGeminiCliImage(ROOT);
   startGeminiCliContainer();
-}, 300_000); // 5 min for Docker build
+}, 600_000); // 10 min for Docker build (no layer cache on CI runners)
 
 afterAll(() => {
   stopGeminiCliContainer();

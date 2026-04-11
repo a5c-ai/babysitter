@@ -35,14 +35,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, observabilityStack, tracingBackends, metricsBackends } = inputs;
 
-  ctx.log.info('Starting observability integration', {
+  ctx.log('info','Starting observability integration', {
     sdkName,
     languages,
     observabilityStack
   });
 
   // Phase 1: OpenTelemetry Integration
-  ctx.log.info('Phase 1: Integrating OpenTelemetry');
+  ctx.log('info','Phase 1: Integrating OpenTelemetry');
   const openTelemetrySetup = await ctx.task(openTelemetryIntegrationTask, {
     sdkName,
     languages,
@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Distributed Tracing Setup
-  ctx.log.info('Phase 2: Setting up distributed tracing');
+  ctx.log('info','Phase 2: Setting up distributed tracing');
   const tracingSetup = await ctx.task(distributedTracingSetupTask, {
     sdkName,
     languages,
@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Metrics Instrumentation
-  ctx.log.info('Phase 3: Instrumenting metrics');
+  ctx.log('info','Phase 3: Instrumenting metrics');
   const metricsSetup = await ctx.task(metricsInstrumentationTask, {
     sdkName,
     languages,
@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Log Correlation
-  ctx.log.info('Phase 4: Setting up log correlation');
+  ctx.log('info','Phase 4: Setting up log correlation');
   const logCorrelation = await ctx.task(logCorrelationSetupTask, {
     sdkName,
     languages,
@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Observability Dashboards
-  ctx.log.info('Phase 5: Creating observability dashboards');
+  ctx.log('info','Phase 5: Creating observability dashboards');
   let dashboards = await ctx.task(observabilityDashboardsTask, {
     sdkName,
     tracingBackends,
@@ -108,7 +108,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Observability integration completed');
+  }  ctx.log('info','Observability integration completed');
 
   return {
     openTelemetryIntegration: openTelemetrySetup.result,

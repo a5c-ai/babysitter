@@ -39,24 +39,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Select Modulation Scheme
-  let modulationSelection = await ctx.task(modulationSelectionTask, {
+  const modulationSelection = await ctx.task(modulationSelectionTask, {
     systemName,
     requirements: requirementsDefinition.specifications,
     channelModel,
     communicationType
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      modulationSelection = await ctx.task(modulationSelectionTask, { ...{
-    systemName,
-    requirements: requirementsDefinition.specifications,
-    channelModel,
-    communicationType
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review modulation selection
+  await ctx.breakpoint({
     question: `Review modulation selection for ${systemName}. Selected: ${modulationSelection.scheme}. Spectral efficiency: ${modulationSelection.spectralEfficiency}. Proceed?`,
     title: 'Modulation Selection Review',
     context: {
@@ -68,15 +59,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: modulationSelection
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Design Transmitter Chain
   const transmitterDesign = await ctx.task(transmitterDesignTask, {
     systemName,
@@ -85,7 +70,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Design Receiver Chain
-  let receiverDesign = await ctx.task(receiverDesignTask, {
+  const receiverDesign = await ctx.task(receiverDesignTask, {
     systemName,
     modulation: modulationSelection,
     transmitter: transmitterDesign,
@@ -93,18 +78,8 @@ export async function process(inputs, ctx) {
     channelModel
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      receiverDesign = await ctx.task(receiverDesignTask, { ...{
-    systemName,
-    modulation: modulationSelection,
-    transmitter: transmitterDesign,
-    requirements: requirementsDefinition.specifications,
-    channelModel
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review TX/RX design
+  await ctx.breakpoint({
     question: `Review transmitter and receiver designs for ${systemName}. Proceed with system simulation?`,
     title: 'TX/RX Design Review',
     context: {
@@ -115,15 +90,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase3-transmitter.json`, format: 'json', content: transmitterDesign },
         { path: `artifacts/phase4-receiver.json`, format: 'json', content: receiverDesign }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Simulate System Performance Over Channel Models
   const systemSimulation = await ctx.task(systemSimulationTask, {
     systemName,
@@ -134,7 +103,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Analyze BER vs SNR Curves
-  let performanceAnalysis = await ctx.task(performanceAnalysisTask, {
+  const performanceAnalysis = await ctx.task(performanceAnalysisTask, {
     systemName,
     simulationResults: systemSimulation.results,
     modulation: modulationSelection,
@@ -142,32 +111,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Performance must meet requirements
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        performanceAnalysis = await ctx.task(performanceAnalysisTask, { ...{
-    systemName,
-    simulationResults: systemSimulation.results,
-    modulation: modulationSelection,
-    requirements: requirementsDefinition.specifications
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!performanceAnalysis.meetsRequirements) {
+    await ctx.breakpoint({
       question: `Performance analysis shows requirements not met. Required BER: ${requirements.ber}, Achieved: ${performanceAnalysis.achievedBer}. Iterate design?`,
       title: 'Performance Gap',
       context: {
         runId: ctx.runId,
         gaps: performanceAnalysis.gaps,
         recommendations: performanceAnalysis.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 7: Implement on Target Platform
   const platformImplementation = await ctx.task(platformImplementationTask, {
@@ -178,24 +132,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validate with Over-the-Air Testing
-  let otaValidation = await ctx.task(otaValidationTask, {
+  const otaValidation = await ctx.task(otaValidationTask, {
     systemName,
     implementation: platformImplementation,
     requirements: requirementsDefinition.specifications,
     performanceBaseline: performanceAnalysis.results
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      otaValidation = await ctx.task(otaValidationTask, { ...{
-    systemName,
-    implementation: platformImplementation,
-    requirements: requirementsDefinition.specifications,
-    performanceBaseline: performanceAnalysis.results
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: System Approval
+  await ctx.breakpoint({
     question: `Communication system design complete for ${systemName}. BER at target SNR: ${performanceAnalysis.berAtTargetSnr}. OTA validation: ${otaValidation.passed ? 'PASSED' : 'FAILED'}. Approve?`,
     title: 'System Approval',
     context: {
@@ -207,15 +152,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/system-design.json`, format: 'json', content: { transmitter: transmitterDesign, receiver: receiverDesign } },
         { path: `artifacts/system-report.md`, format: 'markdown', content: otaValidation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     systemName,
@@ -240,7 +179,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

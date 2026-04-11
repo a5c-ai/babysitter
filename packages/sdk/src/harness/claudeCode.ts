@@ -2,7 +2,7 @@
  * Claude Code harness adapter.
  *
  * Centralizes all Claude Code-specific behaviors:
- *   - Session ID resolution (BABYSITTER_SESSION_ID via CLAUDE_ENV_FILE)
+ *   - Session ID resolution (PID-scoped marker file, BABYSITTER_SESSION_ID env var)
  *   - Plugin root resolution (CLAUDE_PLUGIN_ROOT)
  *   - State directory conventions (~/.a5c/state/)
  *   - Session binding (run:create → state file with run association)
@@ -12,7 +12,8 @@
  */
 
 import * as path from "node:path";
-import { existsSync, readFileSync, appendFileSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { existsSync, readFileSync, appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { loadJournal, appendEvent } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
@@ -50,7 +51,7 @@ import type {
 } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createClaudeCodeContext } from "../prompts/context";
-import { getGlobalStateDir } from "../config";
+import { getGlobalLogDir, getGlobalStateDir } from "../config";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
@@ -74,7 +75,7 @@ interface HookLogger {
 }
 
 function createHookLogger(hookName: string): HookLogger {
-  const logDir = process.env.BABYSITTER_LOG_DIR || '.a5c/logs';
+  const logDir = getGlobalLogDir();
   const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
   const context: Record<string, string> = {};
 
@@ -223,17 +224,104 @@ async function cleanupSession(filePath: string): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Ancestor PID discovery — walks the process tree to find the Claude Code
+// process (claude / claude.exe) that spawned us. Works from both hooks
+// (child of Claude Code) and Bash tool calls (also a descendant).
+// ---------------------------------------------------------------------------
+
 /**
- * Resolve the current session ID from environment, independent of the hook
- * payload. After `/clear`, the hook payload may carry a stale session ID while
- * BABYSITTER_SESSION_ID (persisted via CLAUDE_ENV_FILE) reflects the actual
- * active session.
+ * Cached ancestor PID — the process tree doesn't change during a single
+ * process lifetime, so we only walk it once.
+ */
+let cachedAncestorPid: number | undefined;
+
+/**
+ * Walk the process tree upward to find the Claude Code ancestor process
+ * (claude / claude.exe). Returns the PID or undefined if not found.
+ */
+function findClaudeAncestorPid(): number | undefined {
+  if (cachedAncestorPid !== undefined) return cachedAncestorPid;
+
+  const isWin = process.platform === "win32";
+  let pid = process.pid;
+
+  for (let depth = 0; depth < 20; depth++) {
+    try {
+      let name = "";
+      let ppid = 0;
+
+      if (isWin) {
+        const out = execSync(
+          `wmic process where ProcessId=${pid} get ParentProcessId,Name /format:csv`,
+          { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], timeout: 3000 },
+        );
+        const lines = out.trim().split(/\r?\n/).filter((l: string) => l.includes(","));
+        if (lines.length < 2) break;
+        const parts = lines[1].split(",");
+        name = (parts[1] || "").toLowerCase();
+        ppid = parseInt(parts[2], 10);
+      } else {
+        // macOS / Linux: use ps
+        const out = execSync(
+          `ps -p ${pid} -o ppid=,comm=`,
+          { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], timeout: 3000 },
+        ).trim();
+        const match = out.match(/^\s*(\d+)\s+(.+)$/);
+        if (!match) break;
+        ppid = parseInt(match[1], 10);
+        name = path.basename(match[2]).toLowerCase();
+      }
+
+      // Strip common extensions
+      const baseName = name.replace(/\.exe$/, "");
+
+      if (baseName === "claude") {
+        cachedAncestorPid = pid;
+        return pid;
+      }
+
+      if (isNaN(ppid) || ppid <= 0 || ppid === pid) break;
+      pid = ppid;
+    } catch {
+      break;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Path to a file that maps a Claude Code process to its current session ID.
+ * Keyed by the ancestor Claude Code PID for concurrent-session safety: two
+ * Claude Code instances get separate marker files.
+ *
+ * This is the primary session ID persistence mechanism. It works on all
+ * platforms by walking the process tree to find the Claude Code ancestor.
+ * CLAUDE_ENV_FILE (macOS/Linux only) is written as a bonus when available.
+ */
+function getCurrentSessionIdFilePath(): string | undefined {
+  const ancestorPid = findClaudeAncestorPid();
+  if (!ancestorPid) return undefined;
+  return path.join(getGlobalStateDir(), `current-session-pid-${ancestorPid}`);
+}
+
+/**
+ * Resolve the current session ID, independent of the hook payload.
+ *
+ * Resolution order:
+ *   1. BABYSITTER_SESSION_ID env var (sourced from session-env on macOS/Linux)
+ *   2. CLAUDE_ENV_FILE direct read (macOS/Linux — file exists even if env var
+ *      wasn't sourced yet, e.g. during hook execution itself)
+ *   3. PID-scoped marker file written by session-start hook — works on all
+ *      platforms including Windows where Claude Code's session-env sourcing
+ *      is unsupported. Concurrent-safe: keyed by the ancestor Claude Code PID.
  */
 function resolveCurrentSessionIdFromEnv(): string | undefined {
-  // Cross-harness standard env var (written by session-start hook to CLAUDE_ENV_FILE)
   if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
 
-  // Fallback: read BABYSITTER_SESSION_ID from CLAUDE_ENV_FILE directly
+  // CLAUDE_ENV_FILE: on macOS/Linux, Claude Code sets this and sources it
+  // before Bash commands. Read it directly for use within hooks themselves.
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
@@ -244,6 +332,19 @@ function resolveCurrentSessionIdFromEnv(): string | undefined {
       // Non-fatal
     }
   }
+
+  // PID-scoped marker file: primary mechanism on Windows (where session-env
+  // sourcing is unsupported), also serves as fallback on all platforms.
+  try {
+    const filePath = getCurrentSessionIdFilePath();
+    if (filePath && existsSync(filePath)) {
+      const id = readFileSync(filePath, "utf-8").trim();
+      if (id) return id;
+    }
+  } catch {
+    // Non-fatal
+  }
+
   return undefined;
 }
 
@@ -831,23 +932,33 @@ async function handleSessionStartHookImpl(
     return 0;
   }
 
-  // 2. If CLAUDE_ENV_FILE is set, persist BABYSITTER_SESSION_ID so subsequent
-  //    hooks (stop hook, Bash tool calls) can resolve it from the environment.
+  // 2. Persist session ID via PID-scoped marker file. Every process descended
+  //    from this Claude Code instance can resolve it by walking the process
+  //    tree to the same ancestor PID. Works on all platforms (including Windows
+  //    where CLAUDE_ENV_FILE / session-env is unsupported).
   let envFilePersisted = false;
+  const sessionIdFile = getCurrentSessionIdFilePath();
+  if (sessionIdFile) {
+    try {
+      mkdirSync(path.dirname(sessionIdFile), { recursive: true });
+      writeFileSync(sessionIdFile, sessionId + "\n");
+      envFilePersisted = true;
+    } catch {
+      process.stderr.write(
+        `[hook:run session-start] Failed to write session ID marker file\n`,
+      );
+    }
+  }
+
+  // 2b. Also write to CLAUDE_ENV_FILE when available (macOS/Linux) so that
+  //     BABYSITTER_SESSION_ID is injected into Bash tool env automatically.
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
     try {
       appendFileSync(envFile, `export BABYSITTER_SESSION_ID="${sessionId}"\n`);
-      envFilePersisted = true;
     } catch {
-      process.stderr.write(
-        `[hook:run session-start] Failed to write to CLAUDE_ENV_FILE: ${envFile}\n`,
-      );
+      // Non-fatal: PID marker is the primary mechanism
     }
-  } else {
-    process.stderr.write(
-      `[hook:run session-start] CLAUDE_ENV_FILE not set — session ID will not be persisted to env file\n`,
-    );
   }
 
   // 3. Create baseline session state file so the stop hook can find it later.
@@ -870,6 +981,7 @@ async function handleSessionStartHookImpl(
           iteration: 1,
           maxIterations: 256,
           runId: "",
+          runIds: [],
           startedAt: nowTs,
           lastIterationAt: nowTs,
           iterationTimes: [],
@@ -934,8 +1046,14 @@ async function handleSessionStartHookImpl(
     return 1;
   }
 
-  // 6. Output empty object
-  process.stdout.write("{}\n");
+  // 6. Output session context so Claude can reference the session ID
+  const output = {
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext: `Your Claude Code session ID is: ${sessionId}`,
+    },
+  };
+  process.stdout.write(JSON.stringify(output) + "\n");
   return 0;
 }
 
@@ -1017,6 +1135,7 @@ async function bindSessionImpl(
     iteration: 1,
     maxIterations,
     runId,
+    runIds: [],
     startedAt: nowTs,
     lastIterationAt: nowTs,
     iterationTimes: [],
@@ -1139,7 +1258,11 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
     name: "claude-code",
 
     isActive(): boolean {
-      return !!(process.env.BABYSITTER_SESSION_ID || process.env.CLAUDE_ENV_FILE);
+      if (process.env.BABYSITTER_SESSION_ID || process.env.CLAUDE_ENV_FILE) return true;
+      // On Windows, session-env sourcing is unsupported so neither env var is
+      // set in Bash tool calls. Check the PID-scoped marker file instead.
+      const markerPath = getCurrentSessionIdFilePath();
+      return !!(markerPath && existsSync(markerPath));
     },
 
     autoResolvesSessionId(): boolean {
@@ -1148,23 +1271,7 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       if (parsed.sessionId) return parsed.sessionId;
-
-      // Cross-harness standard (written by session-start hook to CLAUDE_ENV_FILE)
-      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
-
-      // Fallback: read BABYSITTER_SESSION_ID from CLAUDE_ENV_FILE directly
-      const envFile = process.env.CLAUDE_ENV_FILE;
-      if (envFile) {
-        try {
-          const content = readFileSync(envFile, "utf-8");
-          const match = content.match(/export BABYSITTER_SESSION_ID="([^"]+)"/);
-          if (match?.[1]) return match[1];
-        } catch {
-          // Non-fatal
-        }
-      }
-
-      return undefined;
+      return resolveCurrentSessionIdFromEnv();
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {

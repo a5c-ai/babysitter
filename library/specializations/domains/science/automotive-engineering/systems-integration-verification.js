@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Integration Strategy Development
-  let integrationStrategy = await ctx.task(integrationStrategyTask, {
+  const integrationStrategy = await ctx.task(integrationStrategyTask, {
     projectName,
     subsystems,
     integrationLevel,
@@ -48,17 +48,9 @@ export async function process(inputs, ctx) {
       integrationPlan: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      integrationStrategy = await ctx.task(integrationStrategyTask, { ...{
-    projectName,
-    subsystems,
-    integrationLevel,
-    requirements
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review integration strategy
+  await ctx.breakpoint({
     question: `Review integration strategy for ${projectName}. Approach: ${integrationStrategy.approach}. Approve strategy?`,
     title: 'Integration Strategy Review',
     context: {
@@ -70,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: integrationStrategy
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Integration Sequence Planning
   const integrationSequence = await ctx.task(integrationSequenceTask, {
     projectName,
@@ -102,7 +88,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: System-Level Verification
-  let systemVerification = await ctx.task(systemVerificationTask, {
+  const systemVerification = await ctx.task(systemVerificationTask, {
     projectName,
     componentIntegration,
     requirements,
@@ -110,32 +96,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Verification results check
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        systemVerification = await ctx.task(systemVerificationTask, { ...{
-    projectName,
-    componentIntegration,
-    requirements,
-    testPlan: testPlanning.plan
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (systemVerification.failedTests && systemVerification.failedTests.length > 0) {
+    await ctx.breakpoint({
       question: `System verification identified ${systemVerification.failedTests.length} failed tests. Review and define resolution path?`,
       title: 'Verification Failures Review',
       context: {
         runId: ctx.runId,
         failedTests: systemVerification.failedTests,
         recommendation: 'Investigate root cause and implement corrections'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Issue Management and Resolution
   const issueResolution = await ctx.task(issueResolutionTask, {
@@ -146,24 +117,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Verification Evidence Documentation
-  let verificationEvidence = await ctx.task(verificationEvidenceTask, {
+  const verificationEvidence = await ctx.task(verificationEvidenceTask, {
     projectName,
     systemVerification,
     issueResolution,
     requirements
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      verificationEvidence = await ctx.task(verificationEvidenceTask, { ...{
-    projectName,
-    systemVerification,
-    issueResolution,
-    requirements
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Integration verification approval
+  await ctx.breakpoint({
     question: `Systems Integration and Verification complete for ${projectName}. Pass rate: ${systemVerification.passRate}%. Approve verification results?`,
     title: 'Integration Verification Approval',
     context: {
@@ -174,15 +136,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/verification-report.json`, format: 'json', content: verificationEvidence },
         { path: `artifacts/integration-report.md`, format: 'markdown', content: verificationEvidence.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -205,7 +161,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const integrationStrategyTask = defineTask('integration-strategy', (args, taskCtx) => ({
   kind: 'agent',

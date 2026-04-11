@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Auditing existing documentation structure and quality');
 
-  let documentationAudit = await ctx.task(auditDocumentationTask, {
+  const documentationAudit = await ctx.task(auditDocumentationTask, {
     projectPath,
     docsPath,
     repositoryUrl,
@@ -109,17 +109,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...documentationAudit.artifacts);
 
   // Quality Gate: Documentation baseline assessment
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        documentationAudit = await ctx.task(auditDocumentationTask, { ...{
-    projectPath,
-    docsPath,
-    repositoryUrl,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (documentationAudit.maturityScore < 40) {
+    await ctx.breakpoint({
       question: `Documentation maturity score: ${documentationAudit.maturityScore}/100. Low baseline detected. Review audit findings and approve to proceed with setup?`,
       title: 'Documentation Maturity Assessment',
       context: {
@@ -128,15 +119,9 @@ export async function process(inputs, ctx) {
         issues: documentationAudit.issues,
         recommendations: documentationAudit.recommendations,
         files: documentationAudit.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: DOCUMENTATION GENERATOR SETUP
@@ -144,7 +129,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 2: Setting up ${generator} documentation generator`);
 
-  let generatorSetup = await ctx.task(setupDocGeneratorTask, {
+  const generatorSetup = await ctx.task(setupDocGeneratorTask, {
     projectPath,
     docsPath,
     generator,
@@ -158,21 +143,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...generatorSetup.artifacts);
 
   // Quality Gate: Generator configuration validation
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        generatorSetup = await ctx.task(setupDocGeneratorTask, { ...{
-    projectPath,
-    docsPath,
-    generator,
-    versioningStrategy,
-    searchProvider,
-    analytics,
-    audit: documentationAudit,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!generatorSetup.configurationValid) {
+    await ctx.breakpoint({
       question: `Documentation generator configuration has ${generatorSetup.validationErrors.length} error(s). Review and fix configuration?`,
       title: 'Generator Configuration Validation',
       context: {
@@ -181,15 +153,9 @@ export async function process(inputs, ctx) {
         errors: generatorSetup.validationErrors,
         warnings: generatorSetup.validationWarnings,
         files: generatorSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: STYLE GUIDE AND LINTING CONFIGURATION
@@ -197,7 +163,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Configuring style guide and documentation linting');
 
-  let styleGuideSetup = await ctx.task(setupStyleGuideTask, {
+  const styleGuideSetup = await ctx.task(setupStyleGuideTask, {
     projectPath,
     docsPath,
     styleGuide,
@@ -207,18 +173,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...styleGuideSetup.artifacts);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      styleGuideSetup = await ctx.task(setupStyleGuideTask, { ...{
-    projectPath,
-    docsPath,
-    styleGuide,
-    validation,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: Style guide setup
+  await ctx.breakpoint({
     question: `Style guide configured with ${styleGuideSetup.rulesCount} rules (${styleGuideSetup.preset} preset). Review style configuration and approve?`,
     title: 'Style Guide Configuration Review',
     context: {
@@ -228,15 +184,9 @@ export async function process(inputs, ctx) {
       customRules: styleGuideSetup.customRules,
       validationTools: styleGuideSetup.tools,
       files: styleGuideSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: PARALLEL CI/CD PIPELINE STAGES SETUP
   // ============================================================================
@@ -401,7 +351,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Implementing quality gates');
 
-  let qualityGatesImpl = await ctx.task(implementQualityGatesTask, {
+  const qualityGatesImpl = await ctx.task(implementQualityGatesTask, {
     projectPath,
     docsPath,
     platform,
@@ -419,25 +369,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityGatesImpl.artifacts);
 
   // Quality Gate: Quality gates configuration
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        qualityGatesImpl = await ctx.task(implementQualityGatesTask, { ...{
-    projectPath,
-    docsPath,
-    platform,
-    qualityGates,
-    validation,
-    pipelineStages: {
-      prValidation: prValidationConfig,
-      build: buildStageConfig,
-      test: testStageConfig,
-      deployment: deploymentStageConfig
-    },
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (qualityGatesImpl.gatesConfigured < qualityGatesImpl.totalGates) {
+    await ctx.breakpoint({
       question: `${qualityGatesImpl.gatesConfigured}/${qualityGatesImpl.totalGates} quality gates configured. Review missing gates and approve?`,
       title: 'Quality Gates Configuration Review',
       context: {
@@ -446,15 +379,9 @@ export async function process(inputs, ctx) {
         missing: qualityGatesImpl.missingGates,
         blocking: qualityGatesImpl.blockingGates,
         files: qualityGatesImpl.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: PIPELINE ASSEMBLY AND VALIDATION
@@ -462,7 +389,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Assembling complete CI/CD pipeline configuration');
 
-  let pipelineAssembly = await ctx.task(assemblePipelineTask, {
+  const pipelineAssembly = await ctx.task(assemblePipelineTask, {
     projectPath,
     docsPath,
     platform,
@@ -491,35 +418,8 @@ export async function process(inputs, ctx) {
   pipelineConfig = pipelineAssembly.pipelineConfig;
 
   // Quality Gate: Pipeline syntax validation
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        pipelineAssembly = await ctx.task(assemblePipelineTask, { ...{
-    projectPath,
-    docsPath,
-    platform,
-    generator,
-    deploymentTarget,
-    stages: {
-      prValidation: prValidationConfig,
-      build: buildStageConfig,
-      test: testStageConfig,
-      deployment: deploymentStageConfig
-    },
-    tooling: {
-      linkChecker: linkCheckerSetup,
-      spellChecker: spellCheckerSetup,
-      styleLinter: styleLinterSetup,
-      accessibility: accessibilitySetup,
-      search: searchSetup,
-      analytics: analyticsSetup
-    },
-    qualityGates: qualityGatesImpl,
-    versioning: versioningSetup,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (!pipelineAssembly.syntaxValid) {
+    await ctx.breakpoint({
       question: `Pipeline configuration has syntax errors: ${pipelineAssembly.syntaxErrors.join(', ')}. Review and fix?`,
       title: 'Pipeline Syntax Validation Failed',
       context: {
@@ -527,15 +427,9 @@ export async function process(inputs, ctx) {
         errors: pipelineAssembly.syntaxErrors,
         warnings: pipelineAssembly.syntaxWarnings,
         files: pipelineAssembly.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: INITIAL PIPELINE TEST RUN
@@ -543,7 +437,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Running initial pipeline test');
 
-  let initialTestRun = await ctx.task(runInitialPipelineTestTask, {
+  const initialTestRun = await ctx.task(runInitialPipelineTestTask, {
     projectPath,
     docsPath,
     platform,
@@ -556,20 +450,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...initialTestRun.artifacts);
 
   // Quality Gate: Initial test run results
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        initialTestRun = await ctx.task(runInitialPipelineTestTask, { ...{
-    projectPath,
-    docsPath,
-    platform,
-    generator,
-    pipelineConfig,
-    validation,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (!initialTestRun.success) {
+    await ctx.breakpoint({
       question: `Initial pipeline test failed: ${initialTestRun.failureReason}. Review failures and retry?`,
       title: 'Initial Pipeline Test Failed',
       context: {
@@ -579,16 +461,10 @@ export async function process(inputs, ctx) {
         errors: initialTestRun.errors,
         logs: initialTestRun.logs,
         files: initialTestRun.artifacts.map(a => ({ path: a.path, format: a.format || 'text', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    }
-  // Retry after fixes
+      }
+    });
+
+    // Retry after fixes
     const retryTestRun = await ctx.task(runInitialPipelineTestTask, {
       projectPath,
       docsPath,
@@ -615,6 +491,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...retryTestRun.artifacts);
   }
+
   // ============================================================================
   // PHASE 11: DOCUMENTATION BUILD AND QUALITY VALIDATION
   // ============================================================================
@@ -643,8 +520,9 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // Run comprehensive quality validation
-  let qualityValidation = await ctx.task(validateDocumentationQualityTask, {
+  const qualityValidation = await ctx.task(validateDocumentationQualityTask, {
     projectPath,
     docsPath,
     generator,
@@ -659,21 +537,8 @@ export async function process(inputs, ctx) {
   qualityScore = qualityValidation.overallScore;
 
   // Quality Gate: Documentation quality threshold
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        qualityValidation = await ctx.task(validateDocumentationQualityTask, { ...{
-    projectPath,
-    docsPath,
-    generator,
-    buildOutput: documentationBuild.outputPath,
-    validation,
-    qualityGates,
-    audit: documentationAudit,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (qualityScore < 70) {
+    await ctx.breakpoint({
       question: `Documentation quality score: ${qualityScore}/100. Below 70% threshold. Review quality issues and iterate?`,
       title: 'Documentation Quality Gate',
       context: {
@@ -686,15 +551,9 @@ export async function process(inputs, ctx) {
         accessibilityScore: qualityValidation.accessibilityScore,
         recommendations: qualityValidation.recommendations,
         files: qualityValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'html', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: DEPLOYMENT CONFIGURATION AND TEST DEPLOYMENT
@@ -716,7 +575,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...deploymentConfig.artifacts);
 
   // Run test deployment to staging/preview
-  let testDeployment = await ctx.task(runTestDeploymentTask, {
+  const testDeployment = await ctx.task(runTestDeploymentTask, {
     projectPath,
     docsPath,
     generator,
@@ -730,20 +589,8 @@ export async function process(inputs, ctx) {
   deploymentUrl = testDeployment.previewUrl || testDeployment.stagingUrl || '';
 
   // Quality Gate: Test deployment verification
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        testDeployment = await ctx.task(runTestDeploymentTask, { ...{
-    projectPath,
-    docsPath,
-    generator,
-    deploymentTarget,
-    deploymentConfig: deploymentConfig.config,
-    buildOutput: documentationBuild.outputPath,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (!testDeployment.success) {
+    await ctx.breakpoint({
       question: `Test deployment failed: ${testDeployment.error}. Review deployment logs and retry?`,
       title: 'Test Deployment Failed',
       context: {
@@ -751,29 +598,10 @@ export async function process(inputs, ctx) {
         error: testDeployment.error,
         logs: testDeployment.logs,
         files: testDeployment.artifacts.map(a => ({ path: a.path, format: a.format || 'text', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    }
-  let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        testDeployment = await ctx.task(runTestDeploymentTask, { ...{
-    projectPath,
-    docsPath,
-    generator,
-    deploymentTarget,
-    deploymentConfig: deploymentConfig.config,
-    buildOutput: documentationBuild.outputPath,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
       }
-  const qualityGateApproval5 = await ctx.breakpoint({
+    });
+  } else {
+    await ctx.breakpoint({
       question: `Test deployment successful! Preview URL: ${deploymentUrl}. Review deployed documentation and approve production setup?`,
       title: 'Test Deployment Verification',
       context: {
@@ -782,15 +610,9 @@ export async function process(inputs, ctx) {
         deploymentTarget,
         buildTime: testDeployment.buildTime,
         files: testDeployment.artifacts.map(a => ({ path: a.path, format: a.format || 'html', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: DOCUMENTATION AND TRAINING MATERIALS
@@ -842,7 +664,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Final review and pipeline score calculation');
 
-  let finalReview = await ctx.task(performFinalReviewTask, {
+  const finalReview = await ctx.task(performFinalReviewTask, {
     projectPath,
     docsPath,
     platform,
@@ -859,25 +681,8 @@ export async function process(inputs, ctx) {
 
   const pipelineScore = finalReview.pipelineScore;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(performFinalReviewTask, { ...{
-    projectPath,
-    docsPath,
-    platform,
-    generator,
-    deploymentTarget,
-    audit: documentationAudit,
-    pipelineConfig,
-    qualityScore,
-    qualityValidation,
-    testDeployment,
-    artifacts,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final breakpoint for approval
+  await ctx.breakpoint({
     question: `Docs-as-Code CI/CD pipeline setup complete! Quality score: ${qualityScore}/100, Pipeline score: ${pipelineScore}/100. Review final report and approve for production?`,
     title: 'Final Pipeline Review',
     context: {
@@ -895,15 +700,9 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/quality-metrics.json`, format: 'json', label: 'Quality Metrics' },
         { path: `${outputDir}/documentation-guide.md`, format: 'markdown', label: 'Documentation Guide' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // RETURN RESULTS
   // ============================================================================
@@ -967,7 +766,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

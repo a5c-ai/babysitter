@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Research Hypothesis
-  let hypothesisDefinition = await ctx.task(hypothesisDefinitionTask, {
+  const hypothesisDefinition = await ctx.task(hypothesisDefinitionTask, {
     researchQuestion,
     studyType,
     variables
@@ -48,16 +48,9 @@ export async function process(inputs, ctx) {
       experimentDesign: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      hypothesisDefinition = await ctx.task(hypothesisDefinitionTask, { ...{
-    researchQuestion,
-    studyType,
-    variables
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review hypothesis formulation
+  await ctx.breakpoint({
     question: `Review hypothesis formulation. H0: ${hypothesisDefinition.nullHypothesis}, H1: ${hypothesisDefinition.alternativeHypothesis}. Approve?`,
     title: 'Hypothesis Formulation Review',
     context: {
@@ -69,15 +62,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hypothesisDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Calculate Required Sample Size
   const sampleSizeCalculation = await ctx.task(sampleSizeCalculationTask, {
     hypothesisDefinition,
@@ -96,7 +83,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Conduct Power Analysis
-  let powerAnalysis = await ctx.task(powerAnalysisTask, {
+  const powerAnalysis = await ctx.task(powerAnalysisTask, {
     hypothesisDefinition,
     sampleSizeCalculation,
     studyType,
@@ -104,17 +91,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check if design meets power requirements
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        powerAnalysis = await ctx.task(powerAnalysisTask, { ...{
-    hypothesisDefinition,
-    sampleSizeCalculation,
-    studyType,
-    desiredPower
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (powerAnalysis.achievedPower < desiredPower - 0.05) {
+    await ctx.breakpoint({
       question: `Achieved power (${powerAnalysis.achievedPower}) is below desired power (${desiredPower}). Increase sample size or accept lower power?`,
       title: 'Power Analysis Warning',
       context: {
@@ -122,18 +100,12 @@ export async function process(inputs, ctx) {
         achievedPower: powerAnalysis.achievedPower,
         desiredPower,
         recommendation: powerAnalysis.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Document Design Decisions
-  let designDocumentation = await ctx.task(designDocumentationTask, {
+  const designDocumentation = await ctx.task(designDocumentationTask, {
     researchQuestion,
     hypothesisDefinition,
     sampleSizeCalculation,
@@ -143,20 +115,8 @@ export async function process(inputs, ctx) {
     constraints
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      designDocumentation = await ctx.task(designDocumentationTask, { ...{
-    researchQuestion,
-    hypothesisDefinition,
-    sampleSizeCalculation,
-    randomizationDesign,
-    powerAnalysis,
-    studyType,
-    constraints
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Complete
+  await ctx.breakpoint({
     question: `Experimental design complete. Sample size: ${sampleSizeCalculation.requiredSampleSize}, Power: ${powerAnalysis.achievedPower}. Approve design?`,
     title: 'Experimental Design Complete',
     context: {
@@ -168,15 +128,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/experimental-design.json`, format: 'json', content: designDocumentation },
         { path: `artifacts/experimental-design.md`, format: 'markdown', content: designDocumentation.markdownReport }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     researchQuestion,
@@ -212,7 +166,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const hypothesisDefinitionTask = defineTask('hypothesis-definition', (args, taskCtx) => ({
   kind: 'agent',

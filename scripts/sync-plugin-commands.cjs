@@ -47,6 +47,11 @@ const tasks = [
     cmd: process.execPath,
     args: [path.join(REPO_ROOT, 'plugins', 'babysitter-pi', 'scripts', 'sync-command-docs.cjs')],
   },
+  {
+    label: 'babysitter-openclaw',
+    cmd: process.execPath,
+    args: [path.join(REPO_ROOT, 'plugins', 'babysitter-openclaw', 'scripts', 'sync-command-docs.cjs')],
+  },
 ];
 
 for (const task of tasks) {

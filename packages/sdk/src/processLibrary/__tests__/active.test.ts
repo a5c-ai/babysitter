@@ -26,9 +26,17 @@ function runGit(args: string[], cwd: string): void {
 }
 
 async function seedProcessLibraryRepo(repoRoot: string): Promise<void> {
-  await fs.mkdir(path.join(repoRoot, "library", "reference"), { recursive: true });
+  const processDir = path.join(repoRoot, "library");
+  const referenceDir = path.join(repoRoot, "plugins", "babysitter", "reference");
+  await fs.mkdir(processDir, { recursive: true });
+  await fs.mkdir(referenceDir, { recursive: true });
   await fs.writeFile(
-    path.join(repoRoot, "library", "reference", "README.md"),
+    path.join(processDir, "README.md"),
+    "# process library\n",
+    "utf8",
+  );
+  await fs.writeFile(
+    path.join(referenceDir, "README.md"),
     "# test library\n",
     "utf8",
   );

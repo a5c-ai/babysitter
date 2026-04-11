@@ -50,8 +50,9 @@ export async function process(inputs, ctx) {
       architectureDocument: null
     };
   }
+
   // Phase 2: Platform Selection and Evaluation
-  let platformEvaluation = await ctx.task(platformEvaluationTask, {
+  const platformEvaluation = await ctx.task(platformEvaluationTask, {
     vehicleProgram,
     vehicleClass,
     platformOptions,
@@ -59,18 +60,8 @@ export async function process(inputs, ctx) {
     targetMarkets
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      platformEvaluation = await ctx.task(platformEvaluationTask, { ...{
-    vehicleProgram,
-    vehicleClass,
-    platformOptions,
-    performanceRequirements: performanceRequirements.requirements,
-    targetMarkets
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Platform selection review
+  await ctx.breakpoint({
     question: `Review platform evaluation for ${vehicleProgram}. Recommended platform: ${platformEvaluation.recommendedPlatform}. Approve platform selection?`,
     title: 'Platform Selection Review',
     context: {
@@ -82,15 +73,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: platformEvaluation
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: System Architecture Development
   const systemArchitecture = await ctx.task(systemArchitectureTask, {
     vehicleProgram,
@@ -116,38 +101,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Interface Specification Development
-  let interfaceSpecifications = await ctx.task(interfaceSpecificationTask, {
+  const interfaceSpecifications = await ctx.task(interfaceSpecificationTask, {
     vehicleProgram,
     systemArchitecture,
     requirementsAllocation
   });
 
   // Quality Gate: Interface specifications must be complete
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        interfaceSpecifications = await ctx.task(interfaceSpecificationTask, { ...{
-    vehicleProgram,
-    systemArchitecture,
-    requirementsAllocation
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!interfaceSpecifications.interfaces || interfaceSpecifications.interfaces.length === 0) {
+    await ctx.breakpoint({
       question: `Interface specifications incomplete for ${vehicleProgram}. Review and provide guidance.`,
       title: 'Interface Specification Warning',
       context: {
         runId: ctx.runId,
         interfaceSpecifications,
         recommendation: 'Define critical interfaces before proceeding'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Architecture Trade-off Analysis
   const tradeoffAnalysis = await ctx.task(tradeoffAnalysisTask, {
@@ -159,7 +130,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Architecture Document Generation
-  let architectureDocument = await ctx.task(architectureDocumentTask, {
+  const architectureDocument = await ctx.task(architectureDocumentTask, {
     vehicleProgram,
     vehicleClass,
     targetMarkets,
@@ -172,23 +143,8 @@ export async function process(inputs, ctx) {
     tradeoffAnalysis
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      architectureDocument = await ctx.task(architectureDocumentTask, { ...{
-    vehicleProgram,
-    vehicleClass,
-    targetMarkets,
-    performanceRequirements,
-    platformEvaluation,
-    systemArchitecture,
-    packagingAllocation,
-    requirementsAllocation,
-    interfaceSpecifications,
-    tradeoffAnalysis
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Architecture approval
+  await ctx.breakpoint({
     question: `Vehicle Architecture Definition complete for ${vehicleProgram}. Approve architecture to proceed to detailed design?`,
     title: 'Vehicle Architecture Approval',
     context: {
@@ -199,15 +155,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/vehicle-architecture-document.json`, format: 'json', content: architectureDocument },
         { path: `artifacts/vehicle-architecture-document.md`, format: 'markdown', content: architectureDocument.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     vehicleProgram,
@@ -226,7 +176,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const performanceRequirementsTask = defineTask('performance-requirements', (args, taskCtx) => ({
   kind: 'agent',

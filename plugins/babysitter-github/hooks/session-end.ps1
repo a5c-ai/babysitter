@@ -30,7 +30,7 @@ if (-not $hasBabysitter) {
     }
 }
 
-$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $PluginRoot ".a5c\logs" }
+$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $HOME ".a5c\logs" }
 $LogFile = Join-Path $LogDir "babysitter-session-end-hook.log"
 New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction SilentlyContinue | Out-Null
 

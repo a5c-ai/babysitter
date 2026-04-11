@@ -35,14 +35,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, telemetryTypes, analyticsProviders, privacyRequirements } = inputs;
 
-  ctx.log.info('Starting telemetry and analytics integration', {
+  ctx.log('info','Starting telemetry and analytics integration', {
     sdkName,
     languages,
     telemetryTypes
   });
 
   // Phase 1: Telemetry Architecture Design
-  ctx.log.info('Phase 1: Designing telemetry architecture');
+  ctx.log('info','Phase 1: Designing telemetry architecture');
   const telemetryArchitecture = await ctx.task(telemetryArchitectureDesignTask, {
     sdkName,
     languages,
@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Privacy Controls Implementation
-  ctx.log.info('Phase 2: Implementing privacy controls');
+  ctx.log('info','Phase 2: Implementing privacy controls');
   const privacyControls = await ctx.task(privacyControlsImplementationTask, {
     sdkName,
     languages,
@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Analytics Provider Integration
-  ctx.log.info('Phase 3: Integrating analytics providers');
+  ctx.log('info','Phase 3: Integrating analytics providers');
   const analyticsIntegration = await ctx.task(analyticsProviderIntegrationTask, {
     sdkName,
     languages,
@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Metrics Collection Setup
-  ctx.log.info('Phase 4: Setting up metrics collection');
+  ctx.log('info','Phase 4: Setting up metrics collection');
   const metricsCollection = await ctx.task(metricsCollectionSetupTask, {
     sdkName,
     languages,
@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Dashboard and Reporting
-  ctx.log.info('Phase 5: Creating dashboards and reports');
+  ctx.log('info','Phase 5: Creating dashboards and reports');
   let dashboards = await ctx.task(dashboardCreationTask, {
     sdkName,
     telemetryTypes,
@@ -106,7 +106,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Telemetry and analytics integration completed');
+  }  ctx.log('info','Telemetry and analytics integration completed');
 
   return {
     telemetryDesign: {

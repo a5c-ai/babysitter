@@ -368,6 +368,76 @@ function ensureGlobalProcessLibrary(packageRoot) {
 }
 
 // ---------------------------------------------------------------------------
+// Accomplish AI detection and paths
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the Accomplish user data directory for the current platform.
+ * If OPENCODE_CONFIG_DIR is set, returns its parent (the Accomplish data dir).
+ * Otherwise falls back to platform-specific defaults.
+ */
+function getAccomplishDataDir() {
+  if (process.env.OPENCODE_CONFIG_DIR) {
+    return path.resolve(process.env.OPENCODE_CONFIG_DIR, '..');
+  }
+  const home = getUserHome();
+  switch (process.platform) {
+    case 'darwin':
+      return path.join(home, 'Library', 'Application Support', 'Accomplish');
+    case 'win32': {
+      const appData = process.env.APPDATA || process.env.LOCALAPPDATA;
+      return appData
+        ? path.join(appData, 'Accomplish')
+        : path.join(home, 'AppData', 'Roaming', 'Accomplish');
+    }
+    default:
+      return path.join(home, '.config', 'Accomplish');
+  }
+}
+
+/**
+ * Returns true if Accomplish AI appears to be installed or is running.
+ * Checks for:
+ *  - ACCOMPLISH_TASK_ID env var (running inside Accomplish)
+ *  - Accomplish data dir with an opencode/ subdirectory on disk
+ */
+function isAccomplishInstalled() {
+  if (process.env.ACCOMPLISH_TASK_ID) return true;
+  try {
+    const dataDir = getAccomplishDataDir();
+    const openCodeDir = path.join(dataDir, 'opencode');
+    return fs.existsSync(openCodeDir);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Returns the OpenCode home directory inside the Accomplish data dir.
+ */
+function getAccomplishOpenCodeHome() {
+  return path.join(getAccomplishDataDir(), 'opencode');
+}
+
+/**
+ * Install the babysitter plugin into Accomplish's OpenCode directory.
+ * Mirrors the standard OpenCode install: copies bundle, writes index.js,
+ * installs skills and hooks.
+ */
+function installAccomplishSurface(packageRoot, accomplishOpenCodeHome) {
+  const pluginRoot = path.join(accomplishOpenCodeHome, 'plugins', PLUGIN_NAME);
+
+  // Copy plugin bundle
+  copyPluginBundle(packageRoot, pluginRoot);
+
+  // Create index.js entry point
+  writeIndexJs(pluginRoot);
+
+  // Install skills and hooks config
+  installOpenCodeSurface(packageRoot, accomplishOpenCodeHome);
+}
+
+// ---------------------------------------------------------------------------
 // OpenCode surface installation
 // ---------------------------------------------------------------------------
 
@@ -395,10 +465,14 @@ module.exports = {
   copyRecursive,
   ensureGlobalProcessLibrary,
   ensureMarketplaceEntry,
+  getAccomplishDataDir,
+  getAccomplishOpenCodeHome,
   getHomeMarketplacePath,
   getHomePluginRoot,
   getOpenCodeHome,
+  installAccomplishSurface,
   installOpenCodeSurface,
+  isAccomplishInstalled,
   removeManagedHooks,
   removeMarketplaceEntry,
   writeIndexJs,

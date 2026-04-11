@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Synthesizing user research data');
-  let researchSynthesis = await ctx.task(researchSynthesisTask, {
+  const researchSynthesis = await ctx.task(researchSynthesisTask, {
     projectName,
     productDomain,
     researchPlan,
@@ -73,41 +73,24 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Research must provide sufficient insights
   const researchDepth = researchSynthesis.researchDepthScore || 0;
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        researchSynthesis = await ctx.task(researchSynthesisTask, { ...{
-    projectName,
-    productDomain,
-    researchPlan,
-    existingResearch,
-    targetAudience,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (researchDepth < 60) {
+    await ctx.breakpoint({
       question: `Research depth score is ${researchDepth}/100 (below threshold of 60). Should we proceed with additional research or continue with current insights?`,
       title: 'Research Depth Warning',
       context: {
         runId: ctx.runId,
         researchSynthesis,
         recommendation: 'Consider conducting additional user interviews or surveys before proceeding'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: USER SEGMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Segmenting users into distinct groups');
-  let userSegmentation = await ctx.task(userSegmentationTask, {
+  const userSegmentation = await ctx.task(userSegmentationTask, {
     projectName,
     researchSynthesis,
     targetAudience,
@@ -143,18 +126,8 @@ export async function process(inputs, ctx) {
     artifacts.push(...(result.artifacts || []));
   });
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      userSegmentation = await ctx.task(userSegmentationTask, { ...{
-    projectName,
-    researchSynthesis,
-    targetAudience,
-    personaCount,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review developed personas
+  await ctx.breakpoint({
     question: `${personas.length} personas developed for ${projectName}. Review personas before validation?`,
     title: 'Persona Review',
     context: {
@@ -171,15 +144,9 @@ export async function process(inputs, ctx) {
         segments: userSegmentation.segments.length,
         researchDepth
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: GOALS AND PAIN POINTS ANALYSIS
   // ============================================================================
@@ -277,7 +244,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating comprehensive persona documentation');
-  let documentation = await ctx.task(personaDocumentationTask, {
+  const documentation = await ctx.task(personaDocumentationTask, {
     projectName,
     productDomain,
     personas,
@@ -293,24 +260,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      documentation = await ctx.task(personaDocumentationTask, { ...{
-    projectName,
-    productDomain,
-    personas,
-    researchSynthesis,
-    userSegmentation,
-    goalsAnalysis,
-    behavioralAnalysis,
-    journeyMaps,
-    empathyMaps,
-    validation,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Persona Approval
+  await ctx.breakpoint({
     question: `User Persona Development complete for ${projectName}. Validation Score: ${validationScore}/100. ${validationPassed ? 'Personas meet quality standards!' : 'Personas may need refinement.'} Approve and distribute?`,
     title: 'Persona Documentation Approval',
     context: {
@@ -330,15 +281,9 @@ export async function process(inputs, ctx) {
         researchDepth,
         journeyMapCount: journeyMaps.length
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -407,7 +352,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

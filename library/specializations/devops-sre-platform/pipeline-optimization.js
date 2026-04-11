@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing current pipeline performance and identifying bottlenecks');
 
-  let baselineAnalysis = await ctx.task(analyzePipelineBaselineTask, {
+  const baselineAnalysis = await ctx.task(analyzePipelineBaselineTask, {
     projectPath,
     repositoryUrl,
     cicdPlatform,
@@ -101,19 +101,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Baseline Analysis Complete: Total Pipeline Time: ${baselineAnalysis.metrics.totalTime}s`);
   ctx.log('info', `Slowest Stages: ${baselineAnalysis.bottlenecks.slice(0, 3).map(b => `${b.name} (${b.duration}s)`).join(', ')}`);
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      baselineAnalysis = await ctx.task(analyzePipelineBaselineTask, { ...{
-    projectPath,
-    repositoryUrl,
-    cicdPlatform,
-    pipelineFile,
-    currentMetrics,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review baseline analysis
+  await ctx.breakpoint({
     question: `Pipeline baseline analyzed. Current total time: ${baselineAnalysis.metrics.totalTime}s, Target: ${optimizationGoals.targetBuildTime}s. Identified ${baselineAnalysis.bottlenecks.length} bottlenecks. Review and approve optimization plan?`,
     title: 'Pipeline Baseline Analysis Review',
     context: {
@@ -126,22 +115,16 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         language: a.language
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: PARALLEL OPTIMIZATION STRATEGY DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing comprehensive optimization strategy');
 
-  let optimizationStrategy = await ctx.task(designOptimizationStrategyTask, {
+  const optimizationStrategy = await ctx.task(designOptimizationStrategyTask, {
     projectPath,
     baseline: baselineAnalysis,
     optimizationGoals,
@@ -156,19 +139,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Estimated Improvement: ${optimizationStrategy.estimatedTimeReduction}s (${optimizationStrategy.estimatedImprovementPercent}%)`);
 
   // Quality Gate: Strategy validation
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        optimizationStrategy = await ctx.task(designOptimizationStrategyTask, { ...{
-    projectPath,
-    baseline: baselineAnalysis,
-    optimizationGoals,
-    constraints,
-    cicdPlatform,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (optimizationStrategy.estimatedImprovementPercent < 20) {
+    await ctx.breakpoint({
       question: `Estimated improvement is only ${optimizationStrategy.estimatedImprovementPercent}%. Below 20% threshold. This may not justify the effort. Review strategy and approve to proceed?`,
       title: 'Low Estimated Improvement Warning',
       context: {
@@ -181,15 +153,9 @@ export async function process(inputs, ctx) {
           path: a.path,
           format: a.format || 'markdown'
         }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: ITERATIVE OPTIMIZATION LOOP
@@ -269,7 +235,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Iteration ${iterationCount} - Step 2: Validating optimizations and measuring performance`);
 
-    let validationResult = await ctx.task(validateOptimizationsTask, {
+    const validationResult = await ctx.task(validateOptimizationsTask, {
       projectPath,
       baseline: baselineAnalysis,
       optimizations: {
@@ -288,24 +254,9 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Iteration ${iterationCount} - Validation Complete: Success: ${validationResult.success}`);
 
     if (!validationResult.success) {
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          validationResult = await ctx.task(validateOptimizationsTask, { ...{
-      projectPath,
-      baseline: baselineAnalysis,
-      optimizations: {
-        caching: cachingOptimization,
-        parallelization: parallelizationOptimization,
-        build: buildOptimization,
-        test: testOptimization
-      },
-      iteration: iterationCount,
-      cicdPlatform,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+      ctx.log('warn', `Iteration ${iterationCount} - Validation failed. Analyzing issues...`);
+
+      await ctx.breakpoint({
         question: `Iteration ${iterationCount} validation failed. ${validationResult.failures.length} failures detected. Review failures and decide: retry, rollback, or continue?`,
         title: `Optimization Validation Failed - Iteration ${iterationCount}`,
         context: {
@@ -317,19 +268,14 @@ export async function process(inputs, ctx) {
             path: a.path,
             format: a.format || 'json'
           }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }
-  // If we continue after breakpoint, rollback this iteration
+        }
+      });
+
+      // If we continue after breakpoint, rollback this iteration
       continue;
     }
-  // ============================================================================
+
+    // ============================================================================
     // ITERATION STEP 3: PERFORMANCE MEASUREMENT
     // ============================================================================
 
@@ -354,7 +300,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Iteration ${iterationCount} - Step 4: Scoring optimization quality`);
 
-    let qualityScore = await ctx.task(scoreOptimizationQualityTask, {
+    const qualityScore = await ctx.task(scoreOptimizationQualityTask, {
       projectPath,
       baseline: baselineAnalysis,
       optimizationGoals,
@@ -406,25 +352,8 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Iteration ${iterationCount} - Target not reached. Goals met: ${goalsMetPercent}%, Time: ${performanceMeasurement.metrics.totalTime}s vs ${optimizationGoals.targetBuildTime}s`);
 
       // Breakpoint: Review iteration and decide whether to continue
-          let lastFeedback_iterationApproval2 = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (lastFeedback_iterationApproval2) {
-            qualityScore = await ctx.task(scoreOptimizationQualityTask, { ...{
-      projectPath,
-      baseline: baselineAnalysis,
-      optimizationGoals,
-      performanceMetrics: performanceMeasurement,
-      optimizations: {
-        caching: cachingOptimization,
-        parallelization: parallelizationOptimization,
-        build: buildOptimization,
-        test: testOptimization
-      },
-      iteration: iterationCount,
-      outputDir
-    }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
-          }
-  const iterationApproval2 = await ctx.breakpoint({
+      if (iterationCount < maxIterations) {
+        await ctx.breakpoint({
           question: `Iteration ${iterationCount} complete. Quality Score: ${currentScore}/100, Goals Met: ${goalsMetPercent}%, Time: ${performanceMeasurement.metrics.totalTime}s. Continue with iteration ${iterationCount + 1}?`,
           title: `Optimization Iteration ${iterationCount} Review`,
           context: {
@@ -440,15 +369,9 @@ export async function process(inputs, ctx) {
               ...performanceMeasurement.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })),
               ...qualityScore.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
             ]
-          },
-          expert: 'owner',
-          tags: ['approval-gate'],
-          previousFeedback: lastFeedback_iterationApproval2 || undefined,
-          attempt: attempt > 0 ? attempt + 1 : undefined
-          });
-          if (iterationApproval2.approved) break;
-          lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
-        }     }
+          }
+        });
+      }
     }
   }
 
@@ -508,25 +431,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cost Impact: ${costAnalysis.monthlySavings} ${costAnalysis.currency}/month (${costAnalysis.savingsPercent}%)`);
 
   // Quality Gate: Regression test failures
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        qualityScore = await ctx.task(scoreOptimizationQualityTask, { ...{
-      projectPath,
-      baseline: baselineAnalysis,
-      optimizationGoals,
-      performanceMetrics: performanceMeasurement,
-      optimizations: {
-        caching: cachingOptimization,
-        parallelization: parallelizationOptimization,
-        build: buildOptimization,
-        test: testOptimization
-      },
-      iteration: iterationCount,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (regressionTest.failed > 0) {
+    await ctx.breakpoint({
       question: `${regressionTest.failed} regression tests failed. This indicates the optimizations may have broken existing functionality. Review failures and approve or rollback?`,
       title: 'Regression Test Failures Detected',
       context: {
@@ -536,36 +442,13 @@ export async function process(inputs, ctx) {
         failed: regressionTest.failed,
         recommendation: 'Consider rolling back optimizations or fixing the issues',
         files: regressionTest.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Quality Gate: Security validation
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        qualityScore = await ctx.task(scoreOptimizationQualityTask, { ...{
-      projectPath,
-      baseline: baselineAnalysis,
-      optimizationGoals,
-      performanceMetrics: performanceMeasurement,
-      optimizations: {
-        caching: cachingOptimization,
-        parallelization: parallelizationOptimization,
-        build: buildOptimization,
-        test: testOptimization
-      },
-      iteration: iterationCount,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (!securityValidation.passed) {
+    await ctx.breakpoint({
       question: `Security validation failed with ${securityValidation.issues.length} issues. Review security concerns and approve or fix?`,
       title: 'Security Validation Failed',
       context: {
@@ -574,15 +457,9 @@ export async function process(inputs, ctx) {
         severity: securityValidation.maxSeverity,
         recommendation: 'Address security issues before deploying optimizations',
         files: securityValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: COMPREHENSIVE FINAL REVIEW
@@ -590,7 +467,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Generating comprehensive final review and recommendations');
 
-  let finalReview = await ctx.task(generateFinalReviewTask, {
+  const finalReview = await ctx.task(generateFinalReviewTask, {
     projectPath,
     baseline: baselineAnalysis,
     optimizationGoals,
@@ -612,26 +489,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Overall Verdict: ${finalReview.verdict}`);
   ctx.log('info', `Recommendation: ${finalReview.recommendation}`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(generateFinalReviewTask, { ...{
-    projectPath,
-    baseline: baselineAnalysis,
-    optimizationGoals,
-    iterations,
-    finalValidation: {
-      performance: finalPerformanceTest,
-      regression: regressionTest,
-      security: securityValidation,
-      cost: costAnalysis
-    },
-    optimizationScore,
-    targetReached,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final breakpoint for approval
+  await ctx.breakpoint({
     question: `Pipeline optimization complete. ${iterationCount} iterations, Final Score: ${optimizationScore}/100, Time Reduction: ${finalReview.totalTimeReduction}s (${finalReview.improvementPercent}%). Verdict: ${finalReview.verdict}. Approve deployment of optimizations?`,
     title: 'Final Pipeline Optimization Review',
     context: {
@@ -653,15 +512,9 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/final-performance-report.json`, format: 'json' },
         { path: `${outputDir}/optimization-summary.md`, format: 'markdown' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // RETURN RESULTS
   // ============================================================================
@@ -724,7 +577,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

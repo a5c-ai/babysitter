@@ -14,7 +14,15 @@ export interface BreakpointRoutingOptions {
   expert?: string | string[];
   tags?: string[];
   strategy?: BreakpointStrategy;
+  /** Canonical breakpoint identity for cross-run/cross-process matching. Dotted namespace, kebab-case. */
+  breakpointId?: string;
+  /** Auto-approve after N consecutive approvals (-1 = disabled, default). */
+  autoApproveAfterN?: number;
+  /** Whether to present "Always Approve" option to the user (default true). */
+  presentAlwaysApprove?: boolean;
 }
+
+// AutoApprovalResult is defined in breakpoints/types.ts and re-exported from breakpoints/index.ts
 
 export interface BreakpointResult {
   approved: boolean;
@@ -26,7 +34,7 @@ export interface BreakpointResult {
   [key: string]: unknown;
 }
 
-export type EffectStatus = "requested" | "resolved_ok" | "resolved_error";
+export type EffectStatus = "requested" | "resolved_ok" | "resolved_error" | "cancelled";
 
 export interface SerializedEffectError {
   name?: string;
@@ -53,12 +61,36 @@ export interface EffectRecord {
   stderrRef?: string;
   requestedAt?: string;
   resolvedAt?: string;
+  // Progress tracking (GAP-SUBOBS-002)
+  progressPercent?: number;
+  progressLabel?: string;
+  currentStep?: string;
+  progressEta?: string;
+  // Background effect tracking (GAP-PAR-002)
+  background?: boolean;
+  dispatchedAt?: string;
+  lastPolledAt?: string;
+  // Cost tracking (GAP-SUBOBS-003)
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheCreationInputTokens?: number;
+  cacheReadInputTokens?: number;
+  costUsd?: number;
+  costModel?: string;
 }
 
 export interface EffectSchedulerHints {
   pendingCount?: number;
   parallelGroupId?: string;
   sleepUntilEpochMs?: number;
+  maxConcurrency?: number;
+  executionStrategy?: 'sequential' | 'concurrent' | 'adaptive';
+  background?: boolean;
+  pollIntervalMs?: number;
+  timeoutMs?: number;
+  effectGroupId?: string;
+  groupRole?: 'coordinator' | 'worker';
+  preferredHarness?: string;
 }
 
 export interface EffectAction {
@@ -88,6 +120,8 @@ export interface CreateRunOptions {
   request?: string;
   prompt?: string;
   inputs?: unknown;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
   processRevision?: string;
   layoutVersion?: string;
   metadata?: JsonRecord;
@@ -151,7 +185,8 @@ export interface IterationMetadata {
 export type IterationResult =
   | { status: "completed"; output: unknown; metadata?: IterationMetadata }
   | { status: "waiting"; nextActions: EffectAction[]; metadata?: IterationMetadata }
-  | { status: "failed"; error: unknown; metadata?: IterationMetadata };
+  | { status: "failed"; error: unknown; metadata?: IterationMetadata }
+  | { status: "process-error"; error: unknown; metadata?: IterationMetadata };
 
 export interface CommitEffectResultOptions {
   runDir: string;

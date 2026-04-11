@@ -1,30 +1,43 @@
 # Rate Limit Handler -- Uninstall Instructions
 
-## Step 1: Remove Hook Entries from Claude Code Settings
-
-Read `.claude/settings.json` and remove the rate-limit-handler hook entries:
-
-1. From `hooks.PostToolUseFailure`: Remove the entry whose command contains `rate-limit-handler`
-2. From `hooks.StopFailure`: Remove the entry whose command contains `rate-limit-handler`
-3. From `hooks.SessionStart`: Remove the entry whose command contains `rate-limit-handler`
-4. From `hooks.PostToolUse`: Remove the entry whose command contains `rate-limit-handler`
-
-If any of those hook arrays become empty after removal, remove the empty array key as well. Preserve all other hooks and settings.
-
-## Step 2: Remove Plugin Files
+## Step 1: Remove the Shell Wrapper
 
 ```bash
-rm -rf .claude/rate-limit-handler
+claude-auto-retry uninstall
 ```
 
-## Step 3: Remove from Registry
+This removes the shell function from rc files (.bashrc / .zshrc). tmux remains installed.
+
+## Step 2: Uninstall the npm Package
+
+```bash
+npm uninstall -g claude-auto-retry
+```
+
+## Step 3: Remove Configuration (Optional)
+
+```bash
+rm -f ~/.claude-auto-retry.json
+```
+
+## Step 4: Remove from Registry
 
 ```bash
 babysitter plugin:remove-from-registry --plugin-name rate-limit-handler --project --json
 ```
 
+## Step 5: Clean Up Old Hook-Based Installation (If Upgrading)
+
+If the previous hook-based version (v1.x) was installed, also clean up its artifacts:
+
+1. Remove hook entries from `.claude/settings.json` -- delete any entries whose command contains `rate-limit-handler` from `PostToolUseFailure`, `StopFailure`, `SessionStart`, and `PostToolUse` hook arrays. If any array becomes empty after removal, remove the empty array key. Preserve all other hooks.
+
+2. Remove old plugin files:
+```bash
+rm -rf .claude/rate-limit-handler
+```
+
 ## Notes
 
-- Removing the hooks from settings.json takes effect immediately for new Claude Code sessions.
-- Active sessions will continue using the old hooks until restarted.
-- The rate limit log at `.claude/rate-limit-handler/rate-limits.log` is removed with the plugin files.
+- Removing the shell wrapper takes effect in new terminal sessions. Existing sessions continue using the wrapper until the terminal is closed.
+- Active tmux sessions with Claude running are not affected -- they continue normally but without auto-retry monitoring for new rate limits.

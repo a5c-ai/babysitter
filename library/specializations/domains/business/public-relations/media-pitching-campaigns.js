@@ -20,88 +20,52 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const phase1Review = await ctx.breakpoint({
+  // Phase 1: Story Angle Refinement
+  await ctx.breakpoint({
     question: 'Starting media pitching campaign. Refine story angle for pitching?',
     title: 'Phase 1: Story Angle Refinement',
     context: {
       runId: ctx.runId,
       phase: 'angle-refinement',
       storyAngle
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
-  let refinedAngle = await ctx.task(refineStoryAngleTask, {
+    }
+  });
+
+  const refinedAngle = await ctx.task(refineStoryAngleTask, {
     storyAngle,
     campaign,
     mediaList
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      refinedAngle = await ctx.task(refineStoryAngleTask, { ...{
-    storyAngle,
-    campaign,
-    mediaList
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Phase 2: Media List Segmentation
+  await ctx.breakpoint({
     question: 'Story angle refined. Segment media list for personalized outreach?',
     title: 'Phase 2: Media Segmentation',
     context: {
       runId: ctx.runId,
       phase: 'media-segmentation',
       totalContacts: mediaList.length
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
-  let segmentedList = await ctx.task(segmentMediaListTask, {
+    }
+  });
+
+  const segmentedList = await ctx.task(segmentMediaListTask, {
     mediaList,
     refinedAngle,
     exclusiveStrategy
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      segmentedList = await ctx.task(segmentMediaListTask, { ...{
-    mediaList,
-    refinedAngle,
-    exclusiveStrategy
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Phase 3: Personalized Pitch Development
+  await ctx.breakpoint({
     question: 'Media segmented. Develop personalized pitches for each segment?',
     title: 'Phase 3: Pitch Development',
     context: {
       runId: ctx.runId,
       phase: 'pitch-development',
       segments: segmentedList.segments.length
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
-  let pitches = await ctx.task(developPersonalizedPitchesTask, {
+    }
+  });
+
+  const pitches = await ctx.task(developPersonalizedPitchesTask, {
     segmentedList,
     refinedAngle,
     assets,
@@ -109,33 +73,18 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Exclusive/Embargo Coordination
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        pitches = await ctx.task(developPersonalizedPitchesTask, { ...{
-    segmentedList,
-    refinedAngle,
-    assets,
-    campaign
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (exclusiveStrategy) {
+    await ctx.breakpoint({
       question: 'Pitches developed. Execute exclusive/embargo strategy?',
       title: 'Phase 4: Exclusive Strategy',
       context: {
         runId: ctx.runId,
         phase: 'exclusive-strategy',
         exclusiveStrategy
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    }
-  let exclusiveResult = await ctx.task(executeExclusiveStrategyTask, {
+      }
+    });
+
+    const exclusiveResult = await ctx.task(executeExclusiveStrategyTask, {
       exclusiveStrategy,
       pitches,
       segmentedList
@@ -143,16 +92,9 @@ export async function process(inputs, ctx) {
 
     pitches.exclusiveOutcome = exclusiveResult;
   }
-  let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      exclusiveResult = await ctx.task(executeExclusiveStrategyTask, { ...{
-      exclusiveStrategy,
-      pitches,
-      segmentedList
-    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+
+  // Phase 5: Outreach Execution
+  await ctx.breakpoint({
     question: 'Execute outreach campaign according to timeline?',
     title: 'Phase 5: Outreach Execution',
     context: {
@@ -160,107 +102,59 @@ export async function process(inputs, ctx) {
       phase: 'outreach-execution',
       timeline,
       pitchCount: pitches.pitchList.length
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
-  let outreachExecution = await ctx.task(executeOutreachTask, {
+    }
+  });
+
+  const outreachExecution = await ctx.task(executeOutreachTask, {
     pitches,
     timeline,
     segmentedList
   });
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      outreachExecution = await ctx.task(executeOutreachTask, { ...{
-    pitches,
-    timeline,
-    segmentedList
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Phase 6: Response Tracking
+  await ctx.breakpoint({
     question: 'Outreach in progress. Set up response tracking and monitoring?',
     title: 'Phase 6: Response Tracking',
     context: {
       runId: ctx.runId,
       phase: 'response-tracking'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
-  let responseTracking = await ctx.task(trackResponsesTask, {
+    }
+  });
+
+  const responseTracking = await ctx.task(trackResponsesTask, {
     outreachExecution,
     mediaList: segmentedList
   });
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      responseTracking = await ctx.task(trackResponsesTask, { ...{
-    outreachExecution,
-    mediaList: segmentedList
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  // Phase 7: Follow-up Coordination
+  await ctx.breakpoint({
     question: 'Track follow-up activities and journalist requests?',
     title: 'Phase 7: Follow-up Coordination',
     context: {
       runId: ctx.runId,
       phase: 'follow-up',
       responsesReceived: responseTracking.responses.length
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
-  let followUpPlan = await ctx.task(coordinateFollowUpTask, {
+    }
+  });
+
+  const followUpPlan = await ctx.task(coordinateFollowUpTask, {
     responseTracking,
     pitches,
     assets,
     timeline
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      followUpPlan = await ctx.task(coordinateFollowUpTask, { ...{
-    responseTracking,
-    pitches,
-    assets,
-    timeline
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Phase 8: Campaign Analysis
+  await ctx.breakpoint({
     question: 'Analyze campaign performance and coverage secured?',
     title: 'Phase 8: Campaign Analysis',
     context: {
       runId: ctx.runId,
       phase: 'campaign-analysis',
       targetQuality
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const campaignAnalysis = await ctx.task(analyzeCampaignPerformanceTask, {
     outreachExecution,
     responseTracking,
@@ -294,7 +188,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const refineStoryAngleTask = defineTask('refine-story-angle', (args, taskCtx) => ({
   kind: 'agent',

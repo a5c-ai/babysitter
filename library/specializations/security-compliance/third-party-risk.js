@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and classifying vendors');
 
-  let inventoryResult = await ctx.task(vendorInventoryTask, {
+  const inventoryResult = await ctx.task(vendorInventoryTask, {
     projectName,
     vendors,
     dataClassification,
@@ -90,18 +90,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Vendor inventory complete - ${inventoryResult.totalVendors} vendors classified into ${inventoryResult.criticalityLevels.length} criticality levels`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      inventoryResult = await ctx.task(vendorInventoryTask, { ...{
-    projectName,
-    vendors,
-    dataClassification,
-    includeFinancialRisk,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Vendor inventory review
+  await ctx.breakpoint({
     question: `Vendor inventory complete for ${projectName}. Identified ${inventoryResult.totalVendors} vendors (${inventoryResult.criticalVendors} critical). Review vendor classification?`,
     title: 'Vendor Inventory Review',
     context: {
@@ -117,22 +107,16 @@ export async function process(inputs, ctx) {
       criticalVendorsList: inventoryResult.criticalVendorsList,
       dataAccessBreakdown: inventoryResult.dataAccessBreakdown,
       files: inventoryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: SECURITY QUESTIONNAIRE DISTRIBUTION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Distributing and collecting security questionnaires');
 
-  let questionnaireResult = await ctx.task(distributeQuestionnaireTask, {
+  const questionnaireResult = await ctx.task(distributeQuestionnaireTask, {
     projectName,
     vendors: inventoryResult.vendorsList,
     assessmentType,
@@ -145,19 +129,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Questionnaires distributed - ${questionnaireResult.sent} sent, ${questionnaireResult.completed} completed, ${questionnaireResult.pending} pending`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      questionnaireResult = await ctx.task(distributeQuestionnaireTask, { ...{
-    projectName,
-    vendors: inventoryResult.vendorsList,
-    assessmentType,
-    complianceFrameworks,
-    integrations,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Questionnaire completion review
+  await ctx.breakpoint({
     question: `Security questionnaires sent to ${questionnaireResult.sent} vendors. ${questionnaireResult.completed} completed, ${questionnaireResult.pending} pending. Proceed with assessment?`,
     title: 'Questionnaire Collection Review',
     context: {
@@ -172,15 +145,9 @@ export async function process(inputs, ctx) {
       completedVendors: questionnaireResult.completedVendorsList,
       pendingVendors: questionnaireResult.pendingVendorsList,
       files: questionnaireResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: SECURITY CERTIFICATION VERIFICATION
   // ============================================================================
@@ -224,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Assessing data protection and privacy controls');
 
-  let dataProtectionResult = await ctx.task(assessDataProtectionTask, {
+  const dataProtectionResult = await ctx.task(assessDataProtectionTask, {
     projectName,
     vendors: inventoryResult.vendorsList,
     dataClassification,
@@ -237,19 +204,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Data protection assessment complete - ${dataProtectionResult.dpaRequired} DPAs required, ${dataProtectionResult.dpaCompleted} completed`);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      dataProtectionResult = await ctx.task(assessDataProtectionTask, { ...{
-    projectName,
-    vendors: inventoryResult.vendorsList,
-    dataClassification,
-    complianceFrameworks,
-    questionnaireResponses: questionnaireResult.responses,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Quality Gate: Data protection review
+  await ctx.breakpoint({
     question: `Data protection assessment complete. ${dataProtectionResult.dpaRequired} DPAs required, ${dataProtectionResult.highRiskVendors} high-risk data processors identified. Review findings?`,
     title: 'Data Protection Assessment Review',
     context: {
@@ -264,15 +220,9 @@ export async function process(inputs, ctx) {
       complianceGaps: dataProtectionResult.complianceGaps,
       highRiskVendorsList: dataProtectionResult.highRiskVendorsList,
       files: dataProtectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: FINANCIAL AND OPERATIONAL RISK ASSESSMENT
   // ============================================================================
@@ -291,6 +241,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Financial risk assessment complete - ${financialRiskResult.financiallyStable} stable, ${financialRiskResult.financialRisks} at risk`);
   }
+
   // ============================================================================
   // PHASE 7: CONTINUOUS MONITORING AND SCORING
   // ============================================================================
@@ -309,13 +260,14 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Continuous monitoring configured for ${monitoringResult.monitored} vendors using ${monitoringResult.tools.join(', ')}`);
   }
+
   // ============================================================================
   // PHASE 8: AUTOMATED RISK SCORING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Calculating automated risk scores');
 
-  let scoringResult = await ctx.task(calculateRiskScoresTask, {
+  const scoringResult = await ctx.task(calculateRiskScoresTask, {
     projectName,
     vendors: inventoryResult.vendorsList,
     controlAssessment: controlAssessmentResult,
@@ -331,21 +283,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Risk scoring complete - ${scoringResult.highRisk} high risk, ${scoringResult.mediumRisk} medium risk, ${scoringResult.lowRisk} low risk vendors`);
 
-    let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      scoringResult = await ctx.task(calculateRiskScoresTask, { ...{
-    projectName,
-    vendors: inventoryResult.vendorsList,
-    controlAssessment: controlAssessmentResult,
-    dataProtection: dataProtectionResult,
-    certifications: certificationResult,
-    financialRisk: includeFinancialRisk ? inventoryResult.financialRiskData : null,
-    autoScoring,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+  // Quality Gate: Risk scoring review
+  await ctx.breakpoint({
     question: `Risk scoring complete. ${scoringResult.highRisk} high-risk vendors, ${scoringResult.criticalFindings} critical findings identified. Review risk scores?`,
     title: 'Risk Scoring Review',
     context: {
@@ -365,15 +304,9 @@ export async function process(inputs, ctx) {
         topRisks: v.topRisks
       })),
       files: scoringResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 9: RISK FINDING IDENTIFICATION
   // ============================================================================
@@ -402,7 +335,7 @@ export async function process(inputs, ctx) {
   if (remediationTracking) {
     ctx.log('info', 'Phase 10: Creating remediation plans and tracking');
 
-    let remediationResult = await ctx.task(createRemediationPlansTask, {
+    const remediationResult = await ctx.task(createRemediationPlansTask, {
       projectName,
       findings: findingsResult.findings,
       vendors: inventoryResult.vendorsList,
@@ -415,18 +348,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Remediation planning complete - ${remediationResult.plansCreated} plans created, ${remediationResult.ticketsCreated} tickets created`);
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        remediationResult = await ctx.task(createRemediationPlansTask, { ...{
-      projectName,
-      findings: findingsResult.findings,
-      vendors: inventoryResult.vendorsList,
-      integrations,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    // Quality Gate: Remediation plan review
+    await ctx.breakpoint({
       question: `Remediation plans created for ${remediationResult.plansCreated} vendors. ${remediationResult.critical} critical issues require immediate attention. Approve remediation plans?`,
       title: 'Remediation Planning Review',
       context: {
@@ -440,15 +363,9 @@ export async function process(inputs, ctx) {
         },
         criticalRemediations: remediationResult.criticalRemediationsList,
         files: remediationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: CONTRACT AND SLA REVIEW
@@ -494,7 +411,7 @@ export async function process(inputs, ctx) {
   if (complianceFrameworks.length > 0) {
     ctx.log('info', 'Phase 13: Mapping to compliance frameworks and generating reports');
 
-    let complianceResult = await ctx.task(mapComplianceFrameworksTask, {
+    const complianceResult = await ctx.task(mapComplianceFrameworksTask, {
       projectName,
       vendors: inventoryResult.vendorsList,
       vendorScores: scoringResult.vendorScores,
@@ -507,19 +424,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Compliance mapping complete - ${complianceResult.frameworks.length} frameworks mapped, ${complianceResult.complianceGaps} gaps identified`);
 
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        complianceResult = await ctx.task(mapComplianceFrameworksTask, { ...{
-      projectName,
-      vendors: inventoryResult.vendorsList,
-      vendorScores: scoringResult.vendorScores,
-      findings: findingsResult.findings,
-      complianceFrameworks,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    // Quality Gate: Compliance review
+    await ctx.breakpoint({
       question: `Compliance mapping complete for ${complianceFrameworks.join(', ')}. ${complianceResult.complianceGaps} compliance gaps identified. Review compliance status?`,
       title: 'Compliance Mapping Review',
       context: {
@@ -533,15 +439,9 @@ export async function process(inputs, ctx) {
         },
         frameworkStatus: complianceResult.frameworkStatus,
         files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: EXECUTIVE REPORTING AND DASHBOARD
@@ -571,7 +471,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Calculating overall third-party risk score');
 
-  let overallScoringResult = await ctx.task(calculateOverallRiskScoreTask, {
+  const overallScoringResult = await ctx.task(calculateOverallRiskScoreTask, {
     projectName,
     vendorScores: scoringResult.vendorScores,
     findings: findingsResult.findings,
@@ -585,19 +485,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Overall Third-Party Risk Score: ${overallRiskScore}/100 (${overallScoringResult.riskLevel})`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      overallScoringResult = await ctx.task(calculateOverallRiskScoreTask, { ...{
-    projectName,
-    vendorScores: scoringResult.vendorScores,
-    findings: findingsResult.findings,
-    inventoryResult,
-    complianceFrameworks,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Assessment complete
+  await ctx.breakpoint({
     question: `Third-Party Risk Assessment Complete for ${projectName}. Overall Risk Score: ${overallRiskScore}/100 (${overallScoringResult.riskLevel}). ${scoringResult.highRisk} high-risk vendors identified. Review final assessment?`,
     title: 'Final Third-Party Risk Assessment Review',
     context: {
@@ -653,15 +542,9 @@ export async function process(inputs, ctx) {
         { path: overallScoringResult.summaryPath, format: 'json', label: 'Overall Risk Score Summary' },
         { path: reportingResult.dashboardPath, format: 'json', label: 'Risk Dashboard Data' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -743,7 +626,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 
@@ -1710,7 +1594,7 @@ export const identifyRiskFindingsTask = defineTask('identify-risk-findings', (ar
           }
         },
         criticalFindings: { type: 'array', items: { type: 'object' } },
-        systemic: Issues: { type: 'array', items: { type: 'object' }, description: 'Issues affecting multiple vendors' },
+        systemicIssues: { type: 'array', items: { type: 'object' }, description: 'Issues affecting multiple vendors' },
         artifacts: { type: 'array' }
       }
     }

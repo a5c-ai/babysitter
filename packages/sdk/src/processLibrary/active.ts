@@ -8,7 +8,7 @@ const execFile = promisify(execFileCb);
 const ACTIVE_PROCESS_LIBRARY_FILENAME = "process-library.json";
 const DEFAULT_PROCESS_LIBRARY_REPO = "https://github.com/a5c-ai/babysitter.git";
 const DEFAULT_PROCESS_LIBRARY_SUBPATH = "library";
-const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = "library/reference";
+const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = "plugins/babysitter/reference";
 
 export interface ProcessLibraryBinding {
   dir: string;

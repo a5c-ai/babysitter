@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: CFD Mesh Generation');
 
-  let meshResult = await ctx.task(cfdMeshTask, {
+  const meshResult = await ctx.task(cfdMeshTask, {
     projectName,
     geometryResult,
     flowType,
@@ -81,18 +81,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Mesh generated - ${meshResult.cellCount} cells, ${meshResult.meshQuality.orthogonality} orthogonality`);
 
   // Quality Gate: Mesh quality check
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        meshResult = await ctx.task(cfdMeshTask, { ...{
-    projectName,
-    geometryResult,
-    flowType,
-    meshSettings,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (meshResult.meshQuality.orthogonality < 0.2 || meshResult.meshQuality.skewness > 0.85) {
+    await ctx.breakpoint({
       question: `Mesh quality below threshold. Orthogonality: ${meshResult.meshQuality.orthogonality}, Skewness: ${meshResult.meshQuality.skewness}. Refine mesh?`,
       title: 'CFD Mesh Quality Warning',
       context: {
@@ -100,15 +90,9 @@ export async function process(inputs, ctx) {
         meshQuality: meshResult.meshQuality,
         cellDistribution: meshResult.cellDistribution,
         files: meshResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: PHYSICS SETUP
@@ -136,7 +120,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Boundary Conditions Setup');
 
-  let boundaryResult = await ctx.task(cfdBoundaryTask, {
+  const boundaryResult = await ctx.task(cfdBoundaryTask, {
     projectName,
     boundaryConditions,
     meshResult,
@@ -148,18 +132,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Boundary conditions applied - ${boundaryResult.boundaryCount} boundaries`);
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      boundaryResult = await ctx.task(cfdBoundaryTask, { ...{
-    projectName,
-    boundaryConditions,
-    meshResult,
-    physicsResult,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review setup
+  await ctx.breakpoint({
     question: `CFD setup complete. ${meshResult.cellCount} cells, Re=${physicsResult.reynoldsNumber}. ${boundaryResult.boundaryCount} boundaries defined. Review before solving?`,
     title: 'CFD Setup Review',
     context: {
@@ -168,15 +142,9 @@ export async function process(inputs, ctx) {
       physicsSummary: physicsResult.summary,
       boundarySummary: boundaryResult.summary,
       files: meshResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 5: SOLVER CONFIGURATION
   // ============================================================================
@@ -202,7 +170,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Solver Execution');
 
-  let solveResult = await ctx.task(cfdSolveTask, {
+  const solveResult = await ctx.task(cfdSolveTask, {
     projectName,
     solverConfigResult,
     outputDir
@@ -213,16 +181,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Solver complete - ${solveResult.iterations} iterations, Residuals: ${solveResult.finalResiduals}`);
 
   // Quality Gate: Convergence check
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        solveResult = await ctx.task(cfdSolveTask, { ...{
-    projectName,
-    solverConfigResult,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!solveResult.converged) {
+    await ctx.breakpoint({
       question: `CFD solution did not fully converge. Final residuals: ${JSON.stringify(solveResult.finalResiduals)}. Continue with post-processing or adjust?`,
       title: 'CFD Convergence Warning',
       context: {
@@ -231,15 +191,9 @@ export async function process(inputs, ctx) {
         residualHistory: solveResult.residualHistory,
         monitorHistory: solveResult.monitorHistory,
         files: solveResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: RESULTS POST-PROCESSING
@@ -265,7 +219,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Validation and Reporting');
 
-  let reportResult = await ctx.task(generateCFDReportTask, {
+  const reportResult = await ctx.task(generateCFDReportTask, {
     projectName,
     flowType,
     geometryResult,
@@ -280,23 +234,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateCFDReportTask, { ...{
-    projectName,
-    flowType,
-    geometryResult,
-    meshResult,
-    physicsResult,
-    boundaryResult,
-    solverConfigResult,
-    solveResult,
-    resultsResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `CFD Analysis Complete for ${projectName}. Pressure drop: ${resultsResult.pressureDrop} Pa, Max velocity: ${resultsResult.maxVelocity} m/s. Approve results?`,
     title: 'CFD Analysis Complete',
     context: {
@@ -311,15 +250,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'CFD Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -350,7 +283,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing version structure and validating inputs');
 
-  let versionAnalysis = await ctx.task(versionAnalysisTask, {
+  const versionAnalysis = await ctx.task(versionAnalysisTask, {
     productName,
     currentVersion,
     previousVersions,
@@ -105,19 +105,10 @@ export async function process(inputs, ctx) {
       }
     };
   }
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      versionAnalysis = await ctx.task(versionAnalysisTask, { ...{
-    productName,
-    currentVersion,
-    previousVersions,
-    versioningStrategy,
-    docsPath,
-    retentionPolicy
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+
+  artifacts.push(...versionAnalysis.artifacts);
+
+  await ctx.breakpoint({
     question: `Version analysis complete. Detected ${versionAnalysis.totalVersions} versions to manage. Current: ${currentVersion}. Proceed with versioning setup?`,
     title: 'Phase 1: Version Analysis',
     context: {
@@ -128,15 +119,9 @@ export async function process(inputs, ctx) {
       versionScheme: versionAnalysis.versionScheme,
       retentionSuggestions: versionAnalysis.retentionSuggestions,
       files: versionAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DOCUMENTATION SNAPSHOT FOR CURRENT VERSION
   // ============================================================================
@@ -176,7 +161,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Generating changelog and release notes');
 
-  let changelogResult = await ctx.task(changelogGenerationTask, {
+  const changelogResult = await ctx.task(changelogGenerationTask, {
     productName,
     currentVersion,
     previousVersions,
@@ -186,19 +171,9 @@ export async function process(inputs, ctx) {
   });
 
   artifacts.push(...changelogResult.artifacts);
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      changelogResult = await ctx.task(changelogGenerationTask, { ...{
-    productName,
-    currentVersion,
-    previousVersions,
-    releaseNotes,
-    docsPath,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  changelogGenerated = changelogResult.generated;
+
+  await ctx.breakpoint({
     question: `Changelog generated with ${changelogResult.entriesCount} entries. Review changelog?`,
     title: 'Phase 3: Changelog Generation',
     context: {
@@ -208,15 +183,9 @@ export async function process(inputs, ctx) {
       entriesCount: changelogResult.entriesCount,
       categories: changelogResult.categories,
       files: changelogResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: DEPRECATION NOTICES (PARALLEL WITH MIGRATION GUIDES)
   // ============================================================================
@@ -248,19 +217,8 @@ export async function process(inputs, ctx) {
   migrationGuides = migrationResult.guides || [];
 
   // Quality Gate: Migration guides required
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        changelogResult = await ctx.task(changelogGenerationTask, { ...{
-    productName,
-    currentVersion,
-    previousVersions,
-    releaseNotes,
-    docsPath,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (acceptanceCriteria.requireMigrationGuides && migrationGuides.length === 0 && previousVersions.length > 0) {
+    await ctx.breakpoint({
       question: `No migration guides generated, but acceptance criteria requires them. Review and decide to generate or skip?`,
       title: 'Migration Guides Quality Gate',
       context: {
@@ -269,15 +227,9 @@ export async function process(inputs, ctx) {
         previousVersions,
         requiresMigrationGuides: acceptanceCriteria.requireMigrationGuides,
         recommendation: 'Generate migration guides for major version changes'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: VERSION STRUCTURE SETUP
@@ -285,7 +237,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Setting up version structure for documentation platform');
 
-  let versionStructure = await ctx.task(versionStructureTask, {
+  const versionStructure = await ctx.task(versionStructureTask, {
     productName,
     currentVersion,
     previousVersions: versionAnalysis.previousVersions,
@@ -307,21 +259,10 @@ export async function process(inputs, ctx) {
       }
     };
   }
-  let lastFeedback_analysisApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_analysisApproval) {
-      versionStructure = await ctx.task(versionStructureTask, { ...{
-    productName,
-    currentVersion,
-    previousVersions: versionAnalysis.previousVersions,
-    platform,
-    docsPath,
-    docsSnapshot,
-    retentionPolicy,
-    outputDir
-  }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
-    }
-  const analysisApproval = await ctx.breakpoint({
+
+  artifacts.push(...versionStructure.artifacts);
+
+  await ctx.breakpoint({
     question: `Version structure created for ${versionStructure.versionsConfigured} versions. Review structure?`,
     title: 'Phase 5: Version Structure',
     context: {
@@ -331,15 +272,9 @@ export async function process(inputs, ctx) {
       versionsConfigured: versionStructure.versionsConfigured,
       structure: versionStructure.structure,
       files: versionStructure.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_analysisApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (analysisApproval.approved) break;
-    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: VERSION SWITCHER IMPLEMENTATION
   // ============================================================================
@@ -347,7 +282,7 @@ export async function process(inputs, ctx) {
   if (versionSwitcher.enabled) {
     ctx.log('info', 'Phase 6: Implementing version switcher UI');
 
-    let versionSwitcherResult = await ctx.task(versionSwitcherTask, {
+    const versionSwitcherResult = await ctx.task(versionSwitcherTask, {
       productName,
       currentVersion,
       versions: versionAnalysis.previousVersions,
@@ -359,21 +294,9 @@ export async function process(inputs, ctx) {
     });
 
     artifacts.push(...versionSwitcherResult.artifacts);
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        versionSwitcherResult = await ctx.task(versionSwitcherTask, { ...{
-      productName,
-      currentVersion,
-      versions: versionAnalysis.previousVersions,
-      platform,
-      hostingPlatform,
-      versionSwitcher,
-      versionStructure,
-      outputDir
-    }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+    versionSwitcherConfig = versionSwitcherResult.config;
+
+    await ctx.breakpoint({
       question: `Version switcher configured with ${versionSwitcherResult.versionsInSwitcher} versions. Preview switcher UI?`,
       title: 'Phase 6: Version Switcher',
       context: {
@@ -383,15 +306,9 @@ export async function process(inputs, ctx) {
         latestVersion: versionSwitcherResult.latestVersion,
         stableVersion: versionSwitcherResult.stableVersion,
         files: versionSwitcherResult.artifacts.map(a => ({ path: a.path, format: a.format || 'html' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: VERSION-SPECIFIC NAVIGATION AND LINKS
@@ -417,7 +334,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Adding version banners and deprecation warnings');
 
-  let versionBanners = await ctx.task(versionBannersTask, {
+  const versionBanners = await ctx.task(versionBannersTask, {
     productName,
     currentVersion,
     versions: versionAnalysis.previousVersions,
@@ -451,20 +368,8 @@ export async function process(inputs, ctx) {
   const totalBrokenLinks = validationResults.reduce((sum, r) => sum + r.brokenLinksCount, 0);
 
   // Quality Gate: Link validation
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        versionBanners = await ctx.task(versionBannersTask, { ...{
-    productName,
-    currentVersion,
-    versions: versionAnalysis.previousVersions,
-    platform,
-    deprecations: deprecationResult.deprecations || [],
-    versionStructure,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (acceptanceCriteria.allLinksValid && totalBrokenLinks > 0) {
+    await ctx.breakpoint({
       question: `Found ${totalBrokenLinks} broken links across versions. Acceptance criteria requires all links valid. Review and fix?`,
       title: 'Link Validation Quality Gate',
       context: {
@@ -477,15 +382,9 @@ export async function process(inputs, ctx) {
         })),
         recommendation: 'Fix broken links before deployment',
         files: validationResults.flatMap(r => r.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: VERSION RETENTION AND ARCHIVAL
@@ -493,7 +392,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Applying version retention policy and archival');
 
-  let retentionResult = await ctx.task(versionRetentionTask, {
+  const retentionResult = await ctx.task(versionRetentionTask, {
     productName,
     versions: versionAnalysis.previousVersions,
     retentionPolicy,
@@ -503,18 +402,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...retentionResult.artifacts);
 
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        retentionResult = await ctx.task(versionRetentionTask, { ...{
-    productName,
-    versions: versionAnalysis.previousVersions,
-    retentionPolicy,
-    platform,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (retentionResult.versionsArchived.length > 0) {
+    await ctx.breakpoint({
       question: `${retentionResult.versionsArchived.length} version(s) marked for archival: ${retentionResult.versionsArchived.join(', ')}. Approve archival?`,
       title: 'Phase 10: Version Archival',
       context: {
@@ -524,15 +413,9 @@ export async function process(inputs, ctx) {
         versionsRetained: retentionResult.versionsRetained,
         archivalReason: retentionResult.archivalReasons,
         files: retentionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: HOSTING CONFIGURATION FOR MULTI-VERSION DOCS
@@ -540,7 +423,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Configuring hosting for multi-version documentation');
 
-  let hostingConfig = await ctx.task(hostingConfigurationTask, {
+  const hostingConfig = await ctx.task(hostingConfigurationTask, {
     productName,
     currentVersion,
     versions: versionAnalysis.previousVersions,
@@ -551,21 +434,9 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_phase11Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase11Review) {
-      hostingConfig = await ctx.task(hostingConfigurationTask, { ...{
-    productName,
-    currentVersion,
-    versions: versionAnalysis.previousVersions,
-    hostingPlatform,
-    platform,
-    versionStructure,
-    versionSwitcherConfig,
-    outputDir
-  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
-    }
-  const phase11Review = await ctx.breakpoint({
+  artifacts.push(...hostingConfig.artifacts);
+
+  await ctx.breakpoint({
     question: `Hosting configuration complete for ${hostingPlatform}. Ready to deploy ${hostingConfig.versionsConfigured} versions?`,
     title: 'Phase 11: Hosting Configuration',
     context: {
@@ -576,15 +447,9 @@ export async function process(inputs, ctx) {
       baseUrl: hostingConfig.baseUrl,
       deploymentInstructions: hostingConfig.deploymentInstructions,
       files: hostingConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase11Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase11Review.approved) break;
-    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 12: VERSION INDEX AND METADATA
   // ============================================================================
@@ -628,7 +493,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Validating version release readiness');
 
-  let releaseValidation = await ctx.task(releaseValidationTask, {
+  const releaseValidation = await ctx.task(releaseValidationTask, {
     productName,
     currentVersion,
     versionsCreated,
@@ -646,23 +511,8 @@ export async function process(inputs, ctx) {
   const readyForRelease = releaseValidation.passed;
 
   // Quality Gate: Release validation
-      let lastFeedback_phase14Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase14Review) {
-        releaseValidation = await ctx.task(releaseValidationTask, { ...{
-    productName,
-    currentVersion,
-    versionsCreated,
-    changelogGenerated,
-    migrationGuides,
-    versionSwitcherConfig,
-    validationResults,
-    acceptanceCriteria,
-    artifacts,
-    outputDir
-  }, feedback: lastFeedback_phase14Review, attempt: attempt + 1 });
-      }
-  const phase14Review = await ctx.breakpoint({
+  if (!readyForRelease) {
+    await ctx.breakpoint({
       question: `Release validation failed: ${releaseValidation.failureReasons.join(', ')}. Review issues and retry?`,
       title: 'Release Validation Quality Gate',
       context: {
@@ -672,15 +522,9 @@ export async function process(inputs, ctx) {
         checkResults: releaseValidation.checks,
         recommendations: releaseValidation.recommendations,
         files: releaseValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase14Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase14Review.approved) break;
-      lastFeedback_phase14Review = phase14Review.response || phase14Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 15: FINAL RELEASE PACKAGE
@@ -688,7 +532,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Creating final release package');
 
-  let releasePackage = await ctx.task(releasePackageTask, {
+  const releasePackage = await ctx.task(releasePackageTask, {
     productName,
     currentVersion,
     versionsCreated,
@@ -704,24 +548,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...releasePackage.artifacts);
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      releasePackage = await ctx.task(releasePackageTask, { ...{
-    productName,
-    currentVersion,
-    versionsCreated,
-    changelogGenerated,
-    migrationGuides,
-    versionSwitcherConfig,
-    hostingConfig,
-    deploymentScripts,
-    releaseValidation,
-    artifacts,
-    outputDir
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: Approve release
+  await ctx.breakpoint({
     question: `Documentation versioning complete for ${productName} v${currentVersion}. ${versionsCreated.length} version(s) configured, changelog generated, ${migrationGuides.length} migration guide(s) created. Release validation: ${readyForRelease ? 'PASSED' : 'FAILED'}. Approve for deployment?`,
     title: 'Final Release Package Review',
     context: {
@@ -742,15 +570,9 @@ export async function process(inputs, ctx) {
         hostingPlatform,
         deploymentReady: hostingConfig.deploymentReady
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -806,7 +628,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

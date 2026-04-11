@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Analyze Target Domain
   ctx.log('info', 'Analyzing target domain structure');
-  let targetAnalysis = await ctx.task(analyzeDomainTask, {
+  const targetAnalysis = await ctx.task(analyzeDomainTask, {
     domainName: targetDomain,
     domainType: 'target',
     domain
@@ -49,16 +49,9 @@ export async function process(inputs, ctx) {
     sourceAnalysis,
     targetAnalysis,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      targetAnalysis = await ctx.task(analyzeDomainTask, { ...{
-    domainName: targetDomain,
-    domainType: 'target',
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Latent space constructed. Review before transfer operations?',
     title: 'Latent Space Transfer - Space Constructed',
     context: {
@@ -68,15 +61,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/target-analysis.json', format: 'json' },
         { path: 'artifacts/latent-space.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Encode Source Operations
   ctx.log('info', 'Encoding source operations into latent space');
   const encodedOperations = await ctx.task(encodeOperationsTask, {

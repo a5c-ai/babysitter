@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing requirements and validating tool selection');
 
-  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     repositoryUrl,
     cicdPlatform,
@@ -75,21 +75,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...requirementsAnalysis.artifacts);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
-    projectName,
-    repositoryUrl,
-    cicdPlatform,
-    environments,
-    techStack,
-    testingStrategy,
-    deploymentTarget,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements must be clear and tool selection validated
+  await ctx.breakpoint({
     question: `Phase 1 Complete: Requirements analyzed for ${cicdPlatform}. Pipeline will include ${requirementsAnalysis.pipelineStages.length} stages across ${environments.length} environments. Proceed with pipeline design?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -99,15 +86,9 @@ export async function process(inputs, ctx) {
       estimatedComplexity: requirementsAnalysis.complexity,
       toolCompatibility: requirementsAnalysis.toolCompatibility,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: PIPELINE ARCHITECTURE DESIGN
   // ============================================================================
@@ -165,7 +146,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Integrating security scanning (SAST, DAST, dependency scan)');
 
-  let securityIntegration = await ctx.task(securityScanningTask, {
+  const securityIntegration = await ctx.task(securityScanningTask, {
     projectName,
     cicdPlatform,
     techStack,
@@ -175,18 +156,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityIntegration.artifacts);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      securityIntegration = await ctx.task(securityScanningTask, { ...{
-    projectName,
-    cicdPlatform,
-    techStack,
-    architectureDesign,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Quality Gate: Security scanning must be properly configured
+  await ctx.breakpoint({
     question: `Phase 5 Complete: Security scanning configured with ${securityIntegration.scanTypes.length} scan types. Quality gates: ${securityIntegration.qualityGates.join(', ')}. Approve security configuration?`,
     title: 'Security Integration Review',
     context: {
@@ -195,15 +166,9 @@ export async function process(inputs, ctx) {
       qualityGates: securityIntegration.qualityGates,
       vulnerabilityThresholds: securityIntegration.thresholds,
       files: securityIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: ARTIFACT MANAGEMENT SETUP
   // ============================================================================
@@ -341,7 +306,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Validating pipeline configuration and running test execution');
 
-  let validationResult = await ctx.task(pipelineValidationTask, {
+  const validationResult = await ctx.task(pipelineValidationTask, {
     projectName,
     cicdPlatform,
     architectureDesign,
@@ -358,21 +323,8 @@ export async function process(inputs, ctx) {
   const validationPassed = pipelineScore >= 75;
 
   // Quality Gate: Pipeline must meet quality criteria
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        validationResult = await ctx.task(pipelineValidationTask, { ...{
-    projectName,
-    cicdPlatform,
-    architectureDesign,
-    buildConfig,
-    testingStagesConfig,
-    securityIntegration,
-    deploymentConfigs,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (!validationPassed) {
+    await ctx.breakpoint({
       question: `Phase 13 Warning: Pipeline validation score: ${pipelineScore}/100 (below threshold of 75). ${validationResult.failedChecks.length} check(s) failed. Review and fix issues before deployment?`,
       title: 'Pipeline Validation Issues',
       context: {
@@ -382,15 +334,9 @@ export async function process(inputs, ctx) {
         failedChecks: validationResult.failedChecks,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: FINAL REVIEW AND DEPLOYMENT
@@ -398,7 +344,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Final review and pipeline deployment');
 
-  let finalReview = await ctx.task(finalReviewTask, {
+  const finalReview = await ctx.task(finalReviewTask, {
     projectName,
     cicdPlatform,
     requirementsAnalysis,
@@ -412,22 +358,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReview = await ctx.task(finalReviewTask, { ...{
-    projectName,
-    cicdPlatform,
-    requirementsAnalysis,
-    architectureDesign,
-    securityIntegration,
-    deploymentConfigs,
-    documentation,
-    validationResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Pipeline Approval
+  await ctx.breakpoint({
     question: `CI/CD Pipeline Setup Complete for ${projectName}! Validation score: ${pipelineScore}/100. Pipeline includes ${architectureDesign.stages.length} stages across ${environments.length} environments. Review deliverables and approve for deployment?`,
     title: 'Pipeline Setup Complete - Final Approval',
     context: {
@@ -451,15 +383,9 @@ export async function process(inputs, ctx) {
         { path: validationResult.reportPath, format: 'json', label: 'Validation Report' },
         { path: finalReview.deploymentGuidePath, format: 'markdown', label: 'Deployment Guide' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -530,7 +456,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

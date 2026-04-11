@@ -46,38 +46,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Feedback Loop Mapping
-  let feedbackMapping = await ctx.task(feedbackMappingTask, {
+  const feedbackMapping = await ctx.task(feedbackMappingTask, {
     stockFlowAnalysis,
     system,
     domain
   });
 
   // Quality Gate: Must identify feedback loops
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        feedbackMapping = await ctx.task(feedbackMappingTask, { ...{
-    stockFlowAnalysis,
-    system,
-    domain
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (!feedbackMapping.loops || feedbackMapping.loops.length === 0) {
+    await ctx.breakpoint({
       question: `No feedback loops identified in system. This may indicate a non-systemic problem. Continue with linear analysis or revise system definition?`,
       title: 'Feedback Loop Gap',
       context: {
         runId: ctx.runId,
         system: system.name,
         recommendation: 'Consider expanding system boundary or identifying hidden loops'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 4: Delay Identification
   const delayAnalysis = await ctx.task(delayIdentificationTask, {
@@ -102,24 +88,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: System Archetype Identification
-  let archetypeAnalysis = await ctx.task(archetypeIdentificationTask, {
+  const archetypeAnalysis = await ctx.task(archetypeIdentificationTask, {
     feedbackMapping,
     delayAnalysis,
     stockFlowAnalysis,
     domain
   });
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      archetypeAnalysis = await ctx.task(archetypeIdentificationTask, { ...{
-    feedbackMapping,
-    delayAnalysis,
-    stockFlowAnalysis,
-    domain
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  // Breakpoint: Review system structure
+  await ctx.breakpoint({
     question: `System structure mapped with ${feedbackMapping.loops.length} feedback loops and ${archetypeAnalysis.archetypes.length} system archetypes identified. Review causal loop diagram?`,
     title: 'System Structure Review',
     context: {
@@ -127,15 +104,9 @@ export async function process(inputs, ctx) {
       domain,
       loops: feedbackMapping.loops.map(l => l.name),
       archetypes: archetypeAnalysis.archetypes.map(a => a.name)
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 8: Dynamic Behavior Analysis
   const dynamicBehavior = await ctx.task(dynamicBehaviorAnalysisTask, {
     feedbackMapping,
@@ -162,7 +133,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Insight Synthesis
-  let insightSynthesis = await ctx.task(systemsInsightSynthesisTask, {
+  const insightSynthesis = await ctx.task(systemsInsightSynthesisTask, {
     feedbackMapping,
     delayAnalysis,
     emergenceAnalysis,
@@ -174,22 +145,8 @@ export async function process(inputs, ctx) {
     domain
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      insightSynthesis = await ctx.task(systemsInsightSynthesisTask, { ...{
-    feedbackMapping,
-    delayAnalysis,
-    emergenceAnalysis,
-    archetypeAnalysis,
-    dynamicBehavior,
-    leveragePoints,
-    mentalModelAnalysis,
-    question,
-    domain
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Systems thinking analysis complete. Primary insight: ${insightSynthesis.primaryInsight}. Accept analysis?`,
     title: 'Systems Thinking Review',
     context: {
@@ -199,15 +156,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/system-dynamics.json', format: 'json', content: feedbackMapping },
         { path: 'artifacts/leverage-points.json', format: 'json', content: leveragePoints }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     domain,
@@ -235,7 +186,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const boundaryDefinitionTask = defineTask('boundary-definition', (args, taskCtx) => ({
   kind: 'agent',

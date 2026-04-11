@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Read Quality Control and Preprocessing');
 
-  let qcResult = await ctx.task(readQualityControlTask, {
+  const qcResult = await ctx.task(readQualityControlTask, {
     projectName,
     samples,
     outputDir
@@ -64,16 +64,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `QC complete - ${qcResult.passedSamples.length}/${samples.length} samples passed quality filters`);
 
   // Quality Gate: Sample quality check
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        qcResult = await ctx.task(readQualityControlTask, { ...{
-    projectName,
-    samples,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (qcResult.failedSamples.length > 0) {
+    await ctx.breakpoint({
       question: `${qcResult.failedSamples.length} samples failed QC. Review quality metrics and decide whether to proceed?`,
       title: 'RNA-seq Quality Gate',
       context: {
@@ -82,15 +74,9 @@ export async function process(inputs, ctx) {
         failedSamples: qcResult.failedSamples,
         qcMetrics: qcResult.metrics,
         files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: READ ALIGNMENT / QUANTIFICATION
@@ -98,7 +84,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 2: Read Alignment/Quantification with ${alignmentMethod}`);
 
-  let alignmentResult = await ctx.task(readAlignmentQuantificationTask, {
+  const alignmentResult = await ctx.task(readAlignmentQuantificationTask, {
     projectName,
     samples: qcResult.passedSamples,
     referenceGenome,
@@ -111,19 +97,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Alignment complete - Average mapping rate: ${alignmentResult.averageMappingRate}%`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      alignmentResult = await ctx.task(readAlignmentQuantificationTask, { ...{
-    projectName,
-    samples: qcResult.passedSamples,
-    referenceGenome,
-    annotation,
-    alignmentMethod,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review alignment statistics
+  await ctx.breakpoint({
     question: `Alignment/quantification complete. Average mapping rate: ${alignmentResult.averageMappingRate}%. Review alignment statistics?`,
     title: 'Alignment Statistics Review',
     context: {
@@ -133,22 +108,16 @@ export async function process(inputs, ctx) {
       totalGenes: alignmentResult.totalGenesQuantified,
       sampleStats: alignmentResult.sampleStatistics,
       files: alignmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: COUNT MATRIX GENERATION AND NORMALIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Count Matrix Generation and Normalization');
 
-  let normalizationResult = await ctx.task(countNormalizationTask, {
+  const normalizationResult = await ctx.task(countNormalizationTask, {
     projectName,
     countMatrix: alignmentResult.countMatrix,
     samples: qcResult.passedSamples,
@@ -182,19 +151,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Batch effect assessment complete - Batch effect detected: ${batchCorrectionResult.batchEffectDetected}`);
 
     // Breakpoint: Review batch effect
-        let lastFeedback_phase4Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase4Review) {
-          normalizationResult = await ctx.task(countNormalizationTask, { ...{
-    projectName,
-    countMatrix: alignmentResult.countMatrix,
-    samples: qcResult.passedSamples,
-    conditions,
-    deMethod,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-        }
-  const phase4Review = await ctx.breakpoint({
+    if (batchCorrectionResult.batchEffectDetected) {
+      await ctx.breakpoint({
         question: `Batch effect detected. Variance explained by batch: ${batchCorrectionResult.varianceExplained}%. Review batch correction results?`,
         title: 'Batch Effect Review',
         context: {
@@ -203,16 +161,11 @@ export async function process(inputs, ctx) {
           varianceExplained: batchCorrectionResult.varianceExplained,
           correctionMethod: batchCorrectionResult.correctionMethod,
           files: batchCorrectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase4Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase4Review.approved) break;
-        lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 5: EXPLORATORY DATA ANALYSIS
   // ============================================================================
@@ -237,7 +190,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 6: Differential Expression Analysis with ${deMethod}`);
 
-  let deResult = await ctx.task(differentialExpressionTask, {
+  const deResult = await ctx.task(differentialExpressionTask, {
     projectName,
     countMatrix: batchCorrectionResult?.correctedCounts || normalizationResult.normalizedCounts,
     samples: qcResult.passedSamples,
@@ -253,21 +206,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `DE analysis complete - ${deResult.significantGenes} significant genes (FDR < ${pValueThreshold}, |log2FC| > ${log2FCThreshold})`);
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      deResult = await ctx.task(differentialExpressionTask, { ...{
-    projectName,
-    countMatrix: batchCorrectionResult?.correctedCounts || normalizationResult.normalizedCounts,
-    samples: qcResult.passedSamples,
-    conditions,
-    deMethod,
-    pValueThreshold,
-    log2FCThreshold,
-    outputDir
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review DE results
+  await ctx.breakpoint({
     question: `Differential expression analysis complete. ${deResult.upregulated} upregulated, ${deResult.downregulated} downregulated genes. Review results?`,
     title: 'Differential Expression Review',
     context: {
@@ -277,22 +217,16 @@ export async function process(inputs, ctx) {
       downregulated: deResult.downregulated,
       topGenes: deResult.topGenes.slice(0, 20),
       files: deResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: GENE ONTOLOGY AND PATHWAY ENRICHMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Gene Ontology and Pathway Enrichment Analysis');
 
-  let enrichmentResult = await ctx.task(pathwayEnrichmentTask, {
+  const enrichmentResult = await ctx.task(pathwayEnrichmentTask, {
     projectName,
     deGenes: deResult.deGenes,
     upregulatedGenes: deResult.upregulatedGenes,
@@ -305,19 +239,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Enrichment analysis complete - ${enrichmentResult.significantPathways} significant pathways identified`);
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      enrichmentResult = await ctx.task(pathwayEnrichmentTask, { ...{
-    projectName,
-    deGenes: deResult.deGenes,
-    upregulatedGenes: deResult.upregulatedGenes,
-    downregulatedGenes: deResult.downregulatedGenes,
-    pathwayDatabases,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  // Breakpoint: Review pathway enrichment
+  await ctx.breakpoint({
     question: `Pathway enrichment complete. ${enrichmentResult.significantPathways} significant pathways. Top pathways: ${enrichmentResult.topPathways.slice(0, 5).map(p => p.name).join(', ')}. Review enrichment results?`,
     title: 'Pathway Enrichment Review',
     context: {
@@ -326,22 +249,16 @@ export async function process(inputs, ctx) {
       topPathways: enrichmentResult.topPathways.slice(0, 20),
       goTerms: enrichmentResult.goEnrichment,
       files: enrichmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: VISUALIZATION AND REPORTING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating Visualizations and Report');
 
-  let reportResult = await ctx.task(generateRNAseqReportTask, {
+  const reportResult = await ctx.task(generateRNAseqReportTask, {
     projectName,
     conditions,
     qcResult,
@@ -356,23 +273,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateRNAseqReportTask, { ...{
-    projectName,
-    conditions,
-    qcResult,
-    alignmentResult,
-    normalizationResult,
-    batchCorrectionResult,
-    edaResult,
-    deResult,
-    enrichmentResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Analysis complete
+  await ctx.breakpoint({
     question: `RNA-seq Differential Expression Analysis Complete for ${projectName}. ${deResult.significantGenes} DE genes, ${enrichmentResult.significantPathways} enriched pathways. Approve final results?`,
     title: 'RNA-seq Analysis Complete',
     context: {
@@ -388,15 +290,9 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' },
         { path: deResult.deTablePath, format: 'tsv', label: 'DE Results Table' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -452,7 +348,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

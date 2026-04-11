@@ -4,7 +4,7 @@ export type JsonRecord = Record<string, unknown>;
 
 export interface RunEntrypointMetadata {
   importPath: string;
-  exportName: string;
+  exportName?: string;
 }
 
 export interface RunMetadata extends JsonRecord {
@@ -19,6 +19,8 @@ export interface RunMetadata extends JsonRecord {
   createdAt: string;
   completionProof?: string;
   prompt?: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface CreateRunDirOptions {
@@ -37,6 +39,8 @@ export interface CreateRunDirOptions {
   inputs?: unknown;
   extraMetadata?: Record<string, unknown>;
   prompt?: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface AppendEventOptions {
@@ -109,7 +113,7 @@ export interface StoredTaskResult {
   effectId: string;
   taskId: string;
   invocationKey: string;
-  status: "ok" | "error";
+  status: "ok" | "error" | "cancelled";
   result?: unknown;
   value?: unknown;
   resultRef?: string;
@@ -119,6 +123,7 @@ export interface StoredTaskResult {
     stack?: string;
     data?: unknown;
   };
+  reason?: string;
   stdoutRef?: string;
   stderrRef?: string;
   startedAt?: string;

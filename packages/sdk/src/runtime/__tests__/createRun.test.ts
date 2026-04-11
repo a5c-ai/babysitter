@@ -77,7 +77,9 @@ describe("createRun", () => {
     });
 
     const metadata = await readRunMetadata(result.runDir);
-    expect(metadata.entrypoint.exportName).toBe("process");
+    // When exportName is not explicitly specified, it is omitted from metadata.
+    // The process loader applies the "process" default at load-time.
+    expect(metadata.entrypoint.exportName).toBeUndefined();
 
     const inputs = await readRunInputs(result.runDir);
     expect(inputs).toEqual({ branch: "main", sha: "abc123" });

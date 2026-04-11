@@ -304,6 +304,7 @@ export function buildOrchestrationTurnPrompt(args: {
   runId?: string;
   runDir?: string;
   lastStatus?: string;
+  lastError?: string;
   pendingEffects?: Array<{
     effectId: string;
     kind: string;
@@ -326,6 +327,20 @@ export function buildOrchestrationTurnPrompt(args: {
 
   if (args.fallbackReason) {
     lines.push(`Fallback note: ${args.fallbackReason}`);
+  }
+
+  // When recovering from a process-error, instruct the agent to fix the
+  // process code before retrying the iteration.
+  if (args.lastStatus === "process-error" && args.lastError) {
+    lines.push("");
+    lines.push("IMPORTANT: The last iteration returned a recoverable process-error.");
+    lines.push(`Error: ${args.lastError}`);
+    lines.push("");
+    lines.push("The process code has a bug. Read the process file, fix the error, save it, and then call babysitter_run_iterate to retry.");
+    lines.push("Do NOT call babysitter_finish_orchestration — the run has NOT failed. The journal is clean and the iteration can be retried after the fix.");
+    lines.push("");
+    lines.push("End with a short plain-text summary of what you fixed.");
+    return lines.join("\n");
   }
 
   if (args.pendingEffects && args.pendingEffects.length > 0) {

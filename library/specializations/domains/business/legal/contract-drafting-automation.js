@@ -151,7 +151,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Conducting compliance review');
 
-  let complianceReview = await ctx.task(complianceReviewTask, {
+  const complianceReview = await ctx.task(complianceReviewTask, {
     contractDraft,
     contractType,
     jurisdiction,
@@ -168,19 +168,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Compliance review complete. Score: ${complianceScore}/100`);
 
   // Quality Gate: Compliance threshold
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        complianceReview = await ctx.task(complianceReviewTask, { ...{
-    contractDraft,
-    contractType,
-    jurisdiction,
-    complianceFrameworks,
-    parties,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (complianceScore < 80) {
+    await ctx.breakpoint({
       question: `Contract compliance score is ${complianceScore}/100, below threshold of 80. Issues found: ${complianceReview.issues.length}. Review compliance issues and approve to continue?`,
       title: 'Contract Compliance Review',
       context: {
@@ -194,15 +183,9 @@ export async function process(inputs, ctx) {
           format: a.format || 'json',
           label: a.label || 'Compliance Report'
         }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: PLAYBOOK APPLICATION
@@ -248,7 +231,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Assembling final draft');
 
-  let finalAssembly = await ctx.task(finalAssemblyTask, {
+  const finalAssembly = await ctx.task(finalAssemblyTask, {
     contractDraft,
     playbookNotes: playbookApplication.negotiationNotes,
     complianceReport: complianceReview,
@@ -261,21 +244,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalAssembly.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssembly = await ctx.task(finalAssemblyTask, { ...{
-    contractDraft,
-    playbookNotes: playbookApplication.negotiationNotes,
-    complianceReport: complianceReview,
-    qualityReport: qualityAssurance,
-    parties,
-    contractType,
-    jurisdiction,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review and Approval
+  await ctx.breakpoint({
     question: `Contract draft for ${contractType} is ready. Compliance Score: ${complianceScore}/100, Quality Score: ${qualityScore}/100. Review and approve final draft?`,
     title: 'Contract Draft Final Review',
     context: {
@@ -294,15 +264,9 @@ export async function process(inputs, ctx) {
         { path: finalAssembly.summaryPath, format: 'markdown', label: 'Draft Summary' },
         ...artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -341,7 +305,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

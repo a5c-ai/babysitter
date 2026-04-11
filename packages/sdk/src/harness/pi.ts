@@ -86,6 +86,7 @@ async function bindPiSession(
     iteration: 1,
     maxIterations: opts.maxIterations ?? 256,
     runId: opts.runId,
+    runIds: [],
     startedAt: now,
     lastIterationAt: now,
     iterationTimes: [],

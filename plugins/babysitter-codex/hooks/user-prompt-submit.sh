@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 STATE_DIR="${BABYSITTER_STATE_DIR:-${PWD}/.a5c}"
-LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_ROOT/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 
 export CODEX_PLUGIN_ROOT="${CODEX_PLUGIN_ROOT:-${PLUGIN_ROOT}}"
 export BABYSITTER_STATE_DIR="${STATE_DIR}"

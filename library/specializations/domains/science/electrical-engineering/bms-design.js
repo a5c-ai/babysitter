@@ -39,22 +39,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Design Cell Monitoring Circuit
-  let cellMonitoring = await ctx.task(cellMonitoringTask, {
+  const cellMonitoring = await ctx.task(cellMonitoringTask, {
     bmsName,
     batteryConfig,
     requirements: requirementsDefinition.specs
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      cellMonitoring = await ctx.task(cellMonitoringTask, { ...{
-    bmsName,
-    batteryConfig,
-    requirements: requirementsDefinition.specs
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review cell monitoring design
+  await ctx.breakpoint({
     question: `Review cell monitoring design for ${bmsName}. Monitoring IC: ${cellMonitoring.monitoringIC}. Proceed with balancing design?`,
     title: 'Cell Monitoring Review',
     context: {
@@ -66,15 +58,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: cellMonitoring
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Design Cell Balancing System
   const cellBalancing = await ctx.task(cellBalancingTask, {
     bmsName,
@@ -92,22 +78,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Design Thermal Management Interface
-  let thermalManagement = await ctx.task(thermalManagementTask, {
+  const thermalManagement = await ctx.task(thermalManagementTask, {
     bmsName,
     batteryConfig,
     requirements: requirementsDefinition.specs
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      thermalManagement = await ctx.task(thermalManagementTask, { ...{
-    bmsName,
-    batteryConfig,
-    requirements: requirementsDefinition.specs
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review thermal and state estimation
+  await ctx.breakpoint({
     question: `Review SOC algorithm: ${stateEstimation.algorithm}. Thermal strategy: ${thermalManagement.strategy}. Proceed with protection design?`,
     title: 'State Estimation & Thermal Review',
     context: {
@@ -118,15 +96,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase4-soc.json`, format: 'json', content: stateEstimation },
         { path: `artifacts/phase5-thermal.json`, format: 'json', content: thermalManagement }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Design Safety Protection System
   const safetyProtection = await ctx.task(safetyProtectionTask, {
     bmsName,
@@ -136,7 +108,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Develop BMS Firmware Architecture
-  let firmwareDesign = await ctx.task(firmwareDesignTask, {
+  const firmwareDesign = await ctx.task(firmwareDesignTask, {
     bmsName,
     cellMonitoring,
     cellBalancing,
@@ -147,38 +119,20 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Safety compliance check
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        firmwareDesign = await ctx.task(firmwareDesignTask, { ...{
-    bmsName,
-    cellMonitoring,
-    cellBalancing,
-    stateEstimation,
-    thermalManagement,
-    safetyProtection,
-    requirements: requirementsDefinition.specs
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!safetyProtection.compliant) {
+    await ctx.breakpoint({
       question: `Safety compliance issues found: ${safetyProtection.issues.length} items. Review and iterate design?`,
       title: 'Safety Compliance Issues',
       context: {
         runId: ctx.runId,
         issues: safetyProtection.issues,
         recommendations: safetyProtection.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 8: Validate BMS Design
-  let designValidation = await ctx.task(designValidationTask, {
+  const designValidation = await ctx.task(designValidationTask, {
     bmsName,
     hardware: {
       cellMonitoring,
@@ -190,22 +144,8 @@ export async function process(inputs, ctx) {
     requirements: requirementsDefinition.specs
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      designValidation = await ctx.task(designValidationTask, { ...{
-    bmsName,
-    hardware: {
-      cellMonitoring,
-      cellBalancing,
-      thermalManagement,
-      safetyProtection
-    },
-    firmware: firmwareDesign,
-    requirements: requirementsDefinition.specs
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Design Approval
+  await ctx.breakpoint({
     question: `BMS design complete for ${bmsName}. Safety rating: ${designValidation.safetyRating}. Approve for prototyping?`,
     title: 'BMS Design Approval',
     context: {
@@ -216,15 +156,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/bms-design.json`, format: 'json', content: { hardware: { cellMonitoring, cellBalancing, safetyProtection }, firmware: firmwareDesign } },
         { path: `artifacts/bms-report.md`, format: 'markdown', content: designValidation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     bmsName,
@@ -247,7 +181,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

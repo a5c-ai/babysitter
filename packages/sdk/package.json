@@ -7,6 +7,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
+    "babysitter-sdk": "dist/cli/main.js",
     "babysitter": "dist/cli/main.js",
     "babysitter-mcp-server": "dist/cli/mcpServeEntry.js"
   },
@@ -30,7 +31,11 @@
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",
     "fs-extra": "^11.2.0",
-    "ulid": "^2.3.0"
+    "ink": "^4.4.1",
+    "ink-spinner": "^5.0.0",
+    "react": "^18.3.1",
+    "ulid": "^2.3.0",
+    "ws": "^8.20.0"
   },
   "optionalDependencies": {
     "@vscode/ripgrep": "^1.15.9",
@@ -39,9 +44,12 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",
+    "@types/react": "^18.3.28",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
+    "ink-testing-library": "^3.0.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.2",
     "vitest": "^4.0.18"

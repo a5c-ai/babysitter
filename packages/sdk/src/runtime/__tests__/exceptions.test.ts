@@ -170,6 +170,7 @@ describe("typed exceptions", () => {
                   "demo-label",
                   "group",
                 ],
+                "parallelGroupId": "cf7ea07e7ed0a9c2",
                 "requestedAt": "2026-01-01T00:00:00Z",
                 "stepId": "S000001",
                 "taskDefRef": "tasks/01EFFECT/task.json",
@@ -185,6 +186,7 @@ describe("typed exceptions", () => {
                   "demo-label",
                   "group",
                 ],
+                "parallelGroupId": "cf7ea07e7ed0a9c2",
                 "requestedAt": "2026-01-01T00:00:00Z",
                 "stepId": "S000002",
                 "taskDefRef": "tasks/01EFFECT/task.json",
@@ -210,5 +212,82 @@ describe("typed exceptions", () => {
         "name": "RunFailedError",
       }
     `);
+  });
+});
+
+describe("EffectCancelledError", () => {
+  test("EffectCancelledError class exists as a named export", async () => {
+    const exceptions = await import("../exceptions");
+    expect((exceptions as Record<string, unknown>).EffectCancelledError).toBeDefined();
+    expect(typeof (exceptions as Record<string, unknown>).EffectCancelledError).toBe("function");
+  });
+
+  test("extends BabysitterIntrinsicError", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-1", "no longer needed");
+    expect(error).toBeInstanceOf(BabysitterRuntimeError);
+  });
+
+  test("isIntrinsic is true", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-2");
+    expect(error.isIntrinsic).toBe(true);
+  });
+
+  test("exposes effectId and reason", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-3", "user requested cancellation");
+    expect(error.effectId).toBe("ef-cancel-3");
+    expect(error.reason).toBe("user requested cancellation");
+  });
+
+  test("reason is optional", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-4");
+    expect(error.effectId).toBe("ef-cancel-4");
+    expect(error.reason).toBeUndefined();
+  });
+
+  test("name is EffectCancelledError", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-5");
+    expect(error.name).toBe("EffectCancelledError");
+  });
+
+  test("contract serialization", async () => {
+    const exceptions = await import("../exceptions");
+    const EffectCancelledError = (exceptions as Record<string, unknown>).EffectCancelledError as new (
+      effectId: string,
+      reason?: string,
+    ) => BabysitterRuntimeError & { effectId: string; reason?: string; isIntrinsic: boolean };
+    const error = new EffectCancelledError("ef-cancel-6", "timeout");
+    expect(serializeContractError(error)).toMatchObject({
+      name: "EffectCancelledError",
+      message: expect.stringContaining("ef-cancel-6"),
+      details: expect.objectContaining({
+        effectId: "ef-cancel-6",
+        reason: "timeout",
+      }),
+    });
   });
 });

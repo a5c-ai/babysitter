@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Load Spectrum Analysis');
 
-  let spectrumResult = await ctx.task(loadSpectrumAnalysisTask, {
+  const spectrumResult = await ctx.task(loadSpectrumAnalysisTask, {
     projectName,
     componentName,
     loadSpectrum,
@@ -63,17 +63,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Load spectrum analyzed - ${spectrumResult.cycleCount} cycles, ${spectrumResult.blockCount} load blocks`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      spectrumResult = await ctx.task(loadSpectrumAnalysisTask, { ...{
-    projectName,
-    componentName,
-    loadSpectrum,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Breakpoint: Review load spectrum
+  await ctx.breakpoint({
     question: `Load spectrum analysis complete. Total cycles: ${spectrumResult.cycleCount}, Max amplitude: ${spectrumResult.maxAmplitude} MPa, Mean stress range: ${spectrumResult.meanStressRange} MPa. Review spectrum?`,
     title: 'Load Spectrum Review',
     context: {
@@ -81,15 +72,9 @@ export async function process(inputs, ctx) {
       spectrumSummary: spectrumResult.summary,
       rainflowCounts: spectrumResult.rainflowCounts,
       files: spectrumResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: MATERIAL FATIGUE PROPERTIES
   // ============================================================================
@@ -169,7 +154,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: S-N Curve Development');
 
-  let snCurveResult = await ctx.task(snCurveDevelopmentTask, {
+  const snCurveResult = await ctx.task(snCurveDevelopmentTask, {
     projectName,
     material,
     enduranceResult,
@@ -182,34 +167,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `S-N curve developed - Slope b = ${snCurveResult.slope}`);
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      snCurveResult = await ctx.task(snCurveDevelopmentTask, { ...{
-    projectName,
-    material,
-    enduranceResult,
-    stressConcentrationResult,
-    analysisMethod,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Breakpoint: Review S-N curve
+  await ctx.breakpoint({
     question: `S-N curve developed. Endurance limit: ${snCurveResult.enduranceLimit} MPa at ${snCurveResult.enduranceCycles} cycles. Slope: ${snCurveResult.slope}. Review curve parameters?`,
     title: 'S-N Curve Review',
     context: {
       runId: ctx.runId,
       snCurveParams: snCurveResult.parameters,
       files: snCurveResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: MEAN STRESS CORRECTION
   // ============================================================================
@@ -234,7 +202,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Damage Accumulation Analysis');
 
-  let damageResult = await ctx.task(damageAccumulationTask, {
+  const damageResult = await ctx.task(damageAccumulationTask, {
     projectName,
     spectrumResult,
     snCurveResult,
@@ -247,18 +215,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Damage accumulation: D = ${damageResult.totalDamage}`);
 
   // Quality Gate: Damage exceeds 1.0
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        damageResult = await ctx.task(damageAccumulationTask, { ...{
-    projectName,
-    spectrumResult,
-    snCurveResult,
-    meanStressResult,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (damageResult.totalDamage > 1.0) {
+    await ctx.breakpoint({
       question: `Cumulative damage D = ${damageResult.totalDamage} exceeds 1.0. Fatigue failure predicted before design life. Primary contributor: ${damageResult.primaryContributor}. Review damage breakdown?`,
       title: 'Fatigue Failure Predicted',
       context: {
@@ -267,15 +225,9 @@ export async function process(inputs, ctx) {
         damageBreakdown: damageResult.damageBreakdown,
         primaryContributor: damageResult.primaryContributor,
         files: damageResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: FATIGUE LIFE CALCULATION
@@ -301,7 +253,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Safety Factor and Reporting');
 
-  let reportResult = await ctx.task(generateFatigueReportTask, {
+  const reportResult = await ctx.task(generateFatigueReportTask, {
     projectName,
     componentName,
     material,
@@ -323,28 +275,8 @@ export async function process(inputs, ctx) {
 
   const fatigueSF = lifeResult.predictedLife / designLife;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportResult = await ctx.task(generateFatigueReportTask, { ...{
-    projectName,
-    componentName,
-    material,
-    loadSpectrum,
-    spectrumResult,
-    materialResult,
-    modFactorsResult,
-    enduranceResult,
-    stressConcentrationResult,
-    snCurveResult,
-    meanStressResult,
-    damageResult,
-    lifeResult,
-    designLife,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Fatigue Analysis Complete for ${componentName}. Predicted life: ${lifeResult.predictedLife} cycles. Safety factor: ${fatigueSF.toFixed(2)}. Damage per block: ${damageResult.damagePerBlock}. Approve analysis?`,
     title: 'Fatigue Analysis Complete',
     context: {
@@ -360,15 +292,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Fatigue Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -399,7 +325,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

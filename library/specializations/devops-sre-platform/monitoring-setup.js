@@ -71,7 +71,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing monitoring requirements and current state');
 
-  let assessmentResult = await ctx.task(assessMonitoringRequirementsTask, {
+  const assessmentResult = await ctx.task(assessMonitoringRequirementsTask, {
     projectName,
     monitoringScope,
     environment,
@@ -86,21 +86,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assessment complete - Identified ${assessmentResult.services.length} services, ${assessmentResult.components.length} components to monitor`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      assessmentResult = await ctx.task(assessMonitoringRequirementsTask, { ...{
-    projectName,
-    monitoringScope,
-    environment,
-    services,
-    infrastructureType,
-    slos,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements review
+  await ctx.breakpoint({
     question: `Monitoring requirements assessed for ${projectName}. Identified ${assessmentResult.services.length} services and ${assessmentResult.components.length} components. Review and approve monitoring scope?`,
     title: 'Monitoring Requirements Review',
     context: {
@@ -112,15 +99,9 @@ export async function process(inputs, ctx) {
         estimatedCoverage: assessmentResult.estimatedCoverage
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: DEPLOY PROMETHEUS FOR METRICS COLLECTION
   // ============================================================================
@@ -128,7 +109,7 @@ export async function process(inputs, ctx) {
   if (enableMetricsCollection) {
     ctx.log('info', 'Phase 2: Deploying Prometheus for metrics collection');
 
-    let prometheusResult = await ctx.task(deployPrometheusTask, {
+    const prometheusResult = await ctx.task(deployPrometheusTask, {
       projectName,
       monitoringScope,
       environment,
@@ -148,21 +129,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Prometheus deployed - Monitoring ${prometheusResult.targets.length} targets with ${prometheusResult.metricsEndpoints} endpoints`);
 
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        prometheusResult = await ctx.task(deployPrometheusTask, { ...{
-      projectName,
-      monitoringScope,
-      environment,
-      infrastructureType,
-      services: assessmentResult.services,
-      retentionDays,
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+    // Quality Gate: Prometheus deployment review
+    await ctx.breakpoint({
       question: `Prometheus deployed and configured. ${prometheusResult.targets.length} targets configured, ${prometheusResult.metricsEndpoints} metrics endpoints. Verify Prometheus is collecting metrics?`,
       title: 'Prometheus Deployment Review',
       context: {
@@ -175,15 +143,9 @@ export async function process(inputs, ctx) {
           storageRetention: prometheusResult.storageRetention
         },
         files: prometheusResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: SET UP GRAFANA DASHBOARDS
@@ -191,7 +153,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Setting up Grafana for visualization');
 
-  let grafanaResult = await ctx.task(setupGrafanaTask, {
+  const grafanaResult = await ctx.task(setupGrafanaTask, {
     projectName,
     monitoringScope,
     environment,
@@ -212,21 +174,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Grafana deployed - Created ${grafanaResult.dashboards.length} dashboards`);
 
-    let lastFeedback_qualityGateApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval2) {
-      grafanaResult = await ctx.task(setupGrafanaTask, { ...{
-    projectName,
-    monitoringScope,
-    environment,
-    services: assessmentResult.services,
-    goldenSignals: assessmentResult.goldenSignals,
-    slos,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-    }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  // Quality Gate: Grafana dashboard review
+  await ctx.breakpoint({
     question: `Grafana deployed with ${grafanaResult.dashboards.length} dashboards created. Review dashboards: ${grafanaResult.dashboards.map(d => d.name).join(', ')}`,
     title: 'Grafana Dashboard Review',
     context: {
@@ -243,15 +192,9 @@ export async function process(inputs, ctx) {
         url: d.url
       })),
       files: grafanaResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval2.approved) break;
-    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: IMPLEMENT LOG AGGREGATION
   // ============================================================================
@@ -259,7 +202,7 @@ export async function process(inputs, ctx) {
   if (enableLogAggregation) {
     ctx.log('info', 'Phase 4: Implementing log aggregation');
 
-    let logAggregationResult = await ctx.task(setupLogAggregationTask, {
+    const logAggregationResult = await ctx.task(setupLogAggregationTask, {
       projectName,
       monitoringScope,
       environment,
@@ -280,22 +223,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Log aggregation configured - Platform: ${logAggregationResult.platform}, Sources: ${logAggregationResult.logSources.length}`);
 
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        logAggregationResult = await ctx.task(setupLogAggregationTask, { ...{
-      projectName,
-      monitoringScope,
-      environment,
-      services: assessmentResult.services,
-      logPlatform: platforms.includes('Loki') ? 'Loki' : 'ELK',
-      retentionDays,
-      infrastructureType,
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    // Quality Gate: Log aggregation review
+    await ctx.breakpoint({
       question: `Log aggregation configured using ${logAggregationResult.platform}. ${logAggregationResult.logSources.length} log sources configured. Verify logs are being collected?`,
       title: 'Log Aggregation Review',
       context: {
@@ -308,15 +237,9 @@ export async function process(inputs, ctx) {
           structuredLogging: logAggregationResult.structuredLoggingEnabled
         },
         files: logAggregationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: DEPLOY DISTRIBUTED TRACING
@@ -325,7 +248,7 @@ export async function process(inputs, ctx) {
   if (enableDistributedTracing) {
     ctx.log('info', 'Phase 5: Deploying distributed tracing');
 
-    let tracingResult = await ctx.task(setupDistributedTracingTask, {
+    const tracingResult = await ctx.task(setupDistributedTracingTask, {
       projectName,
       monitoringScope,
       environment,
@@ -346,22 +269,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Distributed tracing deployed - Platform: ${tracingResult.platform}, Services instrumented: ${tracingResult.servicesInstrumented}`);
 
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        tracingResult = await ctx.task(setupDistributedTracingTask, { ...{
-      projectName,
-      monitoringScope,
-      environment,
-      services: assessmentResult.services,
-      tracingPlatform: platforms.includes('Jaeger') ? 'Jaeger' : 'Tempo',
-      samplingRate: 0.1, // 10% sampling
-      infrastructureType,
-      platforms,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+    // Quality Gate: Distributed tracing review
+    await ctx.breakpoint({
       question: `Distributed tracing deployed using ${tracingResult.platform}. ${tracingResult.servicesInstrumented} services instrumented. Verify traces are being collected?`,
       title: 'Distributed Tracing Review',
       context: {
@@ -374,15 +283,9 @@ export async function process(inputs, ctx) {
           tracingStandard: tracingResult.tracingStandard
         },
         files: tracingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: CONFIGURE SERVICE INSTRUMENTATION
@@ -417,7 +320,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Implementing alerting rules');
 
-  let alertingResult = await ctx.task(setupAlertingTask, {
+  const alertingResult = await ctx.task(setupAlertingTask, {
     projectName,
     environment,
     services: assessmentResult.services,
@@ -438,21 +341,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Alerting configured - ${alertingResult.alerts.length} alert rules created across ${alertingResult.severity.length} severity levels`);
 
-    let lastFeedback_qualityGateApproval5 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval5) {
-      alertingResult = await ctx.task(setupAlertingTask, { ...{
-    projectName,
-    environment,
-    services: assessmentResult.services,
-    slos,
-    goldenSignals: assessmentResult.goldenSignals,
-    alertingChannels,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-    }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  // Quality Gate: Alerting configuration review
+  await ctx.breakpoint({
     question: `Alerting configured with ${alertingResult.alerts.length} alert rules. Critical alerts: ${alertingResult.criticalAlerts.length}. Review and test alerts?`,
     title: 'Alerting Configuration Review',
     context: {
@@ -465,15 +355,9 @@ export async function process(inputs, ctx) {
       },
       topAlerts: alertingResult.alerts.slice(0, 10),
       files: alertingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval5.approved) break;
-    lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: CREATE INCIDENT RESPONSE RUNBOOKS
   // ============================================================================
@@ -505,7 +389,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Validating monitoring coverage');
 
-  let validationResult = await ctx.task(validateMonitoringCoverageTask, {
+  const validationResult = await ctx.task(validateMonitoringCoverageTask, {
     projectName,
     assessmentResult,
     implementations,
@@ -519,19 +403,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Monitoring coverage validation complete - Coverage: ${validationResult.actualCoverage}%`);
 
   // Quality Gate: Coverage validation
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        validationResult = await ctx.task(validateMonitoringCoverageTask, { ...{
-    projectName,
-    assessmentResult,
-    implementations,
-    targetCoverage,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+  if (validationResult.actualCoverage < targetCoverage) {
+    await ctx.breakpoint({
       question: `Monitoring coverage ${validationResult.actualCoverage}% is below target ${targetCoverage}%. Gaps identified: ${validationResult.gaps.length}. Address gaps before proceeding?`,
       title: 'Coverage Gap Review',
       context: {
@@ -543,15 +416,9 @@ export async function process(inputs, ctx) {
           recommendation: 'Address critical gaps before production deployment'
         },
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: CONDUCT END-TO-END TESTING
@@ -559,7 +426,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Conducting end-to-end monitoring testing');
 
-  let testingResult = await ctx.task(testMonitoringStackTask, {
+  const testingResult = await ctx.task(testMonitoringStackTask, {
     projectName,
     environment,
     implementations,
@@ -574,20 +441,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `End-to-end testing complete - ${testingResult.testsPassed}/${testingResult.testsTotal} tests passed`);
 
   // Quality Gate: Testing validation
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        testingResult = await ctx.task(testMonitoringStackTask, { ...{
-    projectName,
-    environment,
-    implementations,
-    dashboards: grafanaResult.dashboards,
-    alerts: alertingResult.alerts,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+  if (testingResult.testsFailed > 0) {
+    await ctx.breakpoint({
       question: `Monitoring testing complete - ${testingResult.testsFailed} tests failed. Issues: ${testingResult.issues.length}. Review and fix issues?`,
       title: 'Monitoring Testing Review',
       context: {
@@ -599,15 +454,9 @@ export async function process(inputs, ctx) {
           issues: testingResult.issues
         },
         files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: GENERATE MONITORING DOCUMENTATION
@@ -640,7 +489,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Calculating observability score and final assessment');
 
-  let scoringResult = await ctx.task(calculateObservabilityScoreTask, {
+  const scoringResult = await ctx.task(calculateObservabilityScoreTask, {
     projectName,
     monitoringScope,
     targetCoverage,
@@ -659,24 +508,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Observability Score: ${observabilityScore}/100`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(calculateObservabilityScoreTask, { ...{
-    projectName,
-    monitoringScope,
-    targetCoverage,
-    actualCoverage: validationResult.actualCoverage,
-    implementations,
-    dashboardsCount: grafanaResult.dashboards.length,
-    alertsCount: alertingResult.alerts.length,
-    runbooksCount: runbooksResult.runbooks.length,
-    testingResult,
-    platforms,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Monitoring setup complete
+  await ctx.breakpoint({
     question: `Monitoring and Observability Setup Complete for ${projectName}. Score: ${observabilityScore}/100. Coverage: ${validationResult.actualCoverage}% (Target: ${targetCoverage}%). Approve for production deployment?`,
     title: 'Final Monitoring Setup Review',
     context: {
@@ -716,15 +549,9 @@ export async function process(inputs, ctx) {
         { path: scoringResult.summaryPath, format: 'json', label: 'Observability Score Summary' },
         { path: grafanaResult.dashboardsConfigPath, format: 'json', label: 'Grafana Dashboards Configuration' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -808,7 +635,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

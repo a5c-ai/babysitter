@@ -21,10 +21,9 @@ export async function process(inputs, ctx) {
     scope,
     participantCount,
     workshopDuration
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const phase1Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Workshop preparation complete. Ready to begin Event Storming session?',
     title: 'Workshop Preparation Review',
     context: {
@@ -33,17 +32,11 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/workshop-agenda.md', format: 'markdown' },
         { path: 'artifacts/participant-guide.md', format: 'markdown' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Chaotic Exploration (Events Discovery)
-  let eventsDiscovery = await ctx.task(chaoticExplorationTask, {
+  const eventsDiscovery = await ctx.task(chaoticExplorationTask, {
     domain,
     scope,
     preparation
@@ -53,16 +46,9 @@ export async function process(inputs, ctx) {
   const timeline = await ctx.task(enforceTimelineTask, {
     domain,
     events: eventsDiscovery.events
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      eventsDiscovery = await ctx.task(chaoticExplorationTask, { ...{
-    domain,
-    scope,
-    preparation
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Event timeline established. Validate chronological flow and completeness?',
     title: 'Timeline Validation',
     context: {
@@ -71,15 +57,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/event-timeline.md', format: 'markdown' },
         { path: 'artifacts/event-timeline.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Commands and Actors (Parallel Processing)
   const [commandsResult, actorsResult] = await ctx.parallel.all([
     ctx.task(identifyCommandsTask, {
@@ -93,7 +73,7 @@ export async function process(inputs, ctx) {
   ]);
 
   // Phase 5: Aggregate Identification
-  let aggregates = await ctx.task(identifyAggregatesTask, {
+  const aggregates = await ctx.task(identifyAggregatesTask, {
     domain,
     events: timeline.events,
     commands: commandsResult.commands,
@@ -121,17 +101,9 @@ export async function process(inputs, ctx) {
     aggregates: aggregates.aggregates,
     commands: commandsResult.commands,
     actors: actorsResult.actors
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      aggregates = await ctx.task(identifyAggregatesTask, { ...{
-    domain,
-    events: timeline.events,
-    commands: commandsResult.commands,
-    actors: actorsResult.actors
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Bounded contexts identified. Review context boundaries and naming?',
     title: 'Bounded Context Review',
     context: {
@@ -140,15 +112,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/bounded-contexts.md', format: 'markdown' },
         { path: 'artifacts/context-map.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 8: Documentation and Digitization (Parallel Processing)
   const [domainModel, contextMap, documentation] = await ctx.parallel.all([
     ctx.task(createDomainModelTask, {
@@ -178,24 +144,15 @@ export async function process(inputs, ctx) {
   ]);
 
   // Phase 9: Validation and Quality Gates
-  let validation = await ctx.task(validateDomainModelTask, {
+  const validation = await ctx.task(validateDomainModelTask, {
     domain,
     domainModel: domainModel.model,
     boundedContexts: boundedContexts.contexts,
     targetQuality: 85
   });
 
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        validation = await ctx.task(validateDomainModelTask, { ...{
-    domain,
-    domainModel: domainModel.model,
-    boundedContexts: boundedContexts.contexts,
-    targetQuality: 85
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+  if (validation.score < 85) {
+    await ctx.breakpoint({
       question: `Domain model quality score: ${validation.score}/100. Review and refine?`,
       title: 'Quality Gate - Model Validation',
       context: {
@@ -204,15 +161,9 @@ export async function process(inputs, ctx) {
           { path: 'artifacts/validation-report.md', format: 'markdown' },
           { path: 'artifacts/quality-issues.json', format: 'json' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   return {
     success: true,
@@ -244,7 +195,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const prepareWorkshopTask = defineTask('prepare-workshop', (args, taskCtx) => ({
   kind: 'agent',

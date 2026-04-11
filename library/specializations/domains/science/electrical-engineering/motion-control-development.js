@@ -37,24 +37,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Select Motor and Drive System
-  let motorDriveSelection = await ctx.task(motorDriveSelectionTask, {
+  const motorDriveSelection = await ctx.task(motorDriveSelectionTask, {
     systemName,
     requirements: requirementsDefinition.specifications,
     motorSelection,
     loadCharacteristics
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      motorDriveSelection = await ctx.task(motorDriveSelectionTask, { ...{
-    systemName,
-    requirements: requirementsDefinition.specifications,
-    motorSelection,
-    loadCharacteristics
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review motor/drive selection
+  await ctx.breakpoint({
     question: `Review motor and drive selection for ${systemName}. Motor: ${motorDriveSelection.selectedMotor}. Proceed with control design?`,
     title: 'Motor/Drive Selection Review',
     context: {
@@ -66,15 +57,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: motorDriveSelection
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Design Velocity and Position Control Loops
   const controlLoopDesign = await ctx.task(controlLoopDesignTask, {
     systemName,
@@ -84,24 +69,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Implement Trajectory Generation Algorithms
-  let trajectoryPlanning = await ctx.task(trajectoryPlanningTask, {
+  const trajectoryPlanning = await ctx.task(trajectoryPlanningTask, {
     systemName,
     requirements: requirementsDefinition.specifications,
     controlLoops: controlLoopDesign.loops,
     motionProfile: motionRequirements.profile
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      trajectoryPlanning = await ctx.task(trajectoryPlanningTask, { ...{
-    systemName,
-    requirements: requirementsDefinition.specifications,
-    controlLoops: controlLoopDesign.loops,
-    motionProfile: motionRequirements.profile
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review trajectory planning
+  await ctx.breakpoint({
     question: `Review trajectory planning for ${systemName}. Profile type: ${trajectoryPlanning.profileType}. Proceed with drive configuration?`,
     title: 'Trajectory Planning Review',
     context: {
@@ -112,15 +88,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: trajectoryPlanning
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Configure Servo Drive Parameters
   const driveConfiguration = await ctx.task(driveConfigurationTask, {
     systemName,
@@ -138,7 +108,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Test Motion Profiles and Accuracy
-  let motionTesting = await ctx.task(motionTestingTask, {
+  const motionTesting = await ctx.task(motionTestingTask, {
     systemName,
     tunedSystem: loopTuning.tunedSystem,
     trajectoryPlanning,
@@ -146,35 +116,20 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Motion accuracy must meet specifications
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        motionTesting = await ctx.task(motionTestingTask, { ...{
-    systemName,
-    tunedSystem: loopTuning.tunedSystem,
-    trajectoryPlanning,
-    requirements: requirementsDefinition.specifications
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!motionTesting.meetsSpecs) {
+    await ctx.breakpoint({
       question: `Motion testing shows accuracy: ${motionTesting.achievedAccuracy}, required: ${requirementsDefinition.specifications.accuracy}. Iterate tuning?`,
       title: 'Accuracy Gap',
       context: {
         runId: ctx.runId,
         testResults: motionTesting.results,
         recommendations: motionTesting.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 8: Validate System Performance Under Load
-  let loadValidation = await ctx.task(loadValidationTask, {
+  const loadValidation = await ctx.task(loadValidationTask, {
     systemName,
     tunedSystem: loopTuning.tunedSystem,
     loadCharacteristics,
@@ -182,18 +137,8 @@ export async function process(inputs, ctx) {
     motionTestResults: motionTesting.results
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      loadValidation = await ctx.task(loadValidationTask, { ...{
-    systemName,
-    tunedSystem: loopTuning.tunedSystem,
-    loadCharacteristics,
-    requirements: requirementsDefinition.specifications,
-    motionTestResults: motionTesting.results
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: System Approval
+  await ctx.breakpoint({
     question: `Motion control system complete for ${systemName}. Performance under load: ${loadValidation.passed ? 'PASSED' : 'NEEDS ATTENTION'}. Approve?`,
     title: 'System Approval',
     context: {
@@ -204,15 +149,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/motion-system.json`, format: 'json', content: loopTuning.tunedSystem },
         { path: `artifacts/motion-report.md`, format: 'markdown', content: loadValidation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     systemName,
@@ -235,7 +174,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

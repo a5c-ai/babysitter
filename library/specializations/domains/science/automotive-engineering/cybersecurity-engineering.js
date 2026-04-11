@@ -46,25 +46,17 @@ export async function process(inputs, ctx) {
       tara: null
     };
   }
+
   // Phase 2: Threat Analysis and Risk Assessment (TARA)
-  let tara = await ctx.task(taraTask, {
+  const tara = await ctx.task(taraTask, {
     itemName,
     csItemDefinition,
     connectivityFeatures,
     existingTara
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      tara = await ctx.task(taraTask, { ...{
-    itemName,
-    csItemDefinition,
-    connectivityFeatures,
-    existingTara
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: TARA review
+  await ctx.breakpoint({
     question: `Review TARA for ${itemName}. ${tara.threats?.length || 0} threats identified. Approve TARA?`,
     title: 'TARA Review',
     context: {
@@ -76,15 +68,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: tara
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Cybersecurity Goals and Requirements
   const csRequirements = await ctx.task(csRequirementsTask, {
     itemName,
@@ -93,22 +79,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Cybersecurity Architecture Design
-  let csArchitecture = await ctx.task(csArchitectureTask, {
+  const csArchitecture = await ctx.task(csArchitectureTask, {
     itemName,
     tara,
     csRequirements
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      csArchitecture = await ctx.task(csArchitectureTask, { ...{
-    itemName,
-    tara,
-    csRequirements
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Architecture review
+  await ctx.breakpoint({
     question: `Review cybersecurity architecture for ${itemName}. ${csArchitecture.countermeasures?.length || 0} countermeasures defined. Approve architecture?`,
     title: 'Cybersecurity Architecture Review',
     context: {
@@ -120,15 +98,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: csArchitecture
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Countermeasure Implementation
   const countermeasureImpl = await ctx.task(countermeasureImplTask, {
     itemName,
@@ -137,7 +109,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Security Testing
-  let securityTesting = await ctx.task(securityTestingTask, {
+  const securityTesting = await ctx.task(securityTestingTask, {
     itemName,
     csArchitecture,
     countermeasureImpl,
@@ -145,32 +117,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Security test results
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        securityTesting = await ctx.task(securityTestingTask, { ...{
-    itemName,
-    csArchitecture,
-    countermeasureImpl,
-    tara
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (securityTesting.vulnerabilities && securityTesting.vulnerabilities.length > 0) {
+    await ctx.breakpoint({
       question: `Security testing identified ${securityTesting.vulnerabilities.length} vulnerabilities. Review and approve remediation plan?`,
       title: 'Security Vulnerabilities Found',
       context: {
         runId: ctx.runId,
         securityTesting,
         recommendation: 'Address all critical and high vulnerabilities before production'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Vulnerability Management
   const vulnManagement = await ctx.task(vulnManagementTask, {
@@ -180,24 +137,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Incident Response Planning
-  let incidentResponse = await ctx.task(incidentResponseTask, {
+  const incidentResponse = await ctx.task(incidentResponseTask, {
     itemName,
     tara,
     csArchitecture,
     vulnManagement
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      incidentResponse = await ctx.task(incidentResponseTask, { ...{
-    itemName,
-    tara,
-    csArchitecture,
-    vulnManagement
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Cybersecurity approval
+  await ctx.breakpoint({
     question: `Cybersecurity Engineering complete for ${itemName}. UN R155 compliance: ${incidentResponse.r155Compliance}. Approve for production?`,
     title: 'Cybersecurity Approval',
     context: {
@@ -208,15 +156,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/tara-final.json`, format: 'json', content: tara },
         { path: `artifacts/security-test-reports.json`, format: 'json', content: securityTesting }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     itemName,
@@ -234,7 +176,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const csItemDefinitionTask = defineTask('cs-item-definition', (args, taskCtx) => ({
   kind: 'agent',

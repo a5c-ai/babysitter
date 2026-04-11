@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Assessing impact');
-  let impactAssessment = await ctx.task(impactAssessmentTask, {
+  const impactAssessment = await ctx.task(impactAssessmentTask, {
     projectName,
     currentFramework,
     upgradePathAnalysis,
@@ -63,17 +63,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...impactAssessment.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      impactAssessment = await ctx.task(impactAssessmentTask, { ...{
-    projectName,
-    currentFramework,
-    upgradePathAnalysis,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Impact review
+  await ctx.breakpoint({
     question: `Impact assessment complete for ${projectName}. Breaking changes: ${impactAssessment.breakingChanges.length}. Affected files: ${impactAssessment.affectedFiles}. Proceed with upgrade?`,
     title: 'Framework Upgrade Impact Review',
     context: {
@@ -81,15 +72,9 @@ export async function process(inputs, ctx) {
       projectName,
       impactAssessment,
       recommendation: 'Review breaking changes and ensure test coverage before proceeding'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: TEST SUITE PREPARATION
   // ============================================================================
@@ -137,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing and validating');
-  let testingValidation = await ctx.task(testingValidationTask, {
+  const testingValidation = await ctx.task(testingValidationTask, {
     projectName,
     testPreparation,
     codeMigration,
@@ -147,17 +132,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...testingValidation.artifacts);
 
   // Quality Gate: Test results
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        testingValidation = await ctx.task(testingValidationTask, { ...{
-    projectName,
-    testPreparation,
-    codeMigration,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (!testingValidation.allPassed) {
+    await ctx.breakpoint({
       question: `Tests failed after upgrade for ${projectName}. Failed: ${testingValidation.failedCount}. Review failures and fix before proceeding?`,
       title: 'Framework Upgrade Test Failures',
       context: {
@@ -165,15 +141,9 @@ export async function process(inputs, ctx) {
         projectName,
         failures: testingValidation.failures,
         recommendation: 'Fix failing tests before staging deployment'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: STAGING DEPLOYMENT
@@ -194,7 +164,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Deploying to production');
-  let productionDeployment = await ctx.task(productionDeploymentTask, {
+  const productionDeployment = await ctx.task(productionDeploymentTask, {
     projectName,
     stagingDeployment,
     outputDir
@@ -202,16 +172,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...productionDeployment.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      productionDeployment = await ctx.task(productionDeploymentTask, { ...{
-    projectName,
-    stagingDeployment,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Framework upgrade complete for ${projectName}. From ${currentFramework.name} ${currentFramework.version} to ${targetVersion}. All tests passing: ${testingValidation.allPassed}. Approve?`,
     title: 'Framework Upgrade Complete',
     context: {
@@ -223,15 +185,9 @@ export async function process(inputs, ctx) {
         codeChanges: codeMigration.filesModified,
         testsPass: testingValidation.allPassed
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -267,7 +223,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

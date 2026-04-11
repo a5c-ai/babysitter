@@ -15,6 +15,8 @@
 
 import {
   type HarnessCreateRunArgs,
+  type OutputMode,
+  resolveOutputMode,
   RED,
   RESET,
   GREEN,
@@ -55,25 +57,27 @@ export async function handleHarnessCreateRun(
     verbose,
   } = parsed;
 
-  const interactive = parsed.interactive ?? (process.stdin.isTTY === true && !json);
-  const rl = interactive ? createReadlineInterface() : null;
+  const mode: OutputMode = resolveOutputMode(json, parsed.outputMode);
+  const interactive = parsed.interactive ?? (mode === "cli" && process.stdin.isTTY === true);
+  // TUI mode: never create a readline interface — TUI owns the terminal
+  const rl = (interactive && mode !== "tui") ? createReadlineInterface() : null;
 
   try {
     let prompt = initialPrompt;
     if (!prompt && !providedProcessPath) {
       if (interactive && rl) {
-        const userPrompt = await readInteractivePrompt(rl);
+        const userPrompt = await readInteractivePrompt(rl, mode);
         if (!userPrompt) {
           return 0; // User cancelled
         }
         prompt = userPrompt;
       } else {
         const error = "Either --prompt or --process must be provided";
-        if (json) {
+        if (mode === "json") {
           console.error(
             JSON.stringify({ error: "MISSING_PROMPT", message: error }, null, 2),
           );
-        } else {
+        } else if (mode === "cli") {
           process.stderr.write(`${RED}Error:${RESET} ${error}\n`);
         }
         return 1;
@@ -92,7 +96,7 @@ export async function handleHarnessCreateRun(
 
     let processPath = providedProcessPath;
     if (processPath) {
-      emitProgress({ phase: "1", status: "skipped", processPath }, json, verbose);
+      emitProgress({ phase: "1", status: "skipped", processPath }, json, verbose, mode);
     } else {
       const workDir = workspace ?? process.cwd();
       processPath = await runProcessDefinitionPhase({
@@ -107,14 +111,15 @@ export async function handleHarnessCreateRun(
         compressionConfig,
         promptContext,
         selectedHarnessName,
+        outputMode: mode,
       });
     }
 
     if (parsed.planOnly) {
-      emitProgress({ phase: "2", status: "skipped-plan-only", processPath }, json, verbose);
-      if (json) {
+      emitProgress({ phase: "2", status: "skipped-plan-only", processPath }, json, verbose, mode);
+      if (mode === "json") {
         process.stdout.write(JSON.stringify({ ok: true, planOnly: true, processPath }) + "\n");
-      } else {
+      } else if (mode === "cli") {
         process.stderr.write(`${GREEN}Process definition created: ${BOLD}${processPath}${RESET}\n`);
         process.stderr.write(`${DIM}Run /babysitter:call or harness:create-run --process ${processPath} to execute.${RESET}\n`);
       }
@@ -138,6 +143,7 @@ export async function handleHarnessCreateRun(
       promptContext,
       existingRunId: parsed.existingRunId,
       existingRunDir: parsed.existingRunDir,
+      outputMode: mode,
     });
   } finally {
     rl?.close();

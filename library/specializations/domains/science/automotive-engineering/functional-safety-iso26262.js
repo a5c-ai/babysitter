@@ -47,23 +47,16 @@ export async function process(inputs, ctx) {
       safetyCase: null
     };
   }
+
   // Phase 2: Hazard Analysis and Risk Assessment (HARA)
-  let hara = await ctx.task(haraTask, {
+  const hara = await ctx.task(haraTask, {
     itemName,
     itemDefinition,
     existingHara
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      hara = await ctx.task(haraTask, { ...{
-    itemName,
-    itemDefinition,
-    existingHara
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: HARA review
+  await ctx.breakpoint({
     question: `Review HARA for ${itemName}. ${hara.safetyGoals?.length || 0} safety goals identified. Approve HARA?`,
     title: 'HARA Review',
     context: {
@@ -75,15 +68,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hara
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Functional Safety Concept
   const functionalSafetyConcept = await ctx.task(functionalSafetyConceptTask, {
     itemName,
@@ -92,22 +79,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Technical Safety Concept
-  let technicalSafetyConcept = await ctx.task(technicalSafetyConceptTask, {
+  const technicalSafetyConcept = await ctx.task(technicalSafetyConceptTask, {
     itemName,
     functionalSafetyConcept,
     hara
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      technicalSafetyConcept = await ctx.task(technicalSafetyConceptTask, { ...{
-    itemName,
-    functionalSafetyConcept,
-    hara
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Safety concepts review
+  await ctx.breakpoint({
     question: `Review safety concepts for ${itemName}. Functional and technical safety concepts complete. Approve safety architecture?`,
     title: 'Safety Concepts Review',
     context: {
@@ -120,15 +99,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { functional: functionalSafetyConcept, technical: technicalSafetyConcept }
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Hardware Safety Design
   const hardwareSafetyDesign = await ctx.task(hardwareSafetyDesignTask, {
     itemName,
@@ -144,7 +117,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Safety Validation
-  let safetyValidation = await ctx.task(safetyValidationTask, {
+  const safetyValidation = await ctx.task(safetyValidationTask, {
     itemName,
     hara,
     functionalSafetyConcept,
@@ -154,37 +127,20 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Safety validation results
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        safetyValidation = await ctx.task(safetyValidationTask, { ...{
-    itemName,
-    hara,
-    functionalSafetyConcept,
-    technicalSafetyConcept,
-    hardwareSafetyDesign,
-    softwareSafetyDesign
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (safetyValidation.openIssues && safetyValidation.openIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Safety validation identified ${safetyValidation.openIssues.length} open issues. Review and approve closure plan?`,
       title: 'Safety Validation Issues',
       context: {
         runId: ctx.runId,
         safetyValidation,
         recommendation: 'All safety-related issues must be closed before production'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 8: Safety Case and Assessment
-  let safetyCase = await ctx.task(safetyCaseTask, {
+  const safetyCase = await ctx.task(safetyCaseTask, {
     itemName,
     itemDefinition,
     hara,
@@ -195,21 +151,8 @@ export async function process(inputs, ctx) {
     safetyValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      safetyCase = await ctx.task(safetyCaseTask, { ...{
-    itemName,
-    itemDefinition,
-    hara,
-    functionalSafetyConcept,
-    technicalSafetyConcept,
-    hardwareSafetyDesign,
-    softwareSafetyDesign,
-    safetyValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Safety case approval
+  await ctx.breakpoint({
     question: `Functional Safety Development complete for ${itemName}. Safety case compiled. Approve for functional safety assessment?`,
     title: 'Safety Case Approval',
     context: {
@@ -220,15 +163,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/safety-case.json`, format: 'json', content: safetyCase },
         { path: `artifacts/hara-final.json`, format: 'json', content: hara }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     itemName,
@@ -248,7 +185,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const itemDefinitionTask = defineTask('item-definition', (args, taskCtx) => ({
   kind: 'agent',

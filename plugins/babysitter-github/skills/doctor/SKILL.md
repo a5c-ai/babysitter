@@ -178,13 +178,13 @@ Mark as PASS if no issues. Mark as WARN if runaway loops or stale sessions detec
 **Goal:** Analyze babysitter log files for errors, warnings, and stop hook decisions.
 
 Read the last 50 lines of each of these log files (if they exist):
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/hooks.log`
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook.log`
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook-stderr.log`
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook.log`
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-session-start-hook-stderr.log`
-- `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter.log`
-- `$HOME/.a5c/logs/` and relevant logs and run/session specific logs there
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/hooks.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-stop-hook.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-stop-hook-stderr.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-session-start-hook.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-session-start-hook-stderr.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter.log`
+- `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/` and relevant run/session specific logs there
 
 
 For each log file:
@@ -286,7 +286,7 @@ The hooks delegate to the `babysitter` CLI. Check if it is available:
 Check whether the stop hook has actually been invoked during this run's lifetime:
 
 **From log files:**
-- Read `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook.log` (if it exists).
+- Read `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-stop-hook.log` (if it exists).
 - Count the number of "Hook script invoked" lines. This is the total invocation count.
 - Count the number of "CLI exit code=" lines and extract exit codes.
 - If the log file does not exist or has zero invocations, the stop hook has NOT been running.
@@ -298,7 +298,7 @@ Check whether the stop hook has actually been invoked during this run's lifetime
 - If no STOP_HOOK_INVOKED events exist in the journal, note that the stop hook has not recorded any decisions for this run.
 
 **From stderr:**
-- Read `$CLAUDE_PLUGIN_ROOT/.a5c/logs/babysitter-stop-hook-stderr.log`.
+- Read `${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}/babysitter-stop-hook-stderr.log`.
 - If it contains error output, display it and diagnose:
   - "command not found" or exit code 127 → CLI not installed (see 10c)
   - "MODULE_NOT_FOUND" or "Cannot find module" → SDK package corrupted or not built

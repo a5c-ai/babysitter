@@ -52,24 +52,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Task Analysis
-  let taskAnalysis = await ctx.task(taskAnalysisTask, {
+  const taskAnalysis = await ctx.task(taskAnalysisTask, {
     deviceName,
     criticalTasks,
     userProfiles,
     useEnvironmentCharacterization
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      taskAnalysis = await ctx.task(taskAnalysisTask, { ...{
-    deviceName,
-    criticalTasks,
-    userProfiles,
-    useEnvironmentCharacterization
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review critical tasks
+  await ctx.breakpoint({
     question: `Review task analysis for ${deviceName}. Are all critical tasks identified and analyzed?`,
     title: 'Task Analysis Review',
     context: {
@@ -82,15 +73,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: taskAnalysis
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: User Interface Design Specification
   const uiDesignSpec = await ctx.task(uiDesignSpecificationTask, {
     deviceName,
@@ -100,7 +85,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Formative Usability Evaluation
-  let formativeEvaluation = await ctx.task(formativeUsabilityTask, {
+  const formativeEvaluation = await ctx.task(formativeUsabilityTask, {
     deviceName,
     uiDesignSpec,
     userProfiles,
@@ -109,32 +94,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Formative evaluation findings must be addressed
   const criticalFindings = formativeEvaluation.criticalFindings || [];
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        formativeEvaluation = await ctx.task(formativeUsabilityTask, { ...{
-    deviceName,
-    uiDesignSpec,
-    userProfiles,
-    criticalTasks: taskAnalysis.criticalTasks
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (criticalFindings.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalFindings.length} critical findings from formative evaluation. Review and address before summative validation?`,
       title: 'Formative Evaluation Critical Findings',
       context: {
         runId: ctx.runId,
         criticalFindings,
         recommendation: 'Address critical usability issues before proceeding to summative validation'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: User Interface Design Optimization
   const uiOptimization = await ctx.task(uiOptimizationTask, {
@@ -162,7 +132,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: HFE File Compilation
-  let hfeFile = await ctx.task(hfeFileCompilationTask, {
+  const hfeFile = await ctx.task(hfeFileCompilationTask, {
     deviceName,
     intendedUsers,
     useRelatedRiskAnalysis,
@@ -176,24 +146,8 @@ export async function process(inputs, ctx) {
     useErrorAnalysis
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      hfeFile = await ctx.task(hfeFileCompilationTask, { ...{
-    deviceName,
-    intendedUsers,
-    useRelatedRiskAnalysis,
-    userProfiles,
-    useEnvironmentCharacterization,
-    taskAnalysis,
-    uiDesignSpec,
-    formativeEvaluation,
-    uiOptimization,
-    summativeValidationPlan,
-    useErrorAnalysis
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: HFE File Approval
+  await ctx.breakpoint({
     question: `Human Factors Engineering complete for ${deviceName}. Approve HFE File and proceed to summative validation?`,
     title: 'HFE File Approval',
     context: {
@@ -205,15 +159,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/hfe-file.json`, format: 'json', content: hfeFile },
         { path: `artifacts/summative-validation-plan.json`, format: 'json', content: summativeValidationPlan }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     deviceName,
@@ -234,7 +182,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const useRelatedRiskAnalysisTask = defineTask('use-related-risk-analysis', (args, taskCtx) => ({
   kind: 'agent',

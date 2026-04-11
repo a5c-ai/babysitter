@@ -43,40 +43,26 @@ export async function process(inputs, ctx) {
       details: dataPreprocessing.issues
     };
   }
+
   // Phase 2: Test Condition Matching
-  let conditionMatching = await ctx.task(conditionMatchingTask, {
+  const conditionMatching = await ctx.task(conditionMatchingTask, {
     projectName,
     cfdConditions: dataPreprocessing.cfdConditions,
     tunnelConditions: dataPreprocessing.tunnelConditions,
     correlationParameters
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      conditionMatching = await ctx.task(conditionMatchingTask, { ...{
-    projectName,
-    cfdConditions: dataPreprocessing.cfdConditions,
-    tunnelConditions: dataPreprocessing.tunnelConditions,
-    correlationParameters
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review matched conditions
+  await ctx.breakpoint({
     question: `Review ${conditionMatching.matchedPoints} matched test conditions for ${projectName}. Proceed with correlation analysis?`,
     title: 'Test Condition Matching Review',
     context: {
       runId: ctx.runId,
       matchedConditions: conditionMatching.matchedConditions,
       unmatchedConditions: conditionMatching.unmatchedConditions
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Wind Tunnel Corrections Application
   const tunnelCorrections = await ctx.task(tunnelCorrectionsTask, {
     projectName,
@@ -93,7 +79,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Statistical Correlation Analysis
-  let correlationAnalysis = await ctx.task(correlationAnalysisTask, {
+  const correlationAnalysis = await ctx.task(correlationAnalysisTask, {
     projectName,
     cfdData: dataPreprocessing.cfdData,
     correctedTunnelData: tunnelCorrections.correctedData,
@@ -101,17 +87,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check correlation metrics
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        correlationAnalysis = await ctx.task(correlationAnalysisTask, { ...{
-    projectName,
-    cfdData: dataPreprocessing.cfdData,
-    correctedTunnelData: tunnelCorrections.correctedData,
-    uncertaintyAnalysis
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (correlationAnalysis.r2 < 0.9) {
+    await ctx.breakpoint({
       question: `Correlation R-squared is ${correlationAnalysis.r2.toFixed(3)} (below 0.9 threshold). Review discrepancies and determine corrective actions?`,
       title: 'Correlation Quality Warning',
       context: {
@@ -119,15 +96,9 @@ export async function process(inputs, ctx) {
         correlationMetrics: correlationAnalysis.metrics,
         outliers: correlationAnalysis.outliers,
         recommendation: 'Consider reviewing CFD model or wind tunnel corrections'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Model Calibration
   const modelCalibration = await ctx.task(modelCalibrationTask, {
@@ -146,7 +117,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Report Generation
-  let reportGeneration = await ctx.task(correlationReportTask, {
+  const reportGeneration = await ctx.task(correlationReportTask, {
     projectName,
     dataPreprocessing,
     conditionMatching,
@@ -157,21 +128,8 @@ export async function process(inputs, ctx) {
     validationMetrics
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      reportGeneration = await ctx.task(correlationReportTask, { ...{
-    projectName,
-    dataPreprocessing,
-    conditionMatching,
-    tunnelCorrections,
-    uncertaintyAnalysis,
-    correlationAnalysis,
-    modelCalibration,
-    validationMetrics
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Results Approval
+  await ctx.breakpoint({
     question: `Wind tunnel correlation complete for ${projectName}. Overall correlation R2: ${correlationAnalysis.r2.toFixed(3)}. Approve calibration factors?`,
     title: 'Correlation Results Approval',
     context: {
@@ -185,15 +143,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/correlation-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/correlation-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -213,7 +165,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const dataPreprocessingTask = defineTask('data-preprocessing', (args, taskCtx) => ({
   kind: 'agent',

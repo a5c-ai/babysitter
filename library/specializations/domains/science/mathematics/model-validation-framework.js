@@ -29,7 +29,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Validation Metrics
-  let metricsDefinition = await ctx.task(metricsDefinitionTask, {
+  const metricsDefinition = await ctx.task(metricsDefinitionTask, {
     model,
     observationalData,
     validationCriteria
@@ -44,16 +44,9 @@ export async function process(inputs, ctx) {
       goodnessOfFit: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      metricsDefinition = await ctx.task(metricsDefinitionTask, { ...{
-    model,
-    observationalData,
-    validationCriteria
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review validation metrics
+  await ctx.breakpoint({
     question: `Defined ${metricsDefinition.metrics.length} validation metrics. Review selection?`,
     title: 'Validation Metrics Review',
     context: {
@@ -65,15 +58,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: metricsDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Compare Model Predictions to Data
   const predictionComparison = await ctx.task(predictionComparisonTask, {
     model,
@@ -89,41 +76,27 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Assess Predictive Accuracy
-  let accuracyAssessment = await ctx.task(accuracyAssessmentTask, {
+  const accuracyAssessment = await ctx.task(accuracyAssessmentTask, {
     predictionComparison,
     residualAnalysis,
     validationCriteria
   });
 
   // Quality Gate: Check if validation criteria are met
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        accuracyAssessment = await ctx.task(accuracyAssessmentTask, { ...{
-    predictionComparison,
-    residualAnalysis,
-    validationCriteria
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!accuracyAssessment.validationPassed) {
+    await ctx.breakpoint({
       question: `Model validation failed. R-squared: ${accuracyAssessment.rSquared}. Review issues and consider model refinement?`,
       title: 'Validation Failed',
       context: {
         runId: ctx.runId,
         issues: accuracyAssessment.issues,
         recommendation: 'Consider model refinement or additional data'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Document Model Limitations
-  let limitationsDocumentation = await ctx.task(limitationsDocumentationTask, {
+  const limitationsDocumentation = await ctx.task(limitationsDocumentationTask, {
     model,
     predictionComparison,
     residualAnalysis,
@@ -131,18 +104,8 @@ export async function process(inputs, ctx) {
     observationalData
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      limitationsDocumentation = await ctx.task(limitationsDocumentationTask, { ...{
-    model,
-    predictionComparison,
-    residualAnalysis,
-    accuracyAssessment,
-    observationalData
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Validation Complete
+  await ctx.breakpoint({
     question: `Model validation complete. Overall fit: ${accuracyAssessment.overallAssessment}. Accept validation?`,
     title: 'Validation Complete',
     context: {
@@ -153,15 +116,9 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/validation-results.json`, format: 'json', content: { accuracyAssessment, residualAnalysis } }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     model: model.type,
@@ -190,7 +147,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const metricsDefinitionTask = defineTask('metrics-definition', (args, taskCtx) => ({
   kind: 'agent',

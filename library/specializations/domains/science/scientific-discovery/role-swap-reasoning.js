@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
   // Phase 3: Evaluate Each Swap Scenario
   ctx.log('info', 'Evaluating role swap scenarios');
   for (const scenario of swapScenarios.scenarios) {
-    let evaluation = await ctx.task(evaluateSwapScenarioTask, {
+    const evaluation = await ctx.task(evaluateSwapScenarioTask, {
       system,
       systemAnalysis,
       scenario,
@@ -67,17 +67,9 @@ export async function process(inputs, ctx) {
         potential: evaluation.potential
       });
     }
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      evaluation = await ctx.task(evaluateSwapScenarioTask, { ...{
-      system,
-      systemAnalysis,
-      scenario,
-      domain
-    }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Evaluated ${roleSwaps.length} swaps, found ${plausibleReassignments.length} plausible. Review findings?`,
     title: 'Role Swap Reasoning - Evaluation Complete',
     context: {
@@ -86,15 +78,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/role-swaps.json', format: 'json' },
         { path: 'artifacts/plausible-reassignments.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Analyze Plausible Reassignments
   ctx.log('info', 'Analyzing plausible reassignments in depth');
   const reassignmentAnalysis = await ctx.task(analyzeReassignmentsTask, {

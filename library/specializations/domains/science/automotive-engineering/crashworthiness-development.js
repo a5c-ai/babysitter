@@ -46,23 +46,16 @@ export async function process(inputs, ctx) {
       bodyStructureDesign: null
     };
   }
+
   // Phase 2: Body Structure Design for Crash
-  let structureDesign = await ctx.task(structureDesignTask, {
+  const structureDesign = await ctx.task(structureDesignTask, {
     vehicleProgram,
     loadPathDefinition,
     targetRatings
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      structureDesign = await ctx.task(structureDesignTask, { ...{
-    vehicleProgram,
-    loadPathDefinition,
-    targetRatings
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Structure design review
+  await ctx.breakpoint({
     question: `Review body structure design for ${vehicleProgram}. Approve structural concept for CAE analysis?`,
     title: 'Body Structure Design Review',
     context: {
@@ -74,15 +67,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: structureDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: CAE Crash Simulation
   const crashSimulation = await ctx.task(crashSimulationTask, {
     vehicleProgram,
@@ -99,38 +86,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Pedestrian Protection Design
-  let pedestrianProtection = await ctx.task(pedestrianProtectionTask, {
+  const pedestrianProtection = await ctx.task(pedestrianProtectionTask, {
     vehicleProgram,
     structureDesign,
     targetRatings
   });
 
   // Quality Gate: Simulation results check
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        pedestrianProtection = await ctx.task(pedestrianProtectionTask, { ...{
-    vehicleProgram,
-    structureDesign,
-    targetRatings
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (crashSimulation.failedScenarios && crashSimulation.failedScenarios.length > 0) {
+    await ctx.breakpoint({
       question: `CAE simulation identified ${crashSimulation.failedScenarios.length} failing scenarios. Review design modifications?`,
       title: 'Crash Simulation Failures',
       context: {
         runId: ctx.runId,
         crashSimulation,
         recommendation: 'Optimize structure before physical testing'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Physical Crash Testing
   const physicalTesting = await ctx.task(physicalTestingTask, {
@@ -149,7 +122,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: NCAP Compliance Documentation
-  let ncapCompliance = await ctx.task(ncapComplianceTask, {
+  const ncapCompliance = await ctx.task(ncapComplianceTask, {
     vehicleProgram,
     crashSimulation,
     physicalTesting,
@@ -158,19 +131,8 @@ export async function process(inputs, ctx) {
     targetRatings
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      ncapCompliance = await ctx.task(ncapComplianceTask, { ...{
-    vehicleProgram,
-    crashSimulation,
-    physicalTesting,
-    restraintIntegration,
-    pedestrianProtection,
-    targetRatings
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Crashworthiness approval
+  await ctx.breakpoint({
     question: `Crashworthiness Development complete for ${vehicleProgram}. NCAP projected score: ${ncapCompliance.projectedScore}. Approve for production?`,
     title: 'Crashworthiness Approval',
     context: {
@@ -181,15 +143,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/crash-simulation-results.json`, format: 'json', content: crashSimulation },
         { path: `artifacts/ncap-compliance.json`, format: 'json', content: ncapCompliance }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     vehicleProgram,
@@ -207,7 +163,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const loadPathDefinitionTask = defineTask('load-path-definition', (args, taskCtx) => ({
   kind: 'agent',

@@ -17,7 +17,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_analysisApproval) {
       problemDefinition = await ctx.task(problemDefinitionTask, { ...{ projectName, tradeStudyScope, stakeholders }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
     }
-  const analysisApproval = await ctx.breakpoint({
+    const analysisApproval = await ctx.breakpoint({
     question: `${criteriaDefinition.criteria.length} evaluation criteria defined for ${projectName}. Proceed with weighting?`,
     title: 'Criteria Definition Review',
     context: { runId: ctx.runId, criteriaDefinition },
@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         scoringMatrix = await ctx.task(scoringMatrixTask, { ...{ projectName, alternatives: alternativesAnalysis, weights: criteriaWeighting }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `Top alternatives within 10% score differential. Conduct sensitivity analysis?`,
       title: 'Close Decision Warning',
       context: { runId: ctx.runId, topAlternatives: scoringMatrix.topAlternatives },
@@ -49,16 +49,15 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, { projectName, scoringMatrix, criteriaWeighting });
+    }
+    const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, { projectName, scoringMatrix, criteriaWeighting });
   let recommendation = await ctx.task(recommendationTask, { projectName, scoringMatrix, sensitivityAnalysis });
     let lastFeedback_finalApproval = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback_finalApproval) {
       recommendation = await ctx.task(recommendationTask, { ...{ projectName, scoringMatrix, sensitivityAnalysis }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Trade study complete for ${projectName}. Recommended: ${recommendation.selected}. Approve?`,
     title: 'Trade Study Approval',
     context: { runId: ctx.runId, summary: { selected: recommendation.selected, score: recommendation.score, confidence: recommendation.confidence } },
@@ -72,7 +71,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, tradeMatrix: scoringMatrix, recommendation, sensitivityAnalysis, report, metadata: { processId: 'trade-study-methodology', timestamp: ctx.now() } };
 }
-
 export const problemDefinitionTask = defineTask('problem-definition', (args, taskCtx) => ({
   kind: 'agent', title: `Problem Definition - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Systems Engineer', task: 'Define trade study problem', context: args,

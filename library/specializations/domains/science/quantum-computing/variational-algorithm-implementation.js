@@ -46,39 +46,25 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Problem Formulation');
 
-  let formulationResult = await ctx.task(problemFormulationTask, {
+  const formulationResult = await ctx.task(problemFormulationTask, {
     problemType,
     problemDefinition,
     algorithmType,
     framework
   });
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      formulationResult = await ctx.task(problemFormulationTask, { ...{
-    problemType,
-    problemDefinition,
-    algorithmType,
-    framework
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  artifacts.push(...(formulationResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Problem formulated. Hamiltonian terms: ${formulationResult.hamiltonianTerms}, Qubits needed: ${formulationResult.qubitCount}. Proceed with ansatz design?`,
     title: 'Problem Formulation Review',
     context: {
       runId: ctx.runId,
       formulation: formulationResult,
       files: (formulationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: ANSATZ DESIGN
   // ============================================================================
@@ -105,7 +91,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Optimizer Configuration');
 
-  let optimizerResult = await ctx.task(optimizerConfigurationTask, {
+  const optimizerResult = await ctx.task(optimizerConfigurationTask, {
     optimizer,
     parameterCount: ansatzResult.parameterCount,
     maxIterations,
@@ -113,18 +99,9 @@ export async function process(inputs, ctx) {
     framework
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      optimizerResult = await ctx.task(optimizerConfigurationTask, { ...{
-    optimizer,
-    parameterCount: ansatzResult.parameterCount,
-    maxIterations,
-    convergenceThreshold,
-    framework
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  artifacts.push(...(optimizerResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Optimizer ${optimizer} configured. Max iterations: ${maxIterations}. Initial parameters: ${ansatzResult.parameterCount}. Proceed with optimization?`,
     title: 'Optimizer Configuration Review',
     context: {
@@ -132,15 +109,9 @@ export async function process(inputs, ctx) {
       optimizer: optimizerResult,
       ansatz: ansatzResult,
       files: (optimizerResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: HYBRID OPTIMIZATION LOOP
   // ============================================================================
@@ -168,7 +139,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Convergence Analysis');
 
-  let convergenceResult = await ctx.task(convergenceAnalysisTask, {
+  const convergenceResult = await ctx.task(convergenceAnalysisTask, {
     optimizationHistory: optimizationResult.history,
     finalEnergy: optimizationResult.finalEnergy,
     optimalParameters: optimizationResult.optimalParameters,
@@ -177,32 +148,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(convergenceResult.artifacts || []));
 
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        convergenceResult = await ctx.task(convergenceAnalysisTask, { ...{
-    optimizationHistory: optimizationResult.history,
-    finalEnergy: optimizationResult.finalEnergy,
-    optimalParameters: optimizationResult.optimalParameters,
-    convergenceThreshold
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!convergenceResult.converged) {
+    await ctx.breakpoint({
       question: `Optimization may not have converged. Final energy: ${optimizationResult.finalEnergy}. Continue with analysis or restart with different parameters?`,
       title: 'Convergence Warning',
       context: {
         runId: ctx.runId,
         convergence: convergenceResult,
         files: (convergenceResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: CLASSICAL BASELINE COMPARISON
@@ -210,24 +166,16 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Classical Baseline Comparison');
 
-  let benchmarkResult = await ctx.task(classicalBenchmarkTask, {
+  const benchmarkResult = await ctx.task(classicalBenchmarkTask, {
     problemType,
     problemDefinition,
     quantumResult: optimizationResult.finalEnergy,
     optimalParameters: optimizationResult.optimalParameters
   });
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      benchmarkResult = await ctx.task(classicalBenchmarkTask, { ...{
-    problemType,
-    problemDefinition,
-    quantumResult: optimizationResult.finalEnergy,
-    optimalParameters: optimizationResult.optimalParameters
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  artifacts.push(...(benchmarkResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `Benchmarking complete. Quantum energy: ${optimizationResult.finalEnergy}, Classical reference: ${benchmarkResult.classicalEnergy}, Difference: ${benchmarkResult.energyDifference}. Review comparison?`,
     title: 'Classical Comparison Review',
     context: {
@@ -235,22 +183,16 @@ export async function process(inputs, ctx) {
       quantum: { energy: optimizationResult.finalEnergy },
       classical: benchmarkResult,
       files: (benchmarkResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 7: RESULT ANALYSIS AND DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Result Analysis and Documentation');
 
-  let analysisResult = await ctx.task(resultAnalysisTask, {
+  const analysisResult = await ctx.task(resultAnalysisTask, {
     algorithmType,
     problemType,
     formulationResult,
@@ -261,36 +203,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      analysisResult = await ctx.task(resultAnalysisTask, { ...{
-    algorithmType,
-    problemType,
-    formulationResult,
-    ansatzResult,
-    optimizationResult,
-    convergenceResult,
-    benchmarkResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  artifacts.push(...(analysisResult.artifacts || []));
+
+  await ctx.breakpoint({
     question: `${algorithmType} implementation complete. Final energy: ${optimizationResult.finalEnergy}, Chemical accuracy achieved: ${analysisResult.chemicalAccuracyAchieved || 'N/A'}. Approve results?`,
     title: 'Variational Algorithm Complete',
     context: {
       runId: ctx.runId,
       summary: analysisResult.summary,
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
 
   return {
@@ -326,7 +250,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

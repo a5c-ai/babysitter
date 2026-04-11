@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Identify Explanation Points
   ctx.log('info', 'Identifying points requiring explanation');
-  let explanationPoints = await ctx.task(identifyExplanationPointsTask, {
+  const explanationPoints = await ctx.task(identifyExplanationPointsTask, {
     mechanismAnalysis,
     targetAudience,
     explanationDepth,
@@ -49,17 +49,9 @@ export async function process(inputs, ctx) {
     explanationPoints,
     targetAudience,
     domain
-    let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback) {
-      explanationPoints = await ctx.task(identifyExplanationPointsTask, { ...{
-    mechanismAnalysis,
-    targetAudience,
-    explanationDepth,
-    domain
-  }, feedback: lastFeedback, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: 'Self-description features designed. Review before integration?',
     title: 'Self-Describing Mechanism - Design Complete',
     context: {
@@ -68,15 +60,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/mechanism-analysis.json', format: 'json' },
         { path: 'artifacts/self-description-features.json', format: 'json' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Integrate Self-Description into Mechanism
   ctx.log('info', 'Integrating self-description into mechanism');
   const integratedDesign = await ctx.task(integrateDescriptionTask, {

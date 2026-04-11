@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Requirements
-  let requirementsDefinition = await ctx.task(defineRequirementsTask, {
+  const requirementsDefinition = await ctx.task(defineRequirementsTask, {
     projectName,
     requirements,
     constraints,
@@ -53,17 +53,9 @@ export async function process(inputs, ctx) {
       recommendation: 'Refine requirements with more specific functional and non-functional criteria'
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      requirementsDefinition = await ctx.task(defineRequirementsTask, { ...{
-    projectName,
-    requirements,
-    constraints,
-    technologyCategory
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review requirements
+  await ctx.breakpoint({
     question: `Review technology evaluation requirements for ${projectName}. Category: ${technologyCategory}. Requirements score: ${requirementsDefinition.requirementsScore}/100. Approve to proceed?`,
     title: 'Requirements Review',
     context: {
@@ -80,17 +72,11 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: requirementsDefinition.requirementsDocument
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Identify Candidates
-  let candidateIdentification = await ctx.task(identifyCandidatesTask, {
+  const candidateIdentification = await ctx.task(identifyCandidatesTask, {
     projectName,
     technologyCategory,
     requirements: requirementsDefinition,
@@ -99,18 +85,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Must have at least 3 candidates for meaningful comparison
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        candidateIdentification = await ctx.task(identifyCandidatesTask, { ...{
-    projectName,
-    technologyCategory,
-    requirements: requirementsDefinition,
-    constraints,
-    initialCandidates: candidateList
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (candidateIdentification.shortlist.length < 3) {
+    await ctx.breakpoint({
       question: `Only ${candidateIdentification.shortlist.length} candidates identified for ${technologyCategory}. Should we expand the search or proceed with limited options?`,
       title: 'Insufficient Candidates Warning',
       context: {
@@ -118,18 +94,12 @@ export async function process(inputs, ctx) {
         projectName,
         candidates: candidateIdentification.shortlist,
         recommendation: 'Expand research to include at least 3-4 viable candidates'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 3: Define Evaluation Criteria
-  let evaluationCriteria = await ctx.task(defineEvaluationCriteriaTask, {
+  const evaluationCriteria = await ctx.task(defineEvaluationCriteriaTask, {
     projectName,
     technologyCategory,
     requirements: requirementsDefinition,
@@ -137,18 +107,8 @@ export async function process(inputs, ctx) {
     candidates: candidateIdentification.shortlist
   });
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      evaluationCriteria = await ctx.task(defineEvaluationCriteriaTask, { ...{
-    projectName,
-    technologyCategory,
-    requirements: requirementsDefinition,
-    constraints,
-    candidates: candidateIdentification.shortlist
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Breakpoint: Validate evaluation criteria
+  await ctx.breakpoint({
     question: `Review evaluation criteria for ${technologyCategory}. ${evaluationCriteria.criteriaCount} criteria defined with weighted scoring. Approve criteria?`,
     title: 'Evaluation Criteria Review',
     context: {
@@ -160,15 +120,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: evaluationCriteria
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 4: Research Each Candidate (Parallel)
   const candidateResearch = await ctx.parallel.all(
     candidateIdentification.shortlist.map((candidate, index) =>
@@ -197,18 +151,8 @@ export async function process(inputs, ctx) {
     )
   );
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      evaluationCriteria = await ctx.task(defineEvaluationCriteriaTask, { ...{
-    projectName,
-    technologyCategory,
-    requirements: requirementsDefinition,
-    constraints,
-    candidates: candidateIdentification.shortlist
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review PoC results
+  await ctx.breakpoint({
     question: `Proof of Concepts complete for all ${candidateIdentification.shortlist.length} candidates. Review implementations and performance results before scoring?`,
     title: 'PoC Review',
     context: {
@@ -220,15 +164,9 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: poc.pocReport
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Score and Compare
   const scoringComparison = await ctx.task(scoreAndCompareTask, {
     projectName,
@@ -240,7 +178,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Assess Risks
-  let riskAssessment = await ctx.task(assessRisksTask, {
+  const riskAssessment = await ctx.task(assessRisksTask, {
     projectName,
     technologyCategory,
     candidates: candidateIdentification.shortlist,
@@ -254,19 +192,8 @@ export async function process(inputs, ctx) {
     risk => risk.severity === 'critical' && !risk.mitigationPlan
   );
 
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        riskAssessment = await ctx.task(assessRisksTask, { ...{
-    projectName,
-    technologyCategory,
-    candidates: candidateIdentification.shortlist,
-    scoringComparison,
-    requirements: requirementsDefinition,
-    constraints
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (criticalRisksWithoutMitigation.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalRisksWithoutMitigation.length} critical risks identified without mitigation plans. Should we develop mitigation strategies before proceeding?`,
       title: 'Critical Risk Warning',
       context: {
@@ -274,29 +201,12 @@ export async function process(inputs, ctx) {
         projectName,
         criticalRisks: criticalRisksWithoutMitigation,
         recommendation: 'Develop mitigation strategies for all critical risks'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
-    let lastFeedback_reviewApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_reviewApproval) {
-      riskAssessment = await ctx.task(assessRisksTask, { ...{
-    projectName,
-    technologyCategory,
-    candidates: candidateIdentification.shortlist,
-    scoringComparison,
-    requirements: requirementsDefinition,
-    constraints
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-    }
-  const reviewApproval = await ctx.breakpoint({
+  // Breakpoint: Review scoring and risks
+  await ctx.breakpoint({
     question: `Technology evaluation complete. Top recommendation: ${scoringComparison.topRecommendation.name} (Score: ${scoringComparison.topRecommendation.totalScore}/100). Review comparison matrix and risks?`,
     title: 'Scoring and Risk Review',
     context: {
@@ -317,15 +227,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: riskAssessment
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_reviewApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (reviewApproval.approved) break;
-    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 8: Make Recommendation
   const finalRecommendation = await ctx.task(makeRecommendationTask, {
     projectName,
@@ -348,7 +252,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Create Onboarding Plan
-  let onboardingPlan = await ctx.task(createOnboardingPlanTask, {
+  const onboardingPlan = await ctx.task(createOnboardingPlanTask, {
     projectName,
     technologyCategory,
     recommendation: finalRecommendation,
@@ -356,18 +260,8 @@ export async function process(inputs, ctx) {
     team: constraints.teamSkills || []
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      onboardingPlan = await ctx.task(createOnboardingPlanTask, { ...{
-    projectName,
-    technologyCategory,
-    recommendation: finalRecommendation,
-    constraints,
-    team: constraints.teamSkills || []
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Approval
+  await ctx.breakpoint({
     question: `Technology Stack Evaluation complete for ${projectName}. Recommendation: ${finalRecommendation.selectedTechnology}. ADR created. Onboarding plan ready. Approve final recommendation?`,
     title: 'Final Recommendation Approval',
     context: {
@@ -382,15 +276,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/phase9-adr.md', format: 'markdown', content: adr.adrDocument },
         { path: 'artifacts/phase10-onboarding-plan.md', format: 'markdown', content: onboardingPlan.planDocument }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -442,7 +330,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const defineRequirementsTask = defineTask('define-requirements', (args, taskCtx) => ({
   kind: 'agent',

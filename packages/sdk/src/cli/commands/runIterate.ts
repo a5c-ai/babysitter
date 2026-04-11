@@ -20,12 +20,20 @@ import type { EffectAction, IterationResult } from "../../runtime/types";
 import type { HookResult } from "../../hooks/types";
 import type { JsonRecord } from "../../storage/types";
 import { resolveCompletionProof } from "../completionProof";
+import { groupActionsByParallelGroup } from "../../tasks/grouping";
+import { classifyWaitingActions } from "../../runtime/asyncEffects";
 
 export interface RunIterateOptions {
   runDir: string;
   iteration?: number;
   verbose?: boolean;
   json?: boolean;
+  /**
+   * Capabilities declared by the active harness adapter.
+   * Used to gate parallel-group and background-classification enrichment.
+   * When absent, no enrichment is applied (backward-compatible).
+   */
+  harnessCapabilities?: string[];
 }
 
 export interface RunIterateResult {
@@ -38,6 +46,13 @@ export interface RunIterateResult {
   until?: number;
   nextActions?: EffectAction[];
   completionProof?: string;
+  /** Parallel groups keyed by parallelGroupId. Only when harness declares concurrent-effects. */
+  parallelGroups?: Record<string, EffectAction[]>;
+  /** Background vs foreground classification. Only when harness declares background-effects. */
+  backgroundClassification?: {
+    blocking: EffectAction[];
+    background: EffectAction[];
+  };
   metadata?: {
     runId: string;
     processId: string;
@@ -190,6 +205,26 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       hookStatus: deriveHookStatus(hookResult),
     },
   };
+
+  // GAP-PAR enrichment (capability-gated, zero impact on external harnesses)
+  if (result.status === "waiting" && result.nextActions && options.harnessCapabilities) {
+    const caps = options.harnessCapabilities;
+    if (caps.includes("concurrent-effects")) {
+      const groupMap = groupActionsByParallelGroup(result.nextActions);
+      const serializable: Record<string, EffectAction[]> = {};
+      for (const [k, v] of groupMap.entries()) {
+        serializable[k] = v;
+      }
+      result.parallelGroups = serializable;
+    }
+    if (caps.includes("background-effects")) {
+      const classified = classifyWaitingActions(result.nextActions);
+      result.backgroundClassification = {
+        blocking: classified.blocking,
+        background: classified.background,
+      };
+    }
+  }
 
   return result;
 }

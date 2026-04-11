@@ -32,7 +32,7 @@ fi
 WORKSPACE_DIR="${WORKSPACE_DIR:-/tmp/e2e-test-workspace}"
 FIXTURE_SRC="${FIXTURE_SRC:-/app/e2e-tests/fixtures/tic-tac-toe}"
 STATE_DIR="$PLUGIN_DIR/skills/babysit/state"
-LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_DIR/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 SKIP_STRUCTURAL="${SKIP_STRUCTURAL:-false}"
 E2E_TIMEOUT=900
 
@@ -647,4 +647,3 @@ else
 fi
 
 # summary and exit are handled by the EXIT trap
-

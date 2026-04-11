@@ -27,7 +27,8 @@ export async function process(inputs, ctx) {
     bugTriageThreshold = { critical: 0, high: 5 },
     targetDate = '',
     outputDir = 'milestone-delivery-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -53,7 +54,7 @@ export async function process(inputs, ctx) {
     projectName, milestoneType, bugTriageThreshold, outputDir
   }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
       }
-  const phase2Review = await ctx.breakpoint({
+      const phase2Review = await ctx.breakpoint({
       question: `${bugTriage.criticalBugs} critical bugs found for ${milestoneType}. Must fix before milestone. Continue with bug fixing?`,
       title: 'Critical Bugs Found',
       context: { runId: ctx.runId, criticalBugs: bugTriage.criticalBugs, bugList: bugTriage.criticalBugList },
@@ -64,9 +65,8 @@ export async function process(inputs, ctx) {
       });
       if (phase2Review.approved) break;
       lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 3: Release Branch and Build
+    }
+    // Phase 3: Release Branch and Build
   const releaseBuild = await ctx.task(releaseBuildTask, {
     projectName, milestoneType, bugTriage, outputDir
   });
@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
     projectName, milestoneType, acceptanceTesting, milestoneDoc, outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `${milestoneType.toUpperCase()} milestone for ${projectName}. Acceptance: ${acceptanceTesting.passRate}% criteria met. Approved: ${stakeholderApproval.approved}. Proceed?`,
     title: `${milestoneType.toUpperCase()} Milestone Review`,
     context: { runId: ctx.runId, acceptanceTesting, stakeholderApproval },
@@ -126,7 +126,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/game-development/milestone-delivery', timestamp: startTime, outputDir }
   };
 }
-
 export const milestoneRequirementsTask = defineTask('milestone-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: `Milestone Requirements - ${args.milestoneType}`,

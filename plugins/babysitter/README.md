@@ -104,6 +104,40 @@ babysitter harness:install-plugin claude-code
 Then restart Claude Code. The installer does not materialize a repo-local
 plugin copy.
 
+## Claude Cowork Installation
+
+Claude Cowork can install this same plugin package without any plugin-structure
+changes. This repository already includes a Claude marketplace manifest at
+`.claude-plugin/marketplace.json` that points at `plugins/babysitter/`.
+
+### Personal install from this repository
+
+1. Open Claude Desktop and switch to the `Cowork` tab.
+2. Click `Customize` in the left sidebar.
+3. Click `Browse plugins`.
+4. Select `Personal`.
+5. Click `+`, then choose `Add marketplace from GitHub`.
+6. Enter `https://github.com/a5c-ai/babysitter`.
+7. Install `Babysitter` from the marketplace that Cowork imports from this repo.
+
+After installation, the plugin's skills appear in Cowork when you type `/` or
+click `+`.
+
+### Team / Enterprise org-managed install
+
+Organization owners can also distribute Cowork plugins from
+`Organization settings > Plugins`.
+
+- Manual marketplace: upload plugin ZIP files in the admin UI.
+- GitHub-synced marketplace: connect a private or internal GitHub repo in
+  `owner/repo` format.
+
+Anthropic's current Cowork docs require organization GitHub-synced
+marketplaces to use private or internal repositories on `github.com`, not
+public repos. If you want to distribute Babysitter org-wide through a
+GitHub-synced marketplace, use a private/internal fork of this repo or upload
+the plugin ZIP manually.
+
 If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
 
 ```bash

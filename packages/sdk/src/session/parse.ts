@@ -15,6 +15,7 @@ export const DEFAULT_SESSION_STATE: SessionState = {
   iteration: 1,
   maxIterations: 256,
   runId: '',
+  runIds: [],
   startedAt: '',
   lastIterationAt: '',
   iterationTimes: [],
@@ -94,11 +95,17 @@ export function parseSessionState(frontmatter: Record<string, string>): SessionS
       .filter(n => Number.isFinite(n) && n > 0);
   };
 
+  const parseStringArray = (value: string | undefined): string[] => {
+    if (!value || value.trim() === '') return [];
+    return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  };
+
   return {
     active: parseBoolean(frontmatter.active, DEFAULT_SESSION_STATE.active),
     iteration: parseNumber(frontmatter.iteration, DEFAULT_SESSION_STATE.iteration),
     maxIterations: parseNumber(frontmatter.max_iterations, DEFAULT_SESSION_STATE.maxIterations),
     runId: frontmatter.run_id ?? DEFAULT_SESSION_STATE.runId,
+    runIds: parseStringArray(frontmatter.run_ids),
     startedAt: frontmatter.started_at ?? DEFAULT_SESSION_STATE.startedAt,
     lastIterationAt: frontmatter.last_iteration_at ?? DEFAULT_SESSION_STATE.lastIterationAt,
     iterationTimes: parseNumberArray(frontmatter.iteration_times),

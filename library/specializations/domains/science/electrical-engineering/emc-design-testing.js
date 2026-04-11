@@ -39,22 +39,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Apply EMC Design Rules to Schematic and Layout
-  let emcDesignRules = await ctx.task(emcDesignRulesTask, {
+  const emcDesignRules = await ctx.task(emcDesignRulesTask, {
     productName,
     standards: standardsIdentification.applicableStandards,
     productType
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      emcDesignRules = await ctx.task(emcDesignRulesTask, { ...{
-    productName,
-    standards: standardsIdentification.applicableStandards,
-    productType
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review EMC design rules
+  await ctx.breakpoint({
     question: `Review EMC design rules for ${productName}. ${emcDesignRules.ruleCount} rules defined. Proceed with filter design?`,
     title: 'EMC Design Rules Review',
     context: {
@@ -66,15 +58,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: emcDesignRules
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Design Filtering and Suppression Circuits
   const filteringDesign = await ctx.task(filteringDesignTask, {
     productName,
@@ -91,56 +77,34 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Conduct Pre-Compliance Emissions Testing
-  let emissionsTesting = await ctx.task(emissionsTestingTask, {
+  const emissionsTesting = await ctx.task(emissionsTestingTask, {
     productName,
     standards: standardsIdentification.emissionsStandards,
     designImplementation: { filters: filteringDesign, grounding: groundingShielding }
   });
 
   // Quality Gate: Emissions must pass pre-compliance
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        emissionsTesting = await ctx.task(emissionsTestingTask, { ...{
-    productName,
-    standards: standardsIdentification.emissionsStandards,
-    designImplementation: { filters: filteringDesign, grounding: groundingShielding }
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!emissionsTesting.preCompliancePass) {
+    await ctx.breakpoint({
       question: `Pre-compliance emissions testing found ${emissionsTesting.failures.length} frequencies exceeding limits. Debug and mitigate?`,
       title: 'Emissions Failures',
       context: {
         runId: ctx.runId,
         failures: emissionsTesting.failures,
         recommendations: emissionsTesting.mitigationRecommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 6: Perform Immunity Testing
-  let immunityTesting = await ctx.task(immunityTestingTask, {
+  const immunityTesting = await ctx.task(immunityTestingTask, {
     productName,
     standards: standardsIdentification.immunityStandards,
     productType
   });
 
-    let lastFeedback_phase6Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase6Review) {
-      immunityTesting = await ctx.task(immunityTestingTask, { ...{
-    productName,
-    standards: standardsIdentification.immunityStandards,
-    productType
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-    }
-  const phase6Review = await ctx.breakpoint({
+  // Breakpoint: Review immunity test results
+  await ctx.breakpoint({
     question: `Immunity testing complete for ${productName}. ESD: ${immunityTesting.esdResult}, Surge: ${immunityTesting.surgeResult}. Review results?`,
     title: 'Immunity Testing Review',
     context: {
@@ -151,15 +115,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: immunityTesting
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase6Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase6Review.approved) break;
-    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 7: Debug and Mitigate EMC Issues
   const emcDebugging = await ctx.task(emcDebuggingTask, {
     productName,
@@ -169,7 +127,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Document Compliance Test Results
-  let complianceDocumentation = await ctx.task(complianceDocumentationTask, {
+  const complianceDocumentation = await ctx.task(complianceDocumentationTask, {
     productName,
     standardsIdentification,
     emcDesignRules,
@@ -181,22 +139,8 @@ export async function process(inputs, ctx) {
     targetMarkets
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      complianceDocumentation = await ctx.task(complianceDocumentationTask, { ...{
-    productName,
-    standardsIdentification,
-    emcDesignRules,
-    filteringDesign,
-    groundingShielding,
-    emissionsTesting,
-    immunityTesting,
-    emcDebugging,
-    targetMarkets
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Compliance Approval
+  await ctx.breakpoint({
     question: `EMC design and testing complete for ${productName}. Pre-compliance: ${complianceDocumentation.overallStatus}. Ready for formal certification?`,
     title: 'Compliance Approval',
     context: {
@@ -207,15 +151,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/emc-test-results.json`, format: 'json', content: complianceDocumentation.testSummary },
         { path: `artifacts/emc-report.md`, format: 'markdown', content: complianceDocumentation.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     productName,
@@ -237,7 +175,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const standardsIdentificationTask = defineTask('standards-identification', (args, taskCtx) => ({
   kind: 'agent',

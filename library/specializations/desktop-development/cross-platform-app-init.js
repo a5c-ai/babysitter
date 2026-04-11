@@ -304,11 +304,25 @@ export async function process(inputs, ctx) {
     if (finalApproval.approved) break;
     lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
   }
+  // ============================================================================
+  // MANDATORY PACKAGING GATE (issue #59)
+  // ============================================================================
+
+  ctx.log('info', 'Running mandatory packaging gate to verify distributable output');
+
+  const packagingGate = await ctx.task(electronPackagingGateTask, {
+    projectName, framework
+  });
+
+  const packagingVerify = await ctx.task(electronPackagingVerifyTask, {
+    projectName, framework
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
   return {
-    success: validationPassed,
+    success: validationPassed && packagingVerify.exitCode === 0,
     projectName,
     projectPath: projectStructure.projectPath,
     framework,
@@ -728,4 +742,29 @@ export const validateProjectSetupTask = defineTask('validate-project-setup', (ar
     outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
   },
   labels: ['desktop-development', 'validation']
+}));
+
+// Mandatory Electron packaging gate (issue #59)
+export const electronPackagingGateTask = defineTask('electron-packaging-gate', (args, taskCtx) => ({
+  kind: 'shell',
+  title: `Electron Packaging Gate - ${args.projectName}`,
+  shell: {
+    command: 'if grep -q "electron-builder" package.json 2>/dev/null; then npx electron-builder --dir 2>&1; elif grep -q "\\"pack\\"" package.json 2>/dev/null; then npm run pack 2>&1; elif grep -q "\\"dist\\"" package.json 2>/dev/null; then npm run dist 2>&1; else echo "No electron-builder or pack/dist script found" && exit 1; fi',
+    expectedExitCode: 0,
+    timeout: 300000
+  },
+  io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
+  labels: ['shell', 'electron', 'packaging', 'hard-gate']
+}));
+
+export const electronPackagingVerifyTask = defineTask('electron-packaging-verify', (args, taskCtx) => ({
+  kind: 'shell',
+  title: `Verify Packaged App - ${args.projectName}`,
+  shell: {
+    command: 'APP_FOUND=0; for dir in dist/mac dist/mac-arm64 dist/win-unpacked dist/linux-unpacked; do if [ -d "$dir" ]; then echo "Found: $dir"; APP_FOUND=1; fi; done; for f in dist/*.app dist/*.exe dist/*.AppImage dist/*.dmg; do if [ -f "$f" ] 2>/dev/null; then echo "Found: $f"; APP_FOUND=1; fi; done; [ "$APP_FOUND" -eq 1 ] || (echo "ERROR: No packaged app found in dist/" && exit 1)',
+    expectedExitCode: 0,
+    timeout: 30000
+  },
+  io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
+  labels: ['shell', 'electron', 'packaging', 'verification']
 }));

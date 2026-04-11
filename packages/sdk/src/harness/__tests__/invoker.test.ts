@@ -51,12 +51,12 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("HARNESS_CLI_MAP", () => {
-  it("has entries for all 7 supported harnesses", () => {
-    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot"];
+  it("has entries for all 9 supported harnesses", () => {
+    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot", "openclaw"];
     for (const name of expectedNames) {
       expect(HARNESS_CLI_MAP[name]).toBeDefined();
     }
-    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(8);
+    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(9);
   });
 });
 
@@ -157,7 +157,7 @@ describe("buildHarnessArgs", () => {
 
   it("includes programmatic-only harnesses in the supported-name error", () => {
     expect(() => buildHarnessArgs("unknown-harness", baseOptions)).toThrow(
-      /Supported harnesses: internal, claude-code, codex, pi, oh-my-pi, gemini-cli, github-copilot, cursor, opencode/,
+      /Supported harnesses: internal, claude-code, codex, pi, oh-my-pi, gemini-cli, github-copilot, cursor, openclaw, opencode/,
     );
   });
 });
@@ -344,6 +344,82 @@ describe("invokeHarness", () => {
       expect(capturedOpts?.shell).toBe(false);
       expect(capturedOpts?.cwd).toBe(process.cwd());
     }
+  });
+
+  it("cancelRunningProcess function exists", async () => {
+    // This import will fail in the red phase — the function doesn't exist yet
+    const { cancelRunningProcess } = await import("../invoker");
+    expect(cancelRunningProcess).toBeDefined();
+    expect(typeof cancelRunningProcess).toBe("function");
+  });
+
+  it("cancelRunningProcess sends SIGTERM to the child process", async () => {
+    const { cancelRunningProcess } = await import("../invoker");
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/claude" });
+
+    let childProcess: { kill: ReturnType<typeof vi.fn>; pid: number; exitCode: number | null };
+    mockExecFile.mockImplementation((_cmd, _args, _opts, _callback) => {
+      childProcess = {
+        kill: vi.fn().mockReturnValue(true),
+        pid: 12345,
+        exitCode: null,
+      };
+      // Don't call callback — simulate long-running process
+      return childProcess as unknown as ReturnType<typeof execFile>;
+    });
+
+    const handle = invokeHarness("claude-code", { prompt: "long running task" });
+
+    // Give it a tick to start
+    await new Promise((r) => setTimeout(r, 10));
+
+    await cancelRunningProcess(12345);
+    expect(childProcess!.kill).toHaveBeenCalledWith("SIGTERM");
+  });
+
+  it("cancelRunningProcess sends SIGKILL after grace period", async () => {
+    const { cancelRunningProcess } = await import("../invoker");
+
+    const killFn = vi.fn().mockReturnValue(true);
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/claude" });
+    mockExecFile.mockImplementation((_cmd, _args, _opts, _callback) => {
+      return {
+        kill: killFn,
+        pid: 99999,
+        exitCode: null,
+      } as unknown as ReturnType<typeof execFile>;
+    });
+
+    // Start a process
+    const _handle = invokeHarness("claude-code", { prompt: "stubborn task" });
+    await new Promise((r) => setTimeout(r, 10));
+
+    await cancelRunningProcess(99999, { gracePeriodMs: 50 });
+
+    // First call should be SIGTERM
+    expect(killFn).toHaveBeenCalledWith("SIGTERM");
+    // After grace period, should escalate to SIGKILL
+    await new Promise((r) => setTimeout(r, 100));
+    expect(killFn).toHaveBeenCalledWith("SIGKILL");
+  });
+
+  it("cancelRunningProcess handles already-exited process gracefully", async () => {
+    const { cancelRunningProcess } = await import("../invoker");
+
+    // Process that has already exited — kill returns false
+    const killFn = vi.fn().mockReturnValue(false);
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/claude" });
+    mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {
+      (callback as (err: Error | null, stdout: string, stderr: string) => void)(null, "done", "");
+      return {
+        kill: killFn,
+        pid: 77777,
+        exitCode: 0,
+      } as unknown as ReturnType<typeof execFile>;
+    });
+
+    // Should not throw when process is already gone
+    await expect(cancelRunningProcess(77777)).resolves.not.toThrow();
   });
 
   it("uses correct CLI command from HARNESS_CLI_MAP", async () => {

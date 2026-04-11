@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing encryption requirements and data classification');
 
-  let requirementsResult = await ctx.task(encryptionRequirementsAnalysisTask, {
+  const requirementsResult = await ctx.task(encryptionRequirementsAnalysisTask, {
     projectName,
     encryptionScope,
     services,
@@ -91,19 +91,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Requirements analysis complete - ${requirementsResult.dataClassifications.length} data classifications identified`);
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      requirementsResult = await ctx.task(encryptionRequirementsAnalysisTask, { ...{
-    projectName,
-    encryptionScope,
-    services,
-    environment,
-    complianceFrameworks,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  // Quality Gate: Requirements review
+  await ctx.breakpoint({
     question: `Encryption requirements analysis complete for ${projectName}. Identified ${requirementsResult.dataClassifications.length} data classifications and ${requirementsResult.encryptionRequirements.length} encryption requirements. Review classification and proceed?`,
     title: 'Encryption Requirements Review',
     context: {
@@ -115,22 +104,16 @@ export async function process(inputs, ctx) {
         services: services.length
       },
       files: requirementsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: ALGORITHM SELECTION AND CRYPTOGRAPHIC STANDARDS
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Selecting cryptographic algorithms and standards');
 
-  let algorithmResult = await ctx.task(algorithmSelectionTask, {
+  const algorithmResult = await ctx.task(algorithmSelectionTask, {
     projectName,
     encryptionScope,
     complianceFrameworks,
@@ -145,20 +128,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Algorithm selection complete - ${algorithmResult.algorithmsSelected.length} algorithms configured`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      algorithmResult = await ctx.task(algorithmSelectionTask, { ...{
-    projectName,
-    encryptionScope,
-    complianceFrameworks,
-    algorithmPreference,
-    tlsVersion,
-    enableQuantumResistance,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Algorithm review
+  await ctx.breakpoint({
     question: `Cryptographic algorithm selection complete for ${projectName}. Selected ${algorithmResult.algorithmsSelected.length} algorithms including ${algorithmPreference}. Quantum resistance: ${enableQuantumResistance}. Review cryptographic standards?`,
     title: 'Cryptographic Algorithm Review',
     context: {
@@ -170,22 +141,16 @@ export async function process(inputs, ctx) {
         complianceApproved: algorithmResult.complianceApproved
       },
       files: algorithmResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: KEY MANAGEMENT SYSTEM SETUP
   // ============================================================================
 
   ctx.log('info', `Phase 3: Setting up ${keyManagementSystem} key management system`);
 
-  let kmsSetupResult = await ctx.task(keyManagementSetupTask, {
+  const kmsSetupResult = await ctx.task(keyManagementSetupTask, {
     projectName,
     keyManagementSystem,
     environment,
@@ -201,20 +166,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `KMS setup complete - ${kmsSetupResult.keysCreated} keys created, HSM: ${enableHSM}`);
 
-    let lastFeedback_phase3Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase3Review) {
-      kmsSetupResult = await ctx.task(keyManagementSetupTask, { ...{
-    projectName,
-    keyManagementSystem,
-    environment,
-    enableHSM,
-    services,
-    complianceFrameworks,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-    }
-  const phase3Review = await ctx.breakpoint({
+  // Quality Gate: KMS configuration review
+  await ctx.breakpoint({
     question: `Key Management System setup complete using ${keyManagementSystem}. Created ${kmsSetupResult.keysCreated} encryption keys. HSM enabled: ${enableHSM}. Review KMS configuration?`,
     title: 'Key Management System Review',
     context: {
@@ -227,15 +180,9 @@ export async function process(inputs, ctx) {
         accessPolicies: kmsSetupResult.accessPolicies.length
       },
       files: kmsSetupResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase3Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase3Review.approved) break;
-    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 4: ENCRYPTION AT REST IMPLEMENTATION
   // ============================================================================
@@ -243,7 +190,7 @@ export async function process(inputs, ctx) {
   if (encryptionScope.includes('data-at-rest')) {
     ctx.log('info', 'Phase 4: Implementing encryption at rest');
 
-    let encryptionAtRestResult = await ctx.task(encryptionAtRestTask, {
+    const encryptionAtRestResult = await ctx.task(encryptionAtRestTask, {
       projectName,
       services,
       keyManagementSystem,
@@ -258,19 +205,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Encryption at rest configured - ${encryptionAtRestResult.servicesEncrypted} services encrypted`);
 
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        encryptionAtRestResult = await ctx.task(encryptionAtRestTask, { ...{
-      projectName,
-      services,
-      keyManagementSystem,
-      algorithmPreference,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+    // Quality Gate: Encryption at rest review
+    await ctx.breakpoint({
       question: `Encryption at rest implementation complete for ${projectName}. Encrypted ${encryptionAtRestResult.servicesEncrypted} services with ${algorithmPreference}. Coverage: ${encryptionAtRestResult.coveragePercentage}%. Review configuration?`,
       title: 'Encryption at Rest Review',
       context: {
@@ -282,15 +218,9 @@ export async function process(inputs, ctx) {
           storageTypes: encryptionAtRestResult.storageTypes
         },
         files: encryptionAtRestResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: ENCRYPTION IN TRANSIT (TLS/SSL) IMPLEMENTATION
@@ -299,7 +229,7 @@ export async function process(inputs, ctx) {
   if (encryptionScope.includes('data-in-transit')) {
     ctx.log('info', 'Phase 5: Implementing encryption in transit with TLS/SSL');
 
-    let encryptionInTransitResult = await ctx.task(encryptionInTransitTask, {
+    const encryptionInTransitResult = await ctx.task(encryptionInTransitTask, {
       projectName,
       services,
       tlsVersion,
@@ -319,23 +249,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `TLS/SSL configured - ${tlsVersion}, mTLS: ${enableMTLS}, PFS: ${enablePerfectForwardSecrecy}`);
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        encryptionInTransitResult = await ctx.task(encryptionInTransitTask, { ...{
-      projectName,
-      services,
-      tlsVersion,
-      enableMTLS,
-      enablePerfectForwardSecrecy,
-      certificateLifetimeDays,
-      enableCertificateTransparency,
-      keyManagementSystem,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+    // Quality Gate: TLS configuration review
+    await ctx.breakpoint({
       question: `Encryption in transit implementation complete for ${projectName}. TLS ${tlsVersion} configured for ${encryptionInTransitResult.endpointsSecured} endpoints. mTLS: ${enableMTLS}, Perfect Forward Secrecy: ${enablePerfectForwardSecrecy}. Review TLS configuration?`,
       title: 'TLS/SSL Configuration Review',
       context: {
@@ -348,15 +263,9 @@ export async function process(inputs, ctx) {
           cipherSuites: encryptionInTransitResult.cipherSuites
         },
         files: encryptionInTransitResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: ENCRYPTION IN USE (OPTIONAL)
@@ -365,7 +274,7 @@ export async function process(inputs, ctx) {
   if (encryptionScope.includes('data-in-use')) {
     ctx.log('info', 'Phase 6: Implementing encryption in use (confidential computing)');
 
-    let encryptionInUseResult = await ctx.task(encryptionInUseTask, {
+    const encryptionInUseResult = await ctx.task(encryptionInUseTask, {
       projectName,
       services,
       environment,
@@ -378,17 +287,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Encryption in use configured - ${encryptionInUseResult.servicesProtected} services with confidential computing`);
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        encryptionInUseResult = await ctx.task(encryptionInUseTask, { ...{
-      projectName,
-      services,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+    // Quality Gate: Encryption in use review
+    await ctx.breakpoint({
       question: `Encryption in use implementation complete using confidential computing. Protected ${encryptionInUseResult.servicesProtected} services with TEE (Trusted Execution Environments). Review configuration?`,
       title: 'Encryption in Use Review',
       context: {
@@ -399,15 +299,9 @@ export async function process(inputs, ctx) {
           enclaveTypes: encryptionInUseResult.enclaveTypes
         },
         files: encryptionInUseResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: KEY ROTATION POLICIES
@@ -416,7 +310,7 @@ export async function process(inputs, ctx) {
   if (enableKeyRotation) {
     ctx.log('info', 'Phase 7: Implementing automated key rotation policies');
 
-    let keyRotationResult = await ctx.task(keyRotationTask, {
+    const keyRotationResult = await ctx.task(keyRotationTask, {
       projectName,
       keyManagementSystem,
       rotationIntervalDays,
@@ -431,19 +325,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Key rotation policies configured - ${keyRotationResult.keysWithRotation} keys with ${rotationIntervalDays}-day rotation`);
 
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        keyRotationResult = await ctx.task(keyRotationTask, { ...{
-      projectName,
-      keyManagementSystem,
-      rotationIntervalDays,
-      services,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    // Quality Gate: Key rotation review
+    await ctx.breakpoint({
       question: `Key rotation policies configured for ${projectName}. ${keyRotationResult.keysWithRotation} keys will rotate every ${rotationIntervalDays} days. Automated rotation: enabled. Review rotation strategy?`,
       title: 'Key Rotation Policies Review',
       context: {
@@ -455,15 +338,9 @@ export async function process(inputs, ctx) {
           schedules: keyRotationResult.schedules
         },
         files: keyRotationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: CERTIFICATE MANAGEMENT
@@ -471,7 +348,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Implementing certificate lifecycle management');
 
-  let certificateResult = await ctx.task(certificateManagementTask, {
+  const certificateResult = await ctx.task(certificateManagementTask, {
     projectName,
     services,
     keyManagementSystem,
@@ -486,20 +363,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Certificate management configured - ${certificateResult.certificatesManaged} certificates with ${certificateLifetimeDays}-day lifetime`);
 
-    let lastFeedback_phase8Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase8Review) {
-      certificateResult = await ctx.task(certificateManagementTask, { ...{
-    projectName,
-    services,
-    keyManagementSystem,
-    certificateLifetimeDays,
-    enableCertificateTransparency,
-    environment,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-    }
-  const phase8Review = await ctx.breakpoint({
+  // Quality Gate: Certificate management review
+  await ctx.breakpoint({
     question: `Certificate lifecycle management configured for ${projectName}. Managing ${certificateResult.certificatesManaged} certificates with ${certificateLifetimeDays}-day validity. Auto-renewal enabled. Certificate Transparency: ${enableCertificateTransparency}. Review certificate management?`,
     title: 'Certificate Management Review',
     context: {
@@ -511,15 +376,9 @@ export async function process(inputs, ctx) {
         certificateTransparency: enableCertificateTransparency
       },
       files: certificateResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase8Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase8Review.approved) break;
-    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 9: HSM INTEGRATION (IF ENABLED)
   // ============================================================================
@@ -527,7 +386,7 @@ export async function process(inputs, ctx) {
   if (enableHSM) {
     ctx.log('info', 'Phase 9: Configuring Hardware Security Module (HSM) integration');
 
-    let hsmResult = await ctx.task(hsmIntegrationTask, {
+    const hsmResult = await ctx.task(hsmIntegrationTask, {
       projectName,
       keyManagementSystem,
       services,
@@ -542,19 +401,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `HSM integration complete - FIPS 140-2 Level ${hsmResult.fipsLevel} compliant`);
 
-      let lastFeedback_phase9Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase9Review) {
-        hsmResult = await ctx.task(hsmIntegrationTask, { ...{
-      projectName,
-      keyManagementSystem,
-      services,
-      complianceFrameworks,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-      }
-  const phase9Review = await ctx.breakpoint({
+    // Quality Gate: HSM integration review
+    await ctx.breakpoint({
       question: `HSM integration complete for ${projectName}. FIPS 140-2 Level ${hsmResult.fipsLevel} compliance achieved. ${hsmResult.keysInHSM} keys stored in HSM. Review HSM configuration?`,
       title: 'HSM Integration Review',
       context: {
@@ -566,15 +414,9 @@ export async function process(inputs, ctx) {
           backupStrategy: hsmResult.backupStrategy
         },
         files: hsmResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase9Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase9Review.approved) break;
-      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 10: AUDIT LOGGING AND MONITORING
@@ -583,7 +425,7 @@ export async function process(inputs, ctx) {
   if (enableAuditLogging) {
     ctx.log('info', 'Phase 10: Implementing encryption audit logging and monitoring');
 
-    let auditResult = await ctx.task(encryptionAuditLoggingTask, {
+    const auditResult = await ctx.task(encryptionAuditLoggingTask, {
       projectName,
       keyManagementSystem,
       services,
@@ -597,19 +439,8 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Audit logging configured - ${auditResult.auditDevices} devices, ${auditResult.alerts} security alerts`);
 
-      let lastFeedback_phase10Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase10Review) {
-        auditResult = await ctx.task(encryptionAuditLoggingTask, { ...{
-      projectName,
-      keyManagementSystem,
-      services,
-      complianceFrameworks,
-      environment,
-      outputDir
-    }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-      }
-  const phase10Review = await ctx.breakpoint({
+    // Quality Gate: Audit logging review
+    await ctx.breakpoint({
       question: `Encryption audit logging configured for ${projectName}. Setup ${auditResult.auditDevices} audit devices with ${auditResult.alerts} security alerts. Key usage tracking enabled. Review audit configuration?`,
       title: 'Encryption Audit Logging Review',
       context: {
@@ -621,15 +452,9 @@ export async function process(inputs, ctx) {
           complianceLogging: auditResult.complianceLogging
         },
         files: auditResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase10Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase10Review.approved) break;
-      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 11: COMPLIANCE VALIDATION
@@ -637,7 +462,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Validating encryption compliance requirements');
 
-  let complianceResult = await ctx.task(encryptionComplianceValidationTask, {
+  const complianceResult = await ctx.task(encryptionComplianceValidationTask, {
     projectName,
     complianceFrameworks,
     encryptionScope,
@@ -655,22 +480,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Compliance validation complete - ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant`);
 
-    let lastFeedback_qualityGateApproval4 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval4) {
-      complianceResult = await ctx.task(encryptionComplianceValidationTask, { ...{
-    projectName,
-    complianceFrameworks,
-    encryptionScope,
-    keyManagement,
-    tlsConfig,
-    enableHSM,
-    tlsVersion,
-    algorithmPreference,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-    }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  // Quality Gate: Compliance review
+  await ctx.breakpoint({
     question: `Encryption compliance validation complete for ${projectName}. ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant. Compliance gaps: ${complianceResult.complianceGaps.length}. ${complianceResult.complianceGaps.length > 0 ? 'Review compliance gaps and remediation plan?' : 'All encryption compliance requirements met!'}`,
     title: 'Encryption Compliance Review',
     context: {
@@ -683,22 +494,16 @@ export async function process(inputs, ctx) {
         remediationPlan: complianceResult.remediationPlan
       },
       files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval4.approved) break;
-    lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 12: SECURITY TESTING AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Conducting encryption security testing');
 
-  let securityTestResult = await ctx.task(encryptionSecurityTestingTask, {
+  const securityTestResult = await ctx.task(encryptionSecurityTestingTask, {
     projectName,
     services,
     encryptionScope,
@@ -713,19 +518,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Security testing complete - ${securityTestResult.testsRun} tests, ${securityTestResult.testsPassed} passed, ${securityTestResult.testsFailed} failed`);
 
   // Quality Gate: Security test results
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        securityTestResult = await ctx.task(encryptionSecurityTestingTask, { ...{
-    projectName,
-    services,
-    encryptionScope,
-    tlsVersion,
-    keyManagementSystem,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  if (securityTestResult.testsFailed > 0) {
+    await ctx.breakpoint({
       question: `Encryption security testing found ${securityTestResult.testsFailed} failures in ${projectName}. Failed tests: ${securityTestResult.failedTests.join(', ')}. Review and fix encryption issues before deployment?`,
       title: 'Encryption Security Test Failures',
       context: {
@@ -738,15 +532,9 @@ export async function process(inputs, ctx) {
           vulnerabilities: securityTestResult.vulnerabilitiesFound
         },
         files: securityTestResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: DOCUMENTATION AND RUNBOOKS
@@ -754,7 +542,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating encryption documentation and runbooks');
 
-  let docResult = await ctx.task(encryptionDocumentationTask, {
+  const docResult = await ctx.task(encryptionDocumentationTask, {
     projectName,
     encryptionScope,
     keyManagementSystem,
@@ -791,23 +579,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Duration: ${Math.round(duration / 1000)}s`);
   ctx.log('info', '='.repeat(80));
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      docResult = await ctx.task(encryptionDocumentationTask, { ...{
-    projectName,
-    encryptionScope,
-    keyManagementSystem,
-    tlsVersion,
-    complianceFrameworks,
-    encryptionCoverage,
-    keyManagement,
-    tlsConfig,
-    artifacts,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Quality Gate
+  await ctx.breakpoint({
     question: `Encryption Standards Implementation complete for ${projectName}! Security Score: ${finalSecurityScore}/100. Encryption scope: ${encryptionScope.join(', ')}. Compliance: ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks. Review implementation summary and approve for deployment?`,
     title: 'Encryption Standards Implementation Complete',
     context: {
@@ -839,15 +612,9 @@ export async function process(inputs, ctx) {
         ]
       },
       files: artifacts.slice(0, 20).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     securityScore: finalSecurityScore,
@@ -876,7 +643,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

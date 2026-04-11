@@ -62,7 +62,7 @@ import type {
 import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createCursorContext } from "../prompts/context";
-import { getGlobalStateDir } from "../config";
+import { getGlobalLogDir, getGlobalStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -82,7 +82,7 @@ interface HookLogger {
 }
 
 function createHookLogger(hookName: string): HookLogger {
-  const logDir = process.env.BABYSITTER_LOG_DIR || ".a5c/logs";
+  const logDir = getGlobalLogDir();
   const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
   const context: Record<string, string> = {};
 
@@ -674,6 +674,7 @@ async function handleSessionStartHookImpl(
         iteration: 1,
         maxIterations: 256,
         runId: "",
+        runIds: [],
         startedAt: nowTs,
         lastIterationAt: nowTs,
         iterationTimes: [],
@@ -756,6 +757,7 @@ async function bindSessionImpl(
     iteration: 1,
     maxIterations,
     runId,
+    runIds: [],
     startedAt: nowTs,
     lastIterationAt: nowTs,
     iterationTimes: [],

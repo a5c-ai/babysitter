@@ -11,3 +11,5 @@ export {
   readTaskResult,
   writeTaskResult,
 } from "./tasks";
+export { createJournalWatcher } from "./journalWatcher";
+export type { JournalWatcher, JournalWatcherOptions } from "./journalWatcher";

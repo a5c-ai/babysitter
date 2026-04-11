@@ -69,3 +69,4 @@ e2e-artifacts/ci-run-*/
 .a5c/logs/
 # --- end babysitter managed ---
 .claude/scheduled_tasks.lock
+.tmp-restore-library-files.txt

@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Quarterly Roadmap Planning for ${productName} - ${quarter}`);
 
   // Phase 1: OKR Review and Retrospective
-  let okrReview = await ctx.task(okrReviewTask, {
+  const okrReview = await ctx.task(okrReviewTask, {
     quarter,
     productName,
     previousOKRs,
@@ -59,17 +59,9 @@ export async function process(inputs, ctx) {
       roadmap: null
     };
   }
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      okrReview = await ctx.task(okrReviewTask, { ...{
-    quarter,
-    productName,
-    previousOKRs,
-    stakeholders
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review previous quarter outcomes
+  await ctx.breakpoint({
     question: `Previous quarter OKR review complete for ${productName}. Review outcomes and key learnings before proceeding?`,
     title: 'OKR Retrospective Review',
     context: {
@@ -83,15 +75,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: okrReview
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Market Analysis and Competitive Intelligence
   const marketAnalysis = await ctx.task(marketAnalysisTask, {
     quarter,
@@ -110,7 +96,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Strategic Theme Identification
-  let themeIdentification = await ctx.task(themeIdentificationTask, {
+  const themeIdentification = await ctx.task(themeIdentificationTask, {
     quarter,
     productName,
     okrReview,
@@ -127,18 +113,9 @@ export async function process(inputs, ctx) {
       roadmap: null
     };
   }
-  let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      themeIdentification = await ctx.task(themeIdentificationTask, { ...{
-    quarter,
-    productName,
-    okrReview,
-    marketAnalysis,
-    customerResearch
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+
+  // Breakpoint: Review strategic themes
+  await ctx.breakpoint({
     question: `${themeIdentification.themes.length} strategic themes identified for ${quarter}. Review and approve themes before initiative mapping?`,
     title: 'Strategic Themes Review',
     context: {
@@ -151,15 +128,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: themeIdentification
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: Initiative Mapping and Prioritization
   const initiativeMapping = await ctx.task(initiativeMappingTask, {
     quarter,
@@ -171,7 +142,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Capacity Planning and Resource Allocation
-  let capacityPlanning = await ctx.task(capacityPlanningTask, {
+  const capacityPlanning = await ctx.task(capacityPlanningTask, {
     quarter,
     productName,
     initiatives: initiativeMapping.initiatives,
@@ -181,19 +152,8 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Capacity must not exceed 100%
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        capacityPlanning = await ctx.task(capacityPlanningTask, { ...{
-    quarter,
-    productName,
-    initiatives: initiativeMapping.initiatives,
-    teamCapacity,
-    committedPercentage,
-    exploratoryPercentage
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (capacityPlanning.totalCapacityUsed > 100) {
+    await ctx.breakpoint({
       question: `Capacity overallocated at ${capacityPlanning.totalCapacityUsed}%. Review and adjust initiative scope or team capacity?`,
       title: 'Capacity Overallocation Warning',
       context: {
@@ -202,15 +162,9 @@ export async function process(inputs, ctx) {
         committedCapacity: capacityPlanning.committedCapacity,
         exploratoryCapacity: capacityPlanning.exploratoryCapacity,
         recommendation: 'Reduce initiative scope or deprioritize lower-value initiatives'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 7: Timeline Creation and Milestone Planning
   const timelinePlanning = await ctx.task(timelinePlanningTask, {
@@ -255,7 +209,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Final Roadmap Document Generation
-  let roadmapDocument = await ctx.task(roadmapDocumentGenerationTask, {
+  const roadmapDocument = await ctx.task(roadmapDocumentGenerationTask, {
     quarter,
     productName,
     okrReview,
@@ -275,26 +229,8 @@ export async function process(inputs, ctx) {
   const roadmapScore = roadmapDocument.qualityScore || 0;
   const qualityMet = roadmapScore >= 85;
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      roadmapDocument = await ctx.task(roadmapDocumentGenerationTask, { ...{
-    quarter,
-    productName,
-    okrReview,
-    marketAnalysis,
-    customerResearch,
-    themeIdentification,
-    initiativeMapping,
-    capacityPlanning,
-    timelinePlanning,
-    newOKRs,
-    riskAssessment,
-    communicationPlan,
-    stakeholders
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: Roadmap Approval
+  await ctx.breakpoint({
     question: `Quarterly Roadmap Planning Complete for ${productName} - ${quarter}. Quality Score: ${roadmapScore}/100. ${qualityMet ? 'Roadmap meets quality standards!' : 'Roadmap may need refinement.'} Approve for stakeholder distribution?`,
     title: 'Quarterly Roadmap Approval',
     context: {
@@ -311,15 +247,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-roadmap.json`, format: 'json', content: roadmapDocument },
         { path: `artifacts/final-roadmap.md`, format: 'markdown', content: roadmapDocument.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -383,7 +313,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const okrReviewTask = defineTask('okr-review', (args, taskCtx) => ({
   kind: 'agent',

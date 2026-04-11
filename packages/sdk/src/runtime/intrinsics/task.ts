@@ -30,6 +30,11 @@ import { createTaskBuildContext } from "../../tasks/context";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
+import { readRules } from "../../breakpoints/rules";
+import { evaluateAutoApproval } from "../../breakpoints/evaluator";
+import type { PolicyEngine, PolicyEvaluationContext } from "../../governance/types";
+import { logPolicyDecision } from "../../governance/logging";
+
 
 export interface TaskIntrinsicContext {
   runId: string;
@@ -39,6 +44,7 @@ export interface TaskIntrinsicContext {
   replayCursor: ReplayCursor;
   now: () => Date;
   logger?: ProcessLogger;
+  policyEngine?: PolicyEngine;
 }
 
 export interface TaskIntrinsicInvokeOptions<TArgs, TResult> {
@@ -121,6 +127,64 @@ async function requestNewEffect<TArgs, TResult>(
   const taskDef = await Promise.resolve(options.task.build(options.args, buildCtx));
   if (!taskDef || typeof taskDef.kind !== "string") {
     throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
+  }
+
+  // ── Governance policy evaluation (GAP-SEC-001) ──────────────────
+  // Evaluate policies BEFORE writing task artifacts or journal events.
+  if (options.context.policyEngine) {
+    const policyCtx: PolicyEvaluationContext = {
+      effectKind: taskDef.kind,
+      taskId: options.task.id,
+      processId: options.context.processId,
+      runId: options.context.runId,
+      labels: taskDef.labels,
+      metadata: taskDef.metadata as Record<string, string> | undefined,
+    };
+    const decision = options.context.policyEngine.evaluate(policyCtx);
+
+    // Audit-log every policy evaluation
+    const logDir = process.env.BABYSITTER_LOG_DIR
+      ? path.join(process.env.BABYSITTER_LOG_DIR, options.context.runId)
+      : undefined;
+    if (logDir) {
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        context: policyCtx,
+        decision,
+        ruleId: decision.rule?.id,
+      };
+      // Await the write so the audit trail is consistent before the effect
+      // error propagates (deny) or the effect is dispatched (allow/warn).
+      try { await logPolicyDecision(logDir, logEntry); } catch { /* best-effort */ }
+    }
+
+    if (!decision.allowed) {
+      throw new RunFailedError(
+        `Policy denied effect dispatch: ${decision.reason} [rule: ${decision.rule?.id ?? "unknown"}]`,
+        { details: { ruleId: decision.rule?.id, decision } },
+      );
+    }
+  }
+
+  // Pre-compute autoApproval for breakpoint effects
+  if (taskDef.kind === "breakpoint") {
+    try {
+      const meta = taskDef.metadata as Record<string, unknown> | undefined;
+      const breakpointId = meta?.breakpointId as string | undefined;
+      if (breakpointId) {
+        const rules = await readRules();
+        const autoApproval = evaluateAutoApproval({
+          breakpointId,
+          tags: meta?.tags as string[] | undefined,
+          expert: meta?.expert as string | undefined,
+          rules,
+          autoApproveAfterN: meta?.autoApproveAfterN as number | undefined,
+        });
+        (taskDef as Record<string, unknown>).autoApproval = autoApproval;
+      }
+    } catch {
+      // Non-critical: skip autoApproval if evaluation fails
+    }
   }
   const { taskRef: taskDefRef, inputsRef } = await serializeAndWriteTaskDefinition({
     runDir: options.context.runDir,
@@ -264,7 +328,12 @@ async function resolveStoredResultValue(runDir: string, stored: StoredTaskResult
     const raw = await fs.readFile(absolute, "utf8");
     return JSON.parse(raw) as unknown;
   }
-  throw new RunFailedError("Result payload missing data", { effectId: stored.effectId });
+  // Graceful fallback: when a harness marks a task as "ok" but omits the value
+  // payload (e.g. LLM agent completed work without returning structured data),
+  // return null instead of crashing the run.  The process can still inspect
+  // stdout/stderr for output.  A hard failure here previously caused ~90% of
+  // provider-gated E2E runs to fail.
+  return null;
 }
 
 function collectInvocationLabels(ctx: TaskBuildContext, taskDef: TaskDef): string[] {

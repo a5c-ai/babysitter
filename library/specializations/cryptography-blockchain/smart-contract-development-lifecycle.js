@@ -71,7 +71,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing contract architecture');
 
-  let architectureDesign = await ctx.task(architectureDesignTask, {
+  const architectureDesign = await ctx.task(architectureDesignTask, {
     projectName,
     contractType,
     requirementsAnalysis,
@@ -82,19 +82,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...architectureDesign.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      architectureDesign = await ctx.task(architectureDesignTask, { ...{
-    projectName,
-    contractType,
-    requirementsAnalysis,
-    upgradeability,
-    blockchain,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Architecture Review
+  await ctx.breakpoint({
     question: `Contract architecture designed for ${projectName}. Review architecture decisions, contract hierarchy, and security patterns before implementation?`,
     title: 'Contract Architecture Review',
     context: {
@@ -104,15 +93,9 @@ export async function process(inputs, ctx) {
       securityPatterns: architectureDesign.securityPatterns,
       upgradePattern: architectureDesign.upgradePattern,
       files: architectureDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: SMART CONTRACT IMPLEMENTATION
   // ============================================================================
@@ -153,7 +136,7 @@ export async function process(inputs, ctx) {
   if (gasOptimization) {
     ctx.log('info', 'Phase 5: Optimizing gas consumption');
 
-    let gasOptimizationResult = await ctx.task(gasOptimizationTask, {
+    const gasOptimizationResult = await ctx.task(gasOptimizationTask, {
       projectName,
       contractImplementation,
       testingSuite,
@@ -163,6 +146,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...gasOptimizationResult.artifacts);
   }
+
   // ============================================================================
   // PHASE 6: SECURITY ANALYSIS
   // ============================================================================
@@ -186,18 +170,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...staticAnalysis.artifacts, ...dynamicAnalysis.artifacts);
 
   // Quality Gate: Security Analysis Review
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        gasOptimizationResult = await ctx.task(gasOptimizationTask, { ...{
-      projectName,
-      contractImplementation,
-      testingSuite,
-      framework,
-      outputDir
-    }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (staticAnalysis.criticalFindings > 0 || dynamicAnalysis.criticalFindings > 0) {
+    await ctx.breakpoint({
       question: `Security analysis found ${staticAnalysis.criticalFindings + dynamicAnalysis.criticalFindings} critical findings. Review and address security issues before proceeding?`,
       title: 'Security Analysis Review',
       context: {
@@ -211,15 +185,9 @@ export async function process(inputs, ctx) {
           ...staticAnalysis.artifacts.map(a => ({ path: a.path, format: 'json' })),
           ...dynamicAnalysis.artifacts.map(a => ({ path: a.path, format: 'json' }))
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: FORMAL VERIFICATION (if enabled)
@@ -238,6 +206,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...formalVerificationResult.artifacts);
   }
+
   // ============================================================================
   // PHASE 8: TESTNET DEPLOYMENT
   // ============================================================================
@@ -261,7 +230,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Verifying testnet deployment');
 
-  let testnetVerification = await ctx.task(testnetVerificationTask, {
+  const testnetVerification = await ctx.task(testnetVerificationTask, {
     projectName,
     testnetDeployment,
     testingSuite,
@@ -271,18 +240,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testnetVerification.artifacts);
 
-    let lastFeedback_phase9Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase9Review) {
-      testnetVerification = await ctx.task(testnetVerificationTask, { ...{
-    projectName,
-    testnetDeployment,
-    testingSuite,
-    blockchain,
-    outputDir
-  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
-    }
-  const phase9Review = await ctx.breakpoint({
+  // Quality Gate: Testnet Deployment Review
+  await ctx.breakpoint({
     question: `Testnet deployment complete for ${projectName}. Contracts verified: ${testnetVerification.contractsVerified}. All tests passing: ${testnetVerification.allTestsPassing}. Ready for audit preparation?`,
     title: 'Testnet Deployment Review',
     context: {
@@ -293,15 +252,9 @@ export async function process(inputs, ctx) {
       testResults: testnetVerification.testResults,
       explorerLinks: testnetDeployment.explorerLinks,
       files: testnetDeployment.artifacts.map(a => ({ path: a.path, format: 'json' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase9Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase9Review.approved) break;
-    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 10: AUDIT PREPARATION
   // ============================================================================
@@ -327,7 +280,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Creating deployment documentation');
 
-  let deploymentDocs = await ctx.task(deploymentDocumentationTask, {
+  const deploymentDocs = await ctx.task(deploymentDocumentationTask, {
     projectName,
     architectureDesign,
     contractImplementation,
@@ -338,19 +291,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...deploymentDocs.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      deploymentDocs = await ctx.task(deploymentDocumentationTask, { ...{
-    projectName,
-    architectureDesign,
-    contractImplementation,
-    testnetDeployment,
-    blockchain,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint
+  await ctx.breakpoint({
     question: `Smart Contract Development Lifecycle complete for ${projectName}. Contracts implemented: ${contractImplementation.contracts.length}. Test coverage: ${testingSuite.coverage}%. Security issues addressed. Ready for external audit and mainnet deployment preparation?`,
     title: 'Development Lifecycle Complete',
     context: {
@@ -369,15 +311,9 @@ export async function process(inputs, ctx) {
         { path: auditPreparation.auditPackagePath, format: 'markdown', label: 'Audit Package' },
         { path: deploymentDocs.deploymentGuidePath, format: 'markdown', label: 'Deployment Guide' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -418,7 +354,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

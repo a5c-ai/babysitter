@@ -70,9 +70,11 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderUserProfile(ctx),
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),
+    parts.renderParallelDispatch(ctx),
     parts.renderBreakpointHandling(ctx),
     parts.renderResultsPosting(ctx),
     parts.renderLoopControl(ctx),
@@ -84,6 +86,7 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
     parts.renderProcessGuidelines(ctx),
     parts.renderCriticalRules(ctx),
     parts.renderSeeAlso(ctx),
+    parts.renderProjectInstructions(ctx),
   ]);
 }
 
@@ -97,8 +100,10 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
     parts.renderProcessCreation(ctx),
     parts.renderIntentFidelityChecks(ctx),
     parts.renderProcessGuidelines(ctx),
+    parts.renderParallelPhaseDetection(ctx),
     parts.renderTaskKinds(ctx),
     parts.renderTaskExamples(ctx),
+    parts.renderProjectInstructions(ctx),
   ]);
 }
 
@@ -107,9 +112,11 @@ export function composeProcessCreatePrompt(ctx: PromptContext): string {
  */
 export function composeOrchestrationPrompt(ctx: PromptContext): string {
   return joinNonEmpty([
+    parts.renderRunOverlapDetection(ctx),
     parts.renderRunCreation(ctx),
     parts.renderIteration(ctx),
     parts.renderEffects(ctx),
+    parts.renderParallelDispatch(ctx),
     parts.renderBreakpointHandling(ctx),
     parts.renderResultsPosting(ctx),
     parts.renderLoopControl(ctx),

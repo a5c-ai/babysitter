@@ -121,3 +121,34 @@ export interface PromptContext {
  * a markdown string for that section. Returns empty string when not applicable.
  */
 export type PromptPart = (ctx: PromptContext) => string;
+
+/**
+ * GAP-PROMPT-001: Prompt strata for cache optimization and deterministic composition.
+ *
+ * - stable:    System identity, core rules, tool definitions (rarely changes, highly cacheable)
+ * - runtime:   Available capabilities, feature flags, workspace context (changes per session)
+ * - turnLocal: Recent messages, current task, turn-specific instructions (changes every turn)
+ */
+export type PromptStratum = 'stable' | 'runtime' | 'turnLocal';
+
+/**
+ * A prompt part tagged with its stratum classification and a human-readable name.
+ */
+export interface StratumTaggedPart {
+  /** Human-readable part name (e.g. 'renderCriticalRules') */
+  name: string;
+  /** Which stratum this part belongs to */
+  stratum: PromptStratum;
+  /** The render function */
+  render: PromptPart;
+}
+
+/**
+ * Options for strata-aware prompt composition.
+ */
+export interface ComposeByStrataOptions {
+  /** When true, add stratum header labels to the output for debugging */
+  showStrata?: boolean;
+  /** Custom separator between stratum groups (default: '\n\n---\n\n') */
+  separator?: string;
+}

@@ -37,6 +37,53 @@ export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
 }));
 ```
 
+### Shell Verification Task Example
+
+Use shell tasks for all deterministic verification gates. Shell tasks produce
+binary pass/fail results via exit codes that cannot be bypassed by agent
+reasoning.
+
+```javascript
+// Grep-based integration check
+export const grepCheckTask = defineTask('grep-integration-check', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Verify integration points exist',
+  shell: {
+    command: `cd ${args.projectDir || '.'} && grep -q "${args.pattern}" ${args.file}`,
+    expectedExitCode: 0,
+    timeout: 10000
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
+  }
+}));
+
+// Multi-check verification gate
+export const verificationGateTask = defineTask('verification-gate', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Deterministic verification gate',
+  shell: {
+    command: [
+      `cd ${args.projectDir || '.'}`,
+      'npx tsc --noEmit',
+      'npx eslint src/ --max-warnings=0',
+      'npx vitest run --reporter=verbose'
+    ].join(' && '),
+    expectedExitCode: 0,
+    timeout: 300000
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
+  }
+}));
+```
+
+Use `library/processes/shared/deterministic-quality-gate.js` for composable
+preset gates (createGrepCheck, createCompilationGate, createTestSuiteGate,
+createRuntimeSmokeTest).
+
 ### Skill Task Example
 
 Important: Check which skills are actually available before assigning the skill

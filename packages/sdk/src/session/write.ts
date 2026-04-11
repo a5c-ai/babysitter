@@ -18,6 +18,7 @@ export function serializeSessionState(state: SessionState): string {
   lines.push(`iteration: ${state.iteration}`);
   lines.push(`max_iterations: ${state.maxIterations}`);
   lines.push(`run_id: "${state.runId}"`);
+  lines.push(`run_ids: ${state.runIds.join(',')}`);
   lines.push(`started_at: "${state.startedAt}"`);
   lines.push(`last_iteration_at: "${state.lastIterationAt}"`);
   lines.push(`iteration_times: ${state.iterationTimes.join(',')}`);
@@ -125,6 +126,58 @@ export async function deleteSessionFile(filePath: string): Promise<boolean> {
       { filePath, originalError: err.message }
     );
   }
+}
+
+/**
+ * Bind a new run to the session, retiring the previous active run to history.
+ *
+ * Invariant: only one run is active at a time (`runId`).
+ * The previous `runId` (if any) is pushed into `runIds` as audit history.
+ * Idempotent: re-binding the same runId is a no-op.
+ *
+ * Throws if the caller tries to bind a new run while `runId` is still set
+ * and `retirePrevious` is not explicitly true — this forces callers to
+ * acknowledge that the prior run is done.
+ */
+export function addRunToSession(
+  state: SessionState,
+  runId: string,
+  options?: { retirePrevious?: boolean },
+): SessionState {
+  // Idempotent: already bound to this run
+  if (state.runId === runId) return state;
+
+  // Guard: refuse to silently overwrite an active run
+  if (state.runId && !options?.retirePrevious) {
+    throw new SessionError(
+      `Session already bound to run ${state.runId}. ` +
+      `Pass { retirePrevious: true } to retire it and bind ${runId}.`,
+      SessionErrorCode.RUN_ALREADY_ASSOCIATED,
+      { currentRunId: state.runId, requestedRunId: runId },
+    );
+  }
+
+  // Retire the old runId into history (if not already there)
+  const runIds = [...state.runIds];
+  if (state.runId && !runIds.includes(state.runId)) {
+    runIds.push(state.runId);
+  }
+  // Add the new one to the audit trail too
+  if (!runIds.includes(runId)) {
+    runIds.push(runId);
+  }
+
+  return { ...state, runId, runIds };
+}
+
+/**
+ * Get the historical audit trail of all run IDs for this session (GAP-SESSION-001).
+ * Falls back to [runId] when runIds is empty for backward compatibility
+ * with sessions created before the runIds field existed.
+ */
+export function getSessionRuns(state: SessionState): string[] {
+  if (state.runIds.length > 0) return state.runIds;
+  return state.runId ? [state.runId] : [];
 }
 
 /**

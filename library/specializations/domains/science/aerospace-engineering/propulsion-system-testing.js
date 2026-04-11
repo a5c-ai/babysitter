@@ -38,39 +38,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Test Cell Preparation
-  let cellPreparation = await ctx.task(cellPreparationTask, {
+  const cellPreparation = await ctx.task(cellPreparationTask, {
     projectName,
     testPlan: testPlanning,
     engineConfiguration,
     testFacility
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      cellPreparation = await ctx.task(cellPreparationTask, { ...{
-    projectName,
-    testPlan: testPlanning,
-    engineConfiguration,
-    testFacility
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Test readiness review
+  await ctx.breakpoint({
     question: `Test cell preparation complete for ${projectName}. All systems ready? Proceed with instrumentation setup?`,
     title: 'Test Readiness Review',
     context: {
       runId: ctx.runId,
       facilityStatus: cellPreparation.facilityStatus,
       safetyChecklist: cellPreparation.safetyChecklist
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Instrumentation Setup
   const instrumentation = await ctx.task(instrumentationSetupTask, {
     projectName,
@@ -88,7 +73,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Pre-Test Checkout
-  let preTestCheckout = await ctx.task(preTestCheckoutTask, {
+  const preTestCheckout = await ctx.task(preTestCheckoutTask, {
     projectName,
     cellPreparation,
     instrumentation,
@@ -97,33 +82,17 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Pre-test readiness
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        preTestCheckout = await ctx.task(preTestCheckoutTask, { ...{
-    projectName,
-    cellPreparation,
-    instrumentation,
-    dataAcquisition,
-    engineConfiguration
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (!preTestCheckout.allSystemsGo) {
+    await ctx.breakpoint({
       question: `Pre-test checkout found issues: ${preTestCheckout.issues.join(', ')}. Resolve issues before proceeding?`,
       title: 'Pre-Test Checkout Issues',
       context: {
         runId: ctx.runId,
         checkoutResults: preTestCheckout,
         recommendation: 'Address all open items before test execution'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 6: Test Execution
   const testExecution = await ctx.task(testExecutionTask, {
@@ -158,7 +127,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Test Report Generation
-  let testReport = await ctx.task(testReportTask, {
+  const testReport = await ctx.task(testReportTask, {
     projectName,
     testPlanning,
     testExecution,
@@ -166,18 +135,8 @@ export async function process(inputs, ctx) {
     performanceValidation
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      testReport = await ctx.task(testReportTask, { ...{
-    projectName,
-    testPlanning,
-    testExecution,
-    postTestProcessing,
-    performanceValidation
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Test Results Review
+  await ctx.breakpoint({
     question: `Test complete for ${projectName}. Performance validation: ${performanceValidation.overallStatus}. Approve test report?`,
     title: 'Test Results Approval',
     context: {
@@ -191,15 +150,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/test-report.json', format: 'json', content: testReport },
         { path: 'artifacts/test-report.md', format: 'markdown', content: testReport.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -217,7 +170,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const testPlanningTask = defineTask('test-planning', (args, taskCtx) => ({
   kind: 'agent',

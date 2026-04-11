@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Power Supply and Voltage Rail Validation');
 
-  let powerValidation = await ctx.task(powerSupplyValidationTask, {
+  const powerValidation = await ctx.task(powerSupplyValidationTask, {
     boardName,
     powerSupplyVoltages,
     preparation,
@@ -80,17 +80,8 @@ export async function process(inputs, ctx) {
   if (powerValidation.issues) issues.push(...powerValidation.issues);
 
   // Quality Gate: Power validation must pass before proceeding
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        powerValidation = await ctx.task(powerSupplyValidationTask, { ...{
-    boardName,
-    powerSupplyVoltages,
-    preparation,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!powerValidation.allRailsValid) {
+    await ctx.breakpoint({
       question: `Power supply validation for ${boardName} found issues: ${powerValidation.failedRails.join(', ')}. Review and resolve power issues before continuing?`,
       title: 'Power Supply Validation Failed',
       context: {
@@ -100,15 +91,9 @@ export async function process(inputs, ctx) {
         measurements: powerValidation.measurements,
         recommendation: 'Check power supply connections, decoupling capacitors, and regulator outputs',
         files: powerValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: CLOCK CONFIGURATION AND VALIDATION
@@ -133,7 +118,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Debug Interface Connection and Validation');
 
-  let debugValidation = await ctx.task(debugInterfaceValidationTask, {
+  const debugValidation = await ctx.task(debugInterfaceValidationTask, {
     boardName,
     targetMcu,
     debugInterface,
@@ -145,18 +130,8 @@ export async function process(inputs, ctx) {
   if (debugValidation.issues) issues.push(...debugValidation.issues);
 
   // Quality Gate: Debug connection
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        debugValidation = await ctx.task(debugInterfaceValidationTask, { ...{
-    boardName,
-    targetMcu,
-    debugInterface,
-    preparation,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!debugValidation.connectionSuccessful) {
+    await ctx.breakpoint({
       question: `Debug interface (${debugInterface}) connection to ${boardName} failed. Check debug probe and connections. Continue with troubleshooting?`,
       title: 'Debug Interface Connection Failed',
       context: {
@@ -165,15 +140,9 @@ export async function process(inputs, ctx) {
         targetMcu,
         troubleshootingSteps: debugValidation.troubleshootingSteps,
         files: debugValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: MEMORY TESTING
@@ -245,7 +214,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Bring-Up Report');
 
-  let bringUpReport = await ctx.task(bringUpReportTask, {
+  const bringUpReport = await ctx.task(bringUpReportTask, {
     boardName,
     hardwareRevision,
     targetMcu,
@@ -265,24 +234,9 @@ export async function process(inputs, ctx) {
   const overallSuccess = powerValidation.allRailsValid &&
     debugValidation.connectionSuccessful &&
     memoryTesting.allTestsPassed &&
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      bringUpReport = await ctx.task(bringUpReportTask, { ...{
-    boardName,
-    hardwareRevision,
-    targetMcu,
-    powerValidation,
-    clockValidation,
-    debugValidation,
-    memoryTesting,
-    peripheralsValidated,
-    firmwareLoadTest,
-    issues,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+    firmwareLoadTest.loadSuccessful;
+
+  await ctx.breakpoint({
     question: `Hardware Bring-Up Complete for ${boardName}. Overall status: ${overallSuccess ? 'SUCCESS' : 'ISSUES FOUND'}. ${issues.length} issues logged. Review bring-up report?`,
     title: 'Hardware Bring-Up Complete',
     context: {
@@ -301,15 +255,9 @@ export async function process(inputs, ctx) {
         { path: bringUpReport.reportPath, format: 'markdown', label: 'Bring-Up Report' },
         ...bringUpReport.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -354,7 +302,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

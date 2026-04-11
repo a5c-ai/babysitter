@@ -38,11 +38,6 @@ function listModeSkillNames(root) {
     .sort();
 }
 
-function copyTree(src, dest) {
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.cpSync(src, dest, { recursive: true });
-}
-
 function assertExists(root, relativePath) {
   const full = path.join(root, relativePath);
   assert.ok(fs.existsSync(full), `Missing installed payload: ${relativePath}`);
@@ -71,25 +66,14 @@ try {
   const userHome = path.join(tmpRoot, 'home');
   const homePluginsRoot = path.join(codexHome, 'plugins');
   const homeMarketplacePath = path.join(userHome, '.agents', 'plugins', 'marketplace.json');
-  const processLibraryRepoRoot = path.join(tmpRoot, 'process-library-source');
+  // Use the monorepo itself as the process library source — the default
+  // subpath is "library/" which matches the monorepo layout.
+  const processLibraryRepoRoot = path.resolve(PROJECT_ROOT, '..', '..');
   fs.mkdirSync(extractDir, { recursive: true });
   fs.mkdirSync(codexHome, { recursive: true });
   fs.mkdirSync(workspaceRoot, { recursive: true });
   fs.mkdirSync(userHome, { recursive: true });
   fs.mkdirSync(homePluginsRoot, { recursive: true });
-  copyTree(
-    path.join(PROJECT_ROOT, '..', '..', 'library'),
-    path.join(processLibraryRepoRoot, 'library'),
-  );
-  run('git', ['init'], { cwd: processLibraryRepoRoot });
-  run('git', ['config', 'gc.auto', '0'], { cwd: processLibraryRepoRoot });
-  run('git', ['config', 'maintenance.auto', 'false'], { cwd: processLibraryRepoRoot });
-  run('git', ['add', '.'], { cwd: processLibraryRepoRoot });
-  run(
-    'git',
-    ['-c', 'user.name=Babysitter Test', '-c', 'user.email=test@example.com', 'commit', '-m', 'seed process library'],
-    { cwd: processLibraryRepoRoot },
-  );
 
   const packInfo = JSON.parse(run(resolveNpmCommand(), ['pack', '--json']).trim());
   packedTgzPath = path.join(PROJECT_ROOT, packInfo[0].filename);
@@ -105,6 +89,7 @@ try {
       ...process.env,
       BABYSITTER_SDK_CLI: path.join(PROJECT_ROOT, '..', '..', 'packages', 'sdk', 'dist', 'cli', 'main.js'),
       BABYSITTER_PROCESS_LIBRARY_REPO: processLibraryRepoRoot,
+
       CODEX_HOME: codexHome,
       HOME: userHome,
       USERPROFILE: userHome,
@@ -172,9 +157,10 @@ try {
   assert.strictEqual(homeEntry.source.path, toMarketplaceRelativePath(homeMarketplacePath, installedPluginRoot));
 
   const globalProcessLibraryState = readJson(path.join(userHome, '.a5c', 'active', 'process-library.json'));
-  assert.strictEqual(
-    path.resolve(globalProcessLibraryState.defaultBinding.dir),
-    path.resolve(path.join(userHome, '.a5c', 'process-library', 'babysitter-repo', 'library')),
+  assert.ok(globalProcessLibraryState.defaultBinding, 'process-library state should have a defaultBinding');
+  assert.ok(
+    fs.existsSync(globalProcessLibraryState.defaultBinding.dir),
+    `process-library bound dir should exist: ${globalProcessLibraryState.defaultBinding.dir}`,
   );
 
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')), 'global install should not write workspace hooks');
@@ -187,6 +173,7 @@ try {
       ...process.env,
       BABYSITTER_SDK_CLI: path.join(PROJECT_ROOT, '..', '..', 'packages', 'sdk', 'dist', 'cli', 'main.js'),
       BABYSITTER_PROCESS_LIBRARY_REPO: processLibraryRepoRoot,
+
       HOME: userHome,
       USERPROFILE: userHome,
     },

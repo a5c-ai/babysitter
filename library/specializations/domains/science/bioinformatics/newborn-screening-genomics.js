@@ -30,7 +30,8 @@ export async function process(inputs, ctx) {
     outputDir = 'newborn-screening-output',
     includeCarrierStatus = true,
     includePGx = true
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -57,7 +58,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_phase3Review) {
         pathogenicResult = await ctx.task(pathogenicIdentificationTask, { ...{ projectName, panelVariants: panelResult.panelVariants, screeningPanel, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
       }
-  const phase3Review = await ctx.breakpoint({
+      const phase3Review = await ctx.breakpoint({
       question: `URGENT: ${pathogenicResult.actionableFindings} actionable pathogenic variants identified. Review immediately for clinical action.`,
       title: 'Actionable Findings Alert',
       context: { runId: ctx.runId, actionableVariants: pathogenicResult.actionable, urgentRecommendations: pathogenicResult.urgentRecommendations, files: pathogenicResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
@@ -68,9 +69,8 @@ export async function process(inputs, ctx) {
       });
       if (phase3Review.approved) break;
       lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 4: Carrier Status Determination
+    }
+    // Phase 4: Carrier Status Determination
   let carrierResult = null;
   if (includeCarrierStatus) {
     carrierResult = await ctx.task(carrierStatusTask, { projectName, variants: processingResult.variants, outputDir });
@@ -101,7 +101,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_finalApproval) {
       followupResult = await ctx.task(followupRecommendationsTask, { ...{ projectName, screeningResults: pathogenicResult, carrierStatus: carrierResult, pgxResults: pgxResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Newborn Screening Complete. ${pathogenicResult.actionableFindings} actionable, ${carrierResult?.carrierConditions || 0} carrier conditions. Approve clinical report?`,
     title: 'Newborn Screening Complete',
     context: { runId: ctx.runId, summary: { actionable: pathogenicResult.actionableFindings, carriers: carrierResult?.carrierConditions || 0, pgxFindings: pgxResult?.significantFindings || 0 }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Screening Report' }] },
@@ -130,7 +130,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/newborn-screening-genomics', timestamp: startTime, screeningPanel, urgentMode }
   };
 }
-  // Task Definitions
+// Task Definitions
 export const rapidDataProcessingTask = defineTask('rapid-data-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Rapid Processing - ${args.projectName}`,

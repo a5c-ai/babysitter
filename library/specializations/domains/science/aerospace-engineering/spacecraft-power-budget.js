@@ -18,7 +18,7 @@ export async function process(inputs, ctx) {
     if (lastFeedback_designApproval) {
       orbitPower = await ctx.task(orbitPowerTask, { ...{ projectName, orbitParameters, missionProfile }, feedback: lastFeedback_designApproval, attempt: attempt + 1 });
     }
-  const designApproval = await ctx.breakpoint({
+    const designApproval = await ctx.breakpoint({
     question: `Solar array sized at ${solarArrayDesign.area} m2 for ${projectName}. Proceed with battery sizing?`,
     title: 'Solar Array Review',
     context: { runId: ctx.runId, solarArrayDesign },
@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
       if (lastFeedback_reviewApproval) {
         powerBudget = await ctx.task(powerBudgetTask, { ...{ projectName, requirements, solarArrayDesign, batteryDesign, loadList }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
       }
-  const reviewApproval = await ctx.breakpoint({
+      const reviewApproval = await ctx.breakpoint({
       question: `Power margin ${(powerBudget.margin*100).toFixed(1)}% below 15% target. Review loads or increase capacity?`,
       title: 'Power Margin Warning',
       context: { runId: ctx.runId, powerBudget },
@@ -49,15 +49,14 @@ export async function process(inputs, ctx) {
       });
       if (reviewApproval.approved) break;
       lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } }
-
-  let eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { projectName, batteryDesign, orbitPower, loadList });
+    }
+    let eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { projectName, batteryDesign, orbitPower, loadList });
     let lastFeedback_finalApproval = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (lastFeedback_finalApproval) {
       eclipseAnalysis = await ctx.task(eclipseAnalysisTask, { ...{ projectName, batteryDesign, orbitPower, loadList }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `Power analysis complete for ${projectName}. Margin: ${(powerBudget.margin*100).toFixed(1)}%. Approve?`,
     title: 'Power Budget Approval',
     context: { runId: ctx.runId, summary: { margin: powerBudget.margin, solarPower: solarArrayDesign.power, batteryCapacity: batteryDesign.capacity } },
@@ -71,7 +70,6 @@ export async function process(inputs, ctx) {
   }
   return { success: true, projectName, powerBudget, solarArrayDesign, batteryDesign, report, metadata: { processId: 'spacecraft-power-budget', timestamp: ctx.now() } };
 }
-
 export const powerRequirementsTask = defineTask('power-requirements', (args, taskCtx) => ({
   kind: 'agent', title: `Power Requirements - ${args.projectName}`,
   agent: { name: 'general-purpose', prompt: { role: 'Spacecraft Power Engineer', task: 'Define power requirements', context: args,

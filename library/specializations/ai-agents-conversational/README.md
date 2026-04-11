@@ -927,6 +927,91 @@ Systems with multiple specialized agents working together to solve problems.
 - **Communities** - LangChain Discord, r/LangChain, AI Agent communities
 - **Conferences** - NeurIPS, ACL, EMNLP, Applied AI conferences
 
+## MCP Apps Sub-Specialization
+
+### Overview
+
+MCP Apps extend the Model Context Protocol by enabling interactive UIs that render inline in MCP-enabled hosts such as Claude Desktop, ChatGPT, VS Code, Goose, Postman, and other compliant chat clients. The core architectural pattern is **Tool + Resource**: every MCP App requires a Tool (called by the LLM/host, returns data) and a Resource (serves bundled HTML UI that displays the data). The tool's `_meta.ui.resourceUri` references the resource's URI.
+
+**Repository**: https://github.com/modelcontextprotocol/ext-apps
+**npm Package**: `@modelcontextprotocol/ext-apps`
+**Specification Version**: 2026-01-26 (stable)
+
+### Key Principles
+
+1. **Reference-code-first development** -- always clone the SDK repo for examples and API docs rather than relying on memory
+2. **Graceful degradation** -- always provide text fallbacks for non-UI hosts via the `content` array
+3. **CSP-first security** -- all network requests must be declared in CSP since apps run in sandboxed iframes with no same-origin server
+4. **Handler-before-connect pattern** -- register ALL handlers BEFORE calling `app.connect()`
+5. **Single-file bundling** -- mandatory via `vite-plugin-singlefile` for iframe compatibility
+
+### Process Catalog
+
+| Process File | Name | Description |
+|---|---|---|
+| `create-mcp-app.js` | Create MCP App (Greenfield) | Scaffolds a new interactive UI MCP App from scratch. Covers framework selection, project setup, Tool+Resource implementation, client UI with handler-before-connect pattern, single-file bundling, and verification against basic-host. |
+| `add-app-to-mcp-server.js` | Add Interactive UI to Existing MCP Server | Adds interactive UI capabilities to an existing MCP server. Analyzes existing tools for UI benefit, converts selected tools to App tools, preserves backward compatibility with text fallbacks, and adds build pipeline. |
+| `convert-web-app-to-mcp.js` | Convert Web App to Hybrid MCP App | Converts an existing web application into a hybrid that works both standalone in browser AND as an MCP App. Preserves original standalone functionality while adding MCP data path alongside. |
+| `migrate-openai-app-to-mcp.js` | Migrate OpenAI Apps SDK to MCP Apps | Migrates existing OpenAI Apps SDK applications to the open MCP Apps standard. Handles paradigm shift from synchronous global object to async App instance with event handlers. |
+
+### Skills Catalog
+
+| Skill Directory | Name | Description |
+|---|---|---|
+| `skills/mcp-app-scaffolding/` | MCP App Scaffolding | Scaffolds MCP App project structure with framework selection decision tree (React/Vanilla JS/Vue/Svelte/Preact/Solid), directory layout, dependencies, and entry points. |
+| `skills/mcp-csp-investigation/` | MCP CSP Investigation | Performs comprehensive Content Security Policy audit for MCP Apps in sandboxed iframes. Builds the app, traces every network origin to source, produces categorized domain lists. |
+| `skills/mcp-tool-resource-pattern/` | MCP Tool + Resource Pattern | Implements the core Tool + Resource architectural pattern with `registerAppTool`, `registerAppResource`, text fallback, structuredContent, and app-only helper tools. |
+| `skills/mcp-host-styling-integration/` | MCP Host Styling Integration | Integrates MCP App UI with host theming system using CSS variables with fallback values, `onhostcontextchanged` event, safe area insets, and display mode detection. |
+| `skills/mcp-app-verification/` | MCP App Verification | Runs comprehensive verification checklists for MCP Apps. Tests with basic-host, checks handler-before-connect invariant, text fallback, resource URI linking, single-file bundling, host styling. |
+| `skills/single-file-bundling/` | Single-File Bundling | Configures Vite with `vite-plugin-singlefile` for mandatory single-file HTML bundling. All assets (JS, CSS, images, fonts) must be inlined into a single HTML file. |
+
+### Agents Catalog
+
+| Agent Directory | Name | Role |
+|---|---|---|
+| `agents/mcp-app-architect/` | MCP App Architect | Senior architect for MCP Apps -- designs Tool + Resource patterns, transport configuration, data flow, and CSP security model. |
+| `agents/mcp-ui-developer/` | MCP UI Developer | Frontend specialist for MCP App client-side UI -- implements App lifecycle, event handlers, host styling, and framework-specific patterns. |
+| `agents/mcp-migration-specialist/` | MCP Migration Specialist | Expert in migrating applications to MCP Apps from other platforms (OpenAI Apps SDK, plain web apps). Handles paradigm shifts, API mapping, and verification. |
+| `agents/csp-security-auditor/` | CSP Security Auditor | Security specialist focused on Content Security Policy for MCP Apps in sandboxed iframes. Audits network origins and ensures complete CSP configuration. |
+
+### Usage Guide
+
+**Create a new MCP App from scratch:**
+```bash
+babysitter harness:call --harness claude-code \
+  --process library/specializations/ai-agents-conversational/create-mcp-app.js#process \
+  --workspace .
+```
+
+**Add UI to an existing MCP server:**
+```bash
+babysitter harness:call --harness claude-code \
+  --process library/specializations/ai-agents-conversational/add-app-to-mcp-server.js#process \
+  --workspace .
+```
+
+**Convert a web app to hybrid MCP App:**
+```bash
+babysitter harness:call --harness claude-code \
+  --process library/specializations/ai-agents-conversational/convert-web-app-to-mcp.js#process \
+  --workspace .
+```
+
+**Migrate from OpenAI Apps SDK:**
+```bash
+babysitter harness:call --harness claude-code \
+  --process library/specializations/ai-agents-conversational/migrate-openai-app-to-mcp.js#process \
+  --workspace .
+```
+
+### Critical Implementation Notes
+
+- **Handler-before-connect invariant**: Register ALL handlers (`ontoolinput`, `ontoolresult`, `onhostcontextchanged`, `onteardown`) BEFORE calling `app.connect()`. Violating this produces subtle, hard-to-debug failures.
+- **CSP silent failures**: All network requests fail SILENTLY without proper CSP declaration in sandboxed iframes. Missing even one origin causes silent failure.
+- **Text fallback**: Always include a `content` array with text representation for non-UI hosts.
+- **Resource URI linking**: Tool's `_meta.ui.resourceUri` must match the registered resource URI.
+- **vite-plugin-singlefile is mandatory**: Without it, assets will not load in the sandboxed iframe.
+
 ## Conclusion
 
-AI Agents and Conversational AI specialization is at the forefront of human-computer interaction, enabling natural, intelligent conversations and autonomous task execution. From simple chatbots to sophisticated multi-agent systems, this field combines natural language processing, machine learning, software engineering, and user experience design. By understanding agent architectures, conversation design patterns, and best practices for deployment and safety, practitioners can build powerful conversational AI systems that deliver real value while maintaining trust and reliability.
+AI Agents and Conversational AI specialization is at the forefront of human-computer interaction, enabling natural, intelligent conversations and autonomous task execution. From simple chatbots to sophisticated multi-agent systems, this field combines natural language processing, machine learning, software engineering, and user experience design. The addition of MCP Apps extends this into interactive UI delivery within AI chat hosts, creating a bridge between conversational AI and rich visual interfaces. By understanding agent architectures, conversation design patterns, MCP Apps patterns, and best practices for deployment and safety, practitioners can build powerful conversational AI systems that deliver real value while maintaining trust and reliability.

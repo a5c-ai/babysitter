@@ -34,14 +34,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { sdkName, languages, errorCategories, debugFeatures } = inputs;
 
-  ctx.log.info('Starting error handling and debugging support implementation', {
+  ctx.log('info','Starting error handling and debugging support implementation', {
     sdkName,
     languages,
     errorCategories
   });
 
   // Phase 1: Error Architecture Design
-  ctx.log.info('Phase 1: Designing error architecture');
+  ctx.log('info','Phase 1: Designing error architecture');
   const errorArchitecture = await ctx.task(errorArchitectureDesignTask, {
     sdkName,
     languages,
@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Error Catalog Creation
-  ctx.log.info('Phase 2: Creating error catalog');
+  ctx.log('info','Phase 2: Creating error catalog');
   const errorCatalog = await ctx.task(errorCatalogCreationTask, {
     sdkName,
     errorCategories,
@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Debug Mode Implementation
-  ctx.log.info('Phase 3: Implementing debug modes');
+  ctx.log('info','Phase 3: Implementing debug modes');
   const debugModes = await ctx.task(debugModeImplementationTask, {
     sdkName,
     languages,
@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Stack Trace and Context Handling
-  ctx.log.info('Phase 4: Implementing stack trace handling');
+  ctx.log('info','Phase 4: Implementing stack trace handling');
   const stackTraceHandling = await ctx.task(stackTraceHandlingTask, {
     sdkName,
     languages,
@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Developer Tools Integration
-  ctx.log.info('Phase 5: Creating developer debugging tools');
+  ctx.log('info','Phase 5: Creating developer debugging tools');
   let developerTools = await ctx.task(developerToolsIntegrationTask, {
     sdkName,
     languages,
@@ -105,7 +105,7 @@ export async function process(inputs, ctx) {
     });
     if (finalApproval.approved) break;
     lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }  ctx.log.info('Error handling and debugging support implementation completed');
+  }  ctx.log('info','Error handling and debugging support implementation completed');
 
   return {
     errorHandlingDesign: errorArchitecture.result,

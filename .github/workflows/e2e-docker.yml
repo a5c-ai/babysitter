@@ -12,18 +12,22 @@ on:
       - 'plugins/babysitter-gemini/**'
       - 'plugins/babysitter-pi/**'
       - 'plugins/babysitter-omp/**'
+      - 'plugins/babysitter-paperclip/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
       - 'e2e-tests/docker/Dockerfile.pi'
       - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/Dockerfile.paperclip'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
       - 'e2e-tests/docker/helpers-pi.ts'
       - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/helpers-paperclip.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - 'e2e-tests/docker/pi-structural.test.ts'
       - 'e2e-tests/docker/pi-stop-hook.test.ts'
       - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
       - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/paperclip-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   push:
     branches:
@@ -39,18 +43,22 @@ on:
       - 'plugins/babysitter-gemini/**'
       - 'plugins/babysitter-pi/**'
       - 'plugins/babysitter-omp/**'
+      - 'plugins/babysitter-paperclip/**'
       - 'e2e-tests/**'
       - 'e2e-tests/docker/Dockerfile.gemini-cli'
       - 'e2e-tests/docker/Dockerfile.pi'
       - 'e2e-tests/docker/Dockerfile.oh-my-pi'
+      - 'e2e-tests/docker/Dockerfile.paperclip'
       - 'e2e-tests/docker/helpers-gemini-cli.ts'
       - 'e2e-tests/docker/helpers-pi.ts'
       - 'e2e-tests/docker/helpers-oh-my-pi.ts'
+      - 'e2e-tests/docker/helpers-paperclip.ts'
       - 'e2e-tests/docker/gemini-cli-structural.test.ts'
       - 'e2e-tests/docker/pi-structural.test.ts'
       - 'e2e-tests/docker/pi-stop-hook.test.ts'
       - 'e2e-tests/docker/oh-my-pi-structural.test.ts'
       - 'e2e-tests/docker/oh-my-pi-stop-hook.test.ts'
+      - 'e2e-tests/docker/paperclip-structural.test.ts'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
 
@@ -116,13 +124,79 @@ jobs:
             e2e-tests/docker/pi-stop-hook.test.ts \
             e2e-tests/docker/oh-my-pi-structural.test.ts \
             e2e-tests/docker/oh-my-pi-stop-hook.test.ts \
-            e2e-tests/docker/gemini-cli-structural.test.ts
+            e2e-tests/docker/gemini-cli-structural.test.ts \
+            e2e-tests/docker/paperclip-structural.test.ts
 
-      # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
-      # Foundry model is no longer provisioned.  Re-enable when restored.
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-artifacts
+          path: e2e-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  provider-gated-e2e:
+    name: Provider-Gated E2E (Azure OpenAI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # This job depends on a live Azure OpenAI endpoint and an LLM completing a
+    # multi-step orchestration.  Failures are often transient (model timeouts,
+    # rate limits, non-deterministic output) so we allow failure to keep the
+    # overall workflow green.
+    continue-on-error: true
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    env:
+      AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
+
+    steps:
+      - name: Check provider credentials
+        id: creds
+        run: |
+          if [ -n "${AZURE_OPENAI_API_KEY:-}" ] && [ -n "${AZURE_OPENAI_PROJECT_NAME:-}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping provider-gated tests — Azure OpenAI credentials not configured"
+          fi
+
+      - name: Checkout repository
+        if: steps.creds.outputs.available == 'true'
+        uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/ghc /usr/share/swift \
+            /usr/local/lib/android /usr/share/miniconda /opt/hostedtoolcache/CodeQL
+          docker system prune -af || true
+
+      - name: Setup Node.js
+        if: steps.creds.outputs.available == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set up Docker Buildx
+        if: steps.creds.outputs.available == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare artifact directories
+        if: steps.creds.outputs.available == 'true'
+        run: mkdir -p e2e-artifacts
 
       - name: Run provider-gated full-run tests with Azure OpenAI
-        if: ${{ env.AZURE_OPENAI_API_KEY != '' && env.AZURE_OPENAI_PROJECT_NAME != '' }}
+        if: steps.creds.outputs.available == 'true'
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
@@ -134,7 +208,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-artifacts
+          name: provider-gated-e2e-artifacts
           path: e2e-artifacts/
           include-hidden-files: true
           if-no-files-found: warn

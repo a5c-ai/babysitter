@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Running static code analysis');
-  let staticCodeAnalysis = await ctx.task(staticCodeAnalysisTask, {
+  const staticCodeAnalysis = await ctx.task(staticCodeAnalysisTask, {
     projectName,
     inventory: inventoryCollection,
     codeQualityTools,
@@ -69,17 +69,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...staticCodeAnalysis.artifacts);
 
   // Quality Gate: Code analysis completion
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        staticCodeAnalysis = await ctx.task(staticCodeAnalysisTask, { ...{
-    projectName,
-    inventory: inventoryCollection,
-    codeQualityTools,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (staticCodeAnalysis.completeness < 80) {
+    await ctx.breakpoint({
       question: `Static code analysis completeness: ${staticCodeAnalysis.completeness}%. Some areas could not be analyzed. Proceed with partial analysis or investigate blockers?`,
       title: 'Code Analysis Completeness',
       context: {
@@ -88,15 +79,9 @@ export async function process(inputs, ctx) {
         completeness: staticCodeAnalysis.completeness,
         blockers: staticCodeAnalysis.blockers,
         recommendation: 'Review blockers and ensure critical code paths are analyzed'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: ARCHITECTURE ANALYSIS
@@ -117,7 +102,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Analyzing dependencies');
-  let dependencyAnalysis = await ctx.task(dependencyAnalysisTask, {
+  const dependencyAnalysis = await ctx.task(dependencyAnalysisTask, {
     projectName,
     inventory: inventoryCollection,
     outputDir
@@ -126,16 +111,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...dependencyAnalysis.artifacts);
 
   // Quality Gate: Security vulnerabilities
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        dependencyAnalysis = await ctx.task(dependencyAnalysisTask, { ...{
-    projectName,
-    inventory: inventoryCollection,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (dependencyAnalysis.criticalVulnerabilities > 0) {
+    await ctx.breakpoint({
       question: `Found ${dependencyAnalysis.criticalVulnerabilities} critical security vulnerabilities in dependencies. These should be addressed before or during migration. Review vulnerability report?`,
       title: 'Critical Security Vulnerabilities',
       context: {
@@ -145,15 +122,9 @@ export async function process(inputs, ctx) {
         highVulnerabilities: dependencyAnalysis.highVulnerabilities,
         vulnerabilityReport: dependencyAnalysis.vulnerabilityReport,
         recommendation: 'Prioritize addressing critical vulnerabilities in migration plan'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: KNOWLEDGE ASSESSMENT
@@ -227,7 +198,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating recommendations report');
-  let recommendationsReport = await ctx.task(recommendationsReportTask, {
+  const recommendationsReport = await ctx.task(recommendationsReportTask, {
     projectName,
     inventory: inventoryCollection,
     codeAnalysis: staticCodeAnalysis,
@@ -242,23 +213,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendationsReport.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      recommendationsReport = await ctx.task(recommendationsReportTask, { ...{
-    projectName,
-    inventory: inventoryCollection,
-    codeAnalysis: staticCodeAnalysis,
-    architectureAnalysis,
-    dependencyAnalysis,
-    knowledgeAssessment,
-    technicalDebt: technicalDebtQuantification,
-    riskAssessment,
-    readinessScoring,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Assessment Review
+  await ctx.breakpoint({
     question: `Legacy Codebase Assessment complete for ${projectName}. Readiness Score: ${readinessScoring.overallScore}/100. ${readinessScoring.overallScore >= 60 ? 'System is reasonably ready for migration.' : 'Significant preparation needed before migration.'} Review findings and approve assessment?`,
     title: 'Legacy Codebase Assessment Review',
     context: {
@@ -273,15 +229,9 @@ export async function process(inputs, ctx) {
         format: a.format || 'json',
         label: a.label
       }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -349,7 +299,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

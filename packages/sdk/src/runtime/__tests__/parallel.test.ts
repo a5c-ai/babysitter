@@ -24,13 +24,35 @@ function makeAction(effectId: string): EffectAction {
 }
 
 describe("runParallelAll – input validation", () => {
-  test("throws descriptive error when a Promise is passed instead of a thunk", async () => {
+  test("recovers when Promises are passed instead of thunks", async () => {
     const promise = Promise.resolve(42);
     // Common mistake: [ctx.task(...)] instead of [() => ctx.task(...)]
     const thunks = [promise] as unknown as Array<() => number>;
 
-    await expect(runParallelAll(thunks)).rejects.toThrow(/thunk/i);
-    await expect(runParallelAll(thunks)).rejects.toThrow(/\(\) =>/);
+    // parallel.all now auto-recovers by wrapping existing promises as thunks
+    const results = await runParallelAll(thunks);
+    expect(results).toEqual([42]);
+  });
+
+  test("recovers rejecting Promises and collects pending actions", async () => {
+    const actionA = makeAction("A");
+    const actionB = makeAction("B");
+    // Simulate [ctx.task(...), ctx.task(...)] where both reject with EffectRequestedError
+    const promises = [
+      Promise.reject(new EffectRequestedError(actionA)),
+      Promise.reject(new EffectRequestedError(actionB)),
+    ] as unknown as Array<() => unknown>;
+
+    await expect(runParallelAll(promises)).rejects.toThrow(ParallelPendingError);
+    try {
+      await runParallelAll([
+        Promise.reject(new EffectRequestedError(actionA)),
+        Promise.reject(new EffectRequestedError(actionB)),
+      ] as unknown as Array<() => unknown>);
+    } catch (err) {
+      expect(err).toBeInstanceOf(ParallelPendingError);
+      expect((err as ParallelPendingError).batch.actions).toHaveLength(2);
+    }
   });
 
   test("throws descriptive error when a plain value is passed instead of a thunk", async () => {

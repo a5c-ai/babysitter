@@ -21,7 +21,7 @@ if ! command -v babysitter &>/dev/null; then
   fi
 fi
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_ROOT/.a5c/logs}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
 mkdir -p "$LOG_DIR" 2>/dev/null
 
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-user-prompt-submit-$$.json")

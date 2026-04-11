@@ -26,7 +26,8 @@ export async function process(inputs, ctx) {
     subject,
     assessmentType = 'pia', // 'pia', 'dpia', 'threshold'
     outputDir = 'pia-output'
-  } = inputs;
+  }
+  = inputs;
 
   const startTime = ctx.now();
   const artifacts = [];
@@ -92,7 +93,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
       }
-  const phase4Review = await ctx.breakpoint({
+      const phase4Review = await ctx.breakpoint({
       question: `PIA ${assessmentId} identified ${highRisks.length} high privacy risks. Review risks and mitigation measures?`,
       title: 'High Privacy Risk Alert',
       context: {
@@ -108,9 +109,8 @@ export async function process(inputs, ctx) {
       });
       if (phase4Review.approved) break;
       lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
-
-  // Phase 5: Mitigation Measures
+    }
+    // Phase 5: Mitigation Measures
   const mitigation = await ctx.task(mitigationMeasuresTask, {
     assessmentId,
     risks: riskAssessment.risks,
@@ -173,7 +173,7 @@ export async function process(inputs, ctx) {
     outputDir
   }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
     }
-  const finalApproval = await ctx.breakpoint({
+    const finalApproval = await ctx.breakpoint({
     question: `PIA ${assessmentId} complete. Residual risk: ${residualRisk.overallLevel}. ${mitigation.measures.length} mitigations recommended. Approve assessment?`,
     title: 'PIA Approval Review',
     context: {
@@ -217,7 +217,6 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/privacy-impact-assessment', timestamp: startTime }
   };
 }
-
 export const thresholdAssessmentTask = defineTask('threshold-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct threshold assessment',

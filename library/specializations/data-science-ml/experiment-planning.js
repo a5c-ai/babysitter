@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Hypothesis Formulation
-  let hypothesisFormulation = await ctx.task(hypothesisFormulationTask, {
+  const hypothesisFormulation = await ctx.task(hypothesisFormulationTask, {
     projectName,
     experimentGoal,
     baselineModel,
@@ -53,18 +53,9 @@ export async function process(inputs, ctx) {
       hypothesis: hypothesisFormulation
     };
   }
-  let lastFeedback_qualityGateApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval) {
-      hypothesisFormulation = await ctx.task(hypothesisFormulationTask, { ...{
-    projectName,
-    experimentGoal,
-    baselineModel,
-    targetMetric,
-    context: inputs.context || {}
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-    }
-  const qualityGateApproval = await ctx.breakpoint({
+
+  // Breakpoint: Review hypothesis with stakeholders
+  await ctx.breakpoint({
     question: `Review hypothesis for ${projectName}: "${hypothesisFormulation.hypothesisStatement}". Is this hypothesis clear, testable, and aligned with business goals?`,
     title: 'Hypothesis Review',
     context: {
@@ -78,15 +69,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hypothesisFormulation
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval.approved) break;
-    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Statistical Test Planning
   const statisticalPlan = await ctx.task(statisticalTestPlanningTask, {
     projectName,
@@ -98,7 +83,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Sample Size Calculation
-  let sampleSizeCalculation = await ctx.task(sampleSizeCalculationTask, {
+  const sampleSizeCalculation = await ctx.task(sampleSizeCalculationTask, {
     projectName,
     hypothesis: hypothesisFormulation,
     statisticalPlan,
@@ -113,20 +98,8 @@ export async function process(inputs, ctx) {
   const expectedDailyTraffic = inputs.expectedDailyTraffic || sampleSizeCalculation.estimatedDailyTraffic || 0;
   const estimatedDuration = requiredSampleSize / expectedDailyTraffic;
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        sampleSizeCalculation = await ctx.task(sampleSizeCalculationTask, { ...{
-    projectName,
-    hypothesis: hypothesisFormulation,
-    statisticalPlan,
-    targetMetric,
-    confidenceLevel,
-    minimumDetectableEffect: minimumDetectableEffect || statisticalPlan.recommendedMDE,
-    expectedVariance: statisticalPlan.expectedVariance
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (estimatedDuration > experimentDuration * 2) {
+    await ctx.breakpoint({
       question: `Estimated experiment duration (${Math.ceil(estimatedDuration)} days) exceeds 2x the target duration (${experimentDuration} days). Adjust parameters or proceed?`,
       title: 'Sample Size Warning',
       context: {
@@ -135,15 +108,9 @@ export async function process(inputs, ctx) {
         expectedDailyTraffic,
         estimatedDuration: Math.ceil(estimatedDuration),
         recommendation: 'Consider increasing MDE, reducing confidence level, or extending experiment duration'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 4: A/B Test Configuration Design
   const abTestConfig = await ctx.task(abTestConfigurationTask, {
@@ -157,7 +124,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Metric Definition and Instrumentation
-  let metricDefinition = await ctx.task(metricDefinitionTask, {
+  const metricDefinition = await ctx.task(metricDefinitionTask, {
     projectName,
     hypothesis: hypothesisFormulation,
     targetMetric,
@@ -165,18 +132,8 @@ export async function process(inputs, ctx) {
     statisticalPlan
   });
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      metricDefinition = await ctx.task(metricDefinitionTask, { ...{
-    projectName,
-    hypothesis: hypothesisFormulation,
-    targetMetric,
-    abTestConfig,
-    statisticalPlan
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Breakpoint: Review metrics and instrumentation
+  await ctx.breakpoint({
     question: `Review metrics definition for ${projectName}. Primary metric: ${targetMetric}. Secondary metrics: ${metricDefinition.secondaryMetrics.length}. Guardrail metrics: ${metricDefinition.guardrailMetrics.length}. Is instrumentation complete?`,
     title: 'Metrics Review',
     context: {
@@ -189,15 +146,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: metricDefinition
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 6: Randomization Strategy
   const randomizationStrategy = await ctx.task(randomizationStrategyTask, {
     projectName,
@@ -246,7 +197,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Risk Assessment and Mitigation
-  let riskAssessment = await ctx.task(riskAssessmentTask, {
+  const riskAssessment = await ctx.task(riskAssessmentTask, {
     projectName,
     hypothesis: hypothesisFormulation,
     abTestConfig,
@@ -258,36 +209,21 @@ export async function process(inputs, ctx) {
   const highSeverityRisks = riskAssessment.risks.filter(r => r.severity === 'high');
   if (highSeverityRisks.length > 0) {
     const unmitigatedRisks = highSeverityRisks.filter(r => !r.mitigationPlan || r.mitigationPlan.trim() === '');
-        let lastFeedback_qualityGateApproval3 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval3) {
-          riskAssessment = await ctx.task(riskAssessmentTask, { ...{
-    projectName,
-    hypothesis: hypothesisFormulation,
-    abTestConfig,
-    implementationPlan,
-    guardrailMetrics: metricDefinition.guardrailMetrics
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-        }
-  const qualityGateApproval3 = await ctx.breakpoint({
+    if (unmitigatedRisks.length > 0) {
+      await ctx.breakpoint({
         question: `Found ${unmitigatedRisks.length} high-severity risks without mitigation plans. Review and approve risk mitigation strategies?`,
         title: 'Risk Mitigation Review',
         context: {
           runId: ctx.runId,
           highSeverityRisks: unmitigatedRisks,
           recommendation: 'Ensure all high-severity risks have documented mitigation plans before proceeding'
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval3.approved) break;
-        lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 12: Experiment Documentation Generation
-  let experimentDoc = await ctx.task(experimentDocumentationTask, {
+  const experimentDoc = await ctx.task(experimentDocumentationTask, {
     projectName,
     hypothesisFormulation,
     statisticalPlan,
@@ -304,27 +240,8 @@ export async function process(inputs, ctx) {
     confidenceLevel
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      experimentDoc = await ctx.task(experimentDocumentationTask, { ...{
-    projectName,
-    hypothesisFormulation,
-    statisticalPlan,
-    sampleSizeCalculation,
-    abTestConfig,
-    metricDefinition,
-    randomizationStrategy,
-    monitoringPlan,
-    dataQualityPlan,
-    analysisPlan,
-    implementationPlan,
-    riskAssessment,
-    experimentDuration,
-    confidenceLevel
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Experiment Approval
+  await ctx.breakpoint({
     question: `Experiment planning complete for ${projectName}. Review final experiment design and approve to proceed with implementation?`,
     title: 'Experiment Planning Approval',
     context: {
@@ -338,15 +255,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/final-experiment-plan.json', format: 'json', content: experimentDoc.json },
         { path: 'artifacts/final-experiment-plan.md', format: 'markdown', content: experimentDoc.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -418,7 +329,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const hypothesisFormulationTask = defineTask('hypothesis-formulation', (args, taskCtx) => ({
   kind: 'agent',

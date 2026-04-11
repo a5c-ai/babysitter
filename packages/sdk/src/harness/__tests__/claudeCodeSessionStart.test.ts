@@ -156,10 +156,10 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
   // Test: Warning logged when CLAUDE_ENV_FILE is unset
   // ---------------------------------------------------------------------------
 
-  it("warns when CLAUDE_ENV_FILE is unset (not just in verbose mode)", async () => {
+  it("persists session ID to fallback file when CLAUDE_ENV_FILE is unset", async () => {
     delete process.env.CLAUDE_ENV_FILE;
 
-    const sessionId = "env-file-warning-test";
+    const sessionId = "env-file-fallback-test";
     const code = await callWithStdin(
       JSON.stringify({ session_id: sessionId }),
       {
@@ -167,16 +167,16 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
         harness: "claude-code",
         stateDir,
         json: true,
-        // Note: verbose is NOT set — the warning should still appear
       },
     );
 
     expect(code).toBe(0);
-    // Bug #107: When CLAUDE_ENV_FILE is not set, the session ID cannot be
-    // persisted to the env file. The handler should warn about this so
-    // failures are visible, not just silently swallowed.
-    const stderr = getStderr();
-    expect(stderr).toMatch(/CLAUDE_ENV_FILE/i);
+    // When CLAUDE_ENV_FILE is unavailable (anthropics/claude-code#15840),
+    // the handler should still persist the session ID via the fallback file.
+    const output = JSON.parse(getStdout().trim()) as Record<string, unknown>;
+    const hookOutput = output.hookSpecificOutput as Record<string, unknown>;
+    expect(hookOutput.hookEventName).toBe("SessionStart");
+    expect(hookOutput.additionalContext).toContain(sessionId);
   });
 
   // ---------------------------------------------------------------------------
@@ -275,7 +275,10 @@ describe("Claude Code session-start hook (issue #107 regressions)", () => {
     );
 
     expect(code).toBe(0);
-    expect(getStdout().trim()).toBe("{}");
+    const output = JSON.parse(getStdout().trim()) as Record<string, unknown>;
+    const hookOutput = output.hookSpecificOutput as Record<string, unknown>;
+    expect(hookOutput.hookEventName).toBe("SessionStart");
+    expect(hookOutput.additionalContext).toContain(sessionId);
 
     // Verify session ID was appended to env file
     const envContent = await fs.readFile(envFilePath, "utf8");

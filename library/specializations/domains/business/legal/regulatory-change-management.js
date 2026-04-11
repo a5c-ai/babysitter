@@ -53,8 +53,9 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/legal/regulatory-change-management', timestamp: startTime }
     };
   }
+
   // Phase 2: Impact Assessment
-  let impactAssessment = await ctx.task(regulatoryImpactAssessmentTask, {
+  const impactAssessment = await ctx.task(regulatoryImpactAssessmentTask, {
     changes: monitoring.changes,
     outputDir
   });
@@ -62,30 +63,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate for high impact changes
   const highImpactChanges = impactAssessment.assessments.filter(a => a.impactLevel === 'high');
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        impactAssessment = await ctx.task(regulatoryImpactAssessmentTask, { ...{
-    changes: monitoring.changes,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (highImpactChanges.length > 0) {
+    await ctx.breakpoint({
       question: `${highImpactChanges.length} high-impact regulatory changes identified. Review impact assessments?`,
       title: 'High Impact Regulatory Changes',
       context: {
         runId: ctx.runId,
         highImpactChanges: highImpactChanges.map(c => ({ name: c.changeName, impact: c.impactLevel })),
         files: impactAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   if (action === 'assess') {
     return {
@@ -97,6 +85,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/legal/regulatory-change-management', timestamp: startTime }
     };
   }
+
   // Phase 3: Implementation Planning
   const implementationPlanning = await ctx.task(implementationPlanningTask, {
     assessments: impactAssessment.assessments,
@@ -114,19 +103,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...communication.artifacts);
 
   // Phase 5: Compliance Tracking
-  let tracking = await ctx.task(complianceTrackingTask, {
+  const tracking = await ctx.task(complianceTrackingTask, {
     plans: implementationPlanning.plans,
     outputDir
   });
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      tracking = await ctx.task(complianceTrackingTask, { ...{
-    plans: implementationPlanning.plans,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  artifacts.push(...tracking.artifacts);
+
+  await ctx.breakpoint({
     question: `Regulatory change management cycle complete. ${monitoring.changes.length} changes processed, ${implementationPlanning.plans.length} implementation plans created. Approve?`,
     title: 'Regulatory Change Management Review',
     context: {
@@ -137,15 +120,9 @@ export async function process(inputs, ctx) {
         plansCreated: implementationPlanning.plans.length
       },
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     action,
@@ -158,7 +135,8 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/legal/regulatory-change-management', timestamp: startTime }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 export const regulatoryMonitoringTask = defineTask('regulatory-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Monitor regulatory changes',

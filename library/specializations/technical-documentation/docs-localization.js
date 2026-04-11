@@ -94,7 +94,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing source content and assessing i18n readiness');
 
-  let contentInventory = await ctx.task(contentInventoryTask, {
+  const contentInventory = await ctx.task(contentInventoryTask, {
     projectName,
     docsPath,
     sourceLocale,
@@ -115,19 +115,10 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // Quality Gate: i18n readiness issues
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        contentInventory = await ctx.task(contentInventoryTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    includeUIStrings,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (contentInventory.i18nIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Found ${contentInventory.i18nIssues.length} i18n readiness issues (hardcoded text, non-translatable strings, locale-specific formats). Review and fix before proceeding?`,
       title: 'I18n Readiness Assessment',
       context: {
@@ -137,15 +128,9 @@ export async function process(inputs, ctx) {
         i18nIssues: contentInventory.i18nIssues,
         recommendations: contentInventory.recommendations,
         files: contentInventory.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: GLOSSARY AND TERMINOLOGY MANAGEMENT
@@ -153,7 +138,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Building terminology glossary and translation memory');
 
-  let glossarySetup = await ctx.task(glossarySetupTask, {
+  const glossarySetup = await ctx.task(glossarySetupTask, {
     projectName,
     docsPath,
     sourceLocale,
@@ -165,20 +150,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...glossarySetup.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      glossarySetup = await ctx.task(glossarySetupTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    targetLocales,
-    glossaryPath,
-    contentInventory,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Breakpoint: Review glossary
+  await ctx.breakpoint({
     question: `Glossary created with ${glossarySetup.termCount} terms. Review terminology and approve for translation?`,
     title: 'Glossary Review',
     context: {
@@ -188,15 +161,9 @@ export async function process(inputs, ctx) {
       termsByCategory: glossarySetup.termsByCategory,
       doNotTranslateList: glossarySetup.doNotTranslateList,
       files: glossarySetup.artifacts.map(a => ({ path: a.path, format: a.format || 'csv' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: TRANSLATION MEMORY PREPARATION
   // ============================================================================
@@ -245,13 +212,14 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // ============================================================================
   // PHASE 5: SOURCE CONTENT EXTRACTION AND PREPARATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Extracting translatable content and preparing translation files');
 
-  let contentExtraction = await ctx.task(contentExtractionTask, {
+  const contentExtraction = await ctx.task(contentExtractionTask, {
     projectName,
     docsPath,
     sourceLocale,
@@ -282,21 +250,9 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        contentExtraction = await ctx.task(contentExtractionTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    contentInventory,
-    translationProvider,
-    includeUIStrings,
-    contextScreenshots,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+    artifacts.push(...pseudoLocResults.artifacts);
+
+    await ctx.breakpoint({
       question: 'Pseudo-localization generated. Review for layout issues, text expansion problems, and encoding issues before proceeding with actual translation?',
       title: 'Pseudo-Localization Review',
       context: {
@@ -305,15 +261,9 @@ export async function process(inputs, ctx) {
         expansionFactor: pseudoLocResults.expansionFactor,
         issuesFound: pseudoLocResults.issuesFound,
         files: pseudoLocResults.artifacts.map(a => ({ path: a.path, format: a.format || 'html' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: TRANSLATION EXECUTION (PARALLEL BY LOCALE)
@@ -349,21 +299,8 @@ export async function process(inputs, ctx) {
     r.translationQuality < acceptanceCriteria.minTranslationQuality
   );
 
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        contentExtraction = await ctx.task(contentExtractionTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    contentInventory,
-    translationProvider,
-    includeUIStrings,
-    contextScreenshots,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (localesWithIssues.length > 0) {
+    await ctx.breakpoint({
       question: `${localesWithIssues.length} locales have quality issues (missing translations or low quality). Review and address issues?`,
       title: 'Translation Quality Issues',
       context: {
@@ -376,15 +313,9 @@ export async function process(inputs, ctx) {
         })),
         acceptanceCriteria,
         files: localesWithIssues.flatMap(r => r.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: TRANSLATION QUALITY ASSURANCE (PARALLEL BY LOCALE)
@@ -411,21 +342,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: QA failures
   const failedQA = qaResults.filter(r => !r.passed);
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        contentExtraction = await ctx.task(contentExtractionTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    contentInventory,
-    translationProvider,
-    includeUIStrings,
-    contextScreenshots,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (failedQA.length > 0) {
+    await ctx.breakpoint({
       question: `${failedQA.length} locales failed QA checks. Review and fix quality issues before proceeding?`,
       title: 'Translation QA Failures',
       context: {
@@ -438,15 +356,9 @@ export async function process(inputs, ctx) {
           formatErrors: r.formatErrors
         })),
         files: failedQA.flatMap(r => r.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: LOCALIZED CONTENT INTEGRATION
@@ -513,21 +425,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Localization testing failures
   const testFailures = testingResults.filter(r => r.failedTests > 0);
-      let lastFeedback_qualityGateApproval3 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval3) {
-        contentExtraction = await ctx.task(contentExtractionTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    contentInventory,
-    translationProvider,
-    includeUIStrings,
-    contextScreenshots,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-      }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  if (testFailures.length > 0) {
+    await ctx.breakpoint({
       question: `${testFailures.length} locales have test failures (broken links, rendering issues, encoding problems). Review and fix before deployment?`,
       title: 'Localization Testing Failures',
       context: {
@@ -538,15 +437,9 @@ export async function process(inputs, ctx) {
           failures: r.failures
         })),
         files: testFailures.flatMap(r => r.artifacts).map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval3.approved) break;
-      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 12: NATIVE REVIEWER FEEDBACK (IF REQUIRED)
@@ -564,21 +457,9 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-      let lastFeedback_phase12Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase12Review) {
-        contentExtraction = await ctx.task(contentExtractionTask, { ...{
-    projectName,
-    docsPath,
-    sourceLocale,
-    contentInventory,
-    translationProvider,
-    includeUIStrings,
-    contextScreenshots,
-    outputDir
-  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
-      }
-  const phase12Review = await ctx.breakpoint({
+    artifacts.push(...nativeReviewResults.artifacts);
+
+    await ctx.breakpoint({
       question: `Native review initiated for ${targetLocales.length} locales. Review feedback and incorporate changes?`,
       title: 'Native Reviewer Feedback',
       context: {
@@ -586,15 +467,9 @@ export async function process(inputs, ctx) {
         reviewStatus: nativeReviewResults.reviewStatus,
         feedbackSummary: nativeReviewResults.feedbackSummary,
         files: nativeReviewResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase12Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase12Review.approved) break;
-      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 13: LOCALE SWITCHER AND I18N INFRASTRUCTURE
@@ -619,7 +494,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Calculating final translation metrics and quality scores');
 
-  let metricsAssessment = await ctx.task(translationMetricsTask, {
+  const metricsAssessment = await ctx.task(translationMetricsTask, {
     projectName,
     sourceLocale,
     targetLocales,
@@ -638,22 +513,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Overall quality assessment
   const overallQuality = metricsAssessment.overallQualityScore;
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        metricsAssessment = await ctx.task(translationMetricsTask, { ...{
-    projectName,
-    sourceLocale,
-    targetLocales,
-    contentInventory,
-    translationResults,
-    qaResults,
-    testingResults,
-    acceptanceCriteria,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (overallQuality < acceptanceCriteria.minTranslationQuality) {
+    await ctx.breakpoint({
       question: `Overall translation quality: ${overallQuality}%. Target: ${acceptanceCriteria.minTranslationQuality}%. Below threshold. Review quality report and decide to improve or proceed?`,
       title: 'Translation Quality Assessment',
       context: {
@@ -663,15 +524,9 @@ export async function process(inputs, ctx) {
         qualityByLocale: metricsAssessment.qualityByLocale,
         recommendations: metricsAssessment.recommendations,
         files: metricsAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 15: LOCALIZATION DEPLOYMENT PACKAGE
@@ -679,7 +534,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Creating localization deployment package');
 
-  let deploymentPackage = await ctx.task(localizationDeploymentTask, {
+  const deploymentPackage = await ctx.task(localizationDeploymentTask, {
     projectName,
     sourceLocale,
     targetLocales,
@@ -692,21 +547,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...deploymentPackage.artifacts);
 
-    let lastFeedback_finalApproval2 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval2) {
-      deploymentPackage = await ctx.task(localizationDeploymentTask, { ...{
-    projectName,
-    sourceLocale,
-    targetLocales,
-    integrationResults,
-    i18nInfrastructure,
-    translationStats,
-    qualityMetrics,
-    outputDir
-  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-    }
-  const finalApproval2 = await ctx.breakpoint({
+  // Final Breakpoint: Review complete localization
+  await ctx.breakpoint({
     question: `Documentation localization complete for ${projectName}. ${targetLocales.length} locales, overall quality: ${overallQuality}%. Review and approve for deployment?`,
     title: 'Final Localization Review',
     context: {
@@ -726,15 +568,9 @@ export async function process(inputs, ctx) {
         localesCompleted: translationResults.length,
         deploymentReady: deploymentPackage.deploymentReady
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval2 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval2.approved) break;
-    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -780,7 +616,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

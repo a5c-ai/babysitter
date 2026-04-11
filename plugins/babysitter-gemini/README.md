@@ -159,7 +159,7 @@ The extension reads configuration from the following locations:
 | `gemini-extension.json` | Gemini CLI extension manifest. Sets `contextFileName: "GEMINI.md"`. |
 | `plugin.json` | Babysitter plugin manifest. Declares hooks, commands, and harness (`gemini-cli`). |
 | `GEMINI_EXTENSION_PATH` env var | Path to the installed extension root. Set automatically by Gemini CLI. Falls back to the directory containing the hook script. |
-| `BABYSITTER_LOG_DIR` env var | Override the log directory. Defaults to `${EXTENSION_PATH}/.a5c/logs`. |
+| `BABYSITTER_LOG_DIR` env var | Override the log directory. Defaults to `~/.a5c/logs`. |
 | `.a5c/state/` | Session state directory. Created automatically by the SessionStart hook. |
 | `~/.a5c/user-profile.json` | User profile for personalizing orchestration (breakpoint density, tool preferences, communication style). |
 
@@ -211,7 +211,7 @@ The SessionStart hook installs the SDK automatically, but if permissions prevent
 a global install it falls back to `~/.local/bin`. Check the session-start log:
 
 ```bash
-cat ~/.gemini/extensions/babysitter-gemini/.a5c/logs/babysitter-session-start-hook.log
+cat ~/.a5c/logs/babysitter-session-start-hook.log
 ```
 
 If the CLI is still missing, install it manually:
@@ -257,7 +257,7 @@ The SessionStart hook checks `versions.json` and upgrades the SDK if the
 installed version does not match. Check the hook log for version details:
 
 ```bash
-cat ~/.gemini/extensions/babysitter-gemini/.a5c/logs/babysitter-session-start-hook.log | grep version
+cat ~/.a5c/logs/babysitter-session-start-hook.log | grep version
 ```
 
 To force a reinstall to the pinned version:
@@ -285,10 +285,10 @@ babysitter process-library:clone --dir .a5c/process-library/babysitter-repo
 
 | Log file | Contents |
 |----------|----------|
-| `<extension-root>/.a5c/logs/babysitter-session-start-hook.log` | SessionStart hook output |
-| `<extension-root>/.a5c/logs/babysitter-session-start-hook-stderr.log` | SessionStart SDK stderr |
-| `<extension-root>/.a5c/logs/babysitter-after-agent-hook.log` | AfterAgent hook output |
-| `<extension-root>/.a5c/logs/babysitter-after-agent-hook-stderr.log` | AfterAgent SDK stderr |
+| `~/.a5c/logs/babysitter-session-start-hook.log` | SessionStart hook output |
+| `~/.a5c/logs/babysitter-session-start-hook-stderr.log` | SessionStart SDK stderr |
+| `~/.a5c/logs/babysitter-after-agent-hook.log` | AfterAgent hook output |
+| `~/.a5c/logs/babysitter-after-agent-hook-stderr.log` | AfterAgent SDK stderr |
 
 ## License
 

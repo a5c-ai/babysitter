@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Green Chemistry Analysis
-  let greenChemistryAnalysis = await ctx.task(greenChemistryAnalysisTask, {
+  const greenChemistryAnalysis = await ctx.task(greenChemistryAnalysisTask, {
     targetNanomaterial,
     sustainabilityGoals,
     constraints
@@ -42,31 +42,18 @@ export async function process(inputs, ctx) {
     targetNanomaterial,
     sustainabilityGoals,
     greenChemistryAnalysis
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      greenChemistryAnalysis = await ctx.task(greenChemistryAnalysisTask, { ...{
-    targetNanomaterial,
-    sustainabilityGoals,
-    constraints
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Bio-based precursors identified for ${targetNanomaterial.type}. Review and approve?`,
     title: 'Green Precursor Selection Review',
     context: {
       runId: ctx.runId,
       precursors: precursorSelection.selectedPrecursors,
       sustainabilityScore: precursorSelection.sustainabilityScore
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Green Route Design with Iteration
   let iteration = 0;
   let currentGreenScore = 0;
@@ -85,7 +72,7 @@ export async function process(inputs, ctx) {
     });
 
     // Lifecycle assessment
-    let lcaAssessment = await ctx.task(lifecycleAssessmentTask, {
+    const lcaAssessment = await ctx.task(lifecycleAssessmentTask, {
       greenRoute: routeDesign,
       targetNanomaterial
     });
@@ -100,27 +87,15 @@ export async function process(inputs, ctx) {
       greenScore: currentGreenScore
     });
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          lcaAssessment = await ctx.task(lifecycleAssessmentTask, { ...{
-      greenRoute: routeDesign,
-      targetNanomaterial
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (currentGreenScore < greenScoreTarget && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Green score: ${currentGreenScore}/${greenScoreTarget}. Continue optimization?`,
         title: 'Green Synthesis Optimization Progress',
-        context: { runId: ctx.runId, iteration, currentGreenScore, lcaAssessment },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        context: { runId: ctx.runId, iteration, currentGreenScore, lcaAssessment }
+      });
+    }
   }
+
   // Phase 4: Waste Minimization Validation
   const wasteValidation = await ctx.task(wasteMinimizationTask, {
     greenRoute,
@@ -141,38 +116,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Property Parity Validation
-  let propertyValidation = await ctx.task(propertyParityTask, {
+  const propertyValidation = await ctx.task(propertyParityTask, {
     greenRoute,
     targetNanomaterial,
     comparisonAnalysis
   });
 
   // Quality Gate: Must achieve property parity
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        propertyValidation = await ctx.task(propertyParityTask, { ...{
-    greenRoute,
-    targetNanomaterial,
-    comparisonAnalysis
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (!propertyValidation.parityAchieved) {
+    await ctx.breakpoint({
       question: `Property parity not achieved. Gap: ${propertyValidation.parityGap}%. Accept trade-off or continue development?`,
       title: 'Property Parity Warning',
       context: {
         runId: ctx.runId,
         propertyValidation,
         recommendations: propertyValidation.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 8: Documentation and Certification
   const documentation = await ctx.task(greenSynthesisDocumentationTask, {
@@ -183,16 +144,9 @@ export async function process(inputs, ctx) {
     energyAssessment,
     comparisonAnalysis,
     propertyValidation
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      propertyValidation = await ctx.task(propertyParityTask, { ...{
-    greenRoute,
-    targetNanomaterial,
-    comparisonAnalysis
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  });
+
+  await ctx.breakpoint({
     question: `Green synthesis route complete. Green Score: ${currentGreenScore}. Approve for implementation?`,
     title: 'Green Synthesis Approval',
     context: {
@@ -201,15 +155,9 @@ export async function process(inputs, ctx) {
       wasteReduction: wasteValidation.reductionPercentage,
       energySavings: energyAssessment.savingsPercentage,
       propertyParity: propertyValidation.parityAchieved
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     greenRoute,
@@ -227,7 +175,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const greenChemistryAnalysisTask = defineTask('green-chemistry-analysis', (args, taskCtx) => ({
   kind: 'agent',

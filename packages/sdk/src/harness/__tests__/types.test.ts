@@ -31,9 +31,9 @@ describe("HarnessCapability enum", () => {
     expect(HarnessCapability.HeadlessPrompt).toBe("headless-prompt");
   });
 
-  it("has exactly 5 members", () => {
+  it("has exactly 8 members", () => {
     const values = Object.values(HarnessCapability);
-    expect(values).toHaveLength(5);
+    expect(values).toHaveLength(8);
   });
 });
 

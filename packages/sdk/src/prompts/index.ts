@@ -5,7 +5,7 @@
  */
 
 // Types
-export type { PromptContext, PromptPart } from './types';
+export type { PromptContext, PromptPart, PromptStratum, StratumTaggedPart, ComposeByStrataOptions } from './types';
 
 // Context factories
 export {
@@ -36,6 +36,15 @@ export {
   joinNonEmpty,
 } from './compose';
 
+// Strata model (GAP-PROMPT-001)
+export {
+  tagPart,
+  PART_STRATA_MAP,
+  STRATUM_ORDER,
+  getPartsForStratum,
+  composeByStrata,
+} from './strata';
+
 // Parts (individual render functions)
 export {
   renderDependencies,
@@ -58,4 +67,7 @@ export {
   renderCriticalRules,
   renderSeeAlso,
   renderNonNegotiables,
+  renderProjectInstructions,
+  renderRunOverlapDetection,
+  renderParallelPhaseDetection,
 } from './parts';

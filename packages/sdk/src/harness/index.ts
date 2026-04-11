@@ -12,6 +12,9 @@ export type {
   PiSessionOptions,
   PiPromptResult,
   PiSessionEvent,
+  StreamingOutputCallback,
+  StreamingLineCallback,
+  StreamingOutputOptions,
 } from "./types";
 
 export { HarnessCapability } from "./types";
@@ -23,6 +26,7 @@ export { createCursorAdapter } from "./cursor";
 export { createGithubCopilotAdapter } from "./githubCopilot";
 export { createPiAdapter } from "./pi";
 export { createOhMyPiAdapter } from "./ohMyPi";
+export { createOpenClawAdapter } from "./openclaw";
 export { createOpenCodeAdapter } from "./opencode";
 export { createInternalAdapter } from "./internal";
 export { createPiSession, PiSessionHandle, type PiEventListener } from "./piWrapper";
@@ -39,7 +43,9 @@ export {
 
 export { discoverHarnesses, detectCallerHarness, checkCliAvailable, KNOWN_HARNESSES } from "./discovery";
 
-export { invokeHarness, buildHarnessArgs, HARNESS_CLI_MAP } from "./invoker";
+export { invokeHarness, buildHarnessArgs, buildLaunchSpec, HARNESS_CLI_MAP } from "./invoker";
+
+export { OutputStreamCollector, invokeHarnessStreaming } from "./streamingCapture";
 
 export {
   createAgenticToolDefinitions,
@@ -47,3 +53,9 @@ export {
   type CustomToolDefinition,
   AGENTIC_TOOL_NAMES,
 } from "./agenticTools";
+
+export {
+  BackgroundProcessRegistry,
+  type BackgroundTaskRecord,
+  type BackgroundCompletionEvent,
+} from "./backgroundProcessRegistry";

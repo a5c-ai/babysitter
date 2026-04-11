@@ -19,26 +19,18 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  // Phase 1: Specification Analysis and Validation
+  await ctx.breakpoint({
     question: 'Starting API documentation generation. Analyze OpenAPI spec?',
     title: 'Phase 1: Specification Analysis',
     context: {
       runId: ctx.runId,
       phase: 'specification-analysis',
       specPath
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
-  let specAnalysis = await ctx.task(analyzeSpecTask, { specPath });
+    }
+  });
+
+  const specAnalysis = await ctx.task(analyzeSpecTask, { specPath });
 
   if (!specAnalysis.valid) {
     return {
@@ -48,12 +40,9 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'api-doc-generation', timestamp: ctx.now() }
     };
   }
-  let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      specAnalysis = await ctx.task(analyzeSpecTask, { ...{ specPath }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+
+  // Phase 2: Content Generation (Parallel Tasks)
+  await ctx.breakpoint({
     question: 'Specification validated. Generate documentation content?',
     title: 'Phase 2: Content Generation',
     context: {
@@ -61,15 +50,9 @@ export async function process(inputs, ctx) {
       phase: 'content-generation',
       endpoints: specAnalysis.endpointCount,
       schemas: specAnalysis.schemaCount
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const [apiReference, codeExamples, authGuide] = await Promise.all([
     ctx.task(generateApiReferenceTask, {
       spec: specAnalysis.spec,
@@ -88,51 +71,33 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Interactive Documentation Setup
   let interactiveDocs = null;
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        specAnalysis = await ctx.task(analyzeSpecTask, { ...{ specPath }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (interactive) {
+    await ctx.breakpoint({
       question: 'Setup interactive API explorer (Swagger UI/Redoc)?',
       title: 'Phase 3: Interactive Documentation',
       context: {
         runId: ctx.runId,
         phase: 'interactive-setup'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    }    interactiveDocs = await ctx.task(setupInteractiveDocsTask, {
+      }
+    });
+
+    interactiveDocs = await ctx.task(setupInteractiveDocsTask, {
       spec: specAnalysis.spec,
       specPath,
       outputFormat
     });
   }
-  let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      specAnalysis = await ctx.task(analyzeSpecTask, { ...{ specPath }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+
+  // Phase 4: Error Reference and SDK Integration
+  await ctx.breakpoint({
     question: 'Generate error reference and SDK integration guides?',
     title: 'Phase 4: Supplementary Documentation',
     context: {
       runId: ctx.runId,
       phase: 'supplementary-docs'
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const [errorReference, sdkGuide] = await Promise.all([
     ctx.task(generateErrorReferenceTask, {
       spec: specAnalysis.spec,
@@ -144,28 +109,18 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      specAnalysis = await ctx.task(analyzeSpecTask, { ...{ specPath }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  // Phase 5: Quality Validation and Testing
+  await ctx.breakpoint({
     question: 'Validate documentation quality and test examples?',
     title: 'Phase 5: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
-  let qualityResult = await ctx.task(validateDocumentationQualityTask, {
+    }
+  });
+
+  const qualityResult = await ctx.task(validateDocumentationQualityTask, {
     apiReference,
     codeExamples,
     authGuide,
@@ -185,53 +140,24 @@ export async function process(inputs, ctx) {
       spec: specAnalysis.spec
     });
 
-        let lastFeedback_phase6Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase6Review) {
-          qualityResult = await ctx.task(validateDocumentationQualityTask, { ...{
-    apiReference,
-    codeExamples,
-    authGuide,
-    errorReference,
-    sdkGuide,
-    interactiveDocs,
-    targetQuality
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-        }
-  const phase6Review = await ctx.breakpoint({
+    if (exampleTests.failedCount > 0) {
+      await ctx.breakpoint({
         question: `${exampleTests.failedCount} code examples failed. Review and fix?`,
         title: 'Example Test Failures',
         context: {
           runId: ctx.runId,
           failures: exampleTests.failures,
           files: [{ path: `artifacts/example-test-results.json`, format: 'json' }]
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase6Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase6Review.approved) break;
-        lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 7: Documentation Assembly and Deployment
   const deployReady = quality >= targetQuality && (!exampleTests || exampleTests.failedCount === 0);
 
-      let lastFeedback_phase7Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase7Review) {
-        qualityResult = await ctx.task(validateDocumentationQualityTask, { ...{
-    apiReference,
-    codeExamples,
-    authGuide,
-    errorReference,
-    sdkGuide,
-    interactiveDocs,
-    targetQuality
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-      }
-  const phase7Review = await ctx.breakpoint({
+  if (deployReady) {
+    await ctx.breakpoint({
       question: 'Quality standards met. Assemble and deploy documentation?',
       title: 'Phase 7: Assembly and Deployment',
       context: {
@@ -239,16 +165,10 @@ export async function process(inputs, ctx) {
         phase: 'deployment',
         quality,
         targetQuality
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase7Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase7Review.approved) break;
-      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-    }
-  let deployment = await ctx.task(assembleAndDeployTask, {
+      }
+    });
+
+    const deployment = await ctx.task(assembleAndDeployTask, {
       apiReference,
       codeExamples,
       authGuide,
@@ -282,20 +202,8 @@ export async function process(inputs, ctx) {
         outputFormat
       }
     };
-      let lastFeedback_finalApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_finalApproval2) {
-        deployment = await ctx.task(assembleAndDeployTask, { ...{
-      apiReference,
-      codeExamples,
-      authGuide,
-      errorReference,
-      sdkGuide,
-      interactiveDocs,
-      outputFormat
-    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
-      }
-  const finalApproval2 = await ctx.breakpoint({
+  } else {
+    await ctx.breakpoint({
       question: `Quality ${quality}/${targetQuality} below threshold${exampleTests ? ` or ${exampleTests.failedCount} examples failed` : ''}. Iterate?`,
       title: 'Quality Gate Failed',
       context: {
@@ -304,16 +212,10 @@ export async function process(inputs, ctx) {
         targetQuality,
         exampleTests: exampleTests?.summary,
         recommendations: qualityResult.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_finalApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (finalApproval2.approved) break;
-      lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
-    }
-  return {
+      }
+    });
+
+    return {
       success: false,
       qualityGateFailed: true,
       quality,
@@ -327,7 +229,8 @@ export async function process(inputs, ctx) {
     };
   }
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const analyzeSpecTask = defineTask('analyze-spec', (args, taskCtx) => ({
   kind: 'agent',

@@ -62,6 +62,7 @@ export async function process(inputs, ctx) {
       }
     };
   }
+
   // Validate layer is one of: staging, intermediate, marts
   const validLayers = ['staging', 'intermediate', 'marts'];
   if (!validLayers.includes(layer)) {
@@ -85,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing requirements and designing model structure');
 
-  let modelDesign = await ctx.task(modelDesignTask, {
+  const modelDesign = await ctx.task(modelDesignTask, {
     modelName,
     modelType,
     layer,
@@ -95,20 +96,9 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      modelDesign = await ctx.task(modelDesignTask, { ...{
-    modelName,
-    modelType,
-    layer,
-    sourceTables,
-    businessRequirements,
-    targetWarehouse,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+  artifacts.push(...modelDesign.artifacts);
+
+  await ctx.breakpoint({
     question: `Phase 1 Complete: Model design created for "${modelName}" in ${layer} layer. Design includes ${modelDesign.columnCount} columns, ${modelDesign.dependencies.length} dependencies. Review design?`,
     title: 'Model Design Review',
     context: {
@@ -123,22 +113,16 @@ export async function process(inputs, ctx) {
         grain: modelDesign.grain
       },
       files: modelDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 2: NAMING CONVENTION VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Validating naming conventions');
 
-  let namingValidation = await ctx.task(namingConventionTask, {
+  const namingValidation = await ctx.task(namingConventionTask, {
     modelName,
     layer,
     modelType,
@@ -148,18 +132,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...namingValidation.artifacts);
 
-      let lastFeedback_phase2Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase2Review) {
-        namingValidation = await ctx.task(namingConventionTask, { ...{
-    modelName,
-    layer,
-    modelType,
-    modelDesign,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-      }
-  const phase2Review = await ctx.breakpoint({
+  if (!namingValidation.compliant) {
+    await ctx.breakpoint({
       question: `Naming Convention Warning: Model name "${modelName}" does not follow best practices. Suggested name: "${namingValidation.suggestedName}". Violations: ${namingValidation.violations.join(', ')}. Continue anyway?`,
       title: 'Naming Convention Issues',
       context: {
@@ -169,15 +143,9 @@ export async function process(inputs, ctx) {
         violations: namingValidation.violations,
         namingRules: namingValidation.rules,
         files: namingValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase2Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase2Review.approved) break;
-      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 3: STAGING LAYER DEVELOPMENT (if layer === 'staging')
@@ -197,6 +165,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...stagingModel.artifacts);
   }
+
   // ============================================================================
   // PHASE 4: INTERMEDIATE LAYER DEVELOPMENT (if layer === 'intermediate')
   // ============================================================================
@@ -216,6 +185,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...intermediateModel.artifacts);
   }
+
   // ============================================================================
   // PHASE 5: MARTS LAYER DEVELOPMENT (if layer === 'marts')
   // ============================================================================
@@ -237,19 +207,11 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...martsModel.artifacts);
   }
+
   // Consolidate model output
-    let lastFeedback_phase5Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase5Review) {
-      namingValidation = await ctx.task(namingConventionTask, { ...{
-    modelName,
-    layer,
-    modelType,
-    modelDesign,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-    }
-  const phase5Review = await ctx.breakpoint({
+  const modelOutput = stagingModel || intermediateModel || martsModel;
+
+  await ctx.breakpoint({
     question: `Model Development Complete: "${modelName}" SQL model created with ${modelOutput.lineCount} lines of code. Model includes ${modelOutput.transformations.length} transformations. Review SQL code?`,
     title: 'Model Code Review',
     context: {
@@ -264,15 +226,9 @@ export async function process(inputs, ctx) {
         { path: modelOutput.sqlPath, format: 'sql', label: 'Model SQL' },
         ...modelOutput.artifacts.map(a => ({ path: a.path, format: a.format || 'sql' }))
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase5Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase5Review.approved) break;
-    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: MATERIALIZATION CONFIGURATION
   // ============================================================================
@@ -298,7 +254,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Creating comprehensive data tests');
 
-  let testDevelopment = await ctx.task(testDevelopmentTask, {
+  const testDevelopment = await ctx.task(testDevelopmentTask, {
     modelName,
     layer,
     modelDesign,
@@ -307,19 +263,9 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-    let lastFeedback_phase7Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase7Review) {
-      testDevelopment = await ctx.task(testDevelopmentTask, { ...{
-    modelName,
-    layer,
-    modelDesign,
-    modelOutput,
-    testingLevel,
-    outputDir
-  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
-    }
-  const phase7Review = await ctx.breakpoint({
+  artifacts.push(...testDevelopment.artifacts);
+
+  await ctx.breakpoint({
     question: `Phase 7 Complete: ${testDevelopment.totalTests} tests created - Schema tests: ${testDevelopment.schemaTests}, Data quality tests: ${testDevelopment.dataQualityTests}, Custom tests: ${testDevelopment.customTests}. Review test coverage?`,
     title: 'Test Coverage Review',
     context: {
@@ -334,22 +280,16 @@ export async function process(inputs, ctx) {
       },
       testCategories: testDevelopment.testCategories,
       files: testDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase7Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase7Review.approved) break;
-    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 8: DOCUMENTATION GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating model documentation');
 
-  let documentation = await ctx.task(documentationGenerationTask, {
+  const documentation = await ctx.task(documentationGenerationTask, {
     modelName,
     layer,
     modelType,
@@ -381,6 +321,7 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...performanceOptimizations.artifacts);
   }
+
   // ============================================================================
   // PHASE 10: CODE REVIEW (if required)
   // ============================================================================
@@ -405,21 +346,8 @@ export async function process(inputs, ctx) {
     const reviewScore = codeReview.overallScore;
     const reviewPassed = reviewScore >= 80;
 
-        let lastFeedback_phase10Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase10Review) {
-          documentation = await ctx.task(documentationGenerationTask, { ...{
-    modelName,
-    layer,
-    modelType,
-    modelDesign,
-    modelOutput,
-    businessRequirements,
-    documentationStyle,
-    outputDir
-  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
-        }
-  const phase10Review = await ctx.breakpoint({
+    if (!reviewPassed) {
+      await ctx.breakpoint({
         question: `Code Review Warning: Model "${modelName}" scored ${reviewScore}/100 (below threshold of 80). ${codeReview.issues.length} issue(s) found. Review and address issues?`,
         title: 'Code Review Issues',
         context: {
@@ -430,16 +358,11 @@ export async function process(inputs, ctx) {
           issues: codeReview.issues,
           recommendations: codeReview.recommendations,
           files: codeReview.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase10Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase10Review.approved) break;
-        lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // ============================================================================
   // PHASE 11: INTEGRATION VALIDATION
   // ============================================================================
@@ -462,7 +385,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Generating deployment checklist and handoff documentation');
 
-  let deploymentChecklist = await ctx.task(deploymentChecklistTask, {
+  const deploymentChecklist = await ctx.task(deploymentChecklistTask, {
     modelName,
     layer,
     modelOutput,
@@ -481,22 +404,9 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   const finalScore = codeReview ? codeReview.overallScore : 100;
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      deploymentChecklist = await ctx.task(deploymentChecklistTask, { ...{
-    modelName,
-    layer,
-    modelOutput,
-    testDevelopment,
-    documentation,
-    codeReview,
-    integrationValidation,
-    materializationConfig,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  const deploymentReady = finalScore >= 80 && integrationValidation.passed;
+
+  await ctx.breakpoint({
     question: `dbt Model Development Complete for "${modelName}"! Code Review Score: ${finalScore}/100. ${testDevelopment.totalTests} tests, ${documentation.coveragePercentage}% documentation coverage. ${deploymentReady ? 'Ready for deployment' : 'Requires fixes before deployment'}. Review deliverables?`,
     title: 'Model Development Complete',
     context: {
@@ -522,15 +432,9 @@ export async function process(inputs, ctx) {
         { path: deploymentChecklist.checklistPath, format: 'markdown', label: 'Deployment Checklist' },
         ...(codeReview ? [{ path: codeReview.reportPath, format: 'markdown', label: 'Code Review Report' }] : [])
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -593,7 +497,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

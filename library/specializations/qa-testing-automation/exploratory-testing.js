@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Creating test charters for exploration sessions');
 
-  let charterCreation = await ctx.task(charterCreationTask, {
+  const charterCreation = await ctx.task(charterCreationTask, {
     applicationFeatures,
     testingTechniques,
     qualityTargets,
@@ -85,18 +85,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...charterCreation.artifacts);
 
   // Quality Gate: Minimum charters coverage
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        charterCreation = await ctx.task(charterCreationTask, { ...{
-    applicationFeatures,
-    testingTechniques,
-    qualityTargets,
-    sessionDuration,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (charterCreation.charters.length < applicationFeatures.length * qualityTargets.minSessionsPerFeature) {
+    await ctx.breakpoint({
       question: `Only ${charterCreation.charters.length} charters created for ${applicationFeatures.length} features. Minimum recommended: ${applicationFeatures.length * qualityTargets.minSessionsPerFeature}. Review and approve to continue?`,
       title: 'Charter Coverage Review',
       context: {
@@ -106,15 +96,9 @@ export async function process(inputs, ctx) {
         recommendedCharters: applicationFeatures.length * qualityTargets.minSessionsPerFeature,
         charters: charterCreation.charters.map(c => ({ id: c.id, mission: c.mission, area: c.area })),
         files: charterCreation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: SESSION PLANNING
@@ -150,7 +134,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Training team on exploratory testing techniques');
 
-  let techniquesTraining = await ctx.task(testingTechniquesTrainingTask, {
+  const techniquesTraining = await ctx.task(testingTechniquesTrainingTask, {
     testingTechniques,
     teamMembers,
     outputDir
@@ -160,16 +144,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Team training completion
   const trainingCompletionRate = (techniquesTraining.teamMembersTrained / teamMembers.length) * 100;
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        techniquesTraining = await ctx.task(testingTechniquesTrainingTask, { ...{
-    testingTechniques,
-    teamMembers,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (trainingCompletionRate < 80) {
+    await ctx.breakpoint({
       question: `Team training completion: ${trainingCompletionRate.toFixed(0)}%. Only ${techniquesTraining.teamMembersTrained}/${teamMembers.length} members trained. Minimum 80% required. Continue or extend training?`,
       title: 'Training Completion Review',
       context: {
@@ -177,18 +153,12 @@ export async function process(inputs, ctx) {
         trainingCompletionRate,
         teamMembersTrained: techniquesTraining.teamMembersTrained,
         totalMembers: teamMembers.length,
-        techniquesC overed: techniquesTraining.techniquesCovered,
+        techniquesCovered: techniquesTraining.techniquesCovered,
         recommendation: 'Ensure all team members understand SFDPOT, tours, and heuristics before sessions',
         files: techniquesTraining.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: NOTE-TAKING TEMPLATES
@@ -221,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Conducting time-boxed exploratory testing sessions');
 
-  let sessionExecution = await ctx.task(sessionExecutionTask, {
+  const sessionExecution = await ctx.task(sessionExecutionTask, {
     scheduledSessions: sessionPlanning.scheduledSessions,
     charters: charterCreation.charters,
     noteTemplates: noteTemplates.templatesCreated,
@@ -236,20 +206,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Session completion rate
   const sessionCompletionRate = (sessionExecution.sessionsCompleted / sessionPlanning.scheduledSessions.length) * 100;
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        sessionExecution = await ctx.task(sessionExecutionTask, { ...{
-    scheduledSessions: sessionPlanning.scheduledSessions,
-    charters: charterCreation.charters,
-    noteTemplates: noteTemplates.templatesCreated,
-    teamMembers,
-    sessionDuration,
-    bugTrackingSystem,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (sessionCompletionRate < 90) {
+    await ctx.breakpoint({
       question: `Session completion rate: ${sessionCompletionRate.toFixed(0)}%. ${sessionExecution.sessionsCompleted}/${sessionPlanning.scheduledSessions.length} sessions completed. Review incomplete sessions?`,
       title: 'Session Execution Review',
       context: {
@@ -259,15 +217,9 @@ export async function process(inputs, ctx) {
         totalScheduled: sessionPlanning.scheduledSessions.length,
         incompleteSessions: sessionExecution.incompleteSessions,
         files: sessionExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: FINDINGS DOCUMENTATION
@@ -275,7 +227,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Documenting and logging findings');
 
-  let findingsDocumentation = await ctx.task(findingsDocumentationTask, {
+  const findingsDocumentation = await ctx.task(findingsDocumentationTask, {
     sessionResults: sessionExecution.sessionResults,
     bugTrackingSystem,
     qualityTargets,
@@ -287,17 +239,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Critical findings threshold
   const criticalFindings = findingsDocumentation.findingsBySeverity.critical || 0;
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        findingsDocumentation = await ctx.task(findingsDocumentationTask, { ...{
-    sessionResults: sessionExecution.sessionResults,
-    bugTrackingSystem,
-    qualityTargets,
-    outputDir
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (criticalFindings > qualityTargets.criticalFindingsExpected * 2) {
+    await ctx.breakpoint({
       question: `High number of critical findings: ${criticalFindings} (expected ~${qualityTargets.criticalFindingsExpected}). This may indicate quality issues. Review findings and decide next steps?`,
       title: 'Critical Findings Alert',
       context: {
@@ -309,15 +252,9 @@ export async function process(inputs, ctx) {
         topIssues: findingsDocumentation.topIssueCategories,
         recommendation: 'Consider additional testing or development iteration',
         files: findingsDocumentation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 7: DEBRIEF SESSIONS
@@ -353,7 +290,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Tracking exploratory testing coverage');
 
-  let coverageTracking = await ctx.task(coverageTrackingTask, {
+  const coverageTracking = await ctx.task(coverageTrackingTask, {
     applicationFeatures,
     sessionResults: sessionExecution.sessionResults,
     charters: charterCreation.charters,
@@ -365,18 +302,8 @@ export async function process(inputs, ctx) {
   coverageScore = coverageTracking.overallCoverageScore;
 
   // Quality Gate: Coverage threshold
-      let lastFeedback_phase8Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase8Review) {
-        coverageTracking = await ctx.task(coverageTrackingTask, { ...{
-    applicationFeatures,
-    sessionResults: sessionExecution.sessionResults,
-    charters: charterCreation.charters,
-    qualityTargets,
-    outputDir
-  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
-      }
-  const phase8Review = await ctx.breakpoint({
+  if (coverageScore < qualityTargets.coverageThreshold) {
+    await ctx.breakpoint({
       question: `Exploratory coverage score: ${coverageScore}%. Target: ${qualityTargets.coverageThreshold}%. Below threshold. Schedule additional sessions or accept coverage?`,
       title: 'Coverage Threshold Review',
       context: {
@@ -387,15 +314,9 @@ export async function process(inputs, ctx) {
         coverageByFeature: coverageTracking.coverageByFeature,
         recommendation: 'Additional sessions recommended for uncovered areas',
         files: coverageTracking.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase8Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase8Review.approved) break;
-      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: FINAL ASSESSMENT
@@ -403,7 +324,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Conducting final assessment of exploratory testing framework');
 
-  let finalAssessment = await ctx.task(finalAssessmentTask, {
+  const finalAssessment = await ctx.task(finalAssessmentTask, {
     charterCreation,
     sessionPlanning,
     techniquesTraining,
@@ -419,22 +340,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Exploratory testing complete: ${chartersExecuted} charters, ${findingsCount} findings, ${coverageScore}% coverage`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
-    charterCreation,
-    sessionPlanning,
-    techniquesTraining,
-    sessionExecution,
-    findingsDocumentation,
-    debriefSessions,
-    coverageTracking,
-    qualityTargets,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Framework Review
+  await ctx.breakpoint({
     question: `Exploratory Testing Session Framework Complete. ${chartersExecuted} charters executed, ${findingsCount} findings logged, ${coverageScore}% coverage achieved. Approve framework for ongoing use?`,
     title: 'Final Exploratory Testing Framework Review',
     context: {
@@ -458,15 +365,9 @@ export async function process(inputs, ctx) {
         { path: coverageTracking.coverageHeatMapPath, format: 'html', label: 'Coverage Heat Map' },
         { path: findingsDocumentation.findingsReportPath, format: 'json', label: 'Findings Report' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -530,7 +431,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

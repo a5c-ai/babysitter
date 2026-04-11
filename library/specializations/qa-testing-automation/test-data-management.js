@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Setting up data privacy and compliance controls');
 
-  let privacyComplianceResult = await ctx.task(privacyComplianceSetupTask, {
+  const privacyComplianceResult = await ctx.task(privacyComplianceSetupTask, {
     projectName,
     privacyRequirements,
     dataRequirementsResult,
@@ -134,19 +134,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Privacy compliance must be verified
   const privacyScore = privacyComplianceResult.complianceScore;
-      let lastFeedback_phase3Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase3Review) {
-        privacyComplianceResult = await ctx.task(privacyComplianceSetupTask, { ...{
-    projectName,
-    privacyRequirements,
-    dataRequirementsResult,
-    environments,
-    retentionPolicy,
-    outputDir
-  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
-      }
-  const phase3Review = await ctx.breakpoint({
+  if (privacyScore < 90) {
+    await ctx.breakpoint({
       question: `Phase 3 Warning: Privacy compliance score is ${privacyScore}/100. This is below the recommended threshold of 90. ${privacyComplianceResult.violations.length} potential violation(s) detected. Review and address before proceeding?`,
       title: 'Privacy Compliance Review Required',
       context: {
@@ -155,15 +144,9 @@ export async function process(inputs, ctx) {
         violations: privacyComplianceResult.violations,
         recommendations: privacyComplianceResult.recommendations,
         files: privacyComplianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase3Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase3Review.approved) break;
-      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: SYNTHETIC DATA GENERATION SETUP
@@ -193,6 +176,7 @@ export async function process(inputs, ctx) {
       }
     });
   }
+
   // ============================================================================
   // PHASE 5: DATA MASKING AND ANONYMIZATION
   // ============================================================================
@@ -338,6 +322,7 @@ export async function process(inputs, ctx) {
       }
     });
   }
+
   // ============================================================================
   // PHASE 10: DATA CLEANUP AND LIFECYCLE MANAGEMENT
   // ============================================================================
@@ -426,7 +411,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Testing data management system performance');
 
-  let performanceTestResult = await ctx.task(dataManagementPerformanceTestTask, {
+  const performanceTestResult = await ctx.task(dataManagementPerformanceTestTask, {
     projectName,
     dataRepositoryResult,
     dataAccessResult,
@@ -438,18 +423,8 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Performance must meet requirements
   const performanceScore = performanceTestResult.performanceScore;
-      let lastFeedback_phase13Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase13Review) {
-        performanceTestResult = await ctx.task(dataManagementPerformanceTestTask, { ...{
-    projectName,
-    dataRepositoryResult,
-    dataAccessResult,
-    dataVolume,
-    outputDir
-  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
-      }
-  const phase13Review = await ctx.breakpoint({
+  if (performanceScore < 80) {
+    await ctx.breakpoint({
       question: `Phase 13 Warning: Performance score is ${performanceScore}/100. Data generation time: ${performanceTestResult.generationTime}ms, Query time: ${performanceTestResult.queryTime}ms. Performance may need optimization. Continue?`,
       title: 'Performance Review Required',
       context: {
@@ -458,15 +433,9 @@ export async function process(inputs, ctx) {
         metrics: performanceTestResult.metrics,
         bottlenecks: performanceTestResult.bottlenecks,
         files: performanceTestResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase13Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase13Review.approved) break;
-      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 14: DOCUMENTATION AND USAGE GUIDES
@@ -503,7 +472,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Validating test data management system');
 
-  let validationResult = await ctx.task(dataManagementValidationTask, {
+  const validationResult = await ctx.task(dataManagementValidationTask, {
     projectName,
     dataStrategyResult,
     privacyComplianceResult,
@@ -520,21 +489,8 @@ export async function process(inputs, ctx) {
   const qualityMet = overallScore >= 85;
 
   // Final Quality Gate
-      let lastFeedback_phase15Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase15Review) {
-        validationResult = await ctx.task(dataManagementValidationTask, { ...{
-    projectName,
-    dataStrategyResult,
-    privacyComplianceResult,
-    dataRepositoryResult,
-    dataAccessResult,
-    performanceTestResult,
-    documentationResult,
-    outputDir
-  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
-      }
-  const phase15Review = await ctx.breakpoint({
+  if (!qualityMet) {
+    await ctx.breakpoint({
       question: `Phase 15 Warning: Overall system quality score is ${overallScore}/100. ${validationResult.failedCriteria.length} quality criteria not met: ${validationResult.failedCriteria.join(', ')}. Review and address before finalizing?`,
       title: 'System Validation Issues',
       context: {
@@ -544,15 +500,9 @@ export async function process(inputs, ctx) {
         failedCriteria: validationResult.failedCriteria,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase15Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase15Review.approved) break;
-      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 16: FINAL REVIEW AND HANDOFF
@@ -560,7 +510,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Final system review and team handoff');
 
-  let finalReviewResult = await ctx.task(finalReviewHandoffTask, {
+  const finalReviewResult = await ctx.task(finalReviewHandoffTask, {
     projectName,
     dataStrategyResult,
     privacyComplianceResult,
@@ -573,21 +523,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReviewResult.artifacts);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      finalReviewResult = await ctx.task(finalReviewHandoffTask, { ...{
-    projectName,
-    dataStrategyResult,
-    privacyComplianceResult,
-    dataRepositoryResult,
-    dataAccessResult,
-    validationResult,
-    documentationResult,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: System approval
+  await ctx.breakpoint({
     question: `Test Data Management System Complete! Overall score: ${overallScore}/100. Quality criteria met: ${qualityMet}. ${dataRepositoryResult.repositoryCount} repositories, ${dataFactoryResult.factoryCount} factories, ${environments.length} environments configured. System ready for team adoption. Review and approve?`,
     title: 'System Setup Complete - Final Approval',
     context: {
@@ -613,15 +550,9 @@ export async function process(inputs, ctx) {
         { path: validationResult.reportPath, format: 'markdown', label: 'Validation Report' },
         { path: finalReviewResult.handoffPath, format: 'markdown', label: 'Team Handoff Document' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -689,7 +620,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
 import { collapseDoubledA5cRuns as _sharedCollapseDoubledA5cRuns, resolveInputPath } from "./resolveInputPath";
-import { commitEffectResult } from "../runtime/commitEffectResult";
+import { commitEffectResult, commitEffectCancellation } from "../runtime/commitEffectResult";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { readStateCache, rebuildStateCache } from "../runtime/replay/stateCache";
@@ -29,8 +29,11 @@ import {
   handleSessionLastMessage,
   handleSessionIterationMessage,
 } from "./commands/session";
+import { handleSessionHistory } from "./commands/sessionHistory";
 import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, discoverFromProcessFile } from "./commands/skill";
 import { handleMcpServe } from "./commands/mcpServe";
+import { handleJsonlInteractive } from "./commands/jsonlInteractive";
+import { handleDaemonStart, handleDaemonStop, handleDaemonStatus, handleDaemonRun } from "./commands/daemon";
 import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
 import { handleLog } from "./commands/log";
@@ -54,6 +57,7 @@ import {
 } from "./commands/plugin";
 import type { PluginCommandArgs } from "./commands/plugin";
 import { handleTokensStats } from "./commands/tokensStats";
+import { handleCostStats } from "./commands/costStats";
 import { handleCompressionStatus } from "./commands/compressionStatus";
 import { handleCompressionToggle } from "./commands/compressionToggle";
 import { handleCompressionReset } from "./commands/compressionReset";
@@ -66,6 +70,8 @@ import {
 } from "./commands/harnessInstall";
 import { handleInstructionsCommand } from "./commands/instructions";
 import type { InstructionsCommandArgs } from "./commands/instructions";
+import { handleBreakpointCommand } from "./commands/breakpointRules";
+import type { BreakpointCommandArgs } from "./commands/breakpointRules";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
 import { renderCommandTemplate } from "../prompts";
@@ -79,6 +85,10 @@ import {
   isBabysitterError,
 } from "../runtime/exceptions";
 import { CONFIG_ENV_VARS, DEFAULTS } from "../config/defaults";
+import { renderEffectTree } from "../dashboard/components/EffectTree";
+import type { EffectNode } from "../dashboard/components/EffectTree";
+import { renderEventMessage } from "../dashboard/components/messages/EventMessage";
+import type { StatusType } from "../dashboard/components/StatusBadge";
 
 const USAGE = `Usage:
 Agent commands:
@@ -126,6 +136,7 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter plugin:update-registry [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
   babysitter plugin:remove-from-registry [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
   babysitter tokens:stats [runId] [--all] [--runs-dir <dir>] [--json]
+  babysitter cost:stats [runId] [--all] [--runs-dir <dir>] [--json]
   babysitter compression:status [--json]
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
@@ -143,6 +154,7 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:anycli --service <name> [--scope <scopes>] [--mcp] [--auth-file <path>] [--transport <type>] [--prompt <text>] [--workspace <dir>] [--json] [--verbose]
+  babysitter harness:session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
   babysitter harness:help [<topic>]
   babysitter harness:observe [--workspace <dir>]
   babysitter harness:user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
@@ -156,6 +168,12 @@ Other commands (agents should never call these directly unless explicitly instru
   babysitter instructions:orchestrate --harness <name> [--interactive|--no-interactive] [--json]
   babysitter instructions:breakpoint-handling --harness <name> [--interactive|--no-interactive] [--json]
   babysitter mcp:serve [--json]
+  babysitter jsonl:interactive [--runs-dir <dir>]
+  babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
+  babysitter breakpoint:remove-rule <ruleId> [--json]
+  babysitter breakpoint:list-rules [--json]
+  babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
+  babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
@@ -210,6 +228,9 @@ interface ParsedArgs {
   requestId?: string;
   iteration?: number;
   showConfig: boolean;
+  showStrata: boolean;
+  tree: boolean;
+  rich: boolean;
   defaultsOnly: boolean;
   configureSubcommand?: string;
   // Session command args
@@ -263,6 +284,9 @@ interface ParsedArgs {
   // tokens:stats flags
   tokensAll?: boolean;
   tokensRunId?: string;
+  // cost:stats flags
+  costAll?: boolean;
+  costRunId?: string;
   // harness command flags
   positional?: string[];
   workspace?: string;
@@ -279,6 +303,33 @@ interface ParsedArgs {
   anycliMcp?: boolean;
   anycliAuthFile?: string;
   anycliTransport?: string;
+  // breakpoint command flags
+  breakpointPattern?: string;
+  breakpointRuleId?: string;
+  breakpointIdArg?: string;
+  breakpointAction?: string;
+  breakpointSource?: string;
+  breakpointNote?: string;
+  breakpointTags?: string;
+  breakpointExpert?: string;
+  // task:cancel flags
+  cancelReason?: string;
+  // tui flags
+  verbosity?: string;
+  tuiFlag?: boolean;
+  // daemon flags
+  daemonDir?: string;
+  configPath?: string;
+  foreground?: boolean;
+  gracePeriodMs?: number;
+  // mcp:serve WebSocket flags
+  transport?: string;
+  port?: number;
+  host?: string;
+  authToken?: string;
+  wsPingInterval?: number;
+  wsGracePeriod?: number;
+  wsMaxMps?: number;
 }
 
 interface ActionSummary {
@@ -322,6 +373,9 @@ function parseArgs(argv: string[]): ParsedArgs {
     pendingOnly: false,
     reverseOrder: false,
     showConfig: false,
+    showStrata: false,
+    tree: false,
+    rich: false,
     defaultsOnly: false,
   };
   if (parsed.command === "--help" || parsed.command === "-h") {
@@ -468,8 +522,20 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.showConfig = true;
       continue;
     }
+    if (arg === "--show-strata") {
+      parsed.showStrata = true;
+      continue;
+    }
     if (arg === "--defaults-only") {
       parsed.defaultsOnly = true;
+      continue;
+    }
+    if (arg === "--tree") {
+      parsed.tree = true;
+      continue;
+    }
+    if (arg === "--rich") {
+      parsed.rich = true;
       continue;
     }
     // Session command flags
@@ -498,6 +564,50 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--workspace") {
       parsed.workspace = expectFlagValue(rest, ++i, "--workspace");
+      continue;
+    }
+    if (arg === "--daemon-dir") {
+      parsed.daemonDir = expectFlagValue(rest, ++i, "--daemon-dir");
+      continue;
+    }
+    if (arg === "--config-path" || arg === "--config") {
+      parsed.configPath = expectFlagValue(rest, ++i, "--config-path");
+      continue;
+    }
+    if (arg === "--foreground") {
+      parsed.foreground = true;
+      continue;
+    }
+    if (arg === "--grace-period-ms") {
+      parsed.gracePeriodMs = parseInt(expectFlagValue(rest, ++i, "--grace-period-ms"), 10);
+      continue;
+    }
+    if (arg === "--transport") {
+      parsed.transport = expectFlagValue(rest, ++i, "--transport");
+      continue;
+    }
+    if (arg === "--port") {
+      parsed.port = parseInt(expectFlagValue(rest, ++i, "--port"), 10);
+      continue;
+    }
+    if (arg === "--host") {
+      parsed.host = expectFlagValue(rest, ++i, "--host");
+      continue;
+    }
+    if (arg === "--auth-token") {
+      parsed.authToken = expectFlagValue(rest, ++i, "--auth-token");
+      continue;
+    }
+    if (arg === "--ws-ping-interval") {
+      parsed.wsPingInterval = parseInt(expectFlagValue(rest, ++i, "--ws-ping-interval"), 10);
+      continue;
+    }
+    if (arg === "--ws-grace-period") {
+      parsed.wsGracePeriod = parseInt(expectFlagValue(rest, ++i, "--ws-grace-period"), 10);
+      continue;
+    }
+    if (arg === "--ws-max-mps") {
+      parsed.wsMaxMps = parseInt(expectFlagValue(rest, ++i, "--ws-max-mps"), 10);
       continue;
     }
     if (arg === "--model") {
@@ -690,15 +800,53 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.keepDays = parsePositiveInteger(raw, "--keep-days");
       continue;
     }
-    // tokens:stats flags
+    // task:cancel flags
+    if (arg === "--reason") {
+      parsed.cancelReason = expectFlagValue(rest, ++i, "--reason");
+      continue;
+    }
+    // breakpoint command flags
+    if (arg === "--action") {
+      parsed.breakpointAction = expectFlagValue(rest, ++i, "--action");
+      continue;
+    }
+    if (arg === "--note") {
+      parsed.breakpointNote = expectFlagValue(rest, ++i, "--note");
+      continue;
+    }
+    if (arg === "--tags") {
+      parsed.breakpointTags = expectFlagValue(rest, ++i, "--tags");
+      continue;
+    }
+    if (arg === "--expert") {
+      parsed.breakpointExpert = expectFlagValue(rest, ++i, "--expert");
+      continue;
+    }
+    if (arg === "--breakpoint-id") {
+      parsed.breakpointIdArg = expectFlagValue(rest, ++i, "--breakpoint-id");
+      continue;
+    }
+    // tokens:stats / cost:stats flags
     if (arg === "--all") {
       parsed.tokensAll = true;
+      parsed.costAll = true;
       parsed.retrospectAll = true;
+      continue;
+    }
+    // tui flags
+    if (arg === "--verbosity") {
+      parsed.verbosity = expectFlagValue(rest, ++i, "--verbosity");
+      continue;
+    }
+    if (arg === "--tui") {
+      parsed.tuiFlag = true;
       continue;
     }
     positionals.push(arg);
   }
   if (parsed.command === "task:post") {
+    [parsed.runDirArg, parsed.effectId] = positionals;
+  } else if (parsed.command === "task:cancel") {
     [parsed.runDirArg, parsed.effectId] = positionals;
   } else if (parsed.command === "task:list") {
     [parsed.runDirArg] = positionals;
@@ -723,6 +871,8 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
   } else if (parsed.command === "tokens:stats") {
     [parsed.tokensRunId] = positionals;
+  } else if (parsed.command === "cost:stats") {
+    [parsed.costRunId] = positionals;
   } else if (parsed.command === "compression:toggle") {
     const [layer, onOff] = positionals;
     parsed.compressionLayer = layer;
@@ -739,11 +889,18 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.compressionSetValue = value;
   } else if (parsed.command === "compress-output") {
     parsed.compressOutputArgs = positionals;
+  } else if (parsed.command === "breakpoint:approve-rule") {
+    [parsed.breakpointPattern] = positionals;
+  } else if (parsed.command === "breakpoint:remove-rule") {
+    [parsed.breakpointRuleId] = positionals;
+  } else if (parsed.command === "breakpoint:should-auto-approve") {
+    [parsed.breakpointIdArg] = positionals;
   } else if (
     parsed.command === "harness:invoke" ||
     parsed.command === "harness:install" ||
     parsed.command === "harness:install-plugin" ||
-    parsed.command === "harness:help"
+    parsed.command === "harness:help" ||
+    parsed.command === "tui"
   ) {
     parsed.positional = positionals;
   } else if (
@@ -1006,8 +1163,10 @@ function defaultResultRef(effectId: string): string {
   return `tasks/${effectId}/result.json`;
 }
 
-function formatEntrypointSpecifier(entrypoint: { importPath: string; exportName: string }): string {
-  return `${entrypoint.importPath}#${entrypoint.exportName}`;
+function formatEntrypointSpecifier(entrypoint: { importPath: string; exportName?: string }): string {
+  return entrypoint.exportName
+    ? `${entrypoint.importPath}#${entrypoint.exportName}`
+    : entrypoint.importPath;
 }
 
 function parseEntrypointSpecifier(specifier: string): { importPath: string; exportName?: string } {
@@ -1203,12 +1362,15 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // Attempt session binding when --session-id is provided or --harness is
-  // explicitly passed (the adapter resolves session IDs from env vars).
-  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined;
-  const adapter = shouldBindSession
-    ? (parsed.harness ? getAdapterByName(parsed.harness) : getAdapter())
-    : undefined;
+  // Attempt session binding when --session-id or --harness is explicitly
+  // passed, OR when the active harness can be auto-detected (e.g. running
+  // inside Claude Code on Windows where env vars aren't set but the PID
+  // marker file exists).
+  const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
+  const shouldBindSession = parsed.sessionId !== undefined
+    || parsed.harness !== undefined
+    || (detectedAdapter && detectedAdapter.name !== "custom");
+  const adapter = shouldBindSession ? detectedAdapter : undefined;
 
   // Reject explicit --session-id when the adapter auto-resolves it.
   if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
@@ -1377,6 +1539,24 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
     );
     return 0;
   }
+  if (parsed.tree) {
+    // Build EffectNode[] from all effects for tree rendering
+    const allEffects = index.listEffects();
+    const effectNodes: EffectNode[] = allEffects.map((rec: EffectRecord) => ({
+      effectId: rec.effectId,
+      kind: rec.kind ?? "unknown",
+      status: (rec.status === "resolved_ok" || rec.status === "resolved_error" ? "completed" : rec.status === "requested" ? "pending" : "running") as StatusType,
+      title: rec.taskId ?? rec.effectId,
+      progress: rec.progressPercent !== undefined ? {
+        percent: rec.progressPercent,
+        label: rec.progressLabel,
+      } : undefined,
+      costUsd: rec.costUsd,
+    }));
+    console.log(`[run:status] state=${state}`);
+    console.log(renderEffectTree(effectNodes));
+    return 0;
+  }
   const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
   const completionProof = state === "completed" ? resolveCompletionProof(metadata) : undefined;
   const secretSuffix = completionProof ? ` completionProof=${completionProof}` : "";
@@ -1474,8 +1654,18 @@ async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
   if (parsed.reverseOrder) headerParts.push("order=desc");
   const metadataSuffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
   console.log(`[run:events] ${headerParts.join(" ")}${metadataSuffix}`);
-  for (const event of limited) {
-    console.log(`- ${formatEventLine(event)}`);
+  if (parsed.rich) {
+    for (const event of limited) {
+      console.log(renderEventMessage({
+        type: event.type,
+        recordedAt: event.recordedAt,
+        data: (event.data ?? {}) as Record<string, unknown>,
+      }));
+    }
+  } else {
+    for (const event of limited) {
+      console.log(`- ${formatEventLine(event)}`);
+    }
   }
   return 0;
 }
@@ -1838,6 +2028,45 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   return parsed.taskStatus === "ok" ? 0 : 1;
 }
 
+async function handleTaskCancel(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg || !parsed.effectId) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+
+  const index = await buildEffectIndexSafe(runDir, "task:cancel");
+  if (!index) return 1;
+  const record = index.getByEffectId(parsed.effectId);
+  if (!record) {
+    console.error(`[task:cancel] effect ${parsed.effectId} not found at ${runDir}`);
+    return 1;
+  }
+  if (record.status !== "requested") {
+    console.error(`[task:cancel] effect ${parsed.effectId} is already ${record.status}`);
+    return 1;
+  }
+
+  const result = await commitEffectCancellation({
+    runDir,
+    effectId: parsed.effectId,
+    reason: parsed.cancelReason,
+  });
+
+  if (parsed.json) {
+    console.log(
+      JSON.stringify({
+        effectId: parsed.effectId,
+        status: "cancelled",
+        resultRef: result.resultRef,
+      })
+    );
+  } else {
+    console.log(`[task:cancel] effectId=${parsed.effectId} status=cancelled resultRef=${result.resultRef}`);
+  }
+  return 0;
+}
+
 async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
     console.error(USAGE);
@@ -1870,7 +2099,14 @@ async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   console.log(`[task:list] ${scope}=${entries.length}`);
   for (const entry of entries) {
     const label = entry.label ? ` ${entry.label}` : "";
-    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label} (taskId=${entry.taskId ?? "n/a"})`);
+    const record = records.find((r) => r.effectId === entry.effectId);
+    const progressStr = record?.progressPercent !== undefined
+      ? ` [${Math.round(record.progressPercent)}%${record.currentStep ? ` ${record.currentStep}` : ""}]`
+      : "";
+    const costStr = record?.costUsd !== undefined
+      ? ` $${record.costUsd.toFixed(4)}`
+      : "";
+    console.log(`- ${entry.effectId} [${entry.kind ?? "unknown"} ${entry.status}]${label}${progressStr}${costStr} (taskId=${entry.taskId ?? "n/a"})`);
   }
   return 0;
 }
@@ -2244,6 +2480,7 @@ const VALID_COMMANDS = [
   "run:rebuild-state",
   "run:repair-journal",
   "task:post",
+  "task:cancel",
   "task:list",
   "task:show",
   "session:init",
@@ -2267,6 +2504,7 @@ const VALID_COMMANDS = [
   "harness:doctor",
   "harness:contrib",
   "harness:anycli",
+  "harness:session-history",
   "harness:help",
   "harness:observe",
   "harness:user-install",
@@ -2304,14 +2542,26 @@ const VALID_COMMANDS = [
   "instructions:orchestrate",
   "instructions:breakpoint-handling",
   "mcp:serve",
+  "jsonl:interactive",
+  "daemon:start",
+  "daemon:stop",
+  "daemon:status",
+  "daemon:run",
   "health",
   "configure",
   "tokens:stats",
+  "cost:stats",
   "compression:status",
   "compression:toggle",
   "compression:set",
   "compression:reset",
   "compress-output",
+  "breakpoint:approve-rule",
+  "breakpoint:remove-rule",
+  "breakpoint:list-rules",
+  "breakpoint:should-auto-approve",
+  "breakpoint:history",
+  "tui",
   "version",
 ];
 
@@ -2377,6 +2627,20 @@ ${dim}Documentation: https://github.com/a5c-ai/babysitter${reset}
 }
 
 async function handleHarnessObserve(parsed: ParsedArgs): Promise<number> {
+  // --tui: launch the unified Ink-based dashboard instead of the web observer
+  if (parsed.tuiFlag) {
+    const { handleTui } = await import("./commands/tui");
+    return await handleTui({
+      runsDir: parsed.runsDir,
+      json: false,
+      verbose: parsed.verbose,
+      workspace: parsed.workspace,
+      harness: parsed.harness,
+      runId: parsed.runIdOverride,
+      verbosity: parsed.verbosity as ("minimal" | "normal" | "verbose") | undefined,
+    });
+  }
+
   const { spawn } = await import("node:child_process");
   const watchDir = parsed.workspace ?? path.resolve(process.cwd(), "..");
 
@@ -2634,6 +2898,9 @@ export function createBabysitterCli() {
         if (parsed.command === "task:post") {
           return await handleTaskPost(parsed);
         }
+        if (parsed.command === "task:cancel") {
+          return await handleTaskCancel(parsed);
+        }
         if (parsed.command === "task:list") {
           return await handleTaskList(parsed);
         }
@@ -2830,8 +3097,28 @@ export function createBabysitterCli() {
             harness: parsed.harness,
             interactive: parsed.interactive,
             json: parsed.json,
+            showStrata: parsed.showStrata,
           };
           return await handleInstructionsCommand(instructionsArgs);
+        }
+        // Breakpoint commands
+        if (parsed.command?.startsWith("breakpoint:")) {
+          const subcommand = parsed.command.split(":")[1];
+          const bpArgs: BreakpointCommandArgs = {
+            subcommand,
+            pattern: parsed.breakpointPattern,
+            ruleId: parsed.breakpointRuleId,
+            breakpointId: parsed.breakpointIdArg,
+            action: parsed.breakpointAction,
+            source: parsed.breakpointSource ?? parsed.logSource,
+            note: parsed.breakpointNote,
+            tags: parsed.breakpointTags,
+            expert: parsed.breakpointExpert,
+            runsDir: parsed.runsDir,
+            limit: parsed.limit,
+            json: parsed.json,
+          };
+          return await handleBreakpointCommand(bpArgs);
         }
         // Profile commands
         if (
@@ -3134,6 +3421,14 @@ export function createBabysitterCli() {
             interactive: parsed.interactive,
           });
         }
+        if (parsed.command === "harness:session-history") {
+          return await handleSessionHistory({
+            sessionId: parsed.sessionId ?? "",
+            stateDir: parsed.stateDir ?? "",
+            json: parsed.json,
+            runId: parsed.runIdOverride,
+          });
+        }
         if (parsed.command === "harness:help") {
           return handleHarnessHelp(parsed);
         }
@@ -3177,7 +3472,48 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "mcp:serve") {
-          return await handleMcpServe({ json: parsed.json });
+          return await handleMcpServe({
+            json: parsed.json,
+            transport: parsed.transport,
+            port: parsed.port,
+            host: parsed.host,
+            authToken: parsed.authToken,
+            wsOptions: {
+              pingIntervalMs: parsed.wsPingInterval,
+              maxMessagesPerSecond: parsed.wsMaxMps,
+              sessionGracePeriodMs: parsed.wsGracePeriod,
+            },
+          });
+        }
+        if (parsed.command === "jsonl:interactive") {
+          return await handleJsonlInteractive({ runsDir: parsed.runsDir });
+        }
+        if (parsed.command === "daemon:start") {
+          return await handleDaemonStart({
+            daemonDir: parsed.daemonDir,
+            workspace: parsed.workspace,
+            configPath: parsed.configPath,
+            foreground: parsed.foreground,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "daemon:stop") {
+          return await handleDaemonStop({
+            daemonDir: parsed.daemonDir,
+            gracePeriodMs: parsed.gracePeriodMs,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "daemon:status") {
+          return await handleDaemonStatus({
+            daemonDir: parsed.daemonDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "daemon:run") {
+          return await handleDaemonRun({
+            daemonDir: parsed.daemonDir,
+          });
         }
         if (parsed.command === "health") {
           return await handleHealthCommand({
@@ -3196,6 +3532,14 @@ export function createBabysitterCli() {
           return await handleTokensStats({
             runId: parsed.tokensRunId,
             all: parsed.tokensAll,
+            json: parsed.json,
+            runsDir: parsed.runsDir,
+          });
+        }
+        if (parsed.command === "cost:stats") {
+          return await handleCostStats({
+            runId: parsed.costRunId,
+            all: parsed.costAll,
             json: parsed.json,
             runsDir: parsed.runsDir,
           });
@@ -3238,6 +3582,20 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "compress-output") {
           return handleCompressOutput({ args: parsed.compressOutputArgs ?? [] });
+        }
+        if (parsed.command === "tui") {
+          const { handleTui } = await import("./commands/tui");
+          return await handleTui({
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            positional: parsed.positional,
+            harness: parsed.harness,
+            workspace: parsed.workspace,
+            prompt: parsed.prompt,
+            runId: parsed.runIdOverride,
+            verbosity: parsed.verbosity as ("minimal" | "normal" | "verbose") | undefined,
+          });
         }
 
         // This should not be reached due to the VALID_COMMANDS check above

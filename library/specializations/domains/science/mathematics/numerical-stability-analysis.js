@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Identify Potential Numerical Instabilities
-  let instabilityIdentification = await ctx.task(instabilityIdentificationTask, {
+  const instabilityIdentification = await ctx.task(instabilityIdentificationTask, {
     algorithm,
     algorithmCode,
     inputDomain
@@ -46,16 +46,9 @@ export async function process(inputs, ctx) {
       stabilityAnalysis: null
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      instabilityIdentification = await ctx.task(instabilityIdentificationTask, { ...{
-    algorithm,
-    algorithmCode,
-    inputDomain
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review identified instabilities
+  await ctx.breakpoint({
     question: `Identified ${instabilityIdentification.potentialInstabilities.length} potential instabilities in "${algorithm}". Review findings?`,
     title: 'Instability Identification Review',
     context: {
@@ -67,15 +60,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: instabilityIdentification
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Compute Condition Numbers
   const conditionAnalysis = await ctx.task(conditionAnalysisTask, {
     algorithm,
@@ -94,7 +81,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Test Boundary Cases
-  let boundaryTesting = await ctx.task(boundaryTestingTask, {
+  const boundaryTesting = await ctx.task(boundaryTestingTask, {
     algorithm,
     algorithmCode,
     inputDomain,
@@ -104,36 +91,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Check for critical stability issues
   const criticalIssues = boundaryTesting.testResults.filter(r => r.severity === 'critical');
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        boundaryTesting = await ctx.task(boundaryTestingTask, { ...{
-    algorithm,
-    algorithmCode,
-    inputDomain,
-    conditionAnalysis,
-    potentialInstabilities: instabilityIdentification.potentialInstabilities
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (criticalIssues.length > 0) {
+    await ctx.breakpoint({
       question: `Found ${criticalIssues.length} critical stability issues. These require immediate attention. Review?`,
       title: 'Critical Stability Issues',
       context: {
         runId: ctx.runId,
         criticalIssues,
         recommendation: 'Consider alternative algorithms or stabilization techniques'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // Phase 5: Recommend Stable Reformulations
-  let stabilityRecommendations = await ctx.task(stabilityRecommendationsTask, {
+  const stabilityRecommendations = await ctx.task(stabilityRecommendationsTask, {
     algorithm,
     instabilityIdentification,
     conditionAnalysis,
@@ -142,19 +113,8 @@ export async function process(inputs, ctx) {
     precisionRequirements
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      stabilityRecommendations = await ctx.task(stabilityRecommendationsTask, { ...{
-    algorithm,
-    instabilityIdentification,
-    conditionAnalysis,
-    errorAccumulationAnalysis,
-    boundaryTesting,
-    precisionRequirements
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Analysis Complete
+  await ctx.breakpoint({
     question: `Numerical stability analysis complete for "${algorithm}". Stability score: ${stabilityRecommendations.overallStabilityScore}/100. Review findings?`,
     title: 'Stability Analysis Complete',
     context: {
@@ -166,15 +126,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/stability-analysis.json`, format: 'json', content: stabilityRecommendations },
         { path: `artifacts/error-analysis.json`, format: 'json', content: errorAccumulationAnalysis }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     algorithm,
@@ -205,7 +159,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const instabilityIdentificationTask = defineTask('instability-identification', (args, taskCtx) => ({
   kind: 'agent',

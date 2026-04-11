@@ -43,6 +43,8 @@ const piPackageLockPath = "plugins/babysitter-pi/package-lock.json";
 const ompPackageManifestPath = "plugins/babysitter-omp/package.json";
 const ompPackageLockPath = "plugins/babysitter-omp/package-lock.json";
 const opencodePackageManifestPath = "plugins/babysitter-opencode/package.json";
+const openclawPackageManifestPath = "plugins/babysitter-openclaw/package.json";
+const paperclipPackageManifestPath = "plugins/babysitter-paperclip/package.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -105,6 +107,18 @@ const opencodePackageManifest = existsSync(opencodePackageManifestPath)
   ? {
       path: opencodePackageManifestPath,
       data: JSON.parse(readFileSync(opencodePackageManifestPath, "utf8")),
+    }
+  : null;
+const openclawPackageManifest = existsSync(openclawPackageManifestPath)
+  ? {
+      path: openclawPackageManifestPath,
+      data: JSON.parse(readFileSync(openclawPackageManifestPath, "utf8")),
+    }
+  : null;
+const paperclipPackageManifest = existsSync(paperclipPackageManifestPath)
+  ? {
+      path: paperclipPackageManifestPath,
+      data: JSON.parse(readFileSync(paperclipPackageManifestPath, "utf8")),
     }
   : null;
 
@@ -262,6 +276,26 @@ if (opencodePackageManifest) {
   );
 }
 
+if (openclawPackageManifest) {
+  const currentOpenclawVersion = openclawPackageManifest.data.version;
+  const newOpenclawVersion = bumpVersion(currentOpenclawVersion, bumpTarget);
+  openclawPackageManifest.data.version = newOpenclawVersion;
+  writeFileSync(
+    openclawPackageManifest.path,
+    `${JSON.stringify(openclawPackageManifest.data, null, 2)}\n`,
+  );
+}
+
+if (paperclipPackageManifest) {
+  const currentPaperclipVersion = paperclipPackageManifest.data.version;
+  const newPaperclipVersion = bumpVersion(currentPaperclipVersion, bumpTarget);
+  paperclipPackageManifest.data.version = newPaperclipVersion;
+  writeFileSync(
+    paperclipPackageManifest.path,
+    `${JSON.stringify(paperclipPackageManifest.data, null, 2)}\n`,
+  );
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
 for (const versionsPath of [
@@ -273,6 +307,8 @@ for (const versionsPath of [
   "plugins/babysitter-pi/versions.json",
   "plugins/babysitter-github/versions.json",
   "plugins/babysitter-cursor/versions.json",
+  "plugins/babysitter-openclaw/versions.json",
+  "plugins/babysitter-paperclip/versions.json",
 ]) {
   const versionsData = existsSync(versionsPath)
     ? JSON.parse(readFileSync(versionsPath, "utf8"))

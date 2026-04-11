@@ -16,8 +16,10 @@ import {
   composeProcessCreatePrompt,
   composeOrchestrationPrompt,
   composeBreakpointPrompt,
+  PART_STRATA_MAP,
+  composeByStrata,
 } from "../../prompts";
-import type { PromptContext } from "../../prompts";
+import type { PromptContext, StratumTaggedPart } from "../../prompts";
 import {
   resolveActiveProcessLibrary,
   getDefaultProcessLibrarySpec,
@@ -30,6 +32,7 @@ export interface InstructionsCommandArgs {
   harness: string;
   interactive: boolean | undefined;
   json: boolean;
+  showStrata?: boolean;
 }
 
 /**
@@ -47,6 +50,8 @@ type ComposerEntry = {
   fn: (ctx: PromptContext) => string;
   promptType: string;
   partsIncluded: string[];
+  /** Tagged parts for strata-aware composition (GAP-PROMPT-001) */
+  strataParts: string[];
 };
 
 const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = {
@@ -55,11 +60,21 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     promptType: "babysit-skill",
     partsIncluded: [
       "non-negotiables", "dependencies", "interview", "user-profile",
-      "process-creation", "intent-fidelity-checks", "run-creation",
+      "process-creation", "intent-fidelity-checks", "run-overlap-detection", "run-creation",
       "iteration", "effects", "breakpoint-handling", "results-posting",
       "loop-control", "completion-proof", "task-kinds", "task-examples",
       "quick-reference", "recovery", "process-guidelines", "critical-rules",
       "see-also",
+      "project-instructions",
+    ],
+    strataParts: [
+      "renderNonNegotiables", "renderDependencies", "renderInterview", "renderUserProfile",
+      "renderProcessCreation", "renderIntentFidelityChecks", "renderRunOverlapDetection",
+      "renderRunCreation", "renderIteration", "renderEffects", "renderBreakpointHandling",
+      "renderResultsPosting", "renderLoopControl", "renderCompletionProof",
+      "renderTaskKinds", "renderTaskExamples", "renderQuickReference", "renderRecovery",
+      "renderProcessGuidelines", "renderCriticalRules", "renderSeeAlso",
+      "renderProjectInstructions",
     ],
   },
   "process-create": {
@@ -68,22 +83,35 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
     partsIncluded: [
       "interview", "user-profile", "process-creation",
       "intent-fidelity-checks", "process-guidelines",
-      "task-kinds", "task-examples",
+      "parallel-phase-detection", "task-kinds", "task-examples",
+      "project-instructions",
+    ],
+    strataParts: [
+      "renderInterview", "renderUserProfile", "renderProcessCreation",
+      "renderIntentFidelityChecks", "renderProcessGuidelines",
+      "renderParallelPhaseDetection", "renderTaskKinds", "renderTaskExamples",
+      "renderProjectInstructions",
     ],
   },
   "orchestrate": {
     fn: composeOrchestrationPrompt,
     promptType: "orchestrate",
     partsIncluded: [
-      "run-creation", "iteration", "effects", "breakpoint-handling",
+      "run-overlap-detection", "run-creation", "iteration", "effects", "breakpoint-handling",
       "results-posting", "loop-control", "completion-proof",
       "quick-reference", "recovery", "critical-rules",
+    ],
+    strataParts: [
+      "renderRunOverlapDetection", "renderRunCreation", "renderIteration", "renderEffects",
+      "renderBreakpointHandling", "renderResultsPosting", "renderLoopControl",
+      "renderCompletionProof", "renderQuickReference", "renderRecovery", "renderCriticalRules",
     ],
   },
   "breakpoint-handling": {
     fn: composeBreakpointPrompt,
     promptType: "breakpoint-handling",
     partsIncluded: ["breakpoint-handling", "results-posting"],
+    strataParts: ["renderBreakpointHandling", "renderResultsPosting"],
   },
 };
 
@@ -128,7 +156,7 @@ async function tryResolveProcessLibraryRoot(): Promise<{
     if (resolved.binding?.dir) {
       const defaultSpec = getDefaultProcessLibrarySpec();
       return {
-        processLibraryRoot: resolved.binding.dir,
+        processLibraryRoot: defaultSpec.processRoot,
         processLibraryReferenceRoot: defaultSpec.referenceRoot,
       };
     }
@@ -220,7 +248,17 @@ export async function handleInstructionsCommand(
     ...libraryInfo,
     ...hookOverride,
   });
-  const content = composer.fn(ctx);
+
+  // GAP-PROMPT-001: Use strata-aware composition when --show-strata is set
+  let content: string;
+  if (args.showStrata) {
+    const taggedParts: StratumTaggedPart[] = composer.strataParts
+      .map(name => PART_STRATA_MAP[name])
+      .filter((p): p is StratumTaggedPart => p != null);
+    content = composeByStrata(taggedParts, ctx, { showStrata: true });
+  } else {
+    content = composer.fn(ctx);
+  }
 
   if (args.json) {
     console.log(

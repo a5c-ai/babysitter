@@ -92,6 +92,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-monitoring-drift', timestamp: startTime }
     };
   }
+
   // Task 1.2: Retrieve Training Data Statistics
   const trainingStats = await ctx.task(retrieveTrainingStatisticsTask, {
     modelId,
@@ -117,6 +118,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-monitoring-drift', timestamp: startTime }
     };
   }
+
   // ============================================================================
   // PHASE 2: PRODUCTION DATA COLLECTION AND ANALYSIS
   // ============================================================================
@@ -143,6 +145,7 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/data-science-ml/model-monitoring-drift', timestamp: startTime }
     };
   }
+
   // Task 2.2: Calculate Production Data Statistics
   const productionStats = await ctx.task(calculateProductionStatisticsTask, {
     modelId,
@@ -207,6 +210,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // ============================================================================
   // PHASE 4: PREDICTION DRIFT ANALYSIS
   // ============================================================================
@@ -245,6 +249,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // ============================================================================
   // PHASE 5: PERFORMANCE MONITORING
   // ============================================================================
@@ -293,6 +298,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // ============================================================================
   // PHASE 6: CONCEPT DRIFT DETECTION
   // ============================================================================
@@ -326,6 +332,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // ============================================================================
   // PHASE 7: SEGMENT ANALYSIS
   // ============================================================================
@@ -356,6 +363,7 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now()
     });
   }
+
   // ============================================================================
   // PHASE 8: ROOT CAUSE ANALYSIS
   // ============================================================================
@@ -406,6 +414,7 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Sent ${notificationResult.notificationsSent} notifications to ${alertChannels.length} channels`);
   }
+
   // ============================================================================
   // PHASE 10: RETRAINING DECISION AND TRIGGER
   // ============================================================================
@@ -413,7 +422,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', 'Phase 10: Evaluating retraining necessity');
 
   // Task 10.1: Retraining Recommendation Decision
-  let retrainingRecommendation = await ctx.task(retrainingRecommendationTask, {
+  const retrainingRecommendation = await ctx.task(retrainingRecommendationTask, {
     modelId,
     driftDetected,
     performanceDegraded,
@@ -431,27 +440,8 @@ export async function process(inputs, ctx) {
   });
 
   // Breakpoint: Review monitoring results and retraining recommendation
-      let lastFeedback_reviewApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_reviewApproval) {
-        retrainingRecommendation = await ctx.task(retrainingRecommendationTask, { ...{
-    modelId,
-    driftDetected,
-    performanceDegraded,
-    alerts,
-    rootCauseAnalysis,
-    driftSeverity: {
-      dataDrift: featureDriftAnalysis.severity,
-      predictionDrift: predictionDrift.severity,
-      conceptDrift: conceptDriftAnalysis.driftDetected ? 'high' : 'none',
-      performanceDegradation: performanceComparison.severity
-    },
-    retrainingConfig,
-    lastRetrainingDate: modelContext.lastRetrainingDate,
-    modelAge: modelContext.modelAge
-  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
-      }
-  const reviewApproval = await ctx.breakpoint({
+  if (driftDetected || performanceDegraded) {
+    await ctx.breakpoint({
       question: `Monitoring analysis complete for ${modelId}. Drift detected: ${driftDetected}. Performance degraded: ${performanceDegraded}. ${alerts.length} alert(s) generated. Retraining recommended: ${retrainingRecommendation.recommended}. Review results and approve retraining?`,
       title: 'Model Monitoring - Drift and Degradation Detected',
       context: {
@@ -469,17 +459,12 @@ export async function process(inputs, ctx) {
           { path: `artifacts/root-cause-analysis.md`, format: 'markdown', label: 'Root Cause Analysis' },
           { path: monitoringSetup.dashboardUrl, format: 'link', label: 'Monitoring Dashboard' }
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_reviewApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (reviewApproval.approved) break;
-      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
-    } } else {
+      }
+    });
+  } else {
     ctx.log('info', 'No significant drift or performance issues detected');
   }
+
   // Task 10.2: Trigger Retraining if Approved
   if (retrainingRecommendation.recommended &&
       retrainingRecommendation.approved &&
@@ -510,6 +495,7 @@ export async function process(inputs, ctx) {
   } else if (retrainingRecommendation.recommended) {
     ctx.log('warn', 'Retraining recommended but requires manual approval or auto-trigger disabled');
   }
+
   // ============================================================================
   // PHASE 11: REPORTING AND DOCUMENTATION
   // ============================================================================
@@ -545,7 +531,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 11.2: Update Model Registry
-  let registryUpdate = await ctx.task(updateModelRegistryTask, {
+  const registryUpdate = await ctx.task(updateModelRegistryTask, {
     modelId,
     modelVersion: modelContext.modelVersion,
     monitoringResults: {
@@ -558,23 +544,8 @@ export async function process(inputs, ctx) {
     nextMonitoringSchedule: monitoringReport.nextMonitoringDate
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      registryUpdate = await ctx.task(updateModelRegistryTask, { ...{
-    modelId,
-    modelVersion: modelContext.modelVersion,
-    monitoringResults: {
-      timestamp: startTime,
-      driftDetected,
-      performanceDegraded,
-      alertCount: alerts.length,
-      retrainingTriggered
-    },
-    nextMonitoringSchedule: monitoringReport.nextMonitoringDate
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Review complete monitoring analysis
+  await ctx.breakpoint({
     question: `Model monitoring and drift detection complete for ${modelId}. Drift: ${driftDetected}. Degradation: ${performanceDegraded}. Retraining triggered: ${retrainingTriggered}. Review comprehensive report?`,
     title: 'Model Monitoring Complete',
     context: {
@@ -590,15 +561,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/alerts-summary.json`, format: 'json', label: 'Alerts Summary' },
         { path: monitoringSetup.dashboardUrl, format: 'link', label: 'Live Dashboard' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -658,7 +623,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

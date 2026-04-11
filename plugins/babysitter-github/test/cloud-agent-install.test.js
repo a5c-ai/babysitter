@@ -8,6 +8,7 @@ const { spawnSync } = require('child_process');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const INSTALL_SCRIPT = path.join(PACKAGE_ROOT, 'bin', 'install.js');
+const MONOREPO_ROOT = path.resolve(PACKAGE_ROOT, '..', '..');
 
 function assert(condition, message) {
   if (!condition) {
@@ -47,6 +48,7 @@ function main() {
     env: {
       ...process.env,
       BABYSITTER_GLOBAL_STATE_DIR: globalStateDir,
+      BABYSITTER_PROCESS_LIBRARY_REPO: MONOREPO_ROOT,
     },
   });
 

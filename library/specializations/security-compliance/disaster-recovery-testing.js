@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Reviewing and validating disaster recovery plan');
 
-  let planReview = await ctx.task(reviewDRPlanTask, {
+  const planReview = await ctx.task(reviewDRPlanTask, {
     testId,
     organizationName,
     drPlanLocation,
@@ -91,22 +91,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `DR Plan Review Complete - Plan Status: ${planReview.planStatus}, Gaps: ${planReview.gapsIdentified}`);
 
   // Quality Gate: DR Plan Readiness
-      let lastFeedback_qualityGateApproval = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval) {
-        planReview = await ctx.task(reviewDRPlanTask, { ...{
-    testId,
-    organizationName,
-    drPlanLocation,
-    drScope,
-    criticalSystems,
-    rtoTarget,
-    rpoTarget,
-    regulatoryRequirements,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
-      }
-  const qualityGateApproval = await ctx.breakpoint({
+  if (planReview.planStatus !== 'current' || planReview.gapsIdentified > 5) {
+    await ctx.breakpoint({
       question: `DR Plan review for ${organizationName} identified ${planReview.gapsIdentified} gaps. Plan status: ${planReview.planStatus}. Major gaps include: ${planReview.majorGaps.join(', ')}. Update plan before proceeding with test?`,
       title: 'DR Plan Readiness Review',
       context: {
@@ -118,15 +104,9 @@ export async function process(inputs, ctx) {
         lastReviewDate: planReview.lastReviewDate,
         recommendation: 'Address critical gaps in DR plan before conducting full test',
         files: planReview.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval.approved) break;
-      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: TEST OBJECTIVES AND SCOPE DEFINITION
@@ -134,7 +114,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Defining test objectives, scope, and success criteria');
 
-  let testPlanning = await ctx.task(defineTestObjectivesTask, {
+  const testPlanning = await ctx.task(defineTestObjectivesTask, {
     testId,
     organizationName,
     testType,
@@ -153,25 +133,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Test Planning Complete - ${testPlanning.testObjectives.length} objectives, ${testPlanning.successCriteria.length} success criteria`);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      testPlanning = await ctx.task(defineTestObjectivesTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    drScope,
-    criticalSystems,
-    disasterScenario,
-    rtoTarget,
-    rpoTarget,
-    includeFailback,
-    planReview,
-    regulatoryRequirements,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Quality Gate: Test Plan Approval
+  await ctx.breakpoint({
     question: `DR Test plan for ${disasterScenario} scenario ready. Test type: ${testType}. ${testPlanning.testObjectives.length} objectives defined. Systems in scope: ${testPlanning.systemsInScope.length}. Approve test plan and schedule?`,
     title: 'DR Test Plan Approval',
     context: {
@@ -185,22 +148,16 @@ export async function process(inputs, ctx) {
       estimatedDuration: testPlanning.estimatedDuration,
       businessImpact: testPlanning.businessImpact,
       files: testPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: STAKEHOLDER COORDINATION AND COMMUNICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Coordinating stakeholders and establishing communication channels');
 
-  let stakeholderCoordination = await ctx.task(coordinateStakeholdersTask, {
+  const stakeholderCoordination = await ctx.task(coordinateStakeholdersTask, {
     testId,
     organizationName,
     testType,
@@ -216,21 +173,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Stakeholder Coordination Complete - ${stakeholderCoordination.stakeholdersNotified} notified, ${stakeholderCoordination.rolesAssigned} roles assigned`);
 
   // Quality Gate: Stakeholder Readiness
-      let lastFeedback_qualityGateApproval2 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval2) {
-        stakeholderCoordination = await ctx.task(coordinateStakeholdersTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    testPlanning,
-    stakeholderInvolvement,
-    notificationChannels,
-    disasterScenario,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
-      }
-  const qualityGateApproval2 = await ctx.breakpoint({
+  if (!stakeholderCoordination.allRolesAssigned) {
+    await ctx.breakpoint({
       question: `DR Test stakeholder coordination incomplete. Missing roles: ${stakeholderCoordination.missingRoles.join(', ')}. Critical for test execution. Assign missing roles before proceeding?`,
       title: 'Stakeholder Readiness Check',
       context: {
@@ -242,15 +186,9 @@ export async function process(inputs, ctx) {
         communicationChannels: stakeholderCoordination.communicationChannels,
         recommendation: 'All key roles must be assigned before DR test execution',
         files: stakeholderCoordination.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval2.approved) break;
-      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 4: PRE-TEST BASELINE AND PREPARATION
@@ -278,7 +216,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Initiating disaster scenario simulation');
 
-  let disasterSimulation = await ctx.task(simulateDisasterTask, {
+  const disasterSimulation = await ctx.task(simulateDisasterTask, {
     testId,
     organizationName,
     testType,
@@ -297,22 +235,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Disaster Scenario Simulated - Type: ${disasterSimulation.simulationType}, Impact: ${disasterSimulation.impactLevel}`);
 
-    let lastFeedback_qualityGateApproval3 = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_qualityGateApproval3) {
-      disasterSimulation = await ctx.task(simulateDisasterTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    disasterScenario,
-    criticalSystems,
-    testPlanning,
-    baselinePreparation,
-    automatedRecovery,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
-    }
-  const qualityGateApproval3 = await ctx.breakpoint({
+  // Quality Gate: Disaster Simulation Verification
+  await ctx.breakpoint({
     question: `Disaster scenario "${disasterScenario}" has been simulated. ${disasterSimulation.systemsAffected} systems affected. Impact level: ${disasterSimulation.impactLevel}. Ready to proceed with recovery procedures?`,
     title: 'Disaster Simulation Verification',
     context: {
@@ -324,15 +248,9 @@ export async function process(inputs, ctx) {
       affectedSystems: disasterSimulation.affectedSystemsList,
       simulationDetails: disasterSimulation.simulationDetails,
       files: disasterSimulation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (qualityGateApproval3.approved) break;
-    lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 6: NOTIFICATION AND ESCALATION PROCEDURES
   // ============================================================================
@@ -360,7 +278,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Executing disaster recovery procedures');
 
-  let recoveryExecution = await ctx.task(executeRecoveryProceduresTask, {
+  const recoveryExecution = await ctx.task(executeRecoveryProceduresTask, {
     testId,
     organizationName,
     testType,
@@ -383,24 +301,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Recovery Execution Complete - Success: ${recoveryExecution.recoverySuccessful}, Systems Recovered: ${recoveryExecution.systemsRecovered}/${recoveryExecution.totalSystems}, RTO Achieved: ${rtoAchieved.toFixed(2)}h`);
 
   // Quality Gate: Recovery Success Verification
-      let lastFeedback_qualityGateApproval4 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval4) {
-        recoveryExecution = await ctx.task(executeRecoveryProceduresTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    disasterScenario,
-    criticalSystems,
-    testPlanning,
-    baselinePreparation,
-    disasterSimulation,
-    stakeholderCoordination,
-    automatedRecovery,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
-      }
-  const qualityGateApproval4 = await ctx.breakpoint({
+  if (!recoveryExecution.recoverySuccessful) {
+    await ctx.breakpoint({
       question: `Disaster recovery execution incomplete. Only ${recoveryExecution.systemsRecovered}/${recoveryExecution.totalSystems} systems recovered. RTO target: ${rtoTarget}h, Achieved: ${rtoAchieved.toFixed(2)}h. Recovery issues: ${recoveryExecution.recoveryIssues.join(', ')}. Continue with failback or address issues?`,
       title: 'Recovery Execution Issues',
       context: {
@@ -414,15 +316,9 @@ export async function process(inputs, ctx) {
         failedSystems: recoveryExecution.failedSystems,
         recommendation: 'Address recovery issues before proceeding with failback',
         files: recoveryExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval4.approved) break;
-      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 8: DATA INTEGRITY AND RPO VALIDATION
@@ -479,24 +375,8 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Validation Complete - Data Integrity: ${dataIntegrityValidation.integrityScore}%, RPO Achieved: ${rpoAchieved.toFixed(2)}h, Application Functionality: ${applicationValidation.functionalityScore}%`);
 
   // Quality Gate: Data Integrity Check
-      let lastFeedback_qualityGateApproval5 = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_qualityGateApproval5) {
-        recoveryExecution = await ctx.task(executeRecoveryProceduresTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    disasterScenario,
-    criticalSystems,
-    testPlanning,
-    baselinePreparation,
-    disasterSimulation,
-    stakeholderCoordination,
-    automatedRecovery,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
-      }
-  const qualityGateApproval5 = await ctx.breakpoint({
+  if (dataIntegrityValidation.integrityScore < 95 || dataIntegrityValidation.dataLossDetected) {
+    await ctx.breakpoint({
       question: `Data integrity issues detected. Integrity score: ${dataIntegrityValidation.integrityScore}%. Data loss: ${dataIntegrityValidation.dataLossDetected}. Records affected: ${dataIntegrityValidation.recordsAffected}. RPO target: ${rpoTarget}h, Achieved: ${rpoAchieved.toFixed(2)}h. Investigate data issues?`,
       title: 'Data Integrity Concerns',
       context: {
@@ -513,15 +393,9 @@ export async function process(inputs, ctx) {
           ...dataIntegrityValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label })),
           ...rpoValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
         ]
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (qualityGateApproval5.approved) break;
-      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 9: FAILBACK PROCEDURES (IF INCLUDED)
@@ -550,24 +424,8 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Failback Complete - Success: ${failbackResult.failbackSuccessful}, Systems Restored: ${failbackResult.systemsRestoredToPrimary}/${failbackResult.totalSystems}`);
 
     // Quality Gate: Failback Verification
-        let lastFeedback_qualityGateApproval6 = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_qualityGateApproval6) {
-          recoveryExecution = await ctx.task(executeRecoveryProceduresTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    disasterScenario,
-    criticalSystems,
-    testPlanning,
-    baselinePreparation,
-    disasterSimulation,
-    stakeholderCoordination,
-    automatedRecovery,
-    outputDir
-  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
-        }
-  const qualityGateApproval6 = await ctx.breakpoint({
+    if (!failbackResult.failbackSuccessful) {
+      await ctx.breakpoint({
         question: `Failback procedures incomplete. ${failbackResult.systemsRestoredToPrimary}/${failbackResult.totalSystems} systems restored to primary. Failback issues: ${failbackResult.failbackIssues.join(', ')}. Continue or rollback?`,
         title: 'Failback Verification',
         context: {
@@ -579,18 +437,13 @@ export async function process(inputs, ctx) {
           failbackIssues: failbackResult.failbackIssues,
           recommendation: 'Review failback procedures and replication configuration',
           files: failbackResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (qualityGateApproval6.approved) break;
-        lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   } else {
     ctx.log('info', 'Phase 9: Failback procedures not included in this test');
   }
+
   // ============================================================================
   // PHASE 10: PERFORMANCE AND CAPACITY ASSESSMENT
   // ============================================================================
@@ -737,7 +590,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Calculating DR readiness and test effectiveness scores');
 
-  let scoringResult = await ctx.task(calculateDRScoresTask, {
+  const scoringResult = await ctx.task(calculateDRScoresTask, {
     testId,
     organizationName,
     testType,
@@ -763,30 +616,8 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `DR Readiness Score: ${drReadinessScore}/100, Test Execution Score: ${testScore}/100`);
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      scoringResult = await ctx.task(calculateDRScoresTask, { ...{
-    testId,
-    organizationName,
-    testType,
-    rtoTarget,
-    rpoTarget,
-    rtoAchieved,
-    rpoAchieved,
-    planReview,
-    recoveryExecution,
-    dataIntegrityValidation,
-    applicationValidation,
-    performanceAssessment,
-    notificationTest,
-    failbackResult,
-    findingsAnalysis,
-    regulatoryRequirements,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: DR Test Complete
+  await ctx.breakpoint({
     question: `Disaster Recovery Test Complete for ${organizationName}. DR Readiness: ${drReadinessScore}/100, Test Score: ${testScore}/100. RTO Target: ${rtoTarget}h, Achieved: ${rtoAchieved.toFixed(2)}h. RPO Target: ${rpoTarget}h, Achieved: ${rpoAchieved.toFixed(2)}h. ${findingsAnalysis.criticalFindings} critical findings. Review results and approve corrective actions?`,
     title: 'Final DR Test Review',
     context: {
@@ -834,15 +665,9 @@ export async function process(inputs, ctx) {
         { path: recommendationsResult.recommendationsPath, format: 'markdown', label: 'Recommendations' },
         { path: scoringResult.scorecardPath, format: 'json', label: 'DR Scorecard' }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -949,7 +774,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

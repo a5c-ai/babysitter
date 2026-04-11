@@ -16,6 +16,7 @@ import { createInternalAdapter } from "./internal";
 import { createCursorAdapter } from "./cursor";
 import { createGithubCopilotAdapter } from "./githubCopilot";
 import { createOpenCodeAdapter } from "./opencode";
+import { createOpenClawAdapter } from "./openclaw";
 import { createCustomAdapter } from "./customAdapter";
 
 // ---------------------------------------------------------------------------
@@ -27,6 +28,7 @@ const knownAdapters: HarnessAdapter[] = [
   createOhMyPiAdapter(),
   createInternalAdapter(),
   createPiAdapter(),
+  createOpenClawAdapter(),
   createOpenCodeAdapter(),
   createClaudeCodeAdapter(),
   createGeminiCliAdapter(),

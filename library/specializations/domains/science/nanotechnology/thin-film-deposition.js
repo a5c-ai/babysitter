@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Process Design
-  let processDesign = await ctx.task(processDesignTask, {
+  const processDesign = await ctx.task(processDesignTask, {
     depositionMethod,
     material,
     targetThickness,
@@ -53,18 +53,9 @@ export async function process(inputs, ctx) {
       recommendations: processDesign.recommendations
     };
   }
-  let lastFeedback_phase1Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase1Review) {
-      processDesign = await ctx.task(processDesignTask, { ...{
-    depositionMethod,
-    material,
-    targetThickness,
-    substrate,
-    requirements
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-    }
-  const phase1Review = await ctx.breakpoint({
+
+  // Breakpoint: Review process design
+  await ctx.breakpoint({
     question: `Review ${depositionMethod} process design for ${material}. Target: ${targetThickness.value}${targetThickness.units}. Approve to proceed?`,
     title: 'Deposition Process Design Review',
     context: {
@@ -77,15 +68,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: processDesign
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase1Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase1Review.approved) break;
-    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 2: Precursor/Source Optimization
   const precursorOptimization = await ctx.task(precursorOptimizationTask, {
     depositionMethod,
@@ -127,7 +112,7 @@ export async function process(inputs, ctx) {
     });
 
     // Deposition test
-    let depositionTest = await ctx.task(depositionTestTask, {
+    const depositionTest = await ctx.task(depositionTestTask, {
       parameters: parameterAdjustment.adjustedParameters,
       depositionMethod,
       material,
@@ -149,18 +134,8 @@ export async function process(inputs, ctx) {
 
     currentParams = parameterAdjustment.adjustedParameters;
 
-        let lastFeedback_iterationApproval = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_iterationApproval) {
-          depositionTest = await ctx.task(depositionTestTask, { ...{
-      parameters: parameterAdjustment.adjustedParameters,
-      depositionMethod,
-      material,
-      substrate,
-      targetThickness
-    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
-        }
-  const iterationApproval = await ctx.breakpoint({
+    if (Math.abs(thicknessError) > targetThickness.tolerance && iteration < maxIterations) {
+      await ctx.breakpoint({
         question: `Iteration ${iteration}: Thickness = ${thicknessAchieved.toFixed(2)}nm (error: ${thicknessError.toFixed(2)}nm). Continue calibration?`,
         title: 'Growth Rate Calibration Progress',
         context: {
@@ -169,16 +144,11 @@ export async function process(inputs, ctx) {
           targetThickness: targetThickness.value,
           achievedThickness: thicknessAchieved,
           thicknessError
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_iterationApproval || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (iterationApproval.approved) break;
-        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 5: Conformality Validation (for ALD/CVD)
   let conformalityValidation = null;
   if (depositionMethod === 'ALD' || depositionMethod === 'CVD') {
@@ -190,18 +160,8 @@ export async function process(inputs, ctx) {
     });
 
     // Quality Gate: Conformality must meet requirements
-        let lastFeedback_phase5Review = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (lastFeedback_phase5Review) {
-          depositionTest = await ctx.task(depositionTestTask, { ...{
-      parameters: parameterAdjustment.adjustedParameters,
-      depositionMethod,
-      material,
-      substrate,
-      targetThickness
-    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-        }
-  const phase5Review = await ctx.breakpoint({
+    if (requirements.conformality && conformalityValidation.conformality < requirements.conformality) {
+      await ctx.breakpoint({
         question: `Conformality ${(conformalityValidation.conformality * 100).toFixed(1)}% below target ${(requirements.conformality * 100).toFixed(1)}%. Review and adjust?`,
         title: 'Conformality Warning',
         context: {
@@ -209,16 +169,11 @@ export async function process(inputs, ctx) {
           achievedConformality: conformalityValidation.conformality,
           targetConformality: requirements.conformality,
           recommendations: conformalityValidation.recommendations
-        },
-        expert: 'owner',
-        tags: ['approval-gate'],
-        previousFeedback: lastFeedback_phase5Review || undefined,
-        attempt: attempt > 0 ? attempt + 1 : undefined
-        });
-        if (phase5Review.approved) break;
-        lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-      }   }
+        }
+      });
+    }
   }
+
   // Phase 6: Film Property Characterization
   const filmCharacterization = await ctx.task(filmCharacterizationTask, {
     depositionMethod,
@@ -247,7 +202,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Recipe Documentation
-  let recipeDocumentation = await ctx.task(recipeDocumentationTask, {
+  const recipeDocumentation = await ctx.task(recipeDocumentationTask, {
     depositionMethod,
     material,
     substrate,
@@ -259,22 +214,8 @@ export async function process(inputs, ctx) {
     calibrationHistory
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      recipeDocumentation = await ctx.task(recipeDocumentationTask, { ...{
-    depositionMethod,
-    material,
-    substrate,
-    targetThickness,
-    optimizedParams: currentParams,
-    filmCharacterization,
-    spcImplementation,
-    processQualification,
-    calibrationHistory
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Process approval
+  await ctx.breakpoint({
     question: `Deposition process development complete. Thickness: ${thicknessAchieved.toFixed(2)}nm. Uniformity: ${(calibrationHistory[calibrationHistory.length - 1].uniformity * 100).toFixed(1)}%. Cpk: ${spcImplementation.cpk.toFixed(2)}. Approve recipe?`,
     title: 'Deposition Process Approval',
     context: {
@@ -286,15 +227,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/process-recipe.md', format: 'markdown', content: recipeDocumentation.markdown },
         { path: 'artifacts/process-parameters.json', format: 'json', content: currentParams }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     processRecipe: {
@@ -325,7 +260,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const processDesignTask = defineTask('process-design', (args, taskCtx) => ({
   kind: 'agent',

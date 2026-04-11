@@ -40,22 +40,14 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Thermal Testing (Temperature and Humidity)
-  let thermalTesting = await ctx.task(thermalTestingTask, {
+  const thermalTesting = await ctx.task(thermalTestingTask, {
     projectName,
     testPlan: testPlanDefinition.thermalPlan,
     standards
   });
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      thermalTesting = await ctx.task(thermalTestingTask, { ...{
-    projectName,
-    testPlan: testPlanDefinition.thermalPlan,
-    standards
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review thermal test results
+  await ctx.breakpoint({
     question: `Thermal testing complete for ${projectName}. Pass rate: ${thermalTesting.passRate}%. Failures: ${thermalTesting.failures.length}. Proceed with mechanical testing?`,
     title: 'Thermal Test Review',
     context: {
@@ -67,15 +59,9 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: thermalTesting
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 3: Mechanical Testing (Vibration and Shock)
   const mechanicalTesting = await ctx.task(mechanicalTestingTask, {
     projectName,
@@ -84,24 +70,15 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Environmental Stress Screening (ESS)
-  let essResults = await ctx.task(essTask, {
+  const essResults = await ctx.task(essTask, {
     projectName,
     thermalResults: thermalTesting.results,
     mechanicalResults: mechanicalTesting.results,
     testRequirements
   });
 
-    let lastFeedback_phase4Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase4Review) {
-      essResults = await ctx.task(essTask, { ...{
-    projectName,
-    thermalResults: thermalTesting.results,
-    mechanicalResults: mechanicalTesting.results,
-    testRequirements
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-    }
-  const phase4Review = await ctx.breakpoint({
+  // Breakpoint: Review mechanical and ESS results
+  await ctx.breakpoint({
     question: `Mechanical testing pass rate: ${mechanicalTesting.passRate}%. ESS screening: ${essResults.screeningEffectiveness}%. Proceed with EMC testing?`,
     title: 'Mechanical and ESS Review',
     context: {
@@ -112,15 +89,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/phase3-mechanical.json`, format: 'json', content: mechanicalTesting },
         { path: `artifacts/phase4-ess.json`, format: 'json', content: essResults }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase4Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase4Review.approved) break;
-    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // Phase 5: EMC Testing (Emissions and Immunity)
   const emcTesting = await ctx.task(emcTestingTask, {
     projectName,
@@ -129,7 +100,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Accelerated Life Testing (ALT/HALT)
-  let acceleratedLifeTesting = await ctx.task(acceleratedLifeTestingTask, {
+  const acceleratedLifeTesting = await ctx.task(acceleratedLifeTestingTask, {
     projectName,
     testPlan: testPlanDefinition.reliabilityPlan,
     thermalResults: thermalTesting.results,
@@ -144,32 +115,17 @@ export async function process(inputs, ctx) {
     ...acceleratedLifeTesting.failures
   ];
 
-      let lastFeedback_phase6Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase6Review) {
-        acceleratedLifeTesting = await ctx.task(acceleratedLifeTestingTask, { ...{
-    projectName,
-    testPlan: testPlanDefinition.reliabilityPlan,
-    thermalResults: thermalTesting.results,
-    mechanicalResults: mechanicalTesting.results
-  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
-      }
-  const phase6Review = await ctx.breakpoint({
+  if (allFailures.length > 0) {
+    await ctx.breakpoint({
       question: `${allFailures.length} total failures found across all tests. Critical: ${allFailures.filter(f => f.severity === 'critical').length}. Review failure analysis?`,
       title: 'Test Failures Detected',
       context: {
         runId: ctx.runId,
         failureSummary: allFailures,
         recommendations: acceleratedLifeTesting.recommendations
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase6Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase6Review.approved) break;
-      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
-    }  }
+      }
+    });
+  }
 
   // Phase 7: Failure Analysis and Root Cause
   const failureAnalysis = await ctx.task(failureAnalysisTask, {
@@ -184,7 +140,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Generate Test Report and Certification Summary
-  let testReport = await ctx.task(testReportTask, {
+  const testReport = await ctx.task(testReportTask, {
     projectName,
     thermalResults: thermalTesting,
     mechanicalResults: mechanicalTesting,
@@ -195,21 +151,8 @@ export async function process(inputs, ctx) {
     standards
   });
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      testReport = await ctx.task(testReportTask, { ...{
-    projectName,
-    thermalResults: thermalTesting,
-    mechanicalResults: mechanicalTesting,
-    essResults,
-    emcResults: emcTesting,
-    reliabilityResults: acceleratedLifeTesting,
-    failureAnalysis,
-    standards
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Test Program Approval
+  await ctx.breakpoint({
     question: `Environmental testing complete for ${projectName}. Overall pass rate: ${testReport.overallPassRate}%. Certification ready: ${testReport.certificationReady}. Approve test results?`,
     title: 'Environmental Test Approval',
     context: {
@@ -220,15 +163,9 @@ export async function process(inputs, ctx) {
         { path: `artifacts/test-results.json`, format: 'json', content: { thermal: thermalTesting, mechanical: mechanicalTesting, emc: emcTesting } },
         { path: `artifacts/environmental-test-report.md`, format: 'markdown', content: testReport.markdown }
       ]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   return {
     success: true,
     projectName,
@@ -251,7 +188,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // Task Definitions
+
+// Task Definitions
 
 export const testPlanDefinitionTask = defineTask('test-plan-definition', (args, taskCtx) => ({
   kind: 'agent',

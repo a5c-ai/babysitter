@@ -1,0 +1,67 @@
+{
+  "name": "@a5c-ai/babysitter-openclaw",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Babysitter plugin for OpenClaw AI agent with programmatic hook integration, orchestration skills, and SDK-managed process-library bootstrapping",
+  "openclaw": {
+    "extensions": [
+      "./extensions"
+    ],
+    "compat": {
+      "minVersion": "0.1.0"
+    },
+    "build": {
+      "hooks": "extensions/index.ts"
+    }
+  },
+  "keywords": [
+    "babysitter",
+    "openclaw",
+    "orchestration",
+    "ai-agent",
+    "sdk-integration"
+  ],
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.184"
+  },
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "scripts": {
+    "postinstall": "node bin/install.cjs --global",
+    "preuninstall": "node bin/uninstall.cjs --global",
+    "test": "node --test test/integration.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:packaged-install": "node test/packaged-install.test.cjs",
+    "sync:commands": "node scripts/sync-command-docs.cjs",
+    "deploy": "npm publish --access public",
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "bin": {
+    "babysitter-openclaw": "bin/cli.cjs"
+  },
+  "files": [
+    "bin/",
+    "package.json",
+    "versions.json",
+    "plugin.json",
+    "openclaw.plugin.json",
+    "hooks/",
+    "hooks.json",
+    "extensions/",
+    "skills/",
+    "commands/",
+    "scripts/",
+    "README.md"
+  ],
+  "author": "a5c.ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-openclaw#readme"
+}

@@ -6,6 +6,7 @@ import { getJournalDir, RUN_METADATA_FILE } from "./paths";
 import { writeFileAtomic } from "./atomic";
 import { nextUlid } from "./ulids";
 import { getClockIsoString } from "./clock";
+import { warnIfICloudDrivePath } from "./icloudWarning";
 
 function formatSeq(seq: number) {
   return seq.toString().padStart(6, "0");
@@ -26,6 +27,7 @@ async function getExistingSeqs(journalDir: string) {
 
 export async function appendEvent(opts: AppendEventOptions): Promise<AppendEventResult> {
   const journalDir = getJournalDir(opts.runDir);
+  await warnIfICloudDrivePath(journalDir);
   await fs.mkdir(journalDir, { recursive: true });
   const seqs = await getExistingSeqs(journalDir);
   const seq = (seqs.length ? Math.max(...seqs) : 0) + 1;

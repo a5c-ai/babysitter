@@ -22,7 +22,7 @@ import type {
 } from "./types";
 import { HarnessCapability as Cap } from "./types";
 import type { PromptContext } from "../prompts/types";
-import { createPiContext } from "../prompts/context";
+import { createInternalContext } from "../prompts/context";
 
 function resolveInternalPluginRoot(
   args: { pluginRoot?: string } = {},
@@ -88,7 +88,15 @@ export function createInternalAdapter(): HarnessAdapter {
     },
 
     getCapabilities(): HarnessCapability[] {
-      return [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt];
+      return [
+        Cap.Programmatic,
+        Cap.SessionBinding,
+        Cap.StopHook,
+        Cap.HeadlessPrompt,
+        Cap.ConcurrentEffects,
+        Cap.BackgroundEffects,
+        Cap.MultiHarnessDispatch,
+      ];
     },
 
     async bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
@@ -144,7 +152,7 @@ export function createInternalAdapter(): HarnessAdapter {
     },
 
     getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
-      return createPiContext(opts);
+      return createInternalContext(opts);
     },
   };
 }

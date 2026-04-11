@@ -44,7 +44,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Assessing current system state and architecture');
-  let currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
+  const currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
     projectName,
     currentState,
     outputDir
@@ -53,16 +53,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...currentStateAssessment.artifacts);
 
   // Quality Gate: Current state must be sufficiently documented
-      let lastFeedback_phase1Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase1Review) {
-        currentStateAssessment = await ctx.task(currentStateAssessmentTask, { ...{
-    projectName,
-    currentState,
-    outputDir
-  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
-      }
-  const phase1Review = await ctx.breakpoint({
+  if (currentStateAssessment.completenessScore < 70) {
+    await ctx.breakpoint({
       question: `Current state assessment completeness: ${currentStateAssessment.completenessScore}%. Additional discovery needed. Should we conduct deeper analysis before proceeding?`,
       title: 'Current State Assessment Warning',
       context: {
@@ -70,22 +62,16 @@ export async function process(inputs, ctx) {
         projectName,
         assessment: currentStateAssessment,
         recommendation: 'Conduct architecture discovery workshops and technical documentation review'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase1Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase1Review.approved) break;
-      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 2: TARGET STATE DEFINITION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Defining target architecture and technology stack');
-  let targetStateDefinition = await ctx.task(targetStateDefinitionTask, {
+  const targetStateDefinition = await ctx.task(targetStateDefinitionTask, {
     projectName,
     currentState: currentStateAssessment,
     targetState,
@@ -96,19 +82,8 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetStateDefinition.artifacts);
 
-    let lastFeedback_phase2Review = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_phase2Review) {
-      targetStateDefinition = await ctx.task(targetStateDefinitionTask, { ...{
-    projectName,
-    currentState: currentStateAssessment,
-    targetState,
-    migrationGoals,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
-    }
-  const phase2Review = await ctx.breakpoint({
+  // Breakpoint: Review target architecture
+  await ctx.breakpoint({
     question: `Review target architecture for ${projectName}. Target: ${targetStateDefinition.architecturePattern}. Alignment with goals: ${targetStateDefinition.goalAlignmentScore}%. Approve?`,
     title: 'Target Architecture Review',
     context: {
@@ -124,15 +99,9 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: targetStateDefinition.diagram
       }]
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_phase2Review || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (phase2Review.approved) break;
-    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
-  }
+    }
+  });
+
   // ============================================================================
   // PHASE 3: GAP ANALYSIS
   // ============================================================================
@@ -153,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Selecting optimal migration strategy and approach');
-  let migrationStrategy = await ctx.task(migrationStrategySelectionTask, {
+  const migrationStrategy = await ctx.task(migrationStrategySelectionTask, {
     projectName,
     currentState: currentStateAssessment,
     targetState: targetStateDefinition,
@@ -166,20 +135,8 @@ export async function process(inputs, ctx) {
   artifacts.push(...migrationStrategy.artifacts);
 
   // Quality Gate: Migration strategy must be feasible within constraints
-      let lastFeedback_phase4Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase4Review) {
-        migrationStrategy = await ctx.task(migrationStrategySelectionTask, { ...{
-    projectName,
-    currentState: currentStateAssessment,
-    targetState: targetStateDefinition,
-    gapAnalysis,
-    migrationGoals,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
-      }
-  const phase4Review = await ctx.breakpoint({
+  if (!migrationStrategy.feasibilityAssessment.withinConstraints) {
+    await ctx.breakpoint({
       question: `Migration strategy exceeds constraints. Budget: ${migrationStrategy.estimatedCost} vs ${constraints.budget}, Timeline: ${migrationStrategy.estimatedDuration} vs ${constraints.timeline}. Adjust strategy or constraints?`,
       title: 'Migration Feasibility Warning',
       context: {
@@ -188,22 +145,16 @@ export async function process(inputs, ctx) {
         strategy: migrationStrategy,
         constraintViolations: migrationStrategy.feasibilityAssessment.violations,
         recommendation: 'Consider phased approach or adjust scope/constraints'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase4Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase4Review.approved) break;
-      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 5: RISK ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Conducting comprehensive migration risk assessment');
-  let riskAssessment = await ctx.task(migrationRiskAssessmentTask, {
+  const riskAssessment = await ctx.task(migrationRiskAssessmentTask, {
     projectName,
     currentState: currentStateAssessment,
     targetState: targetStateDefinition,
@@ -219,19 +170,8 @@ export async function process(inputs, ctx) {
     risk => risk.severity === 'critical' && !risk.mitigationPlan
   );
 
-      let lastFeedback_phase5Review = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (lastFeedback_phase5Review) {
-        riskAssessment = await ctx.task(migrationRiskAssessmentTask, { ...{
-    projectName,
-    currentState: currentStateAssessment,
-    targetState: targetStateDefinition,
-    migrationStrategy,
-    constraints,
-    outputDir
-  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
-      }
-  const phase5Review = await ctx.breakpoint({
+  if (criticalRisksWithoutMitigation.length > 0) {
+    await ctx.breakpoint({
       question: `${criticalRisksWithoutMitigation.length} critical risks lack mitigation plans. Should we develop mitigation strategies before proceeding?`,
       title: 'Critical Risk Warning',
       context: {
@@ -239,15 +179,9 @@ export async function process(inputs, ctx) {
         projectName,
         criticalRisks: criticalRisksWithoutMitigation,
         recommendation: 'Develop mitigation strategies for all critical risks'
-      },
-      expert: 'owner',
-      tags: ['approval-gate'],
-      previousFeedback: lastFeedback_phase5Review || undefined,
-      attempt: attempt > 0 ? attempt + 1 : undefined
-      });
-      if (phase5Review.approved) break;
-      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
-    } }
+      }
+    });
+  }
 
   // ============================================================================
   // PHASE 6: PHASED MIGRATION ROADMAP
@@ -382,7 +316,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Validating migration strategy quality and completeness');
-  let strategyValidation = await ctx.task(strategyValidationTask, {
+  const strategyValidation = await ctx.task(strategyValidationTask, {
     projectName,
     currentState: currentStateAssessment,
     targetState: targetStateDefinition,
@@ -404,27 +338,8 @@ export async function process(inputs, ctx) {
   const strategyScore = strategyValidation.overallScore;
   const qualityMet = strategyScore >= 85;
 
-    let lastFeedback_finalApproval = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (lastFeedback_finalApproval) {
-      strategyValidation = await ctx.task(strategyValidationTask, { ...{
-    projectName,
-    currentState: currentStateAssessment,
-    targetState: targetStateDefinition,
-    gapAnalysis,
-    migrationStrategy,
-    riskAssessment,
-    migrationRoadmap,
-    dataMigrationStrategy,
-    testingStrategy,
-    rollbackPlan,
-    changeManagement,
-    costBenefitAnalysis,
-    strategyDocument,
-    outputDir
-  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
-    }
-  const finalApproval = await ctx.breakpoint({
+  // Final Breakpoint: Migration Strategy Approval
+  await ctx.breakpoint({
     question: `Migration strategy complete for ${projectName}. Quality score: ${strategyScore}/100. ${qualityMet ? 'Strategy meets quality standards!' : 'Strategy may need refinement.'} Total cost: ${costBenefitAnalysis.totalCost}, Duration: ${migrationRoadmap.timeline.totalDuration}, ROI: ${costBenefitAnalysis.roi.percentage}%. Approve to proceed?`,
     title: 'Migration Strategy Approval',
     context: {
@@ -448,15 +363,9 @@ export async function process(inputs, ctx) {
         criticalRisks: riskAssessment.criticalRisks.length,
         documentPath: strategyDocument.documentPath
       }
-    },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback_finalApproval || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    }
+  });
+
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -547,7 +456,8 @@ export async function process(inputs, ctx) {
     }
   };
 }
-  // ============================================================================
+
+// ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

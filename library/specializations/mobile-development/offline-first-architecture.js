@@ -59,21 +59,14 @@ export async function process(inputs, ctx) {
       appName, platforms, syncStrategy, conflictResolution, outputDir
     });
     artifacts.push(...result.artifacts);
-  let lastFeedback = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // No preceding task identified for re-run with feedback
-    const finalApproval = await ctx.breakpoint({
+  }
+
+  await ctx.breakpoint({
     question: `Offline-first architecture complete for ${appName}. Ready to test offline capabilities?`,
     title: 'Offline Architecture Review',
-    context: { runId: ctx.runId, appName, syncStrategy, conflictResolution },
-    expert: 'owner',
-    tags: ['approval-gate'],
-    previousFeedback: lastFeedback || undefined,
-    attempt: attempt > 0 ? attempt + 1 : undefined
-    });
-    if (finalApproval.approved) break;
-    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
-  }
+    context: { runId: ctx.runId, appName, syncStrategy, conflictResolution }
+  });
+
   const endTime = ctx.now();
   return {
     success: true,
