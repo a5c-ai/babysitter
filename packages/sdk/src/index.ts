@@ -16,6 +16,8 @@ export * from "./logging";
 export * from "./cost/index";
 export * as anycli from "./anycli/index";
 export * from "./breakpoints";
+export * as session from "./session";
+export * as compaction from "./compression/compaction";
 export * as dashboard from "./dashboard";
 export * from "./api";
 export * from "./daemon";

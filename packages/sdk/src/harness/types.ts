@@ -131,6 +131,10 @@ export interface HarnessInvokeResult {
   duration: number;
   /** Name of the harness that was invoked. */
   harness: string;
+  /** GAP-PERF-004: Whether output was streamed in real-time. */
+  streamed?: boolean;
+  /** GAP-PERF-004: Number of streaming chunks emitted. */
+  streamChunkCount?: number;
 }
 
 // ---------------------------------------------------------------------------

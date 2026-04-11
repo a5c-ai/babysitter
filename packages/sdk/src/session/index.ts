@@ -67,3 +67,38 @@ export {
   saveContextSnapshot,
   getSessionHistory,
 } from './history';
+
+// Persistent state (GAP-STATE-003)
+export type {
+  SessionFinding,
+  SessionFileModification,
+  SessionBreakpointPattern,
+  SessionPersistentState,
+} from './persistence';
+export {
+  SESSION_PERSISTENT_SCHEMA_VERSION,
+  getSessionPersistentStatePath,
+  getSessionPersistentState,
+  addFinding,
+  setPreference,
+  recordFileModification,
+  recordBreakpointInteraction,
+  buildResumeContext,
+} from './persistence';
+
+// Cost tracking (GAP-SESSION-004)
+export type {
+  SessionBudget,
+  SessionCostState,
+  SessionBudgetAlert,
+  BudgetCheckResult,
+  RunCostUpdate,
+} from './cost';
+export {
+  getSessionCostPath,
+  getSessionCost,
+  updateSessionCost,
+  setSessionBudget,
+  checkBudget,
+  markThresholdsTriggered,
+} from './cost';
