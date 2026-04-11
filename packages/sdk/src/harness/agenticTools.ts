@@ -86,6 +86,8 @@ export const AGENTIC_TOOL_NAMES: string[] = [
   "background_list",
   "tool_search",
   "tool_fetch",
+  "web_search",
+  "fetch_process",
 ];
 
 const DEFAULT_BASH_TIMEOUT = 120_000;
@@ -1722,6 +1724,137 @@ export function createAgenticToolDefinitions(
         });
       },
     }),
+
+    // -----------------------------------------------------------------
+    // WEB SEARCH (GAP-TOOLS-008)
+    // -----------------------------------------------------------------
+    wrap({
+      name: "web_search",
+      label: "Web Search",
+      description:
+        "Search the web using a query string. Returns search result snippets. Supports domain whitelisting/blacklisting.",
+      parameters: Type.Object({
+        query: Type.String({ description: "Search query" }),
+        max_results: Type.Optional(Type.Number({ description: "Maximum results to return (default 10)" })),
+        domains: Type.Optional(Type.Array(Type.String(), { description: "Domain whitelist (only return results from these domains)" })),
+        exclude_domains: Type.Optional(Type.Array(Type.String(), { description: "Domain blacklist (exclude results from these domains)" })),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: Record<string, unknown>,
+      ): Promise<ToolResult> => {
+        const query = String(params.query ?? "");
+        if (!query.trim()) {
+          return errorResult("Search query is required.");
+        }
+        const maxResults = typeof params.max_results === "number" ? params.max_results : 10;
+        const domains = Array.isArray(params.domains) ? params.domains.filter((d): d is string => typeof d === "string") : undefined;
+        const excludeDomains = Array.isArray(params.exclude_domains) ? params.exclude_domains.filter((d): d is string => typeof d === "string") : undefined;
+
+        // Build search URL with domain filters
+        let searchQuery = query;
+        if (domains && domains.length > 0) {
+          searchQuery += " " + domains.map(d => `site:${d}`).join(" OR ");
+        }
+        if (excludeDomains && excludeDomains.length > 0) {
+          searchQuery += " " + excludeDomains.map(d => `-site:${d}`).join(" ");
+        }
+
+        try {
+          // Use DuckDuckGo HTML API for search (no API key needed)
+          const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), DEFAULT_SEARCH_TIMEOUT);
+          try {
+            const response = await globalThis.fetch(searchUrl, {
+              signal: controller.signal,
+              headers: { "User-Agent": "babysitter-sdk/web-search" },
+            });
+            const html = await response.text();
+            const results = parseSearchResults(html, maxResults);
+            return jsonResult({ query, resultCount: results.length, results });
+          } finally {
+            clearTimeout(timer);
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          return errorResult(`Web search failed: ${message}`);
+        }
+      },
+    }),
+
+    // -----------------------------------------------------------------
+    // FETCH CONTENT PROCESSING (GAP-TOOLS-037)
+    // -----------------------------------------------------------------
+    wrap({
+      name: "fetch_process",
+      label: "Fetch and Process Content",
+      description:
+        "Fetch a URL and process the content to extract relevant information, reducing token usage. Extracts text content, removes boilerplate, and optionally filters by a prompt.",
+      parameters: Type.Object({
+        url: Type.String({ description: "URL to fetch and process" }),
+        prompt: Type.Optional(Type.String({ description: "Focus prompt — extract only content relevant to this query" })),
+        max_length: Type.Optional(Type.Number({ description: "Maximum output length in characters (default 10000)" })),
+        format: Type.Optional(Type.Union([Type.Literal("text"), Type.Literal("markdown"), Type.Literal("summary")], {
+          description: "Output format: text (plain extracted text), markdown (preserve structure), summary (key points only). Default: text",
+        })),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: Record<string, unknown>,
+      ): Promise<ToolResult> => {
+        const url = String(params.url ?? "");
+        if (!url.trim()) {
+          return errorResult("URL is required.");
+        }
+        const maxLength = typeof params.max_length === "number" ? params.max_length : 10_000;
+        const format = typeof params.format === "string" ? params.format : "text";
+        const prompt = typeof params.prompt === "string" ? params.prompt : undefined;
+
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), DEFAULT_SEARCH_TIMEOUT);
+          try {
+            const response = await globalThis.fetch(url, {
+              signal: controller.signal,
+              headers: { "User-Agent": "babysitter-sdk/fetch-process" },
+            });
+            const contentType = response.headers.get("content-type") ?? "";
+            const rawText = await response.text();
+
+            let processed: string;
+            if (contentType.includes("text/html")) {
+              processed = extractTextFromHtml(rawText, format);
+            } else {
+              processed = rawText;
+            }
+
+            // Apply prompt-based filtering if provided
+            if (prompt) {
+              processed = filterByRelevance(processed, prompt);
+            }
+
+            // Truncate to max length
+            if (processed.length > maxLength) {
+              processed = processed.slice(0, maxLength) + "\n... (truncated)";
+            }
+
+            return jsonResult({
+              url,
+              contentType,
+              format,
+              length: processed.length,
+              content: processed,
+            });
+          } finally {
+            clearTimeout(timer);
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          return errorResult(`Fetch processing failed: ${message}`);
+        }
+      },
+    }),
   ];
 
   return tools;
@@ -1771,4 +1904,139 @@ interface NotebookCell {
   metadata: Record<string, unknown>;
   outputs?: unknown[];
   [key: string]: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Web search helpers (GAP-TOOLS-008)
+// ---------------------------------------------------------------------------
+
+interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
+/** Parse DuckDuckGo HTML search results into structured results. Exported for testing. */
+export function parseSearchResults(html: string, maxResults: number): SearchResult[] {
+  const results: SearchResult[] = [];
+  // DuckDuckGo HTML results are in <a class="result__a"> with <a class="result__snippet">
+  const resultPattern = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g;
+  const snippetPattern = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+
+  const urls: string[] = [];
+  const titles: string[] = [];
+  const snippets: string[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = resultPattern.exec(html)) !== null) {
+    try {
+      const rawUrl = match[1].replace(/.*uddg=/, "").split("&")[0] ?? match[1];
+      urls.push(decodeURIComponent(rawUrl));
+    } catch {
+      urls.push(match[1]);
+    }
+    titles.push(stripHtmlTags(match[2]).trim());
+  }
+
+  while ((match = snippetPattern.exec(html)) !== null) {
+    snippets.push(stripHtmlTags(match[1]).trim());
+  }
+
+  for (let i = 0; i < Math.min(urls.length, maxResults); i++) {
+    results.push({
+      title: titles[i] ?? "",
+      url: urls[i] ?? "",
+      snippet: snippets[i] ?? "",
+    });
+  }
+
+  return results;
+}
+
+// ---------------------------------------------------------------------------
+// Fetch content processing helpers (GAP-TOOLS-037)
+// ---------------------------------------------------------------------------
+
+/** Strip HTML tags and decode common entities. Exported for testing. */
+export function stripHtmlTags(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&ndash;/g, "\u2013")
+    .replace(/&hellip;/g, "\u2026")
+    .replace(/&copy;/g, "\u00A9")
+    .replace(/&#(\d+);/g, (_m: string, code: string) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_m: string, hex: string) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+/** Extract meaningful text from HTML, removing boilerplate. Exported for testing. */
+export function extractTextFromHtml(html: string, format: string): string {
+  // Remove scripts, styles, nav, footer, header elements
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+    .replace(/<header[\s\S]*?<\/header>/gi, "")
+    .replace(/<aside[\s\S]*?<\/aside>/gi, "");
+
+  if (format === "markdown") {
+    // Convert headings
+    cleaned = cleaned.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_m: string, level: string, content: string) => {
+      return "\n" + "#".repeat(Number(level)) + " " + stripHtmlTags(content).trim() + "\n";
+    });
+    // Convert paragraphs
+    cleaned = cleaned.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_m: string, content: string) => {
+      return "\n" + stripHtmlTags(content).trim() + "\n";
+    });
+    // Convert list items
+    cleaned = cleaned.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m: string, content: string) => {
+      return "- " + stripHtmlTags(content).trim() + "\n";
+    });
+    // Convert code blocks
+    cleaned = cleaned.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_m: string, content: string) => {
+      return "\n```\n" + stripHtmlTags(content).trim() + "\n```\n";
+    });
+    // Convert inline code
+    cleaned = cleaned.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_m: string, content: string) => {
+      return "`" + stripHtmlTags(content).trim() + "`";
+    });
+    // Strip remaining tags
+    cleaned = stripHtmlTags(cleaned);
+  } else {
+    cleaned = stripHtmlTags(cleaned);
+  }
+
+  // Normalize whitespace
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+/g, " ").trim();
+  return cleaned;
+}
+
+/**
+ * Filter content by relevance to a prompt.
+ * Splits content into paragraphs and keeps those containing query terms.
+ */
+export function filterByRelevance(content: string, prompt: string): string {
+  const terms = prompt.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+  if (terms.length === 0) return content;
+
+  const paragraphs = content.split(/\n\n+/);
+  const scored = paragraphs.map(p => {
+    const lower = p.toLowerCase();
+    const score = terms.reduce((s, t) => s + (lower.includes(t) ? 1 : 0), 0);
+    return { text: p, score };
+  });
+
+  const relevant = scored.filter((p) => p.score > 0);
+
+  // If nothing matched, return original content (query terms may be too specific)
+  if (relevant.length === 0) return content;
+
+  return relevant.map(p => p.text).join("\n\n");
 }

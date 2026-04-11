@@ -52,6 +52,10 @@ export {
   type AgenticToolOptions,
   type CustomToolDefinition,
   AGENTIC_TOOL_NAMES,
+  stripHtmlTags,
+  extractTextFromHtml,
+  filterByRelevance,
+  parseSearchResults,
 } from "./agenticTools";
 
 export {
@@ -68,3 +72,52 @@ export {
   type SchemaLoader,
   type ToolSource,
 } from "./deferredToolRegistry";
+
+export {
+  OPERATOR_COMMANDS,
+  renderOperatorCommand,
+  getCommandsByCategory,
+  getGroupedCommands,
+  formatCommandsForPrompt,
+  type OperatorCommand,
+  type OperatorCommandCategory,
+} from "./operatorCommands";
+
+export {
+  createPlan,
+  updateStepStatus,
+  insertStep,
+  removeStep,
+  getNextStep,
+  getPlanProgress,
+  formatPlanForDisplay,
+  type ExecutionPlan,
+  type PlanStep,
+  type PlanStepStatus,
+  type PlanStatus,
+} from "./planMode";
+
+export {
+  searchCommands,
+  getCommandsByCommandCategory,
+  getContextualSuggestions,
+  getAllCommands,
+  getCommandCategories,
+  type CommandInfo,
+  type CommandCategory,
+} from "./commandDiscovery";
+
+export {
+  getActiveMode,
+  getActiveModeConfig,
+  switchMode,
+  getModeConfig,
+  getAvailableModes,
+  resetMode,
+  shouldAutoApprove,
+  shouldShowPlan,
+  isParallelEnabled,
+  formatModeInfo,
+  type OrchestrationMode,
+  type ModeConfig,
+} from "./modeSelector";
