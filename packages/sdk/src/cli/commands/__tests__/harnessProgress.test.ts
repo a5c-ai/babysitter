@@ -123,6 +123,107 @@ describe("Terminal progress output", () => {
     });
   });
 
+  describe("emitProgress — effect (completion)", () => {
+    it("shows elapsed time when available", () => {
+      emitProgress(
+        {
+          phase: "2",
+          status: "effect",
+          effectKind: "agent",
+          effectTitle: "Design system",
+          effectStatus: "ok",
+          elapsedMs: 45000,
+        },
+        false,
+        false,
+        "cli",
+      );
+      const output = stderrSpy.mock.calls.map((c) => c[0]).join("");
+      expect(output).toContain("45s");
+      expect(output).toContain("Design system");
+    });
+
+    it("shows stdout tail for shell effects", () => {
+      emitProgress(
+        {
+          phase: "2",
+          status: "effect",
+          effectKind: "shell",
+          effectTitle: "Run tests",
+          effectStatus: "ok",
+          elapsedMs: 3000,
+          output: "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7",
+        },
+        false,
+        false,
+        "cli",
+      );
+      const output = stderrSpy.mock.calls.map((c) => c[0]).join("");
+      // Should show last 5 lines
+      expect(output).toContain("line 3");
+      expect(output).toContain("line 7");
+      // Should NOT show line 1 (it's outside the tail)
+      expect(output).not.toContain("line 1");
+    });
+
+    it("shows condensed output for agent effects", () => {
+      emitProgress(
+        {
+          phase: "2",
+          status: "effect",
+          effectKind: "agent",
+          effectTitle: "Score results",
+          effectStatus: "ok",
+          output: "Quality score: 92/100. All checks passed.",
+        },
+        false,
+        false,
+        "cli",
+      );
+      const output = stderrSpy.mock.calls.map((c) => c[0]).join("");
+      expect(output).toContain("Quality score: 92/100");
+    });
+
+    it("shows error message on failure", () => {
+      emitProgress(
+        {
+          phase: "2",
+          status: "effect",
+          effectKind: "shell",
+          effectTitle: "Compile",
+          effectStatus: "error",
+          elapsedMs: 1000,
+          error: "tsc exited with code 1",
+        },
+        false,
+        false,
+        "cli",
+      );
+      const output = stderrSpy.mock.calls.map((c) => c[0]).join("");
+      expect(output).toContain("tsc exited with code 1");
+      expect(output).toContain("1s");
+    });
+
+    it("omits elapsed time when not provided", () => {
+      emitProgress(
+        {
+          phase: "2",
+          status: "effect",
+          effectKind: "agent",
+          effectTitle: "Plan",
+          effectStatus: "ok",
+        },
+        false,
+        false,
+        "cli",
+      );
+      const output = stderrSpy.mock.calls.map((c) => c[0]).join("");
+      expect(output).toContain("Plan");
+      // No time should appear since elapsedMs is undefined
+      expect(output).not.toMatch(/\d+s/);
+    });
+  });
+
   describe("emitProgress — iteration-summary", () => {
     it("writes elapsed time and effect count to stderr", () => {
       emitProgress(

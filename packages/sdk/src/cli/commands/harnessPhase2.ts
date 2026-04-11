@@ -125,37 +125,82 @@ function subscribeVerbosePiEvents(
   // We subscribe *after* the session is initialized.  If it isn't initialized
   // yet, the caller will call initialize() and this subscription will fire
   // once events start flowing.
+  // Track text accumulation for showing snippets of assistant thinking/output
+  let textBuffer = "";
+  let lastTextFlush = 0;
+  const TEXT_FLUSH_INTERVAL_MS = 2000; // Show a snippet every 2s during streaming
+  const TEXT_SNIPPET_LENGTH = 120;
+
   try {
     return session.subscribe((event: PiSessionEvent) => {
       const t = event.type;
 
       // Tool and agent lifecycle events are shown by default for visibility
       if (t === "tool_execution_start") {
+        // Flush any pending text before tool call
+        if (textBuffer.trim()) {
+          const snippet = textBuffer.trim().slice(0, TEXT_SNIPPET_LENGTH);
+          process.stderr.write(`    ${DIM}${snippet}${snippet.length < textBuffer.trim().length ? "..." : ""}${RESET}\n`);
+          textBuffer = "";
+        }
         const name = (event as { name?: string }).name ?? (event as { toolName?: string }).toolName ?? "unknown";
         process.stderr.write(`    ${DIM}tool ${CYAN}${name}${RESET}${DIM}...${RESET}\n`);
       } else if (t === "tool_execution_end") {
-        // Silently complete — the start line already indicated the tool
+        const result = (event as { result?: string; output?: string }).result
+          ?? (event as { result?: string; output?: string }).output;
+        if (result && typeof result === "string") {
+          const snippet = result.trim().slice(0, TEXT_SNIPPET_LENGTH);
+          if (snippet) {
+            process.stderr.write(`    ${DIM}  → ${snippet}${snippet.length < result.trim().length ? "..." : ""}${RESET}\n`);
+          }
+        }
       } else if (t === "agent_start") {
         const agentName = (event as { name?: string }).name ?? (event as { agentName?: string }).agentName;
         const suffix = agentName ? ` ${CYAN}${agentName}${RESET}` : "";
         process.stderr.write(`    ${DIM}subagent${RESET}${suffix}${DIM}...${RESET}\n`);
       } else if (t === "agent_end") {
         // Silently complete
+      } else if (t === "text_delta") {
+        // Accumulate text and show periodic snippets so user sees thinking activity
+        const text = (event as { text?: string }).text;
+        if (text) {
+          textBuffer += text;
+          const now = Date.now();
+          if (opts.verbose) {
+            // Verbose mode: stream all text directly
+            process.stderr.write(text);
+          } else if (now - lastTextFlush >= TEXT_FLUSH_INTERVAL_MS && textBuffer.trim().length > 20) {
+            // Default mode: show periodic snippets of what the agent is writing
+            const lines = textBuffer.trim().split("\n");
+            const lastLine = lines[lines.length - 1].trim();
+            if (lastLine.length > 10) {
+              const snippet = lastLine.slice(0, TEXT_SNIPPET_LENGTH);
+              process.stderr.write(`    ${DIM}... ${snippet}${snippet.length < lastLine.length ? "..." : ""}${RESET}\n`);
+            }
+            textBuffer = "";
+            lastTextFlush = now;
+          }
+        }
+      } else if (t === "message_end" || t === "turn_end") {
+        // Flush remaining text at message/turn boundaries
+        if (textBuffer.trim().length > 20 && !opts.verbose) {
+          const snippet = textBuffer.trim().slice(-TEXT_SNIPPET_LENGTH);
+          process.stderr.write(`    ${DIM}... ${snippet}${RESET}\n`);
+        }
+        textBuffer = "";
+        if (opts.verbose) {
+          process.stderr.write(`${DIM}[${label} ${t}]${RESET}\n`);
+        }
       } else if (opts.verbose) {
-        // Verbose-only: turn lifecycle, message starts, and text streaming
+        // Verbose-only: turn lifecycle, message starts
         if (t === "turn_start") {
           process.stderr.write(`${DIM}[${label} turn:start]${RESET}\n`);
-        } else if (t === "turn_end") {
-          process.stderr.write(`${DIM}[${label} turn:end]${RESET}\n`);
         } else if (t === "message_start") {
           const role = (event as { role?: string; message?: { role?: string } }).role
             ?? (event as { message?: { role?: string } }).message?.role ?? "";
           if (role) {
             process.stderr.write(`${DIM}[${label} message:start] role=${role}${RESET}\n`);
           }
-        } else if (t === "text_delta") {
-          const text = (event as { text?: string }).text;
-          if (text) process.stderr.write(text);
         }
       }
       // tool_execution_update and message_update are high-frequency streaming
@@ -945,6 +990,7 @@ export async function runOrchestrationPhase(args: {
               resolveOutputMode(args.json, args.outputMode),
               taskHarness,
             );
+            const effectStartTime = Date.now();
             const effectResult = await resolveEffectWithRetry(
               action,
               args.selectedHarnessName,
@@ -962,6 +1008,7 @@ export async function runOrchestrationPhase(args: {
               piSessionFactory,
               shutdownPiSession,
             );
+            const effectElapsedMs = Date.now() - effectStartTime;
             await commitEffectResult({
               runDir: state.runDir,
               effectId: action.effectId,
@@ -976,6 +1023,12 @@ export async function runOrchestrationPhase(args: {
                 finishedAt: new Date().toISOString(),
               },
             });
+            // For shell effects, show more stdout (tail). For agents, show condensed output.
+            const outputSlice = action.kind === "shell"
+              ? (effectResult.stdout ?? (typeof effectResult.value === "string" ? effectResult.value : undefined))?.slice(-1500)
+              : typeof effectResult.value === "string"
+                ? effectResult.value.slice(0, 300)
+                : undefined;
             emitProgress(
               {
                 phase: "2",
@@ -984,14 +1037,13 @@ export async function runOrchestrationPhase(args: {
                 effectKind: action.kind,
                 effectTitle: action.taskDef?.title,
                 effectStatus: effectResult.status,
+                elapsedMs: effectElapsedMs,
                 error: effectResult.status === "error"
                   ? (effectResult.error instanceof Error
                     ? effectResult.error.message
                     : String(effectResult.error))
                   : undefined,
-                output: typeof effectResult.value === "string"
-                  ? effectResult.value.slice(0, 200)
-                  : undefined,
+                output: outputSlice,
               },
               args.json,
               args.verbose,

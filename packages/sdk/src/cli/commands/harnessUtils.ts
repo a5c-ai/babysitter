@@ -329,7 +329,18 @@ export function emitProgress(
         process.stderr.write(`  ${CYAN}▸${RESET} ${MAGENTA}${payload.effectKind}${RESET} ${label}${via}...\n`);
       } else if (payload.status === "effect") {
         const icon = payload.effectStatus === "ok" ? `${GREEN}✓${RESET}` : `${RED}✗${RESET}`;
-        process.stderr.write(`  ${icon} ${MAGENTA}${payload.effectKind}${RESET} ${payload.effectTitle ?? payload.effectId}${payload.effectStatus === "error" ? ` ${RED}${payload.error}${RESET}` : ""}\n`);
+        const elapsed = payload.elapsedMs != null ? ` ${DIM}${formatElapsed(payload.elapsedMs)}${RESET}` : "";
+        const errorSuffix = payload.effectStatus === "error" ? ` ${RED}${payload.error}${RESET}` : "";
+        process.stderr.write(`  ${icon} ${MAGENTA}${payload.effectKind}${RESET} ${payload.effectTitle ?? payload.effectId}${elapsed}${errorSuffix}\n`);
+        // Show stdout tail for shell effects and condensed output for others
+        if (payload.output) {
+          const lines = payload.output.split("\n").filter((l) => l.trim());
+          const tail = lines.slice(-5);
+          for (const line of tail) {
+            const trimmed = line.length > 160 ? line.slice(0, 160) + "..." : line;
+            process.stderr.write(`    ${DIM}${trimmed}${RESET}\n`);
+          }
+        }
       } else if (payload.status === "iteration-summary") {
         const elapsed = payload.elapsedMs != null ? formatElapsed(payload.elapsedMs) : "?";
         const tokens = payload.tokenEstimate != null ? ` | ~${payload.tokenEstimate} tokens` : "";
