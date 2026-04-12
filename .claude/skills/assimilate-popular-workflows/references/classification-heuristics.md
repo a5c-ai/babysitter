@@ -75,14 +75,16 @@ When deciding if a skill's procedural content is transferable:
 - Workflow is not tied to a specific codebase
 - Includes quality gates or review checkpoints
 - Describes iteration/convergence patterns
+- **Domain-specific skills with procedural content** -- a "kubernetes-specialist" encoding a k8s deployment audit, a "terraform-engineer" encoding an IaC review pipeline, a "react-expert" encoding a component architecture review. These map to `specializations/<domain>/` processes. Do NOT dismiss domain skills as "just expert personas" without reading them for procedural steps.
 
 ### Medium transferability
 - Describes a useful pattern but tightly coupled to a specific tool
 - Could be generalized with some effort
 - Contains domain knowledge worth capturing as references
+- Domain-specific skill with some procedural content mixed with static knowledge
 
 ### Low transferability (not-transferable)
-- Pure prompt engineering (system prompt, no procedure)
+- Pure prompt engineering (system prompt, no procedure) -- **but verify by reading the skill first; many "expert persona" skills contain hidden procedural content**
 - Entirely repo-specific paths and configuration
 - Duplicates functionality already in babysitter process library
 - Trivially simple (no multi-step procedure to codify)

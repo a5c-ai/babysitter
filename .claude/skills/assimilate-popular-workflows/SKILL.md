@@ -98,9 +98,10 @@ Use a browser tool or `curl` to fetch these pages and extract GitHub repo links.
 
 1. Drop any hit from `a5c-ai/babysitter` (this repo).
 2. Drop archived repos.
-3. Dedupe by `repository.nameWithOwner`.
-4. Group hits by repo -- one repo may contain many SKILL.md files.
-5. **Prefer repos with 50+ stars.** Lower-star repos may be included only if they contain exceptionally novel processes not found elsewhere. Use `gh search repos` with `--stars=">50"` to find higher-quality repos.
+3. **Drop repos without a permissive license.** Only track repos with MIT, BSD (2-clause or 3-clause), or Apache-2.0 licenses. Drop repos with GPL, AGPL, CC-NC, CC-SA, proprietary, or no license specified. Check `license.spdx_id` during enrichment.
+4. Dedupe by `repository.nameWithOwner`.
+5. Group hits by repo -- one repo may contain many SKILL.md files.
+6. **Prefer repos with 50+ stars.** Lower-star repos may be included only if they contain exceptionally novel processes not found elsewhere. Use `gh search repos` with `--stars=">50"` to find higher-quality repos.
 
 ### Enrichment
 
@@ -142,9 +143,16 @@ Read the repo's top-level README, plugin.json (if present), directory structure,
 
 ## Phase 3 -- Deep Research
 
-For each non-skipped repo, produce research under `docs/reference-repos/[org]/[repo-name]/`. Create these files:
+For each non-skipped repo, produce a single `research.md` file containing overview, assessment, and extractable value.
 
-### `index.md` -- Overview and assessment
+### Directory layout
+
+- **GitHub-sourced repos**: `docs/reference-repos/[org]/[repo-name]/research.md`
+- **ClawHub-sourced skills/plugins**: `docs/reference-repos/clawhub/[author]/[skill-name]/research.md`
+
+Each tracked repo gets exactly **one file** (`research.md`) in its directory. Do not split into multiple files (no separate `index.md` or `extractable-value.md`).
+
+### `research.md` -- Unified research document
 
 ```markdown
 # [org]/[repo-name]
@@ -152,41 +160,38 @@ For each non-skipped repo, produce research under `docs/reference-repos/[org]/[r
 - **Archetype**: mega-skill-pack | methodology-repo | claude-plugin | domain-skill-pack | utility-with-skill
 - **Stars**: N
 - **Last pushed**: YYYY-MM-DD
-- **License**: MIT / Apache-2.0 / ...
+- **License**: MIT / Apache-2.0 / BSD-2-Clause / BSD-3-Clause
 - **Discovered**: YYYY-MM-DD
+- **Source**: gh-search | clawhub-skills | clawhub-plugins | topic:X
 - **Skills found**: N
 
 ## Summary
 <2-3 sentences on what the repo provides and why it's interesting>
 
 ## Assessment
-<What is transferable? What is repo-specific? Quality of skill design?>
+<What is transferable? What is repo-specific? Quality of skill design?
+Look beyond methodologies -- domain-specific skills (DevOps, security, frontend, data, etc.)
+often contain multi-step processes extractable as specializations/<domain>/ entries.
+A "kubernetes-specialist" skill may encode a k8s deployment audit process.
+A "debugging-wizard" may encode a systematic debugging process.
+Assess each skill for procedural content, not just methodology content.>
 
 ## Extraction Priority
 - High / Medium / Low
 - Rationale: <why>
-```
 
-### `skills-inventory.md` -- Catalog of all skills found
-
-```markdown
-# Skills Inventory: [org]/[repo-name]
+## Skills Inventory
 
 | Skill | Path | Domain | Transferable? | Notes |
 |-------|------|--------|---------------|-------|
 | skill-name | skills/foo/SKILL.md | DevOps | Yes - pattern | Describes a CI/CD workflow |
-| ... | ... | ... | ... | ... |
-```
-
-### `extractable-value.md` -- The core deliverable
-
-Organized into sections:
-
-```markdown
-# Extractable Value: [org]/[repo-name]
 
 ## Processes
-<Workflows that can be codified as babysitter JS processes>
+<Workflows that can be codified as babysitter JS processes.
+Domain-specific skills are prime extraction targets -- a "react-expert" skill may contain
+a component architecture review process (specializations/frontend/), a "terraform-engineer"
+may contain an IaC audit process (specializations/devops-sre-platform/), etc.
+Don't dismiss domain skills as "just expert personas" -- read them for procedural content.>
 - **Process name**: Description of what it does
   - Source: path/to/SKILL.md (lines N-M)
   - Placement: methodologies/<name> | specializations/shared | specializations/<domain>
@@ -261,7 +266,7 @@ Total repos tracked: N
 ### Mega Skill Packs
 | Repo | Stars | Skills | Extraction Priority |
 |------|-------|--------|---------------------|
-| [org/name](org/name/index.md) | N | M | High |
+| [org/name](org/name/research.md) | N | M | High |
 
 ### Methodology Repos
 ...
@@ -305,14 +310,16 @@ Every repo that has been investigated goes here, regardless of outcome. This pre
 ### Cleanup rules
 
 - **Do NOT keep research directories for skipped repos with no extractable value.** If a repo is classified as `internal-maintenance`, `other-harness`, `not-a-skill`, or otherwise has zero extractable processes and zero plugin ideas, record it in `processed.md` only. Do not create a directory under `docs/reference-repos/`.
-- **Only create research docs** (`index.md`, `extractable-value.md`, or `research.md`) for repos that have at least one extractable process or plugin idea.
+- **Only create `research.md`** for repos that have at least one extractable process or plugin idea. Each repo gets exactly one file (`research.md`), not separate index/extractable-value files.
 - When re-running discovery, check `processed.md` first to skip already-evaluated repos.
+- **License must be verified.** Every `research.md` must include the license field. During enrichment, extract `license.spdx_id` from the GitHub API. If the license is not MIT, BSD, or Apache-2.0, skip the repo and record it in `processed.md` with the reason.
 
 ## Notes
 
 - Never copy SKILL.md content wholesale. Extract the *procedural insight*, not the prose.
 - Respect source licenses. Include attribution in every extracted process file.
 - Skills that are purely prompt-engineering (just a system prompt with no procedure) have no extractable process value -- note them as `not-transferable` in the inventory.
+- **Domain-specific skills are extraction targets, not just methodologies.** A "kubernetes-specialist" skill may contain a k8s deployment audit process (`specializations/devops-sre-platform/`). A "react-expert" may contain a component architecture review (`specializations/frontend/`). A "debugging-wizard" may contain a systematic debugging process (`specializations/shared/`). Always read domain skills for multi-step procedural content before dismissing them as "expert personas." The process library has three placement tiers: `methodologies/` (full dev paradigms), `specializations/shared/` (cross-domain patterns), and `specializations/<domain>/` (domain-specific processes). Most extracted value goes into specializations, not methodologies.
 - **Skip skill-management processes** (skill-routing, skill-discovery pipelines, skill-validation, skill-metadata checks). These are babysitter-internal concerns, not transferable domain processes. Their associated *plugin ideas* (e.g., a skill-registry-browser plugin) may still be valid.
 - **Skip multi-model coordination processes** (multi-model review, heterogeneous AI team orchestration). Babysitter's harness adapter system already handles multi-model dispatch natively. These don't add value as library processes.
 - **Skip patterns already covered by the SDK**: human-in-the-loop review cycles (covered by breakpoints), harness CLI invocation/degradation (covered by harness adapters), effect dispatch coordination (covered by the runtime). Only extract processes that add *domain-specific* or *workflow-specific* value beyond what the SDK primitives provide.
