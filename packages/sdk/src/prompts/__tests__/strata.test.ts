@@ -127,7 +127,7 @@ describe('GAP-PROMPT-001: Prompt Strata Model', () => {
   describe('getPartsForStratum', () => {
     it('returns only stable parts when stratum is stable', () => {
       const parts = getPartsForStratum('stable');
-      expect(parts.length).toBe(27);
+      expect(parts.length).toBe(13);
       expect(parts.every(p => p.stratum === 'stable')).toBe(true);
     });
 

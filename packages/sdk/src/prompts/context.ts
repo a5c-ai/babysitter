@@ -15,21 +15,6 @@ const COMMON_DEFAULTS: Partial<PromptContext> = {
   // Always-on additions — enabled by default across harnesses.
   hasPriorityLadder: true,
   hasRootCauseGuardrail: true,
-  // Context-gated flags — default off, auto-enabled via deriveCapabilityFlags.
-  hasHandoffConventions: false,
-  hasPrPolicies: false,
-  hasBranchPolicies: false,
-  hasIssueLinking: false,
-  hasDraftPrProhibition: false,
-  hasLabelTaxonomy: false,
-  hasSingleChannelRule: false,
-  hasSourceQuoteCap: false,
-  hasIdempotencyAndAbort: false,
-  hasIssueOnlyNoDirectCommits: false,
-  hasPrCommentFormat: false,
-  hasSixDimensionReview: false,
-  hasScheduledReportFormat: false,
-  hasLocalDevRelax: false,
 };
 
 /**

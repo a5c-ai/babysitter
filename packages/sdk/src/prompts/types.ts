@@ -127,26 +127,6 @@ export interface PromptContext {
   /** Always-on additions (enabled by default). */
   hasPriorityLadder?: boolean;
   hasRootCauseGuardrail?: boolean;
-
-  /** GitHub-context-gated. */
-  hasHandoffConventions?: boolean;
-  hasPrPolicies?: boolean;
-  hasBranchPolicies?: boolean;
-  hasIssueLinking?: boolean;
-  hasDraftPrProhibition?: boolean;
-  hasLabelTaxonomy?: boolean;
-  hasSingleChannelRule?: boolean;
-  hasSourceQuoteCap?: boolean;
-
-  /** CI-context-gated. */
-  hasIdempotencyAndAbort?: boolean;
-  hasIssueOnlyNoDirectCommits?: boolean;
-
-  /** Trigger-context-gated. */
-  hasPrCommentFormat?: boolean;
-  hasSixDimensionReview?: boolean;
-  hasScheduledReportFormat?: boolean;
-  hasLocalDevRelax?: boolean;
 }
 
 /**
