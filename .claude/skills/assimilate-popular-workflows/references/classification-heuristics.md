@@ -14,6 +14,10 @@ Has plugin.json or .claude-plugin/?
 │   ├── SKILL.md only references internal paths (.github/, scripts/, etc)?
 │   │   └── Yes → internal-maintenance (SKIP)
 │   │
+│   ├── Skill is for Codex, Cursor, or another non-Claude harness?
+│   │   Or focuses on CLI orchestration / harness invocation?
+│   │   └── Yes → other-harness (SKIP)
+│   │
 │   ├── Repo is primarily a library/tool (has package.json main, bin, or lib)?
 │   │   └── Yes → utility-with-skill
 │   │
@@ -56,6 +60,7 @@ Classify as `not-a-skill` and skip.
 | mega-skill-pack | All (up to 20, sample beyond) | Full inventory + extractable value |
 | methodology-repo | All (usually 1-3) | Full research + process codification |
 | internal-maintenance | 0 (skip) | Classification note only |
+| other-harness | 0 (skip) | Classification note only |
 | claude-plugin | All skills | Inventory + plugin integration ideas |
 | domain-skill-pack | All in-domain | Full inventory + domain process extraction |
 | utility-with-skill | 1-2 (the usage skills) | Light inventory + usage pattern extraction |
@@ -100,3 +105,30 @@ These map directly to babysitter process primitives:
 - Parallel → `ctx.parallel.all()` or `ctx.parallel.map()`
 - Human gates → `ctx.breakpoint()`
 - Artifacts → accumulator array returned in final output
+
+## Process Library Placement Decision Tree
+
+```
+Is this a complete, generic development methodology (like agile, scrum, TDD, waterfall)?
+├── Yes → methodologies/<name>/
+│
+├── No
+│   ├── Is this pattern reusable across multiple domains/specializations?
+│   │   └── Yes → specializations/shared/
+│   │       (e.g., audit-pipeline, expert-advisory, progressive-disclosure, skill-routing)
+│   │
+│   └── Is this domain-specific?
+│       └── Yes → specializations/<domain>/
+│           (e.g., security-compliance/k8s-audit, devops-sre-platform/o11y-setup)
+```
+
+**Common mistake**: Placing domain-specific processes in methodologies/. A "k8s security audit" or "deep research pipeline" are NOT methodologies -- they are specialization processes. Only full workflow paradigms that prescribe how to develop software belong in methodologies/.
+
+## Plugin Idea Validation
+
+A valid babysitter plugin idea must answer:
+1. What would `install.md` instruct the AI agent to do? (detect stack, interview user, install tools, copy processes, create configs)
+2. What processes would it copy from the library?
+3. What project-level artifacts would it create? (configs, hooks, commands, profiles)
+
+Valid plugin categories: security & sandboxing, context & memory, knowledge management, developer experience & UX, tools integration, CI/CD integration, DevOps & infrastructure, quality assurance & testing, workflow automation, theming & environment.

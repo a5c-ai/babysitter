@@ -5,7 +5,45 @@ description: This skill should be used when the user asks to "find skills in the
 
 # Assimilate Popular Workflows
 
-Search public GitHub repositories for SKILL.md files, classify each repo by archetype, and maintain structured research documents under `docs/reference-repos/[org]/[repo-name]/`. The goal is not to copy skills verbatim but to extract transferable value: processes, babysitter plugin ideas, reusable patterns, and implicit procedural knowledge that can be codified into babysitter JS processes.
+Search public GitHub repositories for SKILL.md files, classify each repo by archetype, and maintain structured research documents under `docs/reference-repos/[org]/[repo-name]/`. The goal is not to copy skills verbatim but to extract transferable value: processes for the babysitter process library, babysitter marketplace plugin ideas, and implicit procedural knowledge that can be codified into babysitter JS processes.
+
+### Process Library Placement Rules
+
+Extracted processes go into the babysitter process library (`plugins/babysitter/skills/babysit/process/`). Placement depends on scope:
+
+| What it is | Where it goes | Examples |
+|------------|---------------|---------|
+| Full generic dev methodology (entire workflow paradigm) | `methodologies/<name>/` | agile, gsd, tdd, scrum, kanban, waterfall |
+| Common cross-domain pattern (reusable across many specializations) | `specializations/shared/` | audit-pipeline, expert-advisory, progressive-disclosure |
+| Domain-specific process | `specializations/<domain>/` | security-compliance, devops-sre-platform, data-science-ml |
+
+**Important**: Do NOT place domain-specific processes in `methodologies/`. Only full, generic development methodologies belong there. A "k8s security audit" is `specializations/security-compliance/`, not a methodology. A "deep research pipeline" is `specializations/shared/` (cross-domain). A "TDD agent workflow" is `methodologies/atdd-tdd/` (full dev methodology).
+
+### Plugin Ideas = Babysitter Marketplace Plugins
+
+A babysitter plugin is a set of natural language instructions (markdown) or deterministic coded processes (JS) that an AI agent reads and executes to install a modular set of capabilities. A plugin contains at minimum `install.md` with instructions the AI agent follows to modify the user's project. See `docs/plugins.md` for the full specification.
+
+When identifying plugin ideas, think about what could be distributed as an installable package:
+- An `install.md` that interviews the user about their project, detects their stack, and installs relevant processes/configs/hooks
+- A `configure.md` for reconfiguration
+- Processes copied from the library into `.a5c/processes/`
+- ESLint rules, git hooks, CI/CD templates, tool configs
+- Migration files for version upgrades
+
+**Valid plugin use case categories** (derived from the existing marketplace):
+
+| Category | What the plugin installs | Examples |
+|----------|-------------------------|----------|
+| Security & Sandboxing | Lint rules, git hooks, scanning processes, sandboxing policies | basic-security, agentsh |
+| Context & Memory | MCP servers for memory, lifecycle hooks for auto-capture | claude-mem, mempalace |
+| Knowledge Management | Wiki systems, knowledge graphs, semantic search engines | llm-wiki, graphify, qmd |
+| Developer Experience & UX | Status indicators, session landing pages, skill recommenders | ctx, status-line, welcome |
+| Tools Integration | Browser automation, external tool integration, MCP tools for new capabilities | dev-browser, prompt-master |
+| CI/CD Integration | GitHub Actions workflows, harness-specific pipeline templates | github-actions-cicd-* |
+| DevOps & Infrastructure | IaC templates, deployment configs, cloud provider setup | project-deployment |
+| Quality Assurance & Testing | Test frameworks, coverage gates, linting configs, pre-commit hooks | testing-suite |
+| Workflow Automation | Rate limit handling, auto-retry logic, lifecycle event hooks | rate-limit-handler |
+| Theming & Environment | Sound hooks, design systems, conversational personality, themed assets | themes, sound-hooks |
 
 ## When to use
 
@@ -56,6 +94,7 @@ For each repo, shallow-clone into `.a5c/tmp/skill-discovery/` and investigate th
 | `mega-skill-pack` | Repo exists to distribute many skills across domains | Deep-dive: catalog all skills, extract patterns |
 | `methodology-repo` | Repo represents a specific workflow or methodology | Extract the methodology as a potential babysitter process |
 | `internal-maintenance` | Skills exist only for the repo's own CI/dev workflow | **Skip** -- not transferable |
+| `other-harness` | Skill is specific to a non-Claude harness (Codex, Cursor, etc.) or focused on harness invocation/CLI orchestration | **Skip** -- not transferable to babysitter processes |
 | `claude-plugin` | A Claude Code plugin with skills as part of its offering | Investigate plugin structure, extractable integrations |
 | `domain-skill-pack` | Skills focused on a specific domain (e.g., data science, DevOps) | Extract domain processes and patterns |
 | `utility-with-skill` | A tool/library that ships a SKILL.md for usage guidance | Extract the usage pattern as a potential shared process |
@@ -68,6 +107,7 @@ Read the repo's top-level README, plugin.json (if present), directory structure,
 - **mega-skill-pack**: `skills/` directory with 5+ subdirectories, no primary application code
 - **methodology-repo**: Process/workflow documentation dominates, SKILL.md describes a methodology
 - **internal-maintenance**: SKILL.md references only internal paths, CI pipelines, repo-specific tooling
+- **other-harness**: Skill is for Codex, Cursor, or another non-Claude harness; or focuses on CLI orchestration / harness invocation patterns
 - **claude-plugin**: `.claude-plugin/plugin.json` or `plugin.json` with skill registrations
 - **domain-skill-pack**: Skills all relate to one domain; directory structure groups by topic
 - **utility-with-skill**: Repo is primarily a library/tool; SKILL.md is usage documentation
@@ -121,27 +161,26 @@ Organized into sections:
 <Workflows that can be codified as babysitter JS processes>
 - **Process name**: Description of what it does
   - Source: path/to/SKILL.md (lines N-M)
+  - Placement: methodologies/<name> | specializations/shared | specializations/<domain>
   - Inputs/Outputs: ...
   - Complexity: simple | moderate | complex
   - Notes: ...
 
 ## Plugin Ideas
-<Integrations, harness tools, dev tools that could extend babysitter>
-- **Idea name**: What it would do
-  - Source evidence: ...
-  - Integration surface: hook | command | skill | MCP tool
-
-## Patterns and Wisdoms
-<Reusable patterns, anti-patterns, naming conventions, structural insights>
-- **Pattern name**: Description
-  - Where observed: ...
-  - How to apply in babysitter context: ...
+<Ideas for babysitter marketplace plugins -- installable packages with install.md
+that an AI agent executes to set up capabilities in a user's project>
+- **Plugin name**: What it installs and configures
+  - What install.md would do: <what the AI agent does during install -- detect stack, interview user, copy processes, set up hooks/configs>
+  - Processes it would copy: <which process library entries>
+  - Configs/hooks it would create: <ESLint rules, git hooks, CI/CD templates, etc.>
+  - Source evidence: <what in the repo inspires this plugin idea>
 
 ## Implicit Procedural Knowledge
 <Procedures that are described narratively in SKILL.md files but should be
 codified as deterministic JS processes for the babysitter process library>
 - **Procedure name**: What it accomplishes
   - Source: SKILL.md section or description text
+  - Placement: methodologies/<name> | specializations/shared | specializations/<domain>
   - Why codify: <what makes this better as a process than a skill>
   - Sketch: <brief outline of phases/tasks>
 ```
@@ -150,19 +189,27 @@ codified as deterministic JS processes for the babysitter process library>
 
 For entries in the "Implicit Procedural Knowledge" section that are high-priority, scaffold a babysitter process file. Use the `process-builder` skill patterns from `.claude/skills/process-builder/SKILL.md`.
 
-Process files go in `.a5c/processes/assimilated/` (not the main process library -- these are candidates for review). Use `.cjs` extension because `.a5c/package.json` sets `"type": "module"`:
+Process files go in `.a5c/processes/assimilated/` as staging candidates. After review, they are promoted into the process library at their designated placement path.
 
 ```
 .a5c/processes/assimilated/
-├── [org]-[repo]-[process-name].cjs
+├── [org]-[repo]-[process-name].cjs          # Staged candidate
 └── ...
+
+# After review, promoted to process library:
+# methodologies/<name>/                       # Full generic dev methodologies only
+# specializations/shared/                     # Cross-domain reusable patterns
+# specializations/<domain>/                   # Domain-specific processes
 ```
+
+Use `.cjs` extension because `.a5c/package.json` sets `"type": "module"`.
 
 Each process must:
 - Import `defineTask` from `@a5c-ai/babysitter-sdk`
 - Export `async function process(inputs, ctx)`
 - Include `@references` pointing back to the source SKILL.md
 - Include `@process assimilated/[name]` tag
+- Include `@placement` tag indicating the target library path (e.g. `@placement specializations/security-compliance/k8s-audit`)
 - Honour the source repo's license in the JSDoc header
 
 ## Phase 5 -- Maintain the master index
