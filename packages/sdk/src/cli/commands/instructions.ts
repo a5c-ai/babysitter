@@ -18,6 +18,8 @@ import {
   composeBreakpointPrompt,
   PART_STRATA_MAP,
   composeByStrata,
+  detectExecutionContext,
+  deriveCapabilityFlags,
 } from "../../prompts";
 import type { PromptContext, StratumTaggedPart } from "../../prompts";
 import {
@@ -246,6 +248,13 @@ export async function handleInstructionsCommand(
     hookOverride.hookDriven = false;
   }
 
+  // Detect execution context (CI, trigger, branch, actor) and derive
+  // capability flags so the babysit skill can select context-appropriate
+  // library processes when dispatching (e.g. GitHub collaboration,
+  // scheduled reporting, local-dev relaxations).
+  const executionContext = detectExecutionContext();
+  const capabilityFlags = deriveCapabilityFlags(executionContext);
+
   const ctx = factory({
     interactive: args.interactive,
     ...libraryInfo,
@@ -272,6 +281,8 @@ export async function handleInstructionsCommand(
           promptType: composer.promptType,
           hookDriven: ctx.hookDriven,
           hooksDetected: hooksActive,
+          executionContext,
+          capabilityFlags,
           content,
           partsIncluded: composer.partsIncluded,
         },
@@ -286,7 +297,26 @@ export async function handleInstructionsCommand(
       // clarifies the JSON output. The text output is self-explanatory
       // from the generated instructions.
     }
-    console.log(content);
+    const activeCapabilities = Object.entries(capabilityFlags)
+      .filter(([, v]) => v === true)
+      .map(([k]) => k);
+    const contextHeader = [
+      '## Execution Context',
+      '',
+      `- CI: \`${executionContext.ci}\``,
+      `- Trigger: \`${executionContext.trigger}\``,
+      executionContext.branch ? `- Branch: \`${executionContext.branch}\`` : undefined,
+      executionContext.repo ? `- Repo: \`${executionContext.repo.owner}/${executionContext.repo.name}\`` : undefined,
+      executionContext.actor ? `- Actor: \`${executionContext.actor.login}\`${executionContext.actor.isBot ? ' (bot)' : ''}` : undefined,
+      '',
+      `Active context capabilities: ${activeCapabilities.length > 0 ? activeCapabilities.map(c => `\`${c}\``).join(', ') : '_(none)_'}`,
+      '',
+      'When selecting library processes to dispatch, prefer those whose triggers match the active capabilities above.',
+      '',
+      '---',
+      '',
+    ].filter((l): l is string => l !== undefined).join('\n');
+    console.log(contextHeader + content);
   }
 
   return 0;
