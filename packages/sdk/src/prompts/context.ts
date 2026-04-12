@@ -15,9 +15,6 @@ const COMMON_DEFAULTS: Partial<PromptContext> = {
   // Always-on additions — enabled by default across harnesses.
   hasPriorityLadder: true,
   hasRootCauseGuardrail: true,
-  hasProgressiveDocs: true,
-  // Opt-in per methodology/process (not always-on).
-  hasExecutionLifecycle: false,
   // Context-gated flags — default off, auto-enabled via deriveCapabilityFlags.
   hasHandoffConventions: false,
   hasAgentMentionProtocol: false,

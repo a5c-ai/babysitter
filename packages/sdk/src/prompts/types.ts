@@ -126,9 +126,7 @@ export interface PromptContext {
 
   /** Always-on additions (enabled by default). */
   hasPriorityLadder?: boolean;
-  hasExecutionLifecycle?: boolean;
   hasRootCauseGuardrail?: boolean;
-  hasProgressiveDocs?: boolean;
 
   /** GitHub-context-gated. */
   hasHandoffConventions?: boolean;
