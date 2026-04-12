@@ -22,3 +22,7 @@ export { process as sourceDiscoveryProcess, scopeRefinementTask, sourceDiscovery
 export { process as localDbBuildProcess, schemaDesignTask, pythonEtlAuthoringTask, ingestExecutionTask, indexBuildTask, dataValidationTask, schemaDocumentationTask } from './local-db-build.js';
 export { process as dbAgentExploreProcess, questionPlanningTask, sqlExplorationTask, findingsSynthesisTask, reportExportTask } from './db-agent-explore.js';
 
+// Subagent scene-setting + N-strikes escalation (generalized from joe-habu/superbabysitter):
+export { buildSceneContext, appendToManifest } from './scene-context-builder.js';
+export { nStrikesEscalation } from './n-strikes-escalation.js';
+
