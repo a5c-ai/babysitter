@@ -28,6 +28,7 @@ import {
 import { emitRuntimeMetric } from "../instrumentation";
 import { createTaskBuildContext } from "../../tasks/context";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
+import { getGlobalLogDir } from "../../config/defaults";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
 import { readRules } from "../../breakpoints/rules";
@@ -154,20 +155,14 @@ async function requestNewEffect<TArgs, TResult>(
     const decision = options.context.policyEngine.evaluate(policyCtx);
 
     // Audit-log every policy evaluation
-    const logDir = process.env.BABYSITTER_LOG_DIR
-      ? path.join(process.env.BABYSITTER_LOG_DIR, options.context.runId)
-      : undefined;
-    if (logDir) {
-      const logEntry = {
-        timestamp: new Date().toISOString(),
-        context: policyCtx,
-        decision,
-        ruleId: decision.rule?.id,
-      };
-      // Await the write so the audit trail is consistent before the effect
-      // error propagates (deny) or the effect is dispatched (allow/warn).
-      try { await logPolicyDecision(logDir, logEntry); } catch { /* best-effort */ }
-    }
+    const logDir = path.join(getGlobalLogDir(), options.context.runId);
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      context: policyCtx,
+      decision,
+      ruleId: decision.rule?.id,
+    };
+    try { await logPolicyDecision(logDir, logEntry); } catch { /* best-effort */ }
 
     if (!decision.allowed) {
       throw new RunFailedError(

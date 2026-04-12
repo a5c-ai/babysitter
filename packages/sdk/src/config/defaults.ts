@@ -235,8 +235,19 @@ export function getGlobalStateDir(): string {
  * Override: set BABYSITTER_LOG_DIR to use a different path.
  */
 export function getGlobalLogDir(): string {
-  if (process.env.BABYSITTER_LOG_DIR) {
-    return path.resolve(process.env.BABYSITTER_LOG_DIR);
+  const override = process.env.BABYSITTER_LOG_DIR?.trim();
+  if (override) {
+    if (!path.isAbsolute(override)) {
+      const rebased = path.join(os.homedir(), ".a5c", "logs");
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[babysitter] BABYSITTER_LOG_DIR must be an absolute path; got ${JSON.stringify(
+          override,
+        )}. Falling back to ${rebased}. Set an absolute path to silence this warning.`,
+      );
+      return rebased;
+    }
+    return path.resolve(override);
   }
   const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
     ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
