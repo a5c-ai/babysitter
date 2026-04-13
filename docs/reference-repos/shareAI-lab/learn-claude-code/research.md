@@ -1,6 +1,6 @@
 # shareAI-lab/learn-claude-code
 
-- **Archetype**: methodology-repo
+- **Archetype**: harness-framework (educational harness architecture)
 - **Stars**: 52,165
 - **Last pushed**: 2026-04-07
 - **License**: MIT
@@ -29,8 +29,26 @@ HIGH -- The agent-builder methodology is directly extractable:
 ## Plugin Ideas
 None specific -- methodology content, not tool integration.
 
+## Harness Integration Ideas
+
+### Educational Architecture Patterns
+- **Current limitation**: Limited documentation of harness architecture principles
+- **Integration approach**: Use educational patterns to improve babysitter harness documentation and architecture understanding
+- **Implementation scope**: Internal documentation, architecture refinement, team education
+
+### Agent Loop Optimization
+- **Current limitation**: Could benefit from clearer agent loop architecture documentation
+- **Integration approach**: Apply educational agent loop patterns to babysitter runtime documentation
+- **Implementation scope**: `packages/sdk/src/runtime/`, improved loop architecture
+
+### Permission System Enhancement
+- **Current limitation**: Limited safety validation patterns for model intent execution
+- **Integration approach**: Study permission layer patterns for agent execution safety
+- **Implementation scope**: `packages/sdk/src/security/`, model intent validation
+
 ## Implicit Procedural Knowledge
 - "Start with 3-5 capabilities, add more only when agent consistently fails" -- capability minimalism principle
 - "Make knowledge available, not mandatory. Load when relevant, not upfront" -- lazy knowledge loading
 - "Context is precious. Isolate noisy subtasks. Truncate verbose outputs. Protect clarity" -- context hygiene
 - The agent loop distilled to its simplest form
+- "The model does the reasoning. The harness gives the model a working environment" -- fundamental harness philosophy

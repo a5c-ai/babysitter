@@ -6,7 +6,7 @@
 - **Last pushed:** 2026-04-12
 - **Description:** The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.
 
-## Archetype: Aggregator / Ecosystem (massive skills library)
+## Archetype: Harness Framework (performance optimization system for AI agent harnesses)
 
 ## Structure
 - `skills/` — 181 skill directories spanning many domains
@@ -66,5 +66,23 @@ The selective install architecture (`install-plan.js` / `install-apply.js`) with
 - Skill management/discovery — SDK-covered primitives
 - Observer/dashboard — Babysitter has its own
 
+## Harness Integration Ideas
+
+### Multi-Harness Architecture for Babysitter
+- **Harness Adapter**: Universal optimization framework (like plugins/babysitter-codex)
+- **Adapter implementation**: Multi-harness optimization layer in `packages/sdk/src/harness/optimizers/`
+- **Plugin structure**: Performance optimization plugin for `plugins/babysitter-performance/`
+- **CLI integration**: Token optimization, memory persistence, security scanning integration
+
+### TUI/Orchestration Improvements
+- **Current limitation**: No cross-session memory persistence or performance optimization
+- **Integration approach**: Adapt memory hooks, token optimization, and AgentShield security patterns
+- **Implementation scope**: `packages/sdk/src/memory/`, `packages/sdk/src/performance/`, `packages/sdk/src/security/`
+
+### Security Framework Integration
+- **Current limitation**: Limited security scanning for agent processes
+- **Integration approach**: Integrate AgentShield patterns for process security validation
+- **Implementation scope**: New security validation layer for babysitter processes
+
 ## Classification Rationale
-This is primarily an aggregator. Individual skills should be cherry-picked based on domain value, not bulk-imported. The sheer volume (181 skills, 38 agents) means quality varies. Focus on domain specializations that don't exist in the babysitter process library yet (healthcare, logistics/supply-chain, finance/DeFi). The meta-patterns (verification loops, continuous learning, hook profiles) are more interesting than individual skills.
+While containing 181 skills, this is primarily a harness framework providing performance optimization, security, and memory persistence across multiple AI coding tools. The multi-harness architecture and production-ready optimization patterns represent significant value for enhancing our internal agent harness capabilities. Individual skills should be cherry-picked based on domain value, but the core harness optimization patterns are the primary extraction target.

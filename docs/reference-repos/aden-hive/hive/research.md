@@ -1,56 +1,45 @@
-# aden-hive/hive
+# Hive Research
 
-- **URL**: https://github.com/aden-hive/hive
-- **Stars**: 10,177
-- **License**: Apache-2.0
-- **Last pushed**: 2026-04-11
-- **Description**: Multi-Agent Harness for Production AI
+**Repository:** aden-hive/hive  
+**Stars:** 10,188  
+**License:** Apache-2.0  
+**Language:** Python  
+**Created:** 2025-09-12  
+**Last Updated:** 2026-04-11  
+**Default Branch:** main
 
-## Overview
+## Archetype Classification: **Harness Framework**
 
-Hive is a production multi-agent harness (Python) by Aden (YC). A "queen" coding agent generates agent graphs from natural language goals; the harness then executes them with state isolation, checkpoint-based crash recovery, cost enforcement, and real-time observability. Self-improving: when agents fail, the framework captures failure data, evolves the graph through the coding agent, and redeploys automatically.
+Multi-Agent Harness for Production AI with conversation-aware judge and comprehensive multi-agent coordination capabilities.
 
-## Architecture Highlights
+## Repository Structure & Key Skills
 
-- **Graph executor** with `GraphSpec`, `NodeSpec`, `EdgeSpec` -- nodes are LLM-driven phases with typed DataBuffer I/O
-- **Checkpoint-based crash recovery** (`CheckpointStore`, `CheckpointConfig`) -- nodes can resume from last checkpoint
-- **Conversation-aware judge** (`conversation_judge.py`) -- Level 2 quality evaluation: after a node sets its output keys (Level 0), an LLM evaluates whether the conversation actually met `success_criteria`; returns ACCEPT or RETRY with feedback
-- **GCU nodes** -- browser automation nodes with canonical system prompt and MCP tool auto-inclusion
-- **Event bus runtime** with execution streams, triggers, webhook server
-- **Skills system** with discovery, catalog, registry, validator, trust, installer -- default skills include task-decomposition, error-recovery, quality-monitor, batch-ledger, context-preservation, note-taking
-- **HITL (human-in-the-loop)** pausing at nodes with session state for resume
-- **Execution quality tracking** -- clean/degraded/failed, retry counts, node visit tracking for feedback loops
+### Multi-Agent Platform Features
+- **Production AI Harness**: Enterprise-grade multi-agent coordination
+- **Conversation-Aware Judge**: Intelligent conversation quality assessment
+- **Multi-Agent Coordination**: Advanced agent orchestration patterns
+- **Production Readiness**: Enterprise deployment capabilities
 
-## Default Skills (Extractable Patterns)
+### Novel Patterns & Methodologies
 
-### task-decomposition
-Before complex tasks: decompose into numbered subtasks, estimate effort (small/medium/large), execute in order marking completion, budget by impact when iterations run low, verify all subtasks before declaring done.
+#### 1. **Multi-Agent Production Harness**
+Enterprise-grade agent coordination:
+- **Agent Orchestration**: Advanced multi-agent workflow coordination
+- **Conversation Quality Assessment**: Intelligent conversation evaluation
+- **Production Deployment**: Enterprise-ready agent harness patterns
+- **Coordination Architecture**: Multi-agent communication and state management
 
-### error-recovery
-When tool calls fail: diagnose (transient vs structural), decide (retry once for transient, fix for structural-fixable, record and move on for unfixable), adapt (stop using tool after N failures, find alternative).
+## Harness Integration Ideas
 
-### quality-monitor
-Every N iterations: self-assess on-task, thorough, non-repetitive, consistent, complete. If degrading: write to quality log, re-read working notes, change approach. If acceptable: brief note.
+### Multi-Agent Coordination Enhancement
+- **Current limitation**: Limited multi-agent coordination patterns in babysitter
+- **Integration approach**: Study production multi-agent patterns for babysitter enhancement
+- **Implementation scope**: Multi-agent coordination layer for complex workflows
 
-### context-preservation
-Working notes protocol for maintaining context across iterations.
+## Repository Value: **High for Multi-Agent Patterns**
 
-### batch-ledger
-Tracking batch operations with ledger for completeness verification.
+Provides production-ready multi-agent harness patterns with conversation quality assessment capabilities.
 
-## Extractable Value for Babysitter
+## Research Methodology Notes
 
-### Processes (specializations/shared/)
-1. **Conversation-aware phase validation** -- the Level 2 judge pattern (LLM evaluates whether a phase's goal was genuinely accomplished, not just that output keys were set) maps to a quality-convergence methodology enhancement
-2. **Self-healing graph evolution** -- failure capture + automatic graph modification through coding agent -- maps to an iterative-convergence specialization
-3. **Execution quality degradation tracking** -- clean/degraded/failed classification with retry budgets
-
-### Plugin Ideas
-1. **Checkpoint recovery plugin** -- checkpoint-based crash recovery for babysitter runs, allowing mid-run resume from last known-good state (beyond journal replay)
-2. **Conversation judge plugin** -- LLM-based phase completion validation that goes beyond output key checks to evaluate whether work quality meets criteria
-
-## Classification
-
-- **Archetype**: Production multi-agent harness with self-improvement
-- **Primary value**: The default skills (task-decomposition, error-recovery, quality-monitor) are directly assimilable as process methodology enhancements. The conversation-aware judge pattern is a novel quality-gate concept.
-- **Skip**: Core harness runtime (SDK-covered), graph execution engine (different paradigm), multi-model coordination
+Framework discovered through multi-agent harness search. Repository demonstrates enterprise-grade multi-agent coordination patterns.
