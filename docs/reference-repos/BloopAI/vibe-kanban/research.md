@@ -78,3 +78,21 @@ A babysitter plugin that renders pending/active/completed tasks as a kanban boar
 A babysitter plugin that provisions isolated git worktrees for parallel task execution. When a process dispatches parallel tasks, each task gets its own worktree with a dedicated branch, preventing merge conflicts during concurrent work.
 
 **install.md**: Installs `on-task-start` hook that creates a git worktree for the task's workspace. On `on-task-complete`, merges the worktree branch back and cleans up. Handles merge conflicts by creating a breakpoint for human resolution.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Kanban-Driven Agent Orchestration | NEW | Task organization using kanban methodology with agent dispatch | - | specializations/shared/kanban-agent-orchestration.js |
+| Multi-Agent Executor Abstraction | UPGRADE | Enhanced agent dispatch with unified interface | library/specializations/ai-agents-conversational/ | specializations/shared/multi-agent-executor.js |
+| Workspace Isolation with Git Worktrees | UPGRADE | Enhanced git worktree management | library/methodologies/superpowers/ | specializations/shared/workspace-isolation.js |
+| Inline Code Review Integration | NEW | Review workflow with agent feedback loops | - | specializations/shared/inline-review-integration.js |
+| Issue-to-Workspace Pipeline | NEW | Automated workspace provisioning from issue descriptions | - | specializations/workflow-automation/issue-workspace-pipeline.js |
+| PR Lifecycle Automation | NEW | AI-assisted PR creation and description generation | - | specializations/devops-sre-platform/pr-lifecycle-automation.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Kanban Board Dashboard Widget | NEW | Task visualization as kanban board in observer dashboard | - | plugins/a5c/marketplace/plugins/kanban-dashboard-widget/ |
+| Git Worktree Workspace Isolation | UPGRADE | Enhanced workspace isolation for parallel tasks | agentsh | plugins/a5c/marketplace/plugins/git-worktree-isolation/ |

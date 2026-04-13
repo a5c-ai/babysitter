@@ -44,3 +44,21 @@ VERY HIGH - Contains the most sophisticated skill collection with advanced infra
   - Placement: methodologies/cross-platform-development/
   - Why codify: Enables creating portable skills that work consistently across different AI harnesses
   - Sketch: Harness capability analysis → Common denominator identification → Skill abstraction → Multi-harness testing → Distribution packaging
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Skill Library Management | NEW | Systematic organization and distribution of large skill collections | - | methodologies/skill-engineering/ |
+| Multi-Harness Skill Distribution | NEW | Cross-platform skill development methodology | - | methodologies/cross-platform-development/ |
+| Automated Skill Cataloging | NEW | Metadata-driven skill indexing and discovery | - | specializations/shared/automated-cataloging.js |
+| Risk-Based Skill Categorization | NEW | Security and impact-based skill classification | - | specializations/security-compliance/risk-categorization.js |
+| Professional Skill Packaging | NEW | NPM-based skill distribution with metadata | - | specializations/devops-sre-platform/skill-packaging.js |
+| Workflow Bundle Management | NEW | Coordinated skill groups for complex workflows | - | specializations/shared/workflow-bundling.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Antigravity Skill Distribution | NEW | Large skill collection management with metadata | - | plugins/a5c/marketplace/plugins/skill-distribution-manager/ |
+| Cross-Platform Skill Builder | NEW | Multi-harness compatible skill development | - | plugins/a5c/marketplace/plugins/cross-platform-skill-builder/ |

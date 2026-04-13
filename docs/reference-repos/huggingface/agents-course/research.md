@@ -70,3 +70,20 @@ MEDIUM - Contains educational methodology and evaluation processes that are tran
   - Placement: specializations/shared/
   - Why codify: Systematic approach to agent validation that's applicable across different agent types
   - Sketch: Evaluation criteria definition -> Benchmark setup -> Performance measurement -> Observability implementation -> Results analysis
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Agent Framework Evaluation | UPGRADE | Enhanced framework comparison methodology | library/specializations/ai-agents-conversational/ | specializations/shared/agent-framework-evaluation.js |
+| Agent Development Progression | NEW | Structured learning path for agent development | - | methodologies/agent-development/ |
+| Agentic RAG Implementation | UPGRADE | Enhanced RAG system implementation | library/specializations/ai-agents-conversational/ | specializations/shared/agentic-rag-implementation.js |
+| Framework Selection Methodology | NEW | Systematic framework choice process | - | specializations/shared/framework-selection.js |
+| Agent Evaluation Process | UPGRADE | Enhanced agent validation methodology | library/specializations/ai-agents-conversational/ | specializations/shared/agent-evaluation-process.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Agent Development Curriculum | NEW | Educational plugin for systematic agent learning | - | plugins/a5c/marketplace/plugins/agent-development-curriculum/ |
+| Agent Evaluation Suite | NEW | Comprehensive agent testing and observability | - | plugins/a5c/marketplace/plugins/agent-evaluation-suite/ |

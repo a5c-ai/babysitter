@@ -41,3 +41,28 @@ Extremely rich source of extractable domain processes. The PRD skill demonstrate
 - Heavy use of `metadata` field for categorization and dependency declaration
 - Skills organized as flat directory under `skills/` with one SKILL.md per directory
 - Community contribution model with PR-based submission
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| PRD Generation | NEW | Multi-phase product requirements creation | - | specializations/business/prd-generation.js |
+| CodeQL Security Scan | NEW | CodeQL-based security analysis workflow | - | specializations/security-compliance/codeql-analysis.js |
+| Agent OWASP Compliance | NEW | OWASP compliance checking for agent systems | - | specializations/security-compliance/agent-owasp-compliance.js |
+| Azure Architecture Review | NEW | Cloud architecture assessment workflow | - | specializations/devops-sre-platform/azure-architecture.js |
+| Daily Developer Prep | NEW | Daily standup and work preparation workflow | - | specializations/developer-experience-ux/daily-prep.js |
+| Context Map Generation | NEW | Codebase context mapping for agent consumption | - | methodologies/context-mapping/ |
+| Agentic Evaluation | NEW | Agent skill performance evaluation framework | - | specializations/shared/agentic-evaluation.js |
+| Agent Governance | NEW | Agent governance and policy enforcement | - | specializations/security-compliance/agent-governance.js |
+| Interview-Then-Generate Pattern | NEW | Structured requirements gathering methodology | - | specializations/shared/interview-generate-pattern.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Agent Supply Chain Security | UPGRADE | Enhanced dependency validation | basic-security | plugins/a5c/marketplace/plugins/agent-supply-chain-security/ |
+| PRD Generator | NEW | Multi-phase requirements gathering with stakeholder review | - | plugins/a5c/marketplace/plugins/prd-generator/ |
+| GitHub Actions Workflow Generator | UPGRADE | Enhanced CI/CD workflow automation | github-actions-cicd-* | plugins/a5c/marketplace/plugins/github-actions-enhanced/ |
+| Context Map Builder | NEW | Automated codebase context documentation | - | plugins/a5c/marketplace/plugins/context-map-builder/ |
+| Agentic Evaluation Suite | NEW | Agent skill performance benchmarking | - | plugins/a5c/marketplace/plugins/agentic-evaluation-suite/ |
+| CodeQL Integration | NEW | Security scanning with breakpoint-gated remediation | - | plugins/a5c/marketplace/plugins/codeql-integration/ |

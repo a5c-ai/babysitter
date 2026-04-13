@@ -107,6 +107,26 @@ This repository provides:
 
 The container-based security model and CLI automation patterns represent significant innovations in agent deployment and interaction.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Container-Based Agent Isolation | NEW | Secure execution environment for agent processes | - | specializations/security-compliance/container-agent-isolation.js |
+| CLI Agent Automation | NEW | Terminal-based agent interaction methodology | - | specializations/shared/cli-agent-automation.js |
+| Multi-Platform Messaging Integration | NEW | Comprehensive messaging platform support | - | specializations/tools-integration/multi-platform-messaging.js |
+| Runtime Abstraction | NEW | Cross-platform container deployment methodology | - | specializations/devops-sre-platform/runtime-abstraction.js |
+| Security-First Agent Design | NEW | Process isolation and resource management for agents | - | specializations/security-compliance/security-first-agent-design.js |
+| Session Management for Agents | NEW | Stateful interactions across platforms | - | specializations/shared/agent-session-management.js |
+| Scheduled Agent Execution | NEW | Automated agent workflow scheduling | - | specializations/workflow-automation/scheduled-agent-execution.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Container Agent Security | UPGRADE | Enhanced security through container isolation | basic-security | plugins/a5c/marketplace/plugins/container-agent-security/ |
+| CLI Agent Framework | NEW | Terminal-based agent automation with runtime abstraction | - | plugins/a5c/marketplace/plugins/cli-agent-framework/ |
+| Multi-Platform Agent Bridge | NEW | Messaging platform integration for agents | - | plugins/a5c/marketplace/plugins/multi-platform-agent-bridge/ |
+
 ## Research Methodology Notes
 
 Skills discovered via GitHub Code Search for `filename:SKILL.md`. Repository represents a lightweight but powerful alternative to existing agent frameworks, with particular innovation in containerized security and CLI automation.
