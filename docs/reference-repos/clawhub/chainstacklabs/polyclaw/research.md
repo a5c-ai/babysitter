@@ -42,6 +42,20 @@ LOW extractable value for babysitter. This is a domain-specific financial tradin
 - **Category**: Knowledge Management
 - **install.md**: Installs polyclaw Python dependencies (uv sync), configures Chainstack node URL (free tier). Read-only mode: provides babysitter tasks for browsing Polymarket markets, fetching current probabilities, and searching by topic. No trading keys required for read-only use. Useful as a probability signal source in research and decision-making processes.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Prediction Market Research | NEW | Research prediction markets for probability assessments and market sentiment analysis | - | specializations/business/prediction-market-research.js |
+| LLM-Powered Logical Analysis | NEW | Contrapositive analysis pattern for distinguishing causation from correlation | - | specializations/shared/llm-logical-analysis.js |
+| Coverage Tier Risk Assessment | NEW | Graduated confidence levels (T1/T2/T3) for risk assessment processes | - | specializations/shared/coverage-tier-risk-assessment.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Prediction Market Signal | NEW | Read-only market browsing and probability signal sourcing for research processes | - | plugins/a5c/marketplace/plugins/prediction-market-signal/ |
+
 ## Implicit Procedural Knowledge
 
 - **LLM-powered logical analysis for hedging**: Using an LLM to find contrapositive implications between prediction markets (only logically necessary implications accepted, not correlations). This strict logical filtering pattern is applicable to any LLM-powered analysis where you need to distinguish causation from correlation.

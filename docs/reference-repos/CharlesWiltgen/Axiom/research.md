@@ -87,6 +87,22 @@ Extracted from Axiom's app-store-submission skill and the chain of auditors that
 - Config: `health-auditors.json` mapping signal patterns to auditor definitions
 - Hook: session-start health summary (optional, shows last health score)
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Multi-Domain Health Check Audit | NEW | Signal-based conditional auditor orchestration with parallel execution | - | specializations/shared/multi-domain-health-audit.js |
+| iOS App Store Submission Pipeline | NEW | Pre-submission audit and validation process for Apple App Store | - | specializations/mobile/ios-app-store-submission.js |
+| Signal-Based Technology Detection | NEW | Codebase scanning to detect framework presence for conditional auditor selection | - | specializations/shared/signal-based-technology-detection.js |
+| Parallel Auditor Orchestration | NEW | Concurrent domain-specific audit execution with deduplication and synthesis | - | specializations/shared/parallel-auditor-orchestration.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| iOS Development Skill Pack | NEW | Comprehensive iOS/macOS development with auditor agents, hooks, and Xcode integration | - | plugins/a5c/marketplace/plugins/ios-development-skill-pack/ |
+| Codebase Health Dashboard | NEW | Generic health monitoring with auto-detection, parallel auditors, and unified reporting | - | plugins/a5c/marketplace/plugins/codebase-health-dashboard/ |
+
 ## Implicit Procedural Knowledge
 
 - **Signal-based conditional execution:** Grep for framework imports/patterns before deciding which auditors to run. Prevents irrelevant noise.

@@ -29,6 +29,21 @@ OpenClaw-specific search skills providing multi-source parallel search, content 
 ### Plugin Ideas
 - **Multi-source search plugin:** A babysitter marketplace plugin providing a `search` task kind that dispatches to multiple search APIs in parallel (Brave/Exa/Tavily), with intent-aware routing and result fusion. Install.md configures API keys per source.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Deep Research Methodology | NEW | Two-path retrieval architecture with intent classification and multi-source search | - | specializations/shared/deep-research-methodology.js |
+| Content Extraction Pipeline | NEW | Graduated fallback pattern (direct fetch → anti-scraping → MinerU parse) for URL to Markdown | - | specializations/shared/content-extraction-pipeline.js |
+| Multi-Source Parallel Search | NEW | Four-source parallel search with result fusion and deduplication | - | specializations/shared/multi-source-parallel-search.js |
+| Intent-Aware Retrieval | NEW | Search intent classification (factual/status/comparison/tutorial/exploratory/news/resource) | - | specializations/shared/intent-aware-retrieval.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Multi-Source Search Engine | NEW | Search task kind dispatching to multiple APIs (Brave/Exa/Tavily) with API key configuration | - | plugins/a5c/marketplace/plugins/multi-source-search-engine/ |
+
 ### SKIP
 - OpenClaw-specific skill loading mechanics
 - The Grok integration (model-specific, not generalizable)

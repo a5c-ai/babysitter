@@ -27,6 +27,20 @@ MEDIUM -- The pattern detection checklist and voice calibration procedure could 
 ## Plugin Ideas
 - **writing-humanizer plugin**: Wrap the humanizer as a babysitter plugin with hooks into content generation workflows. Post-processing step after any text generation task.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Humanize Text Process | NEW | Multi-pass AI writing detection and rewriting with voice calibration | - | specializations/shared/humanize-text-process.js |
+| Voice Calibration Methodology | NEW | Voice fingerprinting from writing samples (sentence length, word choice, transitions) | - | specializations/shared/voice-calibration-methodology.js |
+| AI Writing Pattern Detection | NEW | Comprehensive taxonomy of AI writing tells with detection checklist | - | specializations/shared/ai-writing-pattern-detection.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Writing Humanizer | NEW | Post-processing hooks for content generation workflows with AI detection and rewriting | - | plugins/a5c/marketplace/plugins/writing-humanizer/ |
+
 ## Implicit Procedural Knowledge
 - The "two-pass anti-AI" technique: first ask "what makes this AI-generated?", then "fix those tells"
 - Voice fingerprinting from writing samples (sentence length, word choice, punctuation habits, transitions)

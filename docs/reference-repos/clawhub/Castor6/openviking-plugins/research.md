@@ -36,6 +36,18 @@ None -- memory is always a plugin in babysitter, never a process.
 - **Category**: Context & Memory
 - **install.md**: Installs hook-driven transparent memory that automatically captures knowledge after each agent response (stop hook) and silently injects relevant memories before each user message (user-prompt hook). Also provides MCP tools for explicit memory operations (search, store, delete, health). Requires a vector database backend. The dual-interface pattern (hooks for automatic + MCP for explicit) ensures both transparent operation and user control.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| N/A | N/A | No multi-step processes identified - memory systems are plugin architecture, not processes | - | N/A |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Transparent Memory Plugin | UPGRADE | Enhanced auto-recall/auto-capture beyond existing claude-mem functionality | plugins/a5c/marketplace/plugins/claude-mem/ | plugins/a5c/marketplace/plugins/transparent-memory/ |
+
 ## Implicit Procedural Knowledge
 
 - **Hook-driven auto-recall/auto-capture pattern**: Using user-prompt-submit hook for recall (inject relevant memories before the agent sees the message) and stop hook for capture (extract new knowledge after the agent responds). This is the simplest transparent memory architecture and maps directly to babysitter's hook system (13 hook types including `on-iteration-start` and `on-iteration-end`).

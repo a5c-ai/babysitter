@@ -56,6 +56,22 @@ The multi-phase pipeline pattern (Ingest -> Synthesize -> Create -> Publish) wit
   - Configs/hooks it would create: `.a5c/commands/research.md`, `.a5c/commands/deep-research.md`, MCP server configuration, output directory structure for research artifacts
   - Source evidence: The repo's complete 4-phase pipeline with named workflows and MCP tool surface
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Research-to-Content Pipeline | NEW | 4-phase flow: Ingest → Synthesize → Create → Publish with NotebookLM backend | - | specializations/shared/research-to-content-pipeline.js |
+| Deep Web Research | NEW | NotebookLM web/Drive research with source discovery amplification | - | specializations/shared/deep-web-research.js |
+| Async Artifact Generation | NEW | Generate and poll 10 artifact types with async polling pattern | - | specializations/shared/async-artifact-generation.js |
+| Research Pipeline Orchestration | NEW | Multi-phase pipeline orchestration with typed inputs/outputs and named workflows | - | specializations/shared/research-pipeline-orchestration.js |
+| MCP Server Architecture | NEW | FastMCP-based server pattern with 13 tools and async context management | - | specializations/shared/mcp-server-architecture.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Research Automation | NEW | Automated research workflows with NotebookLM integration and MCP server setup | - | plugins/a5c/marketplace/plugins/research-automation/ |
+
 ## Implicit Procedural Knowledge
 
 - **research-pipeline-orchestration**: Full pipeline from source ingestion to published content
