@@ -257,15 +257,104 @@ codified as deterministic JS processes for the babysitter process library>
   - Sketch: <brief outline of phases/tasks>
 ```
 
-## Phase 4 -- Process Codification
+## Phase 4 -- Library Mapping and Re-extraction Analysis
 
-For entries in the "Implicit Procedural Knowledge" section that are high-priority, scaffold a babysitter process file. Use the `process-builder` skill patterns from `.claude/skills/process-builder/SKILL.md`.
+**CRITICAL: Check existing process library before creating new processes.** Many high-value repositories have already been assimilated into the babysitter process library. Before extracting processes, map them against existing library content to identify:
 
+1. **Direct matches** - processes already implemented that could be enhanced with new insights
+2. **Near matches** - similar processes that could be generalized or specialized 
+3. **Gaps** - novel processes not yet in the library
+
+### Library Structure Check
+
+The babysitter process library is located at `library/` with these key directories:
+
+- `library/methodologies/` - Full development methodologies (agile.js, atdd-tdd/, bmad-method/, cc10x/, etc.)
+- `library/specializations/` - Domain-specific processes (ai-agents-conversational/, etc.)
+- `library/cradle/` - Core babysitter processes (bug-report.js, feature-request.js, etc.)
+- `library/contrib/` - User-contributed processes
+
+### Mapping Process
+
+For each extractable process identified in Phase 3 research documents:
+
+1. **Search for existing implementations:**
+   ```bash
+   # Look for similar process names/concepts
+   find library -name "*.js" -type f | grep -i "<process-concept>"
+   
+   # Check for methodology matches
+   ls library/methodologies/
+   
+   # Check specialization domains
+   ls library/specializations/
+   ```
+
+2. **Classify the relationship:**
+   - **UPGRADE** - existing process that could be enhanced with new patterns/insights from the repo
+   - **VARIANT** - similar process that could be generalized or adapted
+   - **NEW** - novel process not represented in the library
+   - **OBSOLETE** - existing process that could be replaced with superior approach from repo
+
+3. **Document the mapping:**
+   Add a "Library Mapping" section to each `research.md`:
+   ```markdown
+   ## Library Mapping
+   
+   | Extractable Process | Library Status | Action | Existing Path |
+   |-------------------|----------------|--------|---------------|
+   | Systematic Debugging | UPGRADE | Enhance with new error categorization patterns | methodologies/cc10x/cc10x-debug.js |
+   | TDD Workflow | VARIANT | Could generalize atdd-tdd with pure TDD variant | methodologies/atdd-tdd/atdd-tdd.js |
+   | Research Pipeline | NEW | Novel 23-stage autonomous research methodology | - |
+   ```
+
+### Re-extraction Strategy
+
+When a repository offers improvements to existing processes:
+
+1. **Read the existing process** to understand current implementation
+2. **Extract the novel insights** - what does the repository add that we don't have?
+3. **Plan the enhancement** - how to integrate new patterns without breaking existing functionality
+4. **Document the upgrade path** - what changes would be made and why
+
+Example upgrade documentation:
+```markdown
+### Upgrade Analysis: cc10x-debug.js ← obra/superpowers debugging methodology
+
+**Current implementation**: Basic debugging workflow with error reproduction and hypothesis testing
+
+**Repository insights**: 
+- Binary search debugging strategy
+- Systematic error categorization (syntax/logic/integration/environment)
+- Rubber duck debugging integration
+- Prevention-focused root cause analysis
+
+**Proposed enhancements**:
+- Add binary search phase for large codebases
+- Implement error taxonomy classification
+- Add prevention analysis step
+- Integrate debugging strategy selection logic
+
+**Backward compatibility**: Existing inputs/outputs preserved, new optional strategies added
+```
+
+## Phase 5 -- Process Codification
+
+For entries marked as **NEW** or **UPGRADE** from the library mapping analysis, proceed with process extraction. Use the `process-builder` skill patterns from `.claude/skills/process-builder/SKILL.md`.
+
+### For NEW processes:
 Process files go in `.a5c/processes/assimilated/` as staging candidates. After review, they are promoted into the process library at their designated placement path.
+
+### For UPGRADE processes:
+1. Create enhanced version in `.a5c/processes/assimilated/` with suffix `-v2` or `-enhanced`
+2. Document the differences from the current version
+3. Plan migration strategy for existing users
+4. After review, replace or merge with existing process
 
 ```
 .a5c/processes/assimilated/
-├── [org]-[repo]-[process-name].cjs          # Staged candidate
+├── [org]-[repo]-[process-name].cjs          # Staged NEW candidate
+├── [existing-process]-enhanced.cjs          # Staged UPGRADE candidate  
 └── ...
 
 # After review, promoted to process library:
@@ -284,7 +373,7 @@ Each process must:
 - Include `@placement` tag indicating the target library path (e.g. `@placement specializations/security-compliance/k8s-audit`)
 - Honour the source repo's license in the JSDoc header
 
-## Phase 5 -- Maintain indexes and history
+## Phase 6 -- Maintain indexes and history
 
 Maintain three files in `docs/reference-repos/` alongside the per-repo research directories:
 
@@ -359,6 +448,8 @@ Every repo that has been investigated goes here, regardless of outcome. This pre
 
 ## Notes
 
+- **ALWAYS check existing library first.** Before extracting any process, map it against the current process library (`library/methodologies/`, `library/specializations/`) to identify UPGRADE opportunities rather than duplicating effort.
+- **Prioritize upgrades over new processes.** Enhancing existing processes with new insights from high-value repositories often provides more value than creating entirely new processes.
 - Never copy SKILL.md content wholesale. Extract the *procedural insight*, not the prose.
 - Respect source licenses. Include attribution in every extracted process file.
 - Skills that are purely prompt-engineering (just a system prompt with no procedure) have no extractable process value -- note them as `not-transferable` in the inventory.
@@ -370,6 +461,7 @@ Every repo that has been investigated goes here, regardless of outcome. This pre
 - The `internal-maintenance` archetype is the most common. Expect 60-70% of hits to be skipped.
 - Rate-limit awareness: `gh search code` is throttled at 30 req/min. Split searches by language qualifier if hitting caps.
 - When a repo appears in `processed.md`, skip it unless explicitly asked to re-evaluate. For tracked repos (directory exists under `docs/reference-repos/`), compare `pushedAt` dates to decide if re-investigation is needed -- update in-place rather than recreating.
+- **Re-extraction for process upgrades**: When explicitly asked to re-extract from high-value repositories to upgrade existing processes, update the existing `research.md` with new insights and add the "Library Mapping" section to identify UPGRADE opportunities.
 - For very large skill packs (20+ skills), sample the most-starred or most-recently-updated skills rather than researching all of them in a single pass.
 - After completing research, suggest the user run `/babysitter:contrib` for any upstream-worthy process candidates.
 - See `references/classification-heuristics.md` for detailed archetype classification examples and edge cases.
