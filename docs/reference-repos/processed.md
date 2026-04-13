@@ -34,5 +34,6 @@ This file tracks repositories that have already been reviewed/processed so we do
 | langflow-ai/langflow | ✅ Tracked | 146,877 stars - AI workflow builder and deployment platform | 2026-04-13 |
 | langchain-ai/deepagents | ✅ Tracked | 20,544 stars - Agent harness with LangChain/LangGraph | 2026-04-13 |
 | emcie-co/parlant | ✅ Tracked | 17,908 stars - Conversational control layer for customer-facing AI | 2026-04-13 |
-| opencode-ai/opencode | ✅ Tracked | 11,982 stars - Terminal AI harness (archived, moved to Crush) | 2026-04-13 |
+| opencode-ai/opencode | ❌ Skipped | 11,982 stars - Archived, moved to charmbracelet/crush | 2026-04-13 |
+| charmbracelet/crush | ✅ Tracked | 22,930 stars - Terminal AI harness (successor to OpenCode) | 2026-04-13 |
 | aden-hive/hive | ✅ Tracked | 10,188 stars - Multi-agent production harness | 2026-04-13 |

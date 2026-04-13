@@ -142,7 +142,7 @@ License filter: MIT / BSD / Apache-2.0 only
 | [langflow-ai/langflow](langflow-ai/langflow/research.md) | 146,877 | AI workflow builder | MIT | Medium |
 | [langchain-ai/deepagents](langchain-ai/deepagents/research.md) | 20,544 | LangChain agent harness | MIT | High |
 | [emcie-co/parlant](emcie-co/parlant/research.md) | 17,908 | Conversational control layer | Apache-2.0 | High |
-| [opencode-ai/opencode](opencode-ai/opencode/research.md) | 11,982 | Terminal AI harness (archived) | MIT | Medium |
+| [charmbracelet/crush](charmbracelet/crush/research.md) | 22,930 | Terminal AI harness (successor to OpenCode) | NOASSERTION | High |
 | [aden-hive/hive](aden-hive/hive/research.md) | 10,188 | Multi-agent production harness | Apache-2.0 | High |
 | [lastmile-ai/mcp-agent](lastmile-ai/mcp-agent/research.md) | 8,245 | MCP agent framework | Apache-2.0 | High |
 | [mergisi/awesome-openclaw-agents](mergisi/awesome-openclaw-agents/research.md) | 2,848 | OpenClaw agent templates | MIT | Medium |

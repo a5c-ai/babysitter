@@ -102,7 +102,7 @@ Use a browser tool or `curl` to fetch these pages and extract GitHub repo links.
 ### Filtering rules
 
 1. Drop any hit from `a5c-ai/babysitter` (this repo).
-2. Drop archived repos.
+2. **Handle archived/moved repos.** If a repo is archived, check for a successor/migration notice. If the archive points to a new location (e.g., "moved to org/new-repo"), skip the archived repo and evaluate the new location instead. Only track active, maintained repositories.
 3. **Drop repos without a permissive license.** Only track repos with MIT, BSD (2-clause or 3-clause), or Apache-2.0 licenses. Drop repos with GPL, AGPL, CC-NC, CC-SA, proprietary, or no license specified. Check `license.spdx_id` during enrichment.
 4. Dedupe by `repository.nameWithOwner`.
 5. Group hits by repo -- one repo may contain many SKILL.md files.
