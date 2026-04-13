@@ -27,6 +27,20 @@ MEDIUM-HIGH -- The heterogeneous-reviewer pattern is directly extractable:
 ## Plugin Ideas
 - **multi-harness-review plugin**: Babysitter plugin that dispatches review tasks to multiple harnesses and synthesizes their feedback
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Heterogeneous AI Review | NEW | Multi-model review pattern with feedback synthesis | - | methodologies/heterogeneous-ai-review/ |
+| AI Development Team Coordination | NEW | Code review with multiple AI model perspectives | - | specializations/shared/ai-team-coordination.js |
+| AI Content Team Orchestration | NEW | Content review and creation with diverse model feedback | - | specializations/shared/ai-content-team-orchestration.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Multi-Harness Review | NEW | Orchestrate review tasks across multiple AI harnesses with feedback synthesis | - | plugins/a5c/marketplace/plugins/multi-harness-review/ |
+
 ## Implicit Procedural Knowledge
 - Different model families find different categories of issues (coverage maximization through diversity)
 - Team architecture: Commander (user) -> Team Lead (Claude) -> Specialists (Codex, Gemini)

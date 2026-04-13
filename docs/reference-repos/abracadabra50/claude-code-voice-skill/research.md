@@ -23,6 +23,18 @@ None with significant multi-step procedural value.
 ## Plugin Ideas
 - **voice-breakpoint plugin**: Babysitter plugin that calls the user via phone when a breakpoint requires human approval
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| N/A | N/A | No significant multi-step processes identified - primarily tool integration | - | N/A |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Voice Breakpoint Notifications | NEW | Phone call integration for babysitter breakpoint notifications | - | plugins/a5c/marketplace/plugins/voice-breakpoint-notifications/ |
+
 ## Implicit Procedural Knowledge
 - Voice as a breakpoint notification channel
 - Project context auto-loading for voice conversations

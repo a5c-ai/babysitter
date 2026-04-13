@@ -84,6 +84,42 @@ This repository provides:
 
 The Claude Code-native architecture and adaptive delegation patterns represent cutting-edge approaches to AI agent workflow orchestration.
 
+## Processes
+
+### 1. Hook-Based Workflow Enforcement
+- **Source**: Hook-Based Architecture and Soft Enforcement Architecture patterns
+- **Placement**: `methodologies/hook-based-workflow-enforcement/`
+- **Description**: Progressive nudge system (silent → hint → warning → strong reminder) with token-efficient session management and native plugin integration.
+
+### 2. Adaptive Agent Delegation
+- **Source**: Agent Delegation System and Delegation-Enforced Workflows
+- **Placement**: `specializations/shared/adaptive-agent-delegation.js`
+- **Description**: Automatic task routing to specialized agents with expert-level routing and parallel execution capabilities.
+
+### 3. Multi-Agent Team Coordination
+- **Source**: Agent Teams Integration and Dual-Mode Agent Execution
+- **Placement**: `specializations/shared/multi-agent-team-coordination.js`
+- **Description**: Collaborative workflows with real-time communication, automatic execution mode selection, and task list sharing.
+
+## Plugin Ideas
+
+- **Hook-Based Orchestration Engine**: Install workflow enforcement hooks with progressive nudging system and token-efficient session management for Claude Code environments.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Hook-Based Workflow Enforcement | NEW | Progressive nudge system with token-efficient session management | - | methodologies/hook-based-workflow-enforcement/ |
+| Adaptive Agent Delegation | NEW | Automatic task routing to specialized agents with parallel execution | - | specializations/shared/adaptive-agent-delegation.js |
+| Multi-Agent Team Coordination | NEW | Collaborative agent workflows with real-time communication | - | specializations/shared/multi-agent-team-coordination.js |
+| Progressive Enforcement Architecture | NEW | Escalating workflow guidance system (silent → hint → warning → reminder) | - | specializations/shared/progressive-enforcement-architecture.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Hook-Based Orchestration Engine | NEW | Workflow enforcement with progressive nudging and token-efficient session management | - | plugins/a5c/marketplace/plugins/hook-based-orchestration-engine/ |
+
 ## Research Methodology Notes
 
 Framework discovered through Claude Code ecosystem analysis. Repository demonstrates sophisticated approach to hook-based workflow enforcement and multi-agent coordination within Claude Code environment.

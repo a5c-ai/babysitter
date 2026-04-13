@@ -24,6 +24,19 @@ MEDIUM VALUE. The meta-tooling aspect (generating skills) is interesting but lar
 ## Plugin Ideas
 - **Skill Quality Benchmark plugin**: A babysitter marketplace plugin that evaluates generated skills against quality criteria (procedural depth, reference completeness, trigger accuracy, guardrail coverage). Uses the skill-factory's output as a baseline for comparison. Install.md sets up evaluation rubrics and scoring.
 
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Skill Template Generation | NEW | Automated skill generation with frontmatter and section templates | - | specializations/shared/skill-template-generation.js |
+| TDD Workflow | EXISTS | Red-green-refactor cycle with coverage analysis | methodologies/tdd/ | No action - already covered by existing TDD methodology |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Skill Quality Benchmark | NEW | Skill evaluation with quality criteria and scoring rubrics | - | plugins/a5c/marketplace/plugins/skill-quality-benchmark/ |
+
 ## Patterns
 - **Skill archetype taxonomy**: The factory implicitly defines skill archetypes: guide (TDD), factory (agent-factory, hook-factory, prompt-factory, slash-command-factory), analyzer (social-media, tech-stack), advisor (AWS, app-store-optimization), manager (scrum-master, ms365-tenant). Useful categorization.
 - **Generated skill structure**: Consistent template: frontmatter -> capabilities list -> input requirements -> workflow steps -> output format. A reusable skeleton.
