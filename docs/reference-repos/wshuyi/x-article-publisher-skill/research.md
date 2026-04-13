@@ -27,3 +27,18 @@ LOW-MEDIUM VALUE for process extraction. The skill is a specific integration pip
 - **Helper script decomposition**: Breaking a complex publishing workflow into focused Python scripts (parse, clipboard, convert) that the skill orchestrates. Each script is independently testable.
 - **Cross-platform clipboard abstraction**: Platform-detection-based clipboard handling for rich content (images + HTML).
 - **Mermaid pre-processing**: Detecting and converting Mermaid diagrams in Markdown before publishing to platforms that lack native support.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Markdown-to-Platform Publishing Pipeline | NEW | Parse markdown → extract metadata/images → convert tables → browser automation publish | - | specializations/shared/markdown-platform-publishing.js |
+| Helper Script Decomposition | NEW | Breaking complex workflows into focused, independently testable scripts | - | specializations/shared/helper-script-decomposition.js |
+| Cross-Platform Clipboard Abstraction | NEW | Platform-detection-based clipboard handling for rich content | - | specializations/shared/cross-platform-clipboard-abstraction.js |
+| Mermaid Pre-Processing | NEW | Detecting and converting Mermaid diagrams for platforms lacking native support | - | specializations/shared/mermaid-preprocessing.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Content Publisher Plugin | NEW | Generalized Markdown-to-platform publisher with Playwright automation and multi-platform support | - | plugins/a5c/marketplace/plugins/content-publisher/ |

@@ -59,3 +59,17 @@ None directly extractable. The scanning workflow is a CLI tool, not a multi-step
 
 - The test SKILL.md fixtures are scanner test data, not real skills to assimilate
 - The MCP scanning capabilities are already covered by babysitter's own MCP server infrastructure
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Agent Security Scanning Process | NEW | Auto-discovery and security scanning workflow for AI agents and MCP servers | - | specializations/security/agent-security-scanning.js |
+| Threat Taxonomy Classification | NEW | 15+ security issue code classification system for prompt injection and tool poisoning | - | specializations/security/threat-taxonomy-classification.js |
+| Auto-Discovery Workflow | NEW | Cross-platform agent component discovery across multiple harnesses | - | specializations/shared/auto-discovery-workflow.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Skill Security Scanner | NEW | Pre-install security scanning with threat detection and breakpoint integration | - | plugins/a5c/marketplace/plugins/skill-security-scanner/ |

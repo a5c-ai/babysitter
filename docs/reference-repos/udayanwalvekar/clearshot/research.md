@@ -48,3 +48,17 @@ The core 3-level analysis methodology (spatial grid mapping -> design system ext
   - Placement: specializations/shared/
   - Why codify: The structured format (page bg, card bg, primary action, text primary/secondary, border, accent, destructive, success -- all hex) combined with qualitative assessment (cohesive vs patchwork) is a reusable pattern for any design review workflow.
   - Sketch: Input: screenshot + Level 1 analysis. Output: Color palette (10 named slots with hex), typography scale (heading/body/caption with px/weight/family), spacing pattern classification (tight/comfortable/spacious), border radius pattern, density classification.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Screenshot-to-Implementation | NEW | Structured UI screenshot analysis pipeline with 3-level analysis framework | - | specializations/shared/screenshot-to-implementation.js |
+| Spatial Grid Analysis Protocol | NEW | 5x5 grid decomposition of UI screenshots with systematic element inventory | - | specializations/shared/spatial-grid-analysis-protocol.js |
+| Design Token Extraction Protocol | NEW | Systematic design system extraction from visual inspection with structured format | - | specializations/shared/design-token-extraction-protocol.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Clearshot | NEW | Screenshot intelligence for UI implementation with 3-level analysis protocol | - | plugins/a5c/marketplace/plugins/clearshot/ |

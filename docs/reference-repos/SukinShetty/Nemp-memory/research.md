@@ -25,3 +25,16 @@ None beyond existing memory plugins.
 
 ## Implicit Procedural Knowledge
 Minimal -- likely standard memory persistence patterns.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Basic Memory CRUD Process | EXISTING | Standard memory persistence patterns already covered | specializations/shared/memory-persistence.js | N/A |
+| NEMP Memory Protocol | LOW_VALUE | Memory management skill with limited novel patterns | - | specializations/shared/nemp-memory-protocol.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| NEMP Memory Integration | EXISTING | Memory persistence already covered by existing plugins | plugins/a5c/marketplace/plugins/claude-mem/ | N/A |

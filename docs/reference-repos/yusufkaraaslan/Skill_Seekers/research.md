@@ -49,3 +49,19 @@ Skill Seekers is a "data layer for AI systems" -- a universal preprocessing tool
 - **Archetype**: Universal documentation-to-skill converter
 - **Primary value**: The concept of automated skill generation from documentation sources with conflict detection and multi-target export. Direct relevance to babysitter's assimilation workflow.
 - **Skip**: Skill management primitives (SDK-covered), the preprocessing engine itself (external tool)
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Documentation-Driven Skill Generation | NEW | Multi-source knowledge extraction with conflict detection and validation pipeline | - | specializations/shared/documentation-driven-skill-generation.js |
+| Multi-Source Knowledge Extraction | NEW | Universal preprocessing from 18+ source types with AST-based analysis | - | specializations/shared/multi-source-knowledge-extraction.js |
+| Conflict Detection for Knowledge Assets | NEW | Automatic detection and resolution of overlapping knowledge across sources | - | specializations/shared/conflict-detection-knowledge-assets.js |
+| Smart Chunking with Context Preservation | NEW | Intelligent content segmentation that preserves code blocks and contextual relationships | - | specializations/shared/smart-chunking-context-preservation.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Documentation-to-Skill Converter Plugin | NEW | Skill Seekers wrapper for automated skill generation from documentation sources | - | plugins/a5c/marketplace/plugins/documentation-skill-converter/ |
+| Knowledge Asset Indexing Plugin | NEW | Multi-source preprocessing integration for process library knowledge extraction | - | plugins/a5c/marketplace/plugins/knowledge-asset-indexing/ |

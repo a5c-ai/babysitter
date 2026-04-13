@@ -35,3 +35,17 @@ Niche but interesting domain. Persona distillation is a specialized area of cont
 - Persona distillation as a category of context engineering
 - Six-dimension extraction framework (from midas.skill: earning engine, transaction architecture, investment logic, risk profile, leverage model, exit path)
 - Anti-distill pattern: separating public distributable skills from private experience backups
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Methodology Extraction from Public Figures | NEW | Extract structured decision frameworks and mental models from public figure content | - | specializations/shared/methodology-extraction.js |
+| Persona Distillation Process | NEW | Extract personality, decision frameworks, and interaction styles from digital traces | - | specializations/shared/persona-distillation-process.js |
+| Six-Dimension Extraction Framework | NEW | Structured extraction model with earning engine, transaction architecture, investment logic, risk profile, leverage model, exit path | - | specializations/shared/six-dimension-extraction-framework.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Persona Memory Plugin | UPGRADE | Store and retrieve distilled persona profiles for context injection | plugins/a5c/marketplace/plugins/claude-mem/ | plugins/a5c/marketplace/plugins/persona-memory/ |

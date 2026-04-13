@@ -33,3 +33,16 @@ This is a legitimate tool-integration plugin (install.md-driven) that adds resea
 - **Archetype**: Tool API + agent skill
 - **Primary value**: Plugin idea for NotebookLM integration in research workflows
 - **Process placement**: N/A (tool integration, not a methodology)
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Research Workflow with NotebookLM | NEW | Automated research workflow using NotebookLM for source management and content generation | - | specializations/shared/research-workflow-notebooklm.js |
+| Content Generation Pipeline | NEW | Multi-format content creation process (audio/video overviews, slides, quizzes, reports, mind maps) | - | specializations/shared/content-generation-pipeline.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| NotebookLM Integration | NEW | NotebookLM API wrapper for research workflows with content generation capabilities | - | plugins/a5c/marketplace/plugins/notebooklm-integration/ |

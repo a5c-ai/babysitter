@@ -29,3 +29,20 @@ MEDIUM VALUE. The dual-interface pattern (MCP tools + REST API fallback) with ex
 - **Format difference documentation**: Explicit table documenting field name differences between API surfaces (MCP vs REST). Critical for avoiding subtle bugs when wrapping external tools.
 - **Visual feedback loop**: Create elements -> take screenshot -> describe scene -> refine. Iterative improvement using the agent's own visual perception.
 - **Coordinate system documentation**: Explicit origin, axis directions, and spacing guidelines for spatial reasoning. Essential for any skill that generates visual layouts.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Diagram Creation Pipeline | NEW | Multi-step diagram creation with connection mode detection and iterative refinement | - | specializations/shared/diagram-creation-pipeline.js |
+| Dual-Mode Connection Detection | NEW | Three-tier degradation pattern: preferred mode → fallback → user guidance | - | specializations/shared/dual-mode-connection-detection.js |
+| Format Difference Documentation | NEW | Systematic documentation of API surface inconsistencies between modes | - | specializations/shared/format-difference-documentation.js |
+| Visual Feedback Loop | NEW | Iterative visual improvement using screenshot analysis and scene description | - | specializations/shared/visual-feedback-loop.js |
+| Coordinate System Documentation | NEW | Spatial reasoning guidelines with origin, axis directions, and spacing specifications | - | specializations/shared/coordinate-system-documentation.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Excalidraw Canvas Plugin | NEW | MCP server wrapper with automatic mode detection and canvas creation skills | - | plugins/a5c/marketplace/plugins/excalidraw-canvas/ |
+| Dual-Mode Tool Wrapper Template | NEW | Template for wrapping tools with both MCP and REST interfaces with format normalization | - | plugins/a5c/marketplace/plugins/dual-mode-tool-wrapper/ |

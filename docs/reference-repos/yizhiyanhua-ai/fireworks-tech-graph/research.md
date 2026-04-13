@@ -29,3 +29,19 @@ MEDIUM VALUE. The helper script architecture is well-designed: a Python template
 - **Helper script decomposition**: Four focused scripts (generate, template-render, validate, batch-test) each handling one concern. The skill orchestrates them as a pipeline.
 - **Bilingual triggers**: Both Chinese and English trigger phrases in the skill description. Simple internationalization for skill discovery.
 - **SVG validation checklist**: XML syntax, tag balance, marker references, attribute completeness, path data integrity. A reusable validation pattern for any structured output format.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Validated Diagram Generation Process | NEW | Template-based SVG creation with comprehensive validation and PNG export | - | specializations/shared/validated-diagram-generation.js |
+| Batch Style Testing | NEW | CI-like quality gate for visual output across multiple styles and sizes | - | specializations/shared/batch-style-testing.js |
+| Template-Based Generation with Validation | NEW | Structured input generation via templates with output validation to prevent fragility | - | specializations/shared/template-based-generation-validation.js |
+| Bilingual Triggers | NEW | Internationalization pattern with both Chinese and English trigger phrases | - | specializations/shared/bilingual-triggers.js |
+| SVG Validation Checklist | NEW | Comprehensive validation pattern for structured output formats | - | specializations/shared/svg-validation-checklist.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Tech Diagram Generator Plugin | NEW | Template-based diagram generation with validation and configurable styles | - | plugins/a5c/marketplace/plugins/tech-diagram-generator/ |

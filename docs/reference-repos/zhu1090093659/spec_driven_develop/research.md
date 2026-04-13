@@ -85,3 +85,19 @@ None. The repo is pure methodology (Markdown files). No tool integrations or ins
 - **Per-principle traffic-light scoring:** Scoring modules against multiple named principles with visual indicators is a reusable assessment pattern. Could be generalized beyond S.U.P.E.R to any principle set.
 - **Threshold-based gating:** The 0/1-2/3+ failure threshold model for deciding proceed/fix/stop is a clean, concrete quality gate pattern applicable to any review process.
 - **Cross-conversation memory anchoring:** Using a master progress file (MASTER.md) as the agent's memory anchor across sessions. Babysitter already handles this via journal/state, but the explicit "memory anchor" framing is useful.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Architecture Quality Assessment Process | NEW | S.U.P.E.R scoring system for module assessment against 5 architectural principles | - | specializations/shared/architecture-quality-assessment.js |
+| Architecture-Gated Code Review Process | NEW | 10-point code review checklist with explicit pass/fail thresholds and gating logic | - | specializations/shared/architecture-gated-review.js |
+| Per-Principle Traffic-Light Scoring | NEW | Visual assessment pattern scoring modules against named principles with traffic-light indicators | - | specializations/shared/per-principle-traffic-light-scoring.js |
+| Threshold-Based Gating | NEW | Quality gate pattern with 0/1-2/3+ failure thresholds for proceed/fix/stop decisions | - | specializations/shared/threshold-based-gating.js |
+| Cross-Conversation Memory Anchoring | NEW | Master progress file pattern for agent memory persistence across sessions | - | specializations/shared/cross-conversation-memory-anchoring.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Architecture Quality Assessment | NEW | S.U.P.E.R scoring system implementation with traffic-light visualization and remediation prioritization | - | plugins/a5c/marketplace/plugins/architecture-quality-assessment/ |

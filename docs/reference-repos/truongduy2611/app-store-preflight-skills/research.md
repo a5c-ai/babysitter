@@ -58,3 +58,16 @@
 ### SKIP
 - Individual Apple guideline content (reference knowledge)
 - asc CLI integration details (external tool, not babysitter primitive)
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| App Store Preflight Workflow | NEW | iOS/macOS App Store compliance checking with app type classification and rule-based scanning | - | specializations/mobile/app-store-preflight.js |
+| Compliance Checklist Orchestration | NEW | Generic compliance pattern: load checklist by type → scan → report → fix → verify | - | specializations/shared/compliance-checklist.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| App Store Preflight Plugin | NEW | iOS/macOS App Store compliance checking with ASC CLI integration and pre-commit hooks | - | plugins/a5c/marketplace/plugins/app-store-preflight/ |

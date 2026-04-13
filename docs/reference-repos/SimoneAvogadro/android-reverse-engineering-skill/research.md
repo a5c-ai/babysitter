@@ -93,3 +93,21 @@ Generalized version of the Android RE pipeline applicable to extracting API surf
 - **Graceful sudo handling**: When root access is needed but unavailable, printing exact manual commands instead of failing is a robust pattern for any tool installation process.
 - **Obfuscation navigation strategies**: Techniques for working with ProGuard/R8 output (string constant analysis, class hierarchy walking, interface-based navigation) are transferable to any reverse engineering domain.
 - **XAPK bundle handling**: The pattern of detecting archive-of-archives and recursively processing each contained artifact generalizes to any nested package format.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Android App Reverse Engineering Pipeline | NEW | 5-phase workflow for decompiling Android packages and extracting HTTP API surfaces | - | specializations/security/android-reverse-engineering.js |
+| Binary API Surface Extraction | NEW | Generalized binary-to-API extraction process applicable across platforms | - | specializations/shared/binary-api-extraction.js |
+| Engine Selection Decision Table | NEW | Strategy for choosing decompiler engines based on input type and quality requirements | - | specializations/security/engine-selection-decision-table.js |
+| Graceful Sudo Handling | NEW | User-local dependency installation with fallback to manual commands when root unavailable | - | specializations/shared/graceful-sudo-handling.js |
+| Obfuscation Navigation Strategies | NEW | Techniques for working with ProGuard/R8 output and obfuscated code analysis | - | specializations/security/obfuscation-navigation-strategies.js |
+| XAPK Bundle Handling | NEW | Pattern for detecting and recursively processing archive-of-archives package formats | - | specializations/shared/xapk-bundle-handling.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Android Reverse Engineering Plugin | NEW | Android decompilation and API extraction with automatic dependency management | - | plugins/a5c/marketplace/plugins/android-reverse-engineering/ |
+| Dependency Auto-Installer Plugin | NEW | Cross-platform CLI tool dependency management with OS detection and install strategies | - | plugins/a5c/marketplace/plugins/dependency-auto-installer/ |

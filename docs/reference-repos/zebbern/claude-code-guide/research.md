@@ -51,3 +51,21 @@ High value for security domain specialization extraction. The 29 pentesting/secu
 - Domain-focused skill collection disguised as general guide
 - Checklist-driven security methodology (pentest-checklist as orchestration backbone)
 - Tool-specific skills (Burp Suite, Wireshark) as reusable sub-processes
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Security Penetration Test Workflow | NEW | End-to-end pentest process: reconnaissance → scanning → exploitation → reporting | - | specializations/security/penetration-test-workflow.js |
+| Web Application Security Audit | NEW | OWASP-aligned web app security audit covering injection, authentication, and access control | - | specializations/security/web-app-security-audit.js |
+| Cloud Security Assessment | NEW | Cloud-specific security assessment for IAM misconfigurations and cloud-native attack vectors | - | specializations/security/cloud-security-assessment.js |
+| Network Traffic Analysis | NEW | Network forensics process for packet capture analysis and anomaly detection | - | specializations/security/network-traffic-analysis.js |
+| Checklist-Driven Security Methodology | NEW | Systematic security audit approach using pentest-checklist as orchestration backbone | - | specializations/security/checklist-driven-security-methodology.js |
+| Tool-Specific Security Sub-Processes | NEW | Reusable security tool integrations (Burp Suite, Wireshark) as modular components | - | specializations/security/tool-specific-security-sub-processes.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Security Scanner Integration | UPGRADE | Integrate security tools as task executors with structured result parsing | plugins/a5c/marketplace/plugins/basic-security/ | plugins/a5c/marketplace/plugins/security-scanner-integration/ |
+| Vulnerability Report Generator | NEW | Auto-generate structured vulnerability reports from security audit process runs | - | plugins/a5c/marketplace/plugins/vulnerability-report-generator/ |

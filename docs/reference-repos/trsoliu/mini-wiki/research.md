@@ -73,3 +73,19 @@ The wiki generation workflow is a genuine multi-phase process: project analysis 
   - Placement: specializations/shared/
   - Why codify: Documentation that cannot be traced to source code becomes stale immediately. The requirement that every section and every diagram includes `file://path#L1-L50` references creates a verifiable link between docs and code. Useful as a quality gate for any documentation generation process.
   - Sketch: For each documentation section: (1) Track which source files were analyzed to produce the section. (2) Append a "Section sources" block with file:// links including line ranges. (3) For each diagram, append a "Diagram sources" block. (4) Quality gate: reject any section that has zero source references.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Project Wiki Generation | NEW | Multi-phase automated project documentation pipeline with quality gates | - | specializations/shared/project-wiki-generation.js |
+| Progressive Project Scanning | NEW | Priority-based batched analysis for large projects with checkpointing | - | specializations/shared/progressive-project-scanning.js |
+| Dynamic Quality Scaling | NEW | Complexity-proportional documentation standards with formula-based depth calculation | - | specializations/shared/dynamic-quality-scaling.js |
+| Business Domain Auto-Clustering | NEW | Keyword and package-based module grouping for hierarchical documentation organization | - | specializations/shared/business-domain-auto-clustering.js |
+| Source-Traced Documentation | NEW | Mandatory source file references in generated documentation with verifiable links | - | specializations/shared/source-traced-documentation.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Wiki Generator | NEW | Automated project documentation generator with progressive scanning and quality gates | - | plugins/a5c/marketplace/plugins/wiki-generator/ |
