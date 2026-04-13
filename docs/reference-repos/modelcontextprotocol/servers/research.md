@@ -90,3 +90,22 @@ N/A - This is not a harness framework repository.
   - Placement: specializations/devx/mcp-deployment
   - Why codify: Standardizes deployment across different MCP client ecosystems
   - Sketch: Package server → Generate client configs → Test integration → Document installation
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| MCP Server Development Workflow | NEW | Multi-phase MCP server creation process | - | specializations/devops-sre-platform/mcp-server-development.js |
+| MCP Tool Design Process | NEW | Systematic tool interface design with annotations | - | specializations/devops-sre-platform/mcp-tool-design.js |
+| MCP Security Model Implementation | NEW | Access controls and sandboxing for MCP servers | - | specializations/security-compliance/mcp-security.js |
+| MCP Deployment Pipeline | NEW | Multi-client packaging and deployment | - | specializations/devops-sre-platform/mcp-deployment.js |
+| MCP Tool Annotation Strategy | NEW | Tool behavior marking with readOnly/idempotent/destructive | - | specializations/devops-sre-platform/mcp-tool-annotations.js |
+| Dynamic Access Control Pattern | NEW | Flexible resource access via MCP Roots protocol | - | specializations/security-compliance/mcp-access-control.js |
+| Multi-Client Deployment Strategy | NEW | Cross-platform MCP server packaging | - | specializations/devops-sre-platform/mcp-multi-deployment.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| MCP Server Builder | NEW | Scaffold MCP servers with canonical patterns | - | plugins/a5c/marketplace/plugins/mcp-server-builder/ |
+| DevX Enhancement | UPGRADE | Enhance babysitter MCP integration with reference patterns | dev-browser | plugins/a5c/marketplace/plugins/mcp-devx-enhancement/ |

@@ -89,3 +89,23 @@ HIGH - Contains sophisticated domain expert personas with unique approach to kno
   - Placement: specializations/expert-orchestration/
   - Why codify: Framework for managing complex projects requiring multiple types of expertise working in coordination
   - Sketch: Expert selection → Role definition → Coordination patterns → Communication protocols → Deliverable integration → Quality assurance
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Domain Expert Persona Design | NEW | Systematic AI personality creation with domain expertise | - | methodologies/persona-engineering/ |
+| Academic Domain Expertise | VARIANT | Could enhance existing conversational AI patterns | library/specializations/ai-agents-conversational/ | specializations/academic-research/ |
+| Creative Design Workflows | NEW | Expert design processes across creative domains | - | specializations/creative-design/ |
+| Business Function Expertise | NEW | Specialized business domain knowledge systems | - | specializations/business-functions/ |
+| Personality-Driven Expertise Delivery | NEW | Domain knowledge embedded in consistent personas | - | methodologies/personality-driven-ai/ |
+| Expert Consultation Patterns | NEW | AI agent interactions as expert consultations | - | specializations/consultation-frameworks/ |
+| Cross-Domain Expert Coordination | NEW | Multi-expert orchestration for complex projects | - | specializations/expert-orchestration/ |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Domain Expert Personas | NEW | Install specialized expert personalities with domain knowledge | - | plugins/a5c/marketplace/plugins/domain-expert-personas/ |
+| Academic Research Suite | NEW | Academic research workflows with disciplinary expertise | - | plugins/a5c/marketplace/plugins/academic-research-suite/ |
+| Business Domain Experts | NEW | Business function expertise with personality-driven consultation | - | plugins/a5c/marketplace/plugins/business-domain-experts/ |

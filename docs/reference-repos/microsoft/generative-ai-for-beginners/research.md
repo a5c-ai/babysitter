@@ -49,3 +49,18 @@ MEDIUM - Contains educational methodology and prompt engineering techniques that
   - Placement: methodologies/generative-ai-education/
   - Why codify: Provides systematic approach to AI education that's reusable for team onboarding
   - Sketch: Fundamentals -> Prompt engineering -> Responsible AI -> Application development -> Advanced techniques -> Production considerations
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Prompt Engineering Methodology | NEW | Systematic approach to LLM prompt optimization | - | specializations/shared/prompt-engineering.js |
+| Generative AI Learning Progression | NEW | Structured 21-lesson educational curriculum | - | methodologies/generative-ai-education/ |
+| AI Application Development Lifecycle | NEW | Progression from fundamentals to production apps | - | methodologies/generative-ai-education/ai-app-lifecycle.js |
+| Responsible AI Framework | NEW | Systematic approach to AI ethics and safety | - | specializations/shared/responsible-ai.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| AI Development Onboarding | NEW | Educational plugin for systematic AI learning | - | plugins/a5c/marketplace/plugins/ai-development-onboarding/ |

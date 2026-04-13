@@ -83,3 +83,22 @@ VERY HIGH - Contains authoritative AI agent methodologies that are directly tran
   - Placement: methodologies/agentic-design/
   - Why codify: Critical methodology for responsible agent development that prioritizes human empowerment
   - Sketch: User need analysis -> Capability gap identification -> Human-AI collaboration design -> UX principle application -> User feedback integration -> Iterative refinement
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Agentic Design Methodology | NEW | Human-centric AI agent design with UX principles | - | methodologies/agentic-design/ |
+| Multi-Agent Coordination | UPGRADE | Enhanced coordination patterns | library/specializations/ai-agents-conversational/ | specializations/shared/multi-agent-coordination.js |
+| Agent Trustworthiness Framework | NEW | Building trustworthy and safe AI agents | - | specializations/shared/agent-trustworthiness.js |
+| Agent Memory Management | UPGRADE | Advanced memory systems | library/specializations/ai-agents-conversational/ | specializations/shared/agent-memory-management.js |
+| Agent Production Deployment | NEW | Systematic agent deployment in production | - | specializations/devops-sre-platform/agent-production-deployment.js |
+| Agent Development Lifecycle | NEW | Complete agent development from concept to production | - | methodologies/agentic-design/agent-development-lifecycle.js |
+| Human-Centric Agent Design | NEW | Human empowerment-focused agent development | - | methodologies/agentic-design/human-centric-design.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Agentic Development Suite | NEW | Comprehensive AI agent development environment | - | plugins/a5c/marketplace/plugins/agentic-development-suite/ |
+| Multi-Agent Orchestration | NEW | Building and managing multi-agent systems | - | plugins/a5c/marketplace/plugins/multi-agent-orchestration/ |

@@ -91,3 +91,22 @@ The skills demonstrate sophisticated approaches to enterprise-grade AI assistanc
 ## Research Methodology Notes
 
 Skills were discovered via GitHub Code Search for `filename:SKILL.md` and analyzed through direct file access. Repository represents the largest collection of official Anthropic-authored skill implementations available for study.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Cookbook Quality Framework | NEW | 4-step systematic review methodology | - | specializations/shared/quality-control-framework.js |
+| Brand Guidelines Automation | NEW | Corporate branding enforcement process | - | specializations/business/brand-guidelines-automation.js |
+| Financial Model Creation | NEW | DCF analysis and valuation workflows | - | specializations/business/financial-model-creation.js |
+| Financial Statement Analysis | NEW | Ratio calculation and trend analysis | - | specializations/business/financial-statement-analysis.js |
+| Professional Domain Skill Design | NEW | Enterprise-grade skill creation methodology | - | specializations/shared/professional-skill-design.js |
+| Input/Output Framework Design | NEW | Systematic I/O handling for data-intensive skills | - | specializations/shared/io-framework-design.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Enterprise Quality Control | NEW | Quality assurance automation with rubric scoring | - | plugins/a5c/marketplace/plugins/enterprise-quality-control/ |
+| Brand Compliance Suite | NEW | Corporate branding automation and validation | - | plugins/a5c/marketplace/plugins/brand-compliance-suite/ |
+| Financial Analysis Toolkit | NEW | Investment-grade financial modeling and analysis | - | plugins/a5c/marketplace/plugins/financial-analysis-toolkit/ |

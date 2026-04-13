@@ -125,3 +125,24 @@ A babysitter plugin that compares requirements/specs against implementation plan
 A babysitter plugin that optimizes prompting strategy based on the active model's capabilities (thinking vs non-thinking models).
 
 **install.md**: Reads the active harness model, determines if it supports extended thinking, and adjusts task prompts accordingly. For thinking models: more open-ended prompts, longer reasoning chains. For standard models: more structured, step-by-step prompts. Integrates via `on-task-start` hook to modify task definitions before dispatch.
+
+## Library Mapping
+
+| Extractable Process | Library Status | Action | Existing Path | Target Placement |
+|-------------------|----------------|--------|---------------|------------------|
+| Context-Rot-Resistant Execution | NEW | Full methodology with fresh context per phase | - | methodologies/context-rot-resistant-execution/ |
+| Quality Gate Framework | NEW | Multi-tier quality gates with gate taxonomy | - | methodologies/quality-gate-framework/ |
+| Codebase Discovery and Mapping | NEW | Systematic unfamiliar codebase mapping | - | specializations/shared/codebase-discovery.js |
+| Wave Execution Pattern | NEW | Parallel task grouping with dependency tracking | - | specializations/shared/wave-execution.js |
+| Schema Drift Detection | NEW | ORM/API schema consistency validation | - | specializations/shared/schema-drift-detection.js |
+| Scope Reduction Auditing | NEW | Requirements vs implementation coverage validation | - | specializations/shared/scope-reduction-auditing.js |
+| XML Plan Format Processing | NEW | Machine-parseable structured plan handling | - | specializations/shared/xml-plan-processing.js |
+| Milestone-Based Planning | VARIANT | Could enhance existing project planning | library/methodologies/agile.js | specializations/shared/milestone-planning.js |
+
+## Plugin Marketplace Mapping
+
+| Plugin Idea | Marketplace Status | Action | Existing Plugin | Target Placement |
+|-------------|-------------------|--------|-----------------|------------------|
+| Schema Drift Detector | NEW | ORM/API schema consistency validation | - | plugins/a5c/marketplace/plugins/schema-drift-detector/ |
+| Scope Reduction Auditor | NEW | Requirements coverage validation | - | plugins/a5c/marketplace/plugins/scope-reduction-auditor/ |
+| Thinking Model Optimizer | NEW | Adaptive prompting for different model capabilities | - | plugins/a5c/marketplace/plugins/thinking-model-optimizer/ |
