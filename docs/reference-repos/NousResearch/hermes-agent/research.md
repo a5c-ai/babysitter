@@ -29,10 +29,10 @@ The research-paper-writing skill (authored by Orchestra Research, shipped in her
 ### Methodology patterns (already covered by babysitter)
 The software-development skills (TDD, code review, debugging, plans, subagent-driven-development) overlap significantly with babysitter's existing methodologies/ and the superpowers skills. No new methodology to extract.
 
-### Plugin idea: hermes-agent-bridge
-A babysitter plugin that bridges to hermes-agent as a harness — hermes already has a rich tool ecosystem, messaging gateway, and skill creator. The plugin could use hermes as an execution backend for tasks requiring messaging platform delivery or autonomous long-running agent work. This is a valid harness adapter concept.
+### Harness Integration: hermes-agent adapter
+Harness assimilation opportunity — create a plugin FOR hermes-agent that integrates babysitter orchestration into the hermes ecosystem. Hermes already has a rich tool ecosystem, messaging gateway, and skill creator. A babysitter-hermes adapter plugin would enable hermes users to access babysitter's process library and deterministic orchestration capabilities within their existing hermes workflows.
 
 ## Classification
 - **Archetype**: Full agent framework with skills ecosystem
-- **Primary value**: Harness adapter plugin idea; research-paper-writing process (duplicate of Orchestra-Research)
+- **Primary value**: Harness assimilation opportunity; research-paper-writing process (duplicate of Orchestra-Research)
 - **SKIP reasoning for most content**: Software dev skills overlap with existing babysitter methodologies. Memory system is agent-internal (memory as processes = skip). Skill management is SDK-covered. Multi-model coordination is skip.

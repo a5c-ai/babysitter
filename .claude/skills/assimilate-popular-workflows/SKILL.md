@@ -46,6 +46,10 @@ When identifying plugin ideas, think about what could be distributed as an insta
 | Theming & Environment | Sound hooks, design systems, conversational personality, themed assets | themes, sound-hooks |
 | Harness Integration | Alternative harness adapters, TUI improvements, orchestration frameworks | opencode-adapter, workflow-orchestration |
 
+**IMPORTANT DISTINCTION**: Do NOT confuse babysitter marketplace plugins with harness assimilation:
+- **Babysitter marketplace plugins**: Install INTO user projects via `install.md` to add capabilities
+- **Harness assimilation**: Create plugins FOR other harnesses (like hermes-agent) that integrate babysitter INTO those harnesses
+
 ## When to use
 
 - User asks to discover what skills or workflows exist in popular repos.
@@ -219,6 +223,10 @@ that an AI agent executes to set up capabilities in a user's project>
   - Adapter implementation: <what would go in packages/sdk/src/harness/adapters/>
   - Plugin structure: <what would go in plugins/babysitter-[harness]/>
   - CLI integration: <command patterns, flag mapping, capability detection>
+- **Harness Assimilation**: Plugin FOR the target harness that integrates babysitter (NOT a babysitter marketplace plugin)
+  - Target harness plugin: <plugin that goes into the other harness to bring babysitter capabilities>
+  - Babysitter integration: <how the other harness would invoke babysitter processes>
+  - Capability bridge: <what babysitter features would be accessible from the target harness>
 - **TUI/Orchestration Improvement**: Enhancement to our internal agent harness
   - Current limitation: <what our harness lacks that this repo provides>
   - Integration approach: <how to incorporate the improvement>
