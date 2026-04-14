@@ -140,7 +140,7 @@ describe("babysitter run:create CLI", () => {
     });
   });
 
-  it("binds claude-code runs to the current marker-backed session instead of a leaked BABYSITTER_SESSION_ID", async () => {
+  it("binds claude-code runs to BABYSITTER_SESSION_ID before falling back to the pid marker", async () => {
     const entryFile = await writeEntrypoint("processes/claude-session.mjs", `export async function process() { return true; }\n`);
     const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-state-"));
     const currentSessionId = "current-claude-session";
@@ -173,12 +173,12 @@ describe("babysitter run:create CLI", () => {
     const payload = readLastJsonLine(logSpy);
     expect(payload.session).toMatchObject({
       harness: "claude-code",
-      sessionId: currentSessionId,
-      resolvedFrom: "pid-marker",
+      sessionId: leakedSessionId,
+      resolvedFrom: "env-var",
     });
-    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${currentSessionId}.md`);
+    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${leakedSessionId}.md`);
     await expect(
-      fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
+      fs.access(path.join(globalStateRoot, "state", `${leakedSessionId}.md`)),
     ).resolves.toBeUndefined();
 
     await fs.rm(globalStateRoot, { recursive: true, force: true });

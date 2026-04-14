@@ -281,11 +281,7 @@ function resolveSessionIdInternal(parsed: { sessionId?: string }): string | unde
     return undefined;
   }
 
-  // 2. PID-scoped marker (authoritative per live copilot ancestor PID)
-  const fromMarker = readSessionMarker("github-copilot");
-  if (fromMarker) return fromMarker;
-
-  // 3. Env file: use LAST-match regex so accumulated stale
+  // 2. Env file: use LAST-match regex so accumulated stale
   //    `export BABYSITTER_SESSION_ID=...` lines don't shadow the most recent
   //    write.
   const envFile = process.env.COPILOT_ENV_FILE || process.env.CLAUDE_ENV_FILE;
@@ -302,11 +298,15 @@ function resolveSessionIdInternal(parsed: { sessionId?: string }): string | unde
     }
   }
 
-  // 4. Copilot-native env var (if the CLI injects it).
+  // 3. Copilot-native env var (if the CLI injects it).
   if (process.env.COPILOT_SESSION_ID) return process.env.COPILOT_SESSION_ID;
 
-  // 5. Cross-harness standard (potentially stale, last resort).
+  // 4. Cross-harness standard ambient binding.
   if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+
+  // 5. PID-scoped marker fallback for descendants that lost env propagation.
+  const fromMarker = readSessionMarker("github-copilot");
+  if (fromMarker) return fromMarker;
 
   return undefined;
 }
@@ -352,8 +352,8 @@ async function handleSessionEndHookImpl(
   log.info("Hook input received");
 
   // 2. Resolve session ID from hook input (stdin JSON) or via internal
-  //    resolver (pid-marker → env-file last-match → COPILOT_SESSION_ID →
-  //    BABYSITTER_SESSION_ID).
+  //    resolver (env-file last-match → COPILOT_SESSION_ID →
+  //    BABYSITTER_SESSION_ID → pid-marker fallback).
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
     resolveSessionIdInternal({}) ||

@@ -1,6 +1,6 @@
 /**
- * Verifies the inverted session-resolution precedence:
- *   pid-marker > env-file > env-var (with legacy BABYSITTER_TRUST_ENV_SESSION
+ * Verifies Claude Code session-resolution precedence:
+ *   env-file > env-var > pid-marker fallback (with legacy BABYSITTER_TRUST_ENV_SESSION
  *   escape hatch).
  */
 
@@ -66,7 +66,7 @@ function seedEnvFile(content: string): string {
 }
 
 describe("resolveSessionIdDetailed precedence", () => {
-  it("returns marker when all three sources are present", () => {
+  it("returns env-file when all three sources are present", () => {
     // Inject ancestor = our pid so marker lookup hits.
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
     seedMarker(process.pid, "MARKER-ID");
@@ -74,33 +74,47 @@ describe("resolveSessionIdDetailed precedence", () => {
     process.env.BABYSITTER_SESSION_ID = "STALE-ENV-ID";
 
     const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("MARKER-ID");
-    expect(r.resolvedFrom).toBe("pid-marker");
+    expect(r.sessionId).toBe("ENV-FILE-ID");
+    expect(r.resolvedFrom).toBe("env-file");
     expect(r.ancestorPid).toBe(process.pid);
     expect(r.ancestorAlive).toBe(true);
   });
 
-  it("falls back to env-file when marker missing", () => {
+  it("falls back to env-var when env-file missing even if marker exists", () => {
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    seedMarker(process.pid, "MARKER-ID");
+    process.env.BABYSITTER_SESSION_ID = "ENV-VAR-ID";
+
+    const r = resolveSessionIdDetailed();
+    expect(r.sessionId).toBe("ENV-VAR-ID");
+    expect(r.resolvedFrom).toBe("env-var");
+  });
+
+  it("falls back to env-file when marker and env-var are missing", () => {
     __setAncestorResolverForTests(() => undefined);
     seedEnvFile(`export BABYSITTER_SESSION_ID="ENV-FILE-ID"\n`);
-    process.env.BABYSITTER_SESSION_ID = "STALE";
 
     const r = resolveSessionIdDetailed();
     expect(r.sessionId).toBe("ENV-FILE-ID");
     expect(r.resolvedFrom).toBe("env-file");
   });
 
-  it("falls back to env-var when marker and env-file missing, warning on stale", () => {
+  it("falls back to pid marker when env-file and env-var are missing", () => {
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    seedMarker(process.pid, "MARKER-FALLBACK");
+
+    const r = resolveSessionIdDetailed();
+    expect(r.sessionId).toBe("MARKER-FALLBACK");
+    expect(r.resolvedFrom).toBe("pid-marker");
+  });
+
+  it("falls back to env-var when marker and env-file are missing, warning on stale", () => {
     __setAncestorResolverForTests(() => undefined);
     process.env.BABYSITTER_SESSION_ID = "FALLBACK";
 
     const r = resolveSessionIdDetailed();
     expect(r.sessionId).toBe("FALLBACK");
     expect(r.resolvedFrom).toBe("env-var");
-
-    // Warning written to the hook log for session resolution; log file lives
-    // in the temp global state dir's logs subdir. Best-effort check: the
-    // function ran without throwing and returned the env var.
   });
 
   it("BABYSITTER_TRUST_ENV_SESSION=1 restores env-var-first precedence", () => {

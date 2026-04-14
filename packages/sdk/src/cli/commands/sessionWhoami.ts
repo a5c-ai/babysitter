@@ -16,6 +16,7 @@ import {
 } from "../../utils/sessionMarker";
 import { isProcessAlive } from "../../utils/processLiveness";
 import { getAdapterByName } from "../../harness";
+import { HARNESS_ENV_VARS } from "../../session/discovery";
 
 export interface SessionWhoamiArgs {
   harness?: string;
@@ -77,19 +78,28 @@ function resolveGenericHarness(harness: string): SessionWhoamiResult {
   const ancestorAlive = ancestorPid !== null ? isProcessAlive(ancestorPid) : null;
   const markerSessionId = readSessionMarker(harness);
   const markerPath = ancestorPid !== null ? getSessionMarkerPath(harness, ancestorPid) : null;
+  const harnessEnvSessionId = (HARNESS_ENV_VARS[harness] || [])
+    .map((key) => process.env[key])
+    .find((value): value is string => Boolean(value));
+  const babysitterEnvSessionId = process.env.BABYSITTER_SESSION_ID;
 
   let resolvedFrom: SessionWhoamiResult["resolvedFrom"] = "none";
   let finalSessionId = sessionId ?? markerSessionId;
-  if (markerSessionId && (!sessionId || sessionId === markerSessionId)) {
+  if (sessionId && harnessEnvSessionId && sessionId === harnessEnvSessionId) {
+    resolvedFrom = "env-var";
+    finalSessionId = sessionId;
+  } else if (sessionId && babysitterEnvSessionId && sessionId === babysitterEnvSessionId) {
+    resolvedFrom = "env-var";
+    finalSessionId = sessionId;
+  } else if (markerSessionId && (!sessionId || sessionId === markerSessionId)) {
     resolvedFrom = "pid-marker";
     finalSessionId = markerSessionId;
-  } else if (sessionId && process.env.BABYSITTER_SESSION_ID === sessionId) {
-    resolvedFrom = "env-var";
   } else if (sessionId) {
     resolvedFrom = "env-var";
+    finalSessionId = sessionId;
   }
 
-  const envVar = process.env.BABYSITTER_SESSION_ID;
+  const envVar = babysitterEnvSessionId;
   const envVarPresent = Boolean(envVar);
   let envVarMatches: boolean | null;
   if (!envVarPresent) envVarMatches = null;

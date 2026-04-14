@@ -238,7 +238,8 @@ function testGeminiMd() {
 }
 
 // ---------------------------------------------------------------------------
-// Test: Command markdown files exist and have frontmatter
+// Test: TOML command files exist, are declared by plugin.json, and include
+// the Gemini CLI fields we generate from the shared Markdown sources.
 // ---------------------------------------------------------------------------
 
 function testCommandFiles() {
@@ -246,29 +247,38 @@ function testCommandFiles() {
     throw new Error('commands/ directory not found');
   }
 
-  const mdFiles = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.md'));
-  if (mdFiles.length === 0) {
-    throw new Error('No command .md files found in commands/');
+  const tomlFiles = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.toml'));
+  if (tomlFiles.length === 0) {
+    throw new Error('No command .toml files found in commands/');
   }
 
+  const plugin = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'plugin.json'), 'utf8'));
+  const declaredCommands = Array.isArray(plugin.commands) ? plugin.commands : [];
+
   let passed = 0;
-  for (const file of mdFiles) {
+  for (const file of tomlFiles) {
+    const manifestPath = `commands/${file}`;
+    if (!declaredCommands.includes(manifestPath)) {
+      throw new Error(`plugin.json commands is missing ${manifestPath}`);
+    }
+
     const content = fs.readFileSync(path.join(COMMANDS_DIR, file), 'utf8');
-    if (!content.startsWith('---')) {
-      throw new Error(`commands/${file} missing YAML frontmatter (must start with ---)`);
+    if (!/^\s*description\s*=/.test(content)) {
+      throw new Error(`commands/${file} missing TOML description field`);
     }
-    // Check that frontmatter has description
-    const fmEnd = content.indexOf('---', 3);
-    if (fmEnd === -1) {
-      throw new Error(`commands/${file} has unclosed YAML frontmatter`);
-    }
-    const frontmatter = content.substring(3, fmEnd);
-    if (!frontmatter.includes('description:')) {
-      throw new Error(`commands/${file} frontmatter missing "description:" field`);
+    if (!/^\s*prompt\s*=/m.test(content)) {
+      throw new Error(`commands/${file} missing TOML prompt field`);
     }
     passed++;
   }
-  console.log(`  ok commands: ${passed} markdown command files with valid frontmatter`);
+
+  if (declaredCommands.length !== tomlFiles.length) {
+    throw new Error(
+      `plugin.json declares ${declaredCommands.length} commands, but commands/ contains ${tomlFiles.length} .toml files`,
+    );
+  }
+
+  console.log(`  ok commands: ${passed} TOML command files declared in plugin.json`);
 }
 
 // ---------------------------------------------------------------------------

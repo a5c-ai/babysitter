@@ -64,7 +64,7 @@ import {
 import type { PromptContext } from "../prompts/types";
 import { createGeminiCliContext } from "../prompts/context";
 import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
-import { writeSessionMarker } from "../utils/sessionMarker";
+import { writeSessionMarker, writeProjectMarker, writeHarnessActiveMarker } from "../utils/sessionMarker";
 import { resolveAmbientSessionId } from "../session/discovery";
 
 // ---------------------------------------------------------------------------
@@ -75,9 +75,9 @@ import { resolveAmbientSessionId } from "../session/discovery";
  * Resolve the current Gemini CLI session ID without a hook payload.
  *
  * Precedence:
- *   1. PID-scoped marker (authoritative; tied to live gemini ancestor PID)
- *   2. GEMINI_SESSION_ID (auto-injected by Gemini CLI into all hooks)
- *   3. BABYSITTER_SESSION_ID (cross-harness; potentially stale, last resort)
+ *   1. GEMINI_SESSION_ID (auto-injected by Gemini CLI into all hooks)
+ *   2. BABYSITTER_SESSION_ID (cross-harness ambient binding)
+ *   3. PID-scoped marker fallback tied to the live Gemini ancestor PID
  *
  * Legacy escape hatch: BABYSITTER_TRUST_ENV_SESSION=1 restores the old
  * env-var-first precedence.
@@ -721,6 +721,10 @@ async function handleSessionStartHookImpl(
   // 2b. Persist PID-scoped marker so descendants can resolve session ID.
   try {
     writeSessionMarker("gemini-cli", sessionId);
+    writeHarnessActiveMarker("gemini-cli", sessionId);
+    if (process.env.GEMINI_PROJECT_DIR) {
+      writeProjectMarker("gemini-cli", process.env.GEMINI_PROJECT_DIR, sessionId);
+    }
   } catch {
     // Non-fatal: marker is a best-effort mechanism
   }

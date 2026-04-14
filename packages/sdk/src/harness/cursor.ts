@@ -914,11 +914,12 @@ export function createCursorAdapter(): HarnessAdapter {
         if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
         return undefined;
       }
+      // Cursor has no env file mechanism, but BABYSITTER_SESSION_ID may be
+      // set externally or by a wrapper script. Prefer that direct binding and
+      // use the PID marker only when no env-based value is available.
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
       const fromMarker = readSessionMarker("cursor");
       if (fromMarker) return fromMarker;
-      // Cursor has no env file mechanism, but BABYSITTER_SESSION_ID may be
-      // set externally or by a wrapper script.
-      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
       return undefined;
     },
 

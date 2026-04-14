@@ -51,33 +51,33 @@ afterEach(async () => {
 });
 
 describe("session:whoami", () => {
-  it("reports pid-marker with envVarMatches=false when env is a mismatch", () => {
+  it("reports env-var with envVarMatches=true when env overrides the pid marker", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
     writeSessionMarker("claude-code", "SESS-FROM-MARKER");
     process.env.BABYSITTER_SESSION_ID = "SESS-FROM-ENV";
 
     const result = runSessionWhoami({ harness: "claude-code" });
     expect(result.harness).toBe("claude-code");
-    expect(result.sessionId).toBe("SESS-FROM-MARKER");
-    expect(result.resolvedFrom).toBe("pid-marker");
+    expect(result.sessionId).toBe("SESS-FROM-ENV");
+    expect(result.resolvedFrom).toBe("env-var");
     expect(result.envVarPresent).toBe(true);
-    expect(result.envVarMatches).toBe(false);
+    expect(result.envVarMatches).toBe(true);
     expect(result.ancestorPid).toBe(process.pid);
     expect(result.ancestorAlive).toBe(true);
     expect(result.markerPath).toContain("current-session-claude-code-pid-");
   });
 
-  it("falls back to env-var when no marker is present", () => {
-    __setAncestorResolverForTests(() => undefined);
-    process.env.BABYSITTER_SESSION_ID = "SESS-ONLY-ENV";
+  it("falls back to pid-marker when env is absent", () => {
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
 
     const result = runSessionWhoami({ harness: "claude-code" });
-    expect(result.sessionId).toBe("SESS-ONLY-ENV");
-    expect(result.resolvedFrom).toBe("env-var");
-    expect(result.envVarPresent).toBe(true);
-    expect(result.envVarMatches).toBe(true);
-    expect(result.ancestorPid).toBeNull();
-    expect(result.markerPath).toBeNull();
+    expect(result.sessionId).toBe("SESS-FROM-MARKER");
+    expect(result.resolvedFrom).toBe("pid-marker");
+    expect(result.envVarPresent).toBe(false);
+    expect(result.envVarMatches).toBeNull();
+    expect(result.ancestorPid).toBe(process.pid);
+    expect(result.markerPath).toContain("current-session-claude-code-pid-");
   });
 
   it("returns the requested harness key for non-default harnesses", () => {

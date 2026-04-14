@@ -7,7 +7,7 @@ import type { PromptContext } from '../types';
  */
 export function renderCriticalRules(ctx: PromptContext): string {
   const codexSessionIdRule = ctx.harness === 'codex'
-    ? `CRITICAL RULE: Do not fabricate a session ID. The ${ctx.harnessLabel} adapter resolves\nthe session ID **PID-marker-first**: the session-start hook writes an\nauthoritative PID-scoped session marker, and the adapter reads that before\nfalling back to \`CODEX_THREAD_ID\`/\`CODEX_SESSION_ID\` or \`BABYSITTER_SESSION_ID\`.\nDo not assume env vars are reliably auto-injected -- they may be stale (inherited\nfrom an ancestor shell) or missing. For CI pipelines that deliberately export\n\`BABYSITTER_SESSION_ID\`, set \`BABYSITTER_TRUST_ENV_SESSION=1\` as an explicit\nescape hatch to re-enable env-var-first resolution.`
+    ? `CRITICAL RULE: Do not fabricate a session ID. The ${ctx.harnessLabel} adapter resolves\nthe session ID from direct ambient bindings first: \`CODEX_THREAD_ID\`/\`CODEX_SESSION_ID\`,\nthen \`BABYSITTER_SESSION_ID\`, and only then falls back to the PID-scoped marker.\nDo not assume env vars are always present or fresh: they may be stale (inherited\nfrom an ancestor shell) or missing. The PID-scoped marker exists as the final\nrecovery path when env propagation is absent. For CI pipelines that deliberately export\n\`BABYSITTER_SESSION_ID\`, set \`BABYSITTER_TRUST_ENV_SESSION=1\` to force the legacy\ntrusted-env behavior explicitly.`
     : '';
 
   return renderTemplate(resolveTemplatePath('critical-rules.md'), ctx, {

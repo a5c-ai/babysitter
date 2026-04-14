@@ -285,11 +285,11 @@ export interface SessionResolutionDetails {
  * Richer session resolution that also surfaces provenance. Used by run:create
  * for its JSON output. The order matches resolveCurrentSessionIdFromEnv:
  *
- *   1. PID-scoped marker (authoritative; tied to a live claude ancestor PID)
- *   2. CLAUDE_ENV_FILE direct read (LAST match — tolerates accumulated stale
+ *   1. CLAUDE_ENV_FILE direct read (LAST match — tolerates accumulated stale
  *      lines from prior sessions)
- *   3. BABYSITTER_SESSION_ID env var (potentially stale; warn if its state
+ *   2. BABYSITTER_SESSION_ID env var (potentially stale; warn if its state
  *      file doesn't exist)
+ *   3. PID-scoped marker tied to a live Claude ancestor PID (fallback only)
  *
  * Legacy escape hatch: BABYSITTER_TRUST_ENV_SESSION=1 restores the old
  * env-var-first precedence.
@@ -322,18 +322,7 @@ export function resolveSessionIdDetailed(explicit?: string): SessionResolutionDe
     };
   }
 
-  // 1. PID-scoped marker: authoritative.
-  const fromMarker = readSessionMarker("claude-code");
-  if (fromMarker) {
-    return {
-      sessionId: fromMarker,
-      resolvedFrom: "pid-marker",
-      ancestorPid,
-      ancestorAlive,
-    };
-  }
-
-  // 2. CLAUDE_ENV_FILE direct read: use LAST match (not first) to handle
+  // 1. CLAUDE_ENV_FILE direct read: use LAST match (not first) to handle
   //    accumulated stale "export BABYSITTER_SESSION_ID=..." lines.
   const envFile = process.env.CLAUDE_ENV_FILE;
   if (envFile) {
@@ -356,7 +345,8 @@ export function resolveSessionIdDetailed(explicit?: string): SessionResolutionDe
     }
   }
 
-  // 3. BABYSITTER_SESSION_ID env var: last resort. Potentially stale.
+  // 2. BABYSITTER_SESSION_ID env var: preferred over the marker because it
+  //    is the direct ambient binding for the current shell context.
   const envVar = process.env.BABYSITTER_SESSION_ID;
   if (envVar) {
     try {
@@ -372,6 +362,18 @@ export function resolveSessionIdDetailed(explicit?: string): SessionResolutionDe
     return {
       sessionId: envVar,
       resolvedFrom: "env-var",
+      ancestorPid,
+      ancestorAlive,
+    };
+  }
+
+  // 3. PID-scoped marker: final fallback when direct/env-based discovery is
+  //    unavailable in the current descendant process.
+  const fromMarker = readSessionMarker("claude-code");
+  if (fromMarker) {
+    return {
+      sessionId: fromMarker,
+      resolvedFrom: "pid-marker",
       ancestorPid,
       ancestorAlive,
     };

@@ -34,7 +34,7 @@ import {
   isCodexPluginInstalled,
   runPackageBinaryViaNpx,
 } from "./installSupport";
-import { writeSessionMarker } from "../utils/sessionMarker";
+import { writeSessionMarker, writeHarnessActiveMarker } from "../utils/sessionMarker";
 import { resolveAmbientSessionId } from "../session/discovery";
 
 function resolveCodexPluginRoot(
@@ -185,6 +185,7 @@ async function handleCodexSessionStartHookImpl(
   // common Codex CLI ancestor PID.
   try {
     writeSessionMarker("codex", sessionId);
+    writeHarnessActiveMarker("codex", sessionId);
   } catch {
     // Non-fatal: marker is a best-effort mechanism
   }

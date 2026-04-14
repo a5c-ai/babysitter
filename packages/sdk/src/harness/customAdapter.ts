@@ -41,11 +41,11 @@ export function createCustomAdapter(): HarnessAdapter {
         if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
         return undefined;
       }
-      // 1. PID-scoped marker (if any harness ancestor happens to exist)
+      // 1. Cross-harness standard env var
+      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+      // 2. PID-scoped marker fallback (if any harness ancestor happens to exist)
       const fromMarker = readSessionMarker("custom");
       if (fromMarker) return fromMarker;
-      // 2. Cross-harness standard env var as last-resort fallback
-      if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
       return undefined;
     },
 
