@@ -125,7 +125,6 @@ try {
   const installedPluginRoot = path.join(homePluginsRoot, INSTALLED_PLUGIN_NAME);
   [
     '.codex-plugin',
-    '.app.json',
     'assets',
     'hooks',
     'hooks.json',
@@ -137,7 +136,6 @@ try {
   }
 
   assert.ok(fs.existsSync(path.join(installedPluginRoot, '.codex-plugin', 'plugin.json')), 'installed plugin should carry a plugin manifest');
-  assert.ok(fs.existsSync(path.join(installedPluginRoot, '.app.json')), 'installed plugin should carry app manifest');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'assets', 'icon.svg')), 'installed plugin should carry composer icon asset');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'assets', 'logo.svg')), 'installed plugin should carry logo asset');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'hooks', 'babysitter-stop-hook.sh')), 'installed plugin should carry hook scripts');

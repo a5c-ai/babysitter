@@ -19,7 +19,6 @@
   ],
   "skills": "./skills/",
   "hooks": "./hooks.json",
-  "apps": "./.app.json",
   "interface": {
     "displayName": "Babysitter",
     "shortDescription": "Run Babysitter orchestration flows from Codex",

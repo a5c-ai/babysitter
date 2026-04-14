@@ -17,7 +17,6 @@
   },
   "files": [
     ".codex-plugin/",
-    ".app.json",
     "assets/",
     "hooks/",
     "hooks.json",
