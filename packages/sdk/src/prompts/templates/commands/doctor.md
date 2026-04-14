@@ -157,8 +157,8 @@ If it exists:
 
 - Search for session state files using Glob:
   - `plugins/babysitter/skills/babysit/state/*.md`
-  - `~/.a5c/state/*.md`
-  - `~/.a5c/state/*.json`
+  - `.a5c/state/*.md`
+  - `.a5c/state/*.json`
 - For each session state file found:
   - Read the file and extract available information: iteration count, associated runId, timestamps, session status.
   - Display: filename, iteration count, runId (if present), last activity time.
@@ -504,7 +504,7 @@ babysitter session:cleanup             # apply
 unset BABYSITTER_SESSION_ID
 
 # 3. Re-bind a run explicitly if needed
-babysitter session:resume --session-id <fresh-id> --state-dir ~/.a5c/state --run-id <runId> --runs-dir .a5c/runs
+babysitter session:resume --session-id <fresh-id> --state-dir ~/.a5c --run-id <runId> --runs-dir .a5c/runs
 
 # 4. Start a fresh Claude Code session (closes and reopens the session)
 ```
