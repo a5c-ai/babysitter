@@ -1006,109 +1006,22 @@ async function searchProcessLibrary(
 ): Promise<{
   scope: ProcessLibraryToolScope;
   root: string;
+  libraryRoot: string;
   query: string;
-  matches: Array<{
-    kind: "content" | "path";
-    path: string;
-    line?: number;
-    excerpt?: string;
-  }>;
+  instructions: string;
+  matches: Array<any>;
 }> {
   const trimmedQuery = query.trim();
-  if (!trimmedQuery) {
-    throw new BabysitterRuntimeError(
-      "ProcessLibrarySearchQueryMissing",
-      "Process-library search query must not be empty.",
-      { category: ErrorCategory.Validation },
-    );
-  }
-
-  const normalizedLimit = Math.max(1, Math.min(limit, 40));
   const { root } = await resolvePhase1ProcessLibraryRoot(scope);
-  const matches: Array<{
-    kind: "content" | "path";
-    path: string;
-    line?: number;
-    excerpt?: string;
-  }> = [];
-  const seen = new Set<string>();
-
-  const contentResult = await execShellEffect(
-    "rg",
-    [
-      "-n",
-      "--no-heading",
-      "--color",
-      "never",
-      "--max-count",
-      "2",
-      "--max-filesize",
-      "256K",
-      "-S",
-      trimmedQuery,
-      root,
-    ],
-    root,
-  );
-  if (contentResult.exitCode === 0 || contentResult.exitCode === 1) {
-    for (const line of contentResult.stdout.split(/\r?\n/)) {
-      if (!line.trim()) {
-        continue;
-      }
-      const parsed = parseRipgrepMatchLine(line, root);
-      if (!parsed) {
-        continue;
-      }
-      const key = `content:${parsed.path}:${parsed.line}`;
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      matches.push({
-        kind: "content",
-        path: parsed.path,
-        line: parsed.line,
-        excerpt: parsed.excerpt,
-      });
-      if (matches.length >= normalizedLimit) {
-        break;
-      }
-    }
-  }
-
-  if (matches.length < normalizedLimit) {
-    const filesResult = await execShellEffect("rg", ["--files", root], root);
-    if (filesResult.exitCode === 0 || filesResult.exitCode === 1) {
-      const loweredQuery = trimmedQuery.toLowerCase();
-      for (const entry of filesResult.stdout.split(/\r?\n/)) {
-        const relativePath = entry.trim();
-        if (!relativePath) {
-          continue;
-        }
-        if (!relativePath.toLowerCase().includes(loweredQuery)) {
-          continue;
-        }
-        const key = `path:${relativePath}`;
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        matches.push({
-          kind: "path",
-          path: relativePath,
-        });
-        if (matches.length >= normalizedLimit) {
-          break;
-        }
-      }
-    }
-  }
+  const libraryRoot = path.join(root, "library");
 
   return {
     scope,
     root,
+    libraryRoot,
     query: trimmedQuery,
-    matches,
+    matches: [],
+    instructions: `To search the process library, please use your run_shell_command tool to run 'rg' (ripgrep) inside the library directory: ${libraryRoot}. For example: run_shell_command({ command: "rg 'your-pattern'", dir_path: "${libraryRoot.replace(/\\/g, '\\\\')}" })`,
   };
 }
 
@@ -1796,7 +1709,7 @@ export async function runProcessDefinitionPhase(args: {
       name: "babysitter_search_process_library",
       label: "Search Process Library",
       description:
-        "Search the active shared process library by content and path before authoring a process.",
+        "Retrieve the active shared process library root path and instructions on how to search it. Use this before authoring a process.",
       parameters: Type.Object({
         query: Type.String(),
         scope: Type.Optional(Type.Union([
