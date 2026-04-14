@@ -64,7 +64,7 @@ import {
 import type { PromptContext } from "../prompts/types";
 import { createGeminiCliContext } from "../prompts/context";
 import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
-import { writeSessionMarker, writeProjectMarker, writeHarnessActiveMarker } from "../utils/sessionMarker";
+import { writeSessionMarker } from "../utils/sessionMarker";
 import { resolveAmbientSessionId } from "../session/discovery";
 
 // ---------------------------------------------------------------------------
@@ -321,9 +321,10 @@ async function handleAfterAgentHookImpl(
   const hookInput = parseHookInput(rawInput) as GeminiAfterAgentHookInput;
   log.info("Hook input received");
 
-  // 2. Resolve session ID from hook input or env via shared resolver
-  //    Precedence: stdin session_id → pid-marker → GEMINI_SESSION_ID →
-  //    BABYSITTER_SESSION_ID (legacy escape: BABYSITTER_TRUST_ENV_SESSION=1).
+  // 2. Resolve session ID from hook input or env via shared resolver.
+  //    Precedence: stdin session_id → GEMINI_SESSION_ID →
+  //    BABYSITTER_SESSION_ID → pid-marker fallback
+  //    (legacy escape: BABYSITTER_TRUST_ENV_SESSION=1).
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
     resolveGeminiSessionIdFromEnv() ||
@@ -702,8 +703,9 @@ async function handleSessionStartHookImpl(
 
   const hookInput = parseHookInput(rawInput) as GeminiSessionStartHookInput;
 
-  // 2. Resolve session ID via shared resolver (marker → GEMINI_SESSION_ID →
-  //    BABYSITTER_SESSION_ID), stdin always wins.
+  // 2. Resolve session ID via shared resolver
+  //    (GEMINI_SESSION_ID → BABYSITTER_SESSION_ID → pid-marker fallback),
+  //    stdin always wins.
   const sessionId =
     safeStr(hookInput as Record<string, unknown>, "session_id") ||
     resolveGeminiSessionIdFromEnv() ||
@@ -721,10 +723,6 @@ async function handleSessionStartHookImpl(
   // 2b. Persist PID-scoped marker so descendants can resolve session ID.
   try {
     writeSessionMarker("gemini-cli", sessionId);
-    writeHarnessActiveMarker("gemini-cli", sessionId);
-    if (process.env.GEMINI_PROJECT_DIR) {
-      writeProjectMarker("gemini-cli", process.env.GEMINI_PROJECT_DIR, sessionId);
-    }
   } catch {
     // Non-fatal: marker is a best-effort mechanism
   }

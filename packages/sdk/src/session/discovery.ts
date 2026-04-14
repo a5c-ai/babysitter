@@ -35,10 +35,5 @@ export function resolveAmbientSessionId(harness?: string): string | undefined {
   }
 
   const envVars = HARNESS_ENV_VARS[harness] || [];
-  let projectPath: string | undefined;
-  if (harness === "gemini-cli") {
-    projectPath = process.env.GEMINI_PROJECT_DIR;
-  }
-
-  return resolveSessionIdWithMarker(harness, {}, envVars, projectPath);
+  return resolveSessionIdWithMarker(harness, {}, envVars);
 }

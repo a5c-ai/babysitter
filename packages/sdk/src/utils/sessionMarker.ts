@@ -1,19 +1,5 @@
-/**
- * Shared session-marker primitives.
- *
- * Provides a harness-agnostic mechanism for persisting a "current session ID"
- * keyed by the PID of a harness ancestor process. This lets descendant
- * processes (hooks, Bash tool calls, etc.) resolve the session they belong to
- * by walking the process tree back to the harness.
- *
- * The ancestor walk has a platform-specific strategy cascade on Windows to
- * survive environments where `wmic` has been removed (Windows 11 24H2+).
- */
-
 import * as path from "node:path";
-import {
-  execSync,
-} from "node:child_process";
+import { execSync } from "node:child_process";
 import {
   existsSync,
   readFileSync,
@@ -23,7 +9,6 @@ import {
   readdirSync,
   unlinkSync,
   statSync,
-  appendFileSync,
 } from "node:fs";
 import { getGlobalStateDir } from "../config";
 import { isProcessAlive } from "../utils/processLiveness";
@@ -52,8 +37,6 @@ export function __resetCacheForTests(): void {
   ancestorResolverOverride = undefined;
 }
 
-// Test seam: allow tests to inject a fake ancestor resolver. Never used in
-// production code paths.
 let ancestorResolverOverride:
   | ((processNames: string[]) => AncestorInfo | undefined)
   | undefined;
@@ -97,7 +80,6 @@ function runCmd(cmd: string, timeoutMs = 5000): string {
 function parsePosixPs(pid: number): ParentInfo | undefined {
   try {
     const out = runCmd(`ps -p ${pid} -o ppid=,comm=,lstart=`).trim();
-    // ppid comm lstart...
     const match = out.match(/^\s*(\d+)\s+(\S+)\s*(.*)$/);
     if (!match) return undefined;
     const ppid = parseInt(match[1], 10);
@@ -111,10 +93,8 @@ function parsePosixPs(pid: number): ParentInfo | undefined {
 
 function parseWindowsViaPowershell(pid: number): ParentInfo | undefined {
   try {
-    const script = `Get-CimInstance Win32_Process -Filter \\"ProcessId=${pid}\\" | Select-Object ParentProcessId,Name,CreationDate | ConvertTo-Json -Compress`;
-    const out = runCmd(
-      `powershell -NoProfile -Command "${script}"`,
-    ).trim();
+    const script = `Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | Select-Object ParentProcessId,Name,CreationDate | ConvertTo-Json -Compress`;
+    const out = runCmd(`powershell -NoProfile -Command '${script}'`).trim();
     if (!out) return undefined;
     const parsed = JSON.parse(out) as
       | { ParentProcessId?: number; Name?: string; CreationDate?: string | { DateTime?: string } }
@@ -161,7 +141,6 @@ function parseWindowsViaWmic(pid: number): ParentInfo | undefined {
 }
 
 function parseWindows(pid: number): ParentInfo | undefined {
-  // Try cached strategy first.
   if (cachedWindowsStrategy === "wmic") {
     const info = parseWindowsViaWmic(pid);
     if (info) return info;
@@ -172,12 +151,6 @@ function parseWindows(pid: number): ParentInfo | undefined {
     return undefined;
   }
 
-  // Cascade. We try wmic first because on most Windows hosts it is
-  // dramatically faster than PowerShell (which has a multi-hundred-ms
-  // startup cost per invocation). Windows 11 24H2 removed wmic, so we fall
-  // back to PowerShell's Get-CimInstance. Finally, tasklist has Name but no
-  // ParentProcessId, so if we're down to only tasklist the ancestor walk is
-  // impossible and we bail.
   const wmicInfo = parseWindowsViaWmic(pid);
   if (wmicInfo) {
     cachedWindowsStrategy = "wmic";
@@ -203,6 +176,14 @@ function normalizeProcName(name: string): string {
 
 export function findHarnessAncestorPid(processNames: string[]): AncestorInfo | undefined {
   if (ancestorResolverOverride) return ancestorResolverOverride(processNames);
+  
+  if (process.env.BABYSITTER_HARNESS_PID) {
+    const overridePid = parseInt(process.env.BABYSITTER_HARNESS_PID, 10);
+    if (Number.isFinite(overridePid) && overridePid > 0) {
+      return { pid: overridePid };
+    }
+  }
+
   const processNamesKey = processNames.join("|");
   const now = Date.now();
 
@@ -213,49 +194,40 @@ export function findHarnessAncestorPid(processNames: string[]): AncestorInfo | u
   ) {
     if (!ancestorCache.info) return undefined;
     if (isProcessAlive(ancestorCache.info.pid)) return ancestorCache.info;
-    // Cached ancestor died — invalidate and re-walk.
     ancestorCache = undefined;
   }
 
-  const targets = processNames.map((n) => n.toLowerCase().replace(/\.exe$/, ""));
+  const envProcessNames = process.env.BABYSITTER_HARNESS_PROCESS_NAMES
+    ?.split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const targets = [...processNames, ...(envProcessNames || [])].map((n) =>
+    n.toLowerCase().replace(/\.exe$/, ""),
+  );
+
   let pid = process.pid;
-  let found: AncestorInfo | undefined;
-
-  const logFile = path.join(getGlobalStateDir(), "..", "logs", "ancestor-walk.log");
-  const log = (msg: string) => {
-    try {
-      appendFileSync(logFile, `[${new Date().toISOString()}] [PID=${process.pid}] ${msg}\n`);
-    } catch { /* ignore */ }
-  };
-
-  log(`Starting walk for ${processNamesKey} from PID ${pid}`);
+  let highestMatch: AncestorInfo | undefined;
 
   for (let depth = 0; depth < 100; depth++) {
     const info = getParentInfo(pid);
-    if (!info) {
-      log(`No parent info for PID ${pid} at depth ${depth}`);
-      break;
-    }
+    if (!info) break;
+
     const base = normalizeProcName(info.name || "");
-    log(`Depth ${depth}: PID ${pid} -> Parent ${info.ppid} (${info.name})`);
     if (targets.includes(base)) {
-      log(`MATCH at depth ${depth}: ${info.name} (PID ${pid})`);
-      found = { pid, startTime: info.startTime };
+      highestMatch = { pid, startTime: info.startTime };
     }
-    if (!Number.isFinite(info.ppid) || info.ppid <= 0 || info.ppid === pid) {
-      log(`Terminal PID ${info.ppid} at depth ${depth}`);
-      break;
-    }
+
+    if (!Number.isFinite(info.ppid) || info.ppid <= 0 || info.ppid === pid) break;
     pid = info.ppid;
   }
 
-  // Final check: if we found a match, make sure it's still alive.
-  if (found && !isProcessAlive(found.pid)) {
-    found = undefined;
+  if (highestMatch && !isProcessAlive(highestMatch.pid)) {
+    highestMatch = undefined;
   }
 
-  ancestorCache = { info: found, resolvedAt: now, processNamesKey };
-  return found;
+  ancestorCache = { info: highestMatch, resolvedAt: now, processNamesKey };
+  return highestMatch;
 }
 
 // ---------------------------------------------------------------------------
@@ -269,22 +241,11 @@ function atomicWriteString(target: string, content: string): void {
   renameSync(tmp, target);
 }
 
-/**
- * Write a session marker for the given harness. Returns the path written, or
- * undefined if no ancestor could be located (in which case there is nothing to
- * key the marker against). Throws if the ancestor is found but the write
- * itself fails — callers can try/catch to preserve legacy error reporting.
- */
 export function writeSessionMarker(harness: string, sessionId: string): string | undefined {
-  // Any harness writer implies its own ancestor name(s). For claude-code this
-  // is the string "claude"; other callers pass their own names via the common
-  // convention of harness basename.
   const info = findHarnessAncestorPid(deriveProcessNames(harness));
   if (!info) return undefined;
   const target = getSessionMarkerPath(harness, info.pid);
   atomicWriteString(target, `${sessionId}\n`);
-  // Opportunistic GC — markers accumulate across ancestor lifetimes; sweep
-  // dead-PID markers on every write. Best-effort, never fatal.
   try { cleanupDeadSessionMarkers(); } catch { /* ignore */ }
   return target;
 }
@@ -292,17 +253,6 @@ export function writeSessionMarker(harness: string, sessionId: string): string |
 const MARKER_FILENAME_RE = /^current-session-.+-pid-(\d+)$/;
 const MARKER_RECENCY_GRACE_MS = 60_000;
 
-/**
- * Remove marker files whose keyed PID is no longer alive. Intended to be
- * invoked opportunistically (e.g. from `writeSessionMarker`). Returns the
- * number of files removed. Errors are swallowed per-entry so a transient
- * filesystem problem does not abort the whole sweep.
- *
- * Markers modified within the last `MARKER_RECENCY_GRACE_MS` are retained
- * regardless of PID liveness. This protects just-written markers on platforms
- * or test harnesses where PID liveness checks cannot observe the owning
- * process yet (e.g. synthesized test PIDs).
- */
 export function cleanupDeadSessionMarkers(): number {
   const dir = getGlobalStateDir();
   let entries: string[];
@@ -329,18 +279,11 @@ export function cleanupDeadSessionMarkers(): number {
     try {
       unlinkSync(full);
       removed++;
-    } catch {
-      // best-effort
-    }
+    } catch { /* ignore */ }
   }
   return removed;
 }
 
-/**
- * Read the session marker for the given harness. Returns undefined when no
- * ancestor can be located, when the marker file does not exist, or when the
- * ancestor is no longer alive.
- */
 export function readSessionMarker(harness: string): string | undefined {
   const info = findHarnessAncestorPid(deriveProcessNames(harness));
   if (!info) return undefined;
@@ -355,19 +298,6 @@ export function readSessionMarker(harness: string): string | undefined {
   }
 }
 
-/**
- * Shared session-id resolution following the standard adapter precedence:
- *   1. Explicit `parsed.sessionId` (from hook stdin JSON).
- *   2. If `BABYSITTER_TRUST_ENV_SESSION=1`: `BABYSITTER_SESSION_ID`, then
- *      harness-native env vars — legacy escape hatch.
- *   3. Otherwise: PID-scoped marker (survives env-var loss across descendants).
- *   4. Harness-native env vars.
- *   5. `BABYSITTER_SESSION_ID`.
- *
- * `harnessEnvVars` is the ordered list of harness-native env var names
- * (e.g. `["CODEX_THREAD_ID"]`, `["GEMINI_SESSION_ID"]`). Adapters that do not
- * use the marker system should not call this helper.
- */
 export function resolveSessionIdWithMarker(
   harness: string,
   parsed: { sessionId?: string },
@@ -383,21 +313,16 @@ export function resolveSessionIdWithMarker(
     }
     return undefined;
   }
-  const fromMarker = readSessionMarker(harness);
-  if (fromMarker) return fromMarker;
   for (const key of harnessEnvVars) {
     const v = process.env[key];
     if (v) return v;
   }
   if (process.env.BABYSITTER_SESSION_ID) return process.env.BABYSITTER_SESSION_ID;
+  const fromMarker = readSessionMarker(harness);
+  if (fromMarker) return fromMarker;
   return undefined;
 }
 
-/**
- * Derive the canonical set of process names to look for based on the harness
- * slug. This is deliberately conservative: callers that need a custom set
- * should use `findHarnessAncestorPid` directly.
- */
 export function deriveProcessNames(harness: string): string[] {
   const slug = sanitizeHarnessSlug(harness);
   switch (slug) {
