@@ -1972,11 +1972,17 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   }
 
   const invocationKey = parsed.invocationKey ?? record.invocationKey;
+  const normalizedShellFailure = parsed.taskStatus === "error" && record.kind === "shell";
+  const committedStatus = normalizedShellFailure ? "ok" : parsed.taskStatus;
+  const committedValue = normalizedShellFailure
+    ? coerceShellFailureResult(errorPayload, stdout, stderr)
+    : value;
 
   const plan = {
     runDir: toRunRelativePosix(runDir, runDir) ?? runDir,
     effectId: parsed.effectId,
-    status: parsed.taskStatus,
+    status: committedStatus,
+    normalizedShellFailure,
     valueProvided: parsed.valuePath || parsed.valueInline ? true : false,
     errorProvided: parsed.errorPath ? true : false,
     stdoutRef: parsed.stdoutRef ?? null,
@@ -2000,10 +2006,10 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     effectId: parsed.effectId,
     invocationKey,
     result:
-      parsed.taskStatus === "ok"
+      committedStatus === "ok"
         ? {
             status: "ok",
-            value,
+            value: committedValue,
             stdout,
             stderr,
             stdoutRef: parsed.stdoutRef,
@@ -2032,7 +2038,8 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   if (parsed.json) {
     console.log(
       JSON.stringify({
-        status: parsed.taskStatus,
+        status: committedStatus,
+        normalizedShellFailure,
         committed,
         stdoutRef,
         stderrRef,
@@ -2040,13 +2047,54 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
       })
     );
   } else {
-    const parts = [`[task:post] status=${parsed.taskStatus}`];
+    const parts = [`[task:post] status=${committedStatus}`];
+    if (normalizedShellFailure) parts.push("normalizedShellFailure=true");
     if (stdoutRef) parts.push(`stdoutRef=${stdoutRef}`);
     if (stderrRef) parts.push(`stderrRef=${stderrRef}`);
     if (resultRef) parts.push(`resultRef=${resultRef}`);
     console.log(parts.join(" "));
   }
-  return parsed.taskStatus === "ok" ? 0 : 1;
+  return committedStatus === "ok" ? 0 : 1;
+}
+
+function coerceShellFailureResult(
+  errorPayload: unknown,
+  stdout?: string,
+  stderr?: string,
+): {
+  success: false;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  error: string;
+} {
+  const payloadData = isJsonRecord(errorPayload)
+    ? (isJsonRecord(errorPayload.data) ? errorPayload.data : errorPayload)
+    : undefined;
+  const exitCode = readNumericField(payloadData, "exitCode") ?? 1;
+  const normalizedStdout = stdout ?? readStringField(payloadData, "stdout") ?? "";
+  const normalizedStderr = stderr ?? readStringField(payloadData, "stderr") ?? "";
+  const errorMessage = readStringField(payloadData, "error")
+    ?? readStringField(payloadData, "message")
+    ?? `Shell command exited with code ${exitCode}`;
+
+  return {
+    success: false,
+    exitCode,
+    stdout: normalizedStdout,
+    stderr: normalizedStderr,
+    error: errorMessage,
+  };
+}
+
+function readStringField(value: JsonRecord | undefined, key: string): string | undefined {
+  const candidate = value?.[key];
+  return typeof candidate === "string" ? candidate : undefined;
+}
+
+function readNumericField(value: JsonRecord | undefined, key: string): number | undefined {
+  const candidate = value?.[key];
+  return typeof candidate === "number" && Number.isFinite(candidate) ? candidate : undefined;
 }
 
 async function handleTaskCancel(parsed: ParsedArgs): Promise<number> {

@@ -98,6 +98,19 @@ async function handleExistingInvocation<TArgs, TResult>(
   }
 
   if (record.status === "resolved_error") {
+    if (record.kind === "shell") {
+      const storedShellResult = await readTaskResult(
+        options.context.runDir,
+        record.effectId,
+        record.resultRef ? normalizeRef(options.context.runDir, record.resultRef) : undefined
+      );
+      if (!storedShellResult) {
+        throw new RunFailedError(`Result for effect ${record.effectId} is missing from disk`, {
+          effectId: record.effectId,
+        });
+      }
+      return await coerceStoredShellFailureResult(options.context.runDir, storedShellResult) as TResult;
+    }
     const error = record.error ? rehydrateSerializedError(record.error) : new Error("Task failed");
     throw error;
   }
@@ -340,6 +353,60 @@ async function resolveStoredResultValue(runDir: string, stored: StoredTaskResult
   // stdout/stderr for output.  A hard failure here previously caused ~90% of
   // provider-gated E2E runs to fail.
   return null;
+}
+
+async function coerceStoredShellFailureResult(runDir: string, stored: StoredTaskResult): Promise<{
+  success: false;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  error: string;
+}> {
+  const errorData = isJsonRecord(stored.error?.data) ? stored.error.data : undefined;
+  const stdout = await resolveStoredTextArtifact(runDir, stored.stdoutRef)
+    ?? readStringField(errorData, "stdout")
+    ?? "";
+  const stderr = await resolveStoredTextArtifact(runDir, stored.stderrRef)
+    ?? readStringField(errorData, "stderr")
+    ?? "";
+  const exitCode = readNumberField(errorData, "exitCode") ?? 1;
+  const errorMessage = readStringField(errorData, "error")
+    ?? stored.error?.message
+    ?? `Shell command exited with code ${exitCode}`;
+
+  return {
+    success: false,
+    exitCode,
+    stdout,
+    stderr,
+    error: errorMessage,
+  };
+}
+
+async function resolveStoredTextArtifact(runDir: string, ref?: string): Promise<string | undefined> {
+  if (!ref) {
+    return undefined;
+  }
+  try {
+    const absolute = normalizeRef(runDir, ref);
+    return await fs.readFile(absolute, "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
+function isJsonRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readStringField(value: Record<string, unknown> | undefined, key: string): string | undefined {
+  const candidate = value?.[key];
+  return typeof candidate === "string" ? candidate : undefined;
+}
+
+function readNumberField(value: Record<string, unknown> | undefined, key: string): number | undefined {
+  const candidate = value?.[key];
+  return typeof candidate === "number" && Number.isFinite(candidate) ? candidate : undefined;
 }
 
 function collectInvocationLabels(ctx: TaskBuildContext, taskDef: TaskDef): string[] {

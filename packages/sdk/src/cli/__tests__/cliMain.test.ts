@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
+import os from "os";
+import { promises as fs } from "fs";
 import { createBabysitterCli } from "../main";
 import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
@@ -272,6 +274,62 @@ describe("CLI main entry", () => {
     );
   });
 
+  it("normalizes shell task error posts into success:false shell results", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-shell-error-"));
+    const errorPath = path.join(tmpDir, "error.json");
+    await fs.writeFile(
+      errorPath,
+      JSON.stringify({
+        exitCode: 2,
+        stderr: "tsc failed",
+      }),
+      "utf8",
+    );
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([shellEffectRecord("ef-shell-err")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-shell-err",
+      "--status",
+      "error",
+      "--error",
+      errorPath,
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectId: "ef-shell-err",
+        result: {
+          status: "ok",
+          value: {
+            success: false,
+            exitCode: 2,
+            stdout: "",
+            stderr: "tsc failed",
+            error: "Shell command exited with code 2",
+          },
+          stdout: undefined,
+          stderr: undefined,
+          stdoutRef: undefined,
+          stderrRef: undefined,
+          startedAt: expect.any(String),
+          finishedAt: expect.any(String),
+          metadata: undefined,
+        },
+      }),
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      "[task:post] status=ok normalizedShellFailure=true stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
+    );
+
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
   it("rejects task:post ok results without a value payload", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-no-value")]));
 
@@ -455,6 +513,14 @@ function nodeEffectRecord(effectId: string, overrides: Partial<EffectRecord> = {
     requestedAt: new Date(0).toISOString(),
     ...overrides,
   };
+}
+
+function shellEffectRecord(effectId: string, overrides: Partial<EffectRecord> = {}): EffectRecord {
+  return nodeEffectRecord(effectId, {
+    kind: "shell",
+    taskId: "task/shell",
+    ...overrides,
+  });
 }
 
 function mockEffectIndex(records: EffectRecord[]) {

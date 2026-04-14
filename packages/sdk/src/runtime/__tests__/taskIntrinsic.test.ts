@@ -26,6 +26,24 @@ const sampleTask: DefinedTask<{ value: number }, number> = {
   }),
 };
 
+const shellTask: DefinedTask<{ command: string }, {
+  success: false;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  error: string;
+}> = {
+  id: "shell-task",
+  build: async (args) => ({
+    kind: "shell",
+    title: "verify shell task",
+    shell: {
+      command: args.command,
+      expectedExitCode: 0,
+    },
+  }),
+};
+
 let tmpRoot: string;
 
 beforeEach(async () => {
@@ -270,6 +288,56 @@ describe("runTaskIntrinsic", () => {
         context: replayCtx,
       })
     ).resolves.toEqual(failureValue);
+  });
+
+  test("returns structured shell failures when a shell effect was committed with status:error", async () => {
+    const { runDir, runId } = await createRun("run-shell-resolved-error");
+    const context = await buildContext(runDir, runId);
+
+    let effectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: shellTask,
+        args: { command: "npm test" },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      effectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    await commitEffectResult({
+      runDir,
+      effectId,
+      result: {
+        status: "error",
+        error: {
+          name: "ShellCommandFailed",
+          message: "Shell command exited with code 2",
+          data: {
+            exitCode: 2,
+            stdout: "",
+            stderr: "tsc failed",
+          },
+        },
+        stderr: "tsc failed",
+      },
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: shellTask,
+        args: { command: "npm test" },
+        context: replayCtx,
+      })
+    ).resolves.toEqual({
+      success: false,
+      exitCode: 2,
+      stdout: "",
+      stderr: "tsc failed",
+      error: "Shell command exited with code 2",
+    });
   });
 
   test("provides TaskBuildContext metadata and records registry entries", async () => {
