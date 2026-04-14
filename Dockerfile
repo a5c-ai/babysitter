@@ -36,6 +36,7 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package.json package-lock.json* ./
 COPY packages/sdk/package.json ./packages/sdk/
+COPY scripts/patch-webpackbar-progress-plugin.cjs ./scripts/
 
 # Install all dependencies (including dev for build)
 RUN npm install --include=dev
