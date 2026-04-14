@@ -6,6 +6,9 @@ export default defineConfig({
     include: ["src/**/*.test.ts"],
     reporters: "default",
     globals: false,
-    testTimeout: 15000
+    testTimeout: 15000,
+    env: {
+      GEMINI_CLI: "",
+    }
   }
 });

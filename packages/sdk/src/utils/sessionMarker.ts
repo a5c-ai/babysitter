@@ -93,8 +93,8 @@ function parsePosixPs(pid: number): ParentInfo | undefined {
 
 function parseWindowsViaPowershell(pid: number): ParentInfo | undefined {
   try {
-    const script = `Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | Select-Object ParentProcessId,Name,CreationDate | ConvertTo-Json -Compress`;
-    const out = runCmd(`powershell -NoProfile -Command '${script}'`).trim();
+    const script = `Get-CimInstance Win32_Process -Filter \\"ProcessId=${pid}\\" | Select-Object ParentProcessId,Name,CreationDate,CommandLine | ConvertTo-Json -Compress`;
+    const out = runCmd(`powershell -NoProfile -Command "${script}"`).trim();
     if (!out) return undefined;
     const parsed = JSON.parse(out) as
       | { ParentProcessId?: number; Name?: string; CreationDate?: string | { DateTime?: string } }

@@ -2248,6 +2248,12 @@ export async function runOrchestrationPhase(args: {
           { category: ErrorCategory.External },
         );
       }
+      if (state.lastIterationResult?.status === "process-error") {
+        writeVerbose(
+          `[phase2 recovery] continuing after a late orchestration prompt failure because babysitter_run_iterate already returned a recoverable process-error: ${result.output}`,
+        );
+        return;
+      }
       if (!isIgnorablePiPromptFailure(result.output)) {
         throw new BabysitterRuntimeError(
           "OrchestrationAgentFailed",

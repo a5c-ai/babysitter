@@ -2775,6 +2775,92 @@ describe("handleHarnessCreateRun", () => {
       expect((orchestrateIteration as Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
     });
 
+    it("continues after a late internal prompt termination when babysitter_run_iterate already returned a recoverable process-error", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce({
+          status: "process-error",
+          error: { message: "Unexpected end of JSON input" },
+        })
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: "done",
+        });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const bindSession = tools.find((tool) => tool.name === "babysitter_bind_session") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        let promptCount = 0;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-process-error-recovery";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => {
+            promptCount += 1;
+
+            if (promptCount === 1) {
+              await runCreate?.execute?.("tool-run-create", {});
+              await bindSession?.execute?.("tool-bind-session", {});
+              return { success: true, output: "bootstrap", exitCode: 0, duration: 1 };
+            }
+
+            if (promptCount === 2) {
+              const iterationResult = await runIterate?.execute?.("tool-iterate-process-error", {});
+              expect((iterationResult?.details as Record<string, unknown> | undefined)?.status).toBe("process-error");
+              return { success: false, output: "terminated", exitCode: 1, duration: 1 };
+            }
+
+            const iterationResult = await runIterate?.execute?.("tool-iterate-recovered", {});
+            expect((iterationResult?.details as Record<string, unknown> | undefined)?.status).toBe("completed");
+            return { success: true, output: "recovered", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleHarnessCreateRun({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(orchestrateIteration).toHaveBeenCalledTimes(2);
+      const phase2Session = vi.mocked(createPiSession).mock.results[0]?.value as {
+        prompt: Mock;
+      };
+      expect(phase2Session.prompt).toHaveBeenCalledTimes(3);
+    });
+
     it("resolves pending effects and re-iterates", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi" }),

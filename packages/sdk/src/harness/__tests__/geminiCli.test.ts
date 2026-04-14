@@ -81,6 +81,7 @@ beforeEach(async () => {
   tmpDir = await makeTmpDir();
   stateDir = path.join(tmpDir, "state");
   await fs.mkdir(stateDir, { recursive: true });
+  process.env.BABYSITTER_GLOBAL_STATE_DIR = tmpDir;
 
   stdoutChunks = [];
   stderrChunks = [];
@@ -381,6 +382,15 @@ describe("Gemini CLI SessionStart hook", () => {
     );
     expect(code).toBe(0);
     expect(getStdout().trim()).toBe("{}");
+    
+    // Debug logging
+    console.log("STDERR:", stderrChunks.join(""));
+    const logPath = path.join(tmpDir, "logs", "babysitter-session-start-hook.log");
+    try {
+      console.log("LOG:", await fs.readFile(logPath, "utf8"));
+    } catch(e) {
+      console.log("NO LOG");
+    }
 
     // Verify state file was created
     const filePath = getSessionFilePath(stateDir, sessionId);
@@ -540,7 +550,8 @@ describe("Gemini CLI resolveStateDir", () => {
     expect(result).toBe(path.resolve("/custom/state"));
   });
 
-  it("defaults to ~/.a5c/state/ when nothing is set", () => {
+  it("resolveStateDir() defaults to ~/.a5c/state/ when nothing is set", () => {
+    delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
     const adapter = createGeminiCliAdapter();
     const result = adapter.resolveStateDir!({});
     expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
