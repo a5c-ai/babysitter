@@ -2505,7 +2505,7 @@ describe("handleHarnessCreateRun", () => {
       expect(code).toBe(1);
     });
 
-    it("binds claude-code orchestration to the current marker-backed session instead of a leaked BABYSITTER_SESSION_ID", async () => {
+    it("binds claude-code orchestration to BABYSITTER_SESSION_ID before falling back to the pid marker", async () => {
       const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-claude-state-"));
       tempDirs.push(globalStateRoot);
       process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
@@ -2514,6 +2514,7 @@ describe("handleHarnessCreateRun", () => {
       __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
       const currentSessionId = "current-claude-session";
+      const leakedSessionId = "leaked-session-from-old-shell";
       const markerPath = getSessionMarkerPath("claude-code", process.pid);
       await fs.mkdir(path.dirname(markerPath), { recursive: true });
       await fs.writeFile(markerPath, `${currentSessionId}\n`);
@@ -2542,7 +2543,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       await expect(
-        fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
+        fs.access(path.join(globalStateRoot, "state", `${leakedSessionId}.md`)),
       ).resolves.toBeUndefined();
     });
   });
