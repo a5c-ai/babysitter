@@ -3,7 +3,7 @@
  *
  * Centralizes all GitHub Copilot CLI-specific behaviors:
  *   - Session ID resolution (hook stdin JSON with `timestamp` and `cwd`)
- *   - State directory conventions (.a5c/state/ by default)
+ *   - State directory conventions (~/.a5c/state/ by default)
  *   - Plugin root resolution (COPILOT_PLUGIN_ROOT)
  *   - Session binding (run:create → state file with run association)
  *   - Session-end hook handler (cleanup on session termination)
@@ -56,7 +56,7 @@ import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createGithubCopilotContext } from "../prompts/context";
 import { installCliViaNpm } from "./installSupport";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
 import { readSessionMarker, writeSessionMarker } from "./sessionMarker";
 
 /**
@@ -235,8 +235,9 @@ function resolveStateDirInternal(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 // ---------------------------------------------------------------------------

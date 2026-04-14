@@ -864,12 +864,14 @@ export async function runOrchestrationPhase(args: {
         { category: ErrorCategory.Configuration },
       );
     }
+    const pluginRoot = adapter.resolvePluginRoot({});
+    const stateDir = adapter.resolveStateDir({ pluginRoot });
     state.sessionBound = await adapter.bindSession({
       sessionId,
       runId: state.runId,
       runDir: state.runDir,
-      pluginRoot: adapter.resolvePluginRoot({}),
-      stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
+      pluginRoot,
+      stateDir,
       runsDir: args.runsDir,
       maxIterations: args.maxIterations,
       prompt: args.prompt ?? "",
@@ -1393,12 +1395,14 @@ export async function runOrchestrationPhase(args: {
             { category: ErrorCategory.Configuration },
           );
         }
+        const pluginRoot = adapter.resolvePluginRoot({});
+        const stateDir = adapter.resolveStateDir({ pluginRoot });
         state.sessionBound = await adapter.bindSession({
           sessionId,
           runId: state.runId,
           runDir: state.runDir,
-          pluginRoot: adapter.resolvePluginRoot({}),
-          stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
+          pluginRoot,
+          stateDir,
           runsDir: args.runsDir,
           maxIterations: args.maxIterations,
           prompt: args.prompt ?? "",

@@ -22,6 +22,7 @@ import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
 import { createPiAdapter, installPiPlugin } from "../pi";
 import { createOhMyPiAdapter } from "../ohMyPi";
+import { createInternalAdapter } from "../internal";
 import { createNullAdapter } from "../nullAdapter";
 import {
   detectAdapter,
@@ -138,6 +139,14 @@ describe("ClaudeCodeAdapter", () => {
       const result = adapter.resolveStateDir({});
       expect(result).toBe(path.resolve("/custom/global/state"));
     });
+
+    it("normalizes legacy global-root BABYSITTER_STATE_DIR env var to the session state dir", () => {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = "/custom/global-root";
+      process.env.BABYSITTER_STATE_DIR = "/custom/global-root";
+      const adapter = createClaudeCodeAdapter();
+      const result = adapter.resolveStateDir({});
+      expect(result).toBe(path.resolve("/custom/global-root/state"));
+    });
   });
 
   describe("resolvePluginRoot", () => {
@@ -220,6 +229,14 @@ describe("CodexAdapter", () => {
       const adapter = createCodexAdapter();
       expect(adapter.resolveStateDir({})).toBe(path.join(os.homedir(), ".a5c", "state"));
     });
+
+    it("normalizes a legacy explicit global-root stateDir to the session state dir", () => {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = "/custom/global-root";
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveStateDir({ stateDir: "/custom/global-root" })).toBe(
+        path.resolve("/custom/global-root/state"),
+      );
+    });
   });
 
   it("reports codex-specific missing session ID guidance", () => {
@@ -252,6 +269,14 @@ describe("CodexAdapter", () => {
 // ---------------------------------------------------------------------------
 // PI-family adapters
 // ---------------------------------------------------------------------------
+
+describe("InternalAdapter", () => {
+  it("defaults state dir to ~/.a5c/state/", () => {
+    const adapter = createInternalAdapter();
+    const result = adapter.resolveStateDir({});
+    expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
+  });
+});
 
 describe("PiAdapter", () => {
   it("defaults state dir to ~/.a5c/state/", () => {
@@ -838,6 +863,35 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     );
 
     // Should find the session via env file fallback and block exit
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed).not.toEqual({});
+    expect(parsed.decision).toBe("block");
+  });
+
+  it("codex stop hook normalizes a legacy root-style stateDir and finds the session under /state", async () => {
+    const rootStateDir = path.join(tmpDir, "global-root");
+    const nestedStateDir = path.join(rootStateDir, "state");
+    const sessionId = "codex-root-state-session";
+    const runId = "codex-root-state-run";
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = rootStateDir;
+    await fs.mkdir(nestedStateDir, { recursive: true });
+    await createMinimalRun(runId);
+
+    const filePath = getSessionFilePath(nestedStateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+
+    const adapter = createCodexAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
+      () => adapter.handleStopHook({
+        stateDir: rootStateDir,
+        runsDir,
+        json: true,
+        verbose: false,
+      }),
+    );
+
     const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
     expect(parsed).not.toEqual({});
     expect(parsed.decision).toBe("block");

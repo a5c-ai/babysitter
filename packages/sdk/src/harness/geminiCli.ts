@@ -3,7 +3,7 @@
  *
  * Centralizes all Gemini CLI-specific behaviors:
  *   - Session ID resolution (GEMINI_SESSION_ID env var or hook stdin)
- *   - State directory conventions (.a5c/state/ by default)
+ *   - State directory conventions (~/.a5c/state/ by default)
  *   - Extension path resolution (GEMINI_EXTENSION_PATH or script-relative)
  *   - Session binding (run:create → state file with run association)
  *   - AfterAgent hook handler (deny/approve decision — equivalent to Stop hook)
@@ -63,7 +63,7 @@ import {
 } from "./installSupport";
 import type { PromptContext } from "../prompts/types";
 import { createGeminiCliContext } from "../prompts/context";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
 import { readSessionMarker, writeSessionMarker } from "./sessionMarker";
 
 // ---------------------------------------------------------------------------
@@ -298,8 +298,9 @@ function resolveStateDirInternal(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,8 @@
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 MARKER_FILE="${PLUGIN_ROOT}/.babysitter-install-attempted"
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-${GLOBAL_ROOT}/logs}"
 LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 

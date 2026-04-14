@@ -71,7 +71,8 @@ fi
 
 # ── Create state directory ───────────────────────────────────────────
 log "Creating state directory..."
-STATE_DIR="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+STATE_DIR="${BABYSITTER_STATE_DIR:-${GLOBAL_ROOT}/state}"
 mkdir -p "$STATE_DIR"
 log "State directory ready: $STATE_DIR"
 

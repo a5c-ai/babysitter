@@ -11,7 +11,7 @@ import type {
 import { HarnessCapability as Cap } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createPiContext } from "../prompts/context";
-import { getGlobalStateDir } from "../config";
+import { normalizeSessionStateDir } from "../config";
 import {
   getCurrentTimestamp,
   getSessionFilePath,
@@ -38,8 +38,9 @@ function resolvePiStateDir(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 function resolvePiSessionId(parsed: { sessionId?: string }): string | undefined {

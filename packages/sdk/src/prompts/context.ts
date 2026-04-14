@@ -34,7 +34,7 @@ export function createClaudeCodeContext(
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars: 'PID-scoped session marker (authoritative); CLAUDE_ENV_FILE and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Read the SDK version from `versions.json` to ensure version compatibility:',
       '',
@@ -72,7 +72,7 @@ export function createCodexContext(
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars:
       'PID-scoped session marker (authoritative); CODEX_THREAD_ID/CODEX_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -112,7 +112,7 @@ export function createGithubCopilotContext(
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars: 'PID-scoped session marker (authoritative); COPILOT_ENV_FILE / COPILOT_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -152,7 +152,7 @@ export function createCursorContext(
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars: 'conversation_id from hook stdin (authoritative per-request); PID-scoped session marker; BABYSITTER_SESSION_ID fallback',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -190,7 +190,7 @@ export function createGeminiCliContext(
     hookDriven: true,
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars: 'PID-scoped session marker (authoritative); GEMINI_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -231,7 +231,7 @@ export function createOpenCodeContext(
     hookDriven: false,
     interactiveToolName: '',
     sessionEnvVars: 'PID-scoped session marker (authoritative); shell.env-injected session ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -269,7 +269,7 @@ export function createPiContext(
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
     sessionEnvVars: 'PID-scoped session marker (authoritative); PI_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -308,7 +308,7 @@ export function createOpenClawContext(
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion tool',
     sessionEnvVars: 'PID-scoped session marker (authoritative); OPENCLAW_SHELL gateway injection and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -343,7 +343,7 @@ export function createOhMyPiContext(
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
     sessionEnvVars: 'PID-scoped session marker (authoritative); OMP_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',
@@ -392,7 +392,7 @@ export function createInternalContext(
     hookDriven: false,
     interactiveToolName: 'AskUserQuestion',
     sessionEnvVars: 'PID-scoped session marker (authoritative); OMP_SESSION_ID / PI_SESSION_ID and BABYSITTER_SESSION_ID are fallbacks',
-    resumeFlags: '--state-dir .a5c',
+    resumeFlags: '',
     cliSetupSnippet: [
       'Use the installed CLI alias:',
       '',

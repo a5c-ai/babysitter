@@ -12,8 +12,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-STATE_DIR="${BABYSITTER_STATE_DIR:-${PWD}/.a5c}"
-LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+STATE_DIR="${BABYSITTER_STATE_DIR:-${GLOBAL_ROOT}/state}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-${GLOBAL_ROOT}/logs}"
 LOG_FILE="$LOG_DIR/babysitter-stop-hook.log"
 
 export CURSOR_PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${PLUGIN_ROOT}}"

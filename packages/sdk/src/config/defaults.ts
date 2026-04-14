@@ -205,6 +205,41 @@ export const DEFAULTS: Readonly<BabysitterConfig> = {
   largeResultPreviewLimit: 1024 * 1024,
 } as const;
 
+function getConfiguredGlobalStateRoot(): string {
+  return process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
+    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
+    : path.join(os.homedir(), ".a5c");
+}
+
+function normalizeComparablePath(value: string): string {
+  const normalized = path.normalize(path.resolve(value));
+  return process.platform === "win32"
+    ? normalized.toLowerCase()
+    : normalized;
+}
+
+/**
+ * Normalizes a session-state directory path.
+ *
+ * The canonical session-state location is `<global-root>/state`. Older
+ * callers sometimes pass `<global-root>` itself (for example `~/.a5c`).
+ * Normalize that legacy/root-style input to the real session-state directory
+ * so hooks can still find `<sessionId>.md`.
+ */
+export function normalizeSessionStateDir(stateDir?: string): string {
+  const globalRoot = getConfiguredGlobalStateRoot();
+  if (!stateDir?.trim()) {
+    return path.join(globalRoot, "state");
+  }
+
+  const resolved = path.resolve(stateDir);
+  if (normalizeComparablePath(resolved) === normalizeComparablePath(globalRoot)) {
+    return path.join(globalRoot, "state");
+  }
+
+  return resolved;
+}
+
 /**
  * Returns the global babysitter state directory (~/.a5c/state/).
  *
@@ -216,13 +251,7 @@ export const DEFAULTS: Readonly<BabysitterConfig> = {
  * Override: set BABYSITTER_STATE_DIR to use a different path.
  */
 export function getGlobalStateDir(): string {
-  if (process.env.BABYSITTER_STATE_DIR) {
-    return path.resolve(process.env.BABYSITTER_STATE_DIR);
-  }
-  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
-    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
-    : path.join(os.homedir(), ".a5c");
-  return path.join(globalRoot, "state");
+  return normalizeSessionStateDir(process.env.BABYSITTER_STATE_DIR);
 }
 
 /**
@@ -249,9 +278,7 @@ export function getGlobalLogDir(): string {
     }
     return path.resolve(override);
   }
-  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
-    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
-    : path.join(os.homedir(), ".a5c");
+  const globalRoot = getConfiguredGlobalStateRoot();
   return path.join(globalRoot, "logs");
 }
 

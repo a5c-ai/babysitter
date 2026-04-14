@@ -9,7 +9,8 @@ if ! command -v babysitter &>/dev/null; then
   exit 0
 fi
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-${GLOBAL_ROOT}/logs}"
 mkdir -p "$LOG_DIR" 2>/dev/null
 
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-user-prompt-submit-$$.json")

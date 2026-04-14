@@ -55,7 +55,7 @@ The plugin implements a hook-driven orchestration loop:
 
 1. `SessionStart` fires when a new Gemini CLI session begins. It ensures the
    correct SDK CLI version is installed (pinned via `versions.json`) and
-   initializes session state under `.a5c/state/`.
+   initializes session state under `~/.a5c/state/`.
 
 2. The `GEMINI.md` context file is loaded into every session, instructing the
    agent on the full 8-step orchestration workflow — from interviewing the user
@@ -160,7 +160,7 @@ The extension reads configuration from the following locations:
 | `plugin.json` | Babysitter plugin manifest. Declares hooks, commands, and harness (`gemini-cli`). |
 | `GEMINI_EXTENSION_PATH` env var | Path to the installed extension root. Set automatically by Gemini CLI. Falls back to the directory containing the hook script. |
 | `BABYSITTER_LOG_DIR` env var | Override the log directory. Defaults to `~/.a5c/logs`. |
-| `.a5c/state/` | Session state directory. Created automatically by the SessionStart hook. |
+| `~/.a5c/state/` | Session state directory. Created automatically by the SessionStart hook. |
 | `~/.a5c/user-profile.json` | User profile for personalizing orchestration (breakpoint density, tool preferences, communication style). |
 
 ## Verification

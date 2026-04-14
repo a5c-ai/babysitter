@@ -8,7 +8,8 @@ if ! command -v babysitter &>/dev/null; then
   # No CLI available — exit 0 (no-op, proceed with original command)
   exit 0
 fi
-LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-${GLOBAL_ROOT}/logs}"
 LOG_FILE="$LOG_DIR/babysitter-stop-hook.log"
 
 mkdir -p "$LOG_DIR" 2>/dev/null

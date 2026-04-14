@@ -26,7 +26,7 @@ export function renderRunCreation(ctx: PromptContext): string {
       const flagName = part.startsWith('--') ? part : `--${part}`;
       const nameOnly = flagName.split(/\s/)[0];
       if (nameOnly === '--state-dir') {
-        requiredFlagsLines.push('- `--state-dir .a5c` -- required for honest workspace-local session state');
+        requiredFlagsLines.push('- `--state-dir <dir>` -- only when intentionally overriding the default global session state directory');
       } else if (nameOnly === '--plugin-root') {
         requiredFlagsLines.push(`- \`--plugin-root "${ctx.pluginRootVar}"\` -- plugin root for state resolution`);
       }

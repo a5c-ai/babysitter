@@ -52,7 +52,7 @@ import type {
 import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createOpenCodeContext } from "../prompts/context";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -181,8 +181,9 @@ function resolveStateDirInternal(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 // ---------------------------------------------------------------------------

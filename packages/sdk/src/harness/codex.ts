@@ -9,7 +9,7 @@
 
 import * as path from "node:path";
 import { Readable } from "node:stream";
-import { getGlobalStateDir } from "../config";
+import { normalizeSessionStateDir } from "../config";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import {
   getCurrentTimestamp,
@@ -47,8 +47,9 @@ function resolveCodexStateDir(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefined {

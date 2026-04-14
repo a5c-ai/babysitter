@@ -38,7 +38,7 @@ import type {
 import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createOpenClawContext } from "../prompts/context";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
 import { checkCliAvailable } from "./discovery";
 import { installCliViaNpm } from "./installSupport";
 
@@ -103,8 +103,9 @@ function resolveStateDirInternal(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 // ---------------------------------------------------------------------------

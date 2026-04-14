@@ -12,13 +12,14 @@
 $ErrorActionPreference = "Stop"
 
 $PluginRoot = if ($env:CURSOR_PLUGIN_ROOT) { $env:CURSOR_PLUGIN_ROOT } else { Split-Path -Parent $PSScriptRoot }
-$StateDir = if ($env:BABYSITTER_STATE_DIR) { $env:BABYSITTER_STATE_DIR } else { Join-Path $PWD ".a5c" }
+$GlobalRoot = if ($env:BABYSITTER_GLOBAL_STATE_DIR) { $env:BABYSITTER_GLOBAL_STATE_DIR } else { Join-Path $HOME ".a5c" }
+$StateDir = if ($env:BABYSITTER_STATE_DIR) { $env:BABYSITTER_STATE_DIR } else { Join-Path $GlobalRoot "state" }
 $MarkerFile = Join-Path $PluginRoot ".babysitter-install-attempted"
 
 $env:CURSOR_PLUGIN_ROOT = $PluginRoot
 $env:BABYSITTER_STATE_DIR = $StateDir
 
-$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $HOME ".a5c\logs" }
+$LogDir = if ($env:BABYSITTER_LOG_DIR) { $env:BABYSITTER_LOG_DIR } else { Join-Path $GlobalRoot "logs" }
 $LogFile = Join-Path $LogDir "babysitter-session-start-hook.log"
 New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction SilentlyContinue | Out-Null
 

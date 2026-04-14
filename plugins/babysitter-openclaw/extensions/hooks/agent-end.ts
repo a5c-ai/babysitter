@@ -17,7 +17,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = resolve(__dirname, "../..");
 
 function getLogDir(): string {
-  const dir = process.env.BABYSITTER_LOG_DIR ?? resolve(homedir(), ".a5c/logs");
+  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR ?? resolve(homedir(), ".a5c");
+  const dir = process.env.BABYSITTER_LOG_DIR ?? resolve(globalRoot, "logs");
   mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -44,7 +45,8 @@ function isBabysitterAvailable(): boolean {
 
 export async function agentEndHandler(context: Record<string, unknown>): Promise<void> {
   const logDir = getLogDir();
-  const stateDir = process.env.BABYSITTER_STATE_DIR ?? resolve(process.cwd(), ".a5c");
+  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR ?? resolve(homedir(), ".a5c");
+  const stateDir = process.env.BABYSITTER_STATE_DIR ?? resolve(globalRoot, "state");
   const input = JSON.stringify(context);
 
   const args = [

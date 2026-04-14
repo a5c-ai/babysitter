@@ -17,7 +17,9 @@ set -euo pipefail
 EXTENSION_PATH="${GEMINI_EXTENSION_PATH:-$(cd "$(dirname "$0")/.." && pwd)}"
 MARKER_FILE="${EXTENSION_PATH}/.babysitter-install-attempted"
 
-LOG_DIR="${BABYSITTER_LOG_DIR:-$HOME/.a5c/logs}"
+GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"
+STATE_DIR="${BABYSITTER_STATE_DIR:-${GLOBAL_ROOT}/state}"
+LOG_DIR="${BABYSITTER_LOG_DIR:-${GLOBAL_ROOT}/logs}"
 LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 
@@ -111,7 +113,7 @@ RESULT=$(babysitter hook:run \
   --hook-type session-start \
   --harness gemini-cli \
   --plugin-root "$EXTENSION_PATH" \
-  --state-dir ".a5c/state" \
+  --state-dir "${STATE_DIR}" \
   --verbose --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-session-start-hook-stderr.log")
 EXIT_CODE=$?
 

@@ -11,7 +11,7 @@
  */
 
 import * as path from "node:path";
-import { getGlobalStateDir } from "../config";
+import { normalizeSessionStateDir } from "../config";
 import type {
   HarnessAdapter,
   SessionBindOptions,
@@ -50,8 +50,9 @@ export function createCustomAdapter(): HarnessAdapter {
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {
-      if (args.stateDir) return path.resolve(args.stateDir);
-      return getGlobalStateDir();
+      return normalizeSessionStateDir(
+        args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+      );
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {

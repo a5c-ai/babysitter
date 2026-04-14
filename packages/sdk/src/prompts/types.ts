@@ -44,7 +44,7 @@ export interface PromptContext {
 
   /**
    * Additional CLI flags appended to run:create for session binding.
-   * e.g., '--state-dir .a5c --plugin-root "${CODEX_PLUGIN_ROOT}"'
+   * e.g., '--state-dir ~/.a5c/state --plugin-root "${CODEX_PLUGIN_ROOT}"'
    */
   sessionBindingFlags: string;
 

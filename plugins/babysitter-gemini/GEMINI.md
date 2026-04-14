@@ -111,7 +111,7 @@ $CLI run:create \
   --prompt "$PROMPT" \
   --harness gemini-cli \
   --session-id "${GEMINI_SESSION_ID}" \
-  --state-dir ".a5c/state" \
+  --state-dir "~/.a5c/state" \
   --json
 ```
 
@@ -126,13 +126,13 @@ $CLI run:create \
 - `--inputs <file>` -- path to a JSON file with process inputs
 - `--run-id <id>` -- override auto-generated run ID
 - `--runs-dir <dir>` -- override runs directory (default: `.a5c/runs`)
-- `--state-dir <dir>` -- state directory for session binding (default: `.a5c/state`)
+- `--state-dir <dir>` -- state directory for session binding (default: `~/.a5c/state`)
 
 **For resuming existing runs:**
 
 ```bash
 $CLI session:resume \
-  --state-dir ".a5c/state" \
+  --state-dir "~/.a5c/state" \
   --run-id <runId> --runs-dir .a5c/runs --json
 ```
 
@@ -291,7 +291,7 @@ npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
 ```bash
 $CLI run:create --process-id <id> --entry <path>#<export> --inputs <file> \
   --prompt "$PROMPT" --harness gemini-cli \
-  --session-id "${GEMINI_SESSION_ID}" --state-dir ".a5c/state" --json
+  --session-id "${GEMINI_SESSION_ID}" --state-dir "~/.a5c/state" --json
 ```
 
 **Check status:**

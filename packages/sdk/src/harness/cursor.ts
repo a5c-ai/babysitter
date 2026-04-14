@@ -4,7 +4,7 @@
  * Centralizes all Cursor-specific behaviors:
  *   - Session ID resolution (conversation_id from hook stdin JSON, persisted
  *     by sessionStart hook to a state file)
- *   - State directory conventions (.a5c/state/ by default)
+ *   - State directory conventions (~/.a5c/state/ by default)
  *   - Plugin root resolution (CURSOR_PLUGIN_ROOT env var)
  *   - Session binding (run:create → state file with run association)
  *   - Stop hook handler (approve/block via followup_message auto-continue)
@@ -67,7 +67,7 @@ import type {
 import { HarnessCapability } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createCursorContext } from "../prompts/context";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, normalizeSessionStateDir } from "../config";
 import { readSessionMarker, writeSessionMarker } from "./sessionMarker";
 
 // ---------------------------------------------------------------------------
@@ -265,8 +265,9 @@ function resolveStateDirInternal(args: {
   stateDir?: string;
   pluginRoot?: string;
 }): string {
-  if (args.stateDir) return path.resolve(args.stateDir);
-  return getGlobalStateDir();
+  return normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 }
 
 // ---------------------------------------------------------------------------

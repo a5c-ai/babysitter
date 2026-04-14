@@ -52,7 +52,7 @@ import type {
 } from "./types";
 import type { PromptContext } from "../prompts/types";
 import { createClaudeCodeContext } from "../prompts/context";
-import { getGlobalLogDir, getGlobalStateDir } from "../config";
+import { getGlobalLogDir, getGlobalStateDir, normalizeSessionStateDir } from "../config";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
@@ -360,7 +360,7 @@ export function resolveSessionIdDetailed(explicit?: string): SessionResolutionDe
   const envVar = process.env.BABYSITTER_SESSION_ID;
   if (envVar) {
     try {
-      const stateFile = path.join(getGlobalStateDir(), "state", `${envVar}.md`);
+      const stateFile = path.join(getGlobalStateDir(), `${envVar}.md`);
       if (!existsSync(stateFile)) {
         log.warn(
           `BABYSITTER_SESSION_ID=${envVar} is set but no matching state file at ${stateFile} — likely stale from a prior Claude Code session. Run 'babysitter session:cleanup' or 'unset BABYSITTER_SESSION_ID'.`,
@@ -452,10 +452,9 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   const pluginRoot =
     args.pluginRoot || process.env.CLAUDE_PLUGIN_ROOT || "";
   const resolvedPluginRoot = pluginRoot ? path.resolve(pluginRoot) : "";
-  const stateDir =
-    args.stateDir
-      ? path.resolve(args.stateDir)
-      : getGlobalStateDir();
+  const stateDir = normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 
   if (!stateDir) {
     log.warn("Cannot determine state directory — allowing exit");
@@ -964,7 +963,7 @@ async function handleSessionStartHookImpl(
     process.env.CLAUDE_PLUGIN_ROOT = path.resolve(args.pluginRoot);
   }
   if (args.stateDir && !process.env.BABYSITTER_STATE_DIR) {
-    process.env.BABYSITTER_STATE_DIR = path.resolve(args.stateDir);
+    process.env.BABYSITTER_STATE_DIR = normalizeSessionStateDir(args.stateDir);
   }
 
   // 1. Read hook input JSON from stdin
@@ -1028,10 +1027,9 @@ async function handleSessionStartHookImpl(
   const pluginRoot =
     args.pluginRoot || process.env.CLAUDE_PLUGIN_ROOT || "";
   const resolvedPluginRoot = pluginRoot ? path.resolve(pluginRoot) : "";
-  const stateDir =
-    args.stateDir
-      ? path.resolve(args.stateDir)
-      : getGlobalStateDir();
+  const stateDir = normalizeSessionStateDir(
+    args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 
   let stateFilePersisted = false;
   if (stateDir) {
@@ -1143,7 +1141,9 @@ async function bindSessionImpl(
   const { sessionId, runId, pluginRoot: _pluginRoot, runsDir, maxIterations = 256, prompt, verbose } = opts;
 
   // Resolve state directory (always resolve to absolute paths)
-  const stateDir = opts.stateDir ? path.resolve(opts.stateDir) : getGlobalStateDir();
+  const stateDir = normalizeSessionStateDir(
+    opts.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+  );
 
   const filePath = getSessionFilePath(stateDir, sessionId);
 
@@ -1351,8 +1351,9 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
     },
 
     resolveStateDir(args: { stateDir?: string; pluginRoot?: string }): string | undefined {
-      if (args.stateDir) return path.resolve(args.stateDir);
-      return getGlobalStateDir();
+      return normalizeSessionStateDir(
+        args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+      );
     },
 
     resolvePluginRoot(args: { pluginRoot?: string }): string | undefined {
