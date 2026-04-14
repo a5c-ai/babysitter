@@ -35,7 +35,6 @@ import {
   GREEN,
   CYAN,
   PROCESS_LIBRARY_READ_MAX_CHARS,
-  PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT,
   ASK_USER_QUESTION_SCHEMA,
   PI_PARENT_PROMPT_TIMEOUT_MS,
   // Functions
@@ -980,36 +979,16 @@ async function resolvePhase1ProcessLibraryRoot(
   };
 }
 
-function parseRipgrepMatchLine(
-  line: string,
-  root: string,
-): { path: string; line: number; excerpt: string } | null {
-  const match = line.match(/^(.*):([0-9]+):(.*)$/);
-  if (!match) {
-    return null;
-  }
-  const absolutePath = path.resolve(match[1] ?? "");
-  if (!isPathWithinRoot(root, absolutePath)) {
-    return null;
-  }
-  return {
-    path: path.relative(root, absolutePath) || path.basename(absolutePath),
-    line: Number(match[2] ?? "0"),
-    excerpt: (match[3] ?? "").trim(),
-  };
-}
-
 async function searchProcessLibrary(
   query: string,
   scope: ProcessLibraryToolScope = "binding",
-  limit = PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT,
 ): Promise<{
   scope: ProcessLibraryToolScope;
   root: string;
   libraryRoot: string;
   query: string;
   instructions: string;
-  matches: Array<any>;
+  matches: Array<unknown>;
 }> {
   const trimmedQuery = query.trim();
   const { root } = await resolvePhase1ProcessLibraryRoot(scope);
@@ -1731,7 +1710,6 @@ export async function runProcessDefinitionPhase(args: {
         const result = await searchProcessLibrary(
           params.query,
           params.scope ?? "binding",
-          params.limit,
         );
         writeVerboseData("phase1 tool babysitter_search_process_library result", result, 2000);
         return formatToolResult(
