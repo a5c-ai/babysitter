@@ -80,6 +80,8 @@ Read the pinned SDK version from `versions.json` when you need a local CLI:
 ```bash
 PLUGIN_ROOT="${OMP_PLUGIN_ROOT:-$(pwd)}"
 SDK_VERSION=$(node -e "try{const fs=require('fs');const path=require('path');const pluginRoot=process.env.OMP_PLUGIN_ROOT||process.env.PLUGIN_ROOT||process.cwd();const probes=[path.join(pluginRoot,'versions.json'),path.join(pluginRoot,'plugins','babysitter-omp','versions.json'),path.join(pluginRoot,'node_modules','@a5c-ai','babysitter-omp','versions.json'),path.join(process.cwd(),'node_modules','@a5c-ai','babysitter-omp','versions.json')];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
+npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+
 CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 

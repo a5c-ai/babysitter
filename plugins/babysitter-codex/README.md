@@ -35,6 +35,10 @@ codex
 
 then navigate to the 'babysitter' entry and select 'Install'.
 
+If Codex was already open when you ran `install --global`, start a new thread
+after installing from `/plugins` before expecting `babysitter:*` skills such as
+`$babysitter:babysit` or `$babysitter:call` to appear in the mention picker.
+
 ## Integration Model
 
 The plugin provides:

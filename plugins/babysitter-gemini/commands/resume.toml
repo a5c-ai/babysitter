@@ -1,0 +1,3 @@
+description = "Resume orchestrating of a babysitter run. use this command to resume babysitting a complex workflow."
+
+prompt = "Invoke the babysitter:babysit skill (using the Skill tool) and follow its instructions (SKILL.md). to resume a run.\nif no run was given, discover the runs and suggest which incomplete run to resume based on the run's status, inputs, process , etc."

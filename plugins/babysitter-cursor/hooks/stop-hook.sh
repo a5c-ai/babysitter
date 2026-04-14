@@ -19,6 +19,11 @@ LOG_FILE="$LOG_DIR/babysitter-stop-hook.log"
 export CURSOR_PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${PLUGIN_ROOT}}"
 export BABYSITTER_STATE_DIR="${STATE_DIR}"
 
+if ! command -v babysitter &>/dev/null; then 
+  # No CLI available — exit 0 (no-op, proceed with original command)
+  exit 0
+fi
+
 mkdir -p "$LOG_DIR" 2>/dev/null
 
 blog() {
@@ -33,16 +38,7 @@ blog "Hook script invoked"
 blog "PLUGIN_ROOT=$PLUGIN_ROOT"
 blog "STATE_DIR=$STATE_DIR"
 
-# Resolve babysitter CLI if not on PATH
-if ! command -v babysitter &>/dev/null; then
-  if [ -x "$HOME/.local/bin/babysitter" ]; then
-    export PATH="$HOME/.local/bin:$PATH"
-  else
-    SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
-    babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
-    export -f babysitter
-  fi
-fi
+
 
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/cursor-stop-hook-$$.json")
 cat > "$INPUT_FILE"

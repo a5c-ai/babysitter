@@ -81,6 +81,7 @@ function main() {
 
   warnWindowsHooks();
   console.log('[team-install] complete');
+  console.log('[team-install] If Codex was already open, start a new thread before expecting `babysitter:*` skills such as `$babysitter:babysit` or `$babysitter:call` to appear.');
 }
 
 main();

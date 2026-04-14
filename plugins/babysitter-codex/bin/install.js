@@ -37,6 +37,7 @@ function main() {
     warnWindowsHooks();
     console.log('[babysitter] Installation complete!');
     console.log('[babysitter] Restart Codex to pick up the installed plugin and config changes, then run Codex and install Babysitter from `/plugins`.');
+    console.log('[babysitter] If Codex was already open, start a new thread after install before expecting `babysitter:*` skills such as `$babysitter:babysit` or `$babysitter:call` to appear.');
   } catch (err) {
     console.error(`[babysitter] Failed to install plugin: ${err.message}`);
     process.exitCode = 1;

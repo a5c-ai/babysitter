@@ -317,12 +317,18 @@ function ensureExecutable(filePath) {
   }
 }
 
+function getMarketplaceRootDir(marketplacePath) {
+  const pluginsDir = path.dirname(marketplacePath);
+  const dotAgentsDir = path.dirname(pluginsDir);
+  return path.dirname(dotAgentsDir);
+}
+
 function normalizeMarketplaceSourcePath(marketplacePath, pluginSourcePath) {
-  let next = path.relative(path.dirname(marketplacePath), pluginSourcePath);
+  let next = path.relative(getMarketplaceRootDir(marketplacePath), pluginSourcePath);
   next = String(next || '').replace(/\\/g, '/');
   if (!next || next === '.' || next.startsWith('../')) {
     throw new Error(
-      `Plugin source path must live under ${path.dirname(marketplacePath)} so Codex can load it via a ./-prefixed marketplace entry.`,
+      `Plugin source path must live under ${getMarketplaceRootDir(marketplacePath)} so Codex can load it via a ./-prefixed marketplace entry.`,
     );
   }
   if (!next.startsWith('./')) {

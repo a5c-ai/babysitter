@@ -18,6 +18,8 @@ Read the SDK version from `versions.json` to ensure version compatibility:
 
 ```bash
 SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${CODEX_PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
+npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+
 CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 

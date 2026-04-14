@@ -50,7 +50,8 @@ function assertExists(root, relativePath) {
 }
 
 function toMarketplaceRelativePath(marketplacePath, pluginRoot) {
-  const rel = path.relative(path.dirname(marketplacePath), pluginRoot).replace(/\\/g, '/');
+  const marketplaceRoot = path.dirname(path.dirname(path.dirname(marketplacePath)));
+  const rel = path.relative(marketplaceRoot, pluginRoot).replace(/\\/g, '/');
   return rel.startsWith('./') || rel.startsWith('../') ? rel : `./${rel}`;
 }
 

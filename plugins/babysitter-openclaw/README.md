@@ -290,6 +290,8 @@ Read the pinned SDK version from `versions.json`:
 ```bash
 PLUGIN_ROOT="$(pwd)"
 SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
+npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+
 CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 ```
 

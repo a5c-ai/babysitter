@@ -34,6 +34,7 @@ Read the SDK version from \`versions.json\` to ensure version compatibility:
 \`\`\`bash
 PLUGIN_ROOT="\${OPENCLAW_PLUGIN_ROOT:-\$(pwd)}"
 SDK_VERSION=$(node -e "try{const fs=require('fs');const path=require('path');const pluginRoot=process.env.OPENCLAW_PLUGIN_ROOT||process.env.PLUGIN_ROOT||process.cwd();const probes=[path.join(pluginRoot,'versions.json'),path.join(pluginRoot,'plugins','babysitter-openclaw','versions.json'),path.join(pluginRoot,'node_modules','@a5c-ai','babysitter-openclaw','versions.json'),path.join(process.cwd(),'node_modules','@a5c-ai','babysitter-openclaw','versions.json')];for(const probe of probes){if(fs.existsSync(probe)){console.log(JSON.parse(fs.readFileSync(probe,'utf8')).sdkVersion||'latest');process.exit(0)}}console.log('latest')}catch{console.log('latest')}")
+npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
 CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"
 \`\`\`
 
