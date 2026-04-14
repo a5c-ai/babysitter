@@ -11,6 +11,11 @@ import { createStateCacheSnapshot, writeStateCache } from "../../runtime/replay/
 import * as orchestrateIterationModule from "../../runtime/orchestrateIteration";
 import * as runFilesModule from "../../storage/runFiles";
 import { deriveCompletionProof } from "../completionProof";
+import {
+  __resetCacheForTests,
+  __setAncestorResolverForTests,
+  getSessionMarkerPath,
+} from "../../harness/sessionMarker";
 
 const realReadRunMetadata = readRunMetadata;
 
@@ -20,6 +25,9 @@ describe("babysitter run:create CLI", () => {
   let errorSpy: ReturnType<typeof vi.spyOn>;
   const sessionEnvKeys = [
     "BABYSITTER_SESSION_ID",
+    "BABYSITTER_GLOBAL_STATE_DIR",
+    "BABYSITTER_TRUST_ENV_SESSION",
+    "CLAUDE_ENV_FILE",
     "CODEX_THREAD_ID",
     "CODEX_SESSION_ID",
     "CODEX_PLUGIN_ROOT",
@@ -32,6 +40,9 @@ describe("babysitter run:create CLI", () => {
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     savedSessionEnv = {
       BABYSITTER_SESSION_ID: process.env.BABYSITTER_SESSION_ID,
+      BABYSITTER_GLOBAL_STATE_DIR: process.env.BABYSITTER_GLOBAL_STATE_DIR,
+      BABYSITTER_TRUST_ENV_SESSION: process.env.BABYSITTER_TRUST_ENV_SESSION,
+      CLAUDE_ENV_FILE: process.env.CLAUDE_ENV_FILE,
       CODEX_THREAD_ID: process.env.CODEX_THREAD_ID,
       CODEX_SESSION_ID: process.env.CODEX_SESSION_ID,
       CODEX_PLUGIN_ROOT: process.env.CODEX_PLUGIN_ROOT,
@@ -51,6 +62,8 @@ describe("babysitter run:create CLI", () => {
         process.env[key] = savedSessionEnv[key];
       }
     }
+    __resetCacheForTests();
+    __setAncestorResolverForTests(undefined);
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
 
@@ -125,6 +138,50 @@ describe("babysitter run:create CLI", () => {
       runDir,
       entry: `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`,
     });
+  });
+
+  it("binds claude-code runs to the current marker-backed session instead of a leaked BABYSITTER_SESSION_ID", async () => {
+    const entryFile = await writeEntrypoint("processes/claude-session.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-state-"));
+    const currentSessionId = "current-claude-session";
+    const leakedSessionId = "leaked-background-shell-session";
+
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    process.env.BABYSITTER_SESSION_ID = leakedSessionId;
+    __resetCacheForTests();
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+    const markerPath = getSessionMarkerPath("claude-code", process.pid);
+    await fs.mkdir(path.dirname(markerPath), { recursive: true });
+    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/claude-session",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "claude-code",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({
+      harness: "claude-code",
+      sessionId: currentSessionId,
+      resolvedFrom: "pid-marker",
+    });
+    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${currentSessionId}.md`);
+    await expect(
+      fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
+    ).resolves.toBeUndefined();
+
+    await fs.rm(globalStateRoot, { recursive: true, force: true });
   });
 
   it("describes dry-run plans without creating run directories", async () => {

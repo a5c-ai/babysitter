@@ -212,6 +212,33 @@ function subscribeVerbosePiEvents(
   }
 }
 
+function resolveHarnessSessionIdForBinding(args: {
+  selectedHarnessName: string;
+}, adapter: NonNullable<ReturnType<typeof getAdapterByName>>, orchestrationSession?: PiSessionHandle | null): string | undefined {
+  if (
+    isInternalHarness(args.selectedHarnessName) &&
+    orchestrationSession?.sessionId
+  ) {
+    process.env.PI_SESSION_ID = process.env.PI_SESSION_ID || orchestrationSession.sessionId;
+    process.env.OMP_SESSION_ID = process.env.OMP_SESSION_ID || orchestrationSession.sessionId;
+  }
+
+  const resolved = adapter.resolveSessionId({});
+  if (resolved) {
+    return resolved;
+  }
+
+  if (args.selectedHarnessName === "codex") {
+    return process.env.CODEX_THREAD_ID || process.env.CODEX_SESSION_ID;
+  }
+
+  if (isInternalHarness(args.selectedHarnessName)) {
+    return orchestrationSession?.sessionId;
+  }
+
+  return undefined;
+}
+
 // ── Effect Resolution ────────────────────────────────────────────────
 
 export async function resolveEffect(
@@ -856,7 +883,7 @@ export async function runOrchestrationPhase(args: {
         { category: ErrorCategory.Configuration },
       );
     }
-    const sessionId = adapter.resolveSessionId({}) || process.env.CODEX_THREAD_ID || process.env.CODEX_SESSION_ID;
+    const sessionId = resolveHarnessSessionIdForBinding(args, adapter);
     if (!sessionId) {
       throw new BabysitterRuntimeError(
         "MissingHarnessSessionId",
@@ -1380,14 +1407,11 @@ export async function runOrchestrationPhase(args: {
             { category: ErrorCategory.Configuration },
           );
         }
-        if (
-          isInternalHarness(args.selectedHarnessName) &&
-          orchestrationSession?.sessionId
-        ) {
-          process.env.PI_SESSION_ID = process.env.PI_SESSION_ID || orchestrationSession.sessionId;
-          process.env.OMP_SESSION_ID = process.env.OMP_SESSION_ID || orchestrationSession.sessionId;
-        }
-        const sessionId = adapter.resolveSessionId({}) || orchestrationSession?.sessionId;
+        const sessionId = resolveHarnessSessionIdForBinding(
+          args,
+          adapter,
+          orchestrationSession,
+        );
         if (!sessionId) {
           throw new BabysitterRuntimeError(
             "MissingHarnessSessionId",

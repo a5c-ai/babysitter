@@ -9,6 +9,11 @@ import * as path from "node:path";
 import type { HarnessDiscoveryResult, HarnessInvokeResult } from "../../../harness/types";
 import type { IterationResult } from "../../../runtime/types";
 import { RunFailedError } from "../../../runtime/exceptions";
+import {
+  __resetCacheForTests,
+  __setAncestorResolverForTests,
+  getSessionMarkerPath,
+} from "../../../harness/sessionMarker";
 
 // ── Mocks ─────────────────────────────────────────────────────────────
 
@@ -327,6 +332,8 @@ describe("selectHarness", () => {
 
 describe("handleHarnessCreateRun", () => {
   let tempDirs: string[] = [];
+  let savedGlobalStateDir: string | undefined;
+  let savedBabysitterSessionId: string | undefined;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -347,6 +354,12 @@ describe("handleHarnessCreateRun", () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
     detectCallerHarnessMock.mockReturnValue(null);
+    savedGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    savedBabysitterSessionId = process.env.BABYSITTER_SESSION_ID;
+    delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    delete process.env.BABYSITTER_SESSION_ID;
+    __resetCacheForTests();
+    __setAncestorResolverForTests(undefined);
   });
 
   afterEach(async () => {
@@ -356,6 +369,18 @@ describe("handleHarnessCreateRun", () => {
       }),
     );
     tempDirs = [];
+    if (savedGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = savedGlobalStateDir;
+    }
+    if (savedBabysitterSessionId === undefined) {
+      delete process.env.BABYSITTER_SESSION_ID;
+    } else {
+      process.env.BABYSITTER_SESSION_ID = savedBabysitterSessionId;
+    }
+    __resetCacheForTests();
+    __setAncestorResolverForTests(undefined);
   });
 
   describe("Phase A: --process flag skips generation", () => {
@@ -2478,6 +2503,47 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(1);
+    });
+
+    it("binds claude-code orchestration to the current marker-backed session instead of a leaked BABYSITTER_SESSION_ID", async () => {
+      const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-claude-state-"));
+      tempDirs.push(globalStateRoot);
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+      process.env.BABYSITTER_SESSION_ID = "leaked-session-from-old-shell";
+      __resetCacheForTests();
+      __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+      const currentSessionId = "current-claude-session";
+      const markerPath = getSessionMarkerPath("claude-code", process.pid);
+      await fs.mkdir(path.dirname(markerPath), { recursive: true });
+      await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "claude-code" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-claude-marker",
+        runDir: "/tmp/runs/run-claude-marker",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleHarnessCreateRun({
+        processPath: "/tmp/process.js",
+        runsDir: "/tmp/runs",
+        harness: "claude-code",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      await expect(
+        fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
+      ).resolves.toBeUndefined();
     });
   });
 
