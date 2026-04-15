@@ -8,6 +8,7 @@
 
 import * as path from "node:path";
 import * as readline from "node:readline";
+import { statSync } from "node:fs";
 import { Type } from "@sinclair/typebox";
 import { invokeHarness } from "../../harness/invoker";
 import { createAgenticToolDefinitions } from "../../harness/agenticTools";
@@ -94,6 +95,7 @@ const PROCESS_MODULE_LOAD_RETRY_DELAYS_MS = process.env.VITEST
  */
 export const MAX_CONSECUTIVE_TIMEOUTS = 3;
 export const MAX_CONSECUTIVE_STALLS = 2;
+export const MAX_CONSECUTIVE_PROCESS_ERROR_STALLS = 5;
 
 /**
  * Maximum number of consecutive process-error recoveries before the
@@ -1290,6 +1292,7 @@ export async function runOrchestrationPhase(args: {
     lastStatus: state.lastIterationResult?.status,
     hasAskUserQuestionResponse: Boolean(state.lastAskUserQuestionResponse),
     finished: Boolean(state.finished),
+    processFileFingerprint: readProcessFileFingerprint(args.processPath),
   });
 
   const orchestrationStateAdvanced = (
@@ -1305,7 +1308,8 @@ export async function runOrchestrationPhase(args: {
       after.pendingResultIds !== before.pendingResultIds ||
       after.lastStatus !== before.lastStatus ||
       after.hasAskUserQuestionResponse !== before.hasAskUserQuestionResponse ||
-      after.finished !== before.finished
+      after.finished !== before.finished ||
+      after.processFileFingerprint !== before.processFileFingerprint
     );
   };
 
@@ -2377,6 +2381,7 @@ export async function runOrchestrationPhase(args: {
 
     let consecutiveTimeouts = 0;
     let consecutiveStalls = 0;
+    let consecutiveProcessErrorStalls = 0;
     while (state.iteration < args.maxIterations) {
       const terminal = ensureTerminalResult();
       if (terminal !== null) {
@@ -2438,17 +2443,34 @@ export async function runOrchestrationPhase(args: {
       if (orchestrationStateAdvanced(progressBeforeTurn)) {
         consecutiveTimeouts = 0;
         consecutiveStalls = 0;
+        consecutiveProcessErrorStalls = 0;
       } else {
-        consecutiveStalls += 1;
-        writeVerbose(
-          `[phase2] Agent stall detected (${consecutiveStalls}/${MAX_CONSECUTIVE_STALLS} consecutive)`,
-        );
-        if (consecutiveStalls >= MAX_CONSECUTIVE_STALLS) {
-          throw new BabysitterRuntimeError(
-            "OrchestrationAgentStalled",
-            `The orchestration agent did not advance the run or resolve pending effects for ${consecutiveStalls} consecutive turns.`,
-            { category: ErrorCategory.Runtime },
+        if (state.lastIterationResult?.status === "process-error") {
+          consecutiveProcessErrorStalls += 1;
+          consecutiveStalls = 0;
+          writeVerbose(
+            `[phase2 recovery] Agent still repairing a recoverable process-error (${consecutiveProcessErrorStalls}/${MAX_CONSECUTIVE_PROCESS_ERROR_STALLS} consecutive prompts without retrying the run)`,
           );
+          if (consecutiveProcessErrorStalls >= MAX_CONSECUTIVE_PROCESS_ERROR_STALLS) {
+            throw new BabysitterRuntimeError(
+              "OrchestrationAgentStalled",
+              `The orchestration agent did not retry the run or repair the process after ${consecutiveProcessErrorStalls} consecutive recovery prompts.`,
+              { category: ErrorCategory.Runtime },
+            );
+          }
+        } else {
+          consecutiveProcessErrorStalls = 0;
+          consecutiveStalls += 1;
+          writeVerbose(
+            `[phase2] Agent stall detected (${consecutiveStalls}/${MAX_CONSECUTIVE_STALLS} consecutive)`,
+          );
+          if (consecutiveStalls >= MAX_CONSECUTIVE_STALLS) {
+            throw new BabysitterRuntimeError(
+              "OrchestrationAgentStalled",
+              `The orchestration agent did not advance the run or resolve pending effects for ${consecutiveStalls} consecutive turns.`,
+              { category: ErrorCategory.Runtime },
+            );
+          }
         }
       }
     }
@@ -2538,5 +2560,13 @@ export async function runOrchestrationPhase(args: {
     await Promise.allSettled(
       Array.from(activePiSessions).map((session) => shutdownPiSession(session)),
     );
+  }
+}
+function readProcessFileFingerprint(processPath: string): string | undefined {
+  try {
+    const stat = statSync(processPath);
+    return `${stat.size}:${Math.trunc(stat.mtimeMs)}`;
+  } catch {
+    return undefined;
   }
 }
