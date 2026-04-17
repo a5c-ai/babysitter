@@ -3,7 +3,18 @@
   "version": "0.0.187",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/hooks-proxy/core",
+    "packages/hooks-proxy/cli",
+    "packages/hooks-proxy/adapter-claude",
+    "packages/hooks-proxy/adapter-codex",
+    "packages/hooks-proxy/adapter-gemini",
+    "packages/hooks-proxy/adapter-copilot",
+    "packages/hooks-proxy/adapter-cursor",
+    "packages/hooks-proxy/adapter-pi",
+    "packages/hooks-proxy/adapter-oh-my-pi",
+    "packages/hooks-proxy/adapter-opencode",
+    "packages/hooks-proxy/adapter-openclaw"
   ],
   "scripts": {
     "postinstall": "node ./scripts/patch-webpackbar-progress-plugin.cjs",
