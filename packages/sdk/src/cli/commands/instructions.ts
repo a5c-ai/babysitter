@@ -9,9 +9,6 @@
 
 import { existsSync } from "node:fs";
 import {
-  createClaudeCodeContext,
-  createCodexContext,
-  createPiContext,
   composeBabysitSkillPrompt,
   composeProcessCreatePrompt,
   composeOrchestrationPrompt,
@@ -28,7 +25,11 @@ import {
   resolveActiveProcessLibrary,
   getDefaultProcessLibrarySpec,
 } from "../../processLibrary/active";
-import { getAdapterByName } from "../../harness/registry";
+import {
+  createPromptContextForHarness,
+  getAdapterByName,
+  KNOWN_HARNESSES,
+} from "../../harness/registry";
 import { getSessionFilePath } from "../../session/parse";
 
 export interface InstructionsCommandArgs {
@@ -38,17 +39,6 @@ export interface InstructionsCommandArgs {
   json: boolean;
   showStrata?: boolean;
 }
-
-/**
- * Legacy fallback map — used only when an adapter does not implement
- * `getPromptContext()`.  New harnesses should add the method to their
- * adapter instead of extending this map.
- */
-const KNOWN_HARNESSES: Record<string, (overrides?: Partial<PromptContext>) => PromptContext> = {
-  "claude-code": createClaudeCodeContext,
-  "codex": createCodexContext,
-  "pi": createPiContext,
-};
 
 type ComposerEntry = {
   fn: (ctx: PromptContext) => string;
@@ -121,29 +111,20 @@ const COMPOSERS: Record<InstructionsCommandArgs["subcommand"], ComposerEntry> = 
 
 /**
  * Resolve a PromptContext factory by harness name.
- *
- * Prefers the adapter's own `getPromptContext()` method when available,
- * falling back to the legacy KNOWN_HARNESSES map for adapters that have
- * not yet been updated.  Returns undefined for completely unknown names.
  */
 function resolveContextFactory(
   harness: string,
 ): ((overrides?: Partial<PromptContext>) => PromptContext) | undefined {
-  // Try adapter-based resolution first
-  const adapter = getAdapterByName(harness);
-  if (adapter?.getPromptContext) {
-    return (overrides?: Partial<PromptContext>) => {
-      const base = adapter.getPromptContext!({ interactive: overrides?.interactive });
-      // Merge any additional overrides beyond interactive
-      if (overrides) {
-        return { ...base, ...overrides };
-      }
-      return base;
-    };
+  if (!getAdapterByName(harness)?.getPromptContext) {
+    return undefined;
   }
-
-  // Fallback to legacy map
-  return KNOWN_HARNESSES[harness];
+  return (overrides?: Partial<PromptContext>) => {
+    const context = createPromptContextForHarness(harness, overrides);
+    if (!context) {
+      throw new Error(`Harness "${harness}" does not provide a prompt context.`);
+    }
+    return context;
+  };
 }
 
 /**
@@ -204,7 +185,7 @@ export async function handleInstructionsCommand(
 ): Promise<number> {
   const factory = resolveContextFactory(args.harness);
   if (!factory) {
-    const known = Object.keys(KNOWN_HARNESSES).join(", ");
+    const known = KNOWN_HARNESSES.map((spec) => spec.name).join(", ");
     if (args.json) {
       console.log(
         JSON.stringify({

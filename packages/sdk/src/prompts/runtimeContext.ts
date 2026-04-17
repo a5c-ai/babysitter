@@ -8,18 +8,7 @@
  */
 
 import type { PromptContext } from './types';
-import {
-  createClaudeCodeContext,
-  createCodexContext,
-  createGeminiCliContext,
-  createPiContext,
-  createGithubCopilotContext,
-  createCursorContext,
-  createOpenCodeContext,
-  createOhMyPiContext,
-  createOpenClawContext,
-  createInternalContext,
-} from './context';
+import { createPromptContextForHarness } from '../harness/registry';
 import { collectCapabilities, mergeCapabilities } from './capabilityCollector';
 import type { CapabilityCollectionOptions } from './capabilityCollector';
 
@@ -35,20 +24,6 @@ export interface RuntimeContextOptions {
   collectionOptions?: CapabilityCollectionOptions;
 }
 
-/** Map of harness names to their static context factories */
-const CONTEXT_FACTORIES: Record<string, (overrides?: Partial<PromptContext>) => PromptContext> = {
-  'claude-code': createClaudeCodeContext,
-  'codex': createCodexContext,
-  'gemini-cli': createGeminiCliContext,
-  'pi': createPiContext,
-  'github-copilot': createGithubCopilotContext,
-  'cursor': createCursorContext,
-  'opencode': createOpenCodeContext,
-  'oh-my-pi': createOhMyPiContext,
-  'openclaw': createOpenClawContext,
-  'internal': createInternalContext,
-};
-
 /**
  * Create a PromptContext enriched with runtime-collected capabilities.
  *
@@ -59,12 +34,15 @@ const CONTEXT_FACTORIES: Record<string, (overrides?: Partial<PromptContext>) => 
 export async function createRuntimePromptContext(
   options: RuntimeContextOptions,
 ): Promise<PromptContext> {
-  const factory = CONTEXT_FACTORIES[options.harness] ?? createClaudeCodeContext;
-  const baseCtx = factory({
-    ...options.baseContext,
-    // Preserve the requested harness name even when falling back to claude-code factory
-    ...(CONTEXT_FACTORIES[options.harness] ? {} : { harness: options.harness }),
-  });
+  const baseCtx =
+    createPromptContextForHarness(options.harness, options.baseContext) ??
+    createPromptContextForHarness('claude-code', {
+      ...options.baseContext,
+      harness: options.harness,
+    });
+  if (!baseCtx) {
+    throw new Error('Claude Code prompt context is not available.');
+  }
 
   const collected = await collectCapabilities({
     harness: options.harness,

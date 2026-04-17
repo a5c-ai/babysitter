@@ -9,8 +9,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleHookRun } from "../hookRun";
-import type { HookRunCommandArgs } from "../hookRun";
+import { handleHookRun } from "../hooks/run";
+import type { HookRunCommandArgs } from "../hooks/run";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -380,6 +380,7 @@ describe("handleHookRun stop", () => {
       iteration: 2,
       maxIterations: 100,
       runId,
+      runDir,
       runIds: [],
       startedAt: now,
       lastIterationAt: now,
@@ -403,6 +404,94 @@ describe("handleHookRun stop", () => {
     expect(output.decision).toBe("block");
     expect(output.systemMessage).toContain("iteration 3");
     expect(output.reason).toBeTruthy();
+  });
+
+  it("uses the session's stored absolute runDir when the hook runs from a different cwd", async () => {
+    const runId = "test-run-cross-cwd";
+    const actualRunsDir = path.join(tmpDir, "project-b", ".a5c", "runs");
+    const wrongRunsDir = path.join(tmpDir, "project-a", ".a5c", "runs");
+    const runDir = path.join(actualRunsDir, runId);
+    const journalDir = path.join(runDir, "journal");
+    await fs.mkdir(journalDir, { recursive: true });
+    await fs.mkdir(wrongRunsDir, { recursive: true });
+
+    const runMetadata = {
+      schemaVersion: "2026.01.run-metadata",
+      runId,
+      processId: "test-process",
+      entrypoint: { importPath: "/tmp/test.js", exportName: "process" },
+      layoutVersion: 1,
+      createdAt: new Date().toISOString(),
+    };
+    await fs.writeFile(path.join(runDir, "run.json"), JSON.stringify(runMetadata));
+
+    const event = {
+      type: "RUN_CREATED",
+      recordedAt: new Date().toISOString(),
+      data: { runId, processId: "test-process" },
+      checksum: "abc123",
+    };
+    await fs.writeFile(
+      path.join(journalDir, "000001.01ARZ3NDEKTSV4RRFFQ69G5FAV.json"),
+      JSON.stringify(event),
+    );
+
+    const sessionId = "cross-cwd-session";
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    const now = getCurrentTimestamp();
+    const state: SessionState = {
+      active: true,
+      iteration: 2,
+      maxIterations: 100,
+      runId,
+      runDir,
+      runIds: [],
+      startedAt: now,
+      lastIterationAt: now,
+      iterationTimes: [],
+    };
+    await writeSessionFile(filePath, state, "Continue orchestrating the run");
+
+    const transcriptPath = path.join(tmpDir, "transcript-cross-cwd.jsonl");
+    await fs.writeFile(transcriptPath, JSON.stringify({
+      type: "assistant",
+      message: { content: [{ type: "text", text: "I ran the iteration." }] },
+    }) + "\n");
+
+    const code = await callWithStdin(
+      JSON.stringify({ session_id: sessionId, transcript_path: transcriptPath }),
+      { ...baseArgs, stateDir, runsDir: wrongRunsDir },
+    );
+    expect(code).toBe(0);
+    const output = JSON.parse(getStdout().trim());
+    expect(output.decision).toBe("block");
+    expect(output.systemMessage).toContain("iteration 3");
+  });
+
+  it("fails loudly when the stop hook cannot resolve the run directory", async () => {
+    const sessionId = "missing-run-session";
+    const runId = "missing-run";
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    const now = getCurrentTimestamp();
+    const state: SessionState = {
+      active: true,
+      iteration: 2,
+      maxIterations: 100,
+      runId,
+      runIds: [],
+      startedAt: now,
+      lastIterationAt: now,
+      iterationTimes: [],
+    };
+    await writeSessionFile(filePath, state, "Continue orchestrating the run");
+
+    const code = await callWithStdin(
+      JSON.stringify({ session_id: sessionId }),
+      { ...baseArgs, stateDir, runsDir: path.join(tmpDir, "wrong-runs") },
+    );
+    expect(code).toBe(1);
+    expect(stderrChunks.join("")).toContain(`Run ${runId} not found`);
+    expect(getStdout().trim()).toBe("{}");
   });
 });
 

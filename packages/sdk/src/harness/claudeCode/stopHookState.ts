@@ -8,7 +8,7 @@ import { discoverSkillsInternal } from "../../cli/commands/skill";
 import {
   extractPromiseTag,
   parseTranscriptLastAssistantMessage,
-} from "../../cli/commands/session";
+} from "../../session/transcript";
 import { loadCompressionConfig } from "../../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../../compression/density-filter";
 import { getOrCompressFile } from "../../compression/library-cache";
@@ -70,28 +70,71 @@ export interface StopHookRunStateDetails {
   onlyBreakpointsPending: boolean;
   entrypointImportPath?: string;
   runDir: string;
+  lookupError?: string;
+}
+
+function resolveCandidateRunDir(
+  runId: string,
+  runsDir: string,
+  preferredRunDir: string | undefined,
+  log: HookLogger,
+): { runDir: string; lookupError?: string } {
+  const candidates: string[] = [];
+  if (preferredRunDir?.trim()) {
+    candidates.push(path.resolve(preferredRunDir));
+  }
+
+  if (path.isAbsolute(runId)) {
+    candidates.push(runId);
+  } else {
+    candidates.push(path.join(runsDir, runId));
+    candidates.push(path.resolve(path.join(".a5c", ".a5c", "runs", runId)));
+    candidates.push(path.resolve(path.join(".a5c", "runs", runId)));
+  }
+
+  const uniqueCandidates = candidates.filter((candidate, index) =>
+    candidates.findIndex((other) => path.resolve(other) === path.resolve(candidate)) === index,
+  );
+
+  for (const candidate of uniqueCandidates) {
+    if (existsSync(path.join(candidate, "run.json"))) {
+      if (preferredRunDir && path.resolve(candidate) === path.resolve(preferredRunDir)) {
+        log.info(`Resolved run via stored session path: ${candidate}`);
+      } else if (candidate !== uniqueCandidates[0]) {
+        log.info(`Run not found at ${uniqueCandidates[0]}, using fallback: ${candidate}`);
+      }
+      return { runDir: candidate };
+    }
+  }
+
+  const primary = uniqueCandidates[0];
+  return {
+    runDir: primary,
+    lookupError: `Run ${runId} not found at ${primary}`,
+  };
 }
 
 export async function resolveStopHookRunState(
-  runId: string,
-  runsDir: string,
-  log: HookLogger,
+  args: {
+    runId: string;
+    runsDir: string;
+    preferredRunDir?: string;
+    log: HookLogger;
+  },
 ): Promise<StopHookRunStateDetails> {
-  let runDir = path.isAbsolute(runId) ? runId : path.join(runsDir, runId);
+  const { runId, runsDir, preferredRunDir, log } = args;
+  const resolvedRun = resolveCandidateRunDir(runId, runsDir, preferredRunDir, log);
+  const runDir = resolvedRun.runDir;
 
-  if (!existsSync(path.join(runDir, "run.json")) && !path.isAbsolute(runId)) {
-    const alternatives = [
-      path.join(".a5c", ".a5c", "runs", runId),
-      path.join(".a5c", "runs", runId),
-    ];
-    for (const alt of alternatives) {
-      const resolved = path.resolve(alt);
-      if (resolved !== path.resolve(runDir) && existsSync(path.join(resolved, "run.json"))) {
-        log.info(`Run not found at ${runDir}, using fallback: ${resolved}`);
-        runDir = resolved;
-        break;
-      }
-    }
+  if (resolvedRun.lookupError) {
+    return {
+      runState: "",
+      completionProof: "",
+      pendingKinds: "",
+      onlyBreakpointsPending: false,
+      runDir,
+      lookupError: resolvedRun.lookupError,
+    };
   }
 
   let runState = "";
@@ -137,6 +180,7 @@ export async function resolveStopHookRunState(
     onlyBreakpointsPending,
     entrypointImportPath,
     runDir,
+    lookupError: runState ? undefined : `Unable to inspect run ${runId} at ${runDir}`,
   };
 }
 

@@ -1,17 +1,7 @@
 /**
- * GAP-PAR-009: Parallel Effect Execution Strategies.
- *
  * Strategy patterns applied to resolved parallel effect results:
  * all-or-nothing, best-effort, first-success, quorum.
- *
- * These strategies are post-resolution concerns — they apply AFTER
- * effects resolve, deciding what to return or throw. The replay
- * engine's ParallelPendingError contract is unaffected.
  */
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export type ParallelStrategyName =
   | "all-or-nothing"
@@ -20,7 +10,6 @@ export type ParallelStrategyName =
   | "quorum";
 
 export interface ParallelStrategyOptions {
-  /** Fraction of results that must succeed for quorum (0-1). Default: 0.5. */
   quorumThreshold?: number;
 }
 
@@ -31,10 +20,6 @@ export interface ParallelStrategyResult<T> {
   totalCount: number;
   successCount: number;
 }
-
-// ---------------------------------------------------------------------------
-// Strategy implementations
-// ---------------------------------------------------------------------------
 
 function allOrNothing<T>(
   results: T[],
@@ -57,10 +42,8 @@ function bestEffort<T>(
   results: T[],
   errors: Array<{ index: number; error: unknown }>,
 ): ParallelStrategyResult<T> {
-  const errorIndices = new Set(errors.map((e) => e.index));
-  const successCount = results.filter(
-    (_, i) => !errorIndices.has(i),
-  ).length;
+  const errorIndices = new Set(errors.map((entry) => entry.index));
+  const successCount = results.filter((_, index) => !errorIndices.has(index)).length;
 
   return {
     results,
@@ -75,12 +58,12 @@ function firstSuccess<T>(
   results: T[],
   errors: Array<{ index: number; error: unknown }>,
 ): ParallelStrategyResult<T> {
-  const errorIndices = new Set(errors.map((e) => e.index));
+  const errorIndices = new Set(errors.map((entry) => entry.index));
 
-  for (let i = 0; i < results.length; i++) {
-    if (!errorIndices.has(i) && results[i] !== undefined) {
+  for (let index = 0; index < results.length; index += 1) {
+    if (!errorIndices.has(index) && results[index] !== undefined) {
       return {
-        results: [results[i]],
+        results: [results[index]],
         errors,
         strategy: "first-success",
         totalCount: results.length,
@@ -89,13 +72,10 @@ function firstSuccess<T>(
     }
   }
 
-  // All failed
-  const allErrors = errors.map((e) =>
-    e.error instanceof Error ? e.error : new Error(String(e.error)),
+  const allErrors = errors.map((entry) =>
+    entry.error instanceof Error ? entry.error : new Error(String(entry.error)),
   );
-  throw allErrors.length > 0
-    ? allErrors[0]
-    : new Error("All parallel effects failed");
+  throw allErrors.length > 0 ? allErrors[0] : new Error("All parallel effects failed");
 }
 
 function quorum<T>(
@@ -104,14 +84,9 @@ function quorum<T>(
   options?: ParallelStrategyOptions,
 ): ParallelStrategyResult<T> {
   const threshold = options?.quorumThreshold ?? 0.5;
-  const errorIndices = new Set(errors.map((e) => e.index));
-  const successCount = results.filter(
-    (_, i) => !errorIndices.has(i),
-  ).length;
-
-  const required = results.length === 0
-    ? 1  // empty input cannot satisfy quorum
-    : Math.ceil(results.length * threshold);
+  const errorIndices = new Set(errors.map((entry) => entry.index));
+  const successCount = results.filter((_, index) => !errorIndices.has(index)).length;
+  const required = results.length === 0 ? 1 : Math.ceil(results.length * threshold);
 
   if (successCount < required) {
     throw new Error(
@@ -128,18 +103,6 @@ function quorum<T>(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/**
- * Apply a parallel execution strategy to resolved effect results.
- *
- * @param strategy - The strategy to apply
- * @param results - Array of resolved results (undefined for failed entries)
- * @param errors - Array of error records with index references
- * @param options - Strategy-specific options (e.g., quorumThreshold)
- */
 export function applyStrategy<T>(
   strategy: ParallelStrategyName,
   results: T[],
@@ -156,8 +119,8 @@ export function applyStrategy<T>(
     case "quorum":
       return quorum(results, errors, options);
     default: {
-      const _exhaustive: never = strategy;
-      throw new TypeError(`Unknown parallel strategy: ${String(_exhaustive)}`);
+      const exhaustive: never = strategy;
+      throw new TypeError(`Unknown parallel strategy: ${String(exhaustive)}`);
     }
   }
 }

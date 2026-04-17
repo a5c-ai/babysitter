@@ -12,8 +12,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleHookLog } from "../hookLog";
-import type { HookLogCommandArgs } from "../hookLog";
+import { handleHookLog } from "../hooks/log";
+import type { HookLogCommandArgs } from "../hooks/log";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";

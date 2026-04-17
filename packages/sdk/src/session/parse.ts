@@ -76,6 +76,11 @@ export function parseYamlFrontmatter(content: string): { frontmatter: Record<str
  * Parse session state from YAML frontmatter values.
  */
 export function parseSessionState(frontmatter: Record<string, string>): SessionState {
+  const parseString = (value: string | undefined, defaultValue: string): string => {
+    if (!value || value === 'undefined') return defaultValue;
+    return value;
+  };
+
   const parseNumber = (value: string | undefined, defaultValue: number): number => {
     if (!value) return defaultValue;
     const parsed = parseInt(value, 10);
@@ -104,7 +109,8 @@ export function parseSessionState(frontmatter: Record<string, string>): SessionS
     active: parseBoolean(frontmatter.active, DEFAULT_SESSION_STATE.active),
     iteration: parseNumber(frontmatter.iteration, DEFAULT_SESSION_STATE.iteration),
     maxIterations: parseNumber(frontmatter.max_iterations, DEFAULT_SESSION_STATE.maxIterations),
-    runId: frontmatter.run_id ?? DEFAULT_SESSION_STATE.runId,
+    runId: parseString(frontmatter.run_id, DEFAULT_SESSION_STATE.runId),
+    runDir: parseString(frontmatter.run_dir, '').trim() || undefined,
     runIds: parseStringArray(frontmatter.run_ids),
     startedAt: frontmatter.started_at ?? DEFAULT_SESSION_STATE.startedAt,
     lastIterationAt: frontmatter.last_iteration_at ?? DEFAULT_SESSION_STATE.lastIterationAt,

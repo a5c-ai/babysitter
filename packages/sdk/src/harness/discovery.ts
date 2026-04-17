@@ -18,126 +18,22 @@ import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
-import type { HarnessDiscoveryResult, HarnessCapability, CallerHarnessResult } from "./types";
-import { HarnessCapability as Cap } from "./types";
+import type {
+  CallerHarnessResult,
+  HarnessDiscoveryResult,
+  HarnessSpec,
+} from "./types";
+import { getHarnessDiscoverySpec, KNOWN_HARNESSES } from "./registry";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-/** Detection specification for a single known harness. */
-interface HarnessSpec {
-  /** Harness identifier (matches HarnessAdapter.name). */
-  name: string;
-  /** CLI command name used to invoke the harness. */
-  cli: string;
-  /**
-   * Environment variables that indicate we are running **inside** an active
-   * session of this harness (e.g. the harness spawned our process).
-   *
-   * Used exclusively by `detectCallerHarness()`, never by `discoverHarnesses()`.
-   */
-  callerEnvVars: string[];
-  /** Capabilities advertised by this harness. */
-  capabilities: HarnessCapability[];
-}
-
-// ---------------------------------------------------------------------------
-// Known harnesses
-// ---------------------------------------------------------------------------
-
-/** Detection specs for all supported harnesses. */
-export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
-  {
-    name: "claude-code",
-    cli: "claude",
-    callerEnvVars: ["CLAUDE_ENV_FILE"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.Mcp, Cap.HeadlessPrompt],
-  },
-  {
-    name: "codex",
-    cli: "codex",
-    callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
-    capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
-  },
-  {
-    name: "cursor",
-    cli: "cursor",
-    // CURSOR_PROJECT_DIR and CURSOR_VERSION are set by Cursor in hook execution
-    // contexts only (not in child processes spawned by hooks).
-    callerEnvVars: ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
-    capabilities: [Cap.HeadlessPrompt, Cap.StopHook, Cap.SessionBinding, Cap.Mcp],
-  },
-  {
-    name: "gemini-cli",
-    cli: "gemini",
-    callerEnvVars: ["GEMINI_CLI", "GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD"],
-    capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt, Cap.StopHook],
-  },
-  {
-    name: "github-copilot",
-    cli: "copilot",
-    // Note: official Copilot docs do not confirm these env vars are injected
-    // into hooks. They are used as best-effort discriminators for caller detection.
-    callerEnvVars: ["COPILOT_HOME", "COPILOT_GITHUB_TOKEN"],
-    // No StopHook — Copilot CLI uses in-turn orchestration model
-    capabilities: [Cap.HeadlessPrompt, Cap.SessionBinding, Cap.Mcp],
-  },
-  {
-    name: "opencode",
-    cli: "opencode",
-    callerEnvVars: ["BABYSITTER_SESSION_ID", "OPENCODE_CONFIG", "ACCOMPLISH_TASK_ID", "OPENCODE_CONFIG_DIR"],
-    capabilities: [Cap.HeadlessPrompt],
-  },
-  {
-    name: "oh-my-pi",
-    cli: "omp",
-    callerEnvVars: ["OMP_SESSION_ID", "OMP_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt, Cap.Mcp],
-  },
-  {
-    name: "openclaw",
-    cli: "openclaw",
-    callerEnvVars: ["OPENCLAW_SHELL", "OPENCLAW_HOME"],
-    capabilities: [Cap.SessionBinding, Cap.Mcp, Cap.HeadlessPrompt],
-  },
-  {
-    name: "pi",
-    cli: "pi",
-    callerEnvVars: ["PI_SESSION_ID", "PI_PLUGIN_ROOT"],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt],
-  },
-  {
-    name: "internal",
-    cli: "internal",
-    callerEnvVars: [],
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
-  },
-] as const;
-
-// ---------------------------------------------------------------------------
-// Config path detection
-// ---------------------------------------------------------------------------
-
-/** Map of harness names to config directory names to look for. */
-const CONFIG_PATHS: Record<string, string[]> = {
-  "claude-code": [".claude"],
-  codex: [".codex"],
-  pi: [".pi"],
-  "oh-my-pi": [".omp"],
-  "gemini-cli": [".gemini"],
-  "github-copilot": [".copilot", ".github"],
-  cursor: [".cursor", ".cursorrules"],
-  opencode: [".opencode"],
-  openclaw: [".openclaw"],
-};
+export { KNOWN_HARNESSES } from "./registry";
 
 /**
  * Checks whether a harness config directory exists in cwd or home.
  */
 async function detectConfig(harnessName: string): Promise<boolean> {
-  const configDirs = CONFIG_PATHS[harnessName];
-  if (!configDirs || configDirs.length === 0) return false;
+  const spec = getHarnessDiscoverySpec(harnessName);
+  const configDirs = spec?.configPaths ?? [];
+  if (configDirs.length === 0) return false;
   const cwd = process.cwd();
   const home = os.homedir();
   for (const dir of configDirs) {
@@ -233,12 +129,6 @@ export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
       platform: process.platform,
     };
   });
-
-  // The 'internal' harness is always available (built into the SDK).
-  const internalIdx = results.findIndex((r) => r.name === "internal");
-  if (internalIdx >= 0) {
-    results[internalIdx].installed = true;
-  }
 
   results.sort((a, b) => a.name.localeCompare(b.name));
   return results;

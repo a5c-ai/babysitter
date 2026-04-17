@@ -1,15 +1,17 @@
 import * as path from "node:path";
 import { loadJournal } from "../../storage/journal";
 import {
-  deleteSessionFile,
-  getCurrentTimestamp,
   getSessionFilePath,
   readSessionFile,
   sessionFileExists,
+} from "../../session/parse";
+import type { SessionState } from "../../session/types";
+import {
+  deleteSessionFile,
+  getCurrentTimestamp,
   updateSessionState,
   writeSessionFile,
-} from "../../session";
-import type { SessionState } from "../../session";
+} from "../../session/write";
 import {
   execFilePromise,
   getClaudeInstalledPluginsPath,
@@ -30,6 +32,7 @@ export async function bindClaudeCodeSession(
   opts: SessionBindOptions,
 ): Promise<SessionBindResult> {
   const { sessionId, runId, runsDir, maxIterations = 256, prompt, verbose } = opts;
+  const resolvedRunDir = path.resolve(opts.runDir);
   const stateDir = normalizeSessionStateDir(
     opts.stateDir ?? process.env.BABYSITTER_STATE_DIR,
   );
@@ -42,7 +45,16 @@ export async function bindClaudeCodeSession(
         const oldRunId = existing.state.runId;
         let isTerminal = false;
 
-        if (runsDir) {
+        if (existing.state.runDir) {
+          try {
+            const journal = await loadJournal(existing.state.runDir);
+            const hasCompleted = journal.some((e) => e.type === "RUN_COMPLETED");
+            const hasFailed = journal.some((e) => e.type === "RUN_FAILED");
+            isTerminal = hasCompleted || hasFailed;
+          } catch {
+            // Safe default
+          }
+        } else if (runsDir) {
           try {
             const oldRunDir = path.join(runsDir, oldRunId);
             const journal = await loadJournal(oldRunDir);
@@ -71,7 +83,7 @@ export async function bindClaudeCodeSession(
           };
         }
       } else {
-        await updateSessionState(filePath, { runId, active: true }, {
+        await updateSessionState(filePath, { runId, runDir: resolvedRunDir, active: true }, {
           state: existing.state,
           prompt: existing.prompt,
         });
@@ -91,6 +103,7 @@ export async function bindClaudeCodeSession(
     iteration: 1,
     maxIterations,
     runId,
+    runDir: resolvedRunDir,
     runIds: [],
     startedAt: nowTs,
     lastIterationAt: nowTs,

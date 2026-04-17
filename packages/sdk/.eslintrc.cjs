@@ -18,6 +18,10 @@ module.exports = {
   ],
   ignorePatterns: ["**/dist/**", "node_modules/**", "**/__tests__/**"],
   rules: {
+    "max-lines": [
+      "warn",
+      { "max": 500, "skipBlankLines": false, "skipComments": false }
+    ],
     "@typescript-eslint/no-unused-vars": [
       "error",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }

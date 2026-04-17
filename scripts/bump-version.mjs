@@ -24,6 +24,7 @@ const packageManifests = [
   { path: "package.json" },
   { path: "packages/sdk/package.json" },
   { path: "packages/babysitter/package.json" },
+  { path: "packages/babysitter-harness/package.json" },
 ];
 
 const pluginManifests = [
@@ -349,6 +350,10 @@ if (existsSync(lockPath)) {
   if (lock.packages && lock.packages[babysitterWorkspaceKey]) {
     lock.packages[babysitterWorkspaceKey].version = newVersion;
   }
+  const harnessWorkspaceKey = "packages/babysitter-harness";
+  if (lock.packages && lock.packages[harnessWorkspaceKey]) {
+    lock.packages[harnessWorkspaceKey].version = newVersion;
+  }
   const sdkManifest = manifests.find(
     (manifest) => manifest.path === "packages/sdk/package.json",
   );
@@ -367,6 +372,16 @@ if (existsSync(lockPath)) {
     const babysitterNodeModulesKey = `node_modules/${babysitterName}`;
     if (lock.packages && lock.packages[babysitterNodeModulesKey]) {
       lock.packages[babysitterNodeModulesKey].version = newVersion;
+    }
+  }
+  const harnessManifest = manifests.find(
+    (manifest) => manifest.path === "packages/babysitter-harness/package.json",
+  );
+  const harnessName = harnessManifest?.data?.name;
+  if (harnessName) {
+    const harnessNodeModulesKey = `node_modules/${harnessName}`;
+    if (lock.packages && lock.packages[harnessNodeModulesKey]) {
+      lock.packages[harnessNodeModulesKey].version = newVersion;
     }
   }
   writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);

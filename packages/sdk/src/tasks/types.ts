@@ -133,7 +133,7 @@ export interface TaskInvokeOptions {
   /**
    * Stable invocation key for retry/idempotent patterns. When provided, the ReplayCursor
    * is NOT advanced — all calls with the same stableKey resolve to the same effect slot.
-   * Use dotted-namespace kebab-case (e.g., 'phase1.fetch-data') unique within the process.
+   * Use dotted-namespace kebab-case (e.g., 'bootstrap.fetch-data') unique within the process.
    * This prevents the phantom duplicate effects bug when ctx.task() is inside a retry loop.
    */
   stableKey?: string;

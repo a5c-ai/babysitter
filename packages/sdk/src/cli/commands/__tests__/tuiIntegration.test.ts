@@ -7,10 +7,10 @@ import { nextUlid } from "../../../storage/ulids";
 import { createBabysitterCli } from "../../main";
 
 /**
- * Integration tests for TUI dashboard CLI flags (--tree, --rich).
+ * Integration tests for CLI tree/rich output flags.
  */
 
-describe("GAP-UX-001 Integration: TUI CLI flags", () => {
+describe("GAP-UX-001 Integration: CLI tree/rich flags", () => {
   let testDir: string;
   let runDir: string;
 
@@ -114,17 +114,6 @@ describe("GAP-UX-001 Integration: TUI CLI flags", () => {
       } finally {
         consoleSpy.mockRestore();
       }
-    });
-  });
-
-  describe("SDK public API", () => {
-    it("exports dashboard module", async () => {
-      const sdk = await import("../../../index");
-      expect(sdk.dashboard).toBeDefined();
-      expect(typeof sdk.dashboard.renderEffectTree).toBe("function");
-      expect(typeof sdk.dashboard.renderEventMessage).toBe("function");
-      expect(typeof sdk.dashboard.renderStatusLine).toBe("function");
-      expect(typeof sdk.dashboard.renderTable).toBe("function");
     });
   });
 });

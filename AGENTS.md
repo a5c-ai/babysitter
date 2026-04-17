@@ -26,7 +26,7 @@ npm run test --workspace=@a5c-ai/babysitter-sdk     # vitest run (all tests)
 npm run test:watch --workspace=@a5c-ai/babysitter-sdk  # vitest watch mode (script name: test:watch)
 cd packages/sdk && npx vitest run src/runtime/__tests__/someFile.test.ts  # Single test file
 cd packages/sdk && npm run smoke:cli                # CLI smoke test
-babysitter mcp:serve [--json]                        # Start MCP server over stdio
+npm run build --workspace=@a5c-ai/babysitter-harness # Build optional harness runtime CLI
 ```
 
 ### Babysitter CLI Reference
@@ -41,20 +41,14 @@ babysitter run:repair-journal <runDir> [--runs-dir <dir>] [--json] [--dry-run]
 babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
 babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
 
+babysitter session:whoami [--harness <name>] [--json]
+babysitter session:resume --session-id <id> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
+babysitter session:cleanup [--harness <name>] [--dry-run] [--runs-dir <dir>] [--json]
+
 # Task Management
 babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
 babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
 babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
-
-# Session Management
-babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
-babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--force] [--runs-dir <dir>] [--json]
-babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
-babysitter session:state --session-id <id> --state-dir <dir> [--json]
-babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
-babysitter session:check-iteration --session-id <id> --state-dir <dir> [--json]
-babysitter session:last-message --transcript-path <file> [--json]
-babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
 
 # Skill Discovery
 babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
@@ -63,25 +57,34 @@ babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--j
 # Harness Management
 babysitter harness:discover [--json]
 babysitter harness:list [--json]                      # Alias for harness:discover
-babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
-babysitter harness:create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
-babysitter harness:call [...]                         # Alias for harness:create-run
-babysitter harness:yolo [...]                         # Alias for harness:create-run --non-interactive
-babysitter harness:plan [...]                         # Alias for harness:create-run, stops after Phase 1
-babysitter harness:forever [...]                      # Alias for harness:create-run, infinite loop process
-babysitter harness:resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
-babysitter harness:resume [...]                       # Alias for harness:resume-run
-babysitter harness:retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:help [<topic>]
-babysitter harness:observe [--workspace <dir>]
-babysitter harness:user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter harness:project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
 babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
 babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
+
+# Optional Harness Runtime CLI (`@a5c-ai/babysitter-harness`)
+babysitter-harness invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
+babysitter-harness create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+babysitter-harness call [...]                         # Alias for create-run
+babysitter-harness yolo [...]                         # Alias for create-run --non-interactive
+babysitter-harness plan [...]                         # Alias for create-run, stops after PhasePlanProcess
+babysitter-harness forever [...]                      # Alias for create-run, infinite loop process
+babysitter-harness resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
+babysitter-harness resume [...]                       # Alias for resume-run
+babysitter-harness retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
+babysitter-harness daemon:start [--workspace <dir>] [--daemon-dir <dir>] [--config-path <path>] [--foreground] [--json]
+babysitter-harness daemon:stop [--daemon-dir <dir>] [--grace-period-ms <n>] [--json]
+babysitter-harness daemon:status [--daemon-dir <dir>] [--json]
+babysitter-harness cost:stats [runId] [--all] [--runs-dir <dir>] [--json]
+babysitter-harness start-server [--transport <stdio|websocket>] [--port <n>] [--host <host>] [--json]
+babysitter-harness help [<topic>]
+babysitter-harness observe [--workspace <dir>] [--tui]
+babysitter-harness user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-harness tui [--run-id <id>] [--verbosity <level>] [--workspace <dir>] [--json]
 
 # Plugin Management
 babysitter plugin:install [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
@@ -134,13 +137,12 @@ babysitter instructions:breakpoint-handling --harness <name> [--interactive|--no
 
 # Utilities
 babysitter compress-output <command and args...>
-babysitter mcp:serve [--json]
 babysitter health [--json] [--verbose]
 babysitter configure [show|validate|paths] [--json] [--defaults-only]
 babysitter version
 ```
 
-Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `harness:*`, `session:init`, `mcp:serve`, `compress-output`, etc.), `--version`/`-v`.
+Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `harness:install`, `compress-output`, etc.), `--version`/`-v`.
 
 ### Catalog (`packages/catalog` / `process-library-catalog`)
 
@@ -171,7 +173,8 @@ Config: `testTimeout: 30000`, `hookTimeout: 300000`, `fileParallelism: false`, J
 | Package | npm name | Role |
 |---------|----------|------|
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core: runtime, storage, tasks, CLI, hooks, testing, config. CJS. |
-| `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage re-exporting SDK. Provides `babysitter` CLI. |
+| `packages/babysitter` | `@a5c-ai/babysitter` | Core CLI package. Provides `babysitter` CLI. |
+| `packages/babysitter-harness` | `@a5c-ai/babysitter-harness` | Optional harness runtime CLI. Provides `babysitter-harness`. |
 | `packages/catalog` | `process-library-catalog` | Next.js 16 app (React 19, SQLite, Radix UI, Tailwind). |
 
 ## Harness Plugin Packages (`plugins/`)
@@ -205,7 +208,7 @@ All harness plugins use the unified plugin name `babysitter` in their manifests.
 - **`prompts/`** -- Composable harness-parameterized prompt generation: PromptContext, per-harness context factories, section render functions, template renderer.
 - **`session/`** -- YAML-frontmatter session state management for orchestration lifecycle (init/associate/resume/update/delete) with timing guards.
 - **`utils/`** -- Async context compression via dynamically-loaded ESM engine with source-code detection.
-- **`cli/`** -- Commands: `run:create|status|events|rebuild-state|repair-journal|iterate|execute-tasks`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration|last-message|iteration-message`, `skill:discover|fetch-remote`, `harness:discover|list|invoke|create-run|call|yolo|plan|forever|resume-run|resume|retrospect|cleanup|assimilate|doctor|contrib|help|observe|user-install|project-install|install|install-plugin`, `plugin:install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry`, `process-library:clone|update|use|active`, `profile:read|write|merge|render`, `tokens:stats`, `compression:status|toggle|set|reset`, `log`, `hook:log|run`, `compress-output`, `instructions:babysit-skill|process-create|orchestrate|breakpoint-handling`, `mcp:serve`, `health`, `configure`, `version`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `harness:*`, `session:init`, `mcp:serve`, `compress-output`, etc.), `--version`/`-v`.
+- **`cli/`** -- Core commands: `run:create|status|events|rebuild-state|repair-journal|iterate|execute-tasks`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration|last-message|iteration-message|whoami|cleanup`, `skill:discover|fetch-remote`, `harness:discover|list|install|install-plugin`, `plugin:install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry`, `process-library:clone|update|use|active`, `profile:read|write|merge|render`, `tokens:stats`, `compression:status|toggle|set|reset`, `log`, `hook:log|run`, `compress-output`, `instructions:babysit-skill|process-create|orchestrate|breakpoint-handling`, `health`, `configure`, `version`. Runtime orchestration commands live in `@a5c-ai/babysitter-harness`: `discover|list|invoke|create-run|call|yolo|plan|forever|resume-run|resume|retrospect|cleanup|assimilate|doctor|contrib|anycli|session-history|daemon:start|daemon:stop|daemon:status|cost:stats|start-server|help|observe|user-install|project-install|tui`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `compress-output`, etc.), `--version`/`-v`.
 - **`mcp/`** -- MCP server: `createBabysitterMcpServer`, tool handlers (runs, tasks, sessions, discovery), stdio transport.
 - **`hooks/`** -- 13 hook types: `on-run-start`, `on-run-complete`, `on-run-fail`, `on-task-start`, `on-task-complete`, `on-step-dispatch`, `on-iteration-start`, `on-iteration-end`, `on-breakpoint`, `pre-commit`, `pre-branch`, `post-planning`, `on-score`. Dispatcher: `callHook(hookType, payload, options)`.
 - **`harness/`** -- Harness adapter abstraction and enrichment APIs. **types** (`HarnessAdapter`, `HarnessCapability` enum: Programmatic/SessionBinding/StopHook/Mcp/HeadlessPrompt, `HarnessDiscoveryResult`, `HarnessInvokeOptions`, `HarnessInvokeResult`, `PiSessionOptions`, `PiPromptResult`, `PiSessionEvent`, `SessionBindOptions`, `SessionBindResult`, `HookHandlerArgs`), **discovery** (`discoverHarnesses` -- parallel CLI detection via `Promise.allSettled`, `checkCliAvailable` -- single CLI probe via `which`/`where` + `--version`, `KNOWN_HARNESSES` -- specs for claude-code, codex, cursor, gemini-cli, github-copilot, opencode, oh-my-pi, pi), **invoker** (`invokeHarness` -- spawn harness CLI as child process with timeout/model/workspace flags, `buildHarnessArgs` -- pure arg builder, `HARNESS_CLI_MAP` -- flag mapping per harness), **piWrapper** (`createPiSession` -- factory for `PiSessionHandle`, `PiSessionHandle` class with `.prompt()`, `.steer()`, `.followUp()`, `.subscribe()`, `.executeBash()`, `.abort()`, `.dispose()`, lazy initialization, `PiEventListener` type), **registry** (`detectAdapter`, `getAdapterByName`, `listSupportedHarnesses`, `getAdapter`, `setAdapter`, `resetAdapter`), **adapters** (`createClaudeCodeAdapter`, `createCodexAdapter`, `createCursorAdapter`, `createGeminiCliAdapter`, `createGithubCopilotAdapter`, `createOhMyPiAdapter`, `createPiAdapter`, `createCustomAdapter`, `createNullAdapter`), **support modules** (`piSecureSandbox` -- secure sandbox for Pi execution, `agenticTools` -- agentic tool integration, `installSupport` -- harness installation helpers).

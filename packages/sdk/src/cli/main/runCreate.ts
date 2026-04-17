@@ -1,0 +1,367 @@
+import * as crypto from "node:crypto";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { createRun } from "../../runtime/createRun";
+import { rebuildStateCache } from "../../runtime/replay/stateCache";
+import type { IterationMetadata } from "../../runtime/types";
+import type { JsonRecord } from "../../storage/types";
+import { nextUlid } from "../../storage/ulids";
+import {
+  getAdapter,
+  getAdapterByName,
+  getSessionResolutionDetails,
+} from "../../harness";
+import { discoverFromProcessFile, discoverSkillsInternal } from "../commands/skill";
+import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
+import {
+  formatEntrypointSpecifier,
+  formatResolvedEntrypoint,
+  isJsonRecord,
+  logVerbose,
+  parseEntrypointSpecifier,
+  readInputsFile,
+  validateProcessEntrypoint,
+} from "./runSupport";
+import { formatIterationMetadata, readRunMetadataSafe } from "./runState";
+import type { ParsedArgs } from "./types";
+import { USAGE } from "./usage";
+
+export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.processId) {
+    console.error("--process-id is required for run:create");
+    console.error(USAGE);
+    return 1;
+  }
+  if (!parsed.entrySpecifier) {
+    console.error("--entry is required for run:create");
+    console.error(USAGE);
+    return 1;
+  }
+
+  let entrypoint;
+  try {
+    entrypoint = parseEntrypointSpecifier(parsed.entrySpecifier);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
+  }
+
+  const runsDir = collapseDoubledA5cRuns(path.resolve(parsed.runsDir));
+  const absoluteImportPath = path.resolve(entrypoint.importPath);
+  const resolvedEntry = formatResolvedEntrypoint(absoluteImportPath, entrypoint.exportName);
+  logVerbose("run:create", parsed, {
+    runsDir,
+    processId: parsed.processId,
+    entry: resolvedEntry,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+    request: parsed.requestId,
+    prompt: parsed.prompt,
+    processRevision: parsed.processRevision,
+    runId: parsed.runIdOverride,
+    inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : undefined,
+  });
+
+  let inputs: unknown = undefined;
+  if (parsed.inputsPath) {
+    try {
+      inputs = await readInputsFile(parsed.inputsPath);
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error));
+      return 1;
+    }
+  }
+
+  if (parsed.dryRun) {
+    const summary = {
+      dryRun: true,
+      runsDir,
+      processId: parsed.processId,
+      entry: resolvedEntry,
+      runId: parsed.runIdOverride ?? null,
+      request: parsed.requestId ?? null,
+      processRevision: parsed.processRevision ?? null,
+      inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : null,
+    };
+    if (parsed.json) {
+      console.log(JSON.stringify(summary, null, 2));
+    } else {
+      const parts = ["[run:create] dry-run", `runsDir=${runsDir}`, `processId=${parsed.processId}`, `entry=${resolvedEntry}`, `runId=${summary.runId ?? "auto"}`];
+      if (parsed.requestId) parts.push(`request=${parsed.requestId}`);
+      if (parsed.processRevision) parts.push(`processRevision=${parsed.processRevision}`);
+      if (summary.inputsPath) parts.push(`inputs=${summary.inputsPath}`);
+      console.log(parts.join(" "));
+    }
+    return 0;
+  }
+
+  try {
+    await validateProcessEntrypoint(absoluteImportPath, entrypoint.exportName);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
+  }
+
+  const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
+  const result = await createRun({
+    runsDir,
+    runId: parsed.runIdOverride,
+    request: parsed.requestId,
+    prompt: parsed.prompt,
+    harness: requestedHarness,
+    processRevision: parsed.processRevision,
+    process: {
+      processId: parsed.processId,
+      importPath: absoluteImportPath,
+      exportName: entrypoint.exportName,
+    },
+    inputs,
+    ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
+  });
+
+  const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
+  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined || (detectedAdapter && detectedAdapter.name !== "custom");
+  const adapter = shouldBindSession ? detectedAdapter : undefined;
+  if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
+    const message = `The "${adapter.name}" harness auto-detects session IDs. Do not pass --session-id explicitly when running inside ${adapter.name}.`;
+    if (parsed.json) {
+      console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message }));
+    } else {
+      process.stderr.write(`Error: ${message}\n`);
+    }
+    return 1;
+  }
+
+  let sessionBound;
+  if (adapter) {
+    const sessionId = adapter.resolveSessionId(parsed);
+    sessionBound = sessionId
+      ? await adapter.bindSession({
+          sessionId,
+          runId: result.runId,
+          runDir: result.runDir,
+          pluginRoot: adapter.resolvePluginRoot(parsed),
+          stateDir: parsed.stateDir,
+          runsDir: parsed.runsDir,
+          maxIterations: parsed.maxIterations,
+          prompt: parsed.prompt ?? "",
+          verbose: parsed.verbose,
+          json: parsed.json,
+        })
+      : {
+          harness: parsed.harness ?? adapter.name,
+          sessionId: "",
+          error: adapter.getMissingSessionIdHint?.() ?? "No session ID provided. Use --session-id or set BABYSITTER_SESSION_ID.",
+        };
+  } else if (parsed.sessionId !== undefined && parsed.harness) {
+    sessionBound = { harness: parsed.harness, sessionId: "", error: `Unsupported harness: ${parsed.harness}` };
+  }
+
+  let discoveredSkills: Array<{ name: string; file?: string }> | undefined;
+  let discoveredAgents: Array<{ name: string; file?: string }> | undefined;
+  const discoverPluginRoot = parsed.pluginRoot ?? adapter?.resolvePluginRoot(parsed);
+  if (discoverPluginRoot) {
+    try {
+      const processDiscovery = discoverFromProcessFile({ processFilePath: absoluteImportPath, pluginRoot: discoverPluginRoot });
+      if (processDiscovery) {
+        discoveredSkills = processDiscovery.skills;
+        discoveredAgents = processDiscovery.agents;
+      } else {
+        const discoverResult = await discoverSkillsInternal({
+          pluginRoot: discoverPluginRoot,
+          runId: result.runId,
+          runsDir: parsed.runsDir,
+          processPath: absoluteImportPath,
+        });
+        discoveredSkills = discoverResult.skills.map((skill) => ({ name: skill.name, file: skill.file }));
+        discoveredAgents = discoverResult.agents.map((agent) => ({ name: agent.name, file: agent.file }));
+      }
+    } catch {
+      // Discovery is best-effort.
+    }
+  }
+
+  const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
+  if (parsed.json) {
+    let sessionOut: unknown = sessionBound ?? undefined;
+    if (sessionBound && adapter?.name === "claude-code") {
+      const details = getSessionResolutionDetails("claude-code", parsed.sessionId);
+      if (details) {
+        sessionOut = {
+          ...sessionBound,
+          resolvedFrom: details.resolvedFrom,
+          ancestorPid: details.ancestorPid,
+          ancestorAlive: details.ancestorAlive,
+        };
+      }
+    }
+    console.log(
+      JSON.stringify(
+        {
+          runId: result.runId,
+          runDir: result.runDir,
+          entry: entrySpec,
+          session: sessionOut,
+          discoveredSkills: summarizeDiscovery(discoveredSkills, parsed.verbose),
+          discoveredAgents: summarizeDiscovery(discoveredAgents, parsed.verbose),
+        },
+        null,
+        2
+      )
+    );
+  } else {
+    console.log(`[run:create] runId=${result.runId} runDir=${result.runDir} entry=${entrySpec}`);
+    if (sessionBound?.error) {
+      console.error(`[run:create] Session binding error: ${sessionBound.error}`);
+    } else if (sessionBound) {
+      console.log(`[run:create] session=${sessionBound.sessionId} bound via ${sessionBound.harness} stateFile=${sessionBound.stateFile}`);
+    }
+  }
+  return sessionBound?.fatal ? 1 : 0;
+}
+
+function summarizeDiscovery(
+  entries: Array<{ name: string; file?: string }> | undefined,
+  verbose: boolean
+) {
+  if (verbose || !entries) {
+    return entries;
+  }
+  return { count: entries.length, names: entries.map((entry) => entry.name) };
+}
+
+export async function handleRunRebuildState(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:rebuild-state", parsed, { runDir, dryRun: parsed.dryRun, json: parsed.json });
+  if (!(await readRunMetadataSafe(runDir, "run:rebuild-state"))) return 1;
+
+  if (parsed.dryRun) {
+    const plan = { dryRun: true, runDir, plan: "rebuild_state_cache", reason: "cli_manual" };
+    if (parsed.json) {
+      console.log(JSON.stringify(plan, null, 2));
+    } else {
+      console.log(`[run:rebuild-state] dry-run runDir=${runDir} plan=${plan.plan} reason=${plan.reason}`);
+    }
+    return 0;
+  }
+
+  const snapshot = await rebuildStateCache(runDir, { reason: "cli_manual" });
+  const metadata: IterationMetadata = {
+    pendingEffectsByKind: snapshot.pendingEffectsByKind,
+    stateVersion: snapshot.stateVersion,
+    journalHead: snapshot.journalHead ?? null,
+    stateRebuilt: true,
+    stateRebuildReason: snapshot.rebuildReason ?? undefined,
+  };
+  const formatted = formatIterationMetadata(metadata);
+  if (parsed.json) {
+    console.log(JSON.stringify({ runDir, metadata: formatted.jsonMetadata ?? null }, null, 2));
+  } else {
+    const suffix = formatted.textParts.length ? ` ${formatted.textParts.join(" ")}` : "";
+    console.log(`[run:rebuild-state] runDir=${runDir}${suffix}`);
+  }
+  return 0;
+}
+
+export async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:repair-journal", parsed, { runDir, dryRun: parsed.dryRun, json: parsed.json });
+  if (!(await readRunMetadataSafe(runDir, "run:repair-journal"))) return 1;
+
+  const journalDir = path.join(runDir, "journal");
+  const files = (await fs.readdir(journalDir)).filter((name) => name.endsWith(".json")).sort();
+  const rawEvents: Array<{ payload: { type?: unknown; recordedAt?: unknown; data?: unknown } }> = [];
+  let droppedCorrupt = 0;
+  for (const filename of files) {
+    try {
+      rawEvents.push({
+        payload: JSON.parse(await fs.readFile(path.join(journalDir, filename), "utf8")) as {
+          type?: unknown;
+          recordedAt?: unknown;
+          data?: unknown;
+        },
+      });
+    } catch {
+      droppedCorrupt += 1;
+    }
+  }
+
+  const seenInvocation = new Set<string>();
+  const keptEffectIds = new Set<string>();
+  const droppedEffectIds = new Set<string>();
+  const kept: Array<{ type: string; recordedAt?: string; data: JsonRecord }> = [];
+  let droppedRequested = 0;
+  let droppedResolved = 0;
+  for (const entry of rawEvents) {
+    const type = typeof entry.payload.type === "string" ? entry.payload.type : "UNKNOWN";
+    const recordedAt = typeof entry.payload.recordedAt === "string" ? entry.payload.recordedAt : undefined;
+    const data = isJsonRecord(entry.payload.data) ? entry.payload.data : {};
+    if (type === "EFFECT_REQUESTED") {
+      const invocationKey = typeof data.invocationKey === "string" ? data.invocationKey : "";
+      const effectId = typeof data.effectId === "string" ? data.effectId : "";
+      if (invocationKey && seenInvocation.has(invocationKey)) {
+        droppedRequested += 1;
+        if (effectId) droppedEffectIds.add(effectId);
+        continue;
+      }
+      if (invocationKey) seenInvocation.add(invocationKey);
+      if (effectId) keptEffectIds.add(effectId);
+      kept.push({ type, recordedAt, data });
+      continue;
+    }
+    if (type === "EFFECT_RESOLVED") {
+      const effectId = typeof data.effectId === "string" ? data.effectId : "";
+      if (effectId && droppedEffectIds.has(effectId) && !keptEffectIds.has(effectId)) {
+        droppedResolved += 1;
+        continue;
+      }
+    }
+    kept.push({ type, recordedAt, data });
+  }
+
+  const summary = { runDir, journal: { originalFiles: files.length, keptEvents: kept.length, droppedCorrupt, droppedRequested, droppedResolved } };
+  if (parsed.dryRun) {
+    if (parsed.json) {
+      console.log(JSON.stringify({ dryRun: true, ...summary }, null, 2));
+    } else {
+      console.log(`[run:repair-journal] dry-run originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved}`);
+    }
+    return 0;
+  }
+
+  const stamp = Date.now();
+  const repairedDir = path.join(runDir, `journal.repaired.${stamp}`);
+  await fs.mkdir(repairedDir, { recursive: true });
+  for (let i = 0; i < kept.length; i += 1) {
+    const eventPayload: JsonRecord = {
+      type: kept[i].type,
+      recordedAt: kept[i].recordedAt ?? new Date().toISOString(),
+      data: kept[i].data,
+    };
+    const contents = JSON.stringify(eventPayload, null, 2) + "\n";
+    const checksum = crypto.createHash("sha256").update(contents).digest("hex");
+    await fs.writeFile(
+      path.join(repairedDir, `${String(i + 1).padStart(6, "0")}.${nextUlid()}.json`),
+      JSON.stringify({ ...eventPayload, checksum }, null, 2) + "\n",
+      "utf8"
+    );
+  }
+
+  const backupDir = path.join(runDir, `journal.bak.${stamp}`);
+  await fs.rename(journalDir, backupDir);
+  await fs.rename(repairedDir, journalDir);
+  if (parsed.json) {
+    console.log(JSON.stringify({ ...summary, backupDir, repaired: true }, null, 2));
+  } else {
+    console.log(`[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedCorrupt=${droppedCorrupt} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`);
+  }
+  return 0;
+}

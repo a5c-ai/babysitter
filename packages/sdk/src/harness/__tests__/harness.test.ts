@@ -22,7 +22,6 @@ import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
 import { createPiAdapter, installPiPlugin } from "../pi";
 import { createOhMyPiAdapter } from "../ohMyPi";
-import { createInternalAdapter } from "../internal";
 import { createNullAdapter } from "../nullAdapter";
 import {
   detectAdapter,
@@ -269,14 +268,6 @@ describe("CodexAdapter", () => {
 // ---------------------------------------------------------------------------
 // PI-family adapters
 // ---------------------------------------------------------------------------
-
-describe("InternalAdapter", () => {
-  it("defaults state dir to ~/.a5c/state/", () => {
-    const adapter = createInternalAdapter();
-    const result = adapter.resolveStateDir({});
-    expect(result).toBe(path.join(os.homedir(), ".a5c", "state"));
-  });
-});
 
 describe("PiAdapter", () => {
   it("defaults state dir to ~/.a5c/state/", () => {
@@ -618,6 +609,29 @@ describe("bindSession stale session handling", () => {
     expect(result.error).toBeUndefined();
     expect(result.sessionId).toBe(sessionId);
     expect(result.stateFile).toBe(filePath);
+  });
+
+  it("stores the absolute runDir in session state when binding a run", async () => {
+    const sessionId = "test-session";
+    const runId = "run-with-absolute-dir";
+    const runDir = path.join(runsDir, runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId,
+      runDir,
+      stateDir,
+      runsDir,
+      prompt: "prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    const session = await readSessionFile(filePath);
+    expect(session.state.runDir).toBe(path.resolve(runDir));
   });
 
   it("works for no-runId case (session init without run)", async () => {

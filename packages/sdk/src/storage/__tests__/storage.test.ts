@@ -4,8 +4,6 @@ import path from "path";
 import { promises as fs } from "fs";
 import { createRunDir } from "../../storage/createRunDir";
 import { appendEvent, loadJournal } from "../../storage/journal";
-import { snapshotState } from "../../storage/snapshotState";
-import { storeTaskArtifacts } from "../../storage/storeTaskArtifacts";
 import { getDiskUsage, findOrphanedBlobs } from "../../storage/cleanup";
 import { acquireRunLock, releaseRunLock } from "../../storage/lock";
 import { readRunMetadata } from "../../storage/runFiles";
@@ -58,44 +56,6 @@ describe("storage primitives", () => {
     expect(events[1].data.harness).toBe("pi");
   });
 
-  test("snapshotState writes rebuildable cache", async () => {
-    const { runDir } = await createRunDir({
-      runsRoot: tmpRoot,
-      runId: "run-3",
-      request: "state",
-      processPath: ".a5c/processes/foo.js",
-    });
-    await snapshotState({ runDir, state: { cursor: 123 }, journalHead: { seq: 1, ulid: "X" } });
-    const contents = JSON.parse(await fs.readFile(path.join(runDir, "state", "state.json"), "utf8"));
-    expect(contents.state.cursor).toBe(123);
-    expect(contents.journalHead.seq).toBe(1);
-  });
-
-  test("storeTaskArtifacts writes metadata and blobs", async () => {
-    const { runDir } = await createRunDir({
-      runsRoot: tmpRoot,
-      runId: "run-4",
-      request: "tasks",
-      processPath: ".a5c/processes/foo.js",
-    });
-    await storeTaskArtifacts({
-      runDir,
-      effectId: "effect-1",
-      task: { kind: "act" },
-      result: { ok: true },
-      artifacts: [
-        { name: "stdout.txt", data: "hello" },
-        { name: "large.bin", data: Buffer.alloc(600 * 1024, 1) },
-      ],
-    });
-    const artifactsManifest = JSON.parse(
-      await fs.readFile(path.join(runDir, "tasks/effect-1/artifacts.json"), "utf8")
-    );
-    expect(artifactsManifest).toHaveLength(2);
-    const blobEntry = artifactsManifest.find((a: any) => a.storedAt.startsWith("blobs/"));
-    expect(blobEntry).toBeDefined();
-  });
-
   test("disk usage + orphan detection", async () => {
     const { runDir } = await createRunDir({
       runsRoot: tmpRoot,
@@ -104,11 +64,8 @@ describe("storage primitives", () => {
       processPath: ".a5c/processes/foo.js",
     });
     await appendEvent({ runDir, eventType: "RUN_CREATED", event: {} });
-    await storeTaskArtifacts({
-      runDir,
-      effectId: "effect-usage",
-      artifacts: [{ name: "stdout.txt", data: "log" }],
-    });
+    await fs.mkdir(path.join(runDir, "tasks", "effect-usage", "artifacts"), { recursive: true });
+    await fs.writeFile(path.join(runDir, "tasks", "effect-usage", "artifacts", "stdout.txt"), "log");
     const usage = await getDiskUsage(tmpRoot, "run-5");
     expect(usage.totalBytes).toBeGreaterThan(0);
     const orphaned = await findOrphanedBlobs(tmpRoot, "run-5");

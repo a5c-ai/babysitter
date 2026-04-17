@@ -75,3 +75,8 @@ tmp/
 tmp-*.mjs
 plugins/babysitter-gemini/.babysitter-install-attempted
 .docusaurus/
+*.d.ts.map
+*.ts.map
+
+packages/sdk/**/*.d.ts
+packages/sdk/src/**/*.js

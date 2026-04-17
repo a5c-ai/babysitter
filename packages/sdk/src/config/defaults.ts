@@ -125,12 +125,7 @@ export const CONFIG_ENV_VARS = {
   NODE_TASK_TIMEOUT: "BABYSITTER_NODE_TASK_TIMEOUT",
 } as const;
 
-/**
- * Default configuration values for the Babysitter SDK.
- *
- * These defaults are used when no explicit configuration is provided.
- * They can be overridden via environment variables or explicit config.
- */
+/** Default SDK configuration values; env vars and explicit overrides can replace them. */
 export const DEFAULTS: Readonly<BabysitterConfig> = {
   /**
    * Default runs directory: .a5c/runs
@@ -178,7 +173,7 @@ export const DEFAULTS: Readonly<BabysitterConfig> = {
    * Node task timeout: 900000ms (15 minutes)
    * Extended timeout for potentially long-running Node.js tasks.
    */
-  nodeTaskTimeout: 15 * 60 * 1000, // 900000
+  nodeTaskTimeout: 15 * 60 * 1000,
 
   /**
    * Clock step: 1000ms (1 second)

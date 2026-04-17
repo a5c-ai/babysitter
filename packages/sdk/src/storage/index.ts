@@ -1,9 +1,7 @@
 export { createRunDir } from "./createRunDir";
 export { appendEvent, loadJournal } from "./journal";
-export { snapshotState } from "./snapshotState";
-export { storeTaskArtifacts } from "./storeTaskArtifacts";
 export { getDiskUsage, findOrphanedBlobs } from "./cleanup";
-export { acquireRunLock, releaseRunLock, readRunLock } from "./lock";
+export { acquireRunLock, releaseRunLock, readRunLock, withRunLock } from "./lock";
 export { readRunMetadata, readRunInputs, writeRunOutput } from "./runFiles";
 export {
   writeTaskDefinition,
@@ -11,5 +9,13 @@ export {
   readTaskResult,
   writeTaskResult,
 } from "./tasks";
-export { createJournalWatcher } from "./journalWatcher";
-export type { JournalWatcher, JournalWatcherOptions } from "./journalWatcher";
+export {
+  getRunDir,
+  getJournalDir,
+  getTasksDir,
+  getBlobsDir,
+  getStateDir,
+  getStateFile,
+  getLockPath,
+} from "./paths";
+export { nextUlid } from "./ulids";

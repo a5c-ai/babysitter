@@ -5,9 +5,9 @@ import {
   createRun,
   orchestrateIteration,
 } from "../../runtime";
-import { readRunMetadata } from "../../storage";
+import { loadJournal, readRunMetadata } from "../../storage";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
-import { apiRunStatus, apiRunEvents } from "../../api/runs";
+import type { JournalEvent } from "../../storage/types";
 import { toolResult, toolError } from "../util/errors";
 import { resolveRunDir } from "../util/resolve-run-dir";
 
@@ -22,6 +22,60 @@ function parseEntrypoint(entrypoint: string): { importPath: string; exportName?:
   const importPath = entrypoint.slice(0, hashIndex);
   const exportName = entrypoint.slice(hashIndex + 1) || undefined;
   return { importPath, exportName };
+}
+
+function deriveRunState(
+  events: JournalEvent[],
+): "created" | "running" | "waiting" | "completed" | "failed" {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const type = events[index].type;
+    if (type === "RUN_COMPLETED") return "completed";
+    if (type === "RUN_FAILED") return "failed";
+  }
+
+  const requested = new Set<string>();
+  const resolved = new Set<string>();
+  for (const event of events) {
+    if (event.type === "EFFECT_REQUESTED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) requested.add(effectId);
+    } else if (event.type === "EFFECT_RESOLVED" || event.type === "EFFECT_CANCELLED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) resolved.add(effectId);
+    }
+  }
+
+  const pending = [...requested].filter((id) => !resolved.has(id));
+  if (pending.length > 0) return "waiting";
+
+  const hasCreated = events.some((event) => event.type === "RUN_CREATED");
+  if (hasCreated && resolved.size > 0) return "running";
+  return "created";
+}
+
+function derivePendingEffects(events: JournalEvent[]): Array<{ effectId: string; kind?: string }> {
+  const requested = new Map<string, { effectId: string; kind?: string }>();
+  const resolved = new Set<string>();
+
+  for (const event of events) {
+    if (event.type === "EFFECT_REQUESTED") {
+      const data = event.data as Record<string, unknown>;
+      const effectId = data.effectId as string | undefined;
+      if (effectId) {
+        requested.set(effectId, {
+          effectId,
+          kind: typeof data.kind === "string" ? data.kind : undefined,
+        });
+      }
+    } else if (event.type === "EFFECT_RESOLVED" || event.type === "EFFECT_CANCELLED") {
+      const effectId = (event.data as Record<string, unknown>).effectId as string | undefined;
+      if (effectId) resolved.add(effectId);
+    }
+  }
+
+  return [...requested.entries()]
+    .filter(([id]) => !resolved.has(id))
+    .map(([, info]) => info);
 }
 
 export function registerRunTools(server: McpServer): void {
@@ -84,25 +138,30 @@ export function registerRunTools(server: McpServer): void {
     },
     async (args) => {
       const runsDir = resolveRunDir(args.runsDir);
-      const result = await apiRunStatus({ runId: args.runId, runsDir });
+      const runDir = path.join(runsDir, args.runId);
+      try {
+        const [metadata, events] = await Promise.all([
+          readRunMetadata(runDir),
+          loadJournal(runDir),
+        ]);
 
-      if (!result.ok) {
-        return toolError(result.error.message);
+        const pendingEffects = derivePendingEffects(events);
+        const pendingByKind: Record<string, number> = {};
+        for (const effect of pendingEffects) {
+          const kind = effect.kind ?? "unknown";
+          pendingByKind[kind] = (pendingByKind[kind] ?? 0) + 1;
+        }
+
+        return toolResult({
+          runId: metadata.runId,
+          processId: metadata.processId,
+          state: deriveRunState(events),
+          pendingEffects,
+          pendingByKind,
+        });
+      } catch (err) {
+        return toolError(err instanceof Error ? err.message : String(err));
       }
-
-      const pendingByKind: Record<string, number> = {};
-      for (const eff of result.data.pendingEffects) {
-        const kind = eff.kind ?? "unknown";
-        pendingByKind[kind] = (pendingByKind[kind] ?? 0) + 1;
-      }
-
-      return toolResult({
-        runId: result.data.runId,
-        processId: result.data.processId,
-        state: result.data.state,
-        pendingEffects: result.data.pendingEffects,
-        pendingByKind,
-      });
     }
   );
 
@@ -183,47 +242,29 @@ export function registerRunTools(server: McpServer): void {
     async (args) => {
       const runsDir = resolveRunDir(args.runsDir);
       const filterType = args.filterType?.toUpperCase();
+      try {
+        const runDir = path.join(runsDir, args.runId);
+        const allEvents = await loadJournal(runDir);
+        const matchingEvents = filterType
+          ? allEvents.filter((event) => event.type === filterType)
+          : allEvents;
+        const ordered = args.reverse ? matchingEvents.slice().reverse() : matchingEvents;
+        const limited = args.limit !== undefined ? ordered.slice(0, args.limit) : ordered;
 
-      // When reverse is requested, we cannot apply limit server-side because
-      // the API applies limit before ordering. Fetch all matching events and
-      // apply limit after reversing.
-      const apiLimit = args.reverse ? undefined : args.limit;
-
-      // Fetch all events (unfiltered) to get the total count,
-      // then apply filter via the API.
-      const [allResult, filteredResult] = filterType
-        ? await Promise.all([
-            apiRunEvents({ runId: args.runId, runsDir }),
-            apiRunEvents({ runId: args.runId, runsDir, limit: apiLimit, filterType }),
-          ])
-        : [
-            await apiRunEvents({ runId: args.runId, runsDir, limit: apiLimit }),
-            undefined,
-          ];
-
-      if (!allResult.ok) {
-        return toolError(allResult.error.message);
+        return toolResult({
+          total: allEvents.length,
+          matching: matchingEvents.length,
+          showing: limited.length,
+          events: limited.map((event) => ({
+            seq: event.seq,
+            type: event.type,
+            recordedAt: event.recordedAt,
+            data: event.data,
+          })),
+        });
+      } catch (err) {
+        return toolError(err instanceof Error ? err.message : String(err));
       }
-      if (filteredResult && !filteredResult.ok) {
-        return toolError(filteredResult.error.message);
-      }
-
-      const matchingEvents = filteredResult?.ok ? filteredResult.data.events : allResult.data.events;
-
-      // Apply ordering
-      const ordered = args.reverse ? matchingEvents.slice().reverse() : matchingEvents;
-
-      // Apply limit (needed when reverse deferred limit from API)
-      const limited = (args.limit !== undefined && args.reverse)
-        ? ordered.slice(0, args.limit)
-        : ordered;
-
-      return toolResult({
-        total: allResult.data.events.length,
-        matching: matchingEvents.length,
-        showing: limited.length,
-        events: limited,
-      });
     }
   );
 

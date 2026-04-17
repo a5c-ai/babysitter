@@ -15,8 +15,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleHookRun } from "../../cli/commands/hookRun";
-import type { HookRunCommandArgs } from "../../cli/commands/hookRun";
+import { handleHookRun } from "../../cli/commands/hooks/run";
+import type { HookRunCommandArgs } from "../../cli/commands/hooks/run";
 import { createGeminiCliAdapter } from "../geminiCli";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";

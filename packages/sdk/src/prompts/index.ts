@@ -23,6 +23,7 @@ export {
   createCodexContext,
   createGeminiCliContext,
   createPiContext,
+  createInternalContext,
 } from './context';
 
 // Execution-context autodetection for prompt gating

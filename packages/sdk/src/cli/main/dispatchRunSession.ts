@@ -1,13 +1,21 @@
-import { getAdapter, getAdapterByName } from "../../harness";
 import type { ParsedArgs } from "./types";
-import { USAGE } from "./usage";
 import { handleBreakpointCommand } from "../commands/breakpointRules";
 import type { BreakpointCommandArgs } from "../commands/breakpointRules";
-import { handleHookLog } from "../commands/hookLog";
-import { handleHookRun } from "../commands/hookRun";
+import { handleHookLog } from "../commands/hooks/log";
+import { handleHookRun } from "../commands/hooks/run";
 import { handleInstructionsCommand } from "../commands/instructions";
 import type { InstructionsCommandArgs } from "../commands/instructions";
 import { handleLog } from "../commands/log";
+import { handleSessionAssociate } from "../commands/session/associate";
+import { handleSessionCheckIteration } from "../commands/session/checkIteration";
+import { handleSessionCleanup } from "../commands/session/cleanup";
+import { handleSessionInit } from "../commands/session/init";
+import { handleSessionIterationMessage } from "../commands/session/iterationMessage";
+import { handleSessionLastMessage } from "../commands/session/lastMessage";
+import { handleSessionResume } from "../commands/session/resume";
+import { handleSessionState } from "../commands/session/state";
+import { handleSessionUpdate } from "../commands/session/update";
+import { handleSessionWhoami } from "../commands/session/whoami";
 import { handleProcessLibraryCommand } from "../commands/processLibrary";
 import type { ProcessLibraryCommandArgs } from "../commands/processLibrary";
 import { handleProfileCommand } from "../commands/profile";
@@ -25,18 +33,6 @@ import {
   handlePluginUpdateRegistry,
 } from "../commands/plugin";
 import type { PluginCommandArgs } from "../commands/plugin";
-import {
-  handleSessionAssociate,
-  handleSessionCheckIteration,
-  handleSessionInit,
-  handleSessionIterationMessage,
-  handleSessionLastMessage,
-  handleSessionResume,
-  handleSessionState,
-  handleSessionUpdate,
-} from "../commands/session";
-import { handleSessionCleanup } from "../commands/sessionCleanup";
-import { handleSessionWhoami } from "../commands/sessionWhoami";
 import { handleSkillDiscover, handleSkillFetchRemote } from "../commands/skill";
 import {
   handleRunCreate,
@@ -57,10 +53,6 @@ export async function executeRunSessionCommand(parsed: ParsedArgs): Promise<numb
   const runTaskResult = await executeRunTaskCommand(parsed);
   if (runTaskResult !== undefined) {
     return runTaskResult;
-  }
-  const sessionResult = await executeSessionCommand(parsed);
-  if (sessionResult !== undefined) {
-    return sessionResult;
   }
   return await executeSupportCommand(parsed);
 }
@@ -87,101 +79,6 @@ async function executeRunTaskCommand(parsed: ParsedArgs): Promise<number | undef
       return await handleTaskList(parsed);
     case "task:show":
       return await handleTaskShow(parsed);
-    default:
-      return undefined;
-  }
-}
-
-async function executeSessionCommand(parsed: ParsedArgs): Promise<number | undefined> {
-  if (!parsed.command?.startsWith("session:")) {
-    return undefined;
-  }
-
-  if (parsed.stateDir) {
-    const message =
-      `The "${parsed.command}" command no longer accepts --state-dir. ` +
-      "Session commands always use the configured global session state directory.";
-    if (parsed.json) {
-      console.log(JSON.stringify({ error: "UNSUPPORTED_FLAG", message }));
-    } else {
-      process.stderr.write(`Error: ${message}\n`);
-    }
-    return 1;
-  }
-
-  const sessionAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
-  if (parsed.sessionId && sessionAdapter?.autoResolvesSessionId?.()) {
-    const message =
-      `The "${sessionAdapter.name}" harness auto-detects session IDs from environment variables. ` +
-      `Do not pass --session-id explicitly when running inside ${sessionAdapter.name}.`;
-    if (parsed.json) {
-      console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message }));
-    } else {
-      process.stderr.write(`Error: ${message}\n`);
-    }
-    return 1;
-  }
-  if (!parsed.sessionId && sessionAdapter) {
-    parsed.sessionId = sessionAdapter.resolveSessionId(parsed) ?? parsed.sessionId;
-  }
-
-  switch (parsed.command) {
-    case "session:init":
-      return await handleSessionInit({
-        sessionId: parsed.sessionId,
-        maxIterations: parsed.maxIterations,
-        runId: parsed.runIdOverride,
-        prompt: parsed.prompt,
-        json: parsed.json,
-      });
-    case "session:associate":
-      return await handleSessionAssociate({
-        sessionId: parsed.sessionId,
-        runId: parsed.runIdOverride,
-        force: parsed.sessionForce,
-        runsDir: parsed.runsDir,
-        json: parsed.json,
-      });
-    case "session:resume":
-      return await handleSessionResume({
-        sessionId: parsed.sessionId,
-        runId: parsed.runIdOverride,
-        maxIterations: parsed.maxIterations,
-        runsDir: parsed.runsDir,
-        json: parsed.json,
-      });
-    case "session:state":
-      return await handleSessionState({ sessionId: parsed.sessionId, json: parsed.json });
-    case "session:update":
-      return await handleSessionUpdate({
-        sessionId: parsed.sessionId,
-        iteration: parsed.iteration,
-        lastIterationAt: parsed.lastIterationAt,
-        iterationTimes: parsed.iterationTimes,
-        delete: parsed.deleteSession,
-        json: parsed.json,
-      });
-    case "session:check-iteration":
-      return await handleSessionCheckIteration({ sessionId: parsed.sessionId, json: parsed.json });
-    case "session:last-message":
-      if (!parsed.transcriptPath) {
-        console.error("--transcript-path is required for session:last-message");
-        console.error(USAGE);
-        return 1;
-      }
-      return handleSessionLastMessage({ transcriptPath: parsed.transcriptPath, json: parsed.json });
-    case "session:iteration-message":
-      return await handleSessionIterationMessage({
-        iteration: parsed.iteration,
-        runId: parsed.runIdOverride,
-        runsDir: parsed.runsDir,
-        pluginRoot: parsed.pluginRoot,
-        json: parsed.json,
-      });
-    case "session:whoami":
-      return handleSessionWhoami({ harness: parsed.harness, json: parsed.json });
-    case "session:cleanup":
-      return await handleSessionCleanup({ harness: parsed.harness, dryRun: parsed.dryRun, runsDir: parsed.runsDir, json: parsed.json });
     default:
       return undefined;
   }
@@ -229,6 +126,97 @@ async function executeSupportCommand(parsed: ParsedArgs): Promise<number | undef
   }
   if (parsed.command === "skill:fetch-remote") {
     return await handleSkillFetchRemote({ sourceType: parsed.sourceType, url: parsed.url, json: parsed.json });
+  }
+  if (parsed.command === "session:whoami") {
+    return handleSessionWhoami({ harness: parsed.harness, json: parsed.json });
+  }
+  if (parsed.command === "session:init") {
+    return await handleSessionInit({
+      sessionId: parsed.sessionId,
+      stateDir: parsed.stateDir,
+      maxIterations: parsed.maxIterations,
+      runId: parsed.runIdOverride,
+      prompt: parsed.prompt,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:associate") {
+    return await handleSessionAssociate({
+      sessionId: parsed.sessionId,
+      stateDir: parsed.stateDir,
+      runId: parsed.runIdOverride,
+      force: parsed.sessionForce,
+      runsDir: parsed.runsDir,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:resume") {
+    return await handleSessionResume({
+      sessionId: parsed.sessionId,
+      runId: parsed.runIdOverride,
+      stateDir: parsed.stateDir,
+      maxIterations: parsed.maxIterations,
+      runsDir: parsed.runsDir,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:state") {
+    return await handleSessionState({
+      sessionId: parsed.sessionId,
+      stateDir: parsed.stateDir,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:update") {
+    return await handleSessionUpdate({
+      sessionId: parsed.sessionId,
+      stateDir: parsed.stateDir,
+      iteration: parsed.iteration,
+      lastIterationAt: parsed.lastIterationAt,
+      iterationTimes: parsed.iterationTimes,
+      delete: parsed.deleteSession,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:check-iteration") {
+    return await handleSessionCheckIteration({
+      sessionId: parsed.sessionId,
+      stateDir: parsed.stateDir,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:last-message") {
+    if (!parsed.transcriptPath) {
+      const message = "--transcript-path is required for session:last-message";
+      if (parsed.json) {
+        console.error(JSON.stringify({ error: "MISSING_TRANSCRIPT_PATH", message }));
+      } else {
+        console.error(message);
+      }
+      return 1;
+    }
+    return handleSessionLastMessage({
+      transcriptPath: parsed.transcriptPath,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:iteration-message") {
+    return await handleSessionIterationMessage({
+      runId: parsed.runIdOverride,
+      iteration: parsed.iteration,
+      runsDir: parsed.runsDir,
+      pluginRoot: parsed.pluginRoot,
+      json: parsed.json,
+    });
+  }
+  if (parsed.command === "session:cleanup") {
+    return await handleSessionCleanup({
+      harness: parsed.harness,
+      dryRun: parsed.dryRun,
+      runsDir: parsed.runsDir,
+      stateDir: parsed.stateDir,
+      json: parsed.json,
+    });
   }
   if (parsed.command?.startsWith("process-library:")) {
     const args: ProcessLibraryCommandArgs = {

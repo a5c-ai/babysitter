@@ -15,6 +15,8 @@ export interface SessionState {
   maxIterations: number;
   /** The single currently-active run bound to this session (empty string if unbound) */
   runId: string;
+  /** Absolute run directory for the active run, when known */
+  runDir?: string;
   /** Historical audit trail of all run IDs ever bound to this session, chronological (GAP-SESSION-001) */
   runIds: string[];
   /** ISO timestamp when session started */
@@ -25,74 +27,6 @@ export interface SessionState {
   iterationTimes: number[];
   /** Optional key-value metadata (e.g. external correlation IDs) */
   metadata?: Record<string, string>;
-}
-
-/**
- * Accumulated context shared across runs within a session (GAP-SESSION-001).
- * Persisted as a JSON file alongside the session state file.
- */
-export interface SessionContext {
-  /** Accumulated notes from across runs */
-  notes: string[];
-  /** Shared knowledge key-value pairs accumulated across runs */
-  sharedKnowledge: Record<string, string>;
-}
-
-// ---------------------------------------------------------------------------
-// GAP-SESSION-002: Session History types
-// ---------------------------------------------------------------------------
-
-/** A recorded decision made during a session. */
-export interface SessionDecision {
-  /** ISO timestamp when the decision was recorded */
-  timestamp: string;
-  /** What was decided */
-  description: string;
-  /** Why it was decided */
-  rationale?: string;
-  /** Run in which this decision was made */
-  runId?: string;
-}
-
-/** Summary of a completed run within a session. */
-export interface SessionRunSummary {
-  /** Run identifier */
-  runId: string;
-  /** Process that was executed */
-  processId: string;
-  /** Terminal status */
-  status: string;
-  /** ISO timestamp when the run started */
-  startedAt: string;
-  /** ISO timestamp when the run finished */
-  completedAt?: string;
-  /** Human-readable outcome */
-  outcome?: string;
-  /** Quality score (0-100) if available */
-  score?: number;
-}
-
-/** Point-in-time snapshot of session context. */
-export interface SessionContextSnapshot {
-  /** ISO timestamp when the snapshot was taken */
-  timestamp: string;
-  /** Run during which this snapshot was taken */
-  runId?: string;
-  /** Arbitrary context data */
-  snapshot: Record<string, unknown>;
-}
-
-/**
- * Rich session history: extends SessionContext with accumulated
- * decisions, run summaries, and context snapshots (GAP-SESSION-002).
- */
-export interface SessionHistory extends SessionContext {
-  /** Accumulated decisions made during this session */
-  decisions: SessionDecision[];
-  /** Summaries of all runs that have executed in this session */
-  runSummaries: SessionRunSummary[];
-  /** Point-in-time context snapshots */
-  contextSnapshots: SessionContextSnapshot[];
 }
 
 /**

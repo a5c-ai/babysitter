@@ -17,27 +17,21 @@ vi.mock("../../../runtime/replay/stateCache", () => ({
   rebuildStateCache: vi.fn(),
 }));
 
-vi.mock("../../../api/runs", () => ({
-  apiRunStatus: vi.fn(),
-  apiRunEvents: vi.fn(),
-}));
-
 import {
   createRun,
   orchestrateIteration,
 } from "../../../runtime";
 import {
+  loadJournal,
   readRunMetadata,
 } from "../../../storage";
 import { rebuildStateCache } from "../../../runtime/replay/stateCache";
-import { apiRunStatus, apiRunEvents } from "../../../api/runs";
 
 const mockedCreateRun = vi.mocked(createRun);
+const mockedLoadJournal = vi.mocked(loadJournal);
 const mockedReadRunMetadata = vi.mocked(readRunMetadata);
 const mockedOrchestrateIteration = vi.mocked(orchestrateIteration);
 const mockedRebuildStateCache = vi.mocked(rebuildStateCache);
-const mockedApiRunStatus = vi.mocked(apiRunStatus);
-const mockedApiRunEvents = vi.mocked(apiRunEvents);
 
 type ToolHandler = (args: Record<string, unknown>) => Promise<{
   content: Array<{ type: string; text: string }>;
@@ -158,15 +152,11 @@ describe("run_create", () => {
 
 describe("run_status", () => {
   it("returns status for a created run with no effects", async () => {
-    mockedApiRunStatus.mockResolvedValue({
-      ok: true,
-      data: {
-        runId: "01STATUS",
-        processId: "test/process",
-        state: "created",
-        pendingEffects: [],
-      },
-    });
+    mockedReadRunMetadata.mockResolvedValue({
+      runId: "01STATUS",
+      processId: "test/process",
+    } as Awaited<ReturnType<typeof readRunMetadata>>);
+    mockedLoadJournal.mockResolvedValue([]);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01STATUS", runsDir: "/tmp/runs" });
@@ -178,15 +168,32 @@ describe("run_status", () => {
   });
 
   it("returns 'waiting' when there are pending effects", async () => {
-    mockedApiRunStatus.mockResolvedValue({
-      ok: true,
-      data: {
-        runId: "01WAIT",
-        processId: "test/process",
-        state: "waiting",
-        pendingEffects: [{ effectId: "eff-1", kind: "node" }],
+    mockedReadRunMetadata.mockResolvedValue({
+      runId: "01WAIT",
+      processId: "test/process",
+    } as Awaited<ReturnType<typeof readRunMetadata>>);
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01REQ",
+        filename: "000001.01REQ.json",
+        path: "/tmp/runs/01WAIT/journal/000001.01REQ.json",
+        type: "RUN_CREATED",
+        recordedAt: "2026-01-01T00:00:00Z",
+        data: { runId: "01WAIT" },
+        checksum: "x",
       },
-    });
+      {
+        seq: 2,
+        ulid: "01REQ2",
+        filename: "000002.01REQ2.json",
+        path: "/tmp/runs/01WAIT/journal/000002.01REQ2.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "2026-01-01T00:00:01Z",
+        data: { effectId: "eff-1", kind: "node" },
+        checksum: "y",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01WAIT", runsDir: "/tmp/runs" });
@@ -201,15 +208,22 @@ describe("run_status", () => {
   });
 
   it("returns 'completed' when run has completed", async () => {
-    mockedApiRunStatus.mockResolvedValue({
-      ok: true,
-      data: {
-        runId: "01DONE",
-        processId: "test/process",
-        state: "completed",
-        pendingEffects: [],
+    mockedReadRunMetadata.mockResolvedValue({
+      runId: "01DONE",
+      processId: "test/process",
+    } as Awaited<ReturnType<typeof readRunMetadata>>);
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01DONE",
+        filename: "000001.01DONE.json",
+        path: "/tmp/runs/01DONE/journal/000001.01DONE.json",
+        type: "RUN_COMPLETED",
+        recordedAt: "2026-01-01T00:00:02Z",
+        data: {},
+        checksum: "z",
       },
-    });
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01DONE", runsDir: "/tmp/runs" });
@@ -219,15 +233,22 @@ describe("run_status", () => {
   });
 
   it("returns 'failed' when run has failed", async () => {
-    mockedApiRunStatus.mockResolvedValue({
-      ok: true,
-      data: {
-        runId: "01FAIL",
-        processId: "test/process",
-        state: "failed",
-        pendingEffects: [],
+    mockedReadRunMetadata.mockResolvedValue({
+      runId: "01FAIL",
+      processId: "test/process",
+    } as Awaited<ReturnType<typeof readRunMetadata>>);
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01FAIL",
+        filename: "000001.01FAIL.json",
+        path: "/tmp/runs/01FAIL/journal/000001.01FAIL.json",
+        type: "RUN_FAILED",
+        recordedAt: "2026-01-01T00:00:02Z",
+        data: {},
+        checksum: "z",
       },
-    });
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "01FAIL", runsDir: "/tmp/runs" });
@@ -237,10 +258,7 @@ describe("run_status", () => {
   });
 
   it("returns error when run not found", async () => {
-    mockedApiRunStatus.mockResolvedValue({
-      ok: false,
-      error: { code: "RUN_NOT_FOUND", message: "Run not found: nonexistent" },
-    });
+    mockedReadRunMetadata.mockRejectedValue(new Error("Run not found: nonexistent"));
 
     const handler = getToolHandler(server, "run_status");
     const result = await handler({ runId: "nonexistent", runsDir: "/tmp/runs" });
@@ -253,15 +271,28 @@ describe("run_status", () => {
 
 describe("run_events", () => {
   it("returns all journal events", async () => {
-    mockedApiRunEvents.mockResolvedValue({
-      ok: true,
-      data: {
-        events: [
-          { seq: 1, type: "RUN_CREATED", recordedAt: "2026-01-01T00:00:00Z", data: { runId: "01EVENTS" } },
-          { seq: 2, type: "EFFECT_REQUESTED", recordedAt: "2026-01-01T00:00:01Z", data: { effectId: "eff-1" } },
-        ],
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01A",
+        filename: "000001.01A.json",
+        path: "/tmp/runs/01EVENTS/journal/000001.01A.json",
+        type: "RUN_CREATED",
+        recordedAt: "2026-01-01T00:00:00Z",
+        data: { runId: "01EVENTS" },
+        checksum: "a",
       },
-    });
+      {
+        seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "2026-01-01T00:00:01Z",
+        data: { effectId: "eff-1" },
+        checksum: "b",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_events");
     const result = await handler({ runId: "01EVENTS", runsDir: "/tmp/runs" });
@@ -271,16 +302,39 @@ describe("run_events", () => {
     expect(data.events).toHaveLength(2);
   });
 
-  it("filters events by type (delegates to API)", async () => {
-    mockedApiRunEvents.mockResolvedValue({
-      ok: true,
-      data: {
-        events: [
-          { seq: 2, type: "EFFECT_REQUESTED", recordedAt: "2026-01-01T00:00:01Z", data: { effectId: "eff-1" } },
-          { seq: 3, type: "EFFECT_REQUESTED", recordedAt: "2026-01-01T00:00:02Z", data: { effectId: "eff-2" } },
-        ],
+  it("filters events by type", async () => {
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01A",
+        filename: "000001.01A.json",
+        path: "/tmp/runs/01EVENTS/journal/000001.01A.json",
+        type: "RUN_CREATED",
+        recordedAt: "2026-01-01T00:00:00Z",
+        data: {},
+        checksum: "a",
       },
-    });
+      {
+        seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "2026-01-01T00:00:01Z",
+        data: { effectId: "eff-1" },
+        checksum: "b",
+      },
+      {
+        seq: 3,
+        ulid: "01C",
+        filename: "000003.01C.json",
+        path: "/tmp/runs/01EVENTS/journal/000003.01C.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "2026-01-01T00:00:02Z",
+        data: { effectId: "eff-2" },
+        checksum: "c",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_events");
     const result = await handler({
@@ -289,22 +343,36 @@ describe("run_events", () => {
       filterType: "EFFECT_REQUESTED",
     });
 
-    const data = parseResult(result) as { total: number; showing: number; events: unknown[] };
-    expect(data.total).toBe(2);
+    const data = parseResult(result) as { total: number; matching: number; showing: number; events: unknown[] };
+    expect(data.total).toBe(3);
+    expect(data.matching).toBe(2);
     expect(data.showing).toBe(2);
     expect(data.events).toHaveLength(2);
   });
 
-  it("applies reverse (limit is delegated to API)", async () => {
-    mockedApiRunEvents.mockResolvedValue({
-      ok: true,
-      data: {
-        events: [
-          { seq: 2, type: "EFFECT_REQUESTED", recordedAt: "t2", data: { effectId: "e1" } },
-          { seq: 3, type: "EFFECT_RESOLVED", recordedAt: "t3", data: { effectId: "e1" } },
-        ],
+  it("applies reverse and limit locally", async () => {
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
+        type: "EFFECT_REQUESTED",
+        recordedAt: "t2",
+        data: { effectId: "e1" },
+        checksum: "b",
       },
-    });
+      {
+        seq: 3,
+        ulid: "01C",
+        filename: "000003.01C.json",
+        path: "/tmp/runs/01EVENTS/journal/000003.01C.json",
+        type: "EFFECT_RESOLVED",
+        recordedAt: "t3",
+        data: { effectId: "e1" },
+        checksum: "c",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "run_events");
     const result = await handler({
@@ -321,10 +389,7 @@ describe("run_events", () => {
   });
 
   it("returns error when run not found", async () => {
-    mockedApiRunEvents.mockResolvedValue({
-      ok: false,
-      error: { code: "RUN_NOT_FOUND", message: "Run not found: nonexistent" },
-    });
+    mockedLoadJournal.mockRejectedValue(new Error("Run not found: nonexistent"));
 
     const handler = getToolHandler(server, "run_events");
     const result = await handler({ runId: "nonexistent", runsDir: "/tmp/runs" });

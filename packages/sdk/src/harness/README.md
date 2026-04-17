@@ -5,7 +5,8 @@ for integrating external AI CLIs (Claude Code, Codex, Cursor, Gemini CLI, GitHub
 Copilot, oh-my-pi, Pi, and custom) with the Babysitter runtime.
 
 See `types.ts` for the `HarnessAdapter` interface and `registry.ts` for adapter
-registration. Discovery and invocation live in `discovery.ts` and `invoker.ts`.
+registration. SDK-owned discovery lives in `discovery.ts`; harness-only
+invocation and TUI orchestration now live in `@a5c-ai/babysitter-harness`.
 
 ## Session ID Resolution Contract
 

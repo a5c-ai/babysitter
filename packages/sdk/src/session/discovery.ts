@@ -1,3 +1,11 @@
+import { CLAUDE_CODE_DISCOVERY_SPEC } from "../harness/claudeCode/discovery";
+import { CODEX_DISCOVERY_SPEC } from "../harness/codex/discovery";
+import { CURSOR_DISCOVERY_SPEC } from "../harness/cursor/discovery";
+import { GEMINI_CLI_DISCOVERY_SPEC } from "../harness/geminiCli/discovery";
+import { GITHUB_COPILOT_DISCOVERY_SPEC } from "../harness/githubCopilot/discovery";
+import { OH_MY_PI_DISCOVERY_SPEC } from "../harness/ohMyPi/discovery";
+import { OPENCODE_DISCOVERY_SPEC } from "../harness/opencode/discovery";
+import { PI_DISCOVERY_SPEC } from "../harness/pi/discovery";
 import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
 
 /**
@@ -7,13 +15,14 @@ import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
  * the final fallback when direct/env-based resolution is unavailable.
  */
 export const HARNESS_ENV_VARS: Record<string, string[]> = {
-  "codex": ["CODEX_THREAD_ID", "CODEX_SESSION_ID"],
-  "gemini-cli": ["GEMINI_SESSION_ID"],
-  "github-copilot": ["COPILOT_SESSION_ID"],
-  "pi": ["PI_SESSION_ID"],
-  "oh-my-pi": ["OMP_SESSION_ID"],
-  "claude-code": [], // Claude Code uses the marker or BABYSITTER_SESSION_ID directly
-  "cursor": [],
+  [CLAUDE_CODE_DISCOVERY_SPEC.name]: [...CLAUDE_CODE_DISCOVERY_SPEC.callerEnvVars],
+  [CODEX_DISCOVERY_SPEC.name]: [...CODEX_DISCOVERY_SPEC.callerEnvVars],
+  [CURSOR_DISCOVERY_SPEC.name]: [...CURSOR_DISCOVERY_SPEC.callerEnvVars],
+  [GEMINI_CLI_DISCOVERY_SPEC.name]: [...GEMINI_CLI_DISCOVERY_SPEC.callerEnvVars],
+  [GITHUB_COPILOT_DISCOVERY_SPEC.name]: [...GITHUB_COPILOT_DISCOVERY_SPEC.callerEnvVars],
+  [OH_MY_PI_DISCOVERY_SPEC.name]: [...OH_MY_PI_DISCOVERY_SPEC.callerEnvVars],
+  [OPENCODE_DISCOVERY_SPEC.name]: [...OPENCODE_DISCOVERY_SPEC.callerEnvVars],
+  [PI_DISCOVERY_SPEC.name]: [...PI_DISCOVERY_SPEC.callerEnvVars],
 };
 
 /**

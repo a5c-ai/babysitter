@@ -22,6 +22,7 @@ export type {
 export {
   STATE_CACHE_SCHEMA_VERSION,
   createStateCacheSnapshot,
+  buildEffectIndex,
   journalHeadsEqual,
   normalizeJournalHead,
   normalizeSnapshot,
@@ -35,23 +36,46 @@ export type {
   StateCacheSnapshot,
   StateCacheJournalHead,
   DerivedEffectSummary,
+  EffectIndex,
 } from "./replay";
+export { ReplayCursor } from "./replay";
 export { hashInvocationKey } from "./invocation";
-export { EffectRequestedError, EffectPendingError, EffectCancelledError, ParallelPendingError, RunFailedError } from "./exceptions";
+export {
+  ErrorCategory,
+  BabysitterRuntimeError,
+  EffectRequestedError,
+  EffectPendingError,
+  EffectCancelledError,
+  ParallelPendingError,
+  RunFailedError,
+  suggestCommand,
+  suggestFlag,
+  suggestFix,
+  formatErrorWithContext,
+  formatNextSteps,
+  toStructuredError,
+  isIntrinsicError,
+  isBabysitterError,
+  rehydrateSerializedError,
+} from "./exceptions";
 export { replaySchemaVersion } from "./constants";
-export {
-  definePipeline,
-  buildStepInputs,
-  validatePipelineDefinition,
-  type PipelineStepDefinition,
-  type PipelineDefinition,
-  type PipelineStepResult,
-  type PipelineResult,
-  type PipelineValidationResult,
-} from "./processPipeline";
-export {
-  applyStrategy,
-  type ParallelStrategyName,
-  type ParallelStrategyOptions,
-  type ParallelStrategyResult,
+export { applyStrategy } from "./parallelStrategies";
+export type {
+  ParallelStrategyName,
+  ParallelStrategyOptions,
+  ParallelStrategyResult,
 } from "./parallelStrategies";
+export type {
+  PolicyRuleKind,
+  PolicyConditionOp,
+  PolicyAction,
+  PolicyCondition,
+  PolicyRule,
+  StatefulPolicyRule,
+  PolicyEvaluationContext,
+  PolicyDecision,
+  PolicyDecisionLog,
+  PolicyEngine,
+  PolicyDecisionReporter,
+} from "./policy";
+export { isStatefulRule } from "./policy";

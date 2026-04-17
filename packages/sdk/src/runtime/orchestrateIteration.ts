@@ -53,9 +53,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
     let finalStatus: IterationResult["status"] = "failed";
     const logger = engine.internalContext.logger ?? options.logger;
 
-    // Compute project root for hook calls (parent of .a5c dir where plugins/ is located)
-    // runDir is like: /path/to/project/.a5c/runs/<runId>
-    // So we need 3 levels up: runs -> .a5c -> project
+    // runDir is /project/.a5c/runs/<runId>, so walk three parents back to the project root for hooks.
     const projectRoot = path.dirname(path.dirname(path.dirname(options.runDir)));
 
     // Call on-iteration-start hook
@@ -71,10 +69,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       }
     );
 
-    // Defensive handler: catch EffectRequestedError from un-awaited ctx.task()
-    // calls.  When a process function calls ctx.task() without await, the
-    // returned promise rejects as an unhandled rejection, bypassing the
-    // try-catch below.  We install a temporary handler to intercept these.
+    // Catch un-awaited ctx.task() rejections that would otherwise bypass the main try/catch.
     let capturedStrayEffect: unknown = null;
     const strayEffectHandler = (reason: unknown) => {
       if (asWaitingResult(reason)) {
@@ -92,11 +87,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
         processFn(inputs, engine.context, options.context)
       );
 
-      // Check whether requestNewEffect was called during process execution.
-      // The counter is incremented synchronously at the start of
-      // requestNewEffect, so it's visible even when the async I/O (journal
-      // write) is still in-flight.  If > 0 AND we reached the success path,
-      // the process returned without awaiting the ctx.task() call.
+      // If requestNewEffect fired but we still reached success, the process likely returned without awaiting ctx.task().
       const strayRequestCount = getNewEffectRequestCount();
       if (strayRequestCount > 0) {
         // Let microtasks settle so unhandledRejection handler can fire.

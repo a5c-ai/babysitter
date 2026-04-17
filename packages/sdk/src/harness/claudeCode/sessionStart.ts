@@ -1,12 +1,8 @@
 import * as path from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
-import {
-  getCurrentTimestamp,
-  getSessionFilePath,
-  sessionFileExists,
-  writeSessionFile,
-} from "../../session";
-import type { SessionState } from "../../session";
+import { getSessionFilePath, sessionFileExists } from "../../session/parse";
+import type { SessionState } from "../../session/types";
+import { getCurrentTimestamp, writeSessionFile } from "../../session/write";
 import { normalizeSessionStateDir } from "../../config";
 import { loadCompressionConfig } from "../../compression/config-loader";
 import {
@@ -71,6 +67,7 @@ export async function handleClaudeCodeSessionStartHook(
   if (envFile) {
     try {
       setBabysitterSessionIdInEnvFile(envFile, sessionId);
+      envFilePersisted = true;
     } catch {
       // Non-fatal
     }
@@ -148,7 +145,7 @@ export async function handleClaudeCodeSessionStartHook(
   }
 
   try {
-    const { runSessionCleanup } = await import("../../cli/commands/session/cleanup");
+    const { runSessionCleanup } = await import("../../session/cleanup");
     void runSessionCleanup({ harness: "claude-code", dryRun: false }).catch(() => {
       // non-fatal
     });

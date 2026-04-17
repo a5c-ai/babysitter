@@ -11,7 +11,8 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { DEFAULTS, CONFIG_ENV_VARS } from "../../config/defaults";
+import { outputTextResult } from "./health/output";
+import { checkEnvironmentVariables } from "./health/environment";
 
 // ============================================================================
 // Types
@@ -71,64 +72,6 @@ export interface HealthCheckResult {
   };
   /** Aggregated next steps from all failing checks */
   nextSteps: string[];
-}
-
-// ============================================================================
-// Color Utilities
-// ============================================================================
-
-/**
- * ANSI color codes for terminal output
- */
-const COLORS = {
-  reset: "\x1b[0m",
-  green: "\x1b[32m",
-  red: "\x1b[31m",
-  yellow: "\x1b[33m",
-  cyan: "\x1b[36m",
-  dim: "\x1b[2m",
-  bold: "\x1b[1m",
-} as const;
-
-/**
- * Check symbols with colors
- */
-const SYMBOLS = {
-  pass: `${COLORS.green}\u2713${COLORS.reset}`,
-  fail: `${COLORS.red}\u2717${COLORS.reset}`,
-  warn: `${COLORS.yellow}\u26A0${COLORS.reset}`,
-} as const;
-
-/**
- * Plain symbols without colors (for non-TTY output)
- */
-const PLAIN_SYMBOLS = {
-  pass: "[PASS]",
-  fail: "[FAIL]",
-  warn: "[WARN]",
-} as const;
-
-/**
- * Checks if stdout supports colors
- */
-function supportsColors(): boolean {
-  if (process.env.NO_COLOR !== undefined) {
-    return false;
-  }
-  if (process.env.FORCE_COLOR !== undefined) {
-    return true;
-  }
-  if (process.stdout && typeof process.stdout.isTTY === "boolean") {
-    return process.stdout.isTTY;
-  }
-  return false;
-}
-
-/**
- * Get the appropriate symbol for a check status
- */
-function getSymbol(status: CheckStatus, useColors: boolean): string {
-  return useColors ? SYMBOLS[status] : PLAIN_SYMBOLS[status];
 }
 
 // ============================================================================
@@ -391,107 +334,6 @@ async function checkPackageDependency(cwd: string): Promise<HealthCheck> {
   }
 }
 
-/**
- * Check: Environment Variables
- * Verifies babysitter-related environment variables are set correctly
- */
-function checkEnvironmentVariables(): HealthCheck {
-  const envChecks: Array<{
-    name: string;
-    key: string;
-    value: string | undefined;
-    required: boolean;
-    valid: boolean;
-    note?: string;
-  }> = [];
-
-  // Check BABYSITTER_RUNS_DIR
-  const runsDir = process.env[CONFIG_ENV_VARS.RUNS_DIR];
-  envChecks.push({
-    name: "BABYSITTER_RUNS_DIR",
-    key: CONFIG_ENV_VARS.RUNS_DIR,
-    value: runsDir,
-    required: false,
-    valid: true,
-    note: runsDir ? `Custom runs directory: ${runsDir}` : `Using default: ${DEFAULTS.runsDir}`,
-  });
-
-  // Check BABYSITTER_MAX_ITERATIONS
-  const maxIterations = process.env[CONFIG_ENV_VARS.MAX_ITERATIONS];
-  let maxIterValid = true;
-  if (maxIterations) {
-    const parsed = parseInt(maxIterations, 10);
-    maxIterValid = Number.isFinite(parsed) && parsed > 0;
-  }
-  envChecks.push({
-    name: "BABYSITTER_MAX_ITERATIONS",
-    key: CONFIG_ENV_VARS.MAX_ITERATIONS,
-    value: maxIterations,
-    required: false,
-    valid: maxIterValid,
-    note: maxIterations
-      ? maxIterValid
-        ? `Max iterations: ${maxIterations}`
-        : `Invalid value: ${maxIterations} (must be positive integer)`
-      : `Using default: ${DEFAULTS.maxIterations}`,
-  });
-
-  // Check BABYSITTER_LOG_LEVEL
-  const logLevel = process.env[CONFIG_ENV_VARS.LOG_LEVEL];
-  const validLogLevels = ["debug", "info", "warn", "error", "silent"];
-  const logLevelValid = !logLevel || validLogLevels.includes(logLevel.toLowerCase());
-  envChecks.push({
-    name: "BABYSITTER_LOG_LEVEL",
-    key: CONFIG_ENV_VARS.LOG_LEVEL,
-    value: logLevel,
-    required: false,
-    valid: logLevelValid,
-    note: logLevel
-      ? logLevelValid
-        ? `Log level: ${logLevel}`
-        : `Invalid value: ${logLevel} (must be one of: ${validLogLevels.join(", ")})`
-      : `Using default: ${DEFAULTS.logLevel}`,
-  });
-
-  // Check BABYSITTER_ALLOW_SECRET_LOGS
-  const allowSecrets = process.env[CONFIG_ENV_VARS.ALLOW_SECRET_LOGS];
-  envChecks.push({
-    name: "BABYSITTER_ALLOW_SECRET_LOGS",
-    key: CONFIG_ENV_VARS.ALLOW_SECRET_LOGS,
-    value: allowSecrets,
-    required: false,
-    valid: true,
-    note: allowSecrets
-      ? `Secret logging: ${allowSecrets === "1" || allowSecrets.toLowerCase() === "true" ? "enabled" : "disabled"}`
-      : "Secret logging: disabled (default)",
-  });
-
-  const invalidVars = envChecks.filter((c) => !c.valid);
-  const setVars = envChecks.filter((c) => c.value !== undefined);
-
-  if (invalidVars.length > 0) {
-    return {
-      name: "environment-variables",
-      description: "Environment variables are configured correctly",
-      status: "fail",
-      message: `${invalidVars.length} environment variable(s) have invalid values`,
-      nextSteps: invalidVars.map((v) => `Fix ${v.name}: ${v.note}`),
-      details: { checks: envChecks, invalid: invalidVars.map((v) => v.name) },
-    };
-  }
-
-  return {
-    name: "environment-variables",
-    description: "Environment variables are configured correctly",
-    status: "pass",
-    message:
-      setVars.length > 0
-        ? `${setVars.length} environment variable(s) configured`
-        : "Using default configuration",
-    details: { checks: envChecks, customized: setVars.map((v) => v.name) },
-  };
-}
-
 // ============================================================================
 // Main Health Check Runner
 // ============================================================================
@@ -564,79 +406,6 @@ export async function runHealthCheck(options: HealthCheckOptions): Promise<Healt
   }
 
   return result;
-}
-
-/**
- * Outputs health check results in human-readable format
- */
-function outputTextResult(result: HealthCheckResult, options: HealthCheckOptions): void {
-  const useColors = supportsColors();
-  const { verbose } = options;
-
-  // Header
-  console.log("");
-  const statusColor =
-    result.status === "healthy"
-      ? COLORS.green
-      : result.status === "degraded"
-        ? COLORS.yellow
-        : COLORS.red;
-  const statusText = useColors
-    ? `${statusColor}${COLORS.bold}${result.status.toUpperCase()}${COLORS.reset}`
-    : result.status.toUpperCase();
-  console.log(`Babysitter SDK Health Check: ${statusText}`);
-  console.log("");
-
-  // Individual checks
-  for (const check of result.checks) {
-    const symbol = getSymbol(check.status, useColors);
-    console.log(`  ${symbol} ${check.description}`);
-
-    if (verbose || check.status !== "pass") {
-      const msgColor =
-        check.status === "pass"
-          ? COLORS.dim
-          : check.status === "warn"
-            ? COLORS.yellow
-            : COLORS.red;
-      const message = useColors ? `${msgColor}${check.message}${COLORS.reset}` : check.message;
-      console.log(`      ${message}`);
-    }
-
-    if (verbose && check.details) {
-      const detailsStr = JSON.stringify(check.details, null, 2)
-        .split("\n")
-        .map((line) => `      ${useColors ? COLORS.dim : ""}${line}${useColors ? COLORS.reset : ""}`)
-        .join("\n");
-      console.log(detailsStr);
-    }
-  }
-
-  console.log("");
-
-  // Summary
-  const summaryLine = [
-    `${result.summary.passed} passed`,
-    result.summary.failed > 0 ? `${result.summary.failed} failed` : null,
-    result.summary.warnings > 0 ? `${result.summary.warnings} warnings` : null,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  console.log(`Summary: ${summaryLine}`);
-
-  // Next steps
-  if (result.nextSteps.length > 0) {
-    console.log("");
-    const nextStepsHeader = useColors
-      ? `${COLORS.cyan}${COLORS.bold}Next Steps:${COLORS.reset}`
-      : "Next Steps:";
-    console.log(nextStepsHeader);
-    for (const step of result.nextSteps) {
-      console.log(`  - ${step}`);
-    }
-  }
-
-  console.log("");
 }
 
 /**

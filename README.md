@@ -181,13 +181,13 @@ The plugin auto-detects which underlying harness (Claude Code, Codex, Gemini CLI
 Babysitter ships with a built-in **internal harness** that runs processes programmatically without any external AI coding agent. This is useful for CI/CD pipelines, scripts, automated testing, and headless orchestration:
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk
+npm install -g @a5c-ai/babysitter-harness
 
 # Run a process definition using the internal harness
-babysitter harness:call --harness internal --process .a5c/processes/my-process.js#process --workspace .
+babysitter-harness call --harness internal --process .a5c/processes/my-process.js#process --workspace .
 
 # Or run a free-form prompt
-babysitter harness:call --harness internal --prompt "run lint and tests" --workspace .
+babysitter-harness call --harness internal --prompt "run lint and tests" --workspace .
 ```
 
 The internal harness uses the SDK's built-in Pi execution engine directly. It supports all capabilities (Programmatic, SessionBinding, StopHook, HeadlessPrompt) and requires no external CLI.
@@ -268,38 +268,50 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 
 ## Harness CLI Wrappers
 
-Beyond the in-session skill commands (`/babysitter:call`, etc.), the Babysitter SDK provides `harness:*` CLI commands that let you create, run, and manage orchestration sessions from the terminal. These commands work with any installed harness.
+Beyond the in-session skill commands (`/babysitter:call`, etc.), Babysitter provides an optional runtime CLI package, `@a5c-ai/babysitter-harness`, for orchestration, session management, MCP serving, daemon utilities, and the TUI. The main `babysitter` CLI keeps SDK management plus `harness:install` and `harness:install-plugin`.
+
+```bash
+npm install -g @a5c-ai/babysitter
+npm install -g @a5c-ai/babysitter-harness
+```
 
 ### Running Processes via a Harness
 
 ```bash
 # Run a process interactively via Claude Code (pauses at breakpoints)
-babysitter harness:call --harness claude-code --prompt "implement user authentication with TDD" --workspace .
+babysitter-harness call --harness claude-code --prompt "implement user authentication with TDD" --workspace .
 
 # Run fully autonomous (no breakpoints)
-babysitter harness:yolo --harness claude-code --prompt "add pagination to the API" --workspace .
+babysitter-harness yolo --harness claude-code --prompt "add pagination to the API" --workspace .
 
 # Plan only (stops after Phase 1)
-babysitter harness:plan --harness claude-code --prompt "implement feature X"
+babysitter-harness plan --harness claude-code --prompt "implement feature X"
 
 # Run with the internal harness (no external AI agent needed)
-babysitter harness:call --harness internal --prompt "run lint and tests" --workspace .
+babysitter-harness call --harness internal --prompt "run lint and tests" --workspace .
 ```
 
 ### Managing Runs
 
 ```bash
 # Resume an interrupted run
-babysitter harness:resume --run-id <runId> --harness claude-code --workspace .
+babysitter-harness resume --run-id <runId> --harness claude-code --workspace .
+
+# Initialize or inspect orchestration session state
+babysitter session:init --session-id demo --state-dir .a5c --run-id <runId>
+babysitter session:state --session-id demo --state-dir .a5c
+
+# Start the MCP server owned by the harness runtime CLI
+babysitter-harness start-server --transport stdio
 
 # Diagnose run health
-babysitter harness:doctor --run-id <runId>
+babysitter-harness doctor --run-id <runId>
 
 # Analyze past runs for insights
-babysitter harness:retrospect --all --harness claude-code --workspace .
+babysitter-harness retrospect --all --harness claude-code --workspace .
 
 # Clean up old runs
-babysitter harness:cleanup --keep-days 7 --harness claude-code --workspace .
+babysitter-harness cleanup --keep-days 7 --harness claude-code --workspace .
 ```
 
 ### Harness Discovery
@@ -321,7 +333,7 @@ The `internal` harness is particularly useful for CI/CD and scripting because it
 
 ```bash
 # In a CI pipeline or script
-babysitter harness:call \
+babysitter-harness call \
   --harness internal \
   --process .a5c/processes/lint-and-test.js#process \
   --workspace . \

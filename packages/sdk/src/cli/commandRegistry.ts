@@ -43,26 +43,22 @@ export const COMMAND_REGISTRY: CommandInfo[] = [
   { name: "task:list", description: "List tasks/effects in a run", category: "task", aliases: ["tasks"], usage: "babysitter task:list <runDir> --pending" },
   { name: "task:show", description: "Show task definition and result details", category: "task", usage: "babysitter task:show <runDir> <effectId>" },
 
-  // Session commands
-  { name: "session:init", description: "Initialize a new orchestration session", category: "session" },
-  { name: "session:associate", description: "Associate session with a run", category: "session" },
-  { name: "session:resume", description: "Resume an existing session", category: "session" },
-  { name: "session:state", description: "Show current session state", category: "session" },
-  { name: "session:update", description: "Update session state", category: "session" },
+  // Session diagnostics
+  { name: "session:init", description: "Initialize session state for a run or prompt", category: "session", usage: "babysitter session:init --session-id <id> --state-dir <dir>" },
+  { name: "session:associate", description: "Associate an existing session with a run", category: "session", usage: "babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id>" },
+  { name: "session:resume", description: "Resume an existing run into a session state file", category: "session", usage: "babysitter session:resume --session-id <id> --run-id <id>" },
+  { name: "session:state", description: "Show the stored state for a session", category: "session", usage: "babysitter session:state --session-id <id> --state-dir <dir>" },
+  { name: "session:update", description: "Update or delete stored session state", category: "session", usage: "babysitter session:update --session-id <id> --state-dir <dir> --iteration 2" },
+  { name: "session:check-iteration", description: "Evaluate whether a session should continue iterating", category: "session", usage: "babysitter session:check-iteration --session-id <id> --state-dir <dir>" },
+  { name: "session:last-message", description: "Extract the last assistant message from a transcript", category: "session", usage: "babysitter session:last-message --transcript-path <file>" },
+  { name: "session:iteration-message", description: "Generate orchestration guidance for a session iteration", category: "session", usage: "babysitter session:iteration-message --iteration <n> --run-id <id>" },
+  { name: "session:whoami", description: "Show how the current session ID was resolved", category: "session", usage: "babysitter session:whoami --json" },
+  { name: "session:cleanup", description: "Clean up dead session markers and stale session state", category: "session", usage: "babysitter session:cleanup --dry-run" },
 
   // Harness commands
   { name: "harness:discover", description: "Discover installed harness CLIs", category: "harness", aliases: ["harness:list"] },
-  { name: "harness:invoke", description: "Invoke a harness CLI with a prompt", category: "harness" },
-  { name: "harness:create-run", description: "Create and run an orchestration session", category: "harness", aliases: ["harness:call"] },
-  { name: "harness:resume-run", description: "Resume an existing orchestration run", category: "harness", aliases: ["harness:resume"] },
-  { name: "harness:yolo", description: "Create run in non-interactive mode", category: "harness" },
-  { name: "harness:plan", description: "Create run, stop after planning phase", category: "harness" },
-  { name: "harness:observe", description: "Launch real-time observer dashboard (--tui redirects to babysitter tui)", category: "harness", usage: "babysitter harness:observe [--workspace <dir>] [--tui]" },
-  { name: "tui", description: "Launch unified Ink-based dashboard with run browser and session views", category: "tui", usage: "babysitter tui [--run-id <id>] [--verbosity minimal|normal|verbose] [--workspace <dir>] [--json]" },
-  { name: "harness:doctor", description: "Diagnose run health issues", category: "harness" },
-  { name: "harness:retrospect", description: "Analyze past runs for insights", category: "harness" },
-  { name: "harness:cleanup", description: "Clean up old runs and artifacts", category: "harness" },
-  { name: "harness:session-history", description: "Browse session history (decisions, run summaries, context snapshots)", category: "harness", usage: "babysitter harness:session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]" },
+  { name: "harness:install", description: "Install a harness CLI", category: "harness", usage: "babysitter harness:install <name>" },
+  { name: "harness:install-plugin", description: "Install a harness plugin", category: "harness", usage: "babysitter harness:install-plugin <name>" },
 
   // Plugin commands
   { name: "plugin:install", description: "Install a plugin", category: "plugin" },
@@ -90,7 +86,6 @@ export const COMMAND_REGISTRY: CommandInfo[] = [
   { name: "hook:log", description: "Log hook execution", category: "debug" },
   { name: "hook:run", description: "Execute a hook manually", category: "debug" },
   { name: "health", description: "Show system health status", category: "debug" },
-  { name: "mcp:serve", description: "Start MCP server over stdio", category: "debug" },
 
   // Help commands
   { name: "help", description: "Show help for babysitter commands", category: "help" },
@@ -125,7 +120,7 @@ export function suggestCommands(context: RunContext): CommandInfo[] {
     // No active run — suggest creation
     suggestions.push(
       ...COMMAND_REGISTRY.filter((c) =>
-        c.name === "run:create" || c.name === "harness:create-run" || c.name === "harness:discover",
+        c.name === "run:create" || c.name === "harness:discover" || c.name === "harness:install",
       ),
     );
     return suggestions;
@@ -144,7 +139,7 @@ export function suggestCommands(context: RunContext): CommandInfo[] {
     // Failed run — suggest recovery
     suggestions.push(
       ...COMMAND_REGISTRY.filter((c) =>
-        c.name === "run:rebuild-state" || c.name === "run:repair-journal" || c.name === "harness:doctor",
+        c.name === "run:rebuild-state" || c.name === "run:repair-journal" || c.name === "health",
       ),
     );
   }
@@ -152,7 +147,7 @@ export function suggestCommands(context: RunContext): CommandInfo[] {
   if (context.runStatus === "completed") {
     suggestions.push(
       ...COMMAND_REGISTRY.filter((c) =>
-        c.name === "run:events" || c.name === "harness:retrospect" || c.name === "tokens:stats",
+        c.name === "run:events" || c.name === "tokens:stats",
       ),
     );
   }

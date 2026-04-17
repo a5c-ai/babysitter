@@ -28,13 +28,15 @@ import {
 import { emitRuntimeMetric } from "../instrumentation";
 import { createTaskBuildContext } from "../../tasks/context";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
-import { getGlobalLogDir } from "../../config/defaults";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
 import { readRules } from "../../breakpoints/rules";
 import { evaluateAutoApproval } from "../../breakpoints/evaluator";
-import type { PolicyEngine, PolicyEvaluationContext } from "../../governance/types";
-import { logPolicyDecision } from "../../governance/logging";
+import type {
+  PolicyDecisionReporter,
+  PolicyEngine,
+  PolicyEvaluationContext,
+} from "../policy/types";
 
 
 // Synchronous counter incremented at the start of requestNewEffect, BEFORE any
@@ -53,6 +55,7 @@ export interface TaskIntrinsicContext {
   now: () => Date;
   logger?: ProcessLogger;
   policyEngine?: PolicyEngine;
+  reportPolicyDecision?: PolicyDecisionReporter;
 }
 
 export interface TaskIntrinsicInvokeOptions<TArgs, TResult> {
@@ -168,14 +171,19 @@ async function requestNewEffect<TArgs, TResult>(
     const decision = options.context.policyEngine.evaluate(policyCtx);
 
     // Audit-log every policy evaluation
-    const logDir = path.join(getGlobalLogDir(), options.context.runId);
     const logEntry = {
       timestamp: new Date().toISOString(),
       context: policyCtx,
       decision,
       ruleId: decision.rule?.id,
     };
-    try { await logPolicyDecision(logDir, logEntry); } catch { /* best-effort */ }
+    if (options.context.reportPolicyDecision) {
+      try {
+        await options.context.reportPolicyDecision(logEntry);
+      } catch {
+        // Best-effort reporting only.
+      }
+    }
 
     if (!decision.allowed) {
       throw new RunFailedError(

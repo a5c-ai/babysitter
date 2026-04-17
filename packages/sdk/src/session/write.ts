@@ -13,11 +13,15 @@ import { SessionError, SessionErrorCode } from './types';
  */
 export function serializeSessionState(state: SessionState): string {
   const lines: string[] = [];
+  const runId = state.runId ?? '';
 
   lines.push(`active: ${state.active}`);
   lines.push(`iteration: ${state.iteration}`);
   lines.push(`max_iterations: ${state.maxIterations}`);
-  lines.push(`run_id: "${state.runId}"`);
+  lines.push(`run_id: "${runId}"`);
+  if (state.runDir) {
+    lines.push(`run_dir: "${state.runDir}"`);
+  }
   lines.push(`run_ids: ${state.runIds.join(',')}`);
   lines.push(`started_at: "${state.startedAt}"`);
   lines.push(`last_iteration_at: "${state.lastIterationAt}"`);

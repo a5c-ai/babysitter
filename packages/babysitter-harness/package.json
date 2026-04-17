@@ -1,0 +1,52 @@
+{
+  "name": "@a5c-ai/babysitter-harness",
+  "version": "0.0.187",
+  "description": "Optional harness runtime CLI for Babysitter orchestration and TUI workflows.",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "babysitter-harness": "dist/cli/main.js"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "0.0.187",
+    "@agentsh/secure-sandbox": "^0.1.7",
+    "@mariozechner/pi-coding-agent": "*",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@sinclair/typebox": "^0.34.48",
+    "ink": "^4.4.1",
+    "ink-spinner": "^5.0.0",
+    "react": "^18.3.1",
+    "zod": "^4.0.0",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.3.28",
+    "@types/ws": "^8.18.1",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.2",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter.git"
+  },
+  "keywords": [
+    "babysitter",
+    "harness",
+    "orchestration",
+    "workflow",
+    "tui"
+  ]
+}

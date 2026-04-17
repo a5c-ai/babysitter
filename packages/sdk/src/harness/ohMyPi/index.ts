@@ -1,0 +1,1 @@
+export { createOhMyPiAdapter } from "./adapter";

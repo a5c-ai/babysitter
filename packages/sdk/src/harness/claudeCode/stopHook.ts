@@ -1,16 +1,18 @@
 import * as path from "node:path";
 import { existsSync } from "node:fs";
 import {
-  deleteSessionFile,
-  getCurrentTimestamp,
   getSessionFilePath,
-  isIterationTooFast,
   readSessionFile,
   sessionFileExists,
+} from "../../session/parse";
+import type { SessionState } from "../../session/types";
+import {
+  deleteSessionFile,
+  getCurrentTimestamp,
+  isIterationTooFast,
   updateIterationTimes,
   writeSessionFile,
-} from "../../session";
-import type { SessionState } from "../../session";
+} from "../../session/write";
 import { normalizeSessionStateDir } from "../../config";
 import type { HookHandlerArgs } from "../types";
 import {
@@ -126,7 +128,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
       process.stderr.write(`[hook:run stop] Max iterations (${state.maxIterations}) reached\n`);
     }
     if (state.runId) {
-      await appendStopHookEvent(path.join(runsDir, state.runId), {
+      await appendStopHookEvent(state.runDir?.trim() || path.join(runsDir, state.runId), {
         sessionId,
         iteration: state.iteration,
         decision: "approve",
@@ -153,7 +155,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
       process.stderr.write(`[hook:run stop] Iteration too fast (avg ${avg}s)\n`);
     }
     if (state.runId) {
-      await appendStopHookEvent(path.join(runsDir, state.runId), {
+      await appendStopHookEvent(state.runDir?.trim() || path.join(runsDir, state.runId), {
         sessionId,
         iteration: state.iteration,
         decision: "approve",
@@ -169,6 +171,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
   }
 
   const runId = state.runId ?? "";
+  const boundRunDir = state.runDir?.trim() || undefined;
   if (runId) {
     log.setContext("run", runId);
   }
@@ -190,8 +193,22 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
     return 0;
   }
 
-  const runStateDetails = await resolveStopHookRunState(runId, runsDir, log);
-  const { runState, completionProof, pendingKinds, onlyBreakpointsPending, entrypointImportPath, runDir } = runStateDetails;
+  const runStateDetails = await resolveStopHookRunState({
+    runId,
+    runsDir,
+    preferredRunDir: boundRunDir,
+    log,
+  });
+  const {
+    runState,
+    completionProof,
+    pendingKinds,
+    onlyBreakpointsPending,
+    entrypointImportPath,
+    runDir,
+    lookupError,
+  } = runStateDetails;
+  const runEventDir = runDir || boundRunDir || path.join(runsDir, runId);
 
   log.info(`Run state: ${runState || "unknown"}`);
   if (completionProof) {
@@ -199,13 +216,12 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
   }
 
   if (!runState) {
-    log.warn(`Run state unknown for ${runId} — allowing exit but preserving session file for recovery`);
-    if (verbose) {
-      process.stderr.write(
-        `[hook:run stop] Run state is empty for ${runId}; run may be misconfigured — preserving session file\n`,
-      );
-    }
-    await appendStopHookEvent(path.join(runsDir, runId), {
+    const errorMessage =
+      lookupError ??
+      `Run ${runId} could not be resolved during the stop hook. Stored runDir=${boundRunDir ?? "(none)"} runsDir=${runsDir}`;
+    log.error(errorMessage);
+    process.stderr.write(`[hook:run stop] ${errorMessage}\n`);
+    await appendStopHookEvent(runEventDir, {
       sessionId,
       iteration: state.iteration,
       decision: "approve",
@@ -215,7 +231,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
       hasPromise,
     });
     process.stdout.write("{}\n");
-    return 0;
+    return 1;
   }
 
   if (runState === "waiting" && onlyBreakpointsPending) {
@@ -225,7 +241,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
         "[hook:run stop] Run waiting on breakpoint(s) — allowing exit for human resolution\n",
       );
     }
-    await appendStopHookEvent(path.join(runsDir, runId), {
+    await appendStopHookEvent(runEventDir, {
       sessionId,
       iteration: state.iteration,
       decision: "approve",
@@ -246,7 +262,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
     if (verbose) {
       process.stderr.write("[hook:run stop] Valid promise tag detected - run complete\n");
     }
-    await appendStopHookEvent(path.join(runsDir, runId), {
+    await appendStopHookEvent(runEventDir, {
       sessionId,
       iteration: state.iteration,
       decision: "approve",
@@ -286,12 +302,12 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
     prompt,
     resolvedPluginRoot,
     runId,
-    runsDir,
+    runsDir: path.dirname(runDir),
     entrypointImportPath,
   });
 
   const output = { decision: "block", reason, systemMessage };
-  await appendStopHookEvent(path.join(runsDir, runId), {
+  await appendStopHookEvent(runEventDir, {
     sessionId,
     iteration: state.iteration,
     decision: "block",
