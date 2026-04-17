@@ -9,6 +9,12 @@
   "bin": {
     "a5c-hooks-proxy": "dist/cli/main.js"
   },
+  "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/hooks-proxy/cli"
+  },
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",

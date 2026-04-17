@@ -6,6 +6,12 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/hooks-proxy/adapter-openclaw"
+  },
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -204,6 +204,24 @@ export function buildPayload(
 }
 
 /**
+ * Check whether a normalized event represents a stop-hook recursion scenario.
+ *
+ * Claude Code sets `stop_hook_active: true` on Stop events that fire *inside*
+ * a stop hook's continued session.  Responding with `continueSession: true`
+ * in this situation would trigger infinite recursion, so callers must detect
+ * this and emit a safe no-op instead.
+ *
+ * @param event - A normalized UnifiedHookEvent (or any object with an
+ *   `execution.metadata` bag).
+ * @returns `true` when the event indicates stop-hook recursion.
+ */
+export function isStopHookRecursion(
+  event: Pick<UnifiedHookEvent, 'execution'>,
+): boolean {
+  return event.execution.metadata?.stop_hook_active === true;
+}
+
+/**
  * Normalize a Claude Code hook invocation into a UnifiedHookEvent.
  *
  * @param nativeEventName - The Claude event name (e.g. 'SessionStart', 'PreToolUse').

@@ -56,6 +56,9 @@ export {
 export {
   materializeExecContext,
   generateTempEnvFile,
+  escapeShellValue,
+  getTrackedTempFiles,
+  cleanupTempFiles,
   adaptOutput,
   propagateEnv,
 } from './propagation';

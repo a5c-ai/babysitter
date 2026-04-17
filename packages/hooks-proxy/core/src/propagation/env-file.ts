@@ -2,6 +2,47 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+// ---------------------------------------------------------------------------
+// Temp file tracking & cleanup
+// ---------------------------------------------------------------------------
+
+/** Paths of temp env files created during this process lifetime. */
+const trackedTempFiles: string[] = [];
+let cleanupRegistered = false;
+
+/**
+ * Return the list of tracked temp file paths (for testing / diagnostics).
+ */
+export function getTrackedTempFiles(): readonly string[] {
+  return trackedTempFiles;
+}
+
+/**
+ * Remove all tracked temp files synchronously (best-effort).
+ * Called automatically on process exit.
+ */
+export function cleanupTempFiles(): void {
+  for (const filePath of trackedTempFiles) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch {
+      // best-effort -- file may already be gone
+    }
+  }
+  trackedTempFiles.length = 0;
+}
+
+function ensureCleanupRegistered(): void {
+  if (!cleanupRegistered) {
+    cleanupRegistered = true;
+    process.on('exit', cleanupTempFiles);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 /**
  * Generate a temporary env file containing KEY=VALUE export lines.
  *
@@ -13,6 +54,8 @@ export async function generateTempEnvFile(
   env: Record<string, string>,
   dir?: string,
 ): Promise<string> {
+  ensureCleanupRegistered();
+
   const targetDir = dir ?? os.tmpdir();
   await fs.promises.mkdir(targetDir, { recursive: true });
 
@@ -20,13 +63,15 @@ export async function generateTempEnvFile(
   const filePath = path.join(targetDir, filename);
 
   const lines = Object.entries(env).map(
-    ([key, value]) => `export ${key}=${escapeValue(value)}`,
+    ([key, value]) => `export ${key}=${escapeShellValue(value)}`,
   );
   const content = lines.join('\n') + '\n';
 
   const tmpPath = `${filePath}.tmp`;
   await fs.promises.writeFile(tmpPath, content, 'utf-8');
   await fs.promises.rename(tmpPath, filePath);
+
+  trackedTempFiles.push(filePath);
 
   return filePath;
 }
@@ -36,7 +81,7 @@ export async function generateTempEnvFile(
  * Wraps in double quotes and escapes backslashes, double quotes,
  * newlines, dollar signs, and backticks.
  */
-function escapeValue(value: string): string {
+export function escapeShellValue(value: string): string {
   const escaped = value
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')

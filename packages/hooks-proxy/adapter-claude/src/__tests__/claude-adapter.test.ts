@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createAdapter } from '../adapter';
 import { CLAUDE_PHASE_MAPPINGS, getClaudePhaseMapping, getSupportedPhases } from '../mappings';
-import { normalizeClaude, parseStdin, buildPayload } from '../normalizer';
+import { normalizeClaude, parseStdin, buildPayload, isStopHookRecursion } from '../normalizer';
 import { renderClaudeOutput, buildEnvFileLines } from '../renderer';
 import { resolveSessionId } from '../session-resolver';
 import * as fixtures from './fixtures/claude-payloads';
@@ -51,6 +51,33 @@ describe('mappings', () => {
       expect(mapping, `mapping for ${native}`).toBeDefined();
       expect(mapping!.canonicalPhase).toBe(canonical);
     }
+  });
+
+  it('contains exactly all 9 Claude native events', () => {
+    // Exhaustive list of Claude Code native hook events per spec 17.1
+    const ALL_CLAUDE_NATIVE_EVENTS = [
+      'SessionStart',
+      'SessionEnd',
+      'PreCompact',
+      'UserPromptSubmit',
+      'PreToolUse',
+      'PostToolUse',
+      'Stop',
+      'SubagentStop',
+      'Notification',
+    ];
+
+    // Every expected event must appear in the mapping table
+    for (const eventName of ALL_CLAUDE_NATIVE_EVENTS) {
+      const mapping = getClaudePhaseMapping(eventName);
+      expect(mapping, `missing mapping for ${eventName}`).toBeDefined();
+      expect(mapping!.supportLevel).toBe('native');
+    }
+
+    // The mapping table must not contain extra entries
+    const mappedNativeHooks = CLAUDE_PHASE_MAPPINGS.map((m) => m.nativeHook);
+    expect(mappedNativeHooks.sort()).toEqual([...ALL_CLAUDE_NATIVE_EVENTS].sort());
+    expect(CLAUDE_PHASE_MAPPINGS.length).toBe(9);
   });
 
   it('returns undefined for unknown event names', () => {
@@ -191,6 +218,23 @@ describe('normalizeClaude', () => {
 
       expect(event.payload.stopHookActive).toBe(true);
       expect(event.execution.metadata.stop_hook_active).toBe(true);
+    });
+  });
+
+  describe('isStopHookRecursion', () => {
+    it('returns true when stop_hook_active is true in metadata', () => {
+      const event = normalizeClaude('Stop', fixtures.STOP_RECURSIVE_GUARD);
+      expect(isStopHookRecursion(event)).toBe(true);
+    });
+
+    it('returns false when stop_hook_active is false in metadata', () => {
+      const event = normalizeClaude('Stop', fixtures.STOP_END_TURN);
+      expect(isStopHookRecursion(event)).toBe(false);
+    });
+
+    it('returns false when stop_hook_active is absent from metadata', () => {
+      const event = normalizeClaude('SessionStart', fixtures.SESSION_START_STARTUP);
+      expect(isStopHookRecursion(event)).toBe(false);
     });
   });
 
@@ -355,6 +399,44 @@ describe('renderClaudeOutput', () => {
       );
       expect(output).toEqual({
         additionalContext: 'Session initialized with project context.',
+      });
+    });
+  });
+
+  describe('Stop recursion guard', () => {
+    it('returns safe no-op when event has stopHookActive true', () => {
+      const event = normalizeClaude('Stop', fixtures.STOP_RECURSIVE_GUARD);
+      // Even though the handler result says continueSession: true, the
+      // recursion guard must override that to prevent infinite loops.
+      const output = renderClaudeOutput(
+        { continueSession: true, followUpMessage: 'keep going' },
+        'Stop',
+        event,
+      );
+      expect(output).toEqual({ continueSession: false });
+    });
+
+    it('does not interfere when stopHookActive is false', () => {
+      const event = normalizeClaude('Stop', fixtures.STOP_END_TURN);
+      const output = renderClaudeOutput(
+        { continueSession: true, followUpMessage: 'keep going' },
+        'Stop',
+        event,
+      );
+      expect(output).toEqual({
+        continueSession: true,
+        followUpMessage: 'keep going',
+      });
+    });
+
+    it('does not interfere when no event is provided', () => {
+      const output = renderClaudeOutput(
+        { continueSession: true, followUpMessage: 'keep going' },
+        'Stop',
+      );
+      expect(output).toEqual({
+        continueSession: true,
+        followUpMessage: 'keep going',
       });
     });
   });

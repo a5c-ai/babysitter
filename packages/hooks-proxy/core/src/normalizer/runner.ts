@@ -27,6 +27,8 @@ export interface RunPlanOptions {
   errorPolicies?: Partial<Record<string, ErrorPolicy>>;
   /** Default error policy if not specified per phase. */
   defaultPolicy?: ErrorPolicy;
+  /** Per-phase error policy overrides (checked before errorPolicies and defaultPolicy). */
+  phasePolicies?: Record<string, ErrorPolicy>;
   /** Timeout in milliseconds per handler. */
   handlerTimeoutMs?: number;
   /** Module loader override (for testing). Defaults to require(). */
@@ -50,6 +52,10 @@ function getEffectivePolicy(
   phase: string,
   options?: RunPlanOptions,
 ): ErrorPolicy {
+  // Per-phase policy override (highest priority)
+  if (options?.phasePolicies?.[phase] != null) {
+    return options.phasePolicies[phase];
+  }
   // Explicit override
   if (options?.errorPolicies?.[phase] != null) {
     return options.errorPolicies[phase]!;

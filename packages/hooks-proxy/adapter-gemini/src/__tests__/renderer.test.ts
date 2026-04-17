@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { UnifiedHookResult } from '@a5c/hooks-proxy-core';
-import { renderGeminiOutput } from '../renderer';
+import { renderGeminiOutput, emitOutput, logToStderr } from '../renderer';
 
 describe('renderGeminiOutput', () => {
   describe('BeforeToolSelection', () => {
@@ -27,6 +27,48 @@ describe('renderGeminiOutput', () => {
       const result: UnifiedHookResult = { decision: 'noop' };
       const output = renderGeminiOutput(result, 'BeforeToolSelection');
       expect(output).toEqual({});
+    });
+
+    it('preserves union-style aggregation format with selectedTools array', () => {
+      // Gemini's BeforeToolSelection uses union-style aggregation:
+      // multiple hooks return tool subsets that are unioned by the CLI.
+      // The renderer must output { selectedTools: [...] } so the CLI
+      // can union them across hook responses.
+      const result: UnifiedHookResult = {
+        toolMutation: {
+          mode: 'replace',
+          value: ['read_file', 'search', 'list_dir'],
+        },
+        additionalContext: 'Restricting to read-only tools',
+      };
+      const output = renderGeminiOutput(result, 'BeforeToolSelection');
+
+      // Must have selectedTools as a top-level array (the union element)
+      expect(output).toHaveProperty('selectedTools');
+      expect(Array.isArray(output.selectedTools)).toBe(true);
+      expect(output.selectedTools).toEqual(['read_file', 'search', 'list_dir']);
+
+      // additionalContext is preserved alongside selectedTools
+      expect(output.additionalContext).toBe('Restricting to read-only tools');
+
+      // No other unexpected keys (decision, block, toolInput, etc.)
+      const keys = Object.keys(output);
+      expect(keys).toEqual(expect.arrayContaining(['selectedTools', 'additionalContext']));
+      expect(keys).toHaveLength(2);
+    });
+
+    it('does not emit selectedTools when toolMutation value is not an array', () => {
+      // If toolMutation.value is an object (not an array), it should not
+      // appear as selectedTools — that format is for BeforeToolExecution, not
+      // BeforeToolSelection.
+      const result: UnifiedHookResult = {
+        toolMutation: {
+          mode: 'replace',
+          value: { path: 'foo.ts' },
+        },
+      };
+      const output = renderGeminiOutput(result, 'BeforeToolSelection');
+      expect(output.selectedTools).toBeUndefined();
     });
   });
 
@@ -181,6 +223,64 @@ describe('renderGeminiOutput', () => {
     it('renders empty object for empty result', () => {
       const output = renderGeminiOutput({}, 'SomeUnknownEvent');
       expect(output).toEqual({});
+    });
+  });
+});
+
+describe('stderr/stdout conventions', () => {
+  let stderrSpy: ReturnType<typeof vi.spyOn>;
+  let stdoutSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    stderrSpy.mockRestore();
+    stdoutSpy.mockRestore();
+  });
+
+  describe('logToStderr', () => {
+    it('writes to stderr, not stdout', () => {
+      logToStderr('diagnostic message');
+
+      expect(stderrSpy).toHaveBeenCalledTimes(1);
+      expect(stderrSpy).toHaveBeenCalledWith('diagnostic message\n');
+      expect(stdoutSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('emitOutput', () => {
+    it('writes valid JSON to stdout', () => {
+      const output = { selectedTools: ['read_file'], additionalContext: 'test' };
+      emitOutput(output);
+
+      expect(stdoutSpy).toHaveBeenCalledTimes(1);
+      const written = stdoutSpy.mock.calls[0][0] as string;
+      // Must be parseable JSON
+      const parsed = JSON.parse(written.trim());
+      expect(parsed).toEqual(output);
+    });
+
+    it('writes log to stderr and JSON to stdout when log is provided', () => {
+      const output = { decision: 'allow' };
+      emitOutput(output, 'hook executed successfully');
+
+      // stderr gets the log
+      expect(stderrSpy).toHaveBeenCalledTimes(1);
+      expect(stderrSpy).toHaveBeenCalledWith('hook executed successfully\n');
+
+      // stdout gets valid JSON
+      expect(stdoutSpy).toHaveBeenCalledTimes(1);
+      const written = stdoutSpy.mock.calls[0][0] as string;
+      const parsed = JSON.parse(written.trim());
+      expect(parsed).toEqual(output);
+    });
+
+    it('does not write to stderr when log is not provided', () => {
+      emitOutput({ additionalContext: 'test' });
+      expect(stderrSpy).not.toHaveBeenCalled();
     });
   });
 });

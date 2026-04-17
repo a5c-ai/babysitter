@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import type { PropagationBackend, PropagationOptions } from './types';
-import { generateTempEnvFile } from './env-file';
+import { generateTempEnvFile, escapeShellValue } from './env-file';
 
 /**
  * Propagate environment variables via the specified backend mode.
@@ -85,17 +85,4 @@ async function propagateNone(
   }
 }
 
-/**
- * Escape a value for KEY=VALUE format in an env file.
- * Wraps in double quotes and escapes backslashes, double quotes,
- * newlines, dollar signs, and backticks.
- */
-function escapeShellValue(value: string): string {
-  const escaped = value
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\$/g, '\\$')
-    .replace(/`/g, '\\`');
-  return `"${escaped}"`;
-}
+// escapeShellValue is now imported from ./env-file to avoid duplication.

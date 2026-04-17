@@ -1,4 +1,4 @@
-import type { UnifiedHookResult } from '@a5c/hooks-proxy-core';
+import type { UnifiedHookEvent, UnifiedHookResult } from '@a5c/hooks-proxy-core';
 
 /**
  * Claude Code native hook output formats.
@@ -45,16 +45,43 @@ export interface ClaudeGenericOutput {
 }
 
 /**
+ * Safe no-op response for Stop events during stop-hook recursion.
+ *
+ * When `stop_hook_active` is true, the hook is firing inside a session that
+ * was already continued by a previous stop hook.  Emitting
+ * `continueSession: true` here would create an infinite loop, so the only
+ * safe response is to let the session stop naturally.
+ */
+const SAFE_STOP_NOOP: Readonly<Record<string, unknown>> = Object.freeze({
+  continueSession: false,
+});
+
+/**
  * Render a UnifiedHookResult back to Claude's native JSON output format.
+ *
+ * If the optional `event` parameter is provided and indicates stop-hook
+ * recursion (`execution.metadata.stop_hook_active === true`), the renderer
+ * short-circuits to a safe no-op (`continueSession: false`) to prevent
+ * infinite recursion (spec 17.1).
  *
  * @param result - The unified hook result from handler execution.
  * @param nativeEventName - The original Claude event name.
+ * @param event - Optional normalized event; used for recursion detection.
  * @returns The native JSON output to write to stdout.
  */
 export function renderClaudeOutput(
   result: UnifiedHookResult,
   nativeEventName: string,
+  event?: Pick<UnifiedHookEvent, 'execution'>,
 ): Record<string, unknown> {
+  // Recursion guard: if stop_hook_active is set, emit safe no-op for Stop events
+  if (
+    nativeEventName === 'Stop' &&
+    event?.execution.metadata?.stop_hook_active === true
+  ) {
+    return { ...SAFE_STOP_NOOP };
+  }
+
   switch (nativeEventName) {
     case 'PreToolUse':
       return renderPreToolUseOutput(result);

@@ -25,6 +25,17 @@ const packageManifests = [
   { path: "packages/sdk/package.json" },
   { path: "packages/babysitter/package.json" },
   { path: "packages/babysitter-harness/package.json" },
+  { path: "packages/hooks-proxy/core/package.json" },
+  { path: "packages/hooks-proxy/cli/package.json" },
+  { path: "packages/hooks-proxy/adapter-claude/package.json" },
+  { path: "packages/hooks-proxy/adapter-codex/package.json" },
+  { path: "packages/hooks-proxy/adapter-gemini/package.json" },
+  { path: "packages/hooks-proxy/adapter-copilot/package.json" },
+  { path: "packages/hooks-proxy/adapter-cursor/package.json" },
+  { path: "packages/hooks-proxy/adapter-pi/package.json" },
+  { path: "packages/hooks-proxy/adapter-oh-my-pi/package.json" },
+  { path: "packages/hooks-proxy/adapter-opencode/package.json" },
+  { path: "packages/hooks-proxy/adapter-openclaw/package.json" },
 ];
 
 const pluginManifests = [
@@ -353,6 +364,23 @@ if (existsSync(lockPath)) {
   const harnessWorkspaceKey = "packages/babysitter-harness";
   if (lock.packages && lock.packages[harnessWorkspaceKey]) {
     lock.packages[harnessWorkspaceKey].version = newVersion;
+  }
+  for (const hpSubdir of [
+    "packages/hooks-proxy/core",
+    "packages/hooks-proxy/cli",
+    "packages/hooks-proxy/adapter-claude",
+    "packages/hooks-proxy/adapter-codex",
+    "packages/hooks-proxy/adapter-gemini",
+    "packages/hooks-proxy/adapter-copilot",
+    "packages/hooks-proxy/adapter-cursor",
+    "packages/hooks-proxy/adapter-pi",
+    "packages/hooks-proxy/adapter-oh-my-pi",
+    "packages/hooks-proxy/adapter-opencode",
+    "packages/hooks-proxy/adapter-openclaw",
+  ]) {
+    if (lock.packages && lock.packages[hpSubdir]) {
+      lock.packages[hpSubdir].version = newVersion;
+    }
   }
   const sdkManifest = manifests.find(
     (manifest) => manifest.path === "packages/sdk/package.json",

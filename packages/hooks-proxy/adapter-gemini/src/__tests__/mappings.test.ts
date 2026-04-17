@@ -15,6 +15,36 @@ describe('GEMINI_PHASE_MAPPINGS', () => {
     expect(nativeHooks).toContain('AfterToolExecution');
   });
 
+  it('has exactly 9 mapping entries covering all Gemini native events', () => {
+    // The 9 canonical Gemini CLI hook events per spec section 8.2 / 17.3
+    const EXPECTED_GEMINI_NATIVE_EVENTS = [
+      'SessionStart',
+      'SessionEnd',
+      'BeforeToolSelection',
+      'BeforeModel',
+      'AfterModel',
+      'BeforeAgent',
+      'AfterAgent',
+      'BeforeToolExecution',
+      'AfterToolExecution',
+    ] as const;
+
+    // Verify count — no missing or duplicate entries
+    expect(GEMINI_PHASE_MAPPINGS).toHaveLength(EXPECTED_GEMINI_NATIVE_EVENTS.length);
+
+    // Verify every expected event has a mapping entry
+    const nativeHooks = GEMINI_PHASE_MAPPINGS.map((m) => m.nativeHook);
+    for (const event of EXPECTED_GEMINI_NATIVE_EVENTS) {
+      expect(nativeHooks).toContain(event);
+      // Each event must resolve via getGeminiPhaseMapping too
+      expect(getGeminiPhaseMapping(event)).toBeDefined();
+    }
+
+    // Verify no duplicate nativeHook values
+    const uniqueHooks = new Set(nativeHooks);
+    expect(uniqueHooks.size).toBe(EXPECTED_GEMINI_NATIVE_EVENTS.length);
+  });
+
   it('maps BeforeToolSelection to planner.before_tool_selection', () => {
     const mapping = getGeminiPhaseMapping('BeforeToolSelection');
     expect(mapping).toBeDefined();

@@ -343,6 +343,12 @@ export function mergeResults(
     if (r.toolMutation) {
       mutatingWriterCount++;
       if (mutatingWriterCount > 1) {
+        // Two replace-mode mutations are always a conflict
+        if (toolMutation?.mode === 'replace' && r.toolMutation.mode === 'replace') {
+          throw new MergeConflictError(
+            'Multiple handlers produced toolMutation with mode=replace. Only one replace-mode writer is allowed.',
+          );
+        }
         throw new MergeConflictError(
           'Multiple handlers produced tool mutations. Only one mutating writer is allowed unless patch chaining is enabled.',
         );
