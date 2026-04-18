@@ -3,7 +3,7 @@ export { normalizeEvent, resolvePhaseMapping, splitEnv } from './normalize';
 export type { NormalizeOptions } from './normalize';
 
 // Plan resolution
-export { resolveHookPlan, sortHandlers, sortPlanEntries } from './plan-resolver';
+export { resolveHookPlan, sortHandlers, sortPlanEntries, evaluateWhen, getNestedValue } from './plan-resolver';
 export type { PlanResolverOptions } from './plan-resolver';
 
 // Runner

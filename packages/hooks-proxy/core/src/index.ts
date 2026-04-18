@@ -13,6 +13,8 @@ export {
   splitEnv,
   resolveHookPlan,
   sortHandlers,
+  evaluateWhen,
+  getNestedValue,
   runHandler,
   runPlan,
   HandlerError,
@@ -104,3 +106,19 @@ export {
   runNormalized,
 } from './api';
 export type { AdapterImpl, RegisteredAdapter } from './api';
+
+// SDK interface
+export {
+  parseHookResult,
+  parseHookEvent,
+  validateHookResult,
+  validateHookEvent,
+  HookEventBuilder,
+  HookResultBuilder,
+  readExecutionContext,
+  isInHooksProxyContext,
+  serializeEvent,
+  serializeResult,
+  HookOutputParseError,
+} from './sdk-interface';
+export type { ExecutionContextFromEnv } from './sdk-interface';

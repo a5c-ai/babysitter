@@ -3,7 +3,8 @@ import type { UnifiedHookEvent } from '../types/event';
 import type { UnifiedHookResult } from '../types/result';
 import type { HandlerRef, HookPlanEntry } from '../types/plan';
 import type { CanonicalPhase } from '../types/lifecycle';
-import { HandlerError } from './errors';
+import { HandlerError, HandlerTimeoutError } from './errors';
+import { evaluateWhen } from './plan-resolver';
 
 /**
  * Error handling policy for handler failures.
@@ -134,6 +135,16 @@ function runShellHandler(
       },
       (error, stdout, _stderr) => {
         if (error) {
+          // Detect timeout: Node's child_process sets `killed` and `signal`
+          // when the process is terminated due to timeout
+          if (error.killed || error.signal === 'SIGTERM') {
+            reject(new HandlerTimeoutError({
+              source: command,
+              handler: 'shell',
+              timeoutMs: timeoutMs ?? 30000,
+            }));
+            return;
+          }
           reject(new HandlerError(
             `Shell handler failed: ${error.message}`,
             { source: command, handler: 'shell', code: 'SHELL_ERROR', cause: error },
@@ -172,12 +183,17 @@ function runShellHandler(
  *
  * All handlers are spawned as child processes. The handler.source
  * is the shell command to execute.
+ *
+ * @param event - The normalized hook event.
+ * @param handler - The handler reference to execute.
+ * @param timeoutMs - Optional per-handler timeout in milliseconds.
  */
 export async function runHandler(
   event: UnifiedHookEvent,
   handler: HandlerRef,
+  timeoutMs?: number,
 ): Promise<UnifiedHookResult> {
-  return runShellHandler(handler.source, event);
+  return runShellHandler(handler.source, event, timeoutMs);
 }
 
 /**
@@ -186,6 +202,12 @@ export async function runHandler(
  * Each HookPlanEntry has a single handler. Entries are executed in order.
  * All handlers receive the same base event.
  * Error handling follows the configured policy for the phase.
+ *
+ * Entries with a `when` condition are evaluated against the event;
+ * if any condition does not match, the handler is skipped.
+ *
+ * Entries with a `timeoutMs` override use that value as the per-handler
+ * timeout; otherwise the global `handlerTimeoutMs` option applies.
  */
 export async function runPlan(
   event: UnifiedHookEvent,
@@ -195,10 +217,16 @@ export async function runPlan(
   const results: UnifiedHookResult[] = [];
 
   for (const entry of plan) {
+    // Evaluate `when` condition — skip handler if any condition fails
+    if (!evaluateWhen(entry.when, event)) {
+      continue;
+    }
+
     const policy = getEffectivePolicy(entry.phase, options);
+    const timeout = entry.timeoutMs ?? options?.handlerTimeoutMs;
 
     try {
-      const result = await runHandler(event, entry.handler);
+      const result = await runHandler(event, entry.handler, timeout);
       results.push(result);
     } catch (err) {
       const shouldFailOpen = resolveFailOpen(policy, event.phase);

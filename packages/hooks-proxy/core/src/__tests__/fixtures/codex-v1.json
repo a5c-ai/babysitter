@@ -1,0 +1,68 @@
+{
+  "version": "v1",
+  "adapter": "codex",
+  "description": "Codex CLI native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "SessionStart",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "cwd": "/home/user/project",
+        "model": "o3",
+        "source": "startup"
+      },
+      "env": {
+        "HOME": "/home/user",
+        "PWD": "/home/user/project"
+      },
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "codex"
+      }
+    },
+    {
+      "nativeEventName": "UserPromptSubmit",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "prompt": "Fix the bug in auth module",
+        "cwd": "/home/user/project"
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.user_prompt_submitted",
+        "supportLevel": "native",
+        "adapter": "codex"
+      }
+    },
+    {
+      "nativeEventName": "Stop",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "reason": "task_complete",
+        "stop_hook_active": false
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.stop",
+        "supportLevel": "native",
+        "adapter": "codex"
+      }
+    },
+    {
+      "nativeEventName": "tool.before",
+      "stdin": {
+        "session_id": "codex-sess-abc123",
+        "tool_name": "bash",
+        "tool_call_id": "tc-001",
+        "tool_input": { "command": "npm test" }
+      },
+      "env": {},
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "lossy",
+        "adapter": "codex"
+      }
+    }
+  ]
+}

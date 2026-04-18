@@ -1,0 +1,69 @@
+{
+  "version": "v1",
+  "adapter": "claude",
+  "description": "Claude Code native hook event payloads for compatibility regression testing",
+  "events": [
+    {
+      "nativeEventName": "SessionStart",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "session_type": "interactive",
+        "cwd": "/home/user/project",
+        "transcript_path": "/home/user/.claude/transcript.jsonl",
+        "model": "claude-opus-4-6",
+        "permission_mode": "default",
+        "source": "startup",
+        "initial_prompt": "Help me refactor the auth module"
+      },
+      "env": {
+        "HOOKS_PROXY_SESSION_ID": "sess-claude-abc123",
+        "HOOKS_PROXY_CWD": "/home/user/project"
+      },
+      "expected": {
+        "phase": "session.start",
+        "supportLevel": "native",
+        "adapter": "claude"
+      }
+    },
+    {
+      "nativeEventName": "PreToolUse",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "cwd": "/home/user/project",
+        "model": "claude-opus-4-6",
+        "tool_name": "Bash",
+        "tool_call_id": "tc-bash-001",
+        "tool_input": {
+          "command": "npm test"
+        }
+      },
+      "env": {
+        "HOOKS_PROXY_SESSION_ID": "sess-claude-abc123"
+      },
+      "expected": {
+        "phase": "tool.before",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["tool_name", "tool_call_id", "tool_input"]
+      }
+    },
+    {
+      "nativeEventName": "Stop",
+      "stdin": {
+        "session_id": "sess-claude-abc123",
+        "cwd": "/home/user/project",
+        "model": "claude-opus-4-6",
+        "reason": "end_turn",
+        "last_assistant_message": "I have completed the refactoring.",
+        "stop_hook_active": false
+      },
+      "env": {},
+      "expected": {
+        "phase": "turn.stop",
+        "supportLevel": "native",
+        "adapter": "claude",
+        "payloadKeys": ["reason", "last_assistant_message", "stop_hook_active"]
+      }
+    }
+  ]
+}
