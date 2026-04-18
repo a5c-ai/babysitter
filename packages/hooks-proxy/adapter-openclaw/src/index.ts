@@ -8,6 +8,7 @@ export {
   getSupportedPluginPhases,
   classifyHookOrigin,
 } from './mappings';
+export { createConfiguredEngine } from './integration';
 export type { OpenClawHookOrigin } from './mappings';
 export {
   normalizeOpenClaw,

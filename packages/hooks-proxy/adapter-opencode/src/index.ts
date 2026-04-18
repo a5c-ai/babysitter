@@ -5,6 +5,7 @@ export {
   getOpenCodePhaseMapping,
   getSupportedPhases,
 } from './mappings';
+export { createConfiguredEngine } from './integration';
 export {
   normalizeOpenCode,
   parseEventData,

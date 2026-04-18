@@ -244,6 +244,122 @@ registerHandler({
 
 ---
 
+## Programmatic Usage (In-Process Harnesses)
+
+For in-process harnesses (Pi, Oh-My-Pi, OpenCode, OpenClaw), the hooks-proxy provides a programmatic engine that runs handlers in-process without spawning shell subprocesses.
+
+### Creating an Engine
+
+Each programmatic adapter exports a `createConfiguredEngine()` factory that pre-wires the adapter's capabilities and phase mappings:
+
+```typescript
+// Pi
+import { createConfiguredEngine } from '@a5c/hooks-proxy-adapter-pi';
+const engine = createConfiguredEngine();
+
+// Oh-My-Pi
+import { createConfiguredEngine } from '@a5c/hooks-proxy-adapter-oh-my-pi';
+const engine = createConfiguredEngine();
+
+// OpenCode
+import { createConfiguredEngine } from '@a5c/hooks-proxy-adapter-opencode';
+const engine = createConfiguredEngine();
+
+// OpenClaw
+import { createConfiguredEngine } from '@a5c/hooks-proxy-adapter-openclaw';
+const engine = createConfiguredEngine();
+```
+
+Or create an engine directly from core:
+
+```typescript
+import { createHooksEngine } from '@a5c/hooks-proxy-core';
+
+const engine = createHooksEngine({
+  adapter: 'my-adapter',
+  capabilities: myAdapterCapabilities,
+  phaseMappings: myPhaseMappings,
+  sessionDir: '/custom/session/dir', // optional
+});
+```
+
+### Registering Handlers
+
+Register portable handler functions directly -- no shell commands needed:
+
+```typescript
+engine.registerHandler({
+  id: 'security-guard',
+  pluginId: 'my-security-plugin',
+  phase: 'tool.before',
+  priority: 10,
+  handler: async (event) => {
+    const toolName = event.execution.toolName;
+    if (toolName === 'Bash' && isDangerousCommand(event.payload)) {
+      return { decision: 'deny', reason: 'Blocked by policy' };
+    }
+    return { decision: 'allow' };
+  },
+  when: { 'execution.adapter': 'pi' }, // optional condition
+  timeoutMs: 5000, // optional per-handler timeout
+});
+```
+
+### Processing Events
+
+When the harness fires a native event, pass it to the engine:
+
+```typescript
+// Pi fires session_start:
+const result = await engine.processEvent({
+  nativeEventName: 'session_start',
+  payload: { sessionId: 'abc', cwd: '/project' },
+  sessionId: 'abc', // optional explicit session ID
+});
+
+console.log(result.mergedResult.decision);     // 'allow' | 'deny' | etc.
+console.log(result.mergedResult.persistEnv);   // env vars to persist
+console.log(result.handlersExecuted);          // ['security-guard', ...]
+console.log(result.diagnostics.executionTimeMs);
+```
+
+For pre-normalized events (skip adapter normalization):
+
+```typescript
+const result = await engine.processNormalizedEvent(normalizedEvent);
+```
+
+### Adding Middleware
+
+Middleware wraps the handler execution pipeline (Express/Koa-style):
+
+```typescript
+import type { HookMiddleware } from '@a5c/hooks-proxy-core';
+
+const loggingMiddleware: HookMiddleware = async (event, next) => {
+  console.log(`[${event.phase}] Processing...`);
+  const result = await next();
+  console.log(`[${event.phase}] Decision: ${result.decision}`);
+  return result;
+};
+
+engine.use(loggingMiddleware);
+```
+
+### Comparison: CLI vs Programmatic
+
+| Feature | CLI (`a5c-hooks-proxy invoke`) | Programmatic (`createHooksEngine`) |
+|---------|------|-------------|
+| Handler type | Shell commands (child processes) | In-process functions |
+| Input format | stdin JSON | Direct function arguments |
+| Output format | stdout JSON | Return values |
+| Session persistence | Automatic | Automatic |
+| Error handling | Per-phase error policies | Fail-open (default) |
+| Middleware | Not available | Express/Koa-style chain |
+| Best for | Shell-hook harnesses (Claude, Codex, Gemini) | In-process harnesses (Pi, OpenCode, OpenClaw) |
+
+---
+
 ## Portability Guidelines
 
 1. **Never depend on `event.raw`** -- it contains the harness-native payload and differs per adapter. Use `event.payload` for normalized data.

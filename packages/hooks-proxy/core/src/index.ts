@@ -111,6 +111,20 @@ export type { AdapterImpl, RegisteredAdapter } from './api';
 export { detectHarness } from './discovery';
 export type { DetectedHarness } from './discovery';
 
+// Programmatic engine
+export {
+  createHooksEngine,
+} from './programmatic';
+export type {
+  PortableHookHandler,
+  ProgrammaticEngineConfig,
+  RegisteredHandler,
+  EngineResult,
+  ProcessEventInput,
+  HooksEngine,
+  HookMiddleware,
+} from './programmatic';
+
 // SDK interface
 export {
   parseHookResult,

@@ -4,6 +4,9 @@ export { createAdapter } from './adapter';
 // Phase mappings
 export { OH_MY_PI_PHASE_MAPPINGS, findMapping, getSupportedPhases } from './mappings';
 
+// Programmatic integration
+export { createConfiguredEngine } from './integration';
+
 // Normalizer
 export {
   normalizeOhMyPiEvent,

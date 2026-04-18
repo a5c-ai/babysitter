@@ -44,6 +44,7 @@ packages/hooks-proxy/
 | `session-store/` | `loadSession`, `saveSession`, `updateSession`, `addContextFragment`, `acquireLock`, `releaseLock`, XDG path resolution |
 | `diagnostics/` | `DiagnosticEntry`, `TraceRecord`, structured JSONL logger, trace writer |
 | `api.ts` | Programmatic integration surface: `createAdapter`, `registerHandler`, `runNormalized`, `getAdapter`, `clearRegistries` |
+| `programmatic/` | In-process engine for programmatic harnesses: `createHooksEngine`, `HooksEngine`, `HookMiddleware`, `RegisteredHandler`, `EngineResult` |
 
 **Adapter sub-modules** (each adapter package):
 
@@ -162,6 +163,59 @@ export function createAdapter(): AdapterCapabilities {
 **`session-resolver.ts`** — extract or derive the `sessionId` from the native invocation context. Prefer native identifiers; fall back to derived (hash) or synthetic (UUID) per the adapter's `sessionIdQuality` declaration.
 
 Register the adapter in `api.ts` via `createAdapter(name, capabilities, impl)` and add it to the CLI adapter map.
+
+---
+
+## 4b. Programmatic Execution Path (In-Process Harnesses)
+
+For in-process harnesses (Pi, Oh-My-Pi, OpenCode, OpenClaw), the `programmatic/` module provides an alternative to the CLI-based execution path. Instead of spawning shell subprocesses, handlers run as in-process functions.
+
+```
+harness runtime (Pi / OpenCode / OpenClaw)
+        |
+        v
+createConfiguredEngine()           -- from adapter-pi, adapter-opencode, etc.
+  -> createHooksEngine(config)     -- from core/programmatic/engine.ts
+        |
+        v
+engine.processEvent(input)
+        |
+        v
+normalizeEvent()                   -- same core normalizer as CLI path
+  rawEventName -> canonicalPhase via phaseMappings
+  -> UnifiedHookEvent
+        |
+        v
+[middleware chain]                 -- optional Express/Koa-style wrappers
+        |
+        v
+resolve matching handlers          -- filter by phase, sort by priority/pluginId/id
+        |
+        v
+for each handler (sequential):
+  evaluateWhen(handler.when, event) -- skip if condition fails
+  handler.handler(event)            -- in-process function call (not shell exec)
+  on error -> fail-open (noop result with error metadata)
+  -> UnifiedHookResult[]
+        |
+        v
+mergeResults(results)              -- same merge engine as CLI path
+  -> MergedExecutionResult
+        |
+        v
+updateSessionFromResult()         -- persist env/contextVars to session store
+        |
+        v
+EngineResult { mergedResult, handlersExecuted, diagnostics }
+  -> consumed by harness runtime
+```
+
+Key differences from the CLI path:
+- Handlers are `PortableHookHandler` functions, not shell commands
+- No stdin/stdout serialization
+- Middleware support for cross-cutting concerns
+- Always fail-open (no per-phase error policy configuration)
+- Session persistence is automatic and best-effort
 
 ---
 
