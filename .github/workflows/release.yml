@@ -78,6 +78,12 @@ jobs:
           npm run build --workspace=@a5c-ai/unified-plugins 2>&1 | tee artifacts/logs/unified-plugins-build.log
           npm run test --workspace=@a5c-ai/unified-plugins 2>&1 | tee artifacts/logs/unified-plugins-tests.log
 
+      - name: Build and test babysitter-harness
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/babysitter-harness 2>&1 | tee artifacts/logs/babysitter-harness-build.log
+          npm run test --workspace=@a5c-ai/babysitter-harness 2>&1 | tee artifacts/logs/babysitter-harness-tests.log
+
       - name: babysitter-codex package tests
         run: |
           set -euo pipefail
