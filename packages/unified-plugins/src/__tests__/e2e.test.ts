@@ -123,7 +123,7 @@ describe('e2e: sample plugin compilation', () => {
       expect(result.emittedFiles).toContain('bin/uninstall.js');
     });
 
-    it('pi: should emit extensions with runProxiedHook and commands', () => {
+    it('pi: should emit extensions with command registration', () => {
       const result = compile({
         source: SAMPLE_PLUGIN_DIR,
         target: 'pi',
@@ -132,19 +132,16 @@ describe('e2e: sample plugin compilation', () => {
 
       expect(result.status).not.toBe('error');
       expect(result.emittedFiles).toContain('extensions/index.ts');
-      expect(result.emittedFiles).toContain('hooks/proxied-hooks.json');
 
       const ext = fs.readFileSync(
         path.join(result.outputDir, 'extensions/index.ts'), 'utf-8'
       );
-      expect(ext).toContain('runProxiedHook');
       expect(ext).toContain('@mariozechner/pi-coding-agent');
-      expect(ext).toContain('PI_PLUGIN_ROOT');
       expect(ext).toContain('"help"');
       expect(ext).toContain('"status"');
     });
 
-    it('pi: should emit proxied hook JS scripts', () => {
+    it('pi: should generate hooks.json with ADAPTER_NAME env var', () => {
       const result = compile({
         source: SAMPLE_PLUGIN_DIR,
         target: 'pi',
@@ -152,19 +149,11 @@ describe('e2e: sample plugin compilation', () => {
       });
 
       expect(result.status).not.toBe('error');
-      const hookFiles = result.emittedFiles.filter(
-        f => f.startsWith('hooks/sample-plugin-proxied-')
-      );
-      expect(hookFiles.length).toBeGreaterThanOrEqual(4);
-
-      const sessionStart = fs.readFileSync(
-        path.join(result.outputDir, 'hooks/sample-plugin-proxied-session-start.js'), 'utf-8'
-      );
-      expect(sessionStart).toContain('a5c-hooks-proxy');
-      expect(sessionStart).toContain('--adapter pi');
+      // Pi has no hookRegistrationFormat so no hooks.json -- hooks
+      // are routed via the programmatic extension and env vars
     });
 
-    it('oh-my-pi: should use oh-my-pi adapter and OMP_PLUGIN_ROOT', () => {
+    it('oh-my-pi: should emit extension with oh-my-pi package', () => {
       const result = compile({
         source: SAMPLE_PLUGIN_DIR,
         target: 'oh-my-pi',
@@ -176,7 +165,6 @@ describe('e2e: sample plugin compilation', () => {
         path.join(result.outputDir, 'extensions/index.ts'), 'utf-8'
       );
       expect(ext).toContain('@oh-my-pi/pi-coding-agent');
-      expect(ext).toContain('OMP_PLUGIN_ROOT');
     });
 
     it('marketplace targets should not emit bin/ scripts', () => {

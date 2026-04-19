@@ -13,27 +13,28 @@
     "hooks", "TDD", "quality-convergence", "agent", "LLM"
   ],
   "hooks": {
-    "SessionStart": true,
-    "Stop": true,
-    "UserPromptSubmit": true,
-    "PreToolUse": true,
-    "PostToolUse": true,
-    "SubagentStop": true,
-    "Notification": true,
-    "PreCompact": true,
-    "AfterAgent": true,
-    "SessionEnd": true,
-    "SessionIdle": true,
-    "ShellEnv": true,
-    "BeforePromptBuild": true,
-    "BeforeProviderRequest": true
+    "SessionStart": "hooks/session-start.sh",
+    "Stop": "hooks/stop.sh",
+    "UserPromptSubmit": "hooks/user-prompt-submit.sh",
+    "PreToolUse": "hooks/pre-tool-use.sh",
+    "PostToolUse": "hooks/post-tool-use.sh",
+    "SubagentStop": "hooks/subagent-stop.sh",
+    "Notification": "hooks/notification.sh",
+    "PreCompact": "hooks/pre-compact.sh",
+    "AfterAgent": "hooks/after-agent.sh",
+    "SessionEnd": "hooks/session-end.sh",
+    "SessionIdle": "hooks/session-idle.sh",
+    "ShellEnv": "hooks/shell-env.sh",
+    "BeforePromptBuild": "hooks/before-prompt-build.sh",
+    "BeforeProviderRequest": "hooks/before-provider-request.sh"
   },
   "commands": "commands",
   "skills": [
     { "name": "babysit", "file": "skills/babysit/SKILL.md" }
   ],
   "include": [
-    "versions.json"
+    "versions.json",
+    "hooks/"
   ],
   "targets": {
     "codex": {

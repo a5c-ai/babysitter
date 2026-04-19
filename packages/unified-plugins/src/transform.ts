@@ -12,16 +12,7 @@ import type {
 import {
   buildSkillFromCommand,
   markdownToToml,
-  slugify,
 } from './utils.js';
-
-// Hook script templates
-import {
-  generateBashHookScript,
-  generatePowerShellHookScript,
-  generateJavaScriptHookScript,
-  generateTypeScriptHookStub,
-} from './hookTemplates.js';
 
 // Manifest generators
 import {
@@ -47,10 +38,8 @@ import {
   generateOpenClawHooksJson,
 } from './hookRegistration.js';
 
-// Proxied hook templates for programmatic targets
+// Programmatic extension generator
 import {
-  generateProxiedHookScript,
-  generateProxiedHooksJson,
   generateProgrammaticExtension,
 } from './proxiedHookTemplates.js';
 
@@ -259,92 +248,17 @@ function transformHooks(
     return files;
   }
 
-  const isProgrammatic = targetProfile.adapterFamily === 'programmatic';
-
-  for (const [canonicalHook, handlerPath] of Object.entries(manifest.hooks)) {
-    if (handlerPath === null) continue;
+  for (const [canonicalHook, handlerValue] of Object.entries(manifest.hooks)) {
+    if (handlerValue === null) continue;
 
     const nativeHook = targetProfile.supportedHooks.get(canonicalHook);
     if (!nativeHook) {
       continue;
     }
 
-    // For programmatic targets, generate proxied Node.js hook scripts
-    if (isProgrammatic && targetProfile.scriptVariants.includes('javascript')) {
-      const jsScript = generateProxiedHookScript(
-        canonicalHook,
-        nativeHook,
-        targetProfile
-      );
-      const fileName = `${manifest.name}-proxied-${slugify(canonicalHook)}.js`;
-      files.push({
-        path: `hooks/${fileName}`,
-        content: jsScript,
-        executable: true,
-      });
-      continue;
-    }
-
-    // Shell-hook targets: generate bash/powershell/js/ts scripts
-    if (targetProfile.scriptVariants.includes('bash')) {
-      const bashScript = generateBashHookScript(
-        canonicalHook,
-        nativeHook,
-        targetProfile
-      );
-      const fileName = `${manifest.name}-proxied-${slugify(canonicalHook)}-hook.sh`;
-      files.push({
-        path: `hooks/${fileName}`,
-        content: bashScript,
-        executable: true,
-      });
-    }
-
-    if (targetProfile.scriptVariants.includes('powershell')) {
-      const ps1Script = generatePowerShellHookScript(
-        canonicalHook,
-        nativeHook,
-        targetProfile
-      );
-      const fileName = `${manifest.name}-proxied-${slugify(canonicalHook)}-hook.ps1`;
-      files.push({
-        path: `hooks/${fileName}`,
-        content: ps1Script,
-        executable: false,
-      });
-    }
-
-    if (!isProgrammatic && targetProfile.scriptVariants.includes('javascript')) {
-      const jsScript = generateJavaScriptHookScript(
-        canonicalHook,
-        nativeHook,
-        targetProfile
-      );
-      const fileName = `${manifest.name}-proxied-${nativeHook.replace(/\./g, '-')}.js`;
-      files.push({
-        path: `hooks/${fileName}`,
-        content: jsScript,
-        executable: true,
-      });
-    }
-
-    if (targetProfile.scriptVariants.includes('typescript')) {
-      const tsStub = generateTypeScriptHookStub(canonicalHook, nativeHook);
-      const fileName = `${nativeHook.replace(/_/g, '-')}.ts`;
-      files.push({
-        path: `extensions/hooks/${fileName}`,
-        content: tsStub,
-        executable: false,
-      });
-    }
-  }
-
-  // Generate proxied-hooks.json for programmatic targets
-  if (isProgrammatic && targetProfile.supportedHooks.size > 0) {
-    files.push({
-      path: 'hooks/proxied-hooks.json',
-      content: generateProxiedHooksJson(targetProfile, targetProfile.supportedHooks, manifest.name),
-    });
+    // String handler = source script (copied via include, referenced in registration)
+    // Boolean true = no source script; registration alone is sufficient
+    // The hook registration generator handles env-var parameterization
   }
 
   // Generate hook registration file for shell-hook targets

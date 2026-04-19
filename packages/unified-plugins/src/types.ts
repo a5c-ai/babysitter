@@ -16,7 +16,11 @@ export interface A5cPluginManifest {
   homepage?: string;
   keywords?: string[];
 
-  // Components — hook values: true = compiler-generated, string = custom handler path, null = disabled
+  // Components — hook values:
+  //   string path  = source script, copied to output and wired via registration
+  //   "proxy"      = passthrough to hooks-proxy with noop handler (no custom logic)
+  //   true         = stub (no-op echo '{}')
+  //   null         = disabled for this target
   hooks?: Record<string, string | boolean | null>;
   commands?: string[] | string;
   skills?: Array<{
