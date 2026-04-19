@@ -12,7 +12,7 @@ function resolveCommand(
   rootRef: string
 ): string {
   if (handlerValue === 'proxy') {
-    return `HOOK_TYPE=${hookSlug} ADAPTER_NAME=${adapter} PLUGIN_ROOT=${rootRef} echo '{}'`;
+    return `a5c-hooks-proxy invoke --adapter ${adapter} --hook-type ${hookSlug} --plugin-root ${rootRef} --json`;
   }
   if (typeof handlerValue === 'string') {
     return `HOOK_TYPE=${hookSlug} ADAPTER_NAME=${adapter} PLUGIN_ROOT=${rootRef} bash ${rootRef}/${handlerValue}`;
@@ -25,7 +25,10 @@ function resolvePsCommand(
   hookSlug: string,
   adapter: string
 ): string {
-  if (typeof handlerValue === 'string' && handlerValue !== 'proxy') {
+  if (handlerValue === 'proxy') {
+    return `a5c-hooks-proxy invoke --adapter ${adapter} --hook-type ${hookSlug} --json`;
+  }
+  if (typeof handlerValue === 'string') {
     return `$env:HOOK_TYPE='${hookSlug}'; $env:ADAPTER_NAME='${adapter}'; & "./${handlerValue.replace(/\.sh$/, '.ps1')}"`;
   }
   return `Write-Output '{}'`;
@@ -156,7 +159,9 @@ export function generateOpenCodeHooksJson(
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
     let script: string;
-    if (typeof handler === 'string' && handler !== 'proxy') {
+    if (handler === 'proxy') {
+      script = `a5c-hooks-proxy invoke --adapter ${targetProfile.adapterName} --hook-type ${slug} --json`;
+    } else if (typeof handler === 'string') {
       script = handler.replace(/\.sh$/, '.js');
     } else {
       script = 'echo {}';
