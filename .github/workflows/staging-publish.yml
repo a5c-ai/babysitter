@@ -254,7 +254,6 @@ jobs:
             const unifiedPkg = JSON.parse(fs.readFileSync(unifiedPkgPath, 'utf8'));
             unifiedPkg.version = '${STAGING_VERSION_UNIFIED}';
             fs.writeFileSync(unifiedPkgPath, JSON.stringify(unifiedPkg, null, 2) + '\n');
-            }
             const codexPkgPath = 'plugins/babysitter-codex/package.json';
             const codexPkg = JSON.parse(fs.readFileSync(codexPkgPath, 'utf8'));
             codexPkg.version = '${STAGING_VERSION_CODEX}';
