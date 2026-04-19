@@ -5,8 +5,8 @@
   "author": "a5c.ai",
   "license": "MIT",
   "hooks": {
-    "SessionStart": "hooks/babysitter-session-start-hook.sh",
-    "Stop": "hooks/babysitter-stop-hook.sh"
+    "SessionStart": "hooks/babysitter-proxied-session-start-hook.sh",
+    "Stop": "hooks/babysitter-proxied-stop-hook.sh"
   },
   "commands": [],
   "skills": [

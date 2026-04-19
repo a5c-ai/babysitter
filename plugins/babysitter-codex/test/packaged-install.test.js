@@ -164,9 +164,9 @@ try {
   assert.ok(homeConfig.includes('max_threads = 4'));
 
   const pluginHooks = readJson(path.join(installedPluginRoot, 'hooks.json'));
-  assert.strictEqual(pluginHooks.hooks.SessionStart[0].hooks[0].command, './hooks/babysitter-session-start.sh');
-  assert.strictEqual(pluginHooks.hooks.UserPromptSubmit[0].hooks[0].command, './hooks/user-prompt-submit.sh');
-  assert.strictEqual(pluginHooks.hooks.Stop[0].hooks[0].command, './hooks/babysitter-stop-hook.sh');
+  assert.strictEqual(pluginHooks.hooks.SessionStart[0].hooks[0].command, './hooks/babysitter-proxied-session-start.sh');
+  assert.strictEqual(pluginHooks.hooks.UserPromptSubmit[0].hooks[0].command, './hooks/babysitter-proxied-user-prompt-submit.sh');
+  assert.strictEqual(pluginHooks.hooks.Stop[0].hooks[0].command, './hooks/babysitter-proxied-stop-hook.sh');
 
   assert.ok(fs.existsSync(homeMarketplacePath));
   const homeMarketplace = readJson(homeMarketplacePath);
