@@ -1,23 +1,46 @@
 {
+  "description": "babysitter plugin hooks for OpenClaw",
   "hooks": {
-    "SessionStart": [
+    "session_start": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/babysitter-proxied-session-start.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter openclaw --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json"
           }
         ]
       }
     ],
-    "Stop": [
+    "agent_end": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/babysitter-proxied-stop-hook.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter openclaw --handler \"bash ./hooks/babysitter-proxied-agent-end.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "session_end": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter openclaw --handler \"bash ./hooks/babysitter-proxied-session-end.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "before_prompt_build": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter openclaw --handler \"bash ./hooks/babysitter-proxied-before-prompt-build.sh\" --json"
           }
         ]
       }

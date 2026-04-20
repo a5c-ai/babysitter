@@ -6,18 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/babysitter-proxied-session-start.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "./hooks/babysitter-proxied-user-prompt-submit.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json"
           }
         ]
       }
@@ -28,7 +17,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/babysitter-proxied-stop.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-stop.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-user-prompt-submit.sh\" --json"
           }
         ]
       }

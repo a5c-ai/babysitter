@@ -1,12 +1,12 @@
 {
-  "description": "Babysitter plugin hooks for continuous orchestration loops and token compression (proxied)",
+  "description": "babysitter plugin hooks",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-session-start.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-session-start.sh\" --json"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-stop.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-stop.sh\" --json"
           }
         ]
       }
@@ -26,18 +26,58 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-user-prompt-submit.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-user-prompt-submit.sh\" --json"
           }
         ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-tool-use.sh"
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-tool-use.sh\" --json"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-post-tool-use.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-subagent-stop.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-notification.sh\" --json"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-compact.sh\" --json"
           }
         ]
       }

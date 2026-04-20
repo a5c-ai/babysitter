@@ -4,16 +4,16 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "bash \"./hooks/babysitter-proxied-session-start.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-session-start.ps1\"",
+        "bash": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter cursor --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json",
+        "powershell": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter cursor --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json",
         "timeoutSec": 30
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "bash \"./hooks/babysitter-proxied-stop.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-stop.ps1\"",
+        "bash": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter cursor --handler \"bash ./hooks/babysitter-proxied-stop.sh\" --json",
+        "powershell": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter cursor --handler \"bash ./hooks/babysitter-proxied-stop.sh\" --json",
         "loop_limit": null
       }
     ]

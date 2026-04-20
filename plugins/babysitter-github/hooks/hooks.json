@@ -4,25 +4,25 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "bash \"./hooks/babysitter-proxied-session-start.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-session-start.ps1\"",
-        "timeoutSec": 30
-      }
-    ],
-    "sessionEnd": [
-      {
-        "type": "command",
-        "bash": "bash \"./hooks/babysitter-proxied-session-end.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-session-end.ps1\"",
+        "bash": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json",
+        "powershell": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json",
         "timeoutSec": 30
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "bash \"./hooks/babysitter-proxied-user-prompt-submitted.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-user-prompt-submitted.ps1\"",
+        "bash": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-user-prompt-submitted.sh\" --json",
+        "powershell": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-user-prompt-submitted.sh\" --json",
         "timeoutSec": 15
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-session-end.sh\" --json",
+        "powershell": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter copilot --handler \"bash ./hooks/babysitter-proxied-session-end.sh\" --json",
+        "timeoutSec": 30
       }
     ]
   }

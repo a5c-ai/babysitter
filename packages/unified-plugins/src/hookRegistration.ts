@@ -46,10 +46,9 @@ function resolveCmd(
   }
   const p = resolveHookPath(handlerValue, hookSlug, pluginName, nativeHook, pattern);
   if (p) {
-    if (rootRef.startsWith('$') || rootRef.startsWith('\\$')) {
-      return `bash ${rootRef}/${p}`;
-    }
-    return `./${p}`;
+    const scriptRef = rootRef.startsWith('$') || rootRef.startsWith('\\$')
+      ? `${rootRef}/${p}` : `./${p}`;
+    return `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "bash ${scriptRef}" --json`;
   }
   return `echo '{}'`;
 }
@@ -153,9 +152,9 @@ export function generateCursorHooksJson(
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
     const p = resolveHookPath(handler, slug, manifest.name, native, pat);
-    const bashCmd = p ? `bash "./${p}"` : `echo '{}'`;
-    const ps1Path = p ? `./${p.replace(/\.sh$/, '.ps1')}` : '';
-    const psCmd = p ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1Path}"` : `Write-Output '{}'`;
+    const adapter = targetProfile.adapterName;
+    const bashCmd = p ? `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `echo '{}'`;
+    const psCmd = p ? `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `Write-Output '{}'`;
     const entry: Record<string, unknown> = { type: 'command', bash: bashCmd, powershell: psCmd, timeoutSec: 30 };
     if (canonical === 'Stop') {
       entry.loop_limit = null;
@@ -207,9 +206,9 @@ export function generateGithubCopilotHooksJson(
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
     const p = resolveHookPath(handler, slug, manifest.name, native, pat);
-    const bashCmd = p ? `bash "./${p}"` : `echo '{}'`;
-    const ps1Path = p ? `./${p.replace(/\.sh$/, '.ps1')}` : '';
-    const psCmd = p ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1Path}"` : `Write-Output '{}'`;
+    const adapter = targetProfile.adapterName;
+    const bashCmd = p ? `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `echo '{}'`;
+    const psCmd = p ? `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `Write-Output '{}'`;
     const timeout = canonical === 'UserPromptSubmit' ? 15 : 30;
     hooks[native] = [{ type: 'command', bash: bashCmd, powershell: psCmd, timeoutSec: timeout }];
   });
@@ -226,27 +225,26 @@ export function generateOpenCodeHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
+    const adapter = targetProfile.adapterName;
     if (handler === 'proxy') {
       hooks[native] = [{
         type: 'command',
-        script: `a5c-hooks-proxy invoke --adapter ${targetProfile.adapterName} --json`,
-        env: { HOOK_TYPE: slug, ADAPTER_NAME: targetProfile.adapterName },
+        script: `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --json`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];
     } else {
       const jsPat = getJsPattern(manifest, targetProfile.name);
-      let script: string;
+      let handlerScript: string;
       if (jsPat) {
-        script = applyPattern(jsPat, manifest.name, slug, native);
+        handlerScript = applyPattern(jsPat, manifest.name, slug, native);
       } else {
         const p = resolveHookPath(handler, slug, manifest.name, native, pat);
-        script = p ? p.replace(/\.sh$/, '.js') : 'echo {}';
+        handlerScript = p ? p.replace(/\.sh$/, '.js') : 'echo {}';
       }
       hooks[native] = [{
         type: 'command',
-        script,
-        env: { HOOK_TYPE: slug, ADAPTER_NAME: targetProfile.adapterName },
+        script: `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter ${adapter} --handler "node ./${handlerScript}" --json`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];

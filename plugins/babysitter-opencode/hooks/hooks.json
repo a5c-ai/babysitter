@@ -1,45 +1,45 @@
 {
   "version": 1,
-  "description": "Babysitter hook registration for OpenCode. Maps OpenCode plugin events to unified babysitter hook scripts with hooks-proxy support.",
+  "description": "babysitter hook registration for OpenCode.",
   "hooks": {
     "session.created": [
       {
         "type": "command",
-        "script": "hooks/babysitter-proxied-session-created.js",
-        "description": "Initialize babysitter session state and inject context (proxied via a5c-hooks-proxy)",
+        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-session-created.js\" --json",
+        "description": "babysitter SessionStart hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "tool.execute.before": [
+      {
+        "type": "command",
+        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-tool-execute-before.js\" --json",
+        "description": "babysitter PreToolUse hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "tool.execute.after": [
+      {
+        "type": "command",
+        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-tool-execute-after.js\" --json",
+        "description": "babysitter PostToolUse hook",
         "timeoutMs": 30000
       }
     ],
     "session.idle": [
       {
         "type": "command",
-        "script": "hooks/babysitter-proxied-session-idle.js",
-        "description": "Check for pending babysitter effects when agent goes idle (proxied via a5c-hooks-proxy)",
+        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-session-idle.js\" --json",
+        "description": "babysitter SessionIdle hook",
         "timeoutMs": 30000
       }
     ],
     "shell.env": [
       {
         "type": "command",
-        "script": "hooks/babysitter-proxied-shell-env.js",
-        "description": "Inject AGENT_SESSION_ID and other env vars into shell (proxied via a5c-hooks-proxy)",
+        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-shell-env.js\" --json",
+        "description": "babysitter ShellEnv hook",
         "timeoutMs": 5000
-      }
-    ],
-    "tool.execute.before": [
-      {
-        "type": "command",
-        "script": "hooks/babysitter-proxied-tool-execute-before.js",
-        "description": "Pre-tool-use hook for babysitter awareness (proxied via a5c-hooks-proxy)",
-        "timeoutMs": 10000
-      }
-    ],
-    "tool.execute.after": [
-      {
-        "type": "command",
-        "script": "hooks/babysitter-proxied-tool-execute-after.js",
-        "description": "Post-tool-use hook for babysitter awareness (proxied via a5c-hooks-proxy)",
-        "timeoutMs": 10000
       }
     ]
   }

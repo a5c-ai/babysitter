@@ -1,29 +1,28 @@
 {
-  "description": "Babysitter plugin hooks for Gemini CLI — session initialization and AfterAgent continuation loop (proxied via a5c-hooks-proxy)",
+  "description": "babysitter plugin hooks for Gemini CLI",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
-            "name": "babysitter-proxied-session-start",
+            "name": "babysitter-session-start",
             "type": "command",
-            "command": "bash \"${extensionPath}/hooks/babysitter-proxied-session-start.sh\"",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter gemini --handler \"bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-session-start.sh\" --json",
             "timeout": 30000,
-            "description": "Initializes a Babysitter session state file so the AfterAgent hook can track orchestration progress (proxied via a5c-hooks-proxy)"
+            "description": "babysitter SessionStart hook"
           }
         ]
       }
     ],
     "AfterAgent": [
       {
-        "matcher": "*",
         "hooks": [
           {
-            "name": "babysitter-proxied-after-agent",
+            "name": "babysitter-after-agent",
             "type": "command",
-            "command": "bash \"${extensionPath}/hooks/babysitter-proxied-after-agent.sh\"",
+            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter gemini --handler \"bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-after-agent.sh\" --json",
             "timeout": 30000,
-            "description": "Babysitter orchestration loop driver — blocks session exit to continue iterating until the run is complete (proxied via a5c-hooks-proxy)"
+            "description": "babysitter AfterAgent hook"
           }
         ]
       }
