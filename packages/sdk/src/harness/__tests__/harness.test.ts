@@ -20,7 +20,7 @@ import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
 import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
-import { createPiAdapter, installPiPlugin } from "../pi";
+import { createPiAdapter } from "../pi";
 import { createOhMyPiAdapter } from "../ohMyPi";
 import { createNullAdapter } from "../nullAdapter";
 import {
@@ -307,18 +307,7 @@ describe("OhMyPiAdapter", () => {
   });
 });
 
-describe("Pi install helpers", () => {
-  it("returns an npx-based dry-run install command", async () => {
-    const result = await installPiPlugin({
-      workspace: "/tmp/project",
-      dryRun: true,
-      json: true,
-      verbose: false,
-    });
-    expect(result.dryRun).toBe(true);
-    expect(result.command).toContain("@a5c-ai/babysitter-pi");
-  });
-});
+// Pi install helpers removed -- installPiPlugin moved to agent-mux.
 
 // ---------------------------------------------------------------------------
 // NullAdapter
@@ -847,41 +836,9 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     expect(stdout.trim()).toBe("{}");
   });
 
-  it("uses CLAUDE_ENV_FILE fallback when AGENT_SESSION_ID is not set", async () => {
-    const staleSessionId = "stale-from-payload";
-    const currentSessionId = "session-from-env-file";
-    const runId = "test-run-002";
-
-    // Write session file for the current session
-    const filePath = getSessionFilePath(stateDir, currentSessionId);
-    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
-
-    // Create a proper run
-    await createMinimalRun(runId);
-
-    // Set CLAUDE_ENV_FILE instead of AGENT_SESSION_ID
-    delete process.env.AGENT_SESSION_ID;
-    writeFileSync(envFilePath, `export AGENT_SESSION_ID="${currentSessionId}"\n`, "utf-8");
-    process.env.CLAUDE_ENV_FILE = envFilePath;
-
-    const adapter = createClaudeCodeAdapter();
-    const hookPayload = JSON.stringify({ session_id: staleSessionId });
-
-    const { exitCode, stdout } = await withSyntheticStdinAndCapturedStdout(
-      hookPayload,
-      () => adapter.handleStopHook({
-        stateDir,
-        runsDir,
-        json: true,
-        verbose: false,
-      }),
-    );
-
-    // Should find the session via env file fallback and block exit
-    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
-    expect(parsed).not.toEqual({});
-    expect(parsed.decision).toBe("block");
-  });
+  // "uses CLAUDE_ENV_FILE fallback" test removed -- env-file fallback
+  // was removed during harness unification. Session resolution is now
+  // solely via AGENT_SESSION_ID.
 
   it("codex stop hook normalizes a legacy root-style stateDir and finds the session under /state", async () => {
     const rootStateDir = path.join(tmpDir, "global-root");

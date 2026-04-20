@@ -1,161 +1,50 @@
 /**
- * Verifies Claude Code session-resolution precedence:
- *   env-file > env-var > pid-marker fallback (with legacy BABYSITTER_TRUST_ENV_SESSION
- *   escape hatch).
+ * Verifies Claude Code session resolution after harness unification.
+ *
+ * PID-marker and env-file precedence logic has been removed.
+ * resolveSessionIdDetailed() now returns process.env.AGENT_SESSION_ID
+ * or an explicit value, with no other sources.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { promises as fs, writeFileSync as writeFileSyncAsync, mkdirSync as mkdirSyncAsync } from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
-import {
-  __resetCacheForTests,
-  __setAncestorResolverForTests,
-  getSessionMarkerPath,
-} from "../../utils/sessionMarker";
 import { resolveSessionIdDetailed } from "../claudeCode";
 
-let tmpDir: string;
-let savedGlobalStateDir: string | undefined;
 let savedSessionId: string | undefined;
-let savedEnvFile: string | undefined;
-let savedTrustEnv: string | undefined;
-let savedPidMarkerFlag: string | undefined;
 
-beforeEach(async () => {
-  tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "claude-resolve-prec-"));
-  savedGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+beforeEach(() => {
   savedSessionId = process.env.AGENT_SESSION_ID;
-  savedEnvFile = process.env.CLAUDE_ENV_FILE;
-  savedTrustEnv = process.env.AGENT_TRUST_ENV_SESSION;
-  savedPidMarkerFlag = process.env.AGENT_ENABLE_SESSION_PID_MARKERS;
-  process.env.BABYSITTER_GLOBAL_STATE_DIR = tmpDir;
   delete process.env.AGENT_SESSION_ID;
-  delete process.env.AGENT_SESSION_ID;
-  delete process.env.CLAUDE_ENV_FILE;
-  delete process.env.AGENT_TRUST_ENV_SESSION;
-  delete process.env.BABYSITTER_TRUST_ENV_SESSION;
-  delete process.env.AGENT_ENABLE_SESSION_PID_MARKERS;
-  delete process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS;
-  __resetCacheForTests();
 });
 
-afterEach(async () => {
-  if (savedGlobalStateDir === undefined) delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
-  else process.env.BABYSITTER_GLOBAL_STATE_DIR = savedGlobalStateDir;
+afterEach(() => {
   if (savedSessionId === undefined) delete process.env.AGENT_SESSION_ID;
   else process.env.AGENT_SESSION_ID = savedSessionId;
-  delete process.env.AGENT_SESSION_ID;
-  if (savedEnvFile === undefined) delete process.env.CLAUDE_ENV_FILE;
-  else process.env.CLAUDE_ENV_FILE = savedEnvFile;
-  if (savedTrustEnv === undefined) delete process.env.AGENT_TRUST_ENV_SESSION;
-  else process.env.AGENT_TRUST_ENV_SESSION = savedTrustEnv;
-  delete process.env.BABYSITTER_TRUST_ENV_SESSION;
-  if (savedPidMarkerFlag === undefined) delete process.env.AGENT_ENABLE_SESSION_PID_MARKERS;
-  else process.env.AGENT_ENABLE_SESSION_PID_MARKERS = savedPidMarkerFlag;
-  delete process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS;
-  __resetCacheForTests();
-  __setAncestorResolverForTests(undefined);
-  try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
-  } catch {
-    // ignore
-  }
 });
 
-function seedMarker(pid: number, sessionId: string): void {
-  const markerPath = getSessionMarkerPath("claude-code", pid);
-  mkdirSyncAsync(path.dirname(markerPath), { recursive: true });
-  writeFileSyncAsync(markerPath, `${sessionId}\n`);
-}
-
-function seedEnvFile(content: string): string {
-  const p = path.join(tmpDir, "claude.env");
-  writeFileSyncAsync(p, content);
-  process.env.CLAUDE_ENV_FILE = p;
-  return p;
-}
-
-describe("resolveSessionIdDetailed precedence", () => {
-  it("returns env-file when markers are disabled even if all three sources are present", () => {
-    // Inject ancestor = our pid so marker lookup hits.
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    seedMarker(process.pid, "MARKER-ID");
-    seedEnvFile(`export AGENT_SESSION_ID="ENV-FILE-ID"\n`);
-    process.env.AGENT_SESSION_ID = "STALE-ENV-ID";
-
-    const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("ENV-FILE-ID");
-    expect(r.resolvedFrom).toBe("env-file");
+describe("resolveSessionIdDetailed (unified)", () => {
+  it("returns explicit sessionId without consulting any source", () => {
+    process.env.AGENT_SESSION_ID = "SHOULD-BE-IGNORED";
+    const r = resolveSessionIdDetailed("EXPLICIT-ID");
+    expect(r.sessionId).toBe("EXPLICIT-ID");
+    expect(r.resolvedFrom).toBe("explicit");
     expect(r.ancestorPid).toBeNull();
     expect(r.ancestorAlive).toBeNull();
   });
 
-  it("uses pid marker first when markers are enabled", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    seedMarker(process.pid, "MARKER-ID");
-    seedEnvFile(`export AGENT_SESSION_ID="ENV-FILE-ID"\n`);
-    process.env.AGENT_SESSION_ID = "STALE-ENV-ID";
-
-    const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("MARKER-ID");
-    expect(r.resolvedFrom).toBe("pid-marker");
-  });
-
-  it("falls back to env-var when env-file missing and markers are disabled", () => {
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    seedMarker(process.pid, "MARKER-ID");
+  it("returns AGENT_SESSION_ID env var when no explicit value given", () => {
     process.env.AGENT_SESSION_ID = "ENV-VAR-ID";
-
     const r = resolveSessionIdDetailed();
     expect(r.sessionId).toBe("ENV-VAR-ID");
     expect(r.resolvedFrom).toBe("env-var");
+    expect(r.ancestorPid).toBeNull();
+    expect(r.ancestorAlive).toBeNull();
   });
 
-  it("falls back to env-file when marker and env-var are missing", () => {
-    __setAncestorResolverForTests(() => undefined);
-    seedEnvFile(`export AGENT_SESSION_ID="ENV-FILE-ID"\n`);
-
+  it("returns none when neither explicit nor env var is present", () => {
     const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("ENV-FILE-ID");
-    expect(r.resolvedFrom).toBe("env-file");
-  });
-
-  it("falls back to pid marker when markers are enabled and env-file/env-var are missing", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    seedMarker(process.pid, "MARKER-FALLBACK");
-
-    const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("MARKER-FALLBACK");
-    expect(r.resolvedFrom).toBe("pid-marker");
-  });
-
-  it("falls back to env-var when marker and env-file are missing, warning on stale", () => {
-    __setAncestorResolverForTests(() => undefined);
-    process.env.AGENT_SESSION_ID = "FALLBACK";
-
-    const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("FALLBACK");
-    expect(r.resolvedFrom).toBe("env-var");
-  });
-
-  it("BABYSITTER_TRUST_ENV_SESSION=1 restores env-var-first precedence", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    seedMarker(process.pid, "MARKER-ID");
-    process.env.AGENT_SESSION_ID = "TRUSTED-ENV";
-    process.env.AGENT_TRUST_ENV_SESSION = "1";
-
-    const r = resolveSessionIdDetailed();
-    expect(r.sessionId).toBe("TRUSTED-ENV");
-    expect(r.resolvedFrom).toBe("env-var");
-  });
-
-  it("returns explicit sessionId without consulting any source", () => {
-    const r = resolveSessionIdDetailed("EXPLICIT-ID");
-    expect(r.sessionId).toBe("EXPLICIT-ID");
-    expect(r.resolvedFrom).toBe("explicit");
+    expect(r.sessionId).toBeUndefined();
+    expect(r.resolvedFrom).toBe("none");
+    expect(r.ancestorPid).toBeNull();
+    expect(r.ancestorAlive).toBeNull();
   });
 });

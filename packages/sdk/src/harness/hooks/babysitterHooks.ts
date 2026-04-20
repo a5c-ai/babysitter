@@ -72,7 +72,7 @@ function parseHooksFromJson(obj: Record<string, unknown>): Record<string, Babysi
   return result;
 }
 
-export async function loadBabysitterHooks(cwd?: string): Promise<BabysitterHooksConfig> {
+export function loadBabysitterHooks(cwd?: string): BabysitterHooksConfig {
   const resolvedCwd = cwd ? path.resolve(cwd) : process.cwd();
   const homeDir = os.homedir();
 
@@ -115,7 +115,7 @@ export async function invokeBabysitterHook(
   input: unknown,
   config?: BabysitterHooksConfig,
 ): Promise<unknown> {
-  const effectiveConfig = config ?? await loadBabysitterHooks();
+  const effectiveConfig = config ?? loadBabysitterHooks();
   const entries = effectiveConfig.hooks[hookName];
   if (!entries || entries.length === 0) return undefined;
 

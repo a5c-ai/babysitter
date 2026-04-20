@@ -189,54 +189,6 @@ describe("babysitter run:create CLI", () => {
     await fs.rm(globalStateRoot, { recursive: true, force: true });
   });
 
-  it("binds claude-code runs to the pid marker before leaked AGENT_SESSION_ID when enabled", async () => {
-    const entryFile = await writeEntrypoint("processes/claude-session-marker.mjs", `export async function process() { return true; }\n`);
-    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-marker-state-"));
-    const currentSessionId = "current-claude-session";
-    const leakedSessionId = "leaked-background-shell-session";
-
-    process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS = "1";
-    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
-    process.env.AGENT_SESSION_ID = leakedSessionId;
-    __resetCacheForTests();
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-
-    const markerPath = getSessionMarkerPath("claude-code", process.pid);
-    await fs.mkdir(path.dirname(markerPath), { recursive: true });
-    await fs.writeFile(markerPath, `${currentSessionId}\n`);
-
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run([
-      "run:create",
-      "--runs-dir",
-      runsRoot,
-      "--process-id",
-      "ci/claude-session-marker",
-      "--entry",
-      `${entryFile}#process`,
-      "--harness",
-      "claude-code",
-      "--json",
-    ]);
-
-    expect(exitCode).toBe(0);
-    const payload = readLastJsonLine(logSpy);
-    expect(payload.session).toMatchObject({
-      harness: "claude-code",
-      sessionId: currentSessionId,
-      resolvedFrom: "pid-marker",
-    });
-    expect(String(payload.session.stateFile).replace(/\\/g, "/")).toContain(`/state/${currentSessionId}.md`);
-    await expect(
-      fs.access(path.join(globalStateRoot, "state", `${currentSessionId}.md`)),
-    ).resolves.toBeUndefined();
-    await expect(
-      fs.access(path.join(globalStateRoot, "state", `${leakedSessionId}.md`)),
-    ).rejects.toMatchObject({ code: "ENOENT" });
-
-    await fs.rm(globalStateRoot, { recursive: true, force: true });
-  });
-
   it("describes dry-run plans without creating run directories", async () => {
     const entryFile = await writeEntrypoint("processes/dry-run.mjs", `export const handler = () => "dry";\n`);
 

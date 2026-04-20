@@ -478,9 +478,12 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "new-run-abc",
+      runDir: path.join(tmpDir, "runs", "new-run-abc"),
       maxIterations: 50,
       prompt: "Build a REST API",
       stateDir,
+      verbose: false,
+      json: false,
     });
 
     expect(result.harness).toBe("gemini-cli");
@@ -516,7 +519,11 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "updated-run-xyz",
+      runDir: path.join(tmpDir, "runs", "updated-run-xyz"),
       stateDir,
+      prompt: "",
+      verbose: false,
+      json: false,
     });
 
     expect(result.error).toBeUndefined();
@@ -546,7 +553,11 @@ describe("Gemini CLI bindSession", () => {
     const result = await adapter.bindSession({
       sessionId,
       runId: "new-conflicting-run",
+      runDir: path.join(tmpDir, "runs", "new-conflicting-run"),
       stateDir,
+      prompt: "",
+      verbose: false,
+      json: false,
     });
 
     expect(result.error).toContain("existing-run-999");
@@ -731,7 +742,7 @@ describe("Gemini CLI findHookDispatcherPath", () => {
     expect(result).toBeNull();
   });
 
-  it("returns after-agent.sh path when it exists under GEMINI_EXTENSION_PATH", async () => {
+  it("returns null even when GEMINI_EXTENSION_PATH is set (hooks-proxy handles dispatch)", async () => {
     const hookDir = path.join(tmpDir, "hooks");
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
@@ -739,10 +750,10 @@ describe("Gemini CLI findHookDispatcherPath", () => {
 
     const adapter = createGeminiCliAdapter();
     const result = adapter.findHookDispatcherPath!("/some/cwd");
-    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
+    expect(result).toBeNull();
   });
 
-  it("checks BABYSITTER_EXTENSION_PATH when GEMINI_EXTENSION_PATH is not set", async () => {
+  it("returns null when BABYSITTER_EXTENSION_PATH is set (hooks-proxy handles dispatch)", async () => {
     const hookDir = path.join(tmpDir, "hooks");
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(path.join(hookDir, "after-agent.sh"), "#!/bin/bash\n");
@@ -750,6 +761,6 @@ describe("Gemini CLI findHookDispatcherPath", () => {
 
     const adapter = createGeminiCliAdapter();
     const result = adapter.findHookDispatcherPath!("/some/cwd");
-    expect(result).toBe(path.join(path.resolve(tmpDir), "hooks", "after-agent.sh"));
+    expect(result).toBeNull();
   });
 });

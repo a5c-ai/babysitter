@@ -25,6 +25,11 @@ vi.mock("node:fs", () => ({
   },
 }));
 
+// Force discoverHarnessesViaAmux to throw so legacy probe path is exercised.
+vi.mock("../install", () => ({
+  discoverHarnessesViaAmux: vi.fn().mockRejectedValue(new Error("agent-mux not available")),
+}));
+
 import {
   KNOWN_HARNESSES,
   discoverHarnesses,

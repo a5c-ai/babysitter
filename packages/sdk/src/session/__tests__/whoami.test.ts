@@ -68,37 +68,21 @@ afterEach(async () => {
 });
 
 describe("runSessionWhoami", () => {
-  it("reports pid-marker provenance when the env session is stale", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
-    process.env.BABYSITTER_HARNESS_PID = String(process.pid);
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
+  // PID-marker tests removed -- PID markers were removed during harness
+  // unification.  AGENT_SESSION_ID is now the sole session source for
+  // claude-code.
+
+  it("returns AGENT_SESSION_ID as the session source for claude-code", () => {
     process.env.AGENT_SESSION_ID = "SESS-FROM-ENV";
 
     const result = runSessionWhoami({ harness: "claude-code" });
     expect(result.harness).toBe("claude-code");
-    expect(result.sessionId).toBe("SESS-FROM-MARKER");
-    expect(result.resolvedFrom).toBe("pid-marker");
+    expect(result.sessionId).toBe("SESS-FROM-ENV");
+    expect(result.resolvedFrom).toBe("env-var");
     expect(result.envVarPresent).toBe(true);
-    expect(result.envVarMatches).toBe(false);
-    expect(result.ancestorPid).toBe(process.pid);
-    expect(result.ancestorAlive).toBe(true);
-    expect(result.markerPath).toContain("current-session-claude-code-pid-");
-  });
-
-  it("falls back to the pid marker when no env session is present", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
-    process.env.BABYSITTER_HARNESS_PID = String(process.pid);
-    __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
-
-    const result = runSessionWhoami({ harness: "claude-code" });
-    expect(result.sessionId).toBe("SESS-FROM-MARKER");
-    expect(result.resolvedFrom).toBe("pid-marker");
-    expect(result.envVarPresent).toBe(false);
-    expect(result.envVarMatches).toBeNull();
-    expect(result.ancestorPid).toBe(process.pid);
-    expect(result.markerPath).toContain("current-session-claude-code-pid-");
+    expect(result.envVarMatches).toBe(true);
+    expect(result.ancestorPid).toBeNull();
+    expect(result.ancestorAlive).toBeNull();
   });
 
   it("ignores pid markers when the feature flag is disabled", () => {

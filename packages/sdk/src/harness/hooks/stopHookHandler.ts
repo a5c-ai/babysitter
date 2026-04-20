@@ -88,7 +88,7 @@ export async function handleStopHookCommon(
   const log = createHookLogger(options.logLabel ?? `babysitter-${options.harness}-stop-hook`);
   log.info(`handleStopHook started (${options.harness})`);
 
-  // Step 1: Read stdin
+  // Read stdin
   let rawInput: string;
   if (args.stdinPayload !== undefined) {
     rawInput = args.stdinPayload;
@@ -113,7 +113,7 @@ export async function handleStopHookCommon(
   const hookInput = parseHookInput(rawInput);
   log.info("Hook input received");
 
-  // Step 2: Get sessionId
+  // Get sessionId
   const sessionId = resolveSessionIdFromInput(
     hookInput,
     options.sessionIdFields,
@@ -148,7 +148,7 @@ export async function handleStopHookCommon(
   const filePath = getSessionFilePath(stateDir, sessionId);
   log.info(`Checking session file at: ${filePath}`);
 
-  // Step 3: Load session state
+  // Load session state
   let sessionFile;
   try {
     if (!(await sessionFileExists(filePath))) {
@@ -169,7 +169,7 @@ export async function handleStopHookCommon(
   const { state } = sessionFile;
   const prompt = sessionFile.prompt ?? "";
 
-  // Step 4: Check max iterations
+  // Check max iterations
   if (state.maxIterations > 0 && state.iteration >= state.maxIterations) {
     if (verbose) {
       process.stderr.write(`[hook:run stop] Max iterations (${state.maxIterations}) reached\n`);
@@ -189,10 +189,10 @@ export async function handleStopHookCommon(
     }
     await cleanupSession(filePath);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, 0, "max_iterations_reached", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, 0, "max_iterations_reached", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
-  // Step 5: Check iteration speed
+  // Check iteration speed
   const now = getCurrentTimestamp();
   const updatedTimes =
     state.iteration >= 5
@@ -219,10 +219,10 @@ export async function handleStopHookCommon(
     }
     await cleanupSession(filePath);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, 0, "iteration_too_fast", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, 0, "iteration_too_fast", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
-  // ── Step 6: Extract promise from response ───────────────────────────
+  // Extract promise from response
   const runId = state.runId ?? "";
   const boundRunDir = state.runDir?.trim() || undefined;
   if (runId) log.setContext("run", runId);
@@ -231,12 +231,10 @@ export async function handleStopHookCommon(
   let promiseValue: string | null = null;
 
   if (options.useDetailedRunState) {
-    // Use the detailed parser (parses transcript + last_assistant_message)
     const assistantState = parseAssistantStopState(hookInput, log);
     hasPromise = assistantState.hasPromise;
     promiseValue = assistantState.promiseValue;
   } else {
-    // Simple promise extraction from configured response fields
     const responseFields = options.responseFields ?? ["last_response", "prompt_response"];
     for (const field of responseFields) {
       const text = safeStr(hookInput, field);
@@ -248,7 +246,7 @@ export async function handleStopHookCommon(
     }
   }
 
-  // ── Step 7: No runId → exit ─────────────────────────────────────────
+  // No runId → exit
   if (!runId) {
     log.info("No run associated with session — allowing exit");
     if (verbose) {
@@ -256,10 +254,10 @@ export async function handleStopHookCommon(
     }
     await cleanupSession(filePath);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, 0, "no_run_id", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, 0, "no_run_id", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
-  // ── Step 7b: Resolve run state ──────────────────────────────────────
+  // Resolve run state
   let runStateDetails: StopHookRunStateDetails | undefined;
   let runStateSummary: HookRunStateSummary | undefined;
   let runState = "";
@@ -290,8 +288,7 @@ export async function handleStopHookCommon(
 
   log.info(`Run state: ${runState || "unknown"}`);
   if (completionProof) log.info("Completion proof available");
-
-  // ── Step 8: Check terminal conditions ───────────────────────────────
+  // Check terminal conditions
   if (!runState) {
     const errorMessage = runStateDetails?.lookupError ??
       `Run ${runId} could not be resolved during the stop hook.`;
@@ -307,7 +304,7 @@ export async function handleStopHookCommon(
       hasPromise,
     }, options.harness);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, options.useDetailedRunState ? 1 : 0, "run_state_unknown", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, options.useDetailedRunState ? 1 : 0, "run_state_unknown", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
   if (runState === "waiting" && onlyBreakpointsPending) {
@@ -325,7 +322,7 @@ export async function handleStopHookCommon(
       hasPromise,
     }, options.harness);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, 0, "breakpoint_waiting", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, 0, "breakpoint_waiting", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
   if (hasPromise && completionProof && promiseValue === completionProof) {
@@ -344,10 +341,10 @@ export async function handleStopHookCommon(
     }, options.harness);
     await cleanupSession(filePath);
     process.stdout.write("{}\n");
-    return makeExitWithState(log, 0, "completion_proof_matched", sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir);
+    return makeExit(log, 0, "completion_proof_matched", { sessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
-  // ── Step 9: Should continue → update session and return ─────────────
+  // Should continue → update session and return
   const nextIteration = state.iteration + 1;
   const currentTime = getCurrentTimestamp();
   const updatedState: SessionState = {
@@ -365,7 +362,6 @@ export async function handleStopHookCommon(
     }
   }
 
-  // Log the block decision
   await appendStopHookEvent(runEventDir, {
     sessionId,
     iteration: state.iteration,
@@ -376,81 +372,21 @@ export async function handleStopHookCommon(
     hasPromise,
   }, options.harness);
 
-  return {
-    shouldContinue: true,
-    exitCode: 0,
-    sessionId,
-    filePath,
-    state: updatedState,
-    prompt,
-    runStateDetails,
-    runStateSummary,
-    hasPromise,
-    promiseValue,
-    resolvedPluginRoot,
-    runsDir,
-    updatedTimes,
-    nextIteration,
-    log,
-  };
+  return { shouldContinue: true, exitCode: 0, sessionId, filePath, state: updatedState,
+    prompt, runStateDetails, runStateSummary, hasPromise, promiseValue, resolvedPluginRoot,
+    runsDir, updatedTimes, nextIteration, log };
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 function resolvePluginRootFromEnv(envVars: string[]): string | undefined {
-  for (const envVar of envVars) {
-    const value = process.env[envVar];
-    if (value) return value;
-  }
+  for (const v of envVars) { if (process.env[v]) return process.env[v]; }
   return process.env.AGENT_PLUGIN_ROOT;
 }
 
-function makeExit(log: HookLogger, exitCode: number, reason: string): StopHookCommonResult {
+function makeExit(log: HookLogger, exitCode: number, reason: string, extra?: Partial<StopHookCommonResult>): StopHookCommonResult {
   return {
-    shouldContinue: false,
-    exitCode,
-    exitReason: reason,
-    sessionId: "",
-    filePath: "",
-    state: {} as SessionState,
-    prompt: "",
-    hasPromise: false,
-    promiseValue: null,
-    resolvedPluginRoot: "",
-    runsDir: "",
-    updatedTimes: [],
-    nextIteration: 0,
-    log,
-  };
-}
-
-function makeExitWithState(
-  log: HookLogger,
-  exitCode: number,
-  reason: string,
-  sessionId: string,
-  filePath: string,
-  state: SessionState,
-  prompt: string,
-  resolvedPluginRoot: string,
-  runsDir: string,
-): StopHookCommonResult {
-  return {
-    shouldContinue: false,
-    exitCode,
-    exitReason: reason,
-    sessionId,
-    filePath,
-    state,
-    prompt,
-    hasPromise: false,
-    promiseValue: null,
-    resolvedPluginRoot,
-    runsDir,
-    updatedTimes: [],
-    nextIteration: 0,
-    log,
+    shouldContinue: false, exitCode, exitReason: reason,
+    sessionId: "", filePath: "", state: {} as SessionState, prompt: "",
+    hasPromise: false, promiseValue: null, resolvedPluginRoot: "", runsDir: "",
+    updatedTimes: [], nextIteration: 0, log, ...extra,
   };
 }
