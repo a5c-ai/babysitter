@@ -1,4 +1,5 @@
 node_modules/
+dist/
 .a5c/runs/
 .a5c/logs/
 .a5c/processes/
@@ -12,4 +13,5 @@ node_modules/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+*.log
 .DS_Store

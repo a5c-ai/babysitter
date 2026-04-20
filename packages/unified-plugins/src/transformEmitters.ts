@@ -39,7 +39,7 @@ export function generateManifests(
       const codexPkg = generateCodexManifest(manifest);
       files.push({ path: 'package.json', content: codexPkg });
       files.push({ path: '.codex-plugin/plugin.json', content: generateHarnessManifest(manifest, targetProfile) });
-      files.push({ path: '.app.json', content: JSON.stringify({ apps: {} }, null, 2) });
+      files.push({ path: '.app.json', content: JSON.stringify({ apps: {} }, null, 2) + '\n' });
       break;
     }
     case 'cursor': {
@@ -297,7 +297,7 @@ export function generateExtraFiles(
   // .gitignore
   files.push({
     path: '.gitignore',
-    content: 'node_modules/\ndist/\n*.log\n.DS_Store\n',
+    content: 'node_modules/\ndist/\n.a5c/runs/\n.a5c/logs/\n.a5c/processes/\n.a5c/artifacts/\n.a5c/session.json\n.a5c/current-run.json\n.a5c/observer.json\n.a5c/index/\n.a5c/team/\n.a5c/config/rules.local.json\n*.sqlite\n*.sqlite-shm\n*.sqlite-wal\n*.log\n.DS_Store\n',
   });
 
   // Emit target-override extraFiles
