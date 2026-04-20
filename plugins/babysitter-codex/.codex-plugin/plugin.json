@@ -1,6 +1,6 @@
 {
   "name": "babysitter",
-  "version": "0.1.5",
+  "version": "5.0.0",
   "description": "Babysitter orchestration plugin for Codex with skill entrypoints and lifecycle hooks.",
   "author": {
     "name": "a5c.ai",

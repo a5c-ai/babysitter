@@ -28,22 +28,34 @@ export function generateManifests(
 ): TransformedFile[] {
   const files: TransformedFile[] = [];
 
+  // Filter manifest hooks to only those supported by this target
+  const filteredManifest = { ...manifest };
+  if (manifest.hooks) {
+    const filtered: Record<string, string | boolean | null> = {};
+    for (const [canonical, handler] of Object.entries(manifest.hooks)) {
+      if (handler !== null && targetProfile.supportedHooks.has(canonical)) {
+        filtered[canonical] = handler;
+      }
+    }
+    filteredManifest.hooks = filtered;
+  }
+
   switch (targetProfile.name) {
     case 'claude-code': {
-      const ccManifest = generateClaudeCodeManifest(manifest);
+      const ccManifest = generateClaudeCodeManifest(filteredManifest);
       files.push({ path: 'plugin.json', content: ccManifest });
       files.push({ path: '.claude-plugin/plugin.json', content: ccManifest });
       break;
     }
     case 'codex': {
-      const codexPkg = generateCodexManifest(manifest);
+      const codexPkg = generateCodexManifest(filteredManifest);
       files.push({ path: 'package.json', content: codexPkg });
       files.push({ path: '.codex-plugin/plugin.json', content: generateHarnessManifest(manifest, targetProfile) });
       files.push({ path: '.app.json', content: JSON.stringify({ apps: {} }, null, 2) + '\n' });
       break;
     }
     case 'cursor': {
-      const cursorManifest = generateCursorManifest(manifest);
+      const cursorManifest = generateCursorManifest(filteredManifest);
       files.push({ path: 'plugin.json', content: cursorManifest });
       files.push({ path: '.cursor-plugin/plugin.json', content: generateHarnessManifest(manifest, targetProfile) });
       break;
@@ -51,7 +63,7 @@ export function generateManifests(
     case 'gemini':
       files.push({
         path: 'plugin.json',
-        content: generateGeminiManifest(manifest),
+        content: generateGeminiManifest(filteredManifest),
       });
       files.push({
         path: 'gemini-extension.json',
@@ -65,11 +77,11 @@ export function generateManifests(
           },
           null,
           2
-        ),
+        ) + '\n',
       });
       break;
     case 'github-copilot': {
-      const copilotManifest = generateGithubCopilotManifest(manifest);
+      const copilotManifest = generateGithubCopilotManifest(filteredManifest);
       files.push({
         path: 'plugin.json',
         content: copilotManifest,
@@ -83,25 +95,25 @@ export function generateManifests(
     case 'pi':
       files.push({
         path: 'package.json',
-        content: generatePiManifest(manifest),
+        content: generatePiManifest(filteredManifest),
       });
       break;
     case 'oh-my-pi':
       files.push({
         path: 'package.json',
-        content: generateOhMyPiManifest(manifest),
+        content: generateOhMyPiManifest(filteredManifest),
       });
       break;
     case 'opencode':
       files.push({
         path: 'plugin.json',
-        content: generateOpenCodeManifest(manifest),
+        content: generateOpenCodeManifest(filteredManifest),
       });
       break;
     case 'openclaw':
       files.push({
         path: 'plugin.json',
-        content: generateOpenClawManifest(manifest),
+        content: generateOpenClawManifest(filteredManifest),
       });
       files.push({
         path: 'openclaw.plugin.json',
@@ -111,12 +123,12 @@ export function generateManifests(
             version: manifest.version,
             description: manifest.description,
             entrypoint: 'extensions/index.ts',
-            hooks: generateOpenClawNativeHooksSection(manifest, targetProfile),
+            hooks: generateOpenClawNativeHooksSection(filteredManifest, targetProfile),
             capabilities: ['orchestration', 'process-management', 'human-in-the-loop'],
           },
           null,
           2
-        ),
+        ) + '\n',
       });
       break;
   }
@@ -127,27 +139,46 @@ export function generateManifests(
     !files.some(f => f.path === 'package.json')
   ) {
     const npmPkg = targetProfile.npmPackageName || `@a5c-ai/${manifest.name}-${targetProfile.name}`;
-    const authorStr = typeof manifest.author === 'string' ? manifest.author : manifest.author.name;
     const isEsm = targetProfile.name === 'pi' || targetProfile.name === 'oh-my-pi' || targetProfile.name === 'openclaw';
     const ext = isEsm ? '.cjs' : '.js';
+    const scripts: Record<string, string> = {
+      deploy: 'npm publish --access public',
+      'deploy:staging': 'npm publish --access public --tag staging',
+    };
+    if (targetProfile.name === 'gemini') {
+      scripts.postinstall = 'node bin/postinstall.js';
+      scripts.preuninstall = 'node bin/preuninstall.js';
+    } else if (targetProfile.name !== 'pi' && targetProfile.name !== 'oh-my-pi') {
+      scripts.postinstall = `node bin/install${ext}`;
+      scripts.preuninstall = `node bin/uninstall${ext}`;
+    }
+    scripts['team:install'] = `node scripts/team-install${ext}`;
     const pkgJson: Record<string, unknown> = {
       name: npmPkg,
       version: manifest.version,
       description: manifest.description,
-      scripts: {
-        deploy: 'npm publish --access public',
-        'deploy:staging': 'npm publish --access public --tag staging',
-        ...(targetProfile.name === 'gemini' ? { postinstall: 'node bin/postinstall.js', preuninstall: 'node bin/preuninstall.js' } : {}),
-      },
+      scripts,
       bin: { [`${manifest.name}-${targetProfile.name}`]: `bin/cli${ext}` },
-      files: ['bin/', 'hooks/', 'hooks.json', 'skills/', 'commands/', 'README.md', 'versions.json', 'plugin.json', 'package.json'],
+      files: ['bin/', 'hooks/', 'hooks/', 'skills/', 'commands/', 'scripts/', 'plugin.json', 'README.md', 'versions.json', 'package.json'],
       keywords: [manifest.name, targetProfile.name, 'orchestration'],
-      author: authorStr,
+      author: manifest.author,
       license: manifest.license,
       publishConfig: { access: 'public' },
+      dependencies: { '@a5c-ai/babysitter-sdk': manifest.version },
     };
+    if (isEsm) pkgJson.type = 'module';
     if (manifest.repository) pkgJson.repository = manifest.repository;
-    files.push({ path: 'package.json', content: JSON.stringify(pkgJson, null, 2) });
+    if (manifest.repository) {
+      const repoUrl = typeof manifest.repository === 'string' ? manifest.repository : manifest.repository.url;
+      pkgJson.homepage = `${repoUrl}/tree/main/plugins/${npmPkg.split('/').pop()}#readme`;
+    }
+    if (targetProfile.adapterFamily === 'programmatic') {
+      const peerPkg = targetProfile.name === 'pi' ? '@mariozechner/pi-coding-agent'
+        : targetProfile.name === 'oh-my-pi' ? '@oh-my-pi/pi-coding-agent'
+        : targetProfile.name === 'openclaw' ? 'openclaw' : undefined;
+      if (peerPkg) pkgJson.peerDependencies = { [peerPkg]: '*' };
+    }
+    files.push({ path: 'package.json', content: JSON.stringify(pkgJson, null, 2) + '\n' });
   }
 
   return files;

@@ -1,5 +1,5 @@
 {
-  "name": "babysitter",
+  "name": "babysit",
   "version": "5.0.0",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
   "author": "a5c.ai",
@@ -11,7 +11,7 @@
   "commands": [],
   "skills": [
     {
-      "name": "babysitter",
+      "name": "babysit",
       "file": "skills/babysit/SKILL.md"
     }
   ],

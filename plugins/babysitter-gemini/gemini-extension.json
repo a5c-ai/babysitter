@@ -1,7 +1,7 @@
 {
   "name": "babysitter",
   "version": "5.0.0",
-  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — powered by the Babysitter SDK",
+  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
   "contextFileName": "GEMINI.md",
   "settings": []
 }

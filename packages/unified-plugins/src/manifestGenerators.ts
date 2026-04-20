@@ -45,7 +45,7 @@ export function generateClaudeCodeManifest(manifest: A5cPluginManifest): string 
     pluginJson.skills = manifest.skills;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
 
 export function generateCodexManifest(manifest: ResolvedManifest): string {
@@ -82,7 +82,7 @@ export function generateCodexManifest(manifest: ResolvedManifest): string {
     packageJson.repository = manifest.repository;
   }
 
-  return JSON.stringify(packageJson, null, 2);
+  return JSON.stringify(packageJson, null, 2) + '\n';
 }
 
 export function generateCursorManifest(manifest: A5cPluginManifest): string {
@@ -105,7 +105,7 @@ export function generateCursorManifest(manifest: A5cPluginManifest): string {
     pluginJson.keywords = manifest.keywords;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
 
 export function generateGeminiManifest(manifest: A5cPluginManifest): string {
@@ -141,7 +141,7 @@ export function generateGeminiManifest(manifest: A5cPluginManifest): string {
     pluginJson.keywords = manifest.keywords;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
 
 export function generateGithubCopilotManifest(manifest: A5cPluginManifest): string {
@@ -152,7 +152,7 @@ export function generateGithubCopilotManifest(manifest: A5cPluginManifest): stri
     author: manifest.author,
     license: manifest.license,
     skills: 'skills/',
-    hooks: 'hooks.json',
+    hooks: 'hooks/hooks.json',
     commands: 'commands/',
     agents: 'AGENTS.md',
   };
@@ -165,7 +165,7 @@ export function generateGithubCopilotManifest(manifest: A5cPluginManifest): stri
     pluginJson.keywords = manifest.keywords;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
 
 export function generatePiManifest(manifest: ResolvedManifest): string {
@@ -208,7 +208,7 @@ export function generatePiManifest(manifest: ResolvedManifest): string {
     packageJson.repository = manifest.repository;
   }
 
-  return JSON.stringify(packageJson, null, 2);
+  return JSON.stringify(packageJson, null, 2) + '\n';
 }
 
 export function generateOhMyPiManifest(manifest: ResolvedManifest): string {
@@ -251,7 +251,7 @@ export function generateOhMyPiManifest(manifest: ResolvedManifest): string {
     packageJson.repository = manifest.repository;
   }
 
-  return JSON.stringify(packageJson, null, 2);
+  return JSON.stringify(packageJson, null, 2) + '\n';
 }
 
 export function generateOpenCodeManifest(manifest: A5cPluginManifest): string {
@@ -275,7 +275,7 @@ export function generateOpenCodeManifest(manifest: A5cPluginManifest): string {
     pluginJson.keywords = manifest.keywords;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
 
 export function generateOpenClawManifest(manifest: A5cPluginManifest): string {
@@ -285,7 +285,7 @@ export function generateOpenClawManifest(manifest: A5cPluginManifest): string {
     description: manifest.description,
     author: manifest.author,
     license: manifest.license,
-    hooks: 'hooks.json',
+    hooks: 'hooks/hooks.json',
     commands: 'commands/',
     skills: 'skills/',
   };
@@ -298,5 +298,5 @@ export function generateOpenClawManifest(manifest: A5cPluginManifest): string {
     pluginJson.keywords = manifest.keywords;
   }
 
-  return JSON.stringify(pluginJson, null, 2);
+  return JSON.stringify(pluginJson, null, 2) + '\n';
 }
