@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ADAPTER_NAME="${ADAPTER_NAME:?ADAPTER_NAME is required}"
+ADAPTER_NAME="${ADAPTER_NAME:-opencode}"
 PLUGIN_ROOT="${PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 
 GLOBAL_ROOT="${BABYSITTER_GLOBAL_STATE_DIR:-$HOME/.a5c}"

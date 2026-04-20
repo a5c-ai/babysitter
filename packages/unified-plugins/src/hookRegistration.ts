@@ -45,11 +45,16 @@ function resolveCmd(
     return `a5c-hooks-proxy invoke --adapter ${adapter} --json`;
   }
   const p = resolveHookPath(handlerValue, hookSlug, pluginName, nativeHook, pattern);
-  if (p) return `HOOK_TYPE=${hookSlug} ADAPTER_NAME=${adapter} PLUGIN_ROOT=${rootRef} bash ${rootRef}/${p}`;
+  if (p) {
+    if (rootRef.startsWith('$') || rootRef.startsWith('\\$')) {
+      return `bash ${rootRef}/${p}`;
+    }
+    return `./${p}`;
+  }
   return `echo '{}'`;
 }
 
-function resolvePsCmd(
+function _resolvePsCmd(
   handlerValue: string | boolean,
   hookSlug: string,
   adapter: string,
@@ -61,7 +66,10 @@ function resolvePsCmd(
     return `a5c-hooks-proxy invoke --adapter ${adapter} --json`;
   }
   const p = resolveHookPath(handlerValue, hookSlug, pluginName, nativeHook, pattern);
-  if (p) return `$env:HOOK_TYPE='${hookSlug}'; $env:ADAPTER_NAME='${adapter}'; & "./${p.replace(/\.sh$/, '.ps1')}"`;
+  if (p) {
+    const ps1Path = `./${p.replace(/\.sh$/, '.ps1')}`;
+    return `powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1Path}"`;
+  }
   return `Write-Output '{}'`;
 }
 
@@ -116,7 +124,7 @@ export function generateClaudeCodeHooksJson(
     hooks[native] = [entry];
   });
 
-  return JSON.stringify({ description: `${manifest.name} plugin hooks`, hooks }, null, 2);
+  return JSON.stringify({ description: `${manifest.name} plugin hooks`, hooks }, null, 2) + '\n';
 }
 
 export function generateCodexHooksJson(
@@ -132,7 +140,7 @@ export function generateCodexHooksJson(
     hooks[native] = [{ matcher: '.*', hooks: [{ type: 'command', command: cmd }] }];
   });
 
-  return JSON.stringify({ hooks }, null, 2);
+  return JSON.stringify({ hooks }, null, 2) + '\n';
 }
 
 export function generateCursorHooksJson(
@@ -144,14 +152,19 @@ export function generateCursorHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
-    const bash = resolveCmd(handler, slug, targetProfile.adapterName, '.', manifest.name, native, pat);
-    const ps = resolvePsCmd(handler, slug, targetProfile.adapterName, manifest.name, native, pat);
-    const entry: Record<string, unknown> = { type: 'command', bash, powershell: ps, timeoutSec: 30 };
-    if (canonical === 'Stop') entry.loop_limit = null;
+    const p = resolveHookPath(handler, slug, manifest.name, native, pat);
+    const bashCmd = p ? `bash "./${p}"` : `echo '{}'`;
+    const ps1Path = p ? `./${p.replace(/\.sh$/, '.ps1')}` : '';
+    const psCmd = p ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1Path}"` : `Write-Output '{}'`;
+    const entry: Record<string, unknown> = { type: 'command', bash: bashCmd, powershell: psCmd, timeoutSec: 30 };
+    if (canonical === 'Stop') {
+      entry.loop_limit = null;
+      delete entry.timeoutSec;
+    }
     hooks[native] = [entry];
   });
 
-  return JSON.stringify({ version: 1, hooks }, null, 2);
+  return JSON.stringify({ version: 1, hooks }, null, 2) + '\n';
 }
 
 export function generateGeminiHooksJson(
@@ -193,12 +206,15 @@ export function generateGithubCopilotHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
-    const bash = resolveCmd(handler, slug, targetProfile.adapterName, '.', manifest.name, native, pat);
-    const ps = resolvePsCmd(handler, slug, targetProfile.adapterName, manifest.name, native, pat);
-    hooks[native] = [{ type: 'command', bash, powershell: ps, timeoutSec: 30 }];
+    const p = resolveHookPath(handler, slug, manifest.name, native, pat);
+    const bashCmd = p ? `bash "./${p}"` : `echo '{}'`;
+    const ps1Path = p ? `./${p.replace(/\.sh$/, '.ps1')}` : '';
+    const psCmd = p ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1Path}"` : `Write-Output '{}'`;
+    const timeout = canonical === 'UserPromptSubmit' ? 15 : 30;
+    hooks[native] = [{ type: 'command', bash: bashCmd, powershell: psCmd, timeoutSec: timeout }];
   });
 
-  return JSON.stringify({ version: 1, hooks }, null, 2);
+  return JSON.stringify({ version: 1, hooks }, null, 2) + '\n';
 }
 
 export function generateOpenCodeHooksJson(

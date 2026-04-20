@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ADAPTER_NAME="${ADAPTER_NAME:?ADAPTER_NAME is required}"
+ADAPTER_NAME="${ADAPTER_NAME:-opencode}"
 PLUGIN_ROOT="${PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 SDK_MARKER_FILE="${PLUGIN_ROOT}/.babysitter-install-attempted"
 PROXY_MARKER_FILE="${PLUGIN_ROOT}/.hooks-proxy-install-attempted"

@@ -20,14 +20,13 @@ const MANIFEST: A5cPluginManifest = {
 };
 
 describe('generateClaudeCodeHooksJson', () => {
-  it('should generate hooks.json with ADAPTER_NAME and HOOK_TYPE env vars', () => {
+  it('should generate hooks.json with bash command referencing script path', () => {
     const json = generateClaudeCodeHooksJson(MANIFEST, CLAUDE_CODE_PROFILE);
     const parsed = JSON.parse(json);
 
     expect(parsed.hooks.SessionStart).toBeDefined();
     const cmd = parsed.hooks.SessionStart[0].hooks[0].command;
-    expect(cmd).toContain('ADAPTER_NAME=claude');
-    expect(cmd).toContain('HOOK_TYPE=session-start');
+    expect(cmd).toContain('bash');
     expect(cmd).toContain('hooks/session-start.sh');
     expect(cmd).toContain('CLAUDE_PLUGIN_ROOT');
   });
@@ -46,15 +45,27 @@ describe('generateClaudeCodeHooksJson', () => {
     const cmd = parsed.hooks.SessionStart[0].hooks[0].command;
     expect(cmd).toContain('hooks/test-plugin-proxied-session-start-hook.sh');
   });
+
+  it('should use global hookFilePattern', () => {
+    const manifest: A5cPluginManifest = {
+      ...MANIFEST,
+      hookFilePattern: '{{name}}-proxied-{{native}}.sh',
+    };
+    const json = generateClaudeCodeHooksJson(manifest, CLAUDE_CODE_PROFILE);
+    const parsed = JSON.parse(json);
+    const cmd = parsed.hooks.SessionStart[0].hooks[0].command;
+    expect(cmd).toContain('hooks/test-plugin-proxied-session-start.sh');
+  });
 });
 
 describe('generateCodexHooksJson', () => {
-  it('should generate codex format with matcher', () => {
+  it('should generate codex format with matcher and direct script path', () => {
     const json = generateCodexHooksJson(MANIFEST, CODEX_PROFILE);
     const parsed = JSON.parse(json);
 
     expect(parsed.hooks.SessionStart[0].matcher).toBe('.*');
     const cmd = parsed.hooks.SessionStart[0].hooks[0].command;
-    expect(cmd).toContain('ADAPTER_NAME=codex');
+    expect(cmd).toContain('hooks/session-start.sh');
+    expect(cmd).not.toContain('ADAPTER_NAME');
   });
 });
