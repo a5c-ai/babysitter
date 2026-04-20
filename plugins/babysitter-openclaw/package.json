@@ -8,7 +8,8 @@
     "postinstall": "node bin/install.cjs",
     "preuninstall": "node bin/uninstall.cjs",
     "team:install": "node scripts/team-install.cjs",
-    "sync:commands": "node scripts/sync-command-docs.cjs"
+    "sync:commands": "node scripts/sync-command-docs.cjs",
+    "test": "node --test test/integration.test.js"
   },
   "bin": {
     "babysitter-openclaw": "bin/cli.cjs"

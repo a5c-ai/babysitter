@@ -188,7 +188,6 @@ function isIgnoredFile(f) {
     f.endsWith('.legacy') ||
     f.endsWith('.legacy.ts') ||
     f.includes('sync-command') ||
-    f === 'package.json' ||
     f.endsWith('.png') ||
     f.endsWith('.svg')
   );

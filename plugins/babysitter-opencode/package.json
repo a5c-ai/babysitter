@@ -8,7 +8,8 @@
     "postinstall": "node bin/install.js",
     "preuninstall": "node bin/uninstall.js",
     "team:install": "node scripts/team-install.js",
-    "sync:commands": "node scripts/sync-command-docs.cjs"
+    "sync:commands": "node scripts/sync-command-docs.cjs",
+    "test": "node test/integration.test.js"
   },
   "bin": {
     "babysitter-opencode": "bin/cli.js"

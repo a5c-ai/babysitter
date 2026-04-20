@@ -7,7 +7,8 @@
     "deploy:staging": "npm publish --access public --tag staging",
     "postinstall": "node bin/postinstall.js",
     "preuninstall": "node bin/preuninstall.js",
-    "team:install": "node scripts/team-install.js"
+    "team:install": "node scripts/team-install.js",
+    "test": "node test/integration.test.js"
   },
   "bin": {
     "babysitter-gemini": "bin/cli.js"
