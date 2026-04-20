@@ -315,7 +315,7 @@ export function createHooksEngine(config: ProgrammaticEngineConfig): HooksEngine
       // If middlewares are present, run the chain to allow them to transform the result
       let finalMergedResult = mergedResult;
       if (middlewares.length > 0) {
-        const chain = buildExecutionChain(event, () => {
+        const chain = buildExecutionChain(event, async () => {
           // Return the already-computed merged result as a UnifiedHookResult
           return {
             decision: mergedResult.decision,
