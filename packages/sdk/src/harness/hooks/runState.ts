@@ -4,18 +4,13 @@ import { loadJournal } from "../../storage/journal";
 import { readRunMetadata } from "../../storage/runFiles";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { resolveCompletionProof } from "../../cli/completionProof";
-import { countPendingByKind } from "./utils";
+import { countPendingByKind, isOnlyBreakpoints } from "./utils";
 
 export interface HookRunStateSummary {
   runState: "" | "completed" | "failed" | "waiting" | "created";
   completionProof: string;
   pendingKinds: string;
   onlyBreakpointsPending: boolean;
-}
-
-function isOnlyBreakpoints(pendingByKind: Record<string, number>): boolean {
-  const keys = Object.keys(pendingByKind);
-  return keys.length === 1 && keys[0] === "breakpoint";
 }
 
 function resolveRunDir(runId: string, runsDir: string, log?: { info(message: string): void }): string {

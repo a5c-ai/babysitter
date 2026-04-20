@@ -1,11 +1,3 @@
-import { CLAUDE_CODE_DISCOVERY_SPEC } from "../harness/claudeCode/discovery";
-import { CODEX_DISCOVERY_SPEC } from "../harness/codex/discovery";
-import { CURSOR_DISCOVERY_SPEC } from "../harness/cursor/discovery";
-import { GEMINI_CLI_DISCOVERY_SPEC } from "../harness/geminiCli/discovery";
-import { GITHUB_COPILOT_DISCOVERY_SPEC } from "../harness/githubCopilot/discovery";
-import { OH_MY_PI_DISCOVERY_SPEC } from "../harness/ohMyPi/discovery";
-import { OPENCODE_DISCOVERY_SPEC } from "../harness/opencode/discovery";
-import { PI_DISCOVERY_SPEC } from "../harness/pi/discovery";
 import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
 
 /**
@@ -13,16 +5,19 @@ import { resolveSessionIdWithMarker } from "../utils/sessionMarker";
  * These are used as the primary ambient discovery sources for harnesses that
  * inject their own per-session env vars. PID-scoped markers are only used as
  * the final fallback when direct/env-based resolution is unavailable.
+ *
+ * Note: inlined here to avoid circular dependencies with the harness registry
+ * (registry -> adapters -> hooks -> storage -> session -> registry).
  */
 export const HARNESS_ENV_VARS: Record<string, string[]> = {
-  [CLAUDE_CODE_DISCOVERY_SPEC.name]: [...CLAUDE_CODE_DISCOVERY_SPEC.callerEnvVars],
-  [CODEX_DISCOVERY_SPEC.name]: [...CODEX_DISCOVERY_SPEC.callerEnvVars],
-  [CURSOR_DISCOVERY_SPEC.name]: [...CURSOR_DISCOVERY_SPEC.callerEnvVars],
-  [GEMINI_CLI_DISCOVERY_SPEC.name]: [...GEMINI_CLI_DISCOVERY_SPEC.callerEnvVars],
-  [GITHUB_COPILOT_DISCOVERY_SPEC.name]: [...GITHUB_COPILOT_DISCOVERY_SPEC.callerEnvVars],
-  [OH_MY_PI_DISCOVERY_SPEC.name]: [...OH_MY_PI_DISCOVERY_SPEC.callerEnvVars],
-  [OPENCODE_DISCOVERY_SPEC.name]: [...OPENCODE_DISCOVERY_SPEC.callerEnvVars],
-  [PI_DISCOVERY_SPEC.name]: [...PI_DISCOVERY_SPEC.callerEnvVars],
+  "claude-code": ["CLAUDE_ENV_FILE"],
+  "codex": ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
+  "cursor": ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
+  "gemini-cli": ["GEMINI_SESSION_ID", "GEMINI_CWD", "GEMINI_PROJECT_DIR"],
+  "github-copilot": ["COPILOT_SESSION_ID"],
+  "oh-my-pi": ["OMP_SESSION_ID"],
+  "opencode": ["AGENT_SESSION_ID", "OPENCODE_SESSION_ID"],
+  "pi": ["PI_SESSION_ID"],
 };
 
 /**

@@ -1,5 +1,3 @@
-import * as path from "node:path";
-import { mkdirSync, appendFileSync } from "node:fs";
 import {
   getSessionFilePath,
   readSessionFile,
@@ -22,54 +20,12 @@ import type {
 import { HarnessCapability } from "../types";
 import type { PromptContext } from "../../prompts/types";
 import { createOpenClawContext } from "./promptContext";
-import { getGlobalLogDir, normalizeSessionStateDir } from "../../config";
+import { normalizeSessionStateDir } from "../../config";
 import { checkCliAvailable } from "../discovery";
 import { installCliViaNpm } from "../installSupport";
+import { createHookLogger, initializeSessionState } from "../hooks/utils";
 
 const HARNESS_NAME = "openclaw";
-
-interface HookLogger {
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  setContext(key: string, value: string): void;
-}
-
-function createHookLogger(hookName: string): HookLogger {
-  const logDir = getGlobalLogDir();
-  const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
-  const context: Record<string, string> = {};
-
-  if (logFile) {
-    try {
-      mkdirSync(logDir, { recursive: true });
-    } catch {
-      // Best-effort
-    }
-  }
-
-  function write(level: string, message: string): void {
-    if (!logFile) return;
-    const ts = new Date().toISOString();
-    const ctxParts = Object.entries(context).map(([k, v]) => `${k}=${v}`);
-    const ctxStr = ctxParts.length > 0 ? ` [${ctxParts.join(" ")}]` : "";
-    const line = `[${level}] ${ts}${ctxStr} ${message}\n`;
-    try {
-      appendFileSync(logFile, line);
-    } catch {
-      // Best-effort
-    }
-  }
-
-  return {
-    info: (msg: string) => write("INFO", msg),
-    warn: (msg: string) => write("WARN", msg),
-    error: (msg: string) => write("ERROR", msg),
-    setContext: (key: string, value: string) => {
-      context[key] = value;
-    },
-  };
-}
 
 function resolveStateDirInternal(args: {
   stateDir?: string;
@@ -116,39 +72,7 @@ async function handleSessionStartHookImpl(
   const stateDir = resolveStateDirInternal(args);
   log.info(`Resolved stateDir: ${stateDir}`);
 
-  const filePath = getSessionFilePath(stateDir, sessionId);
-  try {
-    if (!(await sessionFileExists(filePath))) {
-      const nowTs = getCurrentTimestamp();
-      const state: SessionState = {
-        active: true,
-        iteration: 1,
-        maxIterations: 256,
-        runId: "",
-        runIds: [],
-        startedAt: nowTs,
-        lastIterationAt: nowTs,
-        iterationTimes: [],
-      };
-      await writeSessionFile(filePath, state, "");
-      log.info(`Created session state: ${filePath}`);
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Created session state: ${filePath}\n`,
-        );
-      }
-    } else {
-      log.info(`Session state already exists: ${filePath}`);
-    }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    log.warn(`Failed to create session state: ${msg}`);
-    if (verbose) {
-      process.stderr.write(
-        `[hook:run session-start] Failed to create session state: ${msg}\n`,
-      );
-    }
-  }
+  await initializeSessionState(sessionId, stateDir, { verbose, log });
 
   process.stdout.write("{}\n");
   return 0;

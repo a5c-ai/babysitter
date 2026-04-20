@@ -15,18 +15,17 @@ import {
 import { normalizeSessionStateDir } from "../../config";
 import type { HookHandlerArgs } from "../types";
 import {
+  appendStopHookEvent,
+  buildFollowupMessage,
+  cleanupSession,
   createHookLogger,
+  initializeSessionState,
   parseHookInput,
   readStdin,
   safeStr,
 } from "../hooks/utils";
 import { resolveHookRunState } from "../hooks/runState";
 import { writeSessionMarker } from "../../utils/sessionMarker";
-import {
-  appendStopHookEvent,
-  cleanupSession,
-  buildFollowupMessage,
-} from "./hooksHelpers";
 
 interface CursorStopHookInput {
   conversation_id?: string;
@@ -249,25 +248,7 @@ export async function handleCursorSessionStartHook(
   try { writeSessionMarker(HARNESS_NAME, sessionId); } catch { /* Non-fatal */ }
 
   const stateDir = resolveCursorStateDir(args);
-  const filePath = getSessionFilePath(stateDir, sessionId);
-  try {
-    if (!(await sessionFileExists(filePath))) {
-      const nowTs = getCurrentTimestamp();
-      const state: SessionState = {
-        active: true, iteration: 1, maxIterations: 256, runId: "", runIds: [],
-        startedAt: nowTs, lastIterationAt: nowTs, iterationTimes: [],
-      };
-      await writeSessionFile(filePath, state, "");
-      if (verbose) {
-        process.stderr.write(`[hook:run session-start] Created session state: ${filePath}\n`);
-      }
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (verbose) {
-      process.stderr.write(`[hook:run session-start] Failed to create session state: ${message}\n`);
-    }
-  }
+  await initializeSessionState(sessionId, stateDir, { verbose });
 
   process.stdout.write("{}\n");
   return 0;

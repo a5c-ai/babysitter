@@ -7,6 +7,7 @@
 
 import type { PromptContext } from "../prompts/types";
 import type { HarnessAdapter, HarnessSpec } from "./types";
+import { HarnessCapability as Cap } from "./types";
 import { createClaudeCodeAdapter } from "./claudeCode/adapter";
 import { CLAUDE_CODE_DISCOVERY_SPEC } from "./claudeCode/discovery";
 import {
@@ -14,24 +15,77 @@ import {
   type SessionResolutionDetails,
 } from "./claudeCode/shared";
 import { createCodexAdapter } from "./codex/adapter";
-import { CODEX_DISCOVERY_SPEC } from "./codex/discovery";
 import { createGeminiCliAdapter } from "./geminiCli/adapter";
-import { GEMINI_CLI_DISCOVERY_SPEC } from "./geminiCli/discovery";
 import { createPiAdapter } from "./pi/adapter";
 import { PI_DISCOVERY_SPEC } from "./pi/discovery";
 import { createOhMyPiAdapter } from "./ohMyPi/adapter";
-import { OH_MY_PI_DISCOVERY_SPEC } from "./ohMyPi/discovery";
 import { createCursorAdapter } from "./cursor/adapter";
-import { CURSOR_DISCOVERY_SPEC } from "./cursor/discovery";
 import { createGithubCopilotAdapter } from "./githubCopilot/adapter";
-import { GITHUB_COPILOT_DISCOVERY_SPEC } from "./githubCopilot/discovery";
 import { createOpenCodeAdapter } from "./opencode/adapter";
-import { OPENCODE_DISCOVERY_SPEC } from "./opencode/discovery";
 import { createOpenClawAdapter } from "./openclaw/adapter";
-import { OPENCLAW_DISCOVERY_SPEC } from "./openclaw/discovery";
 import { createUnifiedAdapter } from "./unified/adapter";
 import { UNIFIED_DISCOVERY_SPEC } from "./unified/discovery";
 import { createCustomAdapter } from "./customAdapter";
+
+// ---------------------------------------------------------------------------
+// Inline discovery specs (previously in per-adapter discovery.ts files)
+// ---------------------------------------------------------------------------
+
+export const CODEX_DISCOVERY_SPEC: HarnessSpec = {
+  name: "codex",
+  cli: "codex",
+  callerEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  configPaths: [".codex"],
+};
+
+export const CURSOR_DISCOVERY_SPEC: HarnessSpec = {
+  name: "cursor",
+  cli: "cursor",
+  callerEnvVars: ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  configPaths: [".cursor"],
+};
+
+export const GEMINI_CLI_DISCOVERY_SPEC: HarnessSpec = {
+  name: "gemini-cli",
+  cli: "gemini",
+  callerEnvVars: ["GEMINI_SESSION_ID", "GEMINI_CWD", "GEMINI_PROJECT_DIR"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  configPaths: [".gemini"],
+};
+
+export const GITHUB_COPILOT_DISCOVERY_SPEC: HarnessSpec = {
+  name: "github-copilot",
+  cli: "gh",
+  callerEnvVars: ["COPILOT_SESSION_ID"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  configPaths: [".github", ".copilot"],
+};
+
+export const OH_MY_PI_DISCOVERY_SPEC: HarnessSpec = {
+  name: "oh-my-pi",
+  cli: "pi",
+  callerEnvVars: ["OMP_SESSION_ID"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.Programmatic],
+  configPaths: [".omp"],
+};
+
+export const OPENCODE_DISCOVERY_SPEC: HarnessSpec = {
+  name: "opencode",
+  cli: "opencode",
+  callerEnvVars: ["AGENT_SESSION_ID", "OPENCODE_SESSION_ID"],
+  capabilities: [Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+  configPaths: [".opencode"],
+};
+
+export const OPENCLAW_DISCOVERY_SPEC: HarnessSpec = {
+  name: "openclaw",
+  cli: "openclaw",
+  callerEnvVars: [],
+  capabilities: [Cap.Programmatic, Cap.HeadlessPrompt],
+  configPaths: [".openclaw"],
+};
 
 export type { SessionResolutionDetails } from "./claudeCode/shared";
 

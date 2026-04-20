@@ -1,7 +1,10 @@
 import * as path from "node:path";
-import { Readable } from "node:stream";
 import { normalizeSessionStateDir } from "../../config";
 import { resolveSessionIdWithMarker } from "../../utils/sessionMarker";
+import { parseHookInput } from "../hooks/utils";
+
+// Re-export for consumers
+export { readStdin } from "../hooks/utils";
 
 export function resolveCodexPluginRoot(
   args: { pluginRoot?: string } = {},
@@ -28,32 +31,6 @@ export function resolveCodexSessionId(parsed: {
     "CODEX_THREAD_ID",
     "CODEX_SESSION_ID",
   ]);
-}
-
-export function readStdin(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk: string) => {
-      data += chunk;
-    });
-    process.stdin.on("end", () => resolve(data));
-    process.stdin.on("error", reject);
-  });
-}
-
-function parseHookInput(raw: string): Record<string, unknown> {
-  const trimmed = raw.trim();
-  if (!trimmed) return {};
-  try {
-    const parsed: unknown = JSON.parse(trimmed);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    // Treat malformed JSON as empty input.
-  }
-  return {};
 }
 
 function firstString(
@@ -110,29 +87,4 @@ export function getFirstCodexString(
   keys: string[],
 ): string | undefined {
   return firstString(obj, keys);
-}
-
-export async function withSyntheticStdin<T>(
-  payload: string,
-  fn: () => Promise<T>,
-): Promise<T> {
-  const originalStdin = process.stdin;
-  const fakeStdin = Readable.from([payload], { encoding: "utf8" });
-  (fakeStdin as Readable & { unref?: () => void }).unref = () => {};
-
-  Object.defineProperty(process, "stdin", {
-    value: fakeStdin,
-    writable: true,
-    configurable: true,
-  });
-
-  try {
-    return await fn();
-  } finally {
-    Object.defineProperty(process, "stdin", {
-      value: originalStdin,
-      writable: true,
-      configurable: true,
-    });
-  }
 }

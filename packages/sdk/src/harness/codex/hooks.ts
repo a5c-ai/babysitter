@@ -5,11 +5,8 @@ import {
   readStdin,
   resolveCodexPluginRoot,
   resolveCodexStateDir,
-  withSyntheticStdin,
 } from "./shared";
-import { getSessionFilePath, sessionFileExists } from "../../session/parse";
-import type { SessionState } from "../../session/types";
-import { getCurrentTimestamp, writeSessionFile } from "../../session/write";
+import { initializeSessionState } from "../hooks/utils";
 import { writeSessionMarker } from "../../utils/sessionMarker";
 
 export async function handleCodexStopHook(
@@ -24,16 +21,17 @@ export async function handleCodexStopHook(
   }
   const normalized = normalizeCodexHookInput(rawInput);
 
-  return withSyntheticStdin(JSON.stringify(normalized), () =>
-    claude.handleStopHook({
-      ...args,
-      pluginRoot: resolveCodexPluginRoot({ pluginRoot: args.pluginRoot }),
-      stateDir: resolveCodexStateDir({
-        stateDir: args.stateDir,
-        pluginRoot: args.pluginRoot,
-      }),
+  // Pipe the normalized payload directly via stdinPayload rather than
+  // monkey-patching process.stdin.
+  return claude.handleStopHook({
+    ...args,
+    pluginRoot: resolveCodexPluginRoot({ pluginRoot: args.pluginRoot }),
+    stateDir: resolveCodexStateDir({
+      stateDir: args.stateDir,
+      pluginRoot: args.pluginRoot,
     }),
-  );
+    stdinPayload: JSON.stringify(normalized),
+  });
 }
 
 export async function handleCodexSessionStartHook(
@@ -70,35 +68,8 @@ export async function handleCodexSessionStartHook(
     stateDir: args.stateDir,
     pluginRoot: args.pluginRoot,
   });
-  const filePath = getSessionFilePath(stateDir, sessionId);
 
-  try {
-    if (!(await sessionFileExists(filePath))) {
-      const nowTs = getCurrentTimestamp();
-      const state: SessionState = {
-        active: true,
-        iteration: 1,
-        maxIterations: 256,
-        runId: "",
-        runIds: [],
-        startedAt: nowTs,
-        lastIterationAt: nowTs,
-        iterationTimes: [],
-      };
-      await writeSessionFile(filePath, state, "");
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Created Codex session state: ${filePath}\n`,
-        );
-      }
-    }
-  } catch {
-    if (verbose) {
-      process.stderr.write(
-        `[hook:run session-start] Failed to create session state in ${stateDir}\n`,
-      );
-    }
-  }
+  await initializeSessionState(sessionId, stateDir, { verbose });
 
   process.stdout.write("{}\n");
   return 0;

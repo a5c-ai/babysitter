@@ -128,6 +128,8 @@ export interface HookHandlerArgs {
   runsDir?: string;
   json: boolean;
   verbose?: boolean;
+  /** Pre-read stdin payload. When set, hook handlers should use this instead of reading process.stdin. */
+  stdinPayload?: string;
 }
 
 export interface HarnessInstallOptions {

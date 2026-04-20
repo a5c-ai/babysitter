@@ -7,7 +7,6 @@ import {
 } from "../../session/parse";
 import type { SessionState } from "../../session/types";
 import {
-  deleteSessionFile,
   getCurrentTimestamp,
   isIterationTooFast,
   updateIterationTimes,
@@ -38,16 +37,20 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
   log.info("handleHookRunStop started");
 
   let rawInput: string;
-  try {
-    rawInput = await readStdin();
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    log.warn(`stdin read error: ${msg}`);
-    if (verbose) {
-      process.stderr.write(`[hook:run stop] stdin read error: ${msg}\n`);
+  if (args.stdinPayload !== undefined) {
+    rawInput = args.stdinPayload;
+  } else {
+    try {
+      rawInput = await readStdin();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      log.warn(`stdin read error: ${msg}`);
+      if (verbose) {
+        process.stderr.write(`[hook:run stop] stdin read error: ${msg}\n`);
+      }
+      process.stdout.write("{}\n");
+      return 0;
     }
-    process.stdout.write("{}\n");
-    return 0;
   }
 
   const hookInput = parseHookInput(rawInput) as ClaudeCodeStopHookInput;
@@ -141,7 +144,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
         hasPromise: false,
       });
     }
-    await cleanupSession(filePath, deleteSessionFile);
+    await cleanupSession(filePath);
     process.stdout.write("{}\n");
     return 0;
   }
@@ -168,7 +171,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
         hasPromise: false,
       });
     }
-    await cleanupSession(filePath, deleteSessionFile);
+    await cleanupSession(filePath);
     process.stdout.write("{}\n");
     return 0;
   }
@@ -191,7 +194,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
         `[hook:run stop] No run associated with session ${sessionId} — allowing exit\n`,
       );
     }
-    await cleanupSession(filePath, deleteSessionFile);
+    await cleanupSession(filePath);
     process.stdout.write("{}\n");
     return 0;
   }
@@ -274,7 +277,7 @@ export async function handleClaudeCodeStopHook(args: HookHandlerArgs): Promise<n
       pendingKinds,
       hasPromise,
     });
-    await cleanupSession(filePath, deleteSessionFile);
+    await cleanupSession(filePath);
     process.stdout.write("{}\n");
     return 0;
   }

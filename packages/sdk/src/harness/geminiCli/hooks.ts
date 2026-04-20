@@ -1,6 +1,5 @@
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { appendEvent } from "../../storage/journal";
 import {
   getSessionFilePath,
   readSessionFile,
@@ -9,7 +8,6 @@ import {
 import { extractPromiseTag } from "../../session/transcript";
 import type { SessionState } from "../../session/types";
 import {
-  deleteSessionFile,
   getCurrentTimestamp,
   isIterationTooFast,
   updateIterationTimes,
@@ -18,6 +16,8 @@ import {
 import { normalizeSessionStateDir } from "../../config";
 import type { HookHandlerArgs } from "../types";
 import {
+  appendStopHookEvent as appendStopHookEventShared,
+  cleanupSession,
   createHookLogger,
   parseHookInput,
   readStdin,
@@ -39,29 +39,11 @@ interface GeminiAfterAgentHookInput {
   timestamp?: string;
 }
 
-async function appendStopHookEvent(
+function appendStopHookEvent(
   runDir: string,
-  data: {
-    sessionId: string;
-    iteration: number;
-    decision: "approve" | "block";
-    reason: string;
-    runState: string;
-    pendingKinds: string;
-    hasPromise: boolean;
-  },
+  data: Parameters<typeof appendStopHookEventShared>[1],
 ): Promise<void> {
-  try {
-    await appendEvent({
-      runDir,
-      eventType: "STOP_HOOK_INVOKED",
-      event: { ...data, harness: HARNESS_NAME, timestamp: new Date().toISOString() },
-    });
-  } catch { /* Best-effort */ }
-}
-
-async function cleanupSession(filePath: string): Promise<void> {
-  try { await deleteSessionFile(filePath); } catch { /* Best-effort */ }
+  return appendStopHookEventShared(runDir, data, HARNESS_NAME);
 }
 
 export function resolveGeminiSessionIdFromEnv(): string | undefined {

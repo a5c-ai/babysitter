@@ -3,18 +3,10 @@
  * Extracted from hooks.ts for max-lines compliance.
  */
 
-import type { SessionState } from "../../session/types";
-import {
-  getSessionFilePath,
-  sessionFileExists,
-} from "../../session/parse";
-import {
-  getCurrentTimestamp,
-  writeSessionFile,
-} from "../../session/write";
 import type { HookHandlerArgs } from "../types";
 import {
   createHookLogger,
+  initializeSessionState,
   parseHookInput,
   readStdin,
   safeStr,
@@ -77,39 +69,7 @@ export async function handleGeminiSessionStartHook(
   const stateDir = resolveGeminiCliStateDir(args);
   log.info(`Resolved stateDir: ${stateDir}`);
 
-  const filePath = getSessionFilePath(stateDir, sessionId);
-  try {
-    if (!(await sessionFileExists(filePath))) {
-      const nowTs = getCurrentTimestamp();
-      const state: SessionState = {
-        active: true,
-        iteration: 1,
-        maxIterations: 256,
-        runId: "",
-        runIds: [],
-        startedAt: nowTs,
-        lastIterationAt: nowTs,
-        iterationTimes: [],
-      };
-      await writeSessionFile(filePath, state, "");
-      log.info(`Created session state: ${filePath}`);
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Created session state: ${filePath}\n`,
-        );
-      }
-    } else {
-      log.info(`Session state already exists: ${filePath}`);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.warn(`Failed to create session state: ${message}`);
-    if (verbose) {
-      process.stderr.write(
-        `[hook:run session-start] Failed to create session state: ${message}\n`,
-      );
-    }
-  }
+  await initializeSessionState(sessionId, stateDir, { verbose, log });
 
   process.stdout.write("{}\n");
   return 0;

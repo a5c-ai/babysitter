@@ -1,8 +1,6 @@
 import * as path from "node:path";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
-import { appendEvent } from "../../storage/journal";
-import type { EffectRecord } from "../../runtime/types";
-import { getGlobalLogDir, getGlobalStateDir } from "../../config";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { getGlobalStateDir } from "../../config";
 import {
   findHarnessAncestorPid,
   getSessionMarkerPath,
@@ -12,85 +10,20 @@ import {
 } from "../../utils/sessionMarker";
 import { isProcessAlive } from "../../utils/processLiveness";
 
-export interface HookLogger {
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  setContext(key: string, value: string): void;
-}
+import { createHookLogger } from "../hooks/utils";
 
-export function createHookLogger(hookName: string): HookLogger {
-  const logDir = getGlobalLogDir();
-  const logFile = logDir ? path.join(logDir, `${hookName}.log`) : null;
-  const context: Record<string, string> = {};
-
-  if (logFile) {
-    try {
-      mkdirSync(logDir, { recursive: true });
-    } catch {
-      // Best-effort
-    }
-  }
-
-  function write(level: string, message: string): void {
-    if (!logFile) return;
-    const ts = new Date().toISOString();
-    const ctxParts = Object.entries(context).map(([k, v]) => `${k}=${v}`);
-    const ctxStr = ctxParts.length > 0 ? ` [${ctxParts.join(" ")}]` : "";
-    try {
-      appendFileSync(logFile, `[${level}] ${ts}${ctxStr} ${message}\n`);
-    } catch {
-      // Best-effort
-    }
-  }
-
-  return {
-    info: (msg: string) => write("INFO", msg),
-    warn: (msg: string) => write("WARN", msg),
-    error: (msg: string) => write("ERROR", msg),
-    setContext: (key: string, value: string) => {
-      context[key] = value;
-    },
-  };
-}
-
-export async function appendStopHookEvent(
-  runDir: string,
-  data: {
-    sessionId: string;
-    iteration: number;
-    decision: "approve" | "block";
-    reason: string;
-    runState: string;
-    pendingKinds: string;
-    hasPromise: boolean;
-  },
-): Promise<void> {
-  try {
-    await appendEvent({
-      runDir,
-      eventType: "STOP_HOOK_INVOKED",
-      event: {
-        ...data,
-        timestamp: new Date().toISOString(),
-      },
-    });
-  } catch {
-    // Best-effort
-  }
-}
-
-export function readStdin(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk: string) => {
-      data += chunk;
-    });
-    process.stdin.on("end", () => resolve(data));
-    process.stdin.on("error", reject);
-  });
-}
+// Re-export shared utilities so existing internal consumers don't break.
+export {
+  type HookLogger,
+  createHookLogger,
+  readStdin,
+  parseHookInput,
+  safeStr,
+  countPendingByKind,
+  isOnlyBreakpoints,
+  appendStopHookEvent,
+  cleanupSession,
+} from "../hooks/utils";
 
 export interface ClaudeCodeStopHookInput {
   session_id?: string;
@@ -100,52 +33,6 @@ export interface ClaudeCodeStopHookInput {
 
 export interface ClaudeCodeSessionStartHookInput {
   session_id?: string;
-}
-
-export function parseHookInput(raw: string): Record<string, unknown> {
-  const trimmed = raw.trim();
-  if (!trimmed) return {};
-  try {
-    const parsed: unknown = JSON.parse(trimmed);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    // Malformed JSON
-  }
-  return {};
-}
-
-export function safeStr(obj: Record<string, unknown>, key: string): string {
-  const val = obj[key];
-  return typeof val === "string" ? val : "";
-}
-
-export function countPendingByKind(records: EffectRecord[]): Record<string, number> {
-  const counts = new Map<string, number>();
-  for (const record of records) {
-    const key = record.kind ?? "unknown";
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return Object.fromEntries(
-    Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b)),
-  );
-}
-
-export function isOnlyBreakpoints(pendingByKind: Record<string, number>): boolean {
-  const keys = Object.keys(pendingByKind);
-  return keys.length === 1 && keys[0] === "breakpoint";
-}
-
-export async function cleanupSession(
-  filePath: string,
-  deleteSessionFile: (filePath: string) => Promise<unknown>,
-): Promise<void> {
-  try {
-    await deleteSessionFile(filePath);
-  } catch {
-    // Best-effort
-  }
 }
 
 function findClaudeAncestorPid(): number | undefined {

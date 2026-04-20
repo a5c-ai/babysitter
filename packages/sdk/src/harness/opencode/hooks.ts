@@ -1,7 +1,3 @@
-import * as path from "node:path";
-import { loadJournal } from "../../storage/journal";
-import { readRunMetadata } from "../../storage/runFiles";
-import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import {
   getSessionFilePath,
   readSessionFile,
@@ -9,19 +5,20 @@ import {
 } from "../../session/parse";
 import type { SessionState } from "../../session/types";
 import {
-  deleteSessionFile,
   getCurrentTimestamp,
   writeSessionFile,
 } from "../../session/write";
 import { normalizeSessionStateDir } from "../../config";
 import type { HookHandlerArgs } from "../types";
 import {
-  countPendingByKind,
+  cleanupSession,
   createHookLogger,
+  initializeSessionState,
   parseHookInput,
   readStdin,
   safeStr,
 } from "../hooks/utils";
+import { resolveHookRunState } from "../hooks/runState";
 
 export function resolveOpenCodeStateDir(args: {
   stateDir?: string;
@@ -43,14 +40,6 @@ export function resolveOpenCodeSessionId(parsed: {
     return process.env.OPENCODE_SESSION_ID;
   }
   return undefined;
-}
-
-async function cleanupSession(filePath: string): Promise<void> {
-  try {
-    await deleteSessionFile(filePath);
-  } catch {
-    // Best-effort cleanup
-  }
 }
 
 export async function handleOpenCodeStopHook(
@@ -126,34 +115,7 @@ export async function handleOpenCodeStopHook(
 
   log.setContext("run", runId);
 
-  let runState = "";
-  let pendingKinds = "";
-  try {
-    const runDir = path.isAbsolute(runId) ? runId : path.join(runsDir, runId);
-    void readRunMetadata(runDir);
-    const journal = await loadJournal(runDir);
-    const index = await buildEffectIndex({ runDir, events: journal });
-    const hasCompleted = journal.some((event) => event.type === "RUN_COMPLETED");
-    const hasFailed = journal.some((event) => event.type === "RUN_FAILED");
-    const pendingRecords = index.listPendingEffects();
-    const pendingByKind = countPendingByKind(pendingRecords);
-    const kindKeys = Object.keys(pendingByKind);
-    if (kindKeys.length > 0) {
-      pendingKinds = kindKeys.join(", ");
-    }
-
-    if (hasCompleted) {
-      runState = "completed";
-    } else if (hasFailed) {
-      runState = "failed";
-    } else if (pendingRecords.length > 0) {
-      runState = "waiting";
-    } else {
-      runState = "created";
-    }
-  } catch {
-    runState = "";
-  }
+  const { runState, pendingKinds } = await resolveHookRunState({ runId, runsDir, log });
 
   log.info(`Run state: ${runState || "unknown"}`);
   if (runState === "completed" || runState === "failed" || !runState) {
@@ -230,39 +192,7 @@ export async function handleOpenCodeSessionStartHook(
   const stateDir = resolveOpenCodeStateDir(args);
   log.info(`Resolved stateDir: ${stateDir}`);
 
-  const filePath = getSessionFilePath(stateDir, sessionId);
-  try {
-    if (!(await sessionFileExists(filePath))) {
-      const nowTs = getCurrentTimestamp();
-      const state: SessionState = {
-        active: true,
-        iteration: 1,
-        maxIterations: 256,
-        runId: "",
-        runIds: [],
-        startedAt: nowTs,
-        lastIterationAt: nowTs,
-        iterationTimes: [],
-      };
-      await writeSessionFile(filePath, state, "");
-      log.info(`Created session state: ${filePath}`);
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run session-start] Created session state: ${filePath}\n`,
-        );
-      }
-    } else {
-      log.info(`Session state already exists: ${filePath}`);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.warn(`Failed to create session state: ${message}`);
-    if (verbose) {
-      process.stderr.write(
-        `[hook:run session-start] Failed to create session state: ${message}\n`,
-      );
-    }
-  }
+  await initializeSessionState(sessionId, stateDir, { verbose, log });
 
   process.stdout.write("{}\n");
   return 0;

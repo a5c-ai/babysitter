@@ -14,8 +14,8 @@ import { densityFilterText, estimateTokens } from "../../compression/density-fil
 import { getOrCompressFile } from "../../compression/library-cache";
 import { getActiveProcessLibraryPath } from "../../processLibrary/active";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
-import type { HookLogger } from "./shared";
-import { countPendingByKind, isOnlyBreakpoints, safeStr } from "./shared";
+import type { HookLogger } from "../hooks/utils";
+import { countPendingByKind, isOnlyBreakpoints, safeStr } from "../hooks/utils";
 
 export interface ParsedAssistantState {
   lastText: string | null;
