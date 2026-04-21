@@ -4,21 +4,17 @@
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 
-# Resolve babysitter CLI: installed binary, user-local prefix, or npx fallback
+# Resolve babysitter CLI: installed binary, user-local prefix, or no-op fallback
 if ! command -v babysitter &>/dev/null; then
   # Try user-local prefix (set by session-start hook)
   if [ -x "$HOME/.local/bin/babysitter" ]; then
     export PATH="$HOME/.local/bin:$PATH"
   else
-    # Last resort: npx fallback
-    SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
-    if [ -n "$SDK_VERSION" ]; then
-      babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
-    else
-      # No CLI available at all — allow exit silently
-      echo '{}'
-      exit 0
-    fi
+    # SDK not installed — session-start hook is responsible for installation.
+    # SDK not installed — session-start hook is responsible for installation.
+    # Exit silently so stop is not blocked.
+    echo '{}'
+    exit 0
   fi
 fi
 LOG_DIR="${BABYSITTER_LOG_DIR:-$PLUGIN_ROOT/.a5c/logs}"
