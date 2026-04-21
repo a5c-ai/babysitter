@@ -145,3 +145,6 @@ export {
 } from "./config.js";
 
 export type { RepoConfigResolutionOptions } from "./config.js";
+
+// ── Client Classes ─────────────────────────────────────────────────
+export * from "./client/index.js";
