@@ -1,10 +1,7 @@
-import type { BreakpointBackend, SubmitBreakpointParams, WaitForAnswerOptions } from "../backend.js";
+import type { BreakpointBackend } from "../backend.js";
 import type {
-  Breakpoint,
-  BreakpointAnswer,
   BreakpointContext,
   BreakpointRouting,
-  BreakpointWaitResult,
   InteractionKind,
 } from "../types.js";
 import type { RoutingConfig, RoutingRule } from "../types.js";

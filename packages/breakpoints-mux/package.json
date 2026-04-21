@@ -46,7 +46,8 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
   },
   "author": "a5c.ai",
   "license": "UNLICENSED",
@@ -60,6 +61,9 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
   }
