@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-session-start.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-session-start.sh\" --json"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-stop.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-stop.sh\" --json"
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-user-prompt-submit.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-user-prompt-submit.sh\" --json"
           }
         ]
       }
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-tool-use.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-tool-use.sh\" --json"
           }
         ],
         "matcher": "Bash"
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-post-tool-use.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-post-tool-use.sh\" --json"
           }
         ]
       }
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-subagent-stop.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-subagent-stop.sh\" --json"
           }
         ]
       }
@@ -67,7 +67,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-notification.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-notification.sh\" --json"
           }
         ]
       }
@@ -77,7 +77,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-compact.sh\" --json"
+            "command": "npx a5c-hooks-proxy invoke --adapter claude --handler \"bash ${CLAUDE_PLUGIN_ROOT}/hooks/babysitter-proxied-pre-compact.sh\" --json"
           }
         ]
       }
