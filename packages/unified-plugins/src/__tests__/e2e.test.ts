@@ -234,6 +234,14 @@ describe('e2e: sample plugin compilation', () => {
 
       expect(result.status).not.toBe('error');
       expect(result.emittedFiles).toContain('accomplish-skills/sample-plugin/SKILL.md');
+      expect(result.emittedFiles).toContain('bin/cli.cjs');
+      expect(result.emittedFiles).toContain('bin/install.cjs');
+      expect(result.emittedFiles).toContain('bin/uninstall.cjs');
+
+      const hooksJson = JSON.parse(
+        fs.readFileSync(path.join(result.outputDir, 'hooks', 'hooks.json'), 'utf-8')
+      );
+      expect(hooksJson.hooks['session.created'][0].command).toBe(`echo '{}'`);
     });
   });
 });

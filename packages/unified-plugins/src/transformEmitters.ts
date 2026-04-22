@@ -22,6 +22,17 @@ import { generateInstallShared } from './installSharedGenerator.js';
 import { resolveSdkConfig } from './sdkConfig.js';
 import { getCommandPaths } from './transform.js';
 
+function generateCjsWrapper(moduleBasename: string, exportOnly = false): string {
+  if (exportOnly) {
+    return `'use strict';\n\nmodule.exports = require('./${moduleBasename}.js');\n`;
+  }
+  return `#!/usr/bin/env node
+'use strict';
+
+require('./${moduleBasename}.js');
+`;
+}
+
 export function generateManifests(
   sourceDir: string,
   manifest: A5cPluginManifest,
@@ -193,6 +204,10 @@ export function generateManifests(
       scripts.preuninstall = `node bin/uninstall${ext}`;
     }
     scripts['team:install'] = `node scripts/team-install${ext}`;
+    if (targetProfile.name === 'opencode') {
+      scripts.test = 'node test/integration.test.js';
+      scripts['sync:commands'] = 'node scripts/sync-command-docs.cjs';
+    }
     const packageFiles = ['bin/', 'hooks/', 'skills/', 'commands/', 'scripts/', 'plugin.json', 'README.md', 'versions.json', 'package.json'];
     if (targetProfile.name === 'github-copilot' || targetProfile.name === 'cursor') {
       packageFiles.splice(2, 0, 'hooks.json');
@@ -359,6 +374,13 @@ export function generateExtraFiles(
     files.push({ path: `bin/uninstall${ext}`, content: generateUninstallScript(manifest, targetProfile), executable: true });
     files.push({ path: `bin/install-shared${ext}`, content: generateInstallShared(manifest, targetProfile, sourceDir) });
     files.push({ path: `scripts/team-install${ext}`, content: generateTeamInstall(manifest, targetProfile), executable: true });
+
+    if (targetProfile.name === 'opencode') {
+      files.push({ path: 'bin/cli.cjs', content: generateCjsWrapper('cli'), executable: true });
+      files.push({ path: 'bin/install.cjs', content: generateCjsWrapper('install'), executable: true });
+      files.push({ path: 'bin/uninstall.cjs', content: generateCjsWrapper('uninstall'), executable: true });
+      files.push({ path: 'bin/install-shared.cjs', content: generateCjsWrapper('install-shared', true) });
+    }
   }
 
   // Gemini: npm lifecycle scripts

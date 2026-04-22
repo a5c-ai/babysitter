@@ -235,7 +235,14 @@ export function generateOpenCodeHooksJson(
     if (handler === 'proxy') {
       hooks[native] = [{
         type: 'command',
-        script: `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --json`,
+        command: `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --json`,
+        description: `${manifest.name} ${canonical} hook`,
+        timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
+      }];
+    } else if (handler === true) {
+      hooks[native] = [{
+        type: 'command',
+        command: `echo '{}'`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];
@@ -250,7 +257,7 @@ export function generateOpenCodeHooksJson(
       }
       hooks[native] = [{
         type: 'command',
-        script: `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --handler "node ./${handlerScript}" --json`,
+        script: `./${handlerScript}`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];

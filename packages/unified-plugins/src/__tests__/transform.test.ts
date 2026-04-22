@@ -1,11 +1,12 @@
 // Tests for hook registration generation
 
 import { describe, it, expect } from 'vitest';
-import { generateClaudeCodeHooksJson, generateCodexHooksJson, generateCursorHooksJson, generateGithubCopilotHooksJson } from '../hookRegistration';
+import { generateClaudeCodeHooksJson, generateCodexHooksJson, generateCursorHooksJson, generateGithubCopilotHooksJson, generateOpenCodeHooksJson } from '../hookRegistration';
 import { CLAUDE_CODE_PROFILE } from '../targets/claude-code';
 import { CODEX_PROFILE } from '../targets/codex';
 import { CURSOR_PROFILE } from '../targets/cursor';
 import { GITHUB_COPILOT_PROFILE } from '../targets/github-copilot';
+import { OPENCODE_PROFILE } from '../targets/opencode';
 import type { A5cPluginManifest } from '../types';
 
 const MANIFEST: A5cPluginManifest = {
@@ -91,5 +92,14 @@ describe('generateGithubCopilotHooksJson', () => {
 
     expect(parsed.hooks.sessionStart[0].bash).toBe('./hooks/session-start.sh');
     expect(parsed.hooks.sessionStart[0].powershell).toBe('./hooks/session-start.ps1');
+  });
+});
+
+describe('generateOpenCodeHooksJson', () => {
+  it('should generate bundle-local javascript hook paths', () => {
+    const json = generateOpenCodeHooksJson(MANIFEST, OPENCODE_PROFILE);
+    const parsed = JSON.parse(json);
+
+    expect(parsed.hooks['session.created'][0].script).toBe('./hooks/session-start.js');
   });
 });

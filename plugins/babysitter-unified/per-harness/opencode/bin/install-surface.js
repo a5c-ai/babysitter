@@ -167,7 +167,24 @@ function mergeHooksConfig(packageRoot, openCodeHome) {
       const script = String(entry.script || entry.command || entry.bash || '');
       return !HOOK_SCRIPT_NAMES.some((name) => script.includes(name));
     });
-    existing.hooks[eventName] = [...filteredEntries, ...entries];
+    const installedEntries = entries.map((entry) => {
+      const relativeScript = String(entry.script || '').trim();
+      if (relativeScript) {
+        const normalizedScript = relativeScript.replace(/\\/g, '/').replace(/^\.\//, '');
+        return {
+          ...entry,
+          script: `npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler "node ./plugins/${PLUGIN_NAME}/${normalizedScript}" --json`,
+        };
+      }
+      if (entry.command) {
+        return {
+          ...entry,
+          script: entry.command,
+        };
+      }
+      return entry;
+    });
+    existing.hooks[eventName] = [...filteredEntries, ...installedEntries];
   }
 
   writeJson(hooksConfigPath, existing);

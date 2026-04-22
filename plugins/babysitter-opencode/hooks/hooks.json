@@ -5,7 +5,7 @@
     "session.created": [
       {
         "type": "command",
-        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-session-created.js\" --json",
+        "script": "./hooks/babysitter-proxied-session-created.js",
         "description": "babysitter SessionStart hook",
         "timeoutMs": 30000
       }
@@ -13,7 +13,7 @@
     "tool.execute.before": [
       {
         "type": "command",
-        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-tool-execute-before.js\" --json",
+        "script": "./hooks/babysitter-proxied-tool-execute-before.js",
         "description": "babysitter PreToolUse hook",
         "timeoutMs": 30000
       }
@@ -21,7 +21,7 @@
     "tool.execute.after": [
       {
         "type": "command",
-        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-tool-execute-after.js\" --json",
+        "script": "./hooks/babysitter-proxied-tool-execute-after.js",
         "description": "babysitter PostToolUse hook",
         "timeoutMs": 30000
       }
@@ -29,7 +29,7 @@
     "session.idle": [
       {
         "type": "command",
-        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-session-idle.js\" --json",
+        "script": "./hooks/babysitter-proxied-session-idle.js",
         "description": "babysitter SessionIdle hook",
         "timeoutMs": 30000
       }
@@ -37,7 +37,7 @@
     "shell.env": [
       {
         "type": "command",
-        "script": "npx -y @a5c-ai/hooks-proxy-cli invoke --adapter opencode --handler \"node ./hooks/babysitter-proxied-shell-env.js\" --json",
+        "script": "./hooks/babysitter-proxied-shell-env.js",
         "description": "babysitter ShellEnv hook",
         "timeoutMs": 5000
       }
