@@ -17,7 +17,7 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
-    "test": "vitest run"
+    "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
     "@a5c-ai/agent-mux": "^0.4.0",
