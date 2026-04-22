@@ -64,13 +64,22 @@ interface AmuxClientLike {
 }
 
 let _clientPromise: Promise<AmuxClientLike> | null = null;
+let _amuxOverride:
+  | { createClient: (opts: Record<string, unknown>) => AmuxClientLike }
+  | undefined;
+
+function requireAmux(): { createClient: (opts: Record<string, unknown>) => AmuxClientLike } {
+  if (_amuxOverride) {
+    return _amuxOverride;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+  const mod: { createClient: (opts: Record<string, unknown>) => AmuxClientLike } = require("@a5c-ai/agent-mux");
+  return mod;
+}
 
 async function getAmuxClient(): Promise<AmuxClientLike> {
   if (!_clientPromise) {
-    _clientPromise = (async () => {
-      const mod = await import("@a5c-ai/agent-mux");
-      return (mod as { createClient: (opts: Record<string, unknown>) => AmuxClientLike }).createClient({});
-    })();
+    _clientPromise = Promise.resolve(requireAmux().createClient({}));
   }
   return _clientPromise;
 }
@@ -174,5 +183,17 @@ export async function installHarnessViaAmux(
  * @internal
  */
 export function _resetAmuxInstallClientCache(): void {
+  _clientPromise = null;
+}
+
+/**
+ * Override the agent-mux module for testing.
+ * Pass `undefined` to restore require-based resolution.
+ * @internal
+ */
+export function _setAmuxInstallModuleForTesting(
+  mod: { createClient: (opts: Record<string, unknown>) => AmuxClientLike } | undefined,
+): void {
+  _amuxOverride = mod;
   _clientPromise = null;
 }
