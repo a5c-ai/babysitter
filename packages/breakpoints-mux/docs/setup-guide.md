@@ -28,13 +28,7 @@ npm run build
 npx tsc --build
 ```
 
-This compiles each package in dependency order:
-
-1. `@a5c-ai/breakpoints-pro-shared` (no dependencies)
-2. `@a5c-ai/breakpoints-pro-sdk` (depends on shared)
-3. `@a5c-ai/breakpoints-pro-server` (depends on shared)
-4. `@a5c-ai/breakpoints-pro-cli` (depends on shared, sdk)
-5. `@a5c-ai/breakpoints-pro-mcp-tool` (depends on shared, sdk)
+This compiles the `@a5c-ai/breakpoints-mux` package (types, SDK, CLI, MCP tools, auth).
 
 To clean build artifacts:
 
@@ -250,7 +244,7 @@ These apply to all `bmux` subcommands:
 
 ### Constants
 
-Defined in `@a5c-ai/breakpoints-pro-shared`:
+Defined in `@a5c-ai/breakpoints-mux`:
 
 | Constant | Value | Description |
 |----------|-------|-------------|
