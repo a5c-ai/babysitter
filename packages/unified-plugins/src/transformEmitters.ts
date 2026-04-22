@@ -194,9 +194,11 @@ export function generateManifests(
     }
     scripts['team:install'] = `node scripts/team-install${ext}`;
     const packageFiles = ['bin/', 'hooks/', 'skills/', 'commands/', 'scripts/', 'plugin.json', 'README.md', 'versions.json', 'package.json'];
-    if (targetProfile.name === 'github-copilot') {
+    if (targetProfile.name === 'github-copilot' || targetProfile.name === 'cursor') {
       packageFiles.splice(2, 0, 'hooks.json');
-      packageFiles.push('AGENTS.md');
+      if (targetProfile.name === 'github-copilot') {
+        packageFiles.push('AGENTS.md');
+      }
     }
     const pkgJson: Record<string, unknown> = {
       name: npmPkg,

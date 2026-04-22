@@ -100,7 +100,7 @@ export function generateCursorManifest(manifest: A5cPluginManifest): string {
     description: manifest.description,
     author: manifest.author,
     license: manifest.license,
-    hooks: 'hooks/hooks-cursor.json',
+    hooks: 'hooks.json',
     commands: 'commands/',
     skills: 'skills/',
   };

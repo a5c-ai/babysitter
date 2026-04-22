@@ -152,14 +152,14 @@ export function generateCursorHooksJson(
 ): string {
   const hooks: Record<string, unknown> = {};
   const pat = getPattern(manifest, targetProfile.name);
-  const sdk = resolveSdkConfig(manifest);
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
     const p = resolveHookPath(handler, slug, manifest.name, native, pat);
-    const adapter = targetProfile.adapterName;
-    const bashCmd = p ? `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `echo '{}'`;
-    const psCmd = p ? `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --handler "bash ./${p}" --json` : `Write-Output '{}'`;
+    const bashCmd = p ? `bash "./${p}"` : `echo '{}'`;
+    const psCmd = p
+      ? `powershell -NoProfile -ExecutionPolicy Bypass -File "./${p.replace(/\.sh$/, '.ps1')}"`
+      : `Write-Output '{}'`;
     const entry: Record<string, unknown> = { type: 'command', bash: bashCmd, powershell: psCmd, timeoutSec: 30 };
     if (canonical === 'Stop') {
       entry.loop_limit = null;

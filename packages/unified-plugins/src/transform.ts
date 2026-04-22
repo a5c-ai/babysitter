@@ -312,6 +312,12 @@ function transformHooks(
     );
     if (hookRegFile) {
       files.push(hookRegFile);
+      if (targetProfile.name === 'cursor') {
+        files.push({
+          path: 'hooks/hooks-cursor.json',
+          content: hookRegFile.content,
+        });
+      }
     }
   }
 
@@ -337,7 +343,7 @@ function generateHookRegistrationFile(
       break;
     case 'cursor':
       content = generateCursorHooksJson(manifest, targetProfile);
-      filePath = 'hooks/hooks-cursor.json';
+      filePath = 'hooks.json';
       break;
     case 'gemini':
       content = generateGeminiHooksJson(manifest, targetProfile);

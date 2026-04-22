@@ -16,7 +16,7 @@
   },
   "files": [
     "bin/",
-    "hooks/",
+    "hooks.json",
     "hooks/",
     "skills/",
     "commands/",
