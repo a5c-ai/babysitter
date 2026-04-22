@@ -3,6 +3,10 @@ import type { BreakpointContext, BackendConfig, RoutingConfig, GitHubIssuesBacke
 import { GitNativeBackend } from "./git-native.js";
 import type { GitNativeBackendOptions } from "./git-native.js";
 import { GitHubIssuesBackend } from "./github-issues.js";
+import { ServerBreakpointBackend } from "./server.js";
+import type { ServerBreakpointBackendConfig } from "./server.js";
+export { ServerBreakpointBackend, ServerBackendError } from "./server.js";
+export type { ServerBreakpointBackendConfig } from "./server.js";
 
 /**
  * Factory function type for creating backends from config.
@@ -22,6 +26,24 @@ backendFactories.set("git-native", (config) => {
 // Register the GitHub Issues backend
 backendFactories.set("github-issues", (config) => {
   return new GitHubIssuesBackend(config as GitHubIssuesBackendConfig);
+});
+
+// Register the breakpoints-pro server backend
+backendFactories.set("server", (config) => {
+  const serverUrl = (config.url as string | undefined)
+    ?? (config.serverUrl as string | undefined);
+  if (!serverUrl) {
+    throw new Error(
+      'Server backend requires a "url" or "serverUrl" property in config. ' +
+      'Example: { type: "server", url: "http://localhost:3847" }',
+    );
+  }
+  return new ServerBreakpointBackend({
+    serverUrl,
+    authToken: config.authToken as string | undefined,
+    projectId: config.projectId as string | undefined,
+    repoId: config.repoId as string | undefined,
+  } satisfies ServerBreakpointBackendConfig);
 });
 
 /**

@@ -106,6 +106,10 @@ export type { GitNativeBackendOptions } from "./backends/git-native.js";
 // ── GitHub Issues Backend ──────────────────────────────────────────
 export { GitHubIssuesBackend, getGitHubToken, parseAnswerFromComment } from "./backends/github-issues.js";
 
+// ── Server Backend ─────────────────────────────────────────────────
+export { ServerBreakpointBackend, ServerBackendError } from "./backends/server.js";
+export type { ServerBreakpointBackendConfig } from "./backends/server.js";
+
 // ── Proven Breakpoints ──────────────────────────────────────────────
 export {
   generateKeyPair,
