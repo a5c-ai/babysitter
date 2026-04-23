@@ -4,7 +4,7 @@
 
 ## Existing Architecture
 
-The current a5c.ai harness stack consists of:
+The current a5c.ai agent stack consists of:
 
 - **`@a5c-ai/agent-mux`** - Agent dispatch/multiplexing layer
 - **`@a5c-ai/hooks-mux`** - Hook normalization across harnesses  
@@ -14,7 +14,7 @@ The current a5c.ai harness stack consists of:
 
 ## Current Pain Points
 
-**Monolithic Complexity**: `babysitter-harness` contains:
+**Monolithic Complexity**: `babysitter-agent` contains:
 - Governance system (policies, authorities, sandbox rules) → [Security Architecture](security-architecture.md)
 - Session management (state, context, history, memory)
 - MCP integration (channels, transport, client tools)
@@ -33,7 +33,7 @@ The current a5c.ai harness stack consists of:
 ## Naming Harmonization
 
 Current confusing terminology will be updated:
-- `babysitter-harness` → `babysitter-agent`
+- runtime binary: `babysitter-agent`
 - `hooks-mux` → `hooks-mux` 
 - `agent-plugins-mux` → `agent-plugins-mux`
 

@@ -9,7 +9,7 @@ import { storeTaskArtifacts } from "../storeTaskArtifacts";
 let tmpRoot: string;
 
 beforeEach(async () => {
-  tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-harness-storage-"));
+  tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-agent-storage-"));
 });
 
 afterEach(async () => {

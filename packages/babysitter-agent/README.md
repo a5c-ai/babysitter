@@ -1,6 +1,6 @@
 # @a5c-ai/babysitter-agent
 
-Optional CLI package for Babysitter harness runtime commands.
+Optional CLI package for Babysitter agent runtime commands.
 
 ## Installation
 
@@ -10,16 +10,16 @@ npm install -g @a5c-ai/babysitter-agent
 
 ## Usage
 
-This package provides the `babysitter-harness` command:
+This package provides the `babysitter-agent` command:
 
 ```bash
-babysitter-harness --help
-babysitter-harness call --harness claude-code --prompt "implement feature X" --workspace .
+babysitter-agent --help
+babysitter-agent call --harness claude-code --prompt "implement feature X" --workspace .
 babysitter session:init --session-id demo --state-dir .a5c --run-id run-123
-babysitter-harness start-server --transport stdio
-babysitter-harness discover --json
-babysitter-harness invoke claude-code --prompt "implement feature X" --workspace .
-babysitter-harness tui --workspace .
+babysitter-agent start-server --transport stdio
+babysitter-agent discover --json
+babysitter-agent invoke claude-code --prompt "implement feature X" --workspace .
+babysitter-agent tui --workspace .
 ```
 
 Use the main `babysitter` CLI for harness installation and session-state commands:

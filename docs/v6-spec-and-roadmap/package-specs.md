@@ -37,7 +37,7 @@ This document defines package responsibilities for the current V6 stage. It inte
 ### `@a5c-ai/babysitter-agent`
 
 - State: Current
-- Role: harness runtime and orchestration-facing execution layer
+- Role: agent runtime and orchestration-facing execution layer
 - Responsibilities:
 - harness invocation flows,
 - session/runtime integration,
@@ -75,7 +75,7 @@ These are plausible extraction or rename candidates, but not yet committed deliv
 
 - State: Candidate
 - Why it might be worth doing:
-- `babysitter-harness` likely contains modules with cleaner ownership than the package boundary suggests.
+- `babysitter-agent` likely contains modules with cleaner ownership than the package boundary suggests.
 - Extraction trigger:
 - a subsystem has isolated tests, narrow dependencies, and clear consumers.
 - Do not extract if:

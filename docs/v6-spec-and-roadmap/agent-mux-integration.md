@@ -41,7 +41,7 @@ The agent-mux repository contains the following packages:
 
 **Phase 1: Core Infrastructure Integration**
 - Migrate `agent-mux-core`, `agent-mux-adapters`, `agent-mux-cli`, and `agent-mux` packages
-- Update `babysitter-harness` dependencies to use local agent-mux packages
+- Update `babysitter-agent` dependencies to use local agent-mux packages
 - Maintain existing API compatibility during transition
 
 **Phase 2: Service Layer Integration**  
@@ -81,7 +81,7 @@ Platform Layer (Persistence + Plugins)
 Orchestration Layer (Domain-Specific)
 ├── @a5c-ai/agent-platform-orchestration-plugin
 ├── @a5c-ai/babysitter-sdk (unchanged)
-└── @a5c-ai/babysitter-agent (renamed from babysitter-harness)
+└── @a5c-ai/babysitter-agent (current renamed package target)
 
 User Interface Layer
 ├── @a5c-ai/agent-mux-ui

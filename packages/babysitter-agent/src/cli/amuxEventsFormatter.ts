@@ -1,5 +1,5 @@
 /**
- * Formats babysitter harness invocation results as agent-mux compatible
+ * Formats babysitter-agent invocation results as agent-mux compatible
  * JSONL events.
  *
  * When `--output-format amux-events` is used, the harness:invoke command

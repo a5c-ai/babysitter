@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
-import { createBabysitterHarnessCli } from "../../main";
+import { createBabysitterAgentCli } from "../../main";
 import { createRunDir, appendEvent } from "../../../../../sdk/src/storage";
 import { nextUlid } from "../../../../../sdk/src/storage/ulids";
 
@@ -68,7 +68,7 @@ describe("GAP-UX-001 TUI Command", () => {
 
   describe("command registration", () => {
     it("tui command is recognized and does not return unknown-command error", async () => {
-      const cli = createBabysitterHarnessCli();
+      const cli = createBabysitterAgentCli();
       const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       const consoleErrSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -93,7 +93,7 @@ describe("GAP-UX-001 TUI Command", () => {
       await createTestRun("completed");
       await createTestRun("waiting");
 
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         const code = await cli.run(["tui", "--json", "--runs-dir", testDir]);
@@ -114,7 +114,7 @@ describe("GAP-UX-001 TUI Command", () => {
     });
 
     it("outputs empty runs array when no runs exist", async () => {
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         const code = await cli.run(["tui", "--json", "--runs-dir", testDir]);
@@ -129,7 +129,7 @@ describe("GAP-UX-001 TUI Command", () => {
 
     it("includes run metadata in JSON output", async () => {
       const { runId } = await createTestRun("completed");
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         await cli.run(["tui", "--json", "--runs-dir", testDir]);
@@ -148,7 +148,7 @@ describe("GAP-UX-001 TUI Command", () => {
   describe("run detail view", () => {
     it("shows run detail in JSON mode with --run-id", async () => {
       const { runId } = await createTestRun("waiting");
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         const code = await cli.run(["tui", "--json", "--runs-dir", testDir, runId]);
@@ -178,7 +178,7 @@ describe("GAP-UX-001 TUI Command", () => {
       await createTestRun("waiting");
       await createTestRun("failed");
 
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         await cli.run(["tui", "--json", "--runs-dir", testDir]);
@@ -195,7 +195,7 @@ describe("GAP-UX-001 TUI Command", () => {
   describe("run detail effects", () => {
     it("includes effect tree nodes in detail view", async () => {
       const { runId } = await createTestRun("waiting");
-        const cli = createBabysitterHarnessCli();
+        const cli = createBabysitterAgentCli();
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       try {
         await cli.run(["tui", "--json", "--runs-dir", testDir, runId]);

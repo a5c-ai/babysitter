@@ -1,6 +1,6 @@
 import { renderCommandTemplate } from "../prompts/commandTemplates";
 import type { HarnessParsedArgs } from "./args";
-import { HARNESS_PROGRAM } from "./program";
+import { AGENT_PROGRAM } from "./program";
 import { handleUnknownCommand } from "./ui";
 import { handleHarnessCreateRun } from "./commands/harness/createRun";
 import { handleHarnessResumeRun } from "./commands/harness/resumeRun";
@@ -23,8 +23,8 @@ type HarnessRunPromptKind =
   | "user-install"
   | "project-install";
 
-export function formatHarnessHelp(_surface: "agent" | "human"): string {
-  const commandName = HARNESS_PROGRAM.commandName;
+export function formatAgentHelp(_surface: "agent" | "human"): string {
+  const commandName = AGENT_PROGRAM.commandName;
   return `  ${commandName} create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
   ${commandName} call [...]                          (alias for create-run)
   ${commandName} yolo [...]                          (alias for create-run --non-interactive)
@@ -59,7 +59,7 @@ Install or update harness CLIs and plugins with the main babysitter CLI:
   babysitter harness:install-plugin <name>`;
 }
 
-export async function executeHarnessCliCommand(parsed: HarnessParsedArgs): Promise<number> {
+export async function executeAgentCliCommand(parsed: HarnessParsedArgs): Promise<number> {
   if (parsed.command === "version") {
     const { readCliVersion } = await import("./ui");
     console.log(await readCliVersion());
@@ -67,7 +67,7 @@ export async function executeHarnessCliCommand(parsed: HarnessParsedArgs): Promi
   }
 
   if (!parsed.command || parsed.helpRequested) {
-    console.log(formatHarnessHelp(parsed.helpSurface));
+    console.log(formatAgentHelp(parsed.helpSurface));
     return 0;
   }
 
@@ -143,7 +143,7 @@ export async function executeHarnessCliCommand(parsed: HarnessParsedArgs): Promi
     case "jsonl:interactive":
       return await handleJsonlInteractive({ runsDir: parsed.runsDir });
     case "help":
-      console.log(formatHarnessHelp("human"));
+      console.log(formatAgentHelp("human"));
       return 0;
     case "observe":
       if (parsed.tuiFlag) {
@@ -224,14 +224,14 @@ async function handleHarnessDiscover(parsed: HarnessParsedArgs): Promise<number>
     console.log(JSON.stringify({ installed: results, caller }, null, 2));
     return 0;
   }
-  console.log(formatHarnessHelp("human"));
+  console.log(formatAgentHelp("human"));
   return 0;
 }
 
 async function handleHarnessInvoke(parsed: HarnessParsedArgs): Promise<number> {
   const harnessName = parsed.positional?.[0];
   if (!harnessName || !parsed.prompt) {
-    console.error('Usage: babysitter-harness invoke <name> --prompt "<text>"');
+    console.error('Usage: babysitter-agent invoke <name> --prompt "<text>"');
     return 1;
   }
   const result = await invokeHarness(harnessName, {

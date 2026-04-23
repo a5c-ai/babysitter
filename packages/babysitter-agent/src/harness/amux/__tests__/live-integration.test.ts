@@ -18,7 +18,7 @@ import { execSync, spawn } from "child_process";
 
 const CLI_AVAILABLE = (() => {
   try {
-    execSync("babysitter-harness version", { stdio: "pipe", timeout: 10000 });
+    execSync("babysitter-agent version", { stdio: "pipe", timeout: 10000 });
     return true;
   } catch {
     return false;
@@ -38,7 +38,7 @@ function spawnBabysitter(
   timeoutMs = 15000,
 ): Promise<{ lines: string[]; exitCode: number | null; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const child = spawn("babysitter-harness", args, {
+    const child = spawn("babysitter-agent", args, {
       stdio: ["pipe", "pipe", "pipe"],
       shell: true,
       timeout: timeoutMs,
@@ -99,7 +99,7 @@ describe(
         // Use harness:discover which is fast and does not require a real harness.
         // We invoke it with --output-format amux-events to test that the CLI
         // accepts the flag. If the command doesn't support --output-format,
-        // babysitter-harness should still emit session_start/session_end.
+        // babysitter-agent should still emit session_start/session_end.
         //
         // NOTE: harness:invoke requires a harness name and prompt, so we use
         // a command that will fail fast but still exercise the amux-events

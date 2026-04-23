@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides an architectural comparison between the current a5c.ai harness stack and the V6 architecture, highlighting the key differences in design philosophy, component organization, and system capabilities.
+This document provides an architectural comparison between the current a5c.ai agent stack and the V6 architecture, highlighting the key differences in design philosophy, component organization, and system capabilities.
 
 **Target Audience**: Architects, engineers, and system designers evaluating the V6 architectural approach
 
@@ -11,7 +11,7 @@ This document provides an architectural comparison between the current a5c.ai ha
 ### Current Architecture Philosophy
 
 **Monolithic Integration**
-- Single large package (`babysitter-harness`) containing all functionality
+- Single large package (`babysitter-agent`) containing all functionality
 - Tight coupling between components
 - All-or-nothing deployment model
 - Shared state and configuration across all features

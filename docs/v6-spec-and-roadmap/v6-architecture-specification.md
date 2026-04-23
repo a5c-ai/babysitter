@@ -11,7 +11,7 @@
 V6 is a controlled architecture evolution of the existing Babysitter stack. It does not assume that the repository should be decomposed into a large family of new packages immediately. Instead, V6 defines a bounded target state:
 
 - keep `packages/sdk` as the primary stable core,
-- keep the current CLI and harness packages operational,
+- keep the current CLI and agent runtime packages operational,
 - extract or rename only seams that are already visible in code and operational workflows,
 - require a written validation case before each structural move.
 
@@ -82,7 +82,7 @@ The next stage keeps the current monorepo shape and improves it in place:
 
 - `packages/sdk`: continue as the durable runtime/orchestration core.
 - `packages/babysitter`: remain the primary CLI package.
-- `packages/babysitter-agent`: remain the harness runtime while internal seams are clarified.
+- `packages/babysitter-agent`: remain the agent runtime while internal seams are clarified.
 - `plugins/*`: remain first-class integration boundaries and packaging reality checks.
 - `.a5c/processes` and process-library integration: remain orchestration delivery mechanisms.
 
@@ -91,7 +91,7 @@ The next stage keeps the current monorepo shape and improves it in place:
 The only extraction candidates that should be actively documented now are:
 
 - naming and packaging improvements around existing plugin compilation and hook multiplexing tools,
-- internal module boundaries inside the harness runtime,
+- internal module boundaries inside the agent runtime,
 - small leaf utilities or subsystems whose tests and interfaces already stand on their own.
 
 Each candidate requires a decision record before implementation.

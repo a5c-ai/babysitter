@@ -1,7 +1,7 @@
 /**
  * Read agent-mux interaction responses from stdin.
  *
- * When babysitter-harness runs under agent-mux with `--output-format amux-events`,
+ * When babysitter-agent runs under agent-mux with `--output-format amux-events`,
  * the mux adapter may write JSONL interaction events to stdin (e.g.
  * `approval_response`, `input_response`). This module provides an
  * async-iterable reader that parses those events.

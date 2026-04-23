@@ -33,7 +33,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
   ].join("\n");
 
   return [
-    "You are running babysitter-harness create-run PhasePlanProcess on an external CLI harness in non-interactive mode.",
+    "You are running babysitter-agent create-run PhasePlanProcess on an external CLI harness in non-interactive mode.",
     "Do the real process-authoring work in the workspace and write the actual process file to disk.",
     "",
     "Task:",

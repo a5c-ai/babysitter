@@ -1,7 +1,7 @@
 /**
- * Maps agent-mux AgentEvent instances to babysitter-harness internal events.
+ * Maps agent-mux AgentEvent instances to babysitter-agent internal events.
  *
- * babysitter-harness consumes these mapped events for:
+ * babysitter-agent consumes these mapped events for:
  *   - Session history recording
  *   - Cost journaling
  *   - Governance checks
@@ -18,7 +18,7 @@ import type { AmuxAgentEvent } from "./amuxTypes";
 // ---------------------------------------------------------------------------
 
 /**
- * Internal event representation used within babysitter-harness.
+ * Internal event representation used within babysitter-agent.
  *
  * This is intentionally a simple tagged union so downstream consumers
  * (session history, cost journal, webhooks) can switch on `kind`.
@@ -80,9 +80,9 @@ const KNOWN_EVENT_TYPES = new Set<string>([
 // ---------------------------------------------------------------------------
 
 /**
- * Map an agent-mux AgentEvent to a babysitter-harness internal event.
+ * Map an agent-mux AgentEvent to a babysitter-agent internal event.
  *
- * Returns `null` for event types babysitter-harness doesn't care about
+ * Returns `null` for event types babysitter-agent doesn't care about
  * (e.g. internal debug events from agent-mux). Unknown but non-null
  * events are mapped with kind "unknown" so downstream consumers can
  * log or ignore them.

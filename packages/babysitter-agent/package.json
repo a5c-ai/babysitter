@@ -1,13 +1,13 @@
 {
   "name": "@a5c-ai/babysitter-agent",
   "version": "5.0.0",
-  "description": "Optional harness runtime CLI for Babysitter orchestration (Pi + agent-mux integration).",
+  "description": "Optional agent runtime CLI for Babysitter orchestration (Pi + agent-mux integration).",
   "license": "UNLICENSED",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "babysitter-harness": "dist/cli/main.js"
+    "babysitter-agent": "dist/cli/main.js"
   },
   "files": [
     "dist/",
@@ -42,7 +42,7 @@
   },
   "keywords": [
     "babysitter",
-    "harness",
+    "agent",
     "orchestration",
     "workflow",
     "agent-mux"

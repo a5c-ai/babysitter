@@ -8,7 +8,7 @@
  */
 
 /**
- * Maps babysitter-harness names (as used in HARNESS_CLI_MAP) to the
+ * Maps babysitter-agent harness names to the
  * corresponding agent-mux adapter identifier.
  */
 export const HARNESS_TO_AMUX_ADAPTER: Readonly<Record<string, string>> = {

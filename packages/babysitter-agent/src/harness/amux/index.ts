@@ -1,5 +1,5 @@
 /**
- * agent-mux integration bridge for babysitter-harness.
+ * agent-mux integration bridge for babysitter-agent.
  *
  * This module provides an alternative invocation path that delegates to
  * an AmuxClient rather than spawning harness CLIs directly. The existing

@@ -294,7 +294,7 @@ export function selectHarness(
  * Translate an internal ProgressPayload to an agent-mux compatible JSONL
  * event and write it to stdout.
  *
- * This function maps the babysitter-harness internal progress structure to
+ * This function maps the babysitter-agent internal progress structure to
  * the event types that the agent-mux babysitter adapter's `parseEvent()`
  * understands: `session_start`, `turn_start`, `turn_end`, `tool_call_start`,
  * `tool_result`, `text_delta`, `error`, `session_end`.

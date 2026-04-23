@@ -1,11 +1,11 @@
-export interface HarnessCliProgram {
-  readonly variant: "harness";
-  readonly commandName: "babysitter-harness";
+export interface AgentCliProgram {
+  readonly variant: "agent";
+  readonly commandName: "babysitter-agent";
   readonly packageName: "@a5c-ai/babysitter-agent";
 }
 
-export const HARNESS_PROGRAM: HarnessCliProgram = {
-  variant: "harness",
-  commandName: "babysitter-harness",
+export const AGENT_PROGRAM: AgentCliProgram = {
+  variant: "agent",
+  commandName: "babysitter-agent",
   packageName: "@a5c-ai/babysitter-agent",
 };

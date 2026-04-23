@@ -26,7 +26,7 @@ npm run test --workspace=@a5c-ai/babysitter-sdk     # vitest run (all tests)
 npm run test:watch --workspace=@a5c-ai/babysitter-sdk  # vitest watch mode (script name: test:watch)
 cd packages/sdk && npx vitest run src/runtime/__tests__/someFile.test.ts  # Single test file
 cd packages/sdk && npm run smoke:cli                # CLI smoke test
-npm run build --workspace=@a5c-ai/babysitter-agent # Build optional harness runtime CLI
+npm run build --workspace=@a5c-ai/babysitter-agent # Build optional agent runtime CLI
 ```
 
 ### Babysitter CLI Reference
@@ -60,31 +60,31 @@ babysitter harness:list [--json]                      # Alias for harness:discov
 babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
 babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
 
-# Optional Harness Runtime CLI (`@a5c-ai/babysitter-agent`)
-babysitter-harness invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
-babysitter-harness create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
-babysitter-harness call [...]                         # Alias for create-run
-babysitter-harness yolo [...]                         # Alias for create-run --non-interactive
-babysitter-harness plan [...]                         # Alias for create-run, stops after PhasePlanProcess
-babysitter-harness forever [...]                      # Alias for create-run, infinite loop process
-babysitter-harness resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
-babysitter-harness resume [...]                       # Alias for resume-run
-babysitter-harness retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
-babysitter-harness daemon:start [--workspace <dir>] [--daemon-dir <dir>] [--config-path <path>] [--foreground] [--json]
-babysitter-harness daemon:stop [--daemon-dir <dir>] [--grace-period-ms <n>] [--json]
-babysitter-harness daemon:status [--daemon-dir <dir>] [--json]
-babysitter-harness cost:stats [runId] [--all] [--runs-dir <dir>] [--json]
-babysitter-harness start-server [--transport <stdio|websocket>] [--port <n>] [--host <host>] [--json]
-babysitter-harness help [<topic>]
-babysitter-harness observe [--workspace <dir>] [--tui]
-babysitter-harness user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-harness tui [--run-id <id>] [--verbosity <level>] [--workspace <dir>] [--json]
+# Optional Agent Runtime CLI (`@a5c-ai/babysitter-agent`)
+babysitter-agent invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
+babysitter-agent create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+babysitter-agent call [...]                         # Alias for create-run
+babysitter-agent yolo [...]                         # Alias for create-run --non-interactive
+babysitter-agent plan [...]                         # Alias for create-run, stops after PhasePlanProcess
+babysitter-agent forever [...]                      # Alias for create-run, infinite loop process
+babysitter-agent resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
+babysitter-agent resume [...]                       # Alias for resume-run
+babysitter-agent retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
+babysitter-agent daemon:start [--workspace <dir>] [--daemon-dir <dir>] [--config-path <path>] [--foreground] [--json]
+babysitter-agent daemon:stop [--daemon-dir <dir>] [--grace-period-ms <n>] [--json]
+babysitter-agent daemon:status [--daemon-dir <dir>] [--json]
+babysitter-agent cost:stats [runId] [--all] [--runs-dir <dir>] [--json]
+babysitter-agent start-server [--transport <stdio|websocket>] [--port <n>] [--host <host>] [--json]
+babysitter-agent help [<topic>]
+babysitter-agent observe [--workspace <dir>] [--tui]
+babysitter-agent user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent tui [--run-id <id>] [--verbosity <level>] [--workspace <dir>] [--json]
 
 # Plugin Management
 babysitter plugin:install [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
@@ -174,7 +174,7 @@ Config: `testTimeout: 30000`, `hookTimeout: 300000`, `fileParallelism: false`, J
 |---------|----------|------|
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core: runtime, storage, tasks, CLI, hooks, testing, config. CJS. |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Core CLI package. Provides `babysitter` CLI. |
-| `packages/babysitter-agent` | `@a5c-ai/babysitter-agent` | Optional harness runtime CLI. Provides `babysitter-harness`. |
+| `packages/babysitter-agent` | `@a5c-ai/babysitter-agent` | Optional agent runtime CLI. Provides `babysitter-agent`. |
 | `packages/catalog` | `process-library-catalog` | Next.js 16 app (React 19, SQLite, Radix UI, Tailwind). |
 
 ## Harness Plugin Packages (`plugins/`)

@@ -23,12 +23,12 @@ babysitter --help          # agent-facing commands (default)
 babysitter --help-human    # human-facing SDK/install commands
 ```
 
-For harness runtime orchestration commands such as `call`, `yolo`,
-`invoke`, `resume`, `start-server`, and `tui`, install the optional harness CLI:
+For agent runtime orchestration commands such as `call`, `yolo`,
+`invoke`, `resume`, `start-server`, and `tui`, install the optional agent CLI:
 
 ```bash
 npm install -g @a5c-ai/babysitter-agent
-babysitter-harness --help-human
+babysitter-agent --help-human
 ```
 
 ## What's Included

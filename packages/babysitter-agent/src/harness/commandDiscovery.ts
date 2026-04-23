@@ -56,9 +56,9 @@ const COMMANDS: CommandInfo[] = [
   // Session commands
   { name: "session-history", description: "Browse persisted session history", category: "session", tags: ["session", "history", "browse"] },
   // Harness commands
-  { name: "discover", description: "Discover available harness CLIs", category: "harness", tags: ["discover", "list", "harness"], example: "babysitter-harness discover --json" },
-  { name: "call", description: "Create and run a programmatic session", category: "harness", tags: ["call", "create", "run", "harness"], example: "babysitter-harness call --process ./process.js#process" },
-  { name: "resume", description: "Resume an existing run", category: "harness", tags: ["resume", "continue", "harness"], example: "babysitter-harness resume --run-id <runId>" },
+  { name: "discover", description: "Discover available harness CLIs", category: "harness", tags: ["discover", "list", "harness"], example: "babysitter-agent discover --json" },
+  { name: "call", description: "Create and run a programmatic session", category: "harness", tags: ["call", "create", "run", "harness"], example: "babysitter-agent call --process ./process.js#process" },
+  { name: "resume", description: "Resume an existing run", category: "harness", tags: ["resume", "continue", "harness"], example: "babysitter-agent resume --run-id <runId>" },
   { name: "observe", description: "Launch live observer dashboard", category: "harness", tags: ["observe", "dashboard", "live", "ui"] },
   // Plugin commands
   { name: "plugin:install", description: "Install a plugin", category: "plugin", tags: ["install", "plugin", "add"] },

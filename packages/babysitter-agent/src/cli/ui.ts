@@ -9,7 +9,7 @@ import {
   suggestCommand,
   toStructuredError,
 } from "@a5c-ai/babysitter-sdk";
-import { HARNESS_PROGRAM } from "./program";
+import { AGENT_PROGRAM } from "./program";
 
 export function supportsColors(): boolean {
   if (process.env.NO_COLOR !== undefined) return false;
@@ -22,10 +22,10 @@ export function handleUnknownCommand(command: string, json: boolean): number {
     category: ErrorCategory.Validation,
     suggestions: suggestCommand(command) ? [`Did you mean: ${suggestCommand(command)}?`] : [],
     nextSteps: [
-      `Run ${HARNESS_PROGRAM.commandName} --help to see available harness runtime commands.`,
+      `Run ${AGENT_PROGRAM.commandName} --help to see available agent runtime commands.`,
       'Use "babysitter harness:install" or "babysitter harness:install-plugin" for installation commands.',
     ],
-    details: { command, program: HARNESS_PROGRAM.commandName },
+    details: { command, program: AGENT_PROGRAM.commandName },
   });
   if (json) {
     console.error(JSON.stringify(toStructuredError(error), null, 2));

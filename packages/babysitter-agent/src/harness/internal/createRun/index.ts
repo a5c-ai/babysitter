@@ -131,7 +131,7 @@ export async function handleHarnessCreateRun(
         process.stdout.write(JSON.stringify({ ok: true, planOnly: true, processPath }) + "\n");
       } else if (mode === "cli") {
         process.stderr.write(`${GREEN}Process definition created: ${BOLD}${processPath}${RESET}\n`);
-        process.stderr.write(`${DIM}Run /babysitter:call or babysitter-harness create-run --process ${processPath} to execute.${RESET}\n`);
+        process.stderr.write(`${DIM}Run /babysitter:call or babysitter-agent create-run --process ${processPath} to execute.${RESET}\n`);
       }
       return 0;
     }

@@ -1,8 +1,8 @@
-# babysitter-harness ← agent-mux Integration Spec
+# babysitter-agent ← agent-mux Integration Spec
 
 ## 1. Overview
 
-babysitter-harness replaces its custom harness invocation layer (`invoker.ts`, `HARNESS_CLI_MAP`, per-harness subprocess management) with `@agent-mux/core` as a **programmatic library dependency**. agent-mux handles subprocess spawning, event parsing, and session management for all external harnesses. babysitter-harness keeps its orchestration, governance, Pi wrapper, session history, and webhooks.
+babysitter-agent replaces its custom harness invocation layer (`invoker.ts`, `HARNESS_CLI_MAP`, per-harness subprocess management) with `@agent-mux/core` as a **programmatic library dependency**. agent-mux handles subprocess spawning, event parsing, and session management for all external harnesses. babysitter-agent keeps its orchestration, governance, Pi wrapper, session history, and webhooks.
 
 ### What changes
 
@@ -42,7 +42,7 @@ babysitter-harness replaces its custom harness invocation layer (`invoker.ts`, `
 }
 ```
 
-babysitter-harness imports agent-mux as a library. No CLI subprocess.
+babysitter-agent imports agent-mux as a library. No CLI subprocess.
 
 ---
 
@@ -53,7 +53,7 @@ babysitter-harness imports agent-mux as a library. No CLI subprocess.
 ```typescript
 import { AgentMuxClient } from '@agent-mux/core';
 
-// In babysitter-harness startup:
+// In babysitter-agent startup:
 const amuxClient = new AgentMuxClient({
   defaultAgent: undefined,  // babysitter chooses per invocation
   approvalMode: 'prompt',   // babysitter governance wraps this
@@ -62,7 +62,7 @@ const amuxClient = new AgentMuxClient({
 });
 ```
 
-The client is created once and reused across invocations. babysitter-harness owns the lifecycle.
+The client is created once and reused across invocations. babysitter-agent owns the lifecycle.
 
 ### 3.2 Harness Invocation (replaces invoker.ts)
 
@@ -176,9 +176,9 @@ function mapHarnessToAdapter(harness: string): string {
 
 ### 3.4 Event Stream Consumption
 
-babysitter-harness subscribes to agent-mux's `AgentEvent` stream and maps events to its own concerns:
+babysitter-agent subscribes to agent-mux's `AgentEvent` stream and maps events to its own concerns:
 
-| AgentEvent type | babysitter-harness action |
+| AgentEvent type | babysitter-agent action |
 |----------------|--------------------------|
 | `session_start` | Initialize session history |
 | `text_delta` | Accumulate assistant message for stop-hook |
@@ -251,7 +251,7 @@ for (const adapter of adapters) {
 
 ### 4.1 Current Dashboard
 
-babysitter-harness has `dashboard/` with Ink components: StatusBadge, StatusLine, custom views.
+babysitter-agent has `dashboard/` with Ink components: StatusBadge, StatusLine, custom views.
 
 ### 4.2 After: agent-mux-tui Plugins
 

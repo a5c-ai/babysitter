@@ -9,7 +9,7 @@ The foundation layer establishes the core runtime and infrastructure components 
 ### Runtime Extraction
 
 **Agent Runtime Core**
-- Extract Pi wrapper integration from `babysitter-harness`
+- Extract Pi wrapper integration from `babysitter-agent`
 - Create `@a5c-ai/agent-runtime` package structure → [Package Specifications](../package-specs.md)
 - Implement filesystem-free session management
 - Create structured event protocol

@@ -12,7 +12,7 @@ The repository currently works as a monorepo with a strong operational center:
 
 - `packages/sdk` contains the core orchestration model, storage, task system, replay, CLI infrastructure, hooks, harness abstractions, profiles, plugin management, and process-library support.
 - `packages/babysitter` exposes the primary CLI package.
-- `packages/babysitter-agent` provides the harness runtime layer and operational orchestration support.
+- `packages/babysitter-agent` provides the agent runtime layer and operational orchestration support.
 - `plugins/*` packages encode real harness-specific integration, packaging, and manifest constraints.
 
 This means V6 begins from a working but tightly coupled system, not from a clean-slate layered platform.

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { executeHarnessCliCommand, formatHarnessHelp } from "./dispatch";
+import { executeAgentCliCommand, formatAgentHelp } from "./dispatch";
 import { parseHarnessArgs } from "./args";
 import { outputError } from "./ui";
 
-export function createBabysitterHarnessCli() {
+export function createBabysitterAgentCli() {
   return {
     async run(argv: string[] = process.argv.slice(2)): Promise<number> {
       let parsedJson = false;
@@ -12,7 +12,7 @@ export function createBabysitterHarnessCli() {
         const parsed = parseHarnessArgs(argv);
         parsedJson = parsed.json;
         parsedVerbose = parsed.verbose;
-        return await executeHarnessCliCommand(parsed);
+        return await executeAgentCliCommand(parsed);
       } catch (error) {
         outputError(error instanceof Error ? error : new Error(String(error)), {
           json: parsedJson,
@@ -22,16 +22,16 @@ export function createBabysitterHarnessCli() {
       }
     },
     formatHelp(): string {
-      return formatHarnessHelp("agent");
+      return formatAgentHelp("agent");
     },
     formatHumanHelp(): string {
-      return formatHarnessHelp("human");
+      return formatAgentHelp("human");
     },
   };
 }
 
 if (require.main === module) {
-  void createBabysitterHarnessCli()
+  void createBabysitterAgentCli()
     .run()
     .then((code) => {
       process.exitCode = code;

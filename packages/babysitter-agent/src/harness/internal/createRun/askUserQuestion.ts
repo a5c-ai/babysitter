@@ -50,7 +50,7 @@ export async function readInteractivePrompt(
 
   process.stderr.write("\n");
   process.stderr.write(
-    `${BOLD}${CYAN}babysitter-harness create-run${RESET}\n`,
+    `${BOLD}${CYAN}babysitter-agent create-run${RESET}\n`,
   );
   process.stderr.write(
     `${DIM}Enter your request below. Press Enter to submit.${RESET}\n`,

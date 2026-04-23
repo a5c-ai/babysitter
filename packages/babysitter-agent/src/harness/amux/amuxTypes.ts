@@ -1,9 +1,9 @@
 /**
- * agent-mux type adapters for babysitter-harness.
+ * agent-mux type adapters for babysitter-agent.
  *
  * Keeps a structural compatibility layer for the subset of agent-mux surface
- * that babysitter-harness consumes, without requiring TypeScript to resolve the
- * full @a5c-ai/agent-mux package during babysitter-harness compilation.
+ * that babysitter-agent consumes, without requiring TypeScript to resolve the
+ * full @a5c-ai/agent-mux package during babysitter-agent compilation.
  *
  * @module harness/amux/amuxTypes
  */
@@ -40,7 +40,7 @@ export interface AmuxRunOptions {
  * Adapter interface for the RunHandle returned by AgentMuxClient.run().
  *
  * The real run handle is simultaneously an AsyncIterable<AgentEvent>,
- * an EventEmitter, and a thenable (Promise<RunResult>). babysitter-harness
+ * an EventEmitter, and a thenable (Promise<RunResult>). babysitter-agent
  * only needs the event stream, session metadata, and abort control.
  */
 export interface AmuxRunHandle {
@@ -87,7 +87,7 @@ export interface AmuxAgentEvent {
 /**
  * Channel for responding to interactive events during a run.
  *
- * Simplified from the real MuxInteractionChannel — babysitter-harness
+ * Simplified from the real MuxInteractionChannel — babysitter-agent
  * only uses the basic respond-by-ID pattern.
  */
 export interface AmuxInteractionChannel {
@@ -102,7 +102,7 @@ export interface AmuxInteractionChannel {
 /**
  * Programmatic client for invoking agents via agent-mux.
  *
- * This is the subset of the real client that babysitter-harness depends on.
+ * This is the subset of the real client that babysitter-agent depends on.
  * The concrete agent-mux client has many more methods (adapters, models,
  * sessions, config, auth, profiles, plugins, detectHost).
  */
