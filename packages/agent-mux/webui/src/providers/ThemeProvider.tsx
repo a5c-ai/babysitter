@@ -22,6 +22,7 @@ export function ThemeProvider(props: { children: React.ReactNode }): JSX.Element
       return;
     }
     document.documentElement.dataset.theme = mode;
+    document.documentElement.dataset.compendiumTheme = mode === 'light' ? 'vellum' : 'void';
   }, [mode]);
 
   const value = useMemo(

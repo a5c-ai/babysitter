@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom-v6';
 import { useAgents, useGateway } from '@a5c-ai/agent-mux-ui';
 import { useStore } from 'zustand';
+import { Button, Field, Select, Textarea } from '@a5c-ai/compendium';
 
 import { useGatewayFetch } from '../providers/GatewayProvider.js';
 
@@ -121,16 +122,13 @@ export function NewRunPage(): JSX.Element {
           <h2>Compose First Turn</h2>
         </header>
         <form className="stack" onSubmit={handleSubmit}>
-          <label className="field">
-            <span>Agent</span>
-            <select value={agent} onChange={(event) => setAgent(event.target.value)}>
-              {sessionAgents.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Field label="Agent">
+            <Select
+              value={agent}
+              onChange={setAgent}
+              options={sessionAgents.map((item) => ({ label: item, value: item }))}
+            />
+          </Field>
 
           {agentRecord ? (
             <p className="muted-copy">
@@ -149,22 +147,21 @@ export function NewRunPage(): JSX.Element {
             </p>
           ) : null}
 
-          <label className="field">
-            <span>Prompt</span>
-            <textarea
+          <Field label="Prompt">
+            <Textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
               placeholder="Describe the task you want the agent to handle..."
               rows={10}
             />
-          </label>
+          </Field>
 
           {error ? <p className="error-banner">{error}</p> : null}
 
           <div className="actions">
-            <button type="submit" disabled={submitting || !prompt.trim()}>
-              {submitting ? 'Starting…' : 'Start session'}
-            </button>
+            <Button type="submit" variant="primary" loading={submitting} disabled={submitting || !prompt.trim()}>
+              Start session
+            </Button>
             <Link className="ghost-link" to="/sessions">
               Browse sessions
             </Link>

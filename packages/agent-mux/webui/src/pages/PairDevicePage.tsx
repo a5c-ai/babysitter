@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
+import { Button } from '@a5c-ai/compendium';
 
 import { copyToClipboard } from '../web-only/clipboard.js';
 import { useGatewayAuth, useGatewayFetch } from '../providers/GatewayProvider.js';
@@ -53,8 +54,12 @@ export function PairDevicePage(): JSX.Element {
         <p>Use this for TV and no-camera flows. Codes expire after five minutes and are consumed once.</p>
         <div className="pairing-code">{code}</div>
         <div className="actions">
-          <button onClick={() => void copyToClipboard(code)}>Copy code</button>
-          <button onClick={() => void copyToClipboard(qrPayload)}>Copy QR payload</button>
+          <Button type="button" onClick={() => void copyToClipboard(code)}>
+            Copy code
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => void copyToClipboard(qrPayload)}>
+            Copy QR payload
+          </Button>
         </div>
         <p>{expiresAt ? `Expires at ${new Date(expiresAt).toLocaleTimeString()}` : 'Registering code…'}</p>
       </article>

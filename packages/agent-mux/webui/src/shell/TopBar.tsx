@@ -1,5 +1,6 @@
 import React from 'react';
 import { useConnection } from '@a5c-ai/agent-mux-ui';
+import { Button } from '@a5c-ai/compendium';
 
 function titleForPath(pathname: string): string {
   if (pathname === '/') return 'Sessions';
@@ -24,7 +25,9 @@ export function TopBar(props: { pathname: string; onOpenPalette(): void }): JSX.
       </div>
       <div className="topbar-actions">
         <span className={`connection-pill connection-${connection.status}`}>{connection.status}</span>
-        <button onClick={props.onOpenPalette}>Command palette</button>
+        <Button type="button" size="sm" onClick={props.onOpenPalette}>
+          Command palette
+        </Button>
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { SettingsScreen } from '@a5c-ai/agent-mux-ui';
+import { Button } from '@a5c-ai/compendium';
 
 import { useGatewayAuth } from '../providers/GatewayProvider.js';
 import { useThemeMode } from '../providers/ThemeProvider.js';
@@ -18,11 +19,15 @@ export function SettingsPage(): JSX.Element {
         </div>
         <div>
           <strong>Theme</strong>
-          <button onClick={toggle}>Toggle to {mode === 'light' ? 'dark' : 'light'}</button>
+          <Button type="button" onClick={toggle}>
+            Toggle to {mode === 'light' ? 'dark' : 'light'}
+          </Button>
         </div>
         <div>
           <strong>Token</strong>
-          <button onClick={logout}>Forget saved token</button>
+          <Button type="button" variant="ghost" onClick={logout}>
+            Forget saved token
+          </Button>
         </div>
       </div>
     </section>

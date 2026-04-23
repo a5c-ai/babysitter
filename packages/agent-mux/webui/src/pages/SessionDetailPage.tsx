@@ -3,6 +3,7 @@ import { useSearchParams, useParams } from 'react-router-dom-v6';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { useGateway } from '@a5c-ai/agent-mux-ui';
+import { Button, Field, Textarea } from '@a5c-ai/compendium';
 
 import { useGatewayFetch } from '../providers/GatewayProvider.js';
 import {
@@ -603,13 +604,14 @@ export function SessionDetailPage(): JSX.Element {
         )}
 
         <form className="composer" onSubmit={handleSend}>
-          <label className="field">
-            <span>
-              {status === 'active' && transport !== 'persistent'
+          <Field
+            label={
+              status === 'active' && transport !== 'persistent'
                 ? 'Wait for the current live turn to finish'
-                : 'Continue this session with a new turn'}
-            </span>
-            <textarea
+                : 'Continue this session with a new turn'
+            }
+          >
+            <Textarea
               autoFocus={searchParams.get('compose') === '1'}
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
@@ -621,12 +623,17 @@ export function SessionDetailPage(): JSX.Element {
               }
               disabled={!canCompose}
             />
-          </label>
+          </Field>
           {error ? <p className="error-banner">{error}</p> : null}
           <div className="actions">
-            <button type="submit" disabled={sending || !prompt.trim() || !canCompose}>
-              {sending ? 'Sending…' : 'Continue session'}
-            </button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={sending}
+              disabled={sending || !prompt.trim() || !canCompose}
+            >
+              Continue session
+            </Button>
           </div>
         </form>
       </article>

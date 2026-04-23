@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@a5c-ai/agent-mux-ui": "0.4.9",
+    "@a5c-ai/compendium": "0.1.0",
     "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

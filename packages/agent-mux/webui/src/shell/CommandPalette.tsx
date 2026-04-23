@@ -1,4 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import {
+  CommandPalette as CompendiumCommandPalette,
+  type CommandItem as CompendiumCommandItem,
+} from '@a5c-ai/compendium';
 
 export interface CommandPaletteAction {
   id: string;
@@ -11,34 +15,22 @@ export function CommandPalette(props: {
   open: boolean;
   onClose(): void;
 }): JSX.Element | null {
-  const [query, setQuery] = useState('');
-  const visibleActions = useMemo(
-    () => props.actions.filter((action) => action.label.toLowerCase().includes(query.toLowerCase())),
-    [props.actions, query],
+  const items = useMemo<CompendiumCommandItem[]>(
+    () =>
+      props.actions.map((action) => ({
+        id: action.id,
+        label: action.label,
+        onSelect: action.run,
+      })),
+    [props.actions],
   );
 
-  if (!props.open) {
-    return null;
-  }
-
   return (
-    <div className="palette-backdrop" onClick={props.onClose}>
-      <div className="palette" onClick={(event) => event.stopPropagation()}>
-        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Jump, toggle, start…" />
-        <div className="palette-list">
-          {visibleActions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => {
-                action.run();
-                props.onClose();
-              }}
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    <CompendiumCommandPalette
+      open={props.open}
+      items={items}
+      placeholder="Jump, toggle, start…"
+      onClose={props.onClose}
+    />
   );
 }

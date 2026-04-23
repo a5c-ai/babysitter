@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom-v6';
+import { Button, Field, Input } from '@a5c-ai/compendium';
 
 import { useGatewayAuth } from '../providers/GatewayProvider.js';
 
@@ -33,18 +34,25 @@ export function LoginPage(): JSX.Element {
         <h1>Attach to your gateway</h1>
         <p className="lede">The token is stored in `localStorage.amux.webui.auth`. That is convenient and less secure than an OS keychain.</p>
         <form onSubmit={handleSubmit} className="stack">
-          <label>
-            Gateway URL
-            <input value={gatewayUrl} onChange={(event) => setGatewayUrl(event.target.value)} placeholder="http://127.0.0.1:7878" />
-          </label>
-          <label>
-            Bearer token
-            <input value={token} onChange={(event) => setToken(event.target.value)} placeholder="paste token" />
-          </label>
+          <Field label="Gateway URL">
+            <Input
+              value={gatewayUrl}
+              onChange={(event) => setGatewayUrl(event.target.value)}
+              placeholder="http://127.0.0.1:7878"
+            />
+          </Field>
+          <Field label="Bearer token">
+            <Input
+              type="password"
+              value={token}
+              onChange={(event) => setToken(event.target.value)}
+              placeholder="paste token"
+            />
+          </Field>
           {error ? <p className="error-banner">{error}</p> : null}
-          <button type="submit" disabled={submitting || !token.trim()}>
-            {submitting ? 'Connecting…' : 'Connect'}
-          </button>
+          <Button type="submit" variant="primary" loading={submitting} disabled={submitting || !token.trim()}>
+            Connect
+          </Button>
         </form>
       </section>
     </main>
