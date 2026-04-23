@@ -229,7 +229,7 @@ describe("E2E: babysitter-harness <-> agent-mux round-trip", () => {
     const client = createMockClient([]);
     await expect(
       invokeViaAgentMux(client, "pi", { prompt: "test" }),
-    ).rejects.toThrow(/piWrapper/);
+    ).rejects.toThrow(/agent-core/);
   });
 
   it("onEvent callback fires for every mapped event during the round-trip", async () => {

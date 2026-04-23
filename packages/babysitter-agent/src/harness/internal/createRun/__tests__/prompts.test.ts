@@ -55,7 +55,7 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("pi | installed=yes");
     expect(prompt).toContain("metadata.harness");
     expect(prompt).toContain("Default `agent`, legacy `node`, and `orchestrator_task` work to the internal PI worker");
-    expect(prompt).toContain("native/local PI execution");
+    expect(prompt).toContain("native/local execution");
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
     expect(prompt).toContain("Interview the user");

@@ -14,7 +14,7 @@ import {
   BOLD,
   DEFAULT_EFFECT_RETRY_CONFIG,
   PI_WORKER_TIMEOUT_MS,
-  PiSessionHandle,
+  AgentCoreSessionHandle,
   YELLOW,
   createApprovalAskUserQuestion,
   createAskUserQuestionResponse,
@@ -44,7 +44,7 @@ import {
 export function resolveHarnessSessionIdForBinding(
   args: { selectedHarnessName: string },
   adapter: NonNullable<ReturnType<typeof getAdapterByName>>,
-  orchestrationSession?: PiSessionHandle | null,
+  orchestrationSession?: AgentCoreSessionHandle | null,
 ): string | undefined {
   if (isInternalHarness(args.selectedHarnessName) && orchestrationSession?.sessionId) {
     process.env.PI_SESSION_ID = process.env.PI_SESSION_ID || orchestrationSession.sessionId;
@@ -69,7 +69,7 @@ export async function resolveEffect(
     compressionConfig?: CompressionConfig | null;
     streaming?: StreamingOutputOptions;
   },
-  piSession?: PiSessionHandle | null,
+  piSession?: AgentCoreSessionHandle | null,
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
   json?: boolean,
@@ -223,12 +223,12 @@ export async function resolveEffectWithRetry(
     retryConfig?: Partial<EffectRetryConfig>;
     streaming?: StreamingOutputOptions;
   },
-  piSession?: PiSessionHandle | null,
+  piSession?: AgentCoreSessionHandle | null,
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
   json?: boolean,
-  piSessionFactory?: () => PiSessionHandle,
-  disposePiSession?: (session: PiSessionHandle) => Promise<void>,
+  piSessionFactory?: () => AgentCoreSessionHandle,
+  disposePiSession?: (session: AgentCoreSessionHandle) => Promise<void>,
   askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<ResolveEffectResult> {
   const config = { ...DEFAULT_EFFECT_RETRY_CONFIG, ...options.retryConfig };

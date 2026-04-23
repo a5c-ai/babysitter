@@ -2,10 +2,10 @@ import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import type { EffectAction } from "@a5c-ai/babysitter-sdk";
 import type {
-  PiPromptResult,
-  PiSessionOptions,
+  AgentCorePromptResult,
+  AgentCoreSessionOptions,
 } from "../../types";
-import type { PiSessionHandle } from "../../piWrapper";
+import type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
 import type { DelegationConfig } from "./utils";
 
 export const TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS = process.env.VITEST
@@ -35,7 +35,7 @@ export function readBooleanMetadata(
 
 export function readBashSandboxMetadata(
   metadata: Record<string, unknown> | undefined,
-): PiSessionOptions["bashSandbox"] | undefined {
+): AgentCoreSessionOptions["bashSandbox"] | undefined {
   const value = metadata?.bashSandbox;
   return value === "auto" || value === "secure" || value === "local"
     ? value
@@ -85,13 +85,13 @@ export function isIgnorablePiPromptFailure(output: string): boolean {
 }
 
 export async function promptPiWithRetry(args: {
-  session: PiSessionHandle;
+  session: AgentCoreSessionHandle;
   message: string;
   timeout: number;
   label: string;
   writeVerbose?: (message: string) => void;
   writeVerboseData?: (label: string, value: unknown, maxChars?: number) => void;
-}): Promise<PiPromptResult> {
+}): Promise<AgentCorePromptResult> {
   let attempt = 0;
 
   for (;;) {
@@ -138,7 +138,7 @@ export function buildPiWorkerSessionOptions(args: {
   model?: string;
   customTools?: unknown[];
   delegationConfig?: DelegationConfig;
-}): PiSessionOptions {
+}): AgentCoreSessionOptions {
   const metadata = args.action.taskDef?.metadata as Record<string, unknown> | undefined;
   const isolated = readBooleanMetadata(metadata, "isolated");
   const enableCompaction = readBooleanMetadata(metadata, "enableCompaction");
@@ -150,7 +150,7 @@ export function buildPiWorkerSessionOptions(args: {
     ?? "coding";
   const rawThinkingLevel = args.delegationConfig?.thinkingLevel
     ?? readStringMetadata(metadata, "thinkingLevel") as "none" | "low" | "medium" | "high" | undefined;
-  const effectiveThinkingLevel: PiSessionOptions["thinkingLevel"] | undefined =
+  const effectiveThinkingLevel: AgentCoreSessionOptions["thinkingLevel"] | undefined =
     rawThinkingLevel === "none" ? undefined : rawThinkingLevel;
   const effectiveBashSandbox = args.delegationConfig?.bashSandbox
     ?? readBashSandboxMetadata(metadata);

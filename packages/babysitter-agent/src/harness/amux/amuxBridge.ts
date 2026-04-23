@@ -90,7 +90,7 @@ export type AmuxEventCallback = (event: BabysitterEvent) => void | Promise<void>
  * @param onEvent     - Optional per-event callback for live processing.
  * @returns Promise resolving to the bridge result.
  *
- * @throws {Error} if `harness` is "pi" / "internal" (use piWrapper).
+ * @throws {Error} if `harness` is "pi" / "internal" (use agent-core).
  * @throws {Error} if the harness has no agent-mux adapter mapping.
  */
 export async function invokeViaAgentMux(

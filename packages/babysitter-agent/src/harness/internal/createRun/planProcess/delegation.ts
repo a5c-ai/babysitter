@@ -4,9 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { invokeHarness } from "../../../invoker";
 import {
   PI_PARENT_PROMPT_TIMEOUT_MS,
-  createPiSession,
+  createAgentCoreSession,
   promptPiWithRetry,
-  type PiSessionOptions,
+  type AgentCoreSessionOptions,
 } from "../utils";
 
 function resolveSkillFileCandidates(workspace: string, skillRef: string): string[] {
@@ -73,9 +73,9 @@ export async function runDelegatedHarnessTask(args: {
   model?: string;
   harness?: string;
   timeout?: number;
-  toolsMode?: PiSessionOptions["toolsMode"];
-  thinkingLevel?: PiSessionOptions["thinkingLevel"] | "none";
-  bashSandbox?: PiSessionOptions["bashSandbox"];
+  toolsMode?: AgentCoreSessionOptions["toolsMode"];
+  thinkingLevel?: AgentCoreSessionOptions["thinkingLevel"] | "none";
+  bashSandbox?: AgentCoreSessionOptions["bashSandbox"];
   skills?: string[];
   customTools?: unknown[];
 }): Promise<{
@@ -96,9 +96,9 @@ export async function runDelegatedHarnessTask(args: {
       ].join("\n")
     : args.task;
 
-  const harnessName = args.harness?.trim() || "internal";
-  if (harnessName === "internal" || harnessName === "oh-my-pi") {
-    const session = createPiSession({
+  const harnessName = args.harness?.trim() || "agent-core";
+  if (harnessName === "agent-core" || harnessName === "oh-my-pi") {
+    const session = createAgentCoreSession({
       workspace,
       model: args.model,
       timeout: args.timeout,

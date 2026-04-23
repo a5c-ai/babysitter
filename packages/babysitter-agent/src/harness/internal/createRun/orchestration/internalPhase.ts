@@ -5,7 +5,7 @@ import {
   ErrorCategory,
   PI_PARENT_PROMPT_TIMEOUT_MS,
   compressInternalHarnessPrompt,
-  createPiSession,
+  createAgentCoreSession,
   createReadlineAskUserQuestionUiContext,
   emitProgress,
   isIgnorablePiPromptFailure,
@@ -14,7 +14,7 @@ import {
   writeVerboseBlock,
   writeVerboseLine,
   type OrchestrationState,
-  type PiSessionHandle,
+  type AgentCoreSessionHandle,
 } from "../utils";
 import {
   buildOrchestrationSystemPrompt,
@@ -42,8 +42,8 @@ export async function runInternalOrchestrationPhase(
     pendingActions: new Map(),
     pendingEffectResults: new Map(),
   };
-  let orchestrationSession: PiSessionHandle | null = null;
-  const activePiSessions = new Set<PiSessionHandle>();
+  let orchestrationSession: AgentCoreSessionHandle | null = null;
+  const activePiSessions = new Set<AgentCoreSessionHandle>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
@@ -51,11 +51,11 @@ export async function runInternalOrchestrationPhase(
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars, args.outputMode);
   };
 
-  const registerPiSession = (session: PiSessionHandle): PiSessionHandle => {
+  const registerPiSession = (session: AgentCoreSessionHandle): AgentCoreSessionHandle => {
     activePiSessions.add(session);
     return session;
   };
-  const shutdownPiSession = async (session: PiSessionHandle | null | undefined): Promise<void> => {
+  const shutdownPiSession = async (session: AgentCoreSessionHandle | null | undefined): Promise<void> => {
     if (!session) {
       return;
     }
@@ -202,7 +202,7 @@ export async function runInternalOrchestrationPhase(
     writeVerbose(`[phaseOrchestration agent] ${summarizeAgentText(result.output)}`);
   };
 
-  orchestrationSession = registerPiSession(createPiSession({
+  orchestrationSession = registerPiSession(createAgentCoreSession({
     workspace: args.workspace,
     model: args.model,
     toolsMode: "coding",

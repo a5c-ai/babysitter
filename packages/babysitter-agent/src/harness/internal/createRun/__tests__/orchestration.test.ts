@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PiSessionEvent } from "../../../types";
+import type { AgentCoreSessionEvent } from "../../../types";
 import { subscribeVerbosePiEvents } from "../orchestration";
 
 describe("subscribeVerbosePiEvents", () => {
@@ -14,9 +14,9 @@ describe("subscribeVerbosePiEvents", () => {
   });
 
   it("prints assistant message text and structured tool activity in verbose mode", () => {
-    let listener: ((event: PiSessionEvent) => void) | undefined;
+    let listener: ((event: AgentCoreSessionEvent) => void) | undefined;
     const session = {
-      subscribe(fn: (event: PiSessionEvent) => void) {
+      subscribe(fn: (event: AgentCoreSessionEvent) => void) {
         listener = fn;
         return () => {
           listener = undefined;

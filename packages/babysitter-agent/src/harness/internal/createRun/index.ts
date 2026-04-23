@@ -86,7 +86,7 @@ export async function handleHarnessCreateRun(
     }
 
     const discovered = await discoverHarnesses();
-    const selectedHarnessName = preferredHarness ?? "internal";
+    const selectedHarnessName = preferredHarness ?? "agent-core";
     const compressionConfig = loadSessionCompressionConfig(workspace);
     const promptContext = buildPromptContext({
       workspace,

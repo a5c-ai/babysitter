@@ -2,8 +2,8 @@
  * Harness invoker module.
  *
  * External harnesses are routed through agent-mux exclusively.
- * Only Pi and the "internal" programmatic harness use direct invocation
- * (Pi via CLI subprocess, internal via piWrapper).
+ * Only Pi and the "agent-core" programmatic harness use direct invocation
+ * (Pi via CLI subprocess, agent-core in-process).
  */
 
 import { execFile } from "node:child_process";
@@ -13,7 +13,7 @@ import {
   ErrorCategory,
 } from "@a5c-ai/babysitter-sdk";
 import type { HarnessInvokeOptions, HarnessInvokeResult } from "./types";
-import { createPiSession } from "./piWrapper";
+import { createAgentCoreSession } from "@a5c-ai/agent-core";
 import {
   buildLaunchSpec,
   type HarnessCliSpec,
@@ -41,7 +41,7 @@ export const HARNESS_CLI_MAP: Readonly<Record<string, HarnessCliSpec>> = {
   pi: { cli: "pi", workspaceFlag: "--workspace", supportsModel: true, promptStyle: "flag" },
 } as const;
 
-const PROGRAMMATIC_ONLY_HARNESSES = ["internal"] as const;
+const PROGRAMMATIC_ONLY_HARNESSES = ["agent-core"] as const;
 const SUPPORTED_HARNESS_NAMES = [
   ...PROGRAMMATIC_ONLY_HARNESSES,
   ...Object.keys(HARNESS_CLI_MAP),
@@ -111,7 +111,7 @@ const DEFAULT_TIMEOUT_MS = 900_000;
  * is installed and the harness has an amux adapter mapping). When agent-mux
  * is unavailable, it falls back to direct child-process invocation.
  *
- * Pi / internal harnesses always use piWrapper directly and are never
+ * Pi / agent-core harnesses always use agent-core directly and are never
  * routed through agent-mux.
  *
  * @throws {BabysitterRuntimeError} if the harness is unknown or the CLI is
@@ -121,8 +121,8 @@ export async function invokeHarness(
   name: string,
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
-  // Pi / internal always use piWrapper directly
-  if (name === "pi" || name === "internal") {
+  // Pi / agent-core always use agent-core directly
+  if (name === "pi" || name === "agent-core") {
     return invokeHarnessDirect(name, options);
   }
 
@@ -140,9 +140,9 @@ export async function invokeHarness(
 }
 
 /**
- * Direct child-process invocation for Pi and internal harnesses.
+ * Direct child-process invocation for Pi and agent-core harnesses.
  *
- * "internal" uses piWrapper (in-process). Pi uses CLI subprocess via
+ * "agent-core" uses agent-core (in-process). Pi uses CLI subprocess via
  * `child_process.execFile`. External harnesses should never reach this
  * function -- they are routed through agent-mux in {@link invokeHarness}.
  *
@@ -153,8 +153,8 @@ async function invokeHarnessDirect(
   name: string,
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
-  if (name === "internal") {
-    const session = createPiSession({
+  if (name === "agent-core") {
+    const session = createAgentCoreSession({
       workspace: options.workspace,
       model: options.model,
       timeout: options.timeout,
@@ -164,7 +164,7 @@ async function invokeHarnessDirect(
       const result = await session.prompt(options.prompt, options.timeout);
       return {
         ...result,
-        harness: "internal",
+        harness: "agent-core",
       };
     } finally {
       session.dispose();

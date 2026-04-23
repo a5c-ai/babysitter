@@ -10,7 +10,7 @@ import { createDelegationTools } from "./tools/delegation";
 import { createExecutionTools } from "./tools/execution";
 import { createFileSystemTools } from "./tools/fileSystem";
 
-export function createAgenticToolDefinitions(options: AgenticToolOptions): CustomToolDefinition[] {
+export function createAgentCoreToolDefinitions(options: AgenticToolOptions): CustomToolDefinition[] {
   return [
     ...createFileSystemTools(options),
     ...createExecutionTools(options),

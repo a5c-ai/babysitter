@@ -6,9 +6,9 @@
 
 import * as path from "node:path";
 import { Type } from "@sinclair/typebox";
-import { createPiSession, PiSessionHandle } from "../../../harness/piWrapper";
-import { createAgenticToolDefinitions } from "../../../harness/agenticTools";
-import type { PiSessionEvent } from "../../../harness/types";
+import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/agent-core";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
+import type { AgentCoreSessionEvent } from "../../../harness/types";
 import { handleHarnessCreateRun } from "./createRun";
 import {
   BOLD,
@@ -279,7 +279,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
   // Build agentic tools (read/write/edit/grep/bash/etc.)
   // -----------------------------------------------------------------
 
-  const agenticTools = createAgenticToolDefinitions({
+  const agenticTools = createAgentCoreToolDefinitions({
     workspace: args.workspace ?? process.cwd(),
     interactive: interactive,
     askUserQuestionHandler: interactive
@@ -310,10 +310,10 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
   writeVerboseData("resume system prompt", systemPrompt);
   writeVerboseData("resume user prompt", userPrompt);
 
-  let session: PiSessionHandle | null = null;
+  let session: AgentCoreSessionHandle | null = null;
 
   try {
-    session = createPiSession({
+    session = createAgentCoreSession({
       workspace: args.workspace,
       model: args.model,
       thinkingLevel: "low",
@@ -332,7 +332,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       process.stderr.write(
         `\n${BOLD}${MAGENTA}Run Discovery${RESET} ${DIM}Agent is searching for runs...${RESET}\n\n`,
       );
-      unsubscribe = session.subscribe((event: PiSessionEvent) => {
+      unsubscribe = session.subscribe((event: AgentCoreSessionEvent) => {
         if (event.type === "text_delta") {
           const text = (event as { text?: string }).text;
           if (text) process.stderr.write(text);

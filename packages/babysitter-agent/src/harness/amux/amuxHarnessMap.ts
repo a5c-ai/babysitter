@@ -1,7 +1,7 @@
 /**
  * Mapping from babysitter harness identifiers to agent-mux adapter names.
  *
- * Pi is intentionally excluded -- it uses piWrapper directly rather than
+ * Pi is intentionally excluded -- it uses agent-core directly rather than
  * the agent-mux subprocess model.
  *
  * @module harness/amux/amuxHarnessMap
@@ -20,19 +20,19 @@ export const HARNESS_TO_AMUX_ADAPTER: Readonly<Record<string, string>> = {
   "opencode": "opencode",
   "openclaw": "openclaw",
   "oh-my-pi": "omp",
-  // Pi is NOT here -- uses piWrapper directly.
+  // Pi is NOT here -- uses agent-core directly.
 };
 
 /**
  * Resolve a babysitter harness name to an agent-mux adapter name.
  *
- * @throws {Error} if `harness` is "pi" (Pi uses piWrapper, not agent-mux)
+ * @throws {Error} if `harness` is "pi" (Pi uses agent-core, not agent-mux)
  *         or if the harness has no known mapping.
  */
 export function mapHarnessToAmuxAdapter(harness: string): string {
-  if (harness === "pi" || harness === "internal") {
+  if (harness === "pi" || harness === "agent-core") {
     throw new Error(
-      `Harness "${harness}" uses piWrapper and cannot be invoked via agent-mux.`,
+      `Harness "${harness}" uses agent-core and cannot be invoked via agent-mux.`,
     );
   }
   const adapter = HARNESS_TO_AMUX_ADAPTER[harness];

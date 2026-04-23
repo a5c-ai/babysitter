@@ -23,11 +23,11 @@ export const PROCESS_LIBRARY_READ_MAX_CHARS = 24_000;
 export const PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT = 12;
 
 /**
- * Harness selection priority. Pi / internal harnesses are preferred;
+ * Harness selection priority. Pi / built-in programmatic harnesses are preferred;
  * external harnesses are discovered dynamically via agent-mux.
  */
 const HARNESS_PRIORITY: readonly string[] = [
-  "internal",
+  "agent-core",
   "oh-my-pi",
   "pi",
 ] as const;

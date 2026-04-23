@@ -4,7 +4,7 @@ export {
   type CustomToolDefinition,
   type ToolResult,
 } from "./agenticTools/types";
-export { createAgenticToolDefinitions } from "./agenticTools/index";
+export { createAgentCoreToolDefinitions } from "./agenticTools/index";
 export { resetRunScopedConfig } from "./agenticTools/config/state";
 export { parseSearchResults, stripHtmlTags } from "./agenticTools/web/searchHelpers";
 export { extractTextFromHtml, filterByRelevance } from "./agenticTools/web/content";

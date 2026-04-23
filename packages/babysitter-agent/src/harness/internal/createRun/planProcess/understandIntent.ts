@@ -1,5 +1,5 @@
 import { promptPhaseSession } from "./phaseHelpers";
-import type { PiSessionHandle } from "../utils";
+import type { AgentCoreSessionHandle } from "../utils";
 
 export function buildUnderstandIntentPrompt(args: {
   prompt: string;
@@ -60,7 +60,7 @@ export function appendIntentHandoffToPlanPrompt(
 }
 
 export async function runUnderstandIntentPhase(args: {
-  session: PiSessionHandle;
+  session: AgentCoreSessionHandle;
   promptMessage: string;
   writeVerbose: (message: string) => void;
   writeVerboseData: (label: string, value: unknown, maxChars?: number) => void;

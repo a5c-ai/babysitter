@@ -7,7 +7,7 @@ import {
   PI_WORKER_TIMEOUT_MS,
 } from "../utils";
 import { BabysitterRuntimeError, ErrorCategory } from "@a5c-ai/babysitter-sdk";
-import type { PiSessionHandle } from "../../../piWrapper";
+import type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
 
 describe("harnessUtils", () => {
   it("falls back to default answers when the interactive UI tool fails", async () => {
@@ -158,7 +158,7 @@ describe("harnessUtils", () => {
   describe("promptPiWithRetry", () => {
     function createMockSession(
       promptImpl: (text: string, timeout?: number) => Promise<{ success: boolean; output: string; exitCode: number; duration: number }>,
-    ): PiSessionHandle {
+    ): AgentCoreSessionHandle {
       return {
         prompt: vi.fn(promptImpl),
         initialize: vi.fn(),
@@ -169,7 +169,7 @@ describe("harnessUtils", () => {
         followUp: vi.fn(),
         executeBash: vi.fn(),
         getLastAssistantText: vi.fn(() => ""),
-      } as unknown as PiSessionHandle;
+      } as unknown as AgentCoreSessionHandle;
     }
 
     it("retries on PiTimeoutError and eventually throws after max retries", async () => {

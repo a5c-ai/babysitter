@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import { createAgenticToolDefinitions } from "../../../agenticTools";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
 import { buildBreakpointEffectResult } from "./internalToolsHelpers";
 import {
   commitEffectResult,
@@ -60,7 +60,7 @@ export function createOrchestrationTools(args: {
     createTaskPostResultTool(args),
     createFinishOrchestrationTool(args),
   ];
-  const orchestrationAgenticTools = createAgenticToolDefinitions({
+  const orchestrationAgenticTools = createAgentCoreToolDefinitions({
     workspace: args.phaseArgs.workspace ?? process.cwd(),
     interactive: args.phaseArgs.interactive ?? false,
     askUserQuestionHandler: async (params: unknown) => {

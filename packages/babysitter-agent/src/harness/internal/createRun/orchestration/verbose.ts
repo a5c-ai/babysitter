@@ -1,14 +1,14 @@
 import {
   CYAN,
   DIM,
-  PiSessionHandle,
+  AgentCoreSessionHandle,
   RESET,
   type OutputMode,
-  type PiSessionEvent,
+  type AgentCoreSessionEvent,
 } from "../utils";
 
 export function subscribeVerbosePiEvents(
-  session: PiSessionHandle,
+  session: AgentCoreSessionHandle,
   label: string,
   opts: { verbose: boolean; json: boolean; outputMode?: OutputMode },
 ): (() => void) | null {
@@ -21,7 +21,7 @@ export function subscribeVerbosePiEvents(
   let lastStructuredMessage = "";
 
   try {
-    return session.subscribe((event: PiSessionEvent) => {
+    return session.subscribe((event: AgentCoreSessionEvent) => {
       const eventType = event.type;
 
       if (eventType === "tool_execution_start") {
@@ -155,7 +155,7 @@ function formatVerbosePayload(value: unknown, maxLength: number): string | undef
     : normalized;
 }
 
-function extractVerboseToolName(event: PiSessionEvent): string {
+function extractVerboseToolName(event: AgentCoreSessionEvent): string {
   const record = event as Record<string, unknown>;
   const directName = [
     record.name,
@@ -184,7 +184,7 @@ function extractVerboseToolName(event: PiSessionEvent): string {
   return "unknown";
 }
 
-function extractVerboseToolArgs(event: PiSessionEvent): unknown {
+function extractVerboseToolArgs(event: AgentCoreSessionEvent): unknown {
   const record = event as Record<string, unknown>;
   return record.input
     ?? record.args
@@ -198,7 +198,7 @@ function extractVerboseToolArgs(event: PiSessionEvent): unknown {
       : undefined);
 }
 
-function extractVerboseToolResult(event: PiSessionEvent): unknown {
+function extractVerboseToolResult(event: AgentCoreSessionEvent): unknown {
   const record = event as Record<string, unknown>;
   return record.result
     ?? record.output
@@ -207,7 +207,7 @@ function extractVerboseToolResult(event: PiSessionEvent): unknown {
     ?? record.content;
 }
 
-function extractVerboseMessageRole(event: PiSessionEvent): string | undefined {
+function extractVerboseMessageRole(event: AgentCoreSessionEvent): string | undefined {
   const record = event as Record<string, unknown>;
   if (typeof record.role === "string") {
     return record.role;
@@ -220,7 +220,7 @@ function extractVerboseMessageRole(event: PiSessionEvent): string | undefined {
   return typeof role === "string" ? role : undefined;
 }
 
-function extractVerboseMessagePayload(event: PiSessionEvent): unknown {
+function extractVerboseMessagePayload(event: AgentCoreSessionEvent): unknown {
   const record = event as Record<string, unknown>;
   return record.message ?? record.content ?? record.output;
 }

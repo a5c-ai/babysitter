@@ -11,7 +11,7 @@ import {
   compressInternalHarnessPrompt,
   isInternalHarness,
   promptPiWithRetry,
-  type PiSessionHandle,
+  type AgentCoreSessionHandle,
   type AskUserQuestionResponse,
   type CompressionConfig,
   type EffectAction,
@@ -53,7 +53,7 @@ export function buildBreakpointResult(
 export async function invokePromptEffect(
   action: EffectAction, taskHarness: string, prompt: string,
   options: { workspace?: string; model?: string; compressionConfig?: CompressionConfig | null; streaming?: StreamingOutputOptions },
-  piSession?: PiSessionHandle | null,
+  piSession?: AgentCoreSessionHandle | null,
 ): Promise<ResolveEffectResult> {
   if (isInternalHarness(taskHarness) && piSession) {
     const piResult = await promptPiWithRetry({

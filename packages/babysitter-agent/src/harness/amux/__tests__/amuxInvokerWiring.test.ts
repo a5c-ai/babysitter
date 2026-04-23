@@ -2,7 +2,7 @@
  * Tests for the wiring between invokeHarness and the amux bridge.
  *
  * External harnesses are routed through agent-mux exclusively.
- * Pi / internal harnesses always use piWrapper / direct invocation.
+ * Pi / agent-core harnesses always use agent-core / direct invocation.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { AmuxClient, AmuxRunHandle, AmuxAgentEvent, AmuxInteractionChannel } from "../amuxTypes";
@@ -40,9 +40,9 @@ vi.mock("node:child_process", () => ({
   spawn: vi.fn(),
 }));
 
-// Mock piWrapper
-vi.mock("../../piWrapper", () => ({
-  createPiSession: vi.fn().mockReturnValue({
+// Mock agent-core
+vi.mock("@a5c-ai/agent-core", () => ({
+  createAgentCoreSession: vi.fn().mockReturnValue({
     prompt: vi.fn().mockResolvedValue({
       output: "pi-output",
       duration: 100,
@@ -167,18 +167,18 @@ describe("invokeHarness amux wiring", () => {
     expect(result.harness).toBe("pi");
   });
 
-  it("uses direct invocation for internal harness even when amux is available", async () => {
+  it("uses direct invocation for agent-core harness even when amux is available", async () => {
     const mockClient = createMockAmuxClient();
     vi.mocked(getAmuxClient).mockResolvedValue(mockClient);
 
-    const result = await invokeHarness("internal", {
+    const result = await invokeHarness("agent-core", {
       prompt: "test prompt",
     });
 
-    // "internal" is handled by piWrapper in invokeHarnessDirect
+    // "agent-core" is handled by agent-core in invokeHarnessDirect
     expect(getAmuxClient).not.toHaveBeenCalled();
     expect(invokeViaAgentMux).not.toHaveBeenCalled();
-    expect(result.harness).toBe("internal");
+    expect(result.harness).toBe("agent-core");
   });
 
   it("routes codex through amux", async () => {

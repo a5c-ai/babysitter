@@ -194,7 +194,7 @@ export function isPiHarness(harnessName: string): boolean {
 }
 
 export function isInternalHarness(harnessName: string): boolean {
-  return harnessName === "internal" || harnessName === "oh-my-pi";
+  return harnessName === "agent-core" || harnessName === "oh-my-pi";
 }
 
 export function usesExternalHarness(harnessName: string): boolean {
@@ -267,9 +267,9 @@ export {
 export type { CompressionConfig } from "@a5c-ai/babysitter-sdk";
 export type {
   HarnessDiscoveryResult,
-  PiSessionEvent,
-  PiPromptResult,
-  PiSessionOptions,
+  AgentCoreSessionEvent,
+  AgentCorePromptResult,
+  AgentCoreSessionOptions,
   SessionBindResult,
 } from "../../types";
 export type {
@@ -286,7 +286,8 @@ export {
   createApprovalAskUserQuestion,
   createAskUserQuestionResponse,
 } from "../../../interaction";
-export { createPiSession, PiSessionHandle } from "../../piWrapper";
+export { createAgentCoreSession } from "@a5c-ai/agent-core";
+export type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
 export { discoverHarnesses } from "@a5c-ai/babysitter-sdk";
 export { BabysitterRuntimeError, ErrorCategory } from "@a5c-ai/babysitter-sdk";
 export { Type } from "@sinclair/typebox";

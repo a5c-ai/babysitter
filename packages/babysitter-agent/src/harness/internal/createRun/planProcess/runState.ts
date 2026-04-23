@@ -6,7 +6,7 @@ import {
   ErrorCategory,
   type OrchestrationState,
   type SessionBindResult,
-  PiSessionHandle,
+  AgentCoreSessionHandle,
 } from "../utils";
 
 type EnsureRunAndMaybeBindArgs = {
@@ -18,7 +18,7 @@ type EnsureRunAndMaybeBindArgs = {
   interactive: boolean;
   verbose: boolean;
   json: boolean;
-  phaseSession?: PiSessionHandle | null;
+  phaseSession?: AgentCoreSessionHandle | null;
   state?: OrchestrationState;
   requireBoundSession?: boolean;
 };
@@ -74,7 +74,7 @@ export async function ensureRunAndMaybeBindFromProcessDefinition(
   }
 
   let sessionId = adapter.resolveSessionId({});
-  if (!sessionId && args.selectedHarnessName === "internal") {
+  if (!sessionId && args.selectedHarnessName === "agent-core") {
     sessionId = args.phaseSession?.sessionId;
   }
   if (!sessionId && args.requireBoundSession) {
@@ -131,7 +131,7 @@ export async function createRunAndMaybeBindFromProcessDefinition(args: {
   interactive: boolean;
   verbose: boolean;
   json: boolean;
-  phaseSession: PiSessionHandle | null;
+  phaseSession: AgentCoreSessionHandle | null;
 }): Promise<{
   runId: string;
   runDir: string;

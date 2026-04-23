@@ -1,12 +1,12 @@
 /**
  * Internal harness adapter.
  *
- * The 'internal' harness represents the SDK's built-in programmatic execution
- * engine (piWrapper). It is always available, requires no external CLI, and is
+ * The 'agent-core' harness represents the SDK's built-in programmatic execution
+ * engine (agent-core). It is always available, requires no external CLI, and is
  * the default harness for `babysitter-harness create-run`.
  *
  * Unlike the 'pi' harness (which invokes the pi CLI as a child process), the
- * internal harness calls piWrapper.prompt() directly in-process.
+ * agent-core harness calls agent-core.prompt() directly in-process.
  */
 
 import * as path from "node:path";
@@ -55,10 +55,10 @@ export function createInternalAdapter(): HarnessAdapter {
   const claude = createClaudeCodeAdapter();
 
   return {
-    name: "internal",
+    name: "agent-core",
 
-    // The internal harness is never auto-detected via env vars.
-    // It is explicitly selected as the default or via --harness internal.
+    // The built-in agent-core harness is never auto-detected via env vars.
+    // It is explicitly selected as the default or via --harness agent-core.
     isActive(): boolean {
       return false;
     },
@@ -103,7 +103,7 @@ export function createInternalAdapter(): HarnessAdapter {
         ...opts,
         stateDir,
       });
-      return { ...result, harness: "internal" };
+      return { ...result, harness: "agent-core" };
     },
 
     handleStopHook(args: HookHandlerArgs): Promise<number> {
@@ -136,12 +136,12 @@ export function createInternalAdapter(): HarnessAdapter {
       return null;
     },
 
-    // Internal harness has no CLI to install — it IS the SDK.
+    // Agent-core has no CLI to install — it IS the built-in runtime.
     // eslint-disable-next-line @typescript-eslint/require-await
     async installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
       return {
-        harness: "internal",
-        summary: "The internal harness is built into the babysitter SDK and requires no separate installation.",
+        harness: "agent-core",
+        summary: "The agent-core harness is built into the babysitter SDK and requires no separate installation.",
         dryRun: options.dryRun,
       };
     },

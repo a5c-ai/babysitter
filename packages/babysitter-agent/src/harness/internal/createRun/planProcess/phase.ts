@@ -4,14 +4,14 @@ import {
   DIM,
   RESET,
   PI_PARENT_PROMPT_TIMEOUT_MS,
-  createPiSession,
+  createAgentCoreSession,
   createReadlineAskUserQuestionUiContext,
   emitProgress,
   writeVerboseBlock,
   writeVerboseLine,
-  type PiSessionEvent,
-  type PiSessionHandle,
-  type PiSessionOptions,
+  type AgentCoreSessionEvent,
+  type AgentCoreSessionHandle,
+  type AgentCoreSessionOptions,
   type ProcessDefinitionReport,
   BabysitterRuntimeError,
   ErrorCategory,
@@ -40,7 +40,7 @@ export type { RunPlanProcessPhaseArgs } from "./phaseTypes";
 export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanProcessPhaseArgs): Promise<ProcessDefinitionReport> {
   const state: { report?: ProcessDefinitionReport } = {};
   const phaseOutputs: string[] = [];
-  const sessionRef: { current: PiSessionHandle | null } = { current: null };
+  const sessionRef: { current: AgentCoreSessionHandle | null } = { current: null };
   const interactiveUiContext = args.interactive && args.rl
     ? createReadlineAskUserQuestionUiContext(args.rl)
     : undefined;
@@ -50,7 +50,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
     ...args, state, phaseOutputs, sessionRef, writeVerboseData,
   });
   emitProgress(
-    { phase: "1", status: "started", harness: "internal (agentic)" },
+    { phase: "1", status: "started", harness: "agent-core" },
     args.json,
     args.verbose,
     args.outputMode,
@@ -88,11 +88,11 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
   );
   writeVerboseData("phasePlanProcess system prompt", processDefinitionSystemPrompt);
   writeVerboseData("phaseUnderstandIntent prompt", intentPrompt);
-  const planProcessToolsMode: PiSessionOptions["toolsMode"] =
+  const planProcessToolsMode: AgentCoreSessionOptions["toolsMode"] =
     workspaceAssessment.kind === "empty"
       ? "default"
       : "coding";
-  sessionRef.current = createPiSession({
+  sessionRef.current = createAgentCoreSession({
     workspace: args.workspace,
     model: args.model,
     thinkingLevel: "low",
@@ -108,7 +108,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
     let unsubscribe: (() => void) | null = null;
     if (!args.json && args.outputMode !== "tui") {
       process.stderr.write(`${DIM}PhaseUnderstandIntent agent is analyzing the request...${RESET}\n`);
-      unsubscribe = sessionRef.current.subscribe((event: PiSessionEvent) => {
+      unsubscribe = sessionRef.current.subscribe((event: AgentCoreSessionEvent) => {
         if (event.type === "text_delta") {
           const text = (event as { text?: string }).text;
           if (text) {
@@ -360,7 +360,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
         phase: "1",
         status: "completed",
         processPath: state.report.processPath,
-        harness: "internal (agentic)",
+        harness: "agent-core",
       },
       args.json,
       args.verbose,
@@ -382,7 +382,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
       {
         phase: "1",
         status: "failed",
-        harness: "internal (agentic)",
+        harness: "agent-core",
         error: error instanceof Error ? error.message : String(error),
       },
       args.json,

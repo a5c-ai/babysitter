@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { promises as fs } from "node:fs";
 import { Type } from "@sinclair/typebox";
-import { createAgenticToolDefinitions } from "../../../agenticTools";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
 import {
   askUserQuestionViaTool,
   emitProgress,
@@ -10,7 +10,7 @@ import {
   promptPiWithRetry,
   type AskUserQuestionRequest,
   type OutputMode,
-  type PiSessionHandle,
+  type AgentCoreSessionHandle,
   type ProcessDefinitionReport,
   type ToolResultShape,
   BabysitterRuntimeError,
@@ -22,7 +22,7 @@ import { buildPhaseConversationSummary } from "./recovery";
 import { createRunAndMaybeBindFromProcessDefinition } from "./runState";
 
 export async function promptPhaseSession(args: {
-  session: PiSessionHandle;
+  session: AgentCoreSessionHandle;
   message: string;
   label: string;
   timeout: number;
@@ -67,7 +67,7 @@ export function createPlanProcessTools(args: {
   selectedHarnessName: string;
   state: { report?: ProcessDefinitionReport };
   phaseOutputs: string[];
-  sessionRef: { current: PiSessionHandle | null };
+  sessionRef: { current: AgentCoreSessionHandle | null };
   writeVerboseData: (label: string, value: unknown, maxChars?: number) => void;
 }): unknown[] {
   let mergedCustomTools: unknown[] = [];
@@ -127,7 +127,7 @@ export function createPlanProcessTools(args: {
     },
   ];
 
-  const agenticTools = createAgenticToolDefinitions({
+  const agenticTools = createAgentCoreToolDefinitions({
     workspace: args.workspace ?? process.cwd(),
     interactive: args.interactive ?? false,
     askUserQuestionHandler: async (params: unknown) => {

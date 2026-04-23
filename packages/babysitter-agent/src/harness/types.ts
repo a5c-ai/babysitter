@@ -142,7 +142,7 @@ export interface HarnessInvokeResult {
 // ---------------------------------------------------------------------------
 
 /** Options for creating a Pi harness session (programmatic API). */
-export interface PiSessionOptions {
+export interface AgentCoreSessionOptions {
   /** Working directory for the session. */
   workspace?: string;
   /** Model identifier string (e.g. "claude-opus-4-5"). */
@@ -177,13 +177,13 @@ export interface PiSessionOptions {
  * Event emitted by a Pi session during prompt execution.
  * Mirrors the AgentSessionEvent union from `@mariozechner/pi-coding-agent`.
  */
-export interface PiSessionEvent {
+export interface AgentCoreSessionEvent {
   type: string;
   [key: string]: unknown;
 }
 
 /** Result of sending a prompt through a Pi session. */
-export interface PiPromptResult {
+export interface AgentCorePromptResult {
   /** Collected text output from the agent response. */
   output: string;
   /** Wall-clock duration in milliseconds. */

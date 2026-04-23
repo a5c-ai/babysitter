@@ -20,10 +20,10 @@
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
+    "@a5c-ai/agent-core": "0.1.0",
     "@a5c-ai/agent-mux": "^0.4.0",
     "@a5c-ai/babysitter-sdk": "5.0.0",
     "@agentsh/secure-sandbox": "^0.1.7",
-    "@mariozechner/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",
     "zod": "^4.0.0",

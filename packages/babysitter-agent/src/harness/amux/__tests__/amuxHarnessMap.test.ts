@@ -42,8 +42,8 @@ describe("HARNESS_TO_AMUX_ADAPTER", () => {
     expect(HARNESS_TO_AMUX_ADAPTER["pi"]).toBeUndefined();
   });
 
-  it("does not include internal", () => {
-    expect(HARNESS_TO_AMUX_ADAPTER["internal"]).toBeUndefined();
+  it("does not include agent-core", () => {
+    expect(HARNESS_TO_AMUX_ADAPTER["agent-core"]).toBeUndefined();
   });
 
   it("has exactly 8 entries", () => {
@@ -58,15 +58,15 @@ describe("mapHarnessToAmuxAdapter", () => {
     expect(mapHarnessToAmuxAdapter("oh-my-pi")).toBe("omp");
   });
 
-  it("throws for pi (uses piWrapper)", () => {
+  it("throws for pi (uses agent-core)", () => {
     expect(() => mapHarnessToAmuxAdapter("pi")).toThrow(
-      /piWrapper/,
+      /agent-core/,
     );
   });
 
-  it("throws for internal (uses piWrapper)", () => {
-    expect(() => mapHarnessToAmuxAdapter("internal")).toThrow(
-      /piWrapper/,
+  it("throws for agent-core (uses agent-core)", () => {
+    expect(() => mapHarnessToAmuxAdapter("agent-core")).toThrow(
+      /agent-core/,
     );
   });
 

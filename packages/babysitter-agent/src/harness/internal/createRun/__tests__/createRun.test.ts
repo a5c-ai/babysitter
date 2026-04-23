@@ -48,9 +48,10 @@ vi.mock("../../../../interaction", async () => {
   };
 });
 
-vi.mock("../../../piWrapper", () => {
+vi.mock("@a5c-ai/agent-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@a5c-ai/agent-core")>();
   let sessionCounter = 0;
-  const createPiSession = vi.fn((options?: { customTools?: Array<Record<string, unknown>>; workspace?: string }) => {
+  const createAgentCoreSession = vi.fn((options?: { customTools?: Array<Record<string, unknown>>; workspace?: string }) => {
     sessionCounter += 1;
     const sessionId = `mock-session-id-${sessionCounter}`;
     const tools = options?.customTools ?? [];
@@ -158,8 +159,9 @@ vi.mock("../../../piWrapper", () => {
   });
 
   return {
-    createPiSession,
-    PiSessionHandle: class {},
+    ...actual,
+    createAgentCoreSession,
+    AgentCoreSessionHandle: class {},
   };
 });
 
@@ -185,7 +187,7 @@ import {
   commitEffectResult,
 } from "@a5c-ai/babysitter-sdk";
 import { invokeHarness } from "../../../invoker";
-import { createPiSession } from "../../../piWrapper";
+import { createAgentCoreSession } from "@a5c-ai/agent-core";
 
 const detectCallerHarnessMock = detectCallerHarness as Mock;
 
@@ -293,7 +295,7 @@ function getProcessWriteTool(
 
 describe("selectHarness", () => {
   const harnesses: HarnessDiscoveryResult[] = [
-    makeDiscoveryResult({ name: "internal" }),
+    makeDiscoveryResult({ name: "agent-core" }),
     makeDiscoveryResult({ name: "oh-my-pi" }),
     makeDiscoveryResult({ name: "pi" }),
   ];
@@ -302,17 +304,17 @@ describe("selectHarness", () => {
     detectCallerHarnessMock.mockReturnValue(null);
   });
 
-  it("selects internal as highest priority when all are available", () => {
+  it("selects agent-core as highest priority when all are available", () => {
     const selected = selectHarness(harnesses);
-    expect(selected?.name).toBe("internal");
+    expect(selected?.name).toBe("agent-core");
   });
 
-  it("respects priority order: internal > oh-my-pi > pi", () => {
-    // Remove internal
-    const withoutInternal = harnesses.filter((h) => h.name !== "internal");
+  it("respects priority order: agent-core > oh-my-pi > pi", () => {
+    // Remove agent-core
+    const withoutInternal = harnesses.filter((h) => h.name !== "agent-core");
     expect(selectHarness(withoutInternal)?.name).toBe("oh-my-pi");
 
-    // Remove internal + oh-my-pi
+    // Remove agent-core + oh-my-pi
     const onlyPi = withoutInternal.filter((h) => h.name !== "oh-my-pi");
     expect(selectHarness(onlyPi)?.name).toBe("pi");
   });
@@ -334,7 +336,7 @@ describe("selectHarness", () => {
 
   it("falls back to priority when preferred harness is not installed", () => {
     const selected = selectHarness(harnesses, "cursor");
-    expect(selected?.name).toBe("internal");
+    expect(selected?.name).toBe("agent-core");
   });
 
   it("returns undefined when no harness is installed", () => {
@@ -348,7 +350,7 @@ describe("selectHarness", () => {
 
   it("skips uninstalled harnesses even if they are high priority", () => {
     const internalUninstalled = harnesses.map((h) =>
-      h.name === "internal" ? { ...h, installed: false } : h,
+      h.name === "agent-core" ? { ...h, installed: false } : h,
     );
     const selected = selectHarness(internalUninstalled);
     expect(selected?.name).toBe("oh-my-pi");
@@ -371,11 +373,11 @@ describe("handleHarnessCreateRun", () => {
     // vi.clearAllMocks does NOT clear mockImplementationOnce / mockResolvedValueOnce
     // queues, so leftover overrides from one test can leak into the next.
     // mockReset clears the once queue but also the base implementation, so we
-    // save the factory default for createPiSession (the only mock with a
+    // save the factory default for createAgentCoreSession (the only mock with a
     // non-trivial factory impl) and restore it after reset.
-    const piDefault = vi.mocked(createPiSession).getMockImplementation();
-    vi.mocked(createPiSession).mockReset();
-    if (piDefault) vi.mocked(createPiSession).mockImplementation(piDefault);
+    const piDefault = vi.mocked(createAgentCoreSession).getMockImplementation();
+    vi.mocked(createAgentCoreSession).mockReset();
+    if (piDefault) vi.mocked(createAgentCoreSession).mockImplementation(piDefault);
     // These mocks have no factory implementation (just vi.fn()), so plain
     // mockReset is sufficient to clear once-queues without losing anything.
     vi.mocked(orchestrateIteration).mockReset();
@@ -493,8 +495,8 @@ describe("handleHarnessCreateRun", () => {
   });
 
   describe("Harness policy", () => {
-    it("uses the internal pi wrapper for plan-process and as the default orchestration harness even when external harnesses are discovered", async () => {
-      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-internal-default-"));
+    it("uses the agent-core pi wrapper for plan-process and as the default orchestration harness even when external harnesses are discovered", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-agent-core-default-"));
       tempDirs.push(workspace);
       const generatedPath = path.join(workspace, ".a5c", "processes");
       const generatedFile = path.join(generatedPath, "test-process.mjs");
@@ -515,7 +517,7 @@ describe("handleHarnessCreateRun", () => {
         matchedEnvVars: ["PI_SESSION_ID"],
         capabilities: [],
       });
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -531,7 +533,7 @@ describe("handleHarnessCreateRun", () => {
             cancelled: false,
           })),
           get sessionId() {
-            return "mock-session-id-planProcess-internal-default";
+            return "mock-session-id-planProcess-agent-core-default";
           },
           get isInitialized() {
             return true;
@@ -547,8 +549,8 @@ describe("handleHarnessCreateRun", () => {
         };
       });
       (createRun as Mock).mockResolvedValue({
-        runId: "run-internal-default",
-        runDir: "/tmp/runs/run-internal-default",
+        runId: "run-agent-core-default",
+        runDir: "/tmp/runs/run-agent-core-default",
         metadata: {},
       });
       (orchestrateIteration as Mock).mockResolvedValue({
@@ -566,8 +568,8 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenCalled();
-      const planProcessOptions = vi.mocked(createPiSession).mock.calls[0]?.[0] as {
+      expect(createAgentCoreSession).toHaveBeenCalled();
+      const planProcessOptions = vi.mocked(createAgentCoreSession).mock.calls[0]?.[0] as {
         workspace?: string;
         toolsMode?: string;
         isolated?: boolean;
@@ -598,13 +600,13 @@ describe("handleHarnessCreateRun", () => {
       expect(planProcessOptions.systemPrompt).toContain("normal file/search tools");
       expect(planProcessPrompt).toContain("The generated process must directly execute the user's requested work");
       expect(planProcessPrompt).not.toContain("You are a babysitter process generator");
-      const planProcessSession = vi.mocked(createPiSession).mock.results[0]?.value as { prompt: Mock };
-      const orchestrationSession = vi.mocked(createPiSession).mock.results[1]?.value as { prompt: Mock };
+      const planProcessSession = vi.mocked(createAgentCoreSession).mock.results[0]?.value as { prompt: Mock };
+      const orchestrationSession = vi.mocked(createAgentCoreSession).mock.results[1]?.value as { prompt: Mock };
       expect(planProcessSession.prompt).toHaveBeenCalled();
       expect(orchestrationSession.prompt).toHaveBeenCalled();
     });
 
-    it("binds an interactive UI context into the internal PI sessions", async () => {
+    it("binds an interactive UI context into the agent-core PI sessions", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-interactive-ui-"));
       tempDirs.push(workspace);
       const generatedPath = path.join(workspace, ".a5c", "processes");
@@ -622,7 +624,7 @@ describe("handleHarnessCreateRun", () => {
         status: "completed",
         output: "done",
       });
-      vi.mocked(createPiSession)
+      vi.mocked(createAgentCoreSession)
         .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
           const tools = options?.customTools ?? [];
           const writeProcess = getProcessWriteTool(tools) as {
@@ -707,12 +709,12 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(vi.mocked(createPiSession).mock.calls[0]?.[0]).toEqual(
+      expect(vi.mocked(createAgentCoreSession).mock.calls[0]?.[0]).toEqual(
         expect.objectContaining({
           uiContext: expect.any(Object),
         }),
       );
-      expect(vi.mocked(createPiSession).mock.calls[1]?.[0]).toEqual(
+      expect(vi.mocked(createAgentCoreSession).mock.calls[1]?.[0]).toEqual(
         expect.objectContaining({
           uiContext: expect.any(Object),
         }),
@@ -742,7 +744,7 @@ describe("handleHarnessCreateRun", () => {
           },
         ],
       });
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const getTool = (name: string) => tools.find((t) => t.name === name) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -772,7 +774,7 @@ describe("handleHarnessCreateRun", () => {
             }
             return { success: true, output: "orchestration", exitCode: 0, duration: 1 };
           }),
-        } as ReturnType<typeof createPiSession>;
+        } as ReturnType<typeof createAgentCoreSession>;
       });
 
       const code = await handleHarnessCreateRun({
@@ -821,7 +823,7 @@ describe("handleHarnessCreateRun", () => {
         }),
       );
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const getTool = (name: string) => tools.find((t) => t.name === name) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -862,7 +864,7 @@ describe("handleHarnessCreateRun", () => {
             await getTool("babysitter_finish_orchestration")?.execute?.("tool-finish", { summary: "done" });
             return { success: true, output: "orchestration", exitCode: 0, duration: 1 };
           }),
-        } as ReturnType<typeof createPiSession>;
+        } as ReturnType<typeof createAgentCoreSession>;
       });
 
       const code = await handleHarnessCreateRun({
@@ -896,7 +898,7 @@ describe("handleHarnessCreateRun", () => {
       ]);
 
       let orchestrationPromptCount = 0;
-      vi.mocked(createPiSession)
+      vi.mocked(createAgentCoreSession)
         .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
           const tools = options?.customTools ?? [];
           const reportProcess = getCompatTool(tools, "babysitter_report_process_definition") as {
@@ -1022,7 +1024,7 @@ describe("handleHarnessCreateRun", () => {
         makeDiscoveryResult({ name: "oh-my-pi" }),
       ]);
 
-      vi.mocked(createPiSession)
+      vi.mocked(createAgentCoreSession)
         .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
           const tools = options?.customTools ?? [];
           const reportProcess = getCompatTool(tools, "babysitter_report_process_definition") as {
@@ -1122,7 +1124,7 @@ describe("handleHarnessCreateRun", () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "oh-my-pi" }),
       ]);
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const reportProcess = getCompatTool(tools, "babysitter_report_process_definition") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1206,7 +1208,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const reportProcess = getCompatTool(tools, "babysitter_report_process_definition") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1267,7 +1269,7 @@ describe("handleHarnessCreateRun", () => {
       expect(existsSync(generatedFile)).toBe(true);
     });
 
-    it("keeps internal plan-process parent prompts unbounded while recovery waits for the agent", async () => {
+    it("keeps agent-core plan-process parent prompts unbounded while recovery waits for the agent", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-planProcess-unbounded-timeout-"));
       tempDirs.push(workspace);
       const generatedPath = path.join(workspace, ".a5c", "processes");
@@ -1288,7 +1290,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1378,7 +1380,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce(() => ({
+      vi.mocked(createAgentCoreSession).mockImplementationOnce(() => ({
         initialize: vi.fn().mockResolvedValue(undefined),
         subscribe: vi.fn(() => () => {}),
         dispose: vi.fn(),
@@ -1483,7 +1485,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1580,7 +1582,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1677,7 +1679,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1787,7 +1789,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -1904,7 +1906,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2020,7 +2022,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2123,7 +2125,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2232,7 +2234,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2348,7 +2350,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2478,7 +2480,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const writeProcess = getProcessWriteTool(tools) as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2748,24 +2750,24 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenCalledWith(
+      expect(createAgentCoreSession).toHaveBeenCalledWith(
         expect.objectContaining({
           workspace: undefined,
           toolsMode: "coding",
           ephemeral: true,
         }),
       );
-      expect(createPiSession).not.toHaveBeenCalledWith(
+      expect(createAgentCoreSession).not.toHaveBeenCalledWith(
         expect.objectContaining({
           bashSandbox: "secure",
         }),
       );
-      expect(createPiSession).not.toHaveBeenCalledWith(
+      expect(createAgentCoreSession).not.toHaveBeenCalledWith(
         expect.objectContaining({
           isolated: true,
         }),
       );
-      expect(createPiSession).not.toHaveBeenCalledWith(
+      expect(createAgentCoreSession).not.toHaveBeenCalledWith(
         expect.objectContaining({
           enableCompaction: true,
         }),
@@ -2788,7 +2790,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const taskTool = getCompatTool(tools, "task") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2821,7 +2823,7 @@ describe("handleHarnessCreateRun", () => {
             await finish?.execute?.("tool-finish", { summary: "done" });
             return { success: true, output: "orchestration", exitCode: 0, duration: 1 };
           }),
-        } as ReturnType<typeof createPiSession>;
+        } as ReturnType<typeof createAgentCoreSession>;
       });
 
       const code = await handleHarnessCreateRun({
@@ -2833,7 +2835,7 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenLastCalledWith(
+      expect(createAgentCoreSession).toHaveBeenLastCalledWith(
         expect.objectContaining({
           timeout: 1_800_000,
           toolsMode: "coding",
@@ -2858,7 +2860,7 @@ describe("handleHarnessCreateRun", () => {
         output: "done",
       });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const taskTool = getCompatTool(tools, "task") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -2889,7 +2891,7 @@ describe("handleHarnessCreateRun", () => {
             await finish?.execute?.("tool-finish", { summary: "done" });
             return { success: true, output: "orchestration", exitCode: 0, duration: 1 };
           }),
-        } as ReturnType<typeof createPiSession>;
+        } as ReturnType<typeof createAgentCoreSession>;
       });
 
       const code = await handleHarnessCreateRun({
@@ -2901,7 +2903,7 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(createPiSession).toHaveBeenLastCalledWith(
+      expect(createAgentCoreSession).toHaveBeenLastCalledWith(
         expect.objectContaining({
           timeout: undefined,
           toolsMode: "coding",
@@ -2974,7 +2976,7 @@ describe("handleHarnessCreateRun", () => {
       expect((orchestrateIteration as Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("continues after a late internal prompt termination when babysitter_run_iterate already returned a recoverable process-error", async () => {
+    it("continues after a late agent-core prompt termination when babysitter_run_iterate already returned a recoverable process-error", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi" }),
       ]);
@@ -2993,7 +2995,7 @@ describe("handleHarnessCreateRun", () => {
           output: "done",
         });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const runIterate = getCompatTool(tools, "babysitter_run_iterate") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -3042,7 +3044,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(orchestrateIteration).toHaveBeenCalledTimes(2);
-      const orchestrationSession = vi.mocked(createPiSession).mock.results[0]?.value as {
+      const orchestrationSession = vi.mocked(createAgentCoreSession).mock.results[0]?.value as {
         prompt: Mock;
       };
       expect(orchestrationSession.prompt).toHaveBeenCalledTimes(2);
@@ -3067,7 +3069,7 @@ describe("handleHarnessCreateRun", () => {
           output: "done",
         });
 
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const runIterate = getCompatTool(tools, "babysitter_run_iterate") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -3124,7 +3126,7 @@ describe("handleHarnessCreateRun", () => {
 
       expect(code).toBe(0);
       expect(orchestrateIteration).toHaveBeenCalledTimes(2);
-      const orchestrationSession = vi.mocked(createPiSession).mock.results[0]?.value as {
+      const orchestrationSession = vi.mocked(createAgentCoreSession).mock.results[0]?.value as {
         prompt: Mock;
       };
       expect(orchestrationSession.prompt).toHaveBeenCalledTimes(4);
@@ -3347,7 +3349,7 @@ describe("handleHarnessCreateRun", () => {
   });
 
   describe("error handling", () => {
-    it("proceeds with internal programmatic API even when no CLI harness is installed", async () => {
+    it("proceeds with agent-core programmatic API even when no CLI harness is installed", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi", installed: false }),
       ]);
@@ -3369,7 +3371,7 @@ describe("handleHarnessCreateRun", () => {
         interactive: false,
       });
 
-      // No CLI harness found, but create-run proceeds using internal
+      // No CLI harness found, but create-run proceeds using agent-core
       // programmatic API as the default — does not exit with error
       expect(code).toBe(0);
     });

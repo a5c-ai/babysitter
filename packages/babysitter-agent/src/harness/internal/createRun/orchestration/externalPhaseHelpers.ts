@@ -10,7 +10,7 @@ import {
 } from "@a5c-ai/babysitter-sdk";
 import {
   buildPiWorkerSessionOptions,
-  createPiSession,
+  createAgentCoreSession,
   PI_WORKER_TIMEOUT_MS,
   promptPiWithRetry,
   type EffectAction,
@@ -36,10 +36,10 @@ export async function recoverExternalProcessError(args: {
   args: RunOrchestrationPhaseArgs;
   errorMessage: string;
   errorStack?: string;
-  registerPiSession: (session: ReturnType<typeof createPiSession>) => ReturnType<typeof createPiSession>;
-  shutdownPiSession: (session: ReturnType<typeof createPiSession> | null | undefined) => Promise<void>;
+  registerPiSession: (session: ReturnType<typeof createAgentCoreSession>) => ReturnType<typeof createAgentCoreSession>;
+  shutdownPiSession: (session: ReturnType<typeof createAgentCoreSession> | null | undefined) => Promise<void>;
 }): Promise<void> {
-  const recoverySession = args.registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+  const recoverySession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
     action: {
       effectId: "process-error-recovery",
       invocationKey: "",

@@ -8,7 +8,7 @@
  * Events are forwarded through the `subscribe()` method.
  */
 
-import type { PiSessionOptions, PiPromptResult, PiSessionEvent } from "./types";
+import type { AgentCoreSessionOptions, AgentCorePromptResult, AgentCoreSessionEvent } from "./types";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -17,25 +17,25 @@ import { createSecureBashBackend } from "./piSecureSandbox";
 import {
   buildCompactionSettings,
   loadCompressionConfigSafe,
-} from "./piWrapper/compaction";
-import { discoverRepoInstructionPrompts } from "./piWrapper/instructionPrompts";
+} from "./agent-core/compaction";
+import { discoverRepoInstructionPrompts } from "./agent-core/instructionPrompts";
 import {
   configureAzureOpenAiEnvDefaults,
   extractAssistantFailure,
   loadPiModule,
   resolvePiModel,
-} from "./piWrapper/moduleSupport";
-import type { PiAgentSession } from "./piWrapper/moduleSupport";
+} from "./agent-core/moduleSupport";
+import type { PiAgentSession } from "./agent-core/moduleSupport";
 
 const DEFAULT_TIMEOUT_MS = 900_000;
-const DEFAULT_BASH_SANDBOX_MODE: NonNullable<PiSessionOptions["bashSandbox"]> = "local";
+const DEFAULT_BASH_SANDBOX_MODE: NonNullable<AgentCoreSessionOptions["bashSandbox"]> = "local";
 const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
 
 /** Listener for Pi session events. */
-export type PiEventListener = (event: PiSessionEvent) => void;
+export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
 
 // ---------------------------------------------------------------------------
-// PiSessionHandle
+// AgentCoreSessionHandle
 // ---------------------------------------------------------------------------
 
 /**
@@ -44,12 +44,12 @@ export type PiEventListener = (event: PiSessionEvent) => void;
  * Wraps `AgentSession` from `@mariozechner/pi-coding-agent`. The underlying
  * session is created lazily on first `prompt()` call and reused thereafter.
  */
-export class PiSessionHandle {
-  private readonly options: PiSessionOptions;
+export class AgentCoreSessionHandle {
+  private readonly options: AgentCoreSessionOptions;
   private session: PiAgentSession | null = null;
   private initPromise: Promise<void> | null = null;
   private readonly cleanupTasks: Array<() => Promise<void> | void> = [];
-  constructor(options: PiSessionOptions = {}) {
+  constructor(options: AgentCoreSessionOptions = {}) {
     this.options = options;
   }
   /**
@@ -76,18 +76,18 @@ export class PiSessionHandle {
    * Initializes the session if needed, sends the prompt, waits for the
    * `agent_end` event, and returns collected output.
    */
-  async prompt(text: string, timeout?: number): Promise<PiPromptResult> {
+  async prompt(text: string, timeout?: number): Promise<AgentCorePromptResult> {
     await this.initialize();
     const session = this.requireSession();
     const effectiveTimeout = timeout ?? this.options.timeout ?? DEFAULT_TIMEOUT_MS;
     const start = Date.now();
-    return new Promise<PiPromptResult>((resolve, reject) => {
+    return new Promise<AgentCorePromptResult>((resolve, reject) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
       let agentEndGraceTimer: ReturnType<typeof setTimeout> | undefined;
-      let agentEndResult: PiPromptResult | null = null;
+      let agentEndResult: AgentCorePromptResult | null = null;
       let promptSettled = false;
-      const finishWithResult = (result: PiPromptResult): void => {
+      const finishWithResult = (result: AgentCorePromptResult): void => {
         if (settled) return;
         settled = true;
         if (timer) clearTimeout(timer);
@@ -124,7 +124,7 @@ export class PiSessionHandle {
         }, effectiveTimeout);
       }
       // Subscribe to events to detect completion
-      const unsubscribe = session.subscribe((event: PiSessionEvent) => {
+      const unsubscribe = session.subscribe((event: AgentCoreSessionEvent) => {
         if (settled) return;
         if (event.type === "agent_end") {
           const messages = Array.isArray((event as { messages?: unknown[] }).messages)
@@ -192,7 +192,7 @@ export class PiSessionHandle {
    *
    * Returns an unsubscribe function.
    */
-  subscribe(listener: PiEventListener): () => void {
+  subscribe(listener: AgentCoreEventListener): () => void {
     const session = this.requireSession();
     return session.subscribe(listener);
   }
@@ -384,6 +384,6 @@ export class PiSessionHandle {
  *
  * The underlying `AgentSession` is created lazily on first use.
  */
-export function createPiSession(options?: PiSessionOptions): PiSessionHandle {
-  return new PiSessionHandle(options);
+export function createAgentCoreSession(options?: AgentCoreSessionOptions): AgentCoreSessionHandle {
+  return new AgentCoreSessionHandle(options);
 }

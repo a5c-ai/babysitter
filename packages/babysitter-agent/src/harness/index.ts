@@ -9,9 +9,9 @@ export type {
   HarnessInvokeResult,
   HarnessInstallOptions,
   HarnessInstallResult,
-  PiSessionOptions,
-  PiPromptResult,
-  PiSessionEvent,
+  AgentCoreSessionOptions,
+  AgentCorePromptResult,
+  AgentCoreSessionEvent,
   StreamingOutputCallback,
   StreamingLineCallback,
   StreamingOutputOptions,
@@ -30,8 +30,9 @@ export {
   setAdapter,
   resetAdapter,
 } from "@a5c-ai/babysitter-sdk";
-export { createAgenticToolDefinitions, type AgenticToolOptions, type CustomToolDefinition, AGENTIC_TOOL_NAMES, stripHtmlTags, extractTextFromHtml, filterByRelevance, parseSearchResults } from "./agenticTools";
+export { createAgentCoreToolDefinitions, type AgenticToolOptions, type CustomToolDefinition, AGENTIC_TOOL_NAMES, stripHtmlTags, extractTextFromHtml, filterByRelevance, parseSearchResults } from "@a5c-ai/agent-core";
 export { invokeHarness, buildHarnessArgs, HARNESS_CLI_MAP } from "./invoker";
 export { buildLaunchSpec } from "./invoker/launch";
-export { createPiSession, PiSessionHandle, type PiEventListener } from "./piWrapper";
+export { createAgentCoreSession, type AgentCoreEventListener } from "@a5c-ai/agent-core";
+export type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
 export * as amux from "./amux";

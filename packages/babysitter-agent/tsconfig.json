@@ -14,5 +14,15 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/**/__tests__"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__",
+    "src/harness/piWrapper.ts",
+    "src/harness/piWrapper/**",
+    "src/harness/agenticTools.ts",
+    "src/harness/agenticTools/**",
+    "src/harness/backgroundProcessRegistry.ts",
+    "src/harness/deferredToolRegistry.ts"
+  ]
 }

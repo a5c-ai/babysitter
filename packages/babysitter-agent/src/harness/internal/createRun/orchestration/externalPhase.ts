@@ -6,7 +6,7 @@ import {
   BabysitterRuntimeError,
   ErrorCategory,
   buildPiWorkerSessionOptions,
-  createPiSession,
+  createAgentCoreSession,
   createStreamingProgressCallbacks,
   emitProgress,
   isInternalHarness,
@@ -37,19 +37,19 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
     pendingActions: new Map(),
     pendingEffectResults: new Map(),
   };
-  const activePiSessions = new Set<ReturnType<typeof createPiSession>>();
+  const activePiSessions = new Set<ReturnType<typeof createAgentCoreSession>>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message, args.outputMode);
   };
   const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars, args.outputMode);
   };
-  const registerPiSession = (session: ReturnType<typeof createPiSession>) => {
+  const registerPiSession = (session: ReturnType<typeof createAgentCoreSession>) => {
     activePiSessions.add(session);
     return session;
   };
   const shutdownPiSession = async (
-    session: ReturnType<typeof createPiSession> | null | undefined,
+    session: ReturnType<typeof createAgentCoreSession> | null | undefined,
   ): Promise<void> => {
     if (!session) {
       return;
@@ -268,9 +268,9 @@ async function resolveExternalAction(args: {
   action: EffectAction;
   args: RunOrchestrationPhaseArgs;
   state: OrchestrationState;
-  registerPiSession: (session: ReturnType<typeof createPiSession>) => ReturnType<typeof createPiSession>;
+  registerPiSession: (session: ReturnType<typeof createAgentCoreSession>) => ReturnType<typeof createAgentCoreSession>;
   shutdownPiSession: (
-    session: ReturnType<typeof createPiSession> | null | undefined,
+    session: ReturnType<typeof createAgentCoreSession> | null | undefined,
   ) => Promise<void>;
 }): Promise<void> {
   const taskHarness = resolveTaskHarness(
@@ -292,11 +292,11 @@ async function resolveExternalAction(args: {
     args.args.verbose,
     args.args.outputMode,
   );
-  let workerSession: ReturnType<typeof createPiSession> | null = null;
+  let workerSession: ReturnType<typeof createAgentCoreSession> | null = null;
   let workerUnsub: (() => void) | null = null;
   if (args.action.kind === "shell" || isInternalHarness(taskHarness)) {
     if (isInternalHarness(taskHarness) || args.action.kind === "shell") {
-      workerSession = args.registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+      workerSession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
         action: args.action,
         workspace: args.args.workspace,
         model: args.args.model,
@@ -310,7 +310,7 @@ async function resolveExternalAction(args: {
   }
   const piSessionFactory = workerSession
     ? () => {
-      const nextSession = args.registerPiSession(createPiSession(buildPiWorkerSessionOptions({
+      const nextSession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
         action: args.action,
         workspace: args.args.workspace,
         model: args.args.model,

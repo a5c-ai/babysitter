@@ -1,4 +1,4 @@
-import type { PiSessionEvent } from "../types";
+import type { AgentCoreSessionEvent } from "../types";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -57,7 +57,7 @@ export interface PiAgentSession {
   prompt(text: string, options?: Record<string, unknown>): Promise<void>;
   steer(text: string): Promise<void>;
   followUp(text: string): Promise<void>;
-  subscribe(listener: (event: PiSessionEvent) => void): () => void;
+  subscribe(listener: (event: AgentCoreSessionEvent) => void): () => void;
   bindExtensions?(bindings: { uiContext?: unknown }): Promise<void>;
   executeBash(
     command: string,

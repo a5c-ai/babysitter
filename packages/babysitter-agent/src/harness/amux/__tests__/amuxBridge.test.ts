@@ -194,7 +194,7 @@ describe("invokeViaAgentMux", () => {
     const client = createMockClient([]);
     await expect(
       invokeViaAgentMux(client, "pi", { prompt: "nope" }),
-    ).rejects.toThrow(/piWrapper/);
+    ).rejects.toThrow(/agent-core/);
   });
 
   it("throws for unknown harness", async () => {
