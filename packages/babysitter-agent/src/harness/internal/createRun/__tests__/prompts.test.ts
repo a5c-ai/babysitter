@@ -58,6 +58,9 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("native/local execution");
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
+    expect(prompt).toContain("internal harness routing/guardrail hints");
+    expect(prompt).toContain("Do not treat `execution.permissions` as a cross-harness security boundary");
+    expect(prompt).toContain("Plugin targets may ignore it entirely");
     expect(prompt).toContain("Interview the user");
     expect(prompt).toContain("AskUserQuestion is the only in-loop way to ask the user");
     expect(prompt).toContain("resolve the active shared process-library");

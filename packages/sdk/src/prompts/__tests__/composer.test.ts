@@ -608,6 +608,8 @@ describe('capability-conditional sections', () => {
       expect(output).toContain('execution.harness');
       expect(output).toContain('execution.permissions');
       expect(output).toContain('execution.model');
+      expect(output).toContain('not a universal plugin contract');
+      expect(output).toContain('do not treat them as a cross-harness security boundary');
     });
 
     it('shows harness and permissions in task kinds code example', () => {

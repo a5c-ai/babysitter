@@ -92,7 +92,8 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- For risky shell or system-changing subtasks that truly need stronger guardrails, encode them explicitly in task metadata: `bashSandbox: \"secure\"` to opt into AgentSH, `isolated: true` to disable repo/global extensions and skills, and `enableCompaction: true` when a long-running internal worker needs compaction.",
     "- Treat external CLI harnesses (resolved via agent-mux) as text-agent harnesses. Use them only when their behavior is materially better for that task.",
-    "- Tasks may include an `execution` field with `model`, `harness`, and `permissions`. `execution.model` is universal (plugins and the built-in harness). `execution.harness` and `execution.permissions` are only used by `agent-core` (`create-run`) and ignored by plugins.",
+    "- Tasks may include an `execution` field with `model`, `harness`, and `permissions`. `execution.model` is universal (plugins and the built-in harness). `execution.harness` and `execution.permissions` are internal harness routing/guardrail hints, not a universal plugin contract.",
+    "- Do not treat `execution.permissions` as a cross-harness security boundary. Plugin targets may ignore it entirely, so route security-sensitive work through an execution path whose enforcement you actually control.",
     "- External CLI harnesses do not inherit AgentSH protection for their own internal shell or tool execution. Route security-sensitive shell work through the internal PI worker instead of assuming the external harness is guarded.",
     context.selectedHarnessName
       ? `- The selected orchestration binding harness for this run is ${context.selectedHarnessName}.`

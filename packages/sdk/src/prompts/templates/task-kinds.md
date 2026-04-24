@@ -66,8 +66,12 @@ Tasks can include an `execution` field to express preferences about how the effe
 |-------|-------------|
 | `execution.model` | Preferred model for the task (e.g., `'claude-opus-4-6'`). Used for subagent selection. |
 {{#cap.harness-routing}}
-| `execution.harness` | Preferred harness CLI for the task (internal-only). |
-| `execution.permissions` | Permission list for the task (internal-only). |
+| `execution.harness` | Preferred internal harness CLI for the task. This is routing metadata for harnesses that implement it, not a universal plugin contract. |
+| `execution.permissions` | Internal harness permission hints. Plugins may ignore them; do not treat them as a cross-harness security boundary. |
+{{/cap.harness-routing}}
+
+{{#cap.harness-routing}}
+Use `execution.permissions` only when you are targeting an internal harness flow that actually interprets the hints. If a task must rely on a security boundary across plugin targets, encode that boundary in the execution path itself instead of assuming plugins will enforce these hints.
 {{/cap.harness-routing}}
 
 Example:

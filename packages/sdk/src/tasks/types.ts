@@ -52,11 +52,11 @@ export interface SubprocessTaskOptions {
 }
 
 export interface EffectExecutionHints {
-  /** Preferred harness CLI (e.g., 'pi', 'claude-code'). Only used by internal harness. */
+  /** Preferred internal harness CLI (e.g., 'pi', 'claude-code'). Not a universal cross-plugin contract. */
   harness?: string;
   /** Preferred model identifier (e.g., 'claude-opus-4-6'). Used for subagent model selection. */
   model?: string;
-  /** Free-form permission list. Only used by internal harness. */
+  /** Internal harness permission hints. Plugins may ignore them; do not treat them as a security boundary. */
   permissions?: string[];
 }
 
