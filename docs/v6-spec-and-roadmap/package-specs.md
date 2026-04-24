@@ -100,9 +100,10 @@ The following names may be useful as future concepts, but they are not current p
 - `@a5c-ai/agent-platform`
 - `@a5c-ai/agent-platform-meta-plugins`
 - `@a5c-ai/agent-platform-orchestration-plugin`
-- `@a5c-ai/babysitter-agent`
+- `@a5c-ai/babysitter-agent` as a renamed or re-scoped future package target
 
 For now, they should be treated as directional language only. Any one of them needs a decision record, validation plan, and migration story before it becomes normative.
+Implementation-phase documents must therefore describe work in current-package terms unless such a decision record has already promoted the deferred name into scope. A deferred package name is not a deliverable placeholder.
 
 This does not block metaplugins as an implemented pattern. In current V6 terms, metaplugins are higher-order capability abstractions over existing plugin and hook packaging surfaces, including on legacy non-Babysitter agents. The deferred item here is the standalone package name `@a5c-ai/agent-platform-meta-plugins`, not the ability to ship capability bundles for concerns like memory systems, governance, or policy enforcement. `@a5c-ai/agent-plugins-mux` remains the compiler that emits the concrete per-harness plugin outputs those metaplugins rely on.
 

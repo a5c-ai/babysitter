@@ -107,6 +107,7 @@ The following may become real later, but are not part of the current normative t
 - `babysitter-agent` as a renamed or re-scoped top-level package.
 
 These names can remain as exploratory vocabulary, but they are not yet committed deliverables.
+Implementation plans may mention them only as exploratory labels or appendix material. They must not appear as phase deliverables, package-creation steps, or success criteria unless a later decision record explicitly promotes them into scope.
 
 That deferment does not mean metaplugins are absent from the current stack. V6 can describe metaplugins as a present-day capability abstraction over plugin and hook surfaces, including on legacy non-Babysitter agents. What is deferred is the standalone package vocabulary around them. The concrete delivery path that exists now is unified plugin authoring plus compiled per-harness bundles, with `agent-plugins-mux` acting as the compiler rather than the metaplugin layer itself.
 

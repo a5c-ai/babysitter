@@ -4,54 +4,55 @@
 
 ## Phase 1: Foundation Layer
 
-The foundation layer establishes the core runtime and infrastructure components that provide the base abstractions for all higher-level functionality.
+The foundation layer establishes the minimum V6 base inside the current repository shape. This phase clarifies seams, validation gates, and ownership in `packages/sdk`, `packages/babysitter-agent`, and `plugins/*`. It does not commit V6 to creating deferred top-level packages.
 
-### Runtime Extraction
+### Current-Package Seam Clarification
 
-**Agent Runtime Core**
-- Extract Pi wrapper integration from `babysitter-agent`
-- Create `@a5c-ai/agent-runtime` package structure → [Package Specifications](../package-specs.md)
-- Implement filesystem-free session management
-- Create structured event protocol
+**Runtime And Session Boundaries**
+- Clarify which runtime concerns already belong to `packages/babysitter-agent`
+- Isolate Pi wrapper, session handling, and structured event concerns behind internal module seams before considering any package move
+- Reduce filesystem assumptions only where current commands and tests prove the change is safe
+- Record candidate extraction boundaries as ADR-backed slices rather than package commitments
 
 **Hook System**
-- Design programmatic hooks architecture  
-- Implement hook registration and invocation
-- Create hook acknowledgment system
-- Add model provider configuration
+- Tighten programmatic hook responsibilities in the current SDK and plugin surfaces
+- Verify hook registration, invocation, and acknowledgment flows against existing runtime behavior
+- Add or update configuration only where the current CLI and plugin model already require it
 
 ### Infrastructure Foundation
 
-**Package Structure**
-- Establish `hooks-mux` → `hooks-mux` evolution
-- Establish `agent-plugins-mux` → `agent-plugins-mux` evolution
-- Update import references across codebase
-- Implement package compatibility layers
+**Compiler And Packaging Reality Checks**
+- Validate `agent-plugins-mux` and related packaging flows against real plugin manifests and generated outputs
+- Document import and ownership seams that already exist in the repo instead of inventing new package boundaries
+- Add compatibility notes for any rename or extraction candidate that survives Phase 0 decision framing
 
-**Agent Platform Foundation**
-- Create `@a5c-ai/agent-platform` package structure
-- Design plugin system architecture
-- Implement basic plugin registration
-- Create filesystem abstraction layer
+**Platform Candidate Preparation**
+- Describe plugin-system responsibilities in current-package terms
+- Identify which platform concerns are internal `packages/sdk` or `packages/babysitter-agent` candidates versus actual `plugins/*` responsibilities
+- Treat filesystem abstraction and plugin registration work as candidate slices only when they can be validated independently
 
 ## Deliverables
 
-- `@a5c-ai/agent-runtime` with core functionality
-- Agent-core session management operational
-- Hook system functional
-- Zero filesystem dependencies verified
+- Updated seam map for runtime, session, and hook responsibilities in current packages
+- ADR-ready candidate slices for any extraction or rename still worth considering
+- Hook and packaging flows validated against existing commands and plugin outputs
+- Any reduced-filesystem claim stated with a baseline, command, and rollback note
 
 ## Technical Validation
 
-**Bundle Size Analysis**: Target <2MB for runtime → [Performance Considerations](../performance-docs.md)
+**Documentation Consistency**: Foundation work must remain consistent with [V6 Architecture Specification](../v6-architecture-specification.md) and [Package Specifications](../package-specs.md)
 
-**Memory Usage Profiling**: Target <50MB baseline
+**Current-Behavior Checks**: Use current build, test, and plugin packaging commands as the source of truth for whether a seam is real
 
-**Integration Compatibility**: Testing with existing agent-mux
+**Packaging Validation**: Compare compiler changes against existing manifest and install surfaces
 
-**Performance Benchmarking**: Session creation <200ms
+**Performance Benchmarking**: Any runtime or session target must cite a baseline command before it becomes a success criterion
 
-**API Contract Validation**: TypeScript interfaces → [Testing Framework](../testing-framework.md)
+**Extraction Gate**: No deferred package name becomes part of this phase without a decision record that changes its state in the core V6 docs
+
+## Explicit Non-Deliverables
+
+This phase does not create `@a5c-ai/agent-runtime` or `@a5c-ai/agent-platform`. Those names remain deferred vocabulary unless later decision records promote a specific slice into scope.
 
 ---
 

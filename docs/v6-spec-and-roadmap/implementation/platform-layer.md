@@ -4,99 +4,57 @@
 
 ## Phase 2: Platform Layer
 
-The platform layer builds on the foundation to provide plugin systems, session management, and extensibility frameworks.
+The platform layer builds on the foundation by hardening plugin, session, and extensibility behavior in the current stack. It does not assume that deferred `agent-platform*` package names have already been approved as V6 deliverables.
 
 ### Core Platform Implementation
 
 **Plugin Framework**
-- Implement meta-plugin architecture with lifecycle management, where metaplugins compose capability concerns above concrete plugin and hook bundles → [Plugin Ecosystem](../plugin-ecosystem.md)
-- Create plugin dependency resolution with security validation
-- Add plugin marketplace integration with governance framework
-- Build plugin isolation and resource limit enforcement
+- Improve plugin lifecycle behavior through existing SDK, compiler, and `plugins/*` surfaces → [Plugin Ecosystem](../plugin-ecosystem.md)
+- Validate plugin dependency and manifest handling against current install and packaging flows
+- Treat marketplace, governance, and isolation work as measured slices, not abstract platform promises
+- Describe metaplugins as capability composition above concrete plugin and hook bundles, without requiring a new package boundary
 
 **Session Management Evolution**
-- Extract session management from monolithic structure
-- Implement persistent session state in `agent-platform`
-- Create session context propagation across plugin boundaries
-- Add session recovery mechanisms with consistency validation
+- Clarify session ownership across `packages/babysitter-agent`, `packages/sdk`, and plugin integration points
+- Improve persistence, context propagation, and recovery only where the current runtime already exposes those seams
+- Keep session changes rollbackable and testable without introducing broad cross-package churn
 
-### Meta-Plugins Framework
+### Candidate Slice Areas
 
-**Meta-Plugin System**
-- Create `@a5c-ai/agent-platform-meta-plugins` package structure
-- Implement hook type extension system for pipeline processing
-- Add dynamic plugin loading with security sandbox enforcement
-- Create plugin pipeline processing with resource monitoring
+**Metaplugin Composition**
+- Document composition rules for higher-order capability bundles on top of current plugin and hook surfaces
+- Validate whether hook-type extension or pipeline processing can remain internal to current packages
+- Promote a standalone package only if a later ADR proves that the seam reduces coupling more than it adds API surface
 
-If this future package is pursued, it should host metaplugin composition logic rather than replace concrete plugin packaging. The current repo evidence still treats unified plugins and per-harness bundles as the install surfaces, with `agent-plugins-mux` responsible for compiling those outputs.
+**Orchestration Integration**
+- Keep Babysitter orchestration integration expressed through current packages and plugin bundles
+- Treat orchestration-plugin vocabulary as exploratory only unless a decision record changes its classification
+- Preserve process-library and SDK integration as present-day implementation surfaces
 
-**Orchestration Plugin**
-- Create `@a5c-ai/agent-platform-orchestration-plugin` package
-- Integrate babysitter SDK functionality with event-driven architecture
-- Implement orchestration-specific hooks and session management
-- Add process library integration with security validation
-
-## Technical Implementation Details
-
-### Plugin Isolation Mechanisms
-
-```typescript
-// Plugin Security Boundary
-interface PluginSecurityContext {
-  allowedFileAccess: string[];
-  memoryLimit: number;
-  executionTimeout: number;
-  networkAccess: 'none' | 'restricted' | 'full';
-}
-
-// Plugin Lifecycle Management
-interface PluginLifecycle {
-  initialize(context: PluginSecurityContext): Promise<void>;
-  validate(): Promise<ValidationResult>;
-  execute(input: PluginInput): Promise<PluginOutput>;
-  cleanup(): Promise<void>;
-}
-```
-
-### Event-Driven Communication
-
-```typescript
-// Cross-Layer Event Protocol
-interface LayerEvent {
-  type: string;
-  source: LayerIdentifier;
-  target: LayerIdentifier;
-  payload: unknown;
-  timestamp: number;
-  correlationId: string;
-}
-
-// Event Bus Implementation
-interface EventBus {
-  publish(event: LayerEvent): Promise<void>;
-  subscribe(pattern: string, handler: EventHandler): Subscription;
-  unsubscribe(subscription: Subscription): void;
-}
-```
+If a future standalone package is ever pursued here, it should host proved composition logic rather than replace concrete plugin packaging. The current repository evidence still treats unified plugins and per-harness bundles as the install surfaces, with `agent-plugins-mux` compiling those outputs.
 
 ## Deliverables
 
-- `@a5c-ai/agent-platform` with comprehensive plugin system
-- Session management fully operational with recovery mechanisms
-- Plugin framework supporting extensibility and security isolation
-- Basic tools (grep, bash, read) functional with plugin architecture
+- Improved plugin/session documentation and implementation slices within current packages
+- Manifest, install, and recovery validation for the plugin and session flows actually shipped today
+- Evidence for or against deeper platform extraction recorded as ADR inputs
+- Tooling and plugin integration still working through the current architecture surfaces
 
 ## Technical Validation
 
-**Plugin Isolation Testing**: Memory leaks, resource cleanup, security boundary validation → [Testing Framework](../testing-framework.md)
+**Plugin Compatibility Testing**: Manifest correctness, install flows, and generated bundle behavior → [Testing Framework](../testing-framework.md)
 
-**Session Persistence Validation**: Corruption recovery and consistency verification
+**Session Persistence Validation**: Recovery and consistency verification in the packages that currently own session state
 
-**Plugin Dependency Resolution**: Correctness verification with circular dependency detection
+**Dependency Resolution Checks**: Correctness verification only for logic that already exists or is being added as a bounded slice
 
-**Cross-Platform Compatibility**: Windows, macOS, Linux validation
+**Cross-Platform Compatibility**: Windows, macOS, Linux validation for current commands and plugins
 
-**API Versioning Strategy**: Backward compatibility validation for platform interfaces
+**Deferred Vocabulary Guardrail**: `@a5c-ai/agent-platform`, `@a5c-ai/agent-platform-meta-plugins`, and `@a5c-ai/agent-platform-orchestration-plugin` remain non-deliverables in this phase
+
+## Explicit Non-Deliverables
+
+This phase does not create new `agent-platform*` top-level packages. It only earns the right to propose them later by proving real seams in current-package work.
 
 ---
 
