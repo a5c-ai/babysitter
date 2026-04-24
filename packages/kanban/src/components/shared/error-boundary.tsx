@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 
+import { Button } from "@/components/ui/button";
+
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   /** When set, renders a compact inline fallback instead of the full-page error. */
@@ -45,12 +47,9 @@ export class ErrorBoundary extends React.Component<
             <p className="text-xs text-foreground-muted mb-2">
               This section encountered an error. Other sections are unaffected.
             </p>
-            <button
-              onClick={this.handleRetry}
-              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary/90"
-            >
+            <Button onClick={this.handleRetry} size="sm" variant="primary">
               Retry
-            </button>
+            </Button>
           </div>
         );
       }
@@ -65,12 +64,9 @@ export class ErrorBoundary extends React.Component<
             <p className="mb-4 text-sm text-foreground-muted">
               An unexpected error occurred. Please try again.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
-            >
+            <Button onClick={() => window.location.reload()} variant="primary">
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       );

@@ -2,16 +2,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] ring-1 ring-inset transition-all duration-200",
+  "tkc-tag border font-mono uppercase shadow-none",
   {
     variants: {
       variant: {
-        default: "bg-muted text-foreground-secondary ring-border",
-        success: "bg-success-muted text-success ring-success/20 shadow-neon-glow-success-sm",
-        error: "bg-error-muted text-error ring-error/20 shadow-neon-glow-error-sm",
-        warning: "bg-warning-muted text-warning ring-warning/20 shadow-neon-glow-warning-badge",
-        info: "bg-info-muted text-info ring-info/20 shadow-neon-glow-cyan-sm",
-        pending: "bg-pending-muted text-pending ring-pending/20",
+        default: "bg-[var(--tkc-surface-muted)] text-[var(--tkc-ink-quiet)] border-[color:var(--tkc-rule)]",
+        success: "bg-success/10 text-success border-success/30",
+        error: "bg-error/10 text-error border-error/30",
+        warning: "bg-warning/10 text-warning border-warning/30",
+        info: "bg-info/10 text-info border-info/30",
+        pending: "bg-[var(--tkc-panel-muted)] text-[var(--tkc-cinnabar)] border-[color:var(--tkc-rule-m)]",
       },
     },
     defaultVariants: { variant: "default" },

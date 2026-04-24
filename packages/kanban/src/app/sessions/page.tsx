@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
+import { Button } from "@/components/ui/button";
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
 import { useGateway } from "@/lib/agent-mux-ui";
 
@@ -92,12 +93,9 @@ function SessionsContent() {
               run-detail views, while this page stays focused on live or resumable conversations.
             </p>
           </div>
-          <Link
-            href="/sessions/new"
-            className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-          >
-            Start session
-          </Link>
+          <Button asChild variant="primary">
+            <Link href="/sessions/new">Start session</Link>
+          </Button>
         </div>
       </section>
 
@@ -150,13 +148,13 @@ function SessionColumn(props: {
               </p>
             ) : null}
             <div className="mt-4 flex gap-3">
-              <Link href={`/sessions/${session.sessionId}`} className="text-sm font-medium text-primary">
-                Open chat
-              </Link>
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/sessions/${session.sessionId}`}>Open chat</Link>
+              </Button>
               {session.cwd ? (
-                <Link href={workspaceHref(session.cwd)} className="text-sm font-medium text-primary">
-                  Open workspace
-                </Link>
+                <Button asChild size="sm" variant="ghost">
+                  <Link href={workspaceHref(session.cwd)}>Open workspace</Link>
+                </Button>
               ) : null}
             </div>
           </article>

@@ -39,11 +39,11 @@ export function AccordionTrigger({ className, children }: { className?: string; 
     <Header className="flex">
       <Trigger
         className={cn(
-          "flex flex-1 items-center gap-2 py-3 text-sm font-medium transition-all duration-200 hover:text-primary [&[data-state=open]>svg]:rotate-90 [&[data-state=open]]:text-foreground",
+          "flex flex-1 items-center gap-2 py-3 text-sm font-medium text-[var(--tkc-ink-quiet)] transition-all duration-200 hover:bg-[var(--tkc-panel-muted)] hover:text-[var(--tkc-ink)] [&[data-state=open]>svg]:rotate-90 [&[data-state=open]]:text-[var(--tkc-cinnabar)]",
           className
         )}
       >
-        <ChevronRight className="h-4 w-4 shrink-0 text-foreground-muted transition-transform duration-300 ease-in-out" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-[var(--tkc-ink-quiet)] transition-transform duration-300 ease-in-out" />
         {children}
       </Trigger>
     </Header>
@@ -55,7 +55,7 @@ export function AccordionContent({ className, children }: { className?: string; 
   const Content = AccordionPrimitive.Content as any;
   return (
     <Content className="overflow-hidden text-sm data-[state=open]:animate-[fadeIn_200ms_ease-out] data-[state=closed]:animate-[fadeIn_200ms_ease-out_reverse]">
-      <div className={cn("pb-4 pt-0", className)}>{children}</div>
+      <div className={cn("border-t border-[color:var(--tkc-rule-m)] pb-4 pt-3", className)}>{children}</div>
     </Content>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Field, Input } from "@a5c-ai/compendium";
+
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
@@ -68,45 +70,36 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
 
       {/* Free-text input */}
       <form onSubmit={handleCustomSubmit} className="space-y-2">
-        <label
-          htmlFor="custom-answer"
-          className="text-xs font-medium text-foreground-muted uppercase tracking-wider"
-        >
-          {options.length > 0 ? "Or provide a custom answer" : "Provide an answer"}
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="custom-answer"
-            data-testid="custom-answer-input"
-            type="text"
-            value={customAnswer}
-            onChange={(e) => setCustomAnswer(e.target.value)}
-            placeholder="Type your answer..."
-            disabled={isPending}
-            className={cn(
-              "flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm",
-              "placeholder:text-foreground-muted/50",
-              "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50",
-              "disabled:opacity-50 disabled:cursor-not-allowed"
-            )}
-          />
-          <Button
-            type="submit"
-            variant="default"
-            size="sm"
-            disabled={isPending || !customAnswer.trim()}
-            data-testid="approve-btn"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Approving...
-              </>
-            ) : (
-              "Approve"
-            )}
-          </Button>
-        </div>
+        <Field label={options.length > 0 ? "Or provide a custom answer" : "Provide an answer"}>
+          <div className="flex gap-2">
+            <Input
+              className="flex-1"
+              id="custom-answer"
+              data-testid="custom-answer-input"
+              type="text"
+              value={customAnswer}
+              onChange={(e) => setCustomAnswer(e.target.value)}
+              placeholder="Type your answer..."
+              disabled={isPending}
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={isPending || !customAnswer.trim()}
+              data-testid="approve-btn"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                "Approve"
+              )}
+            </Button>
+          </div>
+        </Field>
       </form>
 
       {/* Result feedback */}

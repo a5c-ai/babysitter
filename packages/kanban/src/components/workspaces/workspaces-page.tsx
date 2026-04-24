@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@a5c-ai/compendium";
 import { AlertTriangle, Archive, FolderGit2, RefreshCw, RotateCcw, Trash2, Wrench } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Button, LogoWordmark } from "@a5c-ai/compendium";
+import { LogoWordmark } from "@a5c-ai/compendium";
 import { useStore } from "zustand";
 
+import { Button } from "@/components/ui/button";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { useConnection, useGateway } from "@/lib/agent-mux-ui";
 

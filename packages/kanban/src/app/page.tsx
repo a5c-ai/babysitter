@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
-import { Button, LogoWordmark } from "@a5c-ai/compendium";
+import { LogoWordmark } from "@a5c-ai/compendium";
 import { useRunDashboard } from "@/hooks/use-run-dashboard";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { BreakpointBanner } from "@/components/dashboard/breakpoint-banner";
 import { BacklogOverview } from "@/components/dashboard/backlog-overview";
 import { CatchUpBanner } from "@/components/dashboard/catch-up-banner";
 import { ExecutiveSummaryBanner } from "@/components/dashboard/executive-summary-banner";
+import { Button } from "@/components/ui/button";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { RunFilterBar } from "@/components/dashboard/run-filter-bar";
 import { ProjectListView } from "@/components/dashboard/project-list-view";

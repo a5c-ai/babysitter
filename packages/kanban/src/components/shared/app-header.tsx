@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Button, LogoWordmark } from "@a5c-ai/compendium";
+import { LogoWordmark } from "@a5c-ai/compendium";
 import { Bell, Columns3, Github, Moon, Sun, Wifi, WifiOff } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { useNotificationContext } from "@/components/notifications/notification-provider";

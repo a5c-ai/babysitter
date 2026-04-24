@@ -26,7 +26,7 @@ export function TabsList({ className, children }: { className?: string; children
   const List = TabsPrimitive.List as any;
   return (
     <List
-      className={cn("inline-flex h-9 items-center gap-1 rounded-lg bg-background-secondary p-1", className)}
+      className={cn("tkc-tabs", className)}
     >
       {children}
     </List>
@@ -40,11 +40,8 @@ export function TabsTrigger({ className, children, value }: { className?: string
     <Trigger
       value={value}
       className={cn(
-        "relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium text-foreground-muted transition-all duration-200",
-        "hover:text-foreground-secondary hover:bg-muted/50",
-        "data-[state=active]:bg-background-tertiary data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-        "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:w-0 after:rounded-full after:bg-primary after:transition-all after:duration-200",
-        "data-[state=active]:after:w-2/3",
+        "tkc-tab inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
+        "data-[state=active]:border-b-[var(--tkc-cinnabar)] data-[state=active]:text-[var(--tkc-cinnabar)]",
         className
       )}
     >

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 
 export function RequireGatewayAuth(props: { children: React.ReactNode; title?: string; body?: string }) {
@@ -25,18 +26,12 @@ export function RequireGatewayAuth(props: { children: React.ReactNode; title?: s
             "This surface wraps live agent-mux sessions and hooks. Save a gateway URL and bearer token in settings, then come back here."}
         </p>
         <div className="mt-6 flex gap-3">
-          <Link
-            href="/login"
-            className="inline-flex items-center rounded-full border border-primary/30 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Connect gateway
-          </Link>
-          <Link
-            href="/settings"
-            className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground-muted"
-          >
-            Open settings
-          </Link>
+          <Button asChild variant="primary">
+            <Link href="/login">Connect gateway</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/settings">Open settings</Link>
+          </Button>
         </div>
       </div>
     </section>

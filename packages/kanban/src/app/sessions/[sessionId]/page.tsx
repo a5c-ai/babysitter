@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button, Textarea } from "@a5c-ai/compendium";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useStore } from "zustand";
@@ -8,6 +9,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
+import { Button as LocalButton } from "@/components/ui/button";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
 import { useGateway } from "@/lib/agent-mux-ui";
@@ -246,9 +248,9 @@ function SessionDetailContent() {
     <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
       <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/sessions" className="text-sm font-medium text-primary">
-            Sessions
-          </Link>
+          <LocalButton asChild size="sm" variant="ghost">
+            <Link href="/sessions">Sessions</Link>
+          </LocalButton>
           <span className="text-foreground-muted">/</span>
           <span className="font-mono text-sm text-foreground-secondary">{sessionId}</span>
         </div>
@@ -296,11 +298,11 @@ function SessionDetailContent() {
           <form onSubmit={handleSubmit} className="mt-6 grid gap-3">
             <label className="grid gap-2 text-sm">
               <span className="font-medium">Send another turn</span>
-              <textarea
+              <Textarea
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
                 rows={5}
-                className="rounded-2xl border border-input bg-background px-4 py-3 outline-none transition focus:border-primary"
+                className="min-h-32"
                 placeholder="Continue the session..."
               />
             </label>
@@ -310,13 +312,12 @@ function SessionDetailContent() {
               </div>
             ) : null}
             <div>
-              <button
+              <Button
                 type="submit"
                 disabled={sending || !prompt.trim()}
-                className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
               >
                 {sending ? "Sending..." : "Send turn"}
-              </button>
+              </Button>
             </div>
           </form>
         </section>
@@ -328,9 +329,9 @@ function SessionDetailContent() {
               <div className="text-xs uppercase tracking-[0.2em] text-foreground-muted">Workspace</div>
               <p className="mt-2 font-mono text-xs text-foreground-muted">{workspacePath}</p>
               <div className="mt-3">
-                <Link href={workspaceHref(workspacePath)} className="text-sm font-medium text-primary">
-                  Open workspace lifecycle
-                </Link>
+                <LocalButton asChild size="sm" variant="ghost">
+                  <Link href={workspaceHref(workspacePath)}>Open workspace lifecycle</Link>
+                </LocalButton>
               </div>
             </div>
           ) : null}

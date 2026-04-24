@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Button, Field, Select, Textarea } from "@a5c-ai/compendium";
+import { Field, Select, Textarea } from "@a5c-ai/compendium";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "zustand";
 
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
+import { Button } from "@/components/ui/button";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
 import { useAgents, useGateway } from "@/lib/agent-mux-ui";
 

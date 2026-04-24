@@ -27,7 +27,7 @@ export const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
           orientation="vertical"
           className="flex touch-none select-none p-0.5 transition-colors data-[orientation=vertical]:w-2"
         >
-          <Thumb className="relative flex-1 rounded-full bg-primary/20 hover:bg-primary/35 transition-colors duration-200" />
+          <Thumb className="relative flex-1 rounded-full bg-[var(--tkc-rule-m)] hover:bg-[var(--tkc-brass-deep)] transition-colors duration-200" />
         </Scrollbar>
       </Root>
     );

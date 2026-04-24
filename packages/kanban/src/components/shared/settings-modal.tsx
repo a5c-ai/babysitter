@@ -15,6 +15,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { resilientFetch } from "@/lib/fetcher";
 import { useTheme } from "@/components/shared/theme-provider";
@@ -471,23 +472,23 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   Config file: <span className="font-mono">~/.a5c/kanban.json</span>
                 </p>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     onClick={handleCancel}
                     disabled={saving}
-                    className="rounded-md px-3 py-1.5 min-h-[44px] text-xs text-foreground-muted hover:text-foreground hover:bg-background-secondary transition-colors disabled:opacity-50"
+                    size="sm"
+                    variant="ghost"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleSave}
                     disabled={saving || !hasChanges}
                     className={cn(
-                      "rounded-md px-3 py-1.5 min-h-[44px] text-xs font-medium transition-colors",
-                      hasChanges
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-background-secondary text-foreground-muted cursor-not-allowed",
+                      !hasChanges && "opacity-60",
                       saving && "opacity-50"
                     )}
+                    size="sm"
+                    variant="primary"
                   >
                     {saving ? (
                       <span className="flex items-center gap-1.5">
@@ -497,7 +498,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     ) : (
                       "Save"
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

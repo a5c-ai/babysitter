@@ -49,13 +49,13 @@ describe('Button', () => {
   it('applies default variant classes', () => {
     render(<Button>Default</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('bg-primary');
+    expect(btn.className).toContain('tkc-btn');
   });
 
-  it('applies neon variant classes', () => {
+  it('applies primary-like classes for neon variant', () => {
     render(<Button variant="neon">Neon</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('border-primary');
+    expect(btn.className).toContain('tkc-btn--primary');
   });
 
   it('applies outline variant classes', () => {
@@ -67,31 +67,31 @@ describe('Button', () => {
   it('applies ghost variant classes', () => {
     render(<Button variant="ghost">Ghost</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('hover:bg-muted');
+    expect(btn.className).toContain('tkc-btn--ghost');
   });
 
   it('applies destructive variant classes', () => {
     render(<Button variant="destructive">Delete</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('bg-destructive');
+    expect(btn.className).toContain('tkc-btn--primary');
   });
 
   it('applies sm size classes', () => {
     render(<Button size="sm">Small</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('h-11');
+    expect(btn.className).toContain('tkc-btn--sm');
   });
 
   it('applies lg size classes', () => {
     render(<Button size="lg">Large</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('h-10');
+    expect(btn.className).toContain('text-base');
   });
 
   it('applies icon size classes', () => {
     render(<Button size="icon">I</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('w-11');
+    expect(btn.className).toContain('tkc-btn--icon');
   });
 
   it('applies custom className', () => {

@@ -23,7 +23,7 @@ describe('Badge', () => {
   it('applies default variant classes', () => {
     const { container } = render(<Badge>Default</Badge>);
     const span = container.firstChild as HTMLElement;
-    expect(span.className).toContain('bg-muted');
+    expect(span.className).toContain('tkc-tag');
   });
 
   it('applies success variant classes', () => {
@@ -53,7 +53,7 @@ describe('Badge', () => {
   it('applies pending variant classes', () => {
     const { container } = render(<Badge variant="pending">Pending</Badge>);
     const span = container.firstChild as HTMLElement;
-    expect(span.className).toContain('text-pending');
+    expect(span.className).toContain('tkc-cinnabar');
   });
 
   it('applies custom className', () => {

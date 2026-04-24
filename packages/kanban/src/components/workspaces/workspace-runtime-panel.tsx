@@ -108,15 +108,20 @@ export function WorkspaceRuntimePanel(props: {
               })}
             </div>
             {props.runtime.preview.primaryUrl ? (
-              <a
-                href={props.runtime.preview.primaryUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary"
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
               >
-                Open preview
-                <ExternalLink className="h-4 w-4" />
-              </a>
+                <a
+                  href={props.runtime.preview.primaryUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open preview
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
             ) : null}
           </div>
 

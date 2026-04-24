@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
 import { useGateway, useHookRequests } from "@/lib/agent-mux-ui";
 
@@ -42,7 +43,7 @@ function InboxContent() {
               Deadline: {Math.max(0, Math.floor((hook.deadlineTs - Date.now()) / 1000))}s
             </p>
             <div className="mt-4 flex gap-3">
-              <button
+              <Button
                 onClick={() =>
                   void client.request({
                     type: "hook.decision",
@@ -50,11 +51,11 @@ function InboxContent() {
                     decision: "allow",
                   })
                 }
-                className="inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
               >
                 Allow
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() =>
                   void client.request({
                     type: "hook.decision",
@@ -62,10 +63,9 @@ function InboxContent() {
                     decision: "deny",
                   })
                 }
-                className="inline-flex items-center rounded-full border border-border px-4 py-2.5 text-sm font-medium text-foreground-muted"
               >
                 Deny
-              </button>
+              </Button>
             </div>
           </article>
         ))}

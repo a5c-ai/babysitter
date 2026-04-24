@@ -70,6 +70,6 @@ describe('Tabs', () => {
   it('renders TabsList with styling classes', () => {
     renderTabs();
     const tablist = screen.getByRole('tablist');
-    expect(tablist.className).toContain('inline-flex');
+    expect(tablist.className).toContain('tkc-tabs');
   });
 });

@@ -4,7 +4,7 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "rounded-xl border border-card-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:bg-[var(--card-hover)] hover:border-[var(--border-hover)] hover:shadow-md",
+        "rounded-[8px] border border-[color:var(--tkc-rule)] bg-[var(--tkc-surface)] text-[var(--tkc-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,.45),0_2px_0_var(--tkc-rule-m)] transition-all duration-200 hover:-translate-y-px hover:bg-[var(--tkc-surface-hover)]",
         className
       )}
       {...props}

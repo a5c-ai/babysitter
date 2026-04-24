@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
+import { Button } from "@/components/ui/button";
 import { useRun } from "@/lib/agent-mux-ui";
 
 export default function SessionPendingPage() {
@@ -47,9 +48,9 @@ function SessionPendingContent() {
           </div>
         </div>
         <div className="mt-6">
-          <Link href="/sessions" className="text-sm font-medium text-primary">
-            Back to sessions
-          </Link>
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/sessions">Back to sessions</Link>
+          </Button>
         </div>
       </div>
     </section>

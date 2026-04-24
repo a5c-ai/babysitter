@@ -1,9 +1,10 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { Button, Field, Input, LogoWordmark } from "@a5c-ai/compendium";
+import { Field, Input, LogoWordmark } from "@a5c-ai/compendium";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 
 export default function LoginPage() {
