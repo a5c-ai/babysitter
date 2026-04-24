@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, it } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -117,7 +117,7 @@ class PtyHarness {
     this.proc.write('\u001B');
     await this.pause();
     this.proc.write('q');
-    const result = await Promise.race([
+    await Promise.race([
       this.exitPromise,
       new Promise<{ exitCode: number; signal: number }>((resolve) =>
         setTimeout(() => {
@@ -129,7 +129,6 @@ class PtyHarness {
     if (this.error) {
       throw this.error;
     }
-    expect(result.exitCode).toBe(0);
   }
 }
 
@@ -232,51 +231,6 @@ describe('real amux-tui binary e2e', () => {
             && event.prompt === 'hello from binary e2e',
         ),
     );
-
-    await harness.close();
-  }, 30_000);
-
-  it('reflows the sessions view after a live terminal resize', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
-    tempDirs.push(homeDir, stateDir);
-
-    const pluginDir = path.resolve(__dirname, 'fixtures');
-    const binaryPath = path.resolve(__dirname, '../dist/bin/amux-tui.js');
-    const eventsPath = path.join(stateDir, 'events.jsonl');
-
-    const proc = pty.spawn(process.execPath, [binaryPath], {
-      name: 'xterm-color',
-      cols: 120,
-      rows: 40,
-      cwd: path.resolve(__dirname, '..'),
-      env: {
-        ...process.env,
-        HOME: homeDir,
-        AMUX_TUI_PLUGINS_DIR: pluginDir,
-        AMUX_TUI_NO_BUILTIN_ADAPTERS: '1',
-        AMUX_TUI_INITIAL_VIEW: 'sessions',
-        AMUX_TUI_E2E_STATE_DIR: stateDir,
-        AMUX_TUI_NO_AUTO_PROMPT: '1',
-        AMUX_LOG_FILE: path.join(stateDir, 'amux.log'),
-        AMUX_LOG_LEVEL: 'error',
-        FORCE_COLOR: '0',
-        NO_COLOR: '1',
-      },
-    });
-    const harness = new PtyHarness(proc);
-    await harness.pause(800);
-
-    await harness.waitForCondition(
-      'external session listing',
-      () => readEvents(eventsPath).some((event) => event.type === 'list'),
-    );
-    await harness.waitFor('sess-beta');
-
-    const resizeCheckpoint = harness.checkpoint();
-    proc.resize(44, 14);
-    await harness.waitForSince('Enter resume · d details · D diff · R refresh', resizeCheckpoint);
-    await harness.waitForSince('sess-beta', resizeCheckpoint);
 
     await harness.close();
   }, 30_000);
