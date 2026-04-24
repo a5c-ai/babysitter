@@ -8,7 +8,8 @@
     "plugin:install": "node bin/install.js --global",
     "plugin:uninstall": "node bin/uninstall.js --global",
     "team:install": "node scripts/team-install.js",
-    "test": "node test/integration.test.js"
+    "test": "node test/integration.test.js",
+    "validate:ci": "npm test"
   },
   "bin": {
     "babysitter-gemini": "bin/cli.js"

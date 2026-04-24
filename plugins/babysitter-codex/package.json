@@ -3,7 +3,10 @@
   "version": "5.0.0",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
   "scripts": {
-    "test": "node test/integration.test.js && node test/packaged-install.test.js",
+    "test": "npm run validate:ci",
+    "test:integration": "node test/integration.test.js",
+    "test:packaged-install": "node test/packaged-install.test.js",
+    "validate:ci": "npm run test:integration && npm run test:packaged-install",
     "sync:commands": "node scripts/sync-command-skills.js",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging",

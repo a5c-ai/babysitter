@@ -30,9 +30,10 @@
   "scripts": {
     "plugin:install": "node bin/install.cjs --global",
     "plugin:uninstall": "node bin/uninstall.cjs --global",
-    "test": "node --test test/integration.test.js",
+    "test": "npm run validate:ci",
     "test:integration": "node --test test/integration.test.js",
     "test:packaged-install": "node test/packaged-install.test.cjs",
+    "validate:ci": "npm run test:integration && npm run test:packaged-install",
     "sync:commands": "node scripts/sync-command-docs.cjs",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging",

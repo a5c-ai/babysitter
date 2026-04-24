@@ -8,6 +8,7 @@
     "build": "node esbuild.config.mjs",
     "dev": "paperclip-plugin-dev-server --root . --ui-dir dist/ui --port 4177",
     "test": "vitest run",
+    "validate:ci": "npm test",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging"
   },
