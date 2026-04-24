@@ -6,7 +6,12 @@ import {
   computeKanbanProjectMetrics,
   evaluateKanbanIssueMove,
   normalizeKanbanIssue,
+  normalizeKanbanTaskTag,
+  normalizeKanbanTaskTagKey,
+  normalizeKanbanTaskTags,
+  type KanbanLabel,
   type KanbanIssue,
+  type KanbanTaskTag,
 } from '../src/kanban.js';
 
 function makeIssue(overrides: Partial<KanbanIssue> = {}): KanbanIssue {
@@ -37,6 +42,100 @@ function makeIssue(overrides: Partial<KanbanIssue> = {}): KanbanIssue {
     source: overrides.source,
   };
 }
+
+function makeTaskTag(overrides: Partial<KanbanTaskTag> = {}): KanbanTaskTag {
+  return {
+    id: overrides.id ?? 'task-tag-1',
+    key: overrides.key ?? 'bug_report',
+    label: overrides.label ?? 'Bug Report',
+    content: overrides.content ?? 'Describe the bug',
+    description: overrides.description,
+    order: overrides.order ?? 0,
+    createdAt: overrides.createdAt ?? '2026-04-24T00:00:00.000Z',
+    updatedAt: overrides.updatedAt ?? '2026-04-24T00:00:00.000Z',
+    scope: overrides.scope,
+  };
+}
+
+describe('normalizeKanbanTaskTagKey', () => {
+  it('converts lookup keys to deterministic snake_case', () => {
+    expect(normalizeKanbanTaskTagKey('  Code Review Checklist  ')).toBe('code_review_checklist');
+    expect(normalizeKanbanTaskTagKey('deploy---validation')).toBe('deploy_validation');
+  });
+});
+
+describe('normalizeKanbanTaskTag', () => {
+  it('normalizes task tags without using label semantics', () => {
+    const normalized = normalizeKanbanTaskTag({
+      id: 'task-tag-1',
+      label: ' Code Review Checklist ',
+      key: 'Code Review Checklist',
+      content: '\nLine one\r\nLine two\r\n',
+      description: '  Reusable review snippet  ',
+      order: -4.8,
+      createdAt: '2026-04-24T00:00:00.000Z',
+      updatedAt: '2026-04-24T00:00:00.000Z',
+      scope: { kind: 'project', refId: ' project-1 ' },
+    });
+
+    expect(normalized).toEqual({
+      id: 'task-tag-1',
+      label: 'Code Review Checklist',
+      key: 'code_review_checklist',
+      content: 'Line one\nLine two',
+      description: 'Reusable review snippet',
+      order: 0,
+      createdAt: '2026-04-24T00:00:00.000Z',
+      updatedAt: '2026-04-24T00:00:00.000Z',
+      scope: { kind: 'project', refId: 'project-1' },
+    });
+    expect('name' in normalized).toBe(false);
+    expect('color' in normalized).toBe(false);
+  });
+
+  it('falls back to the label when the key is omitted', () => {
+    expect(
+      normalizeKanbanTaskTag({
+        id: 'task-tag-2',
+        label: 'Deployment Validation',
+        content: 'Ship checklist',
+        createdAt: '2026-04-24T00:00:00.000Z',
+        updatedAt: '2026-04-24T00:00:00.000Z',
+      }).key,
+    ).toBe('deployment_validation');
+  });
+});
+
+describe('normalizeKanbanTaskTags', () => {
+  it('sorts task tags deterministically by order with stable tie breakers', () => {
+    const normalized = normalizeKanbanTaskTags([
+      makeTaskTag({ id: 'c', key: 'z_last', label: 'Z Last', order: 2 }),
+      makeTaskTag({ id: 'b', key: 'alpha', label: 'Alpha', order: 1 }),
+      makeTaskTag({ id: 'a', key: 'beta', label: 'Beta', order: 1 }),
+      makeTaskTag({ id: 'd', key: 'alpha', label: 'Alpha', order: 1 }),
+    ]);
+
+    expect(normalized.map((taskTag) => taskTag.id)).toEqual(['b', 'd', 'a', 'c']);
+  });
+
+  it('keeps task tags separate from kanban labels', () => {
+    const labels: KanbanLabel[] = [
+      { id: 'label-1', name: 'Bug', color: '#ff0000' },
+      { id: 'label-2', name: 'Docs', color: '#0000ff' },
+    ];
+    const normalizedTaskTags = normalizeKanbanTaskTags([
+      makeTaskTag({ id: 'task-tag-1', key: 'bug_report', label: 'Bug Report', content: 'Template' }),
+    ]);
+
+    expect(labels).toEqual([
+      { id: 'label-1', name: 'Bug', color: '#ff0000' },
+      { id: 'label-2', name: 'Docs', color: '#0000ff' },
+    ]);
+    expect(normalizedTaskTags[0]).not.toHaveProperty('name');
+    expect(normalizedTaskTags[0]).not.toHaveProperty('color');
+    expect(normalizedTaskTags[0]?.key).toBe('bug_report');
+  });
+});
 
 describe('normalizeKanbanIssue', () => {
   it('marks issues with incomplete decomposition as needing decomposition', () => {

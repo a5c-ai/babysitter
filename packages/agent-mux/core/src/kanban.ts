@@ -70,11 +70,30 @@ export type KanbanReviewCommentStatus = 'open' | 'resolved';
 
 export type KanbanReviewCommentSide = 'base' | 'head';
 
+export type KanbanTaskTagScopeKind = 'global' | 'project' | 'workspace';
+
 export interface KanbanLabel {
   readonly id: string;
   readonly name: string;
   readonly color?: string;
   readonly description?: string;
+}
+
+export interface KanbanTaskTagScope {
+  readonly kind: KanbanTaskTagScopeKind;
+  readonly refId?: string;
+}
+
+export interface KanbanTaskTag {
+  readonly id: string;
+  readonly key: string;
+  readonly label: string;
+  readonly content: string;
+  readonly description?: string;
+  readonly order: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly scope?: KanbanTaskTagScope;
 }
 
 export interface KanbanAssignee {
@@ -637,6 +656,73 @@ function uniqueById<T extends { readonly id: string }>(items: readonly T[]): T[]
 
 function uniqueStrings(values: readonly string[]): string[] {
   return Array.from(new Set(values));
+}
+
+export function normalizeKanbanTaskTagKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_+/g, '_');
+}
+
+function normalizeKanbanTaskTagScope(
+  scope: Partial<KanbanTaskTagScope> | undefined,
+): KanbanTaskTagScope | undefined {
+  if (!scope) return undefined;
+
+  const kind: KanbanTaskTagScopeKind =
+    scope.kind === 'project' || scope.kind === 'workspace' ? scope.kind : 'global';
+  const refId = scope.refId?.trim() || undefined;
+
+  return refId ? { kind, refId } : { kind };
+}
+
+function normalizeKanbanTaskTagContent(content: string): string {
+  return content.replace(/\r\n?/g, '\n').trim();
+}
+
+function compareKanbanTaskTags(left: KanbanTaskTag, right: KanbanTaskTag): number {
+  return (
+    left.order - right.order ||
+    left.label.localeCompare(right.label) ||
+    left.key.localeCompare(right.key) ||
+    left.id.localeCompare(right.id)
+  );
+}
+
+export function normalizeKanbanTaskTag(
+  taskTag: Omit<KanbanTaskTag, 'key' | 'content' | 'order' | 'scope'> & {
+    readonly key?: string;
+    readonly content: string;
+    readonly order?: number;
+    readonly scope?: Partial<KanbanTaskTagScope>;
+  },
+): KanbanTaskTag {
+  const label = taskTag.label.trim();
+  const normalizedKey = normalizeKanbanTaskTagKey(taskTag.key ?? label);
+  return {
+    ...taskTag,
+    label,
+    key: normalizedKey || normalizeKanbanTaskTagKey(taskTag.id),
+    content: normalizeKanbanTaskTagContent(taskTag.content),
+    description: taskTag.description?.trim() || undefined,
+    order:
+      typeof taskTag.order === 'number' && Number.isFinite(taskTag.order) ? Math.max(0, Math.floor(taskTag.order)) : 0,
+    scope: normalizeKanbanTaskTagScope(taskTag.scope),
+  };
+}
+
+export function normalizeKanbanTaskTags(
+  taskTags: readonly (Omit<KanbanTaskTag, 'key' | 'content' | 'order' | 'scope'> & {
+    readonly key?: string;
+    readonly content: string;
+    readonly order?: number;
+    readonly scope?: Partial<KanbanTaskTagScope>;
+  })[],
+): KanbanTaskTag[] {
+  return taskTags.map((taskTag) => normalizeKanbanTaskTag(taskTag)).sort(compareKanbanTaskTags);
 }
 
 function normalizeCollaboratorRole(role: KanbanCollaboratorRole | undefined): KanbanCollaboratorRole {
