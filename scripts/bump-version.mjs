@@ -178,6 +178,9 @@ const updateLockVersion = (path, version, agentMuxVersion) => {
     "packages/kanban": {
       version,
       dependencies: { "@a5c-ai/agent-mux-ui": agentMuxVersion }
+    },
+    "packages/observer-dashboard": {
+      version
     }
   };
   for (const [workspacePath, update] of Object.entries(lockUpdates)) {
@@ -204,6 +207,7 @@ const workspaceManifestPaths = [
   "packages/babysitter-agent/package.json",
   "packages/agent-plugins-mux/package.json",
   "packages/kanban/package.json",
+  "packages/observer-dashboard/package.json",
   "packages/hooks-mux/core/package.json",
   "packages/hooks-mux/cli/package.json",
   "packages/hooks-mux/adapter-claude/package.json",

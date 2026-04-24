@@ -93,6 +93,12 @@ jobs:
           npm run build --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/logs/agent-plugins-mux-build.log
           npm run test --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/logs/agent-plugins-mux-tests.log
 
+      - name: Build and test observer-dashboard
+        run: |
+          set -euo pipefail
+          npm run build:observer 2>&1 | tee artifacts/logs/observer-dashboard-build.log
+          npm run test:observer 2>&1 | tee artifacts/logs/observer-dashboard-tests.log
+
       - name: Build and test babysitter-harness
         run: |
           set -euo pipefail
@@ -267,7 +273,8 @@ jobs:
               'package.json',
               'packages/sdk/package.json',
               'packages/babysitter/package.json',
-              'packages/kanban/package.json'
+              'packages/kanban/package.json',
+              'packages/observer-dashboard/package.json'
             ];
             for (const p of pkgs) {
               const data = JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -465,6 +472,12 @@ jobs:
           npm run verify:release --workspace=@a5c-ai/kanban
           npm run test:kanban
 
+      - name: Build and test observer-dashboard
+        run: |
+          set -euo pipefail
+          npm run build:observer
+          npm run test:observer
+
       - name: Publish SDK to npm (staging tag)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -485,6 +498,13 @@ jobs:
         run: |
           set -euo pipefail
           npm publish --workspace=@a5c-ai/kanban --access public --tag staging
+
+      - name: Publish observer-dashboard to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public --tag staging
 
       - name: Publish agent-mux packages (staging)
         env:

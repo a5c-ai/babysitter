@@ -455,9 +455,14 @@ The observer reads and writes `~/.a5c/observer.json`. If this file or directory 
 mkdir -p ~/.a5c
 ```
 
-### Standalone npm package unavailable
+### Release channel ownership
 
-The standalone `@a5c-ai/babysitter-observer-dashboard` npm package is not currently published. If you see `E404` or `ENOVERSIONS` from npm, switch to one of the supported flows in Quick Start instead of retrying the direct package install.
+`@a5c-ai/babysitter-observer-dashboard` is published from the monorepo release workflows:
+
+- `main` publishes the production package through `.github/workflows/release.yml`
+- `staging` publishes prerelease artifacts with the `staging` dist-tag through `.github/workflows/staging-publish.yml`
+
+If you see `E404` or `ENOVERSIONS`, verify the branch-specific publish workflow succeeded before retrying the install.
 
 ## Known Limitations
 
