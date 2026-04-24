@@ -1,5 +1,4 @@
-import type { SessionMessage, SessionToolCall } from '../../core/src/session-types.js';
-import type { CostRecord } from '../../core/src/types.js';
+import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/agent-mux-core';
 
 import type { EventBuffer, RunRecord } from '../store/index.js';
 

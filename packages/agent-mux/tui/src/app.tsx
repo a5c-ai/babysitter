@@ -135,7 +135,7 @@ export function App({
     [stdoutDimensions.height, stdoutDimensions.width],
   );
   const [status, setStatus] = useState<string>('');
-  const [, setPluginLoadVersion] = useState(0);
+  const [pluginLoadVersion, setPluginLoadVersion] = useState(0);
   const [activeId, setActiveId] = useState<string>(initialViewId);
   const [promptMode, setPromptMode] = useState<boolean>(false);
   const [chatPromptDismissed, setChatPromptDismissed] = useState<boolean>(false);
@@ -651,6 +651,7 @@ export function App({
             active={true}
             eventStream={stream}
             emit={viewEmit}
+            pluginEpoch={pluginLoadVersion}
             viewport={viewport}
             filter={filter || undefined}
             selection={selection}

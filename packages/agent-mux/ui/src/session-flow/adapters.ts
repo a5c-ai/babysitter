@@ -1,6 +1,5 @@
 import type {
   AgentdocReadEvent,
-  CostEvent,
   ErrorEvent,
   FileCreateEvent,
   FileDeleteEvent,
@@ -38,9 +37,9 @@ import type {
   TurnEndEvent,
   TurnStartEvent,
   ImageOutputEvent,
-} from '../../core/src/events.js';
+} from '@a5c-ai/agent-mux-core';
 
-import type { SessionFlowEventBuffer, SessionFlowRun, SessionFlowRunInput } from './types.js';
+import type { SessionCost, SessionFlowEventBuffer, SessionFlowRun, SessionFlowRunInput } from './types.js';
 import { toTimestamp } from './utils.js';
 
 type EventTimestamp = { timestamp?: number | string };
@@ -90,7 +89,7 @@ export type SessionFlowEvent =
   | (Pick<SkillInvokedEvent, 'type' | 'skillName'> & EventTimestamp)
   | (Pick<AgentdocReadEvent, 'type' | 'path'> & EventTimestamp)
   | (Pick<ImageOutputEvent, 'type' | 'filePath'> & EventTimestamp)
-  | (Pick<CostEvent, 'type' | 'cost'> & EventTimestamp)
+  | ({ type: 'cost'; cost: SessionCost } & EventTimestamp)
   | (Pick<ErrorEvent, 'type' | 'message'> & EventTimestamp);
 
 type RawEvent = Record<string, unknown>;
@@ -110,6 +109,25 @@ function readNumber(value: unknown): number | null {
 function readTimestamp(event: RawEvent): number | string | undefined {
   const value = event.timestamp;
   return typeof value === 'string' || typeof value === 'number' ? value : undefined;
+}
+
+function readCostRecord(value: unknown): SessionCost | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const cost: SessionCost = {
+    totalUsd: readNumber(value.totalUsd) ?? undefined,
+    inputTokens: readNumber(value.inputTokens) ?? undefined,
+    outputTokens: readNumber(value.outputTokens) ?? undefined,
+    thinkingTokens: readNumber(value.thinkingTokens) ?? undefined,
+    cachedTokens: readNumber(value.cachedTokens) ?? undefined,
+    cacheCreationTokens: readNumber(value.cacheCreationTokens) ?? undefined,
+    cacheReadTokens: readNumber(value.cacheReadTokens) ?? undefined,
+  };
+  if (!Object.values(cost).some((entry) => entry != null)) {
+    return null;
+  }
+  return cost;
 }
 
 function parseToolEvent(event: RawEvent): SessionFlowEvent | null {
@@ -201,17 +219,19 @@ function parseLifecycleEvent(event: RawEvent): SessionFlowEvent | null {
     case 'session_fork':
       return { type: event.type, timestamp };
     case 'turn_start':
-    case 'turn_end':
-      return { type: event.type, turnIndex: readNumber(event.turnIndex) ?? undefined, timestamp };
-    case 'step_start':
-      return {
-        type: 'step_start',
-        stepType: readString(event.stepType) ?? undefined,
-        stepIndex: readNumber(event.stepIndex) ?? undefined,
-        timestamp,
-      };
-    case 'step_end':
-      return { type: 'step_end', stepIndex: readNumber(event.stepIndex) ?? undefined, timestamp };
+    case 'turn_end': {
+      const turnIndex = readNumber(event.turnIndex);
+      return turnIndex != null ? { type: event.type, turnIndex, timestamp } : null;
+    }
+    case 'step_start': {
+      const stepType = readString(event.stepType);
+      const stepIndex = readNumber(event.stepIndex);
+      return stepType != null && stepIndex != null ? { type: 'step_start', stepType, stepIndex, timestamp } : null;
+    }
+    case 'step_end': {
+      const stepIndex = readNumber(event.stepIndex);
+      return stepIndex != null ? { type: 'step_end', stepIndex, timestamp } : null;
+    }
     default:
       return null;
   }
@@ -345,8 +365,10 @@ export function adaptSessionFlowEvent(value: unknown): SessionFlowEvent | null {
     case 'agentdoc_read':
     case 'image_output':
       return parseSystemEvent(event);
-    case 'cost':
-      return isRecord(event.cost) ? { type: 'cost', cost: event.cost as CostEvent['cost'], timestamp: readTimestamp(event) } : null;
+    case 'cost': {
+      const cost = readCostRecord(event.cost);
+      return cost ? { type: 'cost', cost, timestamp: readTimestamp(event) } : null;
+    }
     case 'error': {
       const message = readString(event.message) ?? readString(event.error);
       return message != null ? { type: 'error', message, timestamp: readTimestamp(event) } : null;

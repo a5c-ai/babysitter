@@ -4,9 +4,14 @@ import * as os from 'node:os';
 import { pathToFileURL } from 'node:url';
 import type { TuiPlugin } from './plugin.js';
 
+function resolveHomeDir(): string {
+  const env = Reflect.get(process, 'env') as NodeJS.ProcessEnv | undefined;
+  return env?.HOME || env?.USERPROFILE || os.homedir() || '.';
+}
+
 export function defaultExternalPluginsDir(): string {
   if (process.env.AMUX_TUI_PLUGINS_DIR) return process.env.AMUX_TUI_PLUGINS_DIR;
-  const home = os.homedir() || '.';
+  const home = resolveHomeDir();
   return path.join(home, '.amux', 'tui-plugins');
 }
 

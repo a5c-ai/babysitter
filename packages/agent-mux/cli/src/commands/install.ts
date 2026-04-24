@@ -329,6 +329,52 @@ async function handleAll(
   const results: Array<Record<string, unknown>> = [];
   let overall: ExitCodeValue = ExitCode.SUCCESS;
 
+  if (mode === 'detect' && jsonMode) {
+    const detectResults = await Promise.all(registered.map(async (info) => {
+      const adapter = client.adapters.get(info.agent);
+      if (!adapter) {
+        return {
+          agent: info.agent,
+          exitCode: errorCodeToExitCode('UNKNOWN_AGENT'),
+          error: `Unknown agent: ${info.agent}`,
+        };
+      }
+
+      injectSpawner(adapter, spawner);
+
+      try {
+        const detected = adapter.detectInstallation
+          ? await adapter.detectInstallation()
+          : { installed: false, notes: 'detectInstallation() not implemented' };
+        return {
+          agent: info.agent,
+          exitCode: ExitCode.SUCCESS,
+          installed: detected.installed,
+          version: detected.version,
+          path: detected.path,
+          notes: detected.notes,
+        };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return {
+          agent: info.agent,
+          exitCode: ExitCode.GENERAL_ERROR,
+          error: `Detect failed: ${msg}`,
+        };
+      }
+    }));
+
+    for (const result of detectResults) {
+      results.push(result);
+      if (result.exitCode !== ExitCode.SUCCESS && overall === ExitCode.SUCCESS) {
+        overall = ExitCode.GENERAL_ERROR;
+      }
+    }
+
+    printJsonOk({ results });
+    return overall;
+  }
+
   for (const info of registered) {
     if (!jsonMode) process.stdout.write(`\n=== ${info.agent} ===\n`);
     let code: number;

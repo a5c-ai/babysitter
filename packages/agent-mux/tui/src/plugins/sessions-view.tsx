@@ -8,7 +8,7 @@ interface Row {
   agent: string;
 }
 
-function SessionsView({ client, active, emit, activeSessions, viewport }: TuiViewProps) {
+function SessionsView({ client, active, emit, activeSessions, pluginEpoch, viewport }: TuiViewProps) {
   const [sessions, setSessions] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [cursor, setCursor] = useState<number>(0);
@@ -52,7 +52,7 @@ function SessionsView({ client, active, emit, activeSessions, viewport }: TuiVie
     return () => {
       cancelled = true;
     };
-  }, [active, client, refreshTick]);
+  }, [active, client, pluginEpoch, refreshTick]);
 
   useInput(
     (input, key) => {

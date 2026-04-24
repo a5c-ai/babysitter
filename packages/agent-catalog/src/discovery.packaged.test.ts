@@ -6,8 +6,17 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const PACKAGE_ROOT = path.resolve(__dirname, "..");
 const REPO_ROOT = path.resolve(PACKAGE_ROOT, "..", "..");
+const NPM_COMMAND = "npm";
 
 function exec(command: string, args: string[], cwd: string): string {
+  if (process.platform === "win32" && /^npm(?:\.cmd)?$/i.test(command)) {
+    const cmd = process.env.ComSpec ?? "cmd.exe";
+    return execFileSync(cmd, ["/d", "/s", "/c", command, ...args], {
+      cwd,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+  }
   return execFileSync(command, args, {
     cwd,
     encoding: "utf8",
@@ -31,14 +40,14 @@ describe("agent-catalog packaged discovery", () => {
       "utf8",
     );
 
-    exec("npm", ["run", "build", "--workspace=@a5c-ai/agent-catalog"], REPO_ROOT);
+    exec(NPM_COMMAND, ["run", "build", "--workspace=@a5c-ai/agent-catalog"], REPO_ROOT);
 
-    const packOutput = exec("npm", ["pack", "--json"], PACKAGE_ROOT);
+    const packOutput = exec(NPM_COMMAND, ["pack", "--json"], PACKAGE_ROOT);
     const [packResult] = JSON.parse(packOutput) as Array<{ filename: string; files?: Array<{ path: string }> }>;
     packedTgzPath = path.join(PACKAGE_ROOT, packResult.filename);
     packedEntries = packResult.files ?? [];
 
-    exec("npm", ["install", "--no-package-lock", packedTgzPath], consumerRoot);
+    exec(NPM_COMMAND, ["install", "--no-package-lock", packedTgzPath], consumerRoot);
   }, 180000);
 
   afterAll(() => {
