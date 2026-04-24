@@ -9,6 +9,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>agent-mux webui</title>
+    <script>
+      // Polyfill for Node.js process global in browser environment
+      if (typeof window !== 'undefined' && !window.process) {
+        window.process = {
+          env: {},
+          platform: 'browser',
+          version: '0.0.0',
+          versions: { node: '0.0.0' },
+          argv: [],
+          pid: 0,
+          title: 'browser',
+          browser: true,
+          nextTick: function(fn) { setTimeout(fn, 0); },
+          cwd: function() { return '/'; },
+          exit: function() {},
+          on: function() {},
+          off: function() {},
+          emit: function() {},
+          removeListener: function() {}
+        };
+      }
+      // Ensure global is available as well
+      if (typeof window !== 'undefined' && !window.global) {
+        window.global = window;
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
