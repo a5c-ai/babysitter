@@ -12,7 +12,7 @@ const GLOBAL_KEYS: { key: string; desc: string }[] = [
   { key: 'P', desc: 'pick run-options profile' },
   { key: 'i', desc: 'interrupt current run' },
   { key: 'y / n', desc: 'approve / deny pending tool request' },
-  { key: '1-9', desc: 'switch to numeric view (chat, sessions, cost, adapters, models, profiles, plugins, help)' },
+  { key: '1-7, 9', desc: 'switch to numeric view (1 chat, 2 sessions, 3 cost, 4 adapters, 5 models, 6 profiles, 7 plugins, 9 help)' },
   { key: 'C', desc: 'config view' },
   { key: 'A', desc: 'auth view' },
   { key: 'K', desc: 'skills view (a: add · d: delete · r: refresh)' },

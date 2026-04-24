@@ -34,10 +34,13 @@ describe('help-view', () => {
     const f = lastFrame() ?? '';
     expect(f).toContain('Keybindings');
     expect(f).toContain('open prompt input');
+    expect(f).toContain('1-7, 9');
+    expect(f).toContain('1 chat, 2 sessions, 3 cost, 4 adapters, 5 models, 6 profiles, 7 plugins, 9 help');
     expect(f).toContain('open logs / observability view');
     expect(f).toContain('claude-code');
     expect(f).toContain('codex');
     expect(f).toContain('metrics summarize the full buffered stream');
     expect(f).toContain('AMUX_TUI_COST_ALERT');
+    expect(f).not.toContain('runs');
   });
 });
