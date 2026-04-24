@@ -171,6 +171,8 @@ Performance and packaging claims must specify:
 
 If a claim cannot meet that bar, it should be phrased as a hypothesis instead of a target.
 
+Repo-wide targets such as "all performance targets met", "zero regressions", or trend-based regression detection are not minimum-acceptable V6 gates unless a concrete slice owner, measurement command, and enforcement point already exist.
+
 ## 9. Deliverables By Maturity Level
 
 ### Minimum Acceptable V6
@@ -178,14 +180,16 @@ If a claim cannot meet that bar, it should be phrased as a hypothesis instead of
 - coherent architecture docs,
 - explicit non-goals,
 - one validated executable slice,
-- documented decision framework for future extraction.
+- documented decision framework for future extraction,
+- success metrics scoped to the validated slice and the docs that support it.
 
 ### Strong V6
 
 - minimum V6 plus:
 - at least one successful internal boundary improvement,
 - compatibility and rollback guidance proven on a real change,
-- measurable reduction in ambiguity around packaging and ownership.
+- measurable reduction in ambiguity around packaging and ownership,
+- broader quality or performance targets only where a named owner and gate exist.
 
 ### Overreach Signal
 

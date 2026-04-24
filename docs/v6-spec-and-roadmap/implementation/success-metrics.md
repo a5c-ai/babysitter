@@ -4,7 +4,26 @@
 
 ## Overall Success Criteria
 
-The V6 architecture refactoring success is measured across multiple dimensions with specific, measurable criteria for each implementation phase.
+The current V6 success bar is intentionally narrow: coherent documentation, one validated executable slice, and a decision framework that proves whether further extraction is earned. This document only treats a metric as normative when it can be enforced against that scope.
+
+### Current Normative Scoreboard
+
+| Dimension | What Is Normative Now | Evidence Required |
+|-----------|------------------------|-------------------|
+| Documentation coherence | Core V6 docs tell one consistent story about current reality, target vocabulary, and deferred work | Roadmap, architecture, and package docs agree on scope and non-goals |
+| Executable proof | At least one bounded slice is implemented and validated | Named commands/tests pass for the slice and rollback is documented |
+| Compatibility discipline | Any compatibility claim is tied to an explicit surface | Compatibility notes and targeted tests for the touched surface |
+| Measurement discipline | Any performance or packaging target names a baseline, command/procedure, threshold, owner, and miss path | Slice contract or checked-in CI/job definition |
+
+### Deferred Scoreboard
+
+The following remain desirable outcomes, but they are not V6 acceptance criteria until they have a concrete owner and gate:
+
+- repo-wide performance targets,
+- blanket "zero regression" claims,
+- trend-based regression detection,
+- repo-wide coverage percentages,
+- generalized production-readiness promises beyond the validated slice.
 
 ### Contract-Governed Success Metrics
 
@@ -31,29 +50,30 @@ The linked [Performance Considerations](../performance-docs.md) document is the 
 
 #### Phase-Based Validation
 
-**Phase 1: Foundation Layer** → [Foundation Layer](foundation-layer.md)
-- `agent-runtime` isolated and functional with zero filesystem dependencies
-- Infrastructure renames complete with backward compatibility maintained
-- All existing tests passing with zero performance regression
-- Hook system operational with event acknowledgment
+**Phase 0: Baseline And Decision Framing** → [V6 Implementation Roadmap](../v6-implementation-roadmap.md)
+- candidate moves are bounded with owners, validation plans, and rollback paths
+- baseline packaging, performance, and compatibility measurements are captured where claims are being made
+- at least one slice is small enough to validate without cross-repo churn
 
-**Phase 2: Platform Layer** → [Platform Layer](platform-layer.md)  
-- Plugin system operational, with metaplugin composition and concrete plugin delivery validated as separate concerns
-- Session management fully migrated with persistence and recovery
-- Orchestration plugin functional with babysitter SDK integration
-- No performance commitment introduced without a slice-specific measurement contract
+**Phase 1: Documentation And Naming Stabilization** → [Foundation Layer](foundation-layer.md)
+- the docs clearly separate current reality from deferred architecture
+- target vocabulary is consistent across the core V6 documents
+- no core explanation depends on speculative APIs or repo-wide promises
 
-**Phase 3: Application Layer** → [Application Layer](application-layer.md)
-- All functionality converted to plugins with proper isolation
-- New `babysitter-agent` feature-complete with existing functionality
-- Any package-level performance claim linked to an executable slice contract
-- Agent-mux integration completed with API compatibility
+**Phase 2: First Executable Slice** → [Platform Layer](platform-layer.md)
+- one narrow slice ships with passing targeted commands and tests
+- compatibility notes and rollback steps are written for the touched surface
+- any performance or packaging claim for the slice is attached to an explicit measurement contract
 
-**Phase 4: Optimization & Polish** → [Optimization & Polish](optimization-polish.md)
-- Any accepted performance target validated through a slice-specific contract
-- Package-scoped coverage gates satisfied where they are explicitly declared
-- Complete documentation published with user validation
-- Migration tooling validated with real-world scenarios
+**Phase 3: Evaluate Whether Further Extraction Is Earned** → [Application Layer](application-layer.md)
+- the first slice is assessed for payoff versus migration cost
+- the repo either approves one next bounded slice or explicitly stops at the validated-docs-plus-one-slice state
+- follow-on work is justified by evidence rather than architectural preference
+
+**Phase 4: Optional Follow-On Slices Or Polish** → [Optimization & Polish](optimization-polish.md)
+- only accepted slices with named owners and gates can introduce stronger quality or performance targets
+- package-scoped coverage or benchmark gates are only normative where they are declared and enforced
+- optimization work remains optional unless it directly supports an approved slice or release gate
 
 ### Architectural Compliance Validation
 
@@ -80,14 +100,14 @@ interface ComplianceResult {
 #### Continuous Validation
 
 **Automated Compliance Checking**
-- Layer boundary validation in CI/CD pipeline
-- Plugin isolation enforcement verification
-- Event protocol conformance testing
-- Security boundary integrity validation
+- Layer boundary validation for the slice or seam being changed
+- Plugin isolation enforcement verification where plugins are directly affected
+- Event protocol conformance testing where protocol behavior is part of the slice
+- Security boundary integrity validation for the touched surface
 
 **Quality Gates**
-- Pre-merge validation for architectural compliance
-- Performance regression detection for slices that define measurement commands
+- Pre-merge validation for the architectural claims made by the current slice
+- Performance regression detection only for slices that define commands, owners, thresholds, and enforcement points
 - Bundle size monitoring only where a slice-specific contract exists
 - Memory usage validation only where a slice-specific contract exists
 
@@ -124,7 +144,7 @@ interface ComplianceResult {
 - Plugin development workflow is demonstrably simpler in documented comparison scenarios
 - Marketplace onboarding steps are documented and validated against a real setup path
 - Developer documentation feedback is collected and reviewed with explicit follow-up actions
-- Plugin certification flow is validated against the actual certification procedure in scope
+- Plugin certification flow is validated only if certification is part of the accepted slice or release gate
 
 **Deployment Simplification**
 - Deployment complexity reduced through selective deployment capability
@@ -136,8 +156,8 @@ interface ComplianceResult {
 **Functionality Preservation**
 - Feature parity with the existing monolithic solution is validated against an explicit workflow inventory
 - User workflow disruption minimized during transition
-- Performance improvements measurable in user-facing operations
-- Error rates maintained or improved compared to baseline
+- Performance improvements are only claimed for workflows with a slice-specific measurement contract
+- Error-rate claims are only normative where baseline collection and ownership exist
 
 ## Measurement Methodology
 
@@ -165,7 +185,7 @@ interface SuccessDashboard {
 
 **Automated Validation**
 - CI/CD integration with quality gates and automated rejection
-- Performance regression detection with trend analysis
+- Performance regression detection only where a maintained benchmark harness, owner, and gate exist
 - Security scanning with vulnerability assessment
 - Dependency validation with compatibility checking
 
