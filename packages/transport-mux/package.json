@@ -43,6 +43,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "scorecard:migration": "node ./scripts/migration-scorecard.mjs",
     "test:unit": "vitest run --config ../../vitest.config.ts \"tests/**/*.test.ts\" \"tests/**/*.test.tsx\" \"src/**/*.test.ts\" \"src/**/*.test.tsx\"",
     "test:e2e": "vitest run --config ../../vitest.config.ts \"tests/e2e/**/*.test.ts\"",
     "test": "npm run test:unit",
