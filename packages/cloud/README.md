@@ -1,19 +1,34 @@
 # @a5c-ai/cloud
 
-Spec-first workspace for the Babysitter deployment utility.
+Deployment SDK and CLI for installing Babysitter repo services into Kubernetes.
 
-This package is intended to become the monorepo's deployment SDK + CLI for:
+This package implements the spec in [SPEC.md](./SPEC.md) with:
 
-- local Minikube installs
-- installs onto existing Kubernetes clusters
-- launching new Kubernetes clusters for cloud providers
-- coordinated deployment of Babysitter repo utilities into a single cluster topology
+- environment-aware config loading and validation
+- deployment plan construction
+- Terraform rendering for Minikube, existing clusters, EKS, AKS, and GKE
+- Kubernetes manifest rendering for `kanban`, `agent-mux-gateway`, and optional `babysitter-agent`
+- install, upgrade, status, auth bootstrap, provider configuration, and agent install workflows
+- a `cloud` CLI built on the SDK
 
-The detailed contract lives in [SPEC.md](./SPEC.md).
+Current scope deliberately excludes the separately tracked upstream dependency tickets referenced in the spec.
 
-Current status:
+## Package scripts
 
-- package directory created
-- deployment architecture specified
-- upstream dependency gaps identified and tracked as kanban issues before implementation
+```bash
+npm run build --workspace=@a5c-ai/cloud
+npm run test --workspace=@a5c-ai/cloud
+npm run test:coverage --workspace=@a5c-ai/cloud
+```
+
+## CLI examples
+
+```bash
+cloud init --env minikube
+cloud plan --env staging --provider eks --set target.region=us-east-1
+cloud render terraform --config cloud.config.json
+cloud render kubernetes --config cloud.config.json
+cloud install --config cloud.config.json --dry-run
+cloud status --config cloud.config.json
+```
 
