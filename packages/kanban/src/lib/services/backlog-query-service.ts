@@ -12,7 +12,7 @@ import {
   type KanbanProject,
   type KanbanWorkflowState,
   type LinkedRunSummary,
-} from '../../../../agent-mux/core/src/kanban.js';
+} from '@a5c-ai/agent-mux-core/kanban';
 
 import { AppError } from '../error-handler';
 import { RunQueryService } from './run-query-service';

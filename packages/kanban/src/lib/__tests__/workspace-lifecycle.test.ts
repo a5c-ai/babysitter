@@ -1,7 +1,13 @@
+import path from "node:path";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorkspaceLifecycleService, type WorkspaceLifecycleDeps, type WorkspaceSessionSnapshot } from "../workspace-lifecycle";
 import type { Run } from "@/types";
+
+function repoPath(...segments: string[]): string {
+  return path.resolve(path.sep, ...segments);
+}
 
 function createRun(overrides: Partial<Run> = {}): Run {
   return {
@@ -20,10 +26,14 @@ function createRun(overrides: Partial<Run> = {}): Run {
 }
 
 function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceLifecycleDeps {
+  const kanbanPath = repoPath("repo", "packages", "kanban");
+  const mainPath = repoPath("repo", "main");
+  const taskPath = repoPath("repo", "worktrees", "task");
+  const commonDirPath = repoPath("repo", "common", ".git");
   const existingPaths = new Set<string>([
-    "/repo/packages/kanban",
-    "/repo/main",
-    "/repo/worktrees/task",
+    kanbanPath,
+    mainPath,
+    taskPath,
   ]);
 
   const registryWrites: string[] = [];
@@ -31,30 +41,30 @@ function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceL
     const key = `${cwd}::${args.join(" ")}`;
 
     const map: Record<string, { stdout: string; stderr: string }> = {
-      "/repo/packages/kanban::rev-parse --show-toplevel": { stdout: "/repo/main\n", stderr: "" },
-      "/repo/packages/kanban::rev-parse --path-format=absolute --git-common-dir": { stdout: "/repo/common/.git\n", stderr: "" },
-      "/repo/packages/kanban::worktree list --porcelain": {
+      [`${kanbanPath}::rev-parse --show-toplevel`]: { stdout: `${mainPath}\n`, stderr: "" },
+      [`${kanbanPath}::rev-parse --path-format=absolute --git-common-dir`]: { stdout: `${commonDirPath}\n`, stderr: "" },
+      [`${kanbanPath}::worktree list --porcelain`]: {
         stdout: [
-          "worktree /repo/main",
+          `worktree ${mainPath}`,
           "HEAD abc123",
           "branch refs/heads/main",
           "",
-          "worktree /repo/worktrees/task",
+          `worktree ${taskPath}`,
           "HEAD def456",
           "branch refs/heads/vk/task",
           "",
         ].join("\n"),
         stderr: "",
       },
-      "/repo/main::status --porcelain": { stdout: "", stderr: "" },
-      "/repo/worktrees/task::status --porcelain": { stdout: " M packages/kanban/src/app/page.tsx\n", stderr: "" },
-      "/repo/main::branch --show-current": { stdout: "main\n", stderr: "" },
-      "/repo/worktrees/task::branch --show-current": { stdout: "vk/task\n", stderr: "" },
-      "/repo/main::rev-parse HEAD": { stdout: "abc123\n", stderr: "" },
-      "/repo/worktrees/task::rev-parse HEAD": { stdout: "def456\n", stderr: "" },
-      "/repo/main::worktree add /repo/worktrees/task vk/task": { stdout: "prepared\n", stderr: "" },
-      "/repo/main::worktree remove --force /repo/worktrees/task": { stdout: "removed\n", stderr: "" },
-      "/repo/main::worktree prune": { stdout: "pruned\n", stderr: "" },
+      [`${mainPath}::status --porcelain`]: { stdout: "", stderr: "" },
+      [`${taskPath}::status --porcelain`]: { stdout: " M packages/kanban/src/app/page.tsx\n", stderr: "" },
+      [`${mainPath}::branch --show-current`]: { stdout: "main\n", stderr: "" },
+      [`${taskPath}::branch --show-current`]: { stdout: "vk/task\n", stderr: "" },
+      [`${mainPath}::rev-parse HEAD`]: { stdout: "abc123\n", stderr: "" },
+      [`${taskPath}::rev-parse HEAD`]: { stdout: "def456\n", stderr: "" },
+      [`${mainPath}::worktree add ${taskPath} vk/task`]: { stdout: "prepared\n", stderr: "" },
+      [`${mainPath}::worktree remove --force ${taskPath}`]: { stdout: "removed\n", stderr: "" },
+      [`${mainPath}::worktree prune`]: { stdout: "pruned\n", stderr: "" },
     };
 
     const value = map[key];
@@ -67,8 +77,8 @@ function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceL
   return {
     discoverAllRunDirs: async () => [
       {
-        runDir: "/repo/worktrees/task/.a5c/runs/run-1",
-        source: { path: "/repo/worktrees/task", depth: 1 },
+        runDir: path.join(taskPath, ".a5c", "runs", "run-1"),
+        source: { path: taskPath, depth: 1 },
         projectName: "task",
       },
     ],
@@ -88,7 +98,7 @@ function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceL
     }),
     execGit,
     now: () => "2026-04-24T12:00:00.000Z",
-    cwd: () => "/repo/packages/kanban",
+    cwd: () => kanbanPath,
     ...overrides,
   };
 }
@@ -105,7 +115,7 @@ describe("WorkspaceLifecycleService", () => {
         sessionId: "session-1",
         agent: "codex",
         status: "active",
-        cwd: "/repo/worktrees/task",
+        cwd: repoPath("repo", "worktrees", "task"),
         title: "KANBAN-GAP-003",
         updatedAt: Date.parse("2026-04-24T02:00:00.000Z"),
       },
@@ -115,7 +125,7 @@ describe("WorkspaceLifecycleService", () => {
 
     expect(result.summary.total).toBe(2);
     expect(result.summary.active).toBe(1);
-    expect(result.workspaces[0]?.path).toBe("/repo/worktrees/task");
+    expect(result.workspaces[0]?.path).toBe(repoPath("repo", "worktrees", "task"));
     expect(result.workspaces[0]?.runs.active).toBe(1);
     expect(result.workspaces[0]?.sessions.active).toBe(1);
     expect(result.workspaces[0]?.git.branch).toBe("vk/task");
@@ -128,7 +138,7 @@ describe("WorkspaceLifecycleService", () => {
     await expect(
       service.applyAction({
         action: "cleanup",
-        workspacePath: "/repo/worktrees/task",
+        workspacePath: repoPath("repo", "worktrees", "task"),
         sessions: [],
       }),
     ).rejects.toThrow("not eligible for cleanup");
@@ -140,10 +150,10 @@ describe("WorkspaceLifecycleService", () => {
         JSON.stringify({
           version: 1,
           workspaces: {
-            "/repo/worktrees/task": {
-              path: "/repo/worktrees/task",
-              gitRoot: "/repo/main",
-              commonDir: "/repo/common/.git",
+            [repoPath("repo", "worktrees", "task")]: {
+              path: repoPath("repo", "worktrees", "task"),
+              gitRoot: repoPath("repo", "main"),
+              commonDir: repoPath("repo", "common", ".git"),
               branch: "vk/task",
               archivedAt: "2026-04-23T12:00:00.000Z",
               cleanedAt: "2026-04-23T13:00:00.000Z",
@@ -152,7 +162,7 @@ describe("WorkspaceLifecycleService", () => {
         }),
       ),
       stat: vi.fn(async (targetPath: string) => {
-        if (targetPath === "/repo/worktrees/task") {
+        if (targetPath === repoPath("repo", "worktrees", "task")) {
           throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
         }
         return {} as never;
@@ -162,11 +172,14 @@ describe("WorkspaceLifecycleService", () => {
     const service = new WorkspaceLifecycleService(deps);
     const result = await service.applyAction({
       action: "recover",
-      workspacePath: "/repo/worktrees/task",
+      workspacePath: repoPath("repo", "worktrees", "task"),
       sessions: [],
     });
 
     expect(result.ok).toBe(true);
-    expect(deps.execGit).toHaveBeenCalledWith(["worktree", "add", "/repo/worktrees/task", "vk/task"], "/repo/main");
+    expect(deps.execGit).toHaveBeenCalledWith(
+      ["worktree", "add", repoPath("repo", "worktrees", "task"), "vk/task"],
+      repoPath("repo", "main"),
+    );
   });
 });

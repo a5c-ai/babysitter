@@ -8,7 +8,7 @@ import type {
   KanbanBacklogSnapshot,
   KanbanBoardSnapshot,
   KanbanWorkflowState,
-} from "../../../agent-mux/core/src/kanban.js";
+} from "@a5c-ai/agent-mux-core/kanban";
 
 import { useSmartPolling } from "./use-smart-polling";
 

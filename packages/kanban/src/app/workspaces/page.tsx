@@ -5,7 +5,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
-import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
+import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
 import { WorkspacesPageContent } from "@/components/workspaces/workspaces-page";
 import { useGateway } from "@/lib/agent-mux-ui";
 
@@ -17,7 +17,14 @@ function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
 }
 
 export default function WorkspacesPage() {
-  const { isAuthenticated } = useGatewayAuth();
+  return (
+    <RequireGatewayAuth>
+      <WorkspacesContent />
+    </RequireGatewayAuth>
+  );
+}
+
+function WorkspacesContent() {
   const { store } = useGateway();
   const sessions = useStore(store, useShallow((state) => Object.values(state.sessions.byId)));
 
@@ -48,5 +55,5 @@ export default function WorkspacesPage() {
     [sessions],
   );
 
-  return <WorkspacesPageContent isAuthenticated={isAuthenticated} sessions={workspaceSessions} />;
+  return <WorkspacesPageContent isAuthenticated sessions={workspaceSessions} />;
 }

@@ -36,6 +36,12 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
+    },
+    "./kanban": {
+      "import": {
+        "types": "./dist/kanban.d.ts",
+        "default": "./dist/kanban.js"
+      }
     }
   },
   "files": [
