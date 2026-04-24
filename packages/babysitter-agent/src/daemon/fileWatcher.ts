@@ -87,6 +87,7 @@ export function createFileWatcher(
         entry.debounceTimer = setTimeout(() => {
           if (disposed) return;
           void onTrigger({
+            type: "file",
             processId: trigger.processId,
             entrypoint: trigger.entrypoint,
           });

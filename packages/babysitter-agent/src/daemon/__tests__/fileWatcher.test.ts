@@ -15,6 +15,7 @@ import * as crypto from "node:crypto";
 import { createFileWatcher } from "../fileWatcher";
 import type {
   FileTriggerConfig,
+  FileTriggerEvent,
   FileWatcherHandle,
   TriggerCallback,
 } from "../types";
@@ -34,9 +35,9 @@ function collectTriggers(
   timeoutMs = 5000,
 ): {
   callback: TriggerCallback;
-  promise: Promise<Array<{ processId: string; entrypoint: string; inputs?: Record<string, unknown> }>>;
+  promise: Promise<FileTriggerEvent[]>;
 } {
-  const events: Array<{ processId: string; entrypoint: string; inputs?: Record<string, unknown> }> = [];
+  const events: FileTriggerEvent[] = [];
   let resolve: (v: typeof events) => void;
   let reject: (e: Error) => void;
 
@@ -50,6 +51,9 @@ function collectTriggers(
   }, timeoutMs);
 
   const callback: TriggerCallback = (trigger) => {
+    if (trigger.type === "automation") {
+      return;
+    }
     events.push(trigger);
     if (events.length >= count) {
       clearTimeout(timer);

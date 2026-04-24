@@ -308,6 +308,22 @@ export {
   buildKanbanBoardSnapshot,
 } from './kanban.js';
 
+export type {
+  AutomationRuleLifecycleState,
+  AutomationRuleSourceMetadata,
+  AutomationRuleAuditMetadata,
+  AutomationTaskTemplate,
+  AutomationTarget,
+  AutomationIssueCreateRoute,
+  AutomationDerivedBoardRoute,
+  AutomationRouting,
+  TimerAutomationTrigger,
+  WebhookAutomationTrigger,
+  TimerAutomationRule,
+  WebhookAutomationRule,
+  AutomationRule,
+} from './automation.js';
+
 // Auth types (canonical from dedicated module)
 export type {
   AuthMethod,

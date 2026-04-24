@@ -4,10 +4,16 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import type { DaemonConfig, TriggerCallback, FileTriggerConfig } from "./types";
+import type { DaemonConfig, TriggerCallback, TriggerEvent } from "./types";
+import {
+  isAutomationTriggerEvent,
+  isFileTriggerConfig,
+  isTimerAutomationRule,
+  isWebhookAutomationRule,
+} from "./types";
 import { createFileWatcher } from "./fileWatcher";
 import { createWebhookListener } from "./webhookListener";
-import { createTimerScheduler, type TimerTriggerConfig } from "./timerScheduler";
+import { createTimerScheduler } from "./timerScheduler";
 import { appendDaemonLog } from "./daemonLog";
 
 export interface DaemonLoopOptions {
@@ -29,7 +35,7 @@ export async function runDaemonLoop(
   const maxConcurrent = config.maxConcurrentRuns ?? 4;
   const handles: Array<{ dispose?: () => void; close?: () => Promise<void> }> = [];
   const activeRuns = new Set<Promise<void>>();
-  const queue: Array<{ processId: string; entrypoint: string; inputs?: Record<string, unknown> }> = [];
+  const queue: TriggerEvent[] = [];
 
   function drainQueue(): void {
     while (queue.length > 0 && activeRuns.size < maxConcurrent) {
@@ -39,7 +45,7 @@ export async function runDaemonLoop(
     void writeLoopStatus();
   }
 
-  function dispatchTrigger(trigger: { processId: string; entrypoint: string; inputs?: Record<string, unknown> }): void {
+  function dispatchTrigger(trigger: TriggerEvent): void {
     if (options?.onTrigger) {
       const result = options.onTrigger(trigger);
       // If onTrigger returns a Promise, track it for concurrency
@@ -72,10 +78,23 @@ export async function runDaemonLoop(
   const triggerCallback: TriggerCallback = (trigger) => {
     // Log the activation
     if (options?.logDir) {
+      const data = isAutomationTriggerEvent(trigger)
+        ? {
+          type: "automation",
+          ruleId: trigger.rule.id,
+          triggerType: trigger.rule.trigger.type,
+          projectId: trigger.rule.target.projectId,
+          boardProjectId: trigger.rule.target.boardProjectId,
+        }
+        : {
+          type: trigger.type,
+          processId: trigger.processId,
+          entrypoint: trigger.entrypoint,
+        };
       void appendDaemonLog(options.logDir, {
         timestamp: new Date().toISOString(),
         event: "TRIGGER_ACTIVATED",
-        data: { processId: trigger.processId, entrypoint: trigger.entrypoint },
+        data,
       });
     }
 
@@ -91,13 +110,7 @@ export async function runDaemonLoop(
 
   // Set up file triggers
   const fileTriggers = config.triggers
-    .filter((t) => t.type === "file")
-    .map((t): FileTriggerConfig => ({
-      pattern: t.pattern ?? "",
-      processId: t.processId,
-      entrypoint: t.entrypoint,
-      debounceMs: t.debounceMs,
-    }));
+    .filter(isFileTriggerConfig);
 
   if (fileTriggers.length > 0) {
     const handle = createFileWatcher(fileTriggers, triggerCallback);
@@ -105,29 +118,21 @@ export async function runDaemonLoop(
   }
 
   // Set up webhook triggers
-  const webhookTriggers = config.triggers.filter((t) => t.type === "webhook");
-  for (const wt of webhookTriggers) {
-    if (wt.port) {
-      try {
-        const handle = await createWebhookListener({
-          port: wt.port,
-          onTrigger: triggerCallback,
-        });
-        handles.push(handle);
-      } catch {
-        // Port in use or other error — skip
-      }
+  const webhookTriggers = config.triggers.filter(isWebhookAutomationRule);
+  for (const rule of webhookTriggers) {
+    try {
+      const handle = await createWebhookListener({
+        rule,
+        onTrigger: triggerCallback,
+      });
+      handles.push(handle);
+    } catch {
+      // Port in use or other error — skip
     }
   }
 
   // Set up timer/cron triggers
-  const timerTriggers = config.triggers
-    .filter((t) => t.type === "timer" && t.cron)
-    .map((t): TimerTriggerConfig => ({
-      cron: t.cron!,
-      processId: t.processId,
-      entrypoint: t.entrypoint,
-    }));
+  const timerTriggers = config.triggers.filter(isTimerAutomationRule);
 
   if (timerTriggers.length > 0) {
     const handle = createTimerScheduler(timerTriggers, triggerCallback);

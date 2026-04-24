@@ -10,10 +10,14 @@ const MAX_BODY_BYTES = 1024 * 1024; // 1 MiB
 export async function createWebhookListener(
   options: WebhookListenerOptions,
 ): Promise<WebhookListenerHandle> {
-  const { port, onTrigger, authToken } = options;
+  const { rule, onTrigger } = options;
+  const port = rule.trigger.port;
+  const path = rule.trigger.path ?? "/trigger";
+  const method = rule.trigger.method ?? "POST";
+  const authToken = rule.trigger.auth?.type === "bearer" ? rule.trigger.auth.token : undefined;
 
   const server = http.createServer((req, res) => {
-    if (req.method !== "POST" || req.url !== "/trigger") {
+    if (req.method !== method || req.url !== path) {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Not found" }));
       return;
@@ -44,22 +48,15 @@ export async function createWebhookListener(
 
     req.on("end", () => {
       try {
-        const payload = JSON.parse(body) as {
-          processId?: string;
-          entrypoint?: string;
-          inputs?: Record<string, unknown>;
-        };
-
-        if (!payload.processId || !payload.entrypoint) {
-          res.writeHead(400, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Missing processId or entrypoint" }));
-          return;
-        }
+        const payload = JSON.parse(body) as Record<string, unknown>;
+        const inputs = typeof payload.inputs === "object" && payload.inputs !== null && !Array.isArray(payload.inputs)
+          ? payload.inputs as Record<string, unknown>
+          : undefined;
 
         void onTrigger({
-          processId: payload.processId,
-          entrypoint: payload.entrypoint,
-          inputs: payload.inputs,
+          type: "automation",
+          rule,
+          inputs,
         });
 
         res.writeHead(200, { "Content-Type": "application/json" });

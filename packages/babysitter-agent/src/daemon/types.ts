@@ -2,6 +2,12 @@
  * GAP-REMOTE-001: Daemon Mode — Type definitions.
  */
 
+import type {
+  AutomationRule,
+  TimerAutomationRule,
+  WebhookAutomationRule,
+} from "@a5c-ai/agent-mux-core";
+
 // ── Config types ────────────────────────────────────────────────────────────
 
 export interface DaemonConfig {
@@ -10,20 +16,58 @@ export interface DaemonConfig {
   maxConcurrentRuns?: number;
 }
 
-export interface TriggerConfig {
+export interface FileTriggerConfig {
+  type: "file";
+  pattern: string;
+  processId: string;
+  entrypoint: string;
+  debounceMs?: number;
+}
+
+export type TriggerConfig = FileTriggerConfig | AutomationRule;
+
+export interface FileTriggerEvent {
+  type: "file";
+  processId: string;
+  entrypoint: string;
+  inputs?: Record<string, unknown>;
+}
+
+export interface AutomationTriggerEvent {
+  type: "automation";
+  rule: AutomationRule;
+  inputs?: Record<string, unknown>;
+}
+
+export type TriggerEvent = FileTriggerEvent | AutomationTriggerEvent;
+
+export function isFileTriggerConfig(trigger: TriggerConfig): trigger is FileTriggerConfig {
+  return "type" in trigger && trigger.type === "file";
+}
+
+export function isTimerAutomationRule(trigger: TriggerConfig): trigger is TimerAutomationRule {
+  return "trigger" in trigger && trigger.trigger.type === "timer";
+}
+
+export function isWebhookAutomationRule(trigger: TriggerConfig): trigger is WebhookAutomationRule {
+  return "trigger" in trigger && trigger.trigger.type === "webhook";
+}
+
+export function isFileTriggerEvent(event: TriggerEvent): event is FileTriggerEvent {
+  return event.type !== "automation";
+}
+
+export function isAutomationTriggerEvent(event: TriggerEvent): event is AutomationTriggerEvent {
+  return event.type === "automation";
+}
+
+export interface LegacyTriggerConfig {
   type: "file" | "webhook" | "timer";
   processId: string;
   entrypoint: string;
   pattern?: string;
   port?: number;
   cron?: string;
-  debounceMs?: number;
-}
-
-export interface FileTriggerConfig {
-  pattern: string;
-  processId: string;
-  entrypoint: string;
   debounceMs?: number;
 }
 
@@ -74,9 +118,8 @@ export interface FileWatcherHandle {
 // ── Webhook types ───────────────────────────────────────────────────────────
 
 export interface WebhookListenerOptions {
-  port: number;
+  rule: WebhookAutomationRule;
   onTrigger: TriggerCallback;
-  authToken?: string;
 }
 
 export interface WebhookListenerHandle {
@@ -86,11 +129,7 @@ export interface WebhookListenerHandle {
 
 // ── Shared types ────────────────────────────────────────────────────────────
 
-export type TriggerCallback = (trigger: {
-  processId: string;
-  entrypoint: string;
-  inputs?: Record<string, unknown>;
-}) => void | Promise<void>;
+export type TriggerCallback = (trigger: TriggerEvent) => void | Promise<void>;
 
 // ── Daemon metadata (persisted to daemon.json) ──────────────────────────────
 

@@ -1,6 +1,48 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createTimerScheduler } from "../timerScheduler";
 
+function timerRule(overrides: Partial<{
+  id: string;
+  cron: string;
+  projectId: string;
+  title: string;
+}> = {}) {
+  const projectId = overrides.projectId ?? "kanban-app";
+  return {
+    id: overrides.id ?? "rule-1",
+    name: "Timer rule",
+    state: "active" as const,
+    trigger: {
+      type: "timer" as const,
+      cron: overrides.cron ?? "30 10 * * *",
+    },
+    target: {
+      projectId,
+      boardProjectId: projectId,
+    },
+    template: {
+      title: overrides.title ?? "Generated task",
+    },
+    routing: {
+      issue: {
+        action: "canonical-issue-create" as const,
+        projectId,
+      },
+      board: {
+        action: "shared-board-derive" as const,
+        boardProjectId: projectId,
+      },
+      mutateBoardDirectly: false as const,
+    },
+    source: {
+      kind: "config-file" as const,
+    },
+    audit: {
+      createdAt: "2026-04-24T00:00:00.000Z",
+    },
+  };
+}
+
 describe("timerScheduler", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -13,7 +55,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "30 10 * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ id: "rule-1", cron: "30 10 * * *" })],
       onTrigger,
     );
 
@@ -21,8 +63,8 @@ describe("timerScheduler", () => {
     vi.advanceTimersByTime(30_000);
 
     expect(onTrigger).toHaveBeenCalledWith({
-      processId: "p1",
-      entrypoint: "e1",
+      type: "automation",
+      rule: timerRule({ id: "rule-1", cron: "30 10 * * *" }),
     });
 
     handle.dispose();
@@ -34,7 +76,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "0 12 * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ cron: "0 12 * * *" })],
       onTrigger,
     );
 
@@ -51,7 +93,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "30 10 * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ cron: "30 10 * * *" })],
       onTrigger,
     );
 
@@ -71,8 +113,8 @@ describe("timerScheduler", () => {
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
       [
-        { cron: "invalid", processId: "p1", entrypoint: "e1" },
-        { cron: "30 10 * * *", processId: "p2", entrypoint: "e2" },
+        timerRule({ id: "rule-invalid", cron: "invalid" }),
+        timerRule({ id: "rule-valid", cron: "30 10 * * *" }),
       ],
       onTrigger,
     );
@@ -81,8 +123,8 @@ describe("timerScheduler", () => {
 
     expect(onTrigger).toHaveBeenCalledTimes(1);
     expect(onTrigger).toHaveBeenCalledWith({
-      processId: "p2",
-      entrypoint: "e2",
+      type: "automation",
+      rule: timerRule({ id: "rule-valid", cron: "30 10 * * *" }),
     });
 
     handle.dispose();
@@ -94,7 +136,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "15,30,45 10 * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ cron: "15,30,45 10 * * *" })],
       onTrigger,
     );
 
@@ -113,8 +155,8 @@ describe("timerScheduler", () => {
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
       [
-        { cron: "30 10 * * 1", processId: "monday", entrypoint: "e1" },
-        { cron: "30 10 * * 4", processId: "thursday", entrypoint: "e2" },
+        timerRule({ id: "monday", cron: "30 10 * * 1" }),
+        timerRule({ id: "thursday", cron: "30 10 * * 4" }),
       ],
       onTrigger,
     );
@@ -123,8 +165,8 @@ describe("timerScheduler", () => {
 
     expect(onTrigger).toHaveBeenCalledTimes(1);
     expect(onTrigger).toHaveBeenCalledWith({
-      processId: "thursday",
-      entrypoint: "e2",
+      type: "automation",
+      rule: timerRule({ id: "thursday", cron: "30 10 * * 4" }),
     });
 
     handle.dispose();
@@ -136,7 +178,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "*/15 * * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ cron: "*/15 * * * *" })],
       onTrigger,
     );
 
@@ -153,7 +195,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "30 10 * * 1-5", processId: "weekday", entrypoint: "e1" }],
+      [timerRule({ id: "weekday", cron: "30 10 * * 1-5" })],
       onTrigger,
     );
 
@@ -170,7 +212,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "30 10 * * 1-5", processId: "weekday", entrypoint: "e1" }],
+      [timerRule({ id: "weekday", cron: "30 10 * * 1-5" })],
       onTrigger,
     );
 
@@ -186,7 +228,7 @@ describe("timerScheduler", () => {
 
     const onTrigger = vi.fn();
     const handle = createTimerScheduler(
-      [{ cron: "30 10 * * *", processId: "p1", entrypoint: "e1" }],
+      [timerRule({ cron: "30 10 * * *" })],
       onTrigger,
     );
 

@@ -13,7 +13,7 @@ import * as crypto from "node:crypto";
 
 // Imports from the module under test (will fail until implementation -- that's TDD).
 import { loadDaemonConfig, writeDaemonConfig } from "../config";
-import type { DaemonConfig, TriggerConfig } from "../types";
+import type { DaemonConfig } from "../types";
 import type { ApiResult } from "../../api/runs";
 
 // -- Helpers ------------------------------------------------------------------
@@ -27,7 +27,7 @@ function validConfig(): DaemonConfig {
     workspace: "/tmp/workspace",
     triggers: [
       {
-        type: "file" as const,
+        type: "file",
         processId: "lint-on-save",
         entrypoint: "processes/lint.js#process",
         pattern: "src/**/*.ts",
@@ -68,6 +68,58 @@ describe("GAP-REMOTE-001: Daemon Config", () => {
         expect(result.data.triggers).toHaveLength(1);
         expect(result.data.triggers[0].type).toBe("file");
         expect(result.data.maxConcurrentRuns).toBe(4);
+      }
+    });
+
+    it("loads a valid shared timer automation rule", async () => {
+      const configPath = path.join(testDir, "timer-automation.json");
+      const config: DaemonConfig = {
+        workspace: "/tmp/workspace",
+        triggers: [
+          {
+            id: "rule-daily-review",
+            name: "Daily review",
+            state: "active",
+            trigger: {
+              type: "timer",
+              cron: "0 9 * * 1-5",
+            },
+            target: {
+              projectId: "kanban-app",
+              boardProjectId: "kanban-app",
+            },
+            template: {
+              title: "Run daily review",
+            },
+            routing: {
+              issue: {
+                action: "canonical-issue-create",
+                projectId: "kanban-app",
+              },
+              board: {
+                action: "shared-board-derive",
+                boardProjectId: "kanban-app",
+              },
+              mutateBoardDirectly: false,
+            },
+            source: {
+              kind: "config-file",
+              path: ".a5c/automations.json",
+            },
+            audit: {
+              createdAt: "2026-04-24T00:00:00.000Z",
+            },
+          },
+        ],
+      };
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+
+      const result = await loadDaemonConfig(configPath);
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.triggers).toHaveLength(1);
+        expect("trigger" in result.data.triggers[0] && result.data.triggers[0].trigger.type).toBe("timer");
       }
     });
 
@@ -147,6 +199,58 @@ describe("GAP-REMOTE-001: Daemon Config", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toMatch(/VALIDATION_ERROR|INVALID_CONFIG/);
+      }
+    });
+
+    it("returns error for automation rules that try to mutate boards directly", async () => {
+      const configPath = path.join(testDir, "bad-automation.json");
+      await fs.writeFile(
+        configPath,
+        JSON.stringify({
+          workspace: "/tmp/ws",
+          triggers: [
+            {
+              id: "rule-webhook",
+              name: "Webhook rule",
+              state: "active",
+              trigger: {
+                type: "webhook",
+                port: 4100,
+              },
+              target: {
+                projectId: "kanban-app",
+                boardProjectId: "kanban-app",
+              },
+              template: {
+                title: "Triage webhook",
+              },
+              routing: {
+                issue: {
+                  action: "canonical-issue-create",
+                  projectId: "kanban-app",
+                },
+                board: {
+                  action: "shared-board-derive",
+                  boardProjectId: "kanban-app",
+                },
+                mutateBoardDirectly: true,
+              },
+              source: {
+                kind: "config-file",
+              },
+              audit: {
+                createdAt: "2026-04-24T00:00:00.000Z",
+              },
+            },
+          ],
+        }),
+      );
+
+      const result = await loadDaemonConfig(configPath);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.message).toMatch(/direct board mutation/i);
       }
     });
 

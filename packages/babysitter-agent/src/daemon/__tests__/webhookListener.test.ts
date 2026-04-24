@@ -2,10 +2,62 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import * as http from "node:http";
 import { createWebhookListener } from "../webhookListener";
 
-function post(port: number, body: string, headers?: Record<string, string>): Promise<{ status: number; body: string }> {
+function webhookRule(overrides: Partial<{
+  id: string;
+  port: number;
+  path: string;
+  authToken: string;
+}> = {}) {
+  const port = overrides.port ?? 0;
+  const path = overrides.path ?? "/trigger";
+  return {
+    id: overrides.id ?? "rule-webhook",
+    name: "Webhook rule",
+    state: "active" as const,
+    trigger: {
+      type: "webhook" as const,
+      port,
+      path,
+      method: "POST" as const,
+      ...(overrides.authToken ? {
+        auth: {
+          type: "bearer" as const,
+          token: overrides.authToken,
+        },
+      } : {}),
+    },
+    target: {
+      projectId: "kanban-app",
+      boardProjectId: "kanban-app",
+    },
+    template: {
+      title: "Generated from webhook",
+    },
+    routing: {
+      issue: {
+        action: "canonical-issue-create" as const,
+        projectId: "kanban-app",
+      },
+      board: {
+        action: "shared-board-derive" as const,
+        boardProjectId: "kanban-app",
+      },
+      mutateBoardDirectly: false as const,
+    },
+    source: {
+      kind: "external-system" as const,
+      provider: "github",
+    },
+    audit: {
+      createdAt: "2026-04-24T00:00:00.000Z",
+    },
+  };
+}
+
+function post(port: number, path: string, body: string, headers?: Record<string, string>): Promise<{ status: number; body: string }> {
   return new Promise((resolve, reject) => {
     const req = http.request(
-      { hostname: "127.0.0.1", port, path: "/trigger", method: "POST", headers: { "Content-Type": "application/json", ...headers } },
+      { hostname: "127.0.0.1", port, path, method: "POST", headers: { "Content-Type": "application/json", ...headers } },
       (res) => {
         let data = "";
         res.on("data", (chunk: Buffer) => { data += chunk.toString(); });
@@ -44,53 +96,51 @@ describe("webhookListener", () => {
 
   it("accepts a valid trigger POST and calls onTrigger", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
+    const rule = webhookRule();
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    const resp = await post(handle.port, JSON.stringify({ processId: "p1", entrypoint: "e1" }));
+    const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}));
     expect(resp.status).toBe(200);
     expect(JSON.parse(resp.body)).toEqual({ ok: true });
     expect(onTrigger).toHaveBeenCalledWith({
-      processId: "p1",
-      entrypoint: "e1",
+      type: "automation",
+      rule,
       inputs: undefined,
     });
   });
 
   it("passes inputs to onTrigger", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
+    const rule = webhookRule();
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    await post(handle.port, JSON.stringify({ processId: "p1", entrypoint: "e1", inputs: { key: "val" } }));
+    await post(handle.port, rule.trigger.path!, JSON.stringify({ inputs: { key: "val" } }));
     expect(onTrigger).toHaveBeenCalledWith(
-      expect.objectContaining({ inputs: { key: "val" } }),
+      {
+        type: "automation",
+        rule,
+        inputs: { key: "val" },
+      },
     );
-  });
-
-  it("returns 400 when processId is missing", async () => {
-    const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
-    handles.push(handle);
-
-    const resp = await post(handle.port, JSON.stringify({ entrypoint: "e1" }));
-    expect(resp.status).toBe(400);
-    expect(onTrigger).not.toHaveBeenCalled();
   });
 
   it("returns 400 for invalid JSON", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
+    const rule = webhookRule();
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    const resp = await post(handle.port, "not json");
+    const resp = await post(handle.port, rule.trigger.path!, "not json");
     expect(resp.status).toBe(400);
     expect(JSON.parse(resp.body)).toEqual({ error: "Invalid JSON body" });
   });
 
   it("returns 404 for non-POST or wrong path", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
+    const rule = webhookRule();
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
     const resp = await get(handle.port, "/trigger");
@@ -99,20 +149,22 @@ describe("webhookListener", () => {
 
   it("returns 401 when auth token is required but missing", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger, authToken: "secret" });
+    const rule = webhookRule({ authToken: "secret" });
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    const resp = await post(handle.port, JSON.stringify({ processId: "p1", entrypoint: "e1" }));
+    const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}));
     expect(resp.status).toBe(401);
     expect(onTrigger).not.toHaveBeenCalled();
   });
 
   it("returns 401 when auth token is wrong", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger, authToken: "secret" });
+    const rule = webhookRule({ authToken: "secret" });
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    const resp = await post(handle.port, JSON.stringify({ processId: "p1", entrypoint: "e1" }), {
+    const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}), {
       Authorization: "Bearer wrong",
     });
     expect(resp.status).toBe(401);
@@ -120,10 +172,11 @@ describe("webhookListener", () => {
 
   it("accepts request with correct auth token", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger, authToken: "secret" });
+    const rule = webhookRule({ authToken: "secret" });
+    const handle = await createWebhookListener({ rule, onTrigger });
     handles.push(handle);
 
-    const resp = await post(handle.port, JSON.stringify({ processId: "p1", entrypoint: "e1" }), {
+    const resp = await post(handle.port, rule.trigger.path!, JSON.stringify({}), {
       Authorization: "Bearer secret",
     });
     expect(resp.status).toBe(200);
@@ -132,10 +185,11 @@ describe("webhookListener", () => {
 
   it("closes cleanly", async () => {
     const onTrigger = vi.fn();
-    const handle = await createWebhookListener({ port: 0, onTrigger });
+    const rule = webhookRule();
+    const handle = await createWebhookListener({ rule, onTrigger });
 
     await handle.close();
     // Should not be able to connect after close
-    await expect(post(handle.port, "{}")).rejects.toThrow();
+    await expect(post(handle.port, rule.trigger.path!, "{}")).rejects.toThrow();
   });
 });

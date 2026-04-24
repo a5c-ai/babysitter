@@ -15,12 +15,15 @@ export type {
   DaemonStatusOutput,
   DaemonMetadata,
   TriggerConfig,
+  TriggerEvent,
+  FileTriggerEvent,
+  AutomationTriggerEvent,
   FileTriggerConfig,
   FileWatcherHandle,
   WebhookListenerOptions,
   WebhookListenerHandle,
   TriggerCallback,
 } from "./types";
-export type { TimerTriggerConfig, TimerSchedulerHandle } from "./timerScheduler";
+export type { TimerSchedulerHandle } from "./timerScheduler";
 export type { DaemonLoopOptions, DaemonLoopStatus } from "./loop";
 export type { DaemonLogEntry } from "./daemonLog";

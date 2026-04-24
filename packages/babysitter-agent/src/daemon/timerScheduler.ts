@@ -5,13 +5,8 @@
  * Uses setInterval to check the cron expression against current time.
  */
 
+import type { TimerAutomationRule } from "@a5c-ai/agent-mux-core";
 import type { TriggerCallback } from "./types";
-
-export interface TimerTriggerConfig {
-  cron: string;
-  processId: string;
-  entrypoint: string;
-}
 
 export interface TimerSchedulerHandle {
   dispose(): void;
@@ -105,12 +100,12 @@ function matchesCron(parsed: ParsedCron, date: Date): boolean {
 }
 
 export function createTimerScheduler(
-  triggers: TimerTriggerConfig[],
+  triggers: TimerAutomationRule[],
   onTrigger: TriggerCallback,
 ): TimerSchedulerHandle {
   const parsedTriggers = triggers
-    .map((t) => ({ trigger: t, parsed: parseCron(t.cron) }))
-    .filter((t) => t.parsed !== null) as Array<{ trigger: TimerTriggerConfig; parsed: ParsedCron }>;
+    .map((t) => ({ trigger: t, parsed: parseCron(t.trigger.cron) }))
+    .filter((t) => t.parsed !== null) as Array<{ trigger: TimerAutomationRule; parsed: ParsedCron }>;
 
   let lastMinute = -1;
   const interval = setInterval(() => {
@@ -124,8 +119,8 @@ export function createTimerScheduler(
     for (const { trigger, parsed } of parsedTriggers) {
       if (matchesCron(parsed, now)) {
         void onTrigger({
-          processId: trigger.processId,
-          entrypoint: trigger.entrypoint,
+          type: "automation",
+          rule: trigger,
         });
       }
     }
