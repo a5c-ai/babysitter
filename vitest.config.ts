@@ -9,6 +9,7 @@ export default {
       '@': path.resolve(__dirname, 'packages/catalog/src'),
       '@a5c-ai/agent-catalog': path.resolve(__dirname, 'packages/agent-catalog/src/index.ts'),
       'next/server': path.resolve(__dirname, 'test-shims/next-server.ts'),
+      'react-native': path.resolve(__dirname, 'node_modules/react-native-web'),
     },
   },
   test: {

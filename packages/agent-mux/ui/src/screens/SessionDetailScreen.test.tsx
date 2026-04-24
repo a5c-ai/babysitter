@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { createGatewayStore } from '../store/index.js';
@@ -75,6 +75,7 @@ function createMockGateway() {
 
 describe('SessionDetailScreen', () => {
   beforeEach(() => {
+    cleanup();
     mockUseGateway.mockReset();
   });
 
