@@ -9,7 +9,7 @@ import {
   type KanbanReviewCommentAnchor,
   type KanbanReviewFeedbackSource,
   type KanbanReviewSnapshot,
-} from "../../../agent-mux/core/src/kanban.js";
+} from "@a5c-ai/agent-mux-core/kanban";
 
 const REVIEW_FILE_PATH =
   process.env.KANBAN_REVIEW_FILE ?? path.join(os.homedir(), ".a5c", "kanban-review-artifacts.json");

@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, mkdirSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { createSecureBashBackend } from "../../packages/sdk/src/harness/piSecureSandbox";
+import { createSecureBashBackend } from "../../packages/babysitter-agent/src/harness/piSecureSandbox";
 
 const HAS_DOCKER = (() => {
   try {

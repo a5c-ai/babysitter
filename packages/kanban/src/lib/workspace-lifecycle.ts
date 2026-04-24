@@ -9,7 +9,7 @@ import { getRunCached as defaultGetRunCached } from "@/lib/run-cache";
 import type { Run } from "@/types";
 import type { WatchSource } from "@/lib/config-loader";
 import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
-import type { KanbanReviewSummary } from "../../../agent-mux/core/src/kanban.js";
+import type { KanbanReviewSummary } from "@a5c-ai/agent-mux-core/kanban";
 
 const execFile = promisify(execFileCallback);
 

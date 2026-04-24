@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import type { KanbanWorkflowState } from '../../../../../agent-mux/core/src/kanban.js';
+import type { KanbanWorkflowState } from '@a5c-ai/agent-mux-core/kanban';
 
 import { AppError, normalizeError } from '@/lib/error-handler';
 import { ensureInitialized } from '@/lib/server-init';

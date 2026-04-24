@@ -14,7 +14,7 @@ import type {
   KanbanReviewCommentAnchor,
   KanbanReviewFeedbackSource,
   KanbanReviewSnapshot,
-} from "../../../../agent-mux/core/src/kanban.js";
+} from "@a5c-ai/agent-mux-core/kanban";
 
 function decisionLabel(decision: KanbanReviewArtifact["decision"]): string {
   switch (decision) {
