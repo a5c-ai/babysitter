@@ -10,6 +10,7 @@ import {
   linkKanbanIssueRepository,
   upsertKanbanProjectRepository,
   updateKanbanProjectRepositorySettings,
+  summarizeKanbanReviewArtifact,
   type KanbanBoardSnapshot,
   type KanbanBacklogSnapshot,
   type KanbanIssue,
@@ -17,11 +18,13 @@ import {
   type KanbanRepositoryContext,
   type KanbanRepositoryProvider,
   type KanbanRepositorySettings,
+  type KanbanReviewSnapshot,
   type KanbanWorkflowState,
   type LinkedRunSummary,
 } from '@a5c-ai/agent-mux-core/kanban';
 
 import { AppError } from '../error-handler';
+import { ReviewService } from '../review-service';
 import { RunQueryService } from './run-query-service';
 
 const BACKLOG_FILE_PATH =
@@ -445,13 +448,57 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     key: 'KANBAN-GAP-004',
     projectId: PROJECT_ID,
     title: 'Expose review and diff workflow primitives',
-    status: 'backlog',
+    summary:
+      'Add shared review artifacts, inline comments, approval state, and diff viewing for issues and workspaces.',
+    description:
+      'The kanban surface needs Vibe Kanban style review loops: work item and workspace diffs, inline comments mapped back to agent feedback, a review queue, and approval state carried through shared APIs.',
+    status: 'review',
     priority: 'medium',
     labels: [debtLabel],
     assignees: [],
     dependencies: [{ issueId: 'KANBAN-GAP-001', type: 'blocked-by' }],
-    acceptanceCriteria: [],
-    decomposition: [],
+    acceptanceCriteria: [
+      {
+        id: 'KANBAN-GAP-004-ac-1',
+        title: 'Add diff viewing for work items and workspaces.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-004-ac-2',
+        title: 'Support inline review comments mapped back to agent feedback.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-004-ac-3',
+        title: 'Add review queue and approval state for issues and workspaces.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-004-ac-4',
+        title: 'Expose review artifacts and actions through shared APIs, then compose the UX in packages/kanban.',
+        satisfied: false,
+      },
+    ],
+    decomposition: [
+      {
+        id: 'KANBAN-GAP-004-decomp-1',
+        title: 'Extend shared review and diff types in agent-mux core.',
+        kind: 'implementation',
+        status: 'ready',
+      },
+      {
+        id: 'KANBAN-GAP-004-decomp-2',
+        title: 'Persist review artifacts and approval actions in a shared kanban service.',
+        kind: 'implementation',
+        status: 'ready',
+      },
+      {
+        id: 'KANBAN-GAP-004-decomp-3',
+        title: 'Compose the review queue and diff viewer in dashboard and workspace surfaces.',
+        kind: 'validation',
+        status: 'ready',
+      },
+    ],
     childIssueIds: [],
     createdAt: '2026-04-24T00:00:00.000Z',
     updatedAt: '2026-04-24T00:00:00.000Z',
@@ -605,6 +652,7 @@ interface BacklogFilePayload {
 
 interface BacklogQueryServiceDeps {
   runQueryService: Pick<RunQueryService, 'listProjects'>;
+  reviewService: Pick<ReviewService, 'listReviews'>;
   readFile: typeof fs.readFile;
   writeFile: typeof fs.writeFile;
   backlogFilePath: string;
@@ -613,6 +661,7 @@ interface BacklogQueryServiceDeps {
 
 const defaultDeps: BacklogQueryServiceDeps = {
   runQueryService: new RunQueryService(),
+  reviewService: new ReviewService(),
   readFile: fs.readFile,
   writeFile: fs.writeFile,
   backlogFilePath: BACKLOG_FILE_PATH,
@@ -681,18 +730,41 @@ function attachRunSummaries(
   };
 }
 
+function attachReviewSummaries(
+  snapshot: KanbanBacklogSnapshot,
+  reviewSnapshot: KanbanReviewSnapshot,
+): KanbanBacklogSnapshot {
+  const reviewSummaryByIssueId = new Map(
+    reviewSnapshot.artifacts
+      .filter((artifact) => artifact.targetType === 'issue')
+      .map((artifact) => [artifact.targetId, summarizeKanbanReviewArtifact(artifact)]),
+  );
+
+  return {
+    ...snapshot,
+    issues: snapshot.issues.map((issue) => ({
+      ...issue,
+      review: reviewSummaryByIssueId.get(issue.id),
+    })),
+  };
+}
+
 function buildHydratedOverview(input: {
   readonly generatedAt?: string;
   readonly projects: readonly BacklogSeedProject[];
   readonly issues: readonly BacklogSeedIssue[];
   readonly runSummaries: readonly LinkedRunSummary[];
+  readonly reviewSnapshot: KanbanReviewSnapshot;
 }): BacklogOverview {
   const snapshot = buildKanbanBacklogSnapshot({
     generatedAt: input.generatedAt,
     projects: input.projects,
     issues: input.issues,
   });
-  const hydratedSnapshot = attachRunSummaries(snapshot, input.runSummaries);
+  const hydratedSnapshot = attachReviewSummaries(
+    attachRunSummaries(snapshot, input.runSummaries),
+    input.reviewSnapshot,
+  );
   return {
     snapshot: hydratedSnapshot,
     board: buildKanbanBoardSnapshot(hydratedSnapshot),
@@ -739,6 +811,7 @@ export class BacklogQueryService {
       projects: payload.projects,
       issues: payload.issues,
       runSummaries: await this.listRunSummaries(),
+      reviewSnapshot: await this.deps.reviewService.listReviews({ targetType: 'issue' }),
       generatedAt: this.deps.now(),
     });
   }
@@ -807,12 +880,13 @@ export class BacklogQueryService {
         409,
       );
     }
+    const nextStatus = evaluation.nextStatus;
 
     const nextIssues = payload.issues.map((candidate) =>
       candidate.id === input.issueId
         ? {
             ...candidate,
-            status: evaluation.nextStatus!,
+            status: nextStatus,
             updatedAt: this.deps.now(),
           }
         : candidate,

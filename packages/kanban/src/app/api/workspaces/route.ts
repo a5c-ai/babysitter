@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 import { normalizeError } from "@/lib/error-handler";
+import { ReviewService } from "@/lib/review-service";
 import { WorkspaceLifecycleService, type WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 
 export const dynamic = "force-dynamic";
 
 const NO_CACHE_HEADERS = { "Cache-Control": "no-cache, no-store" };
 const service = new WorkspaceLifecycleService();
+const reviewService = new ReviewService();
 
 function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
   if (!value || typeof value !== "object") {
@@ -49,7 +51,18 @@ function readSessions(body: unknown): WorkspaceSessionSnapshot[] {
 
 export async function GET() {
   try {
-    const payload = await service.listWorkspaces();
+    const reviews = await reviewService.listReviews({ targetType: "workspace" });
+    const payload = await service.listWorkspaces({
+      reviewByWorkspacePath: new Map(
+        reviews.artifacts.map((artifact) => [artifact.targetId, {
+          decision: artifact.decision,
+          queueState: artifact.queueState,
+          commentCount: artifact.comments.length,
+          openCommentCount: artifact.comments.filter((comment) => comment.status === "open").length,
+          latestActivityAt: artifact.updatedAt,
+        }]),
+      ),
+    });
     return NextResponse.json(payload, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     const normalized = normalizeError(error);
@@ -61,6 +74,16 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
     const sessions = readSessions(body);
+    const reviews = await reviewService.listReviews({ targetType: "workspace" });
+    const reviewByWorkspacePath = new Map(
+      reviews.artifacts.map((artifact) => [artifact.targetId, {
+        decision: artifact.decision,
+        queueState: artifact.queueState,
+        commentCount: artifact.comments.length,
+        openCommentCount: artifact.comments.filter((comment) => comment.status === "open").length,
+        latestActivityAt: artifact.updatedAt,
+      }]),
+    );
 
     if (body.action === "archive" || body.action === "cleanup" || body.action === "recover") {
       const workspacePath = typeof body.workspacePath === "string" ? body.workspacePath : "";
@@ -73,11 +96,11 @@ export async function POST(request: Request) {
         workspacePath,
         sessions,
       });
-      const payload = await service.listWorkspaces({ sessions });
+      const payload = await service.listWorkspaces({ sessions, reviewByWorkspacePath });
       return NextResponse.json({ result, ...payload }, { headers: NO_CACHE_HEADERS });
     }
 
-    const payload = await service.listWorkspaces({ sessions });
+    const payload = await service.listWorkspaces({ sessions, reviewByWorkspacePath });
     return NextResponse.json(payload, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     const normalized = normalizeError(error);

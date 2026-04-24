@@ -9,6 +9,7 @@ import { getRunCached as defaultGetRunCached } from "@/lib/run-cache";
 import type { Run } from "@/types";
 import type { WatchSource } from "@/lib/config-loader";
 import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
+import type { KanbanReviewSummary } from "../../../agent-mux/core/src/kanban.js";
 
 const execFile = promisify(execFileCallback);
 
@@ -66,6 +67,7 @@ export interface WorkspaceInventoryItem {
     canCleanup: boolean;
     canRecover: boolean;
   };
+  review?: KanbanReviewSummary;
 }
 
 export interface WorkspaceInventoryResponse {
@@ -304,8 +306,12 @@ export class WorkspaceLifecycleService {
     this.deps = { ...defaultDeps, ...deps };
   }
 
-  async listWorkspaces(input: { sessions?: WorkspaceSessionSnapshot[] } = {}): Promise<WorkspaceInventoryResponse> {
+  async listWorkspaces(input: {
+    sessions?: WorkspaceSessionSnapshot[];
+    reviewByWorkspacePath?: ReadonlyMap<string, KanbanReviewSummary>;
+  } = {}): Promise<WorkspaceInventoryResponse> {
     const sessions = input.sessions ?? [];
+    const reviewByWorkspacePath = input.reviewByWorkspacePath ?? new Map<string, KanbanReviewSummary>();
     const registry = await readRegistry(this.deps);
     const records = new Map<string, MutableWorkspaceRecord>();
 
@@ -463,6 +469,7 @@ export class WorkspaceLifecycleService {
             canRecover:
               Boolean(record.archivedAt) || (Boolean(record.cleanedAt) && record.missing),
           },
+          review: reviewByWorkspacePath.get(record.path),
         };
       })
       .sort((left, right) => {

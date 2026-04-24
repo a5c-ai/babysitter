@@ -5,7 +5,9 @@ import { AlertTriangle, Archive, FolderGit2, RefreshCw, RotateCcw, Trash2, Wrenc
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ReviewPanel } from "@/components/review/review-panel";
 import { cn } from "@/lib/cn";
+import { useReviews } from "@/hooks/use-reviews";
 import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 
@@ -75,6 +77,7 @@ export function WorkspacesPageContent(props: {
   const [loading, setLoading] = useState(true);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const workspaceReviews = useReviews({ targetType: "workspace" });
 
   const sessionFingerprint = useMemo(
     () =>
@@ -134,6 +137,22 @@ export function WorkspacesPageContent(props: {
     archived: 0,
     missing: 0,
   };
+  const liveReviewByPath = useMemo(
+    () =>
+      new Map(
+        workspaceReviews.artifacts.map((artifact) => [
+          artifact.targetId,
+          {
+            decision: artifact.decision,
+            queueState: artifact.queueState,
+            commentCount: artifact.comments.length,
+            openCommentCount: artifact.comments.filter((comment) => comment.status === "open").length,
+            latestActivityAt: artifact.updatedAt,
+          },
+        ]),
+      ),
+    [workspaceReviews.artifacts],
+  );
 
   function refreshInventory() {
     startTransition(() => {
@@ -223,6 +242,7 @@ export function WorkspacesPageContent(props: {
           icon={FolderGit2}
           empty="No active workspaces are currently attached to sessions or waiting runs."
           workspaces={groups.active}
+          reviewByPath={liveReviewByPath}
           pendingAction={pendingAction}
           onAction={handleAction}
         />
@@ -231,6 +251,7 @@ export function WorkspacesPageContent(props: {
           icon={Wrench}
           empty="No idle workspaces are currently tracked."
           workspaces={groups.idle}
+          reviewByPath={liveReviewByPath}
           pendingAction={pendingAction}
           onAction={handleAction}
         />
@@ -239,6 +260,7 @@ export function WorkspacesPageContent(props: {
           icon={Archive}
           empty="No archived workspaces yet."
           workspaces={groups.archived}
+          reviewByPath={liveReviewByPath}
           pendingAction={pendingAction}
           onAction={handleAction}
         />
@@ -247,10 +269,32 @@ export function WorkspacesPageContent(props: {
           icon={AlertTriangle}
           empty="No cleaned or missing workspaces need recovery."
           workspaces={groups.missing}
+          reviewByPath={liveReviewByPath}
           pendingAction={pendingAction}
           onAction={handleAction}
         />
       </div>
+
+      <ReviewPanel
+        title="Workspace diff and approval handoff"
+        description="Workspace review is fed by the same shared artifact model as issue review, so lifecycle cards and diff actions stay in sync."
+        empty="No workspace reviews are queued yet."
+        loading={workspaceReviews.loading}
+        error={workspaceReviews.error}
+        artifacts={workspaceReviews.artifacts}
+        queue={workspaceReviews.queue}
+        summary={workspaceReviews.summary}
+        pendingArtifactId={workspaceReviews.pendingArtifactId}
+        onApprove={(artifactId) =>
+          workspaceReviews.actOnReview({ action: "approve", artifactId }).then(() => refreshInventory())
+        }
+        onRequestChanges={(artifactId) =>
+          workspaceReviews.actOnReview({ action: "request-changes", artifactId }).then(() => refreshInventory())
+        }
+        onAddComment={(input) =>
+          workspaceReviews.actOnReview({ action: "add-comment", ...input }).then(() => refreshInventory())
+        }
+      />
     </div>
   );
 }
@@ -269,6 +313,10 @@ function WorkspaceColumn(props: {
   icon: typeof FolderGit2;
   empty: string;
   workspaces: WorkspaceInventoryItem[];
+  reviewByPath: ReadonlyMap<
+    string,
+    NonNullable<WorkspaceInventoryItem["review"]>
+  >;
   pendingAction: string | null;
   onAction: (action: "archive" | "cleanup" | "recover", workspace: WorkspaceInventoryItem) => void;
 }) {
@@ -294,6 +342,7 @@ function WorkspaceColumn(props: {
           const runtimeSession =
             workspace.sessions.items.find((session) => session.status === "active" && session.runtime) ??
             workspace.sessions.items.find((session) => session.runtime);
+          const review = props.reviewByPath.get(workspace.path) ?? workspace.review;
 
           return (
             <article key={workspace.path} className="rounded-2xl border border-border bg-background/70 p-4">
@@ -318,6 +367,11 @@ function WorkspaceColumn(props: {
                     {workspace.git.branch ? (
                       <span className="rounded-full border border-info/20 bg-info/10 px-2 py-0.5 text-xs text-info">
                         {workspace.git.branch}
+                      </span>
+                    ) : null}
+                    {review ? (
+                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                        {review.decision} · {review.openCommentCount} open
                       </span>
                     ) : null}
                   </div>

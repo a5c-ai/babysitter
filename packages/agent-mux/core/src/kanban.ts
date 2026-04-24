@@ -47,6 +47,18 @@ export type KanbanCiGateStatus = 'pending' | 'passing' | 'failing' | 'skipped';
 
 export type KanbanPublishStatus = 'not-ready' | 'pending' | 'ready' | 'published' | 'failed';
 
+export type KanbanReviewTargetType = 'issue' | 'workspace';
+
+export type KanbanReviewDecision = 'pending' | 'changes-requested' | 'approved';
+
+export type KanbanReviewQueueState = 'queued' | 'in-review' | 'completed';
+
+export type KanbanDiffLineKind = 'context' | 'add' | 'delete';
+
+export type KanbanReviewCommentStatus = 'open' | 'resolved';
+
+export type KanbanReviewCommentSide = 'base' | 'head';
+
 export interface KanbanLabel {
   readonly id: string;
   readonly name: string;
@@ -159,6 +171,108 @@ export interface KanbanIssueRepositoryLifecycle {
   readonly lastPublishedAt?: string;
 }
 
+export interface KanbanReviewFeedbackSource {
+  readonly kind: 'agent-feedback';
+  readonly label: string;
+  readonly sessionId?: string;
+  readonly runId?: string;
+  readonly effectId?: string;
+  readonly messageId?: string;
+}
+
+export interface KanbanDiffLine {
+  readonly kind: KanbanDiffLineKind;
+  readonly content: string;
+  readonly oldLineNumber?: number;
+  readonly newLineNumber?: number;
+}
+
+export interface KanbanDiffHunk {
+  readonly id: string;
+  readonly header: string;
+  readonly lines: readonly KanbanDiffLine[];
+}
+
+export interface KanbanDiffFile {
+  readonly id: string;
+  readonly path: string;
+  readonly additions: number;
+  readonly deletions: number;
+  readonly hunks: readonly KanbanDiffHunk[];
+}
+
+export interface KanbanReviewCommentAnchor {
+  readonly fileId: string;
+  readonly filePath: string;
+  readonly hunkId: string;
+  readonly side: KanbanReviewCommentSide;
+  readonly line: number;
+}
+
+export interface KanbanReviewComment {
+  readonly id: string;
+  readonly author: {
+    readonly kind: 'agent' | 'human';
+    readonly name: string;
+  };
+  readonly body: string;
+  readonly createdAt: string;
+  readonly status: KanbanReviewCommentStatus;
+  readonly anchor: KanbanReviewCommentAnchor;
+  readonly feedbackSource?: KanbanReviewFeedbackSource;
+}
+
+export interface KanbanReviewSummary {
+  readonly decision: KanbanReviewDecision;
+  readonly queueState: KanbanReviewQueueState;
+  readonly commentCount: number;
+  readonly openCommentCount: number;
+  readonly latestActivityAt: string;
+}
+
+export interface KanbanReviewArtifact {
+  readonly id: string;
+  readonly targetType: KanbanReviewTargetType;
+  readonly targetId: string;
+  readonly targetLabel: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly branch?: string;
+  readonly decision: KanbanReviewDecision;
+  readonly queueState: KanbanReviewQueueState;
+  readonly diff: readonly KanbanDiffFile[];
+  readonly comments: readonly KanbanReviewComment[];
+  readonly updatedAt: string;
+}
+
+export interface KanbanReviewQueueItem {
+  readonly artifactId: string;
+  readonly targetType: KanbanReviewTargetType;
+  readonly targetId: string;
+  readonly targetLabel: string;
+  readonly title: string;
+  readonly decision: KanbanReviewDecision;
+  readonly queueState: KanbanReviewQueueState;
+  readonly commentCount: number;
+  readonly openCommentCount: number;
+  readonly updatedAt: string;
+}
+
+export interface KanbanReviewSnapshot {
+  readonly generatedAt: string;
+  readonly artifacts: readonly KanbanReviewArtifact[];
+  readonly queue: readonly KanbanReviewQueueItem[];
+  readonly summary: {
+    readonly total: number;
+    readonly issueCount: number;
+    readonly workspaceCount: number;
+    readonly pendingCount: number;
+    readonly changesRequestedCount: number;
+  readonly approvedCount: number;
+  readonly openCommentCount: number;
+  };
+}
+
 export interface KanbanIssue {
   readonly id: string;
   readonly projectId: string;
@@ -180,6 +294,7 @@ export interface KanbanIssue {
   readonly dispatch: KanbanIssueDispatchState;
   readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle;
   readonly source?: KanbanIssueSource;
+  readonly review?: KanbanReviewSummary;
 }
 
 export interface KanbanStatusDefinition {
@@ -276,6 +391,7 @@ export interface KanbanBoardCard {
   readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle;
   readonly moveTargets: readonly KanbanBoardMoveTarget[];
   readonly policySignals: readonly KanbanBoardPolicySignal[];
+  readonly review?: KanbanReviewSummary;
 }
 
 export interface KanbanBoardColumn {
@@ -643,6 +759,18 @@ function createPolicySignal(
     message,
     blocking,
     severity: blocking ? 'error' : 'warning',
+  };
+}
+
+export function summarizeKanbanReviewArtifact(
+  artifact: Pick<KanbanReviewArtifact, 'decision' | 'queueState' | 'comments' | 'updatedAt'>,
+): KanbanReviewSummary {
+  return {
+    decision: artifact.decision,
+    queueState: artifact.queueState,
+    commentCount: artifact.comments.length,
+    openCommentCount: artifact.comments.filter((comment) => comment.status === 'open').length,
+    latestActivityAt: artifact.updatedAt,
   };
 }
 
@@ -1085,6 +1213,7 @@ export function buildKanbanProjectBoard(input: {
         };
       }),
       policySignals: signals,
+      review: issue.review,
     };
   });
 

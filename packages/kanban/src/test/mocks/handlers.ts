@@ -245,6 +245,46 @@ const mockBacklogOverview = {
     inProgressCount: 0,
   },
 };
+const mockReviewSnapshot = {
+  generatedAt: new Date().toISOString(),
+  artifacts: [
+    {
+      id: "review-issue-kanban-gap-004",
+      targetType: "issue",
+      targetId: "KANBAN-GAP-004",
+      targetLabel: "KANBAN-GAP-004",
+      title: "Review diff workflow primitives",
+      decision: "pending",
+      queueState: "queued",
+      updatedAt: new Date().toISOString(),
+      diff: [],
+      comments: [],
+    },
+  ],
+  queue: [
+    {
+      artifactId: "review-issue-kanban-gap-004",
+      targetType: "issue",
+      targetId: "KANBAN-GAP-004",
+      targetLabel: "KANBAN-GAP-004",
+      title: "Review diff workflow primitives",
+      decision: "pending",
+      queueState: "queued",
+      commentCount: 0,
+      openCommentCount: 0,
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  summary: {
+    total: 1,
+    issueCount: 1,
+    workspaceCount: 0,
+    pendingCount: 1,
+    changesRequestedCount: 0,
+    approvedCount: 0,
+    openCommentCount: 0,
+  },
+};
 
 export const handlers = [
   // GET /api/runs — returns run list (supports ?mode=projects)
@@ -344,5 +384,13 @@ export const handlers = [
       ...mockBacklogOverview,
       lastAction: body.action ?? null,
     });
+  }),
+
+  http.get('/api/reviews', () => {
+    return HttpResponse.json(mockReviewSnapshot);
+  }),
+
+  http.post('/api/reviews', () => {
+    return HttpResponse.json(mockReviewSnapshot);
   }),
 ];

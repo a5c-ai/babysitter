@@ -22,6 +22,8 @@ import {
 import { useState } from "react";
 
 import { useBacklog } from "@/hooks/use-backlog";
+import { useReviews } from "@/hooks/use-reviews";
+import { ReviewPanel } from "@/components/review/review-panel";
 
 const workflowOrder: readonly KanbanWorkflowState[] = ["todo", "in-progress", "review", "done"];
 
@@ -426,7 +428,9 @@ export function BacklogOverview() {
     createPullRequest,
     movingIssueId,
     mutatingIssueId,
+    refresh,
   } = useBacklog();
+  const issueReviews = useReviews({ targetType: "issue" });
 
   if (loading && !snapshot) {
     return (
@@ -460,7 +464,9 @@ export function BacklogOverview() {
 
   const primaryProject = snapshot.projects[0];
   const primaryBoard = board.projects.find((candidate) => candidate.projectId === primaryProject?.id);
-  const targetModelIssue = snapshot.issues.find((issue) => issue.key === "KANBAN-DEBT-003");
+  const targetModelIssue =
+    snapshot.issues.find((issue) => issue.key === "KANBAN-GAP-004") ??
+    snapshot.issues.find((issue) => issue.key === "KANBAN-DEBT-003");
 
   if (!primaryProject || !primaryBoard) {
     return null;
@@ -527,9 +533,9 @@ export function BacklogOverview() {
             Review Queue
           </div>
           <div className="mt-3 text-2xl font-semibold text-primary">
-            {primaryBoard.columns.find((column) => column.id === "review")?.issueCount ?? 0}
+            {(issueReviews.summary?.pendingCount ?? 0) + (issueReviews.summary?.changesRequestedCount ?? 0)}
           </div>
-          <div className="text-sm text-primary/80">policy-gated handoff column</div>
+          <div className="text-sm text-primary/80">shared issue review artifacts awaiting action</div>
         </div>
         <div className="rounded-2xl border border-error/25 bg-error-muted p-4">
           <div className="flex items-center gap-2 text-sm text-error">
@@ -718,6 +724,17 @@ export function BacklogOverview() {
                               <p className="mt-2 text-sm leading-6 opacity-90">{card.summary}</p>
                             ) : null}
 
+                            {card.review ? (
+                              <div className="mt-3 flex flex-wrap gap-2 text-xs opacity-90">
+                                <span className="rounded-full border border-current/20 px-2 py-0.5">
+                                  Review {card.review.decision}
+                                </span>
+                                <span className="rounded-full border border-current/20 px-2 py-0.5">
+                                  {card.review.openCommentCount} open comments
+                                </span>
+                              </div>
+                            ) : null}
+
                             <div className="mt-3 flex flex-wrap items-center gap-3 text-xs opacity-80">
                               <span className="inline-flex items-center gap-1">
                                 <GitBranch className="h-3.5 w-3.5" />
@@ -792,6 +809,27 @@ export function BacklogOverview() {
               </div>
             </section>
           ))}
+      </div>
+
+      <div className="mt-6">
+        <ReviewPanel
+          title="Issue diff and feedback loop"
+          description="Issue review artifacts stay in the shared layer, so diff viewing, inline comments, and approval state are the same review record used across the app."
+          empty="No issue reviews are queued yet."
+          loading={issueReviews.loading}
+          error={issueReviews.error}
+          artifacts={issueReviews.artifacts}
+          queue={issueReviews.queue}
+          summary={issueReviews.summary}
+          pendingArtifactId={issueReviews.pendingArtifactId}
+          onApprove={(artifactId) => issueReviews.actOnReview({ action: "approve", artifactId }).then(() => refresh())}
+          onRequestChanges={(artifactId) =>
+            issueReviews.actOnReview({ action: "request-changes", artifactId }).then(() => refresh())
+          }
+          onAddComment={(input) =>
+            issueReviews.actOnReview({ action: "add-comment", ...input }).then(() => refresh())
+          }
+        />
       </div>
     </section>
   );

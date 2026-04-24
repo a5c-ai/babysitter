@@ -15,6 +15,35 @@ afterEach(async () => {
 describe("BacklogQueryService", () => {
   it("returns a seeded backlog summary and links matching run summaries", async () => {
     const service = new BacklogQueryService({
+      reviewService: {
+        listReviews: vi.fn().mockResolvedValue({
+          generatedAt: "2026-04-24T00:00:00.000Z",
+          artifacts: [
+            {
+              id: "review-1",
+              targetType: "issue",
+              targetId: "KANBAN-GAP-004",
+              targetLabel: "KANBAN-GAP-004",
+              title: "Review diff workflow primitives",
+              decision: "pending",
+              queueState: "queued",
+              updatedAt: "2026-04-24T00:00:00.000Z",
+              diff: [],
+              comments: [],
+            },
+          ],
+          queue: [],
+          summary: {
+            total: 1,
+            issueCount: 1,
+            workspaceCount: 0,
+            pendingCount: 1,
+            changesRequestedCount: 0,
+            approvedCount: 0,
+            openCommentCount: 0,
+          },
+        }),
+      } as never,
       runQueryService: {
         listProjects: vi.fn().mockResolvedValue({
           recentCompletionWindowMs: 14400000,
@@ -43,6 +72,7 @@ describe("BacklogQueryService", () => {
     expect(overview.summary.issueCount).toBeGreaterThanOrEqual(7);
     expect(overview.summary.needsDecompositionCount).toBeGreaterThanOrEqual(1);
     expect(overview.snapshot.projects[0]?.linkedRunSummary?.activeRuns).toBe(2);
+    expect(overview.snapshot.issues.find((issue) => issue.id === "KANBAN-GAP-004")?.review?.decision).toBe("pending");
     expect(overview.board.projects[0]?.columns.find((column) => column.id === "todo")?.issueCount).toBeGreaterThan(0);
     expect(overview.snapshot.issues.find((issue) => issue.key === "KANBAN-DEBT-003")).toMatchObject({
       childIssueIds: ["KANBAN-GAP-001", "KANBAN-GAP-002", "KANBAN-GAP-003"],
@@ -60,6 +90,22 @@ describe("BacklogQueryService", () => {
     const service = new BacklogQueryService({
       backlogFilePath,
       now: () => "2026-04-24T12:00:00.000Z",
+      reviewService: {
+        listReviews: vi.fn().mockResolvedValue({
+          generatedAt: "2026-04-24T12:00:00.000Z",
+          artifacts: [],
+          queue: [],
+          summary: {
+            total: 0,
+            issueCount: 0,
+            workspaceCount: 0,
+            pendingCount: 0,
+            changesRequestedCount: 0,
+            approvedCount: 0,
+            openCommentCount: 0,
+          },
+        }),
+      } as never,
       runQueryService: {
         listProjects: vi.fn().mockResolvedValue({
           recentCompletionWindowMs: 14400000,
@@ -186,6 +232,22 @@ describe("BacklogQueryService", () => {
 
   it("rejects moves that violate board policy", async () => {
     const service = new BacklogQueryService({
+      reviewService: {
+        listReviews: vi.fn().mockResolvedValue({
+          generatedAt: "2026-04-24T12:00:00.000Z",
+          artifacts: [],
+          queue: [],
+          summary: {
+            total: 0,
+            issueCount: 0,
+            workspaceCount: 0,
+            pendingCount: 0,
+            changesRequestedCount: 0,
+            approvedCount: 0,
+            openCommentCount: 0,
+          },
+        }),
+      } as never,
       runQueryService: {
         listProjects: vi.fn().mockResolvedValue({
           recentCompletionWindowMs: 14400000,
