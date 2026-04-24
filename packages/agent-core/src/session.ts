@@ -56,6 +56,24 @@ function buildSystemPrompt(options: AgentCoreSessionOptions): string | undefined
   return segments.join("\n\n");
 }
 
+function mapThinkingLevel(
+  thinkingLevel: AgentCoreSessionOptions["thinkingLevel"],
+): import("@a5c-ai/agent-mux").RunOptions["thinkingEffort"] | undefined {
+  switch (thinkingLevel) {
+    case "minimal":
+    case "low":
+      return "low";
+    case "medium":
+      return "medium";
+    case "high":
+      return "high";
+    case "xhigh":
+      return "max";
+    default:
+      return undefined;
+  }
+}
+
 function mapEventPayload(event: unknown): AgentCoreSessionEvent {
   if (!event || typeof event !== "object") {
     return { type: "unknown", value: event };
@@ -91,6 +109,7 @@ export class AgentCoreSessionHandle {
     const client = await getAgentMuxClient();
     const effectiveTimeout = timeout ?? this.options.timeout ?? DEFAULT_TIMEOUT_MS;
     const backend = this.options.backend ?? process.env.AGENT_CORE_BACKEND ?? DEFAULT_BACKEND;
+    const thinkingEffort = mapThinkingLevel(this.options.thinkingLevel);
     const start = Date.now();
 
     const followUps = this.queuedFollowUps;
@@ -109,6 +128,7 @@ export class AgentCoreSessionHandle {
       systemPrompt: buildSystemPrompt(this.options),
       systemPromptMode: this.options.systemPrompt ? "replace" : "append",
       approvalMode: this.options.uiContext ? "prompt" : "yolo",
+      ...(thinkingEffort ? { thinkingEffort } : {}),
       collectEvents: true,
     });
 

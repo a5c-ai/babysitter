@@ -14,20 +14,60 @@ export interface AgentCoreSessionEvent {
 }
 
 export interface AgentCoreSessionOptions {
+  /** Working directory forwarded to agent-mux as `cwd`. */
   workspace?: string;
+  /** Model identifier forwarded to agent-mux as `model`. */
   model?: string;
+  /** Prompt timeout in milliseconds forwarded to agent-mux as `timeout`. */
   timeout?: number;
+  /** Translated to agent-mux `thinkingEffort`. */
   thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use agent-mux-specific configuration, or the PI wrapper in
+   * `@a5c-ai/babysitter-agent`, if you still need tool-surface control.
+   */
   toolsMode?: "default" | "coding" | "readonly";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use `createAgentCoreToolDefinitions()` in the host integration or the PI
+   * wrapper in `@a5c-ai/babysitter-agent` for custom tool injection.
+   */
   customTools?: unknown[];
+  /** Enables interactive approval mode when a host UI context is present. */
   uiContext?: unknown;
+  /** Base system prompt text forwarded to agent-mux. */
   systemPrompt?: string;
+  /** Additional system prompt segments appended before dispatch. */
   appendSystemPrompt?: string[];
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use the PI wrapper in `@a5c-ai/babysitter-agent` if you still need
+   * extension and skills isolation controls.
+   */
   isolated?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Session persistence is controlled by the selected agent-mux backend.
+   */
   ephemeral?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Sandbox behavior now belongs to the selected agent-mux backend.
+   */
   bashSandbox?: "auto" | "secure" | "local";
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Compaction behavior now belongs to the selected agent-mux backend.
+   */
   enableCompaction?: boolean;
+  /**
+   * @deprecated Ignored by the agent-mux-backed agent-core runtime.
+   * Use the target backend's native configuration if you need a custom agents
+   * directory.
+   */
   agentDir?: string;
+  /** Agent-mux adapter/backend name forwarded as `agent`. */
   backend?: string;
 }
 
