@@ -37,6 +37,10 @@ import {
   generateExtraFiles,
 } from './transformEmitters.js';
 
+function toOutputPath(value: string): string {
+  return value.replace(/\\/g, '/');
+}
+
 export function transform(
   sourceDir: string,
   manifest: A5cPluginManifest,
@@ -100,12 +104,12 @@ function transformCommands(
       const entries = fs.readdirSync(commandDir);
       for (const entry of entries) {
         if (entry.endsWith('.md')) {
-          commandPaths.push(path.join(manifest.commands, entry));
+          commandPaths.push(toOutputPath(path.join(manifest.commands, entry)));
         }
       }
     }
   } else {
-    commandPaths.push(...manifest.commands);
+    commandPaths.push(...manifest.commands.map(toOutputPath));
   }
 
   for (const cmdPath of commandPaths) {
@@ -209,12 +213,12 @@ export function getCommandPaths(
       const entries = fs.readdirSync(commandDir);
       for (const entry of entries) {
         if (entry.endsWith('.md')) {
-          commandPaths.push(path.join(manifest.commands, entry));
+          commandPaths.push(toOutputPath(path.join(manifest.commands, entry)));
         }
       }
     }
   } else {
-    commandPaths.push(...manifest.commands);
+    commandPaths.push(...manifest.commands.map(toOutputPath));
   }
 
   return commandPaths;

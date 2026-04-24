@@ -29,6 +29,10 @@ import { generateInstallShared } from './installSharedGenerator.js';
 import { resolveSdkConfig } from './sdkConfig.js';
 import { getCommandPaths } from './transform.js';
 
+function toOutputPath(value: string): string {
+  return value.replace(/\\/g, '/');
+}
+
 function generateCjsWrapper(moduleBasename: string, exportOnly = false): string {
   if (exportOnly) {
     return `'use strict';\n\nmodule.exports = require('./${moduleBasename}.js');\n`;
@@ -269,7 +273,7 @@ export function copyContextFiles(
     if (fs.existsSync(fullPath)) {
       const basename = path.basename(contextPath);
       files.push({
-        path: basename,
+        path: toOutputPath(basename),
         content: fs.readFileSync(fullPath, 'utf-8'),
       });
     }
@@ -298,7 +302,7 @@ export function copyIncludedFiles(
         const stat = fs.statSync(fullPath);
         if (stat.isFile()) {
           files.push({
-            path: pattern,
+            path: toOutputPath(pattern),
             content: fs.readFileSync(fullPath, 'utf-8'),
           });
         } else if (stat.isDirectory()) {
@@ -315,7 +319,7 @@ export function copyIncludedFiles(
     if (fs.existsSync(fullDir) && fs.statSync(fullDir).isDirectory()) {
       for (const entry of fs.readdirSync(fullDir)) {
         if (ext && !entry.endsWith(ext)) continue;
-        const entryPath = path.join(dir, entry);
+        const entryPath = toOutputPath(path.join(dir, entry));
         const fullEntry = path.join(sourceDir, entryPath);
         if (fs.statSync(fullEntry).isFile()) {
           files.push({
@@ -337,7 +341,7 @@ export function collectDir(
 ): void {
   const fullDir = path.join(sourceDir, relDir);
   for (const entry of fs.readdirSync(fullDir)) {
-    const relPath = path.join(relDir, entry);
+    const relPath = toOutputPath(path.join(relDir, entry));
     const fullPath = path.join(sourceDir, relPath);
     const stat = fs.statSync(fullPath);
     if (stat.isFile()) {

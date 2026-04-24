@@ -2,6 +2,11 @@
 
 import type { TargetProfile } from './types.js';
 
+function commandNameFromPath(cmdPath: string): string {
+  const normalized = cmdPath.replace(/\\/g, '/');
+  return normalized.replace(/^.*\//, '').replace(/\.md$/, '');
+}
+
 export function generateProgrammaticExtension(
   manifest: { name: string; skills?: Array<{ name: string }>; commands?: string[] | string; hooks?: Record<string, string | boolean | null> },
   targetProfile: TargetProfile,
@@ -26,7 +31,7 @@ export function generateProgrammaticExtension(
 
   if (commandPaths) {
     for (const cmdPath of commandPaths) {
-      const name = cmdPath.replace(/^.*\//, '').replace(/\.md$/, '');
+      const name = commandNameFromPath(cmdPath);
       if (!excludeNames.has(name)) {
         commandNameSet.add(name);
       }
