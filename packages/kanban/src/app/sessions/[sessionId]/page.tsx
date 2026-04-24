@@ -5,8 +5,10 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
+import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
 import { useGateway } from "@/lib/agent-mux-ui";
 
@@ -30,6 +32,13 @@ function formatUsd(totalUsd: number | null): string {
 
 function workspaceHref(cwd: string): string {
   return `/workspaces?workspace=${encodeURIComponent(cwd)}`;
+}
+
+function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  return value as WorkspaceRuntimeSurface;
 }
 
 function buildTranscript(
@@ -192,6 +201,7 @@ function SessionDetailContent() {
   const runIds = useMemo(() => runs.map((run) => String(run.runId ?? "")), [runs]);
   const totalCost = useMemo(() => accumulateEventCost(runIds, eventBuffers), [eventBuffers, runIds]);
   const workspacePath = typeof session?.cwd === "string" && session.cwd.length > 0 ? session.cwd : null;
+  const runtime = readRuntime(session?.runtime);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -346,6 +356,8 @@ function SessionDetailContent() {
           </div>
         </aside>
       </div>
+
+      {runtime ? <WorkspaceRuntimePanel runtime={runtime} sessionId={sessionId} /> : null}
     </div>
   );
 }

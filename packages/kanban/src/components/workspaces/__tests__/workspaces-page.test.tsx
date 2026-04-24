@@ -27,6 +27,26 @@ describe("workspaces-page helpers", () => {
       summary: { total: 1, active: 1, idle: 0, archived: 0, missing: 0 },
       workspaces: [],
     };
+    const runtime = {
+      updatedAt: 1,
+      workspacePath: "/repo/worktrees/task",
+      preview: {
+        status: "ready",
+        primaryUrl: "http://127.0.0.1:3000",
+        urls: ["http://127.0.0.1:3000"],
+        deviceProfiles: [],
+      },
+      terminal: {
+        status: "idle",
+        commands: [],
+      },
+      devServer: {
+        status: "running",
+        primaryUrl: "http://127.0.0.1:3000",
+        urls: ["http://127.0.0.1:3000"],
+        logs: [],
+      },
+    };
 
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify(payload), {
@@ -36,7 +56,9 @@ describe("workspaces-page helpers", () => {
     );
 
     await expect(
-      loadInventory([{ sessionId: "session-1", agent: "codex", status: "active", cwd: "/repo/worktrees/task" }]),
+      loadInventory([
+        { sessionId: "session-1", agent: "codex", status: "active", cwd: "/repo/worktrees/task", runtime },
+      ]),
     ).resolves.toEqual(payload);
 
     expect(fetch).toHaveBeenCalledWith(
@@ -44,7 +66,7 @@ describe("workspaces-page helpers", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          sessions: [{ sessionId: "session-1", agent: "codex", status: "active", cwd: "/repo/worktrees/task" }],
+          sessions: [{ sessionId: "session-1", agent: "codex", status: "active", cwd: "/repo/worktrees/task", runtime }],
         }),
       }),
     );

@@ -11,6 +11,7 @@ import { createHookWebhookPayload, emitHookWebhook } from '../notifications/webh
 import type { HookDecisionFrame } from '../protocol/v1.js';
 import { EventLog, type LoggedRunEvent } from './event-log.js';
 import { HookBroker } from './hook-broker.js';
+import { buildWorkspaceRuntimeSurface } from './session-runtime.js';
 import type { RunEntry, RunOwner, RunStartInput, RunStatus, SessionEntry } from './types.js';
 
 interface ActiveRun {
@@ -272,7 +273,11 @@ export class RunManager {
   async getSessionContent(sessionId: string): Promise<FullSession | null> {
     const cached = this.nativeSessionContentCache.get(sessionId);
     if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
+      const session = await this.getSession(sessionId);
+      return {
+        ...cached.value,
+        runtime: session?.runtime,
+      };
     }
     const inFlight = this.nativeSessionContentPromises.get(sessionId);
     if (inFlight) {
@@ -297,7 +302,15 @@ export class RunManager {
         this.nativeSessionContentPromises.delete(sessionId);
       });
     this.nativeSessionContentPromises.set(sessionId, load);
-    return await load;
+    const result = await load;
+    if (!result) {
+      return null;
+    }
+    const latest = await this.getSession(sessionId);
+    return {
+      ...result,
+      runtime: latest?.runtime,
+    };
   }
 
   async listSessions(): Promise<SessionEntry[]> {
@@ -353,7 +366,15 @@ export class RunManager {
       });
     }
 
-    return Array.from(sessions.values())
+    const enriched = await Promise.all(
+      Array.from(sessions.values()).map(async (session) => {
+        const runs = grouped.get(session.sessionId) ?? [];
+        session.runtime = await this.buildRuntimeSurface(session, runs);
+        return session;
+      }),
+    );
+
+    return enriched
       .sort((left, right) => right.updatedAt - left.updatedAt)
       .map(cloneSession);
   }
@@ -683,11 +704,39 @@ export class RunManager {
         tags: parsed.tags ?? [],
         cwd: parsed.cwd,
         forkedFrom: parsed.forkedFrom,
+        runtime: undefined,
         messages: parsed.messages ?? [],
         raw: parsed.raw,
       };
     } catch {
       return null;
     }
+  }
+
+  private async buildRuntimeSurface(session: SessionEntry, runs: RunEntry[]) {
+    if ((!session.cwd || session.cwd.length === 0) && runs.length === 0) {
+      return undefined;
+    }
+
+    const eventsByRunId = new Map<string, LoggedRunEvent[]>();
+    for (const run of runs) {
+      eventsByRunId.set(run.runId, await this.readRecentEvents(run.runId));
+    }
+
+    return buildWorkspaceRuntimeSurface({
+      cwd: session.cwd,
+      runs,
+      eventsByRunId,
+    });
+  }
+
+  private async readRecentEvents(runId: string, limit = 120): Promise<LoggedRunEvent[]> {
+    const state = this.eventLog.getSeqState(runId);
+    if (state.tailSeq <= 0) {
+      return [];
+    }
+    const sinceSeq = Math.max(0, state.tailSeq - limit);
+    const replay = await this.eventLog.readSince(runId, sinceSeq, state.tailSeq);
+    return replay.events;
   }
 }

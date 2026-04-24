@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { cn } from "@/lib/cn";
 import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
+import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 
 function formatTimestamp(value: string | null): string {
   if (!value) {
@@ -290,6 +291,9 @@ function WorkspaceColumn(props: {
           const archiveKey = `archive:${workspace.path}`;
           const cleanupKey = `cleanup:${workspace.path}`;
           const recoverKey = `recover:${workspace.path}`;
+          const runtimeSession =
+            workspace.sessions.items.find((session) => session.status === "active" && session.runtime) ??
+            workspace.sessions.items.find((session) => session.runtime);
 
           return (
             <article key={workspace.path} className="rounded-2xl border border-border bg-background/70 p-4">
@@ -375,6 +379,14 @@ function WorkspaceColumn(props: {
                 {workspace.archivedAt ? ` · archived ${formatTimestamp(workspace.archivedAt)}` : ""}
                 {workspace.cleanedAt ? ` · cleaned ${formatTimestamp(workspace.cleanedAt)}` : ""}
               </p>
+
+              {runtimeSession?.runtime ? (
+                <WorkspaceRuntimePanel
+                  className="mt-5 border-border/70 bg-card/70"
+                  runtime={runtimeSession.runtime}
+                  sessionId={runtimeSession.sessionId}
+                />
+              ) : null}
             </article>
           );
         })}

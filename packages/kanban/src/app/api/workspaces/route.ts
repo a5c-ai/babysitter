@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 import { normalizeError } from "@/lib/error-handler";
 import { WorkspaceLifecycleService, type WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
@@ -7,6 +8,13 @@ export const dynamic = "force-dynamic";
 
 const NO_CACHE_HEADERS = { "Cache-Control": "no-cache, no-store" };
 const service = new WorkspaceLifecycleService();
+
+function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  return value as WorkspaceRuntimeSurface;
+}
 
 function readSessions(body: unknown): WorkspaceSessionSnapshot[] {
   if (!body || typeof body !== "object" || !Array.isArray((body as { sessions?: unknown[] }).sessions)) {
@@ -33,6 +41,7 @@ function readSessions(body: unknown): WorkspaceSessionSnapshot[] {
         updatedAt: typeof session.updatedAt === "number" ? session.updatedAt : undefined,
         activeRunId: typeof session.activeRunId === "string" ? session.activeRunId : null,
         latestRunId: typeof session.latestRunId === "string" ? session.latestRunId : null,
+        runtime: readRuntime(session.runtime),
       },
     ];
   });

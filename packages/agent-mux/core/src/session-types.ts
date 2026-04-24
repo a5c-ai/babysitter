@@ -75,6 +75,67 @@ export interface SessionMessage {
 }
 
 // ---------------------------------------------------------------------------
+// Workspace runtime surfaces
+// ---------------------------------------------------------------------------
+
+export interface WorkspaceRuntimeDeviceProfile {
+  readonly id: 'desktop' | 'tablet' | 'mobile';
+  readonly label: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+export interface WorkspaceRuntimeLogLine {
+  readonly timestamp: number;
+  readonly stream: 'stdout' | 'stderr' | 'system';
+  readonly text: string;
+}
+
+export interface WorkspaceTerminalCommand {
+  readonly id: string;
+  readonly runId: string;
+  readonly source: 'shell' | 'tool';
+  readonly toolName?: string;
+  readonly command: string;
+  readonly status: 'running' | 'completed' | 'failed';
+  readonly startedAt: number;
+  readonly endedAt?: number;
+  readonly exitCode?: number;
+  readonly logs: readonly WorkspaceRuntimeLogLine[];
+}
+
+export interface WorkspacePreviewSurface {
+  readonly status: 'ready' | 'unavailable';
+  readonly primaryUrl?: string;
+  readonly urls: readonly string[];
+  readonly detectedAt?: number;
+  readonly deviceProfiles: readonly WorkspaceRuntimeDeviceProfile[];
+}
+
+export interface WorkspaceTerminalSurface {
+  readonly status: 'active' | 'idle';
+  readonly commands: readonly WorkspaceTerminalCommand[];
+}
+
+export interface WorkspaceDevServerSurface {
+  readonly status: 'running' | 'starting' | 'idle' | 'error';
+  readonly command?: string;
+  readonly primaryUrl?: string;
+  readonly urls: readonly string[];
+  readonly port?: number;
+  readonly detectedAt?: number;
+  readonly logs: readonly WorkspaceRuntimeLogLine[];
+}
+
+export interface WorkspaceRuntimeSurface {
+  readonly workspacePath?: string;
+  readonly updatedAt: number;
+  readonly preview: WorkspacePreviewSurface;
+  readonly terminal: WorkspaceTerminalSurface;
+  readonly devServer: WorkspaceDevServerSurface;
+}
+
+// ---------------------------------------------------------------------------
 // SessionSummary
 // ---------------------------------------------------------------------------
 
@@ -121,6 +182,9 @@ export interface SessionSummary {
 
   /** Relevance score (0.0 to 1.0), present only in search results. */
   readonly relevanceScore?: number;
+
+  /** Derived runtime surfaces for the session's workspace, when available. */
+  readonly runtime?: WorkspaceRuntimeSurface;
 }
 
 // ---------------------------------------------------------------------------
@@ -164,6 +228,9 @@ export interface FullSession {
 
   /** Parent session ID if forked. */
   readonly forkedFrom?: string;
+
+  /** Derived runtime surfaces for the session's workspace, when available. */
+  readonly runtime?: WorkspaceRuntimeSurface;
 
   /** The ordered list of messages in this session. */
   readonly messages: SessionMessage[];

@@ -3,10 +3,18 @@
 import { useMemo } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { WorkspacesPageContent } from "@/components/workspaces/workspaces-page";
 import { useGateway } from "@/lib/agent-mux-ui";
+
+function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  return value as WorkspaceRuntimeSurface;
+}
 
 export default function WorkspacesPage() {
   const { isAuthenticated } = useGatewayAuth();
@@ -33,6 +41,7 @@ export default function WorkspacesPage() {
             updatedAt: typeof session.updatedAt === "number" ? session.updatedAt : undefined,
             activeRunId: typeof session.activeRunId === "string" ? session.activeRunId : null,
             latestRunId: typeof session.latestRunId === "string" ? session.latestRunId : null,
+            runtime: readRuntime(session.runtime),
           },
         ];
       }),

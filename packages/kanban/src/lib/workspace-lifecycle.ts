@@ -8,6 +8,7 @@ import { discoverAllRunDirs as defaultDiscoverAllRunDirs, type DiscoveredRun } f
 import { getRunCached as defaultGetRunCached } from "@/lib/run-cache";
 import type { Run } from "@/types";
 import type { WatchSource } from "@/lib/config-loader";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 
 const execFile = promisify(execFileCallback);
 
@@ -26,6 +27,7 @@ export interface WorkspaceSessionSnapshot {
   updatedAt?: number;
   activeRunId?: string | null;
   latestRunId?: string | null;
+  runtime?: WorkspaceRuntimeSurface;
 }
 
 export interface WorkspaceInventoryItem {
