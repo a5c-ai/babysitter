@@ -177,6 +177,27 @@ Recommended validation categories:
 - documentation consistency checks for renamed concepts,
 - performance spot checks when bundle or startup claims are involved.
 
+Current V6-facing commands that can be cited today are:
+
+- `npm run verify:v6:seams`
+- `npm run lint --workspace=@a5c-ai/babysitter-sdk`
+- `npm run build:sdk`
+- `npm run test:sdk`
+- `npm run build:hooks-mux`
+- `npm run test:hooks-mux`
+- `npm run build:agent-mux`
+- `npm run test:agent-mux`
+- `npm run build --workspace=@a5c-ai/breakpoints-mux`
+- `npm run typecheck --workspace=@a5c-ai/breakpoints-mux`
+- `npm run test --workspace=@a5c-ai/breakpoints-mux`
+- `npm run build --workspace=@a5c-ai/agent-plugins-mux`
+- `npm run test --workspace=@a5c-ai/agent-plugins-mux`
+- `npm run verify:metadata`
+- `npm run docs:build`
+- `npm run validate:ci --prefix plugins/<plugin>`
+
+Those commands justify build, test, packaging, metadata, and docs-build claims only. They do not yet justify architectural-boundary or interface-contract enforcement claims.
+
 ## 8. Measurement Expectations
 
 Performance and packaging claims must specify:
@@ -189,6 +210,44 @@ Performance and packaging claims must specify:
 If a claim cannot meet that bar, it should be phrased as a hypothesis instead of a target.
 
 Repo-wide targets such as "all performance targets met", "zero regressions", or trend-based regression detection are not minimum-acceptable V6 gates unless a concrete slice owner, measurement command, and enforcement point already exist.
+
+## 8A. Deferred Future Slice: Architecture-Gate Validation
+
+This slice is intentionally deferred until the repo is ready to add and maintain explicit enforcement.
+
+### Purpose
+
+Turn architecture-boundary and interface-contract language into executable gates instead of documentation intent.
+
+### Owners
+
+- SDK maintainers own the new gate commands.
+- CI maintainers own workflow wiring in `.github/workflows/ci.yml`.
+- V6 documentation owners own promotion of related claims after the gates exist.
+
+### Planned Commands
+
+- `npm run test:architecture` for repository architecture-boundary checks
+- `npm run test:contracts` for repository interface-contract checks
+- `npm run test:e2e:docker` if a promoted slice depends on end-to-end runtime proof
+
+These command names are part of the proposed slice definition, not current repository guarantees.
+
+### Entry Criteria
+
+- an owner is assigned for each command,
+- the target boundary or contract is written down precisely enough to fail deterministically,
+- the CI cost and rollback path are documented.
+
+### Exit Criteria
+
+- the new commands exist and pass locally,
+- the new commands run in CI,
+- V6 docs are updated to cite those commands explicitly where claims depend on them.
+
+### Until This Slice Lands
+
+V6 docs should describe architecture-boundary and contract validation as deferred work rather than current enforcement.
 
 ## 9. Deliverables By Maturity Level
 
