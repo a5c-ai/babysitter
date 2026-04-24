@@ -69,6 +69,8 @@ describe('scripts/agent-mux-build.cjs', () => {
     });
 
     expect(exitCode).toBe(0);
+    expect(packages[0]).toBe('packages/agent-catalog');
+    expect(packages.indexOf('packages/agent-catalog')).toBeLessThan(packages.indexOf('packages/agent-mux/core'));
     expect(commands).toHaveLength(packages.length);
     expect(commands.map(({ cwd }) => path.relative(repoRoot, cwd).split(path.sep).join('/'))).toEqual(packages);
     expect(commands.slice(0, -1).every(({ command }) => command === 'npm run build')).toBe(true);

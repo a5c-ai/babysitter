@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 const { execSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 const packages = [
+  'packages/agent-catalog',
   'packages/hooks-mux/core',
   'packages/hooks-mux/cli',
   'packages/hooks-mux/adapter-claude',
@@ -20,10 +22,15 @@ const mode = process.argv[2] || 'build';
 
 for (const pkg of packages) {
   const dir = path.resolve(__dirname, '..', pkg);
-  const cmd = mode === 'test' ? 'npx vitest run' : mode === 'lint' ? 'npx eslint "src/**/*.ts" --max-warnings=0' : 'npx tsc -p tsconfig.json';
+  const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+  const scriptName = mode === 'lint' ? 'lint' : mode;
+  if (!manifest.scripts?.[scriptName]) {
+    console.log(`\n=== ${pkg} (${mode}) skipped: no ${scriptName} script ===`);
+    continue;
+  }
   console.log(`\n=== ${pkg} (${mode}) ===`);
   try {
-    execSync(cmd, { cwd: dir, stdio: 'inherit' });
+    execSync(`npm run ${scriptName}`, { cwd: dir, stdio: 'inherit' });
   } catch {
     process.exit(1);
   }
