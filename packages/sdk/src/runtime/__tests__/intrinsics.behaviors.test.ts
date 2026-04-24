@@ -98,19 +98,24 @@ describe("subprocess intrinsic", () => {
     const { runDir, runId } = await createTestRun(tmpRoot);
     const context = await buildTaskContext(runDir, runId);
 
-    await expect(
+    expect(() =>
       runSubprocessIntrinsic(
         {
           processPath: "./processes/subtask.mjs",
           processId: "subtask",
         },
         context,
-      ),
-    ).rejects.toSatisfy((error) => {
-      expect(error).toBeInstanceOf(RunFailedError);
-      expect((error as Error).message).toContain("only supported when the run is iterated by babysitter-agent");
-      return true;
-    });
+      )
+    ).toThrowError(RunFailedError);
+    expect(() =>
+      runSubprocessIntrinsic(
+        {
+          processPath: "./processes/subtask.mjs",
+          processId: "subtask",
+        },
+        context,
+      )
+    ).toThrowError("only supported when the run is iterated by babysitter-agent");
   });
 
   test("requests a subprocess effect with typed child-run metadata", async () => {

@@ -44,6 +44,14 @@ const HOOKS_PROXY_CLI_DIR = path.join(
 
 /** Compiled CLI entry point. */
 const CLI_ENTRY = path.join(HOOKS_PROXY_CLI_DIR, "dist", "cli", "main.js");
+const CLAUDE_ADAPTER_ENTRY = path.join(
+  REPO_ROOT,
+  "packages",
+  "hooks-mux",
+  "adapter-claude",
+  "dist",
+  "index.js",
+);
 
 // ---------------------------------------------------------------------------
 // Availability gate
@@ -52,6 +60,7 @@ const CLI_ENTRY = path.join(HOOKS_PROXY_CLI_DIR, "dist", "cli", "main.js");
 function hooksProxyDistExists(): boolean {
   try {
     fs.accessSync(CLI_ENTRY, fs.constants.R_OK);
+    fs.accessSync(CLAUDE_ADAPTER_ENTRY, fs.constants.R_OK);
     return true;
   } catch {
     return false;

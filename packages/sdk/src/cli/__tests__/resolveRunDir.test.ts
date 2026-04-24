@@ -16,8 +16,9 @@ describe("resolveRunDir", () => {
   });
 
   it("resolves a plain run ID relative to baseDir", () => {
-    const result = resolveRunDir(".a5c/runs", "01RUNID");
-    expect(result).toBe(path.resolve(".a5c/runs", "01RUNID"));
+    const baseDir = path.join(tmpDir, ".a5c", "runs");
+    const result = resolveRunDir(baseDir, "01RUNID");
+    expect(result).toBe(path.join(baseDir, "01RUNID"));
   });
 
   it("uses absolute runDirArg directly without prepending baseDir", () => {
@@ -69,13 +70,15 @@ describe("resolveRunDir", () => {
   });
 
   it("handles trailing slashes in baseDir", () => {
-    const result = resolveRunDir(".a5c/runs/", "01RUNID");
-    expect(result).toBe(path.resolve(".a5c/runs", "01RUNID"));
+    const baseDir = `${path.join(tmpDir, ".a5c", "runs")}${path.sep}`;
+    const result = resolveRunDir(baseDir, "01RUNID");
+    expect(result).toBe(path.join(tmpDir, ".a5c", "runs", "01RUNID"));
   });
 
-  it("handles relative path with parent traversal", () => {
-    const result = resolveRunDir(".a5c/runs", "../other/01RUNID");
-    expect(result).toBe(path.resolve(".a5c/runs", "../other/01RUNID"));
+  it("resolves relative path traversal from the current working directory", () => {
+    const baseDir = path.join(tmpDir, ".a5c", "runs");
+    const result = resolveRunDir(baseDir, "../other/01RUNID");
+    expect(result).toBe(path.resolve("../other/01RUNID"));
   });
 });
 
