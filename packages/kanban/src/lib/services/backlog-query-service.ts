@@ -57,8 +57,9 @@ const defaultProjects: readonly BacklogSeedProject[] = [
     key: 'KANBAN',
     name: 'Kanban App',
     description:
-      'Issue-centric planning surface for Babysitter runs and agent-mux sessions.',
+      'Board-, issue-, and workspace-first orchestration surface for Babysitter and agent-mux.',
     issueIds: [
+      'KANBAN-DEBT-003',
       'KANBAN-GAP-001',
       'KANBAN-GAP-001-A',
       'KANBAN-GAP-001-B',
@@ -80,14 +81,73 @@ const defaultProjects: readonly BacklogSeedProject[] = [
 
 const defaultIssues: readonly BacklogSeedIssue[] = [
   {
+    id: 'KANBAN-DEBT-003',
+    key: 'KANBAN-DEBT-003',
+    projectId: PROJECT_ID,
+    title: 'Align the kanban package contract to a board-, issue-, and workspace-first product model',
+    summary:
+      'Define the target product model explicitly and track the remaining work as board-product capabilities instead of treating the package as observability-first.',
+    description:
+      'The package name should match the real product contract. `packages/kanban` is the shell for board planning, issue orchestration, and workspace execution, with Babysitter observability layered on top. The unresolved work is deeper product capability, not cosmetic renaming.',
+    status: 'review',
+    priority: 'high',
+    labels: [debtLabel],
+    assignees: [],
+    dependencies: [],
+    acceptanceCriteria: [
+      {
+        id: 'KANBAN-DEBT-003-ac-1',
+        title: 'Document the target product model for packages/kanban.',
+        satisfied: true,
+      },
+      {
+        id: 'KANBAN-DEBT-003-ac-2',
+        title: 'Track board, issue, and workspace concepts as first-class work rather than observer-dashboard follow-ons.',
+        satisfied: true,
+      },
+      {
+        id: 'KANBAN-DEBT-003-ac-3',
+        title: 'Frame remaining gaps as missing board-product capabilities instead of a naming mismatch.',
+        satisfied: true,
+      },
+    ],
+    decomposition: [
+      {
+        id: 'KANBAN-DEBT-003-decomp-1',
+        title: 'Define the target product model and package contract.',
+        kind: 'coordination',
+        status: 'done',
+        issueId: 'KANBAN-GAP-001',
+      },
+      {
+        id: 'KANBAN-DEBT-003-decomp-2',
+        title: 'Keep deepening first-class board semantics.',
+        kind: 'implementation',
+        status: 'ready',
+        issueId: 'KANBAN-GAP-002',
+      },
+      {
+        id: 'KANBAN-DEBT-003-decomp-3',
+        title: 'Keep deepening first-class workspace execution flows.',
+        kind: 'implementation',
+        status: 'ready',
+        issueId: 'KANBAN-GAP-003',
+      },
+    ],
+    childIssueIds: ['KANBAN-GAP-001', 'KANBAN-GAP-002', 'KANBAN-GAP-003'],
+    createdAt: '2026-04-24T00:00:00.000Z',
+    updatedAt: '2026-04-24T00:00:00.000Z',
+    source: { kind: 'seed', path: SOURCE_PATH, externalId: 'KANBAN-DEBT-003' },
+  },
+  {
     id: 'KANBAN-GAP-001',
     key: 'KANBAN-GAP-001',
     projectId: PROJECT_ID,
     title: 'Add a first-class issue and project model to the kanban app',
     summary:
-      'Move the app from run/session-only concepts toward project and issue primitives that can drive backlog planning.',
+      'Deepen the shared project and issue model so the board uses a real system of record instead of seeded backlog data.',
     description:
-      'The current kanban app is run/session centric and does not yet model projects, issues, priorities, labels, assignees, dependencies, or acceptance criteria the way the original Vibe Kanban surface does.',
+      'The app now has first-class issue and project primitives, but the model still needs to mature from seeded local data into a true shared system of record with richer authoring for priorities, labels, assignees, dependencies, and acceptance criteria.',
     status: 'in-progress',
     priority: 'high',
     labels: [debtLabel],
@@ -151,6 +211,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
       'KANBAN-GAP-001-C',
       'KANBAN-GAP-001-D',
     ],
+    parentIssueId: 'KANBAN-DEBT-003',
     createdAt: '2026-04-24T00:00:00.000Z',
     updatedAt: '2026-04-24T00:00:00.000Z',
     source: { kind: 'seed', path: SOURCE_PATH, externalId: 'KANBAN-GAP-001' },
@@ -284,6 +345,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
       },
     ],
     childIssueIds: [],
+    parentIssueId: 'KANBAN-DEBT-003',
     createdAt: '2026-04-24T00:00:00.000Z',
     updatedAt: '2026-04-24T00:00:00.000Z',
     source: { kind: 'seed', path: SOURCE_PATH, externalId: 'KANBAN-GAP-002' },
@@ -301,6 +363,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     acceptanceCriteria: [],
     decomposition: [],
     childIssueIds: [],
+    parentIssueId: 'KANBAN-DEBT-003',
     createdAt: '2026-04-24T00:00:00.000Z',
     updatedAt: '2026-04-24T00:00:00.000Z',
     source: { kind: 'seed', path: SOURCE_PATH, externalId: 'KANBAN-GAP-003' },

@@ -54,17 +54,20 @@ export default function DashboardPage() {
               <LogoWordmark className="h-6 w-auto" />
             </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Babysitter run board with agent-mux session controls
+              Board-first orchestration with issue and workspace ownership
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-foreground-muted">
-              The board below now combines a real kanban issue flow with Babysitter-native
-              observability. Session creation, conversation, and hook approvals still live alongside
-              it through agent-mux, so the package stays thin while the shared integration layers own
-              the board semantics.
+              `packages/kanban` is the shell for planning work on a board, dispatching it through
+              first-class issues, and executing it inside explicit workspaces. Babysitter runs,
+              sessions, and approvals remain visible as execution overlays rather than replacing the
+              core kanban model.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button asChild variant="primary">
                 <Link href="/sessions/new">Start session</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/workspaces">Open workspaces</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href="/sessions">Browse sessions</Link>

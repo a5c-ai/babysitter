@@ -111,7 +111,7 @@ export function BacklogOverview() {
 
   const primaryProject = snapshot.projects[0];
   const primaryBoard = board.projects.find((candidate) => candidate.projectId === primaryProject?.id);
-  const currentGap = snapshot.issues.find((issue) => issue.key === "KANBAN-GAP-002");
+  const targetModelIssue = snapshot.issues.find((issue) => issue.key === "KANBAN-DEBT-003");
 
   if (!primaryProject || !primaryBoard) {
     return null;
@@ -192,17 +192,20 @@ export function BacklogOverview() {
         </div>
       </div>
 
-      {currentGap ? (
+      {targetModelIssue ? (
         <div className="mt-5 rounded-2xl border border-border bg-background p-4">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-              {currentGap.key}
+              {targetModelIssue.key}
             </span>
-            <span className="text-sm font-semibold text-foreground">{currentGap.title}</span>
-            <span className="text-sm text-foreground-muted">{currentGap.status}</span>
+            <span className="text-sm font-semibold text-foreground">{targetModelIssue.title}</span>
+            <span className="text-sm text-foreground-muted">{targetModelIssue.status}</span>
           </div>
+          {targetModelIssue.summary ? (
+            <p className="mt-3 text-sm leading-6 text-foreground-muted">{targetModelIssue.summary}</p>
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
-            {currentGap.acceptanceCriteria.map((criterion) => (
+            {targetModelIssue.acceptanceCriteria.map((criterion) => (
               <span
                 key={criterion.id}
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-foreground-secondary"

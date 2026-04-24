@@ -1,7 +1,7 @@
 {
   "name": "@a5c-ai/kanban",
   "version": "1.0.0",
-  "description": "Kanban surface for babysitter runs and agent-mux sessions",
+  "description": "Board-, issue-, and workspace-first kanban surface for Babysitter orchestration",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -20,9 +20,12 @@
   },
   "keywords": [
     "kanban",
+    "board",
+    "issue",
     "babysitter",
     "agent-mux",
     "workspace",
+    "observability",
     "review",
     "nextjs",
     "sse",

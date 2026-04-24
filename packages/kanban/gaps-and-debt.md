@@ -1,16 +1,35 @@
 # Kanban Gaps And Debt
 
-This package is a thin Next.js surface over Babysitter observability and agent-mux session control. It is not yet feature-complete relative to the original Vibe Kanban product shape.
+This package is the web shell for a board-, issue-, and workspace-first Babysitter product. It still has meaningful feature gaps relative to the original Vibe Kanban product shape, but the target model is no longer "observer dashboard plus a kanban name".
 
 ## Current Intent
 
 - keep the app in `packages/kanban`
-- make it the single web surface for Babysitter runs plus agent-mux sessions
+- make it the single web surface for board planning, issue execution, workspace control, Babysitter runs, and agent-mux sessions
 - avoid rebuilding gateway, session, transport, or hook plumbing locally
 - extend `agent-mux` directly when a missing capability blocks the UI
 
+## Target Product Model
+
+`packages/kanban` should be understood as:
+
+- a board-first planning surface where workflow columns and policy hooks are real shared primitives
+- an issue-first orchestration shell where priorities, dependencies, decomposition, and acceptance criteria are first-class entities
+- a workspace-first execution surface where worktree lifecycle, ownership, and cleanup are explicit product concepts
+- an observability-rich layer where runs, sessions, breakpoints, and telemetry explain and control execution without replacing the board/issue/workspace model
+
+What this means in practice:
+
+- the primary user journey starts from an issue on a board, not from a raw run list
+- a workspace exists because an issue needs isolated execution context
+- runs and sessions are subordinate execution artifacts linked back to issue and workspace state
+- remaining gaps should be tracked as missing capabilities inside this model, not as reasons to rename the package or collapse it back into an observer dashboard
+
 ## What Exists Today
 
+- first-class backlog snapshots with project, issue, dependency, decomposition, and acceptance-criteria data
+- shared board snapshots with columns, swimlanes, WIP policies, and move validation
+- workspace lifecycle inventory with archive, cleanup, and recovery controls
 - live Babysitter run dashboard and detail views
 - SSE-backed status updates and cached run parsing
 - breakpoint visibility and approval flows
@@ -25,10 +44,9 @@ This package is a thin Next.js surface over Babysitter observability and agent-m
 Original Vibe Kanban centers the product on issues, projects, statuses, labels, and acceptance criteria.
 
 Current gap:
-- no first-class issue entity
-- no project backlog model
-- no priority, label, assignee, or dependency management in the app
-- no issue decomposition workflow before dispatch
+- shared issue/project entities exist, but they are still seeded and local-file-backed rather than true shared system-of-record APIs
+- assignee, label, dependency, and acceptance-criteria data exists, but authoring/editing flows are still thin
+- issue decomposition is represented, but dispatch and planning workflows still need deeper authoring UX
 
 Preferred direction:
 - add issue/project APIs and models to `agent-mux` or an adjacent shared service layer, then render them here
@@ -38,10 +56,9 @@ Preferred direction:
 Original Vibe Kanban has a real board with columns and issue movement semantics.
 
 Current gap:
-- dashboard is still primarily observability-driven, not issue-board-driven
-- no draggable columns or card movement
-- no WIP limits, swimlanes, or board policies
-- no board state transitions like `todo -> in-progress -> review -> done`
+- a real board now exists, but it is still the opening slice of the product rather than the full planning surface
+- movement semantics are policy-aware, but richer board operations such as bulk moves, richer authoring, and planning views are still missing
+- WIP limits, swimlanes, and workflow transitions exist, but board customization is still minimal
 
 Preferred direction:
 - introduce board/state primitives at the shared integration layer first, then build the board UI in this package
@@ -51,10 +68,9 @@ Preferred direction:
 Original Vibe Kanban turns issues into isolated workspaces with branch and worktree ownership.
 
 Current gap:
-- no workspace provisioning UI
-- no branch/worktree lifecycle controls
-- no per-task workspace inventory
-- no workspace cleanup, archive, or recovery controls
+- workspace inventory, archive, cleanup, and recovery controls now exist
+- provisioning still routes through session creation rather than a richer issue-to-workspace workflow
+- branch/worktree ownership exists operationally, but issue-scoped provisioning and richer recovery flows still need work
 
 Preferred direction:
 - extend `agent-mux` and Babysitter integration points for workspace lifecycle operations; keep this package as the orchestration shell
@@ -136,9 +152,9 @@ These are additions that should exist beyond Vibe Kanban parity because this pac
 
 ### Product-model mismatch
 
-- current package is stronger at observability than at actual kanban planning
-- naming says "kanban" while the underlying product model is still mostly run/session-centric
-- parity requires real board, issue, and workspace concepts rather than cosmetic renaming
+- package naming and product contract should stay aligned to the board/issue/workspace model now present in the app
+- remaining debt is about maturing those first-class concepts into deeper review, preview, PR, and collaboration flows
+- do not paper over missing capabilities with brand language; track the unfinished work as missing board-product capabilities, not as an excuse to retreat to observability-first framing
 
 ### Publish and release maturation
 
@@ -147,7 +163,7 @@ These are additions that should exist beyond Vibe Kanban parity because this pac
 
 ## Recommended Sequencing
 
-1. Finish shared `agent-mux` capabilities needed for issue/workspace/review primitives.
-2. Add a first-class kanban board model and state transitions.
-3. Add workspace lifecycle and review surfaces.
-4. Add Babysitter-native observability overlays that Vibe Kanban does not have.
+1. Mature shared `agent-mux` capabilities so issue/project/workspace data becomes a real shared system of record.
+2. Deepen board authoring, movement, and review workflows on top of the existing shared board model.
+3. Connect issue-driven workspace provisioning and richer workspace runtime surfaces.
+4. Add Babysitter-native observability overlays that strengthen execution without replacing the board-first product model.

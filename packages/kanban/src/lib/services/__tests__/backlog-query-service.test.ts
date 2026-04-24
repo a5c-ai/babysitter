@@ -44,6 +44,9 @@ describe("BacklogQueryService", () => {
     expect(overview.summary.needsDecompositionCount).toBeGreaterThanOrEqual(1);
     expect(overview.snapshot.projects[0]?.linkedRunSummary?.activeRuns).toBe(2);
     expect(overview.board.projects[0]?.columns.find((column) => column.id === "todo")?.issueCount).toBeGreaterThan(0);
+    expect(overview.snapshot.issues.find((issue) => issue.key === "KANBAN-DEBT-003")).toMatchObject({
+      childIssueIds: ["KANBAN-GAP-001", "KANBAN-GAP-002", "KANBAN-GAP-003"],
+    });
     expect(
       overview.snapshot.issues.find((issue) => issue.key === "KANBAN-GAP-001")?.childIssueIds,
     ).toHaveLength(4);
