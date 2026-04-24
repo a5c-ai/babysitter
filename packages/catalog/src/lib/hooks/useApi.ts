@@ -59,6 +59,10 @@ export interface CatalogQueryParams {
   specialization?: string;
   category?: string;
   expertise?: string;
+  provider?: string;
+  transport?: string;
+  modality?: string;
+  capability?: string;
 }
 
 // =============================================================================
@@ -160,6 +164,10 @@ export function usePaginatedQuery<T>(
       specialization: params.specialization,
       category: params.category,
       expertise: params.expertise,
+      provider: params.provider,
+      transport: params.transport,
+      modality: params.modality,
+      capability: params.capability,
     }),
     [
       params.limit,
@@ -170,6 +178,10 @@ export function usePaginatedQuery<T>(
       params.specialization,
       params.category,
       params.expertise,
+      params.provider,
+      params.transport,
+      params.modality,
+      params.capability,
     ]
   );
 
@@ -184,6 +196,10 @@ export function usePaginatedQuery<T>(
     if (memoizedParams.specialization) searchParams.set('specialization', memoizedParams.specialization);
     if (memoizedParams.category) searchParams.set('category', memoizedParams.category);
     if (memoizedParams.expertise) searchParams.set('expertise', memoizedParams.expertise);
+    if (memoizedParams.provider) searchParams.set('provider', memoizedParams.provider);
+    if (memoizedParams.transport) searchParams.set('transport', memoizedParams.transport);
+    if (memoizedParams.modality) searchParams.set('modality', memoizedParams.modality);
+    if (memoizedParams.capability) searchParams.set('capability', memoizedParams.capability);
 
     const queryString = searchParams.toString();
     return queryString ? `${baseEndpoint}?${queryString}` : baseEndpoint;

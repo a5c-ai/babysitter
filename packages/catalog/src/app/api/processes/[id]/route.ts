@@ -47,7 +47,7 @@ export async function GET(
       updatedAt: process.updatedAt,
       inputs: process.inputs,
       outputs: process.outputs,
-      tasks: process.tasks,
+      tasks: process.tasks.map((task) => ({ ...task })),
       frontmatter: process.frontmatter,
     };
 

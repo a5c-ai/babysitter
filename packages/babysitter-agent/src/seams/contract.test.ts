@@ -18,6 +18,15 @@ const currentStateDocPath = path.resolve(
   "v6-spec-and-roadmap",
   "current-state.md",
 );
+const seamAdrPath = path.resolve(
+  packageRoot,
+  "..",
+  "..",
+  "docs",
+  "v6-spec-and-roadmap",
+  "decisions",
+  "ADR-001-babysitter-agent-seam-contract.md",
+);
 
 describe("babysitter-agent seam contract", () => {
   test("assigns every top-level src directory to exactly one seam", async () => {
@@ -95,5 +104,15 @@ describe("babysitter-agent seam contract", () => {
     expect(currentStateDoc).toContain("`governance-control`");
     expect(currentStateDoc).toContain("`integration-bridges`");
     expect(currentStateDoc).toContain("`operator-surfaces`");
+    expect(currentStateDoc).toContain("`npm run verify:v6:seams`");
+  });
+
+  test("keeps the accepted ADR aligned with the seam validation command", async () => {
+    const seamAdr = await fs.readFile(seamAdrPath, "utf8");
+
+    expect(seamAdr).toContain("# ADR-001: Babysitter-Agent Seam Contract As The First Executable V6 Slice");
+    expect(seamAdr).toContain("`packages/babysitter-agent/src/seams/contract.ts`");
+    expect(seamAdr).toContain("npm run verify:v6:seams");
+    expect(seamAdr).toContain("`@a5c-ai/babysitter-agent`");
   });
 });

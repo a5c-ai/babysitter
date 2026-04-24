@@ -3,23 +3,24 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "@/components/common/Tag";
 import type { AgentListItem } from "@/lib/api/types";
 
 export interface AgentCardProps {
-  /** Agent data */
   agent: AgentListItem;
-  /** Card variant */
   variant?: "default" | "compact";
-  /** Show expertise badges */
   showExpertise?: boolean;
-  /** Maximum expertise badges to display */
   maxExpertise?: number;
-  /** Custom class name */
   className?: string;
-  /** Click handler (alternative to link) */
   onClick?: () => void;
 }
 
@@ -27,85 +28,94 @@ export function AgentCard({
   agent,
   variant = "default",
   showExpertise = true,
-  maxExpertise = 3,
+  maxExpertise = 4,
   className,
   onClick,
 }: AgentCardProps) {
   const isCompact = variant === "compact";
+  const capabilityItems = agent.capabilities.slice(0, maxExpertise);
 
   const cardContent = (
     <Card
       className={cn(
-        "h-full hover:border-[rgba(0,223,223,0.5)]",
-        isCompact ? "p-3" : ""
+        "h-full border-[rgba(179,126,62,0.18)] bg-[rgba(255,251,244,0.86)] hover:border-[rgba(192,58,43,0.35)]",
+        isCompact ? "p-3" : "",
       )}
     >
-      <CardHeader className={isCompact ? "p-0 pb-2" : ""}>
-        <div className="flex items-start gap-3">
-          {/* Agent avatar/icon */}
-          <div className="shrink-0 rounded-full bg-[rgba(255,215,0,0.1)] p-2 text-[var(--scifi-yellow)]" style={{ border: '1px solid rgba(255, 215, 0, 0.2)' }}>
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <CardTitle
-              className={cn(
-                "truncate",
-                isCompact ? "text-sm" : "text-base"
-              )}
-            >
+      <CardHeader className={isCompact ? "p-0 pb-3" : ""}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <CardTitle className={cn("truncate", isCompact ? "text-base" : "text-lg")}>
               {agent.name}
             </CardTitle>
-            {agent.role && (
-              <p className="text-xs text-[rgba(255,255,255,0.4)] mt-0.5">
-                {agent.role}
-              </p>
-            )}
-            {!isCompact && (
-              <CardDescription className="mt-1 line-clamp-2">
-                {agent.description || "No description available"}
-              </CardDescription>
-            )}
+            <p className="text-xs uppercase tracking-[0.16em] text-[var(--tkc-cinnabar)]">
+              {agent.versionRange}
+            </p>
           </div>
+          <Badge variant="outline" className="shrink-0">
+            {agent.runtimeFamily ?? "runtime"}
+          </Badge>
         </div>
+        <CardDescription className="line-clamp-3">
+          {agent.description || "No description available"}
+        </CardDescription>
       </CardHeader>
 
-      <CardContent className={cn("space-y-3", isCompact ? "p-0 py-2" : "")}>
-        {/* Domain/Specialization Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {agent.domainName && (
-            <Tag variant="domain" size="sm">
-              {agent.domainName}
-            </Tag>
-          )}
-          {agent.specializationName && (
-            <Tag variant="category" size="sm">
-              {agent.specializationName}
-            </Tag>
-          )}
+      <CardContent className={cn("space-y-4", isCompact ? "p-0 py-2" : "")}>
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+            Providers
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {agent.providers.map((provider) => (
+              <Tag key={provider.providerId} variant="domain" size="sm">
+                {provider.displayName}
+              </Tag>
+            ))}
+          </div>
         </div>
 
-        {/* Capability Badges */}
-        {showExpertise && agent.expertise && agent.expertise.length > 0 && (
-          <div className="space-y-1">
-            {!isCompact && (
-              <p className="text-xs font-medium text-[rgba(255,255,255,0.4)]">Capabilities:</p>
-            )}
-            <div className="flex flex-wrap gap-1">
-              {agent.expertise.slice(0, maxExpertise).map((exp, index) => (
-                <Badge key={index} variant="warning" className="text-xs">
-                  {exp}
+        <div className="grid grid-cols-2 gap-2 text-sm text-[var(--tkc-ink-soft)]">
+          <div>
+            <span className="block text-xs uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+              Models
+            </span>
+            <span>{agent.models.map((model) => model.label).join(", ") || "None"}</span>
+          </div>
+          <div>
+            <span className="block text-xs uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+              Transports
+            </span>
+            <span>{agent.transports.map((transport) => transport.label).join(", ") || "None"}</span>
+          </div>
+          <div>
+            <span className="block text-xs uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+              Modalities
+            </span>
+            <span>{agent.modalities.map((modality) => modality.label).join(", ") || "None"}</span>
+          </div>
+          <div>
+            <span className="block text-xs uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+              Hooks
+            </span>
+            <span>{agent.hooks.map((hook) => hook.canonicalName).join(", ") || "None"}</span>
+          </div>
+        </div>
+
+        {showExpertise && capabilityItems.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+              Capability Matrix
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {capabilityItems.map((capability) => (
+                <Badge key={capability.capabilityId} variant="warning" className="text-xs">
+                  {capability.label}
                 </Badge>
               ))}
-              {agent.expertise.length > maxExpertise && (
+              {agent.capabilities.length > maxExpertise && (
                 <Badge variant="outline" className="text-xs">
-                  +{agent.expertise.length - maxExpertise}
+                  +{agent.capabilities.length - maxExpertise}
                 </Badge>
               )}
             </div>
@@ -115,32 +125,16 @@ export function AgentCard({
 
       <CardFooter
         className={cn(
-          "flex items-center justify-between text-xs text-[rgba(255,255,255,0.4)]",
-          isCompact ? "p-0 pt-2 border-t border-[rgba(255,0,224,0.1)]" : ""
+          "flex items-center justify-between text-xs text-[var(--tkc-ink-quiet)]",
+          isCompact ? "border-t border-[rgba(179,126,62,0.18)] p-0 pt-3" : "",
         )}
       >
-        {/* Capability count */}
-        <div className="flex items-center gap-1">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-            />
-          </svg>
-          <span>{agent.expertise?.length || 0} capabilities</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <span>{agent.evidenceSummary.evidenceCount} evidence</span>
+          <span>{agent.evidenceSummary.claimCount} claims</span>
+          <span>{agent.evidenceSummary.unresolvedGapCount} gaps</span>
         </div>
-
-        {/* Link indicator */}
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+        <span className="text-[var(--tkc-cinnabar)]">Open</span>
       </CardFooter>
     </Card>
   );
@@ -149,13 +143,10 @@ export function AgentCard({
     return (
       <div
         onClick={onClick}
-        onKeyDown={(e) => e.key === "Enter" && onClick()}
+        onKeyDown={(event) => event.key === "Enter" && onClick()}
         role="button"
         tabIndex={0}
-        className={cn(
-          "block transition-all duration-200 cursor-pointer",
-          className
-        )}
+        className={cn("block cursor-pointer transition-all duration-200", className)}
       >
         {cardContent}
       </div>
@@ -164,11 +155,8 @@ export function AgentCard({
 
   return (
     <Link
-      href={`/agents/${encodeURIComponent(agent.name)}` as Route}
-      className={cn(
-        "block transition-all duration-200",
-        className
-      )}
+      href={`/agents/${encodeURIComponent(agent.slug)}` as Route}
+      className={cn("block transition-all duration-200", className)}
     >
       {cardContent}
     </Link>

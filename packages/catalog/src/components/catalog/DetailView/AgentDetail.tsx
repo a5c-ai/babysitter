@@ -2,20 +2,16 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tag } from "@/components/common/Tag";
-import { MetadataDisplay } from "../MetadataDisplay";
 import { QuickActions } from "../QuickActions";
 import { RelatedItems } from "../RelatedItems";
 import type { AgentDetail as AgentDetailType } from "@/lib/api/types";
 
 export interface AgentDetailProps {
-  /** Agent data */
   agent: AgentDetailType;
-  /** Related agents */
-  relatedAgents?: Array<{ id: number; name: string; description: string; role?: string | null }>;
-  /** Custom class name */
+  relatedAgents?: Array<{ id: string; name: string; description: string; versionRange?: string | null }>;
   className?: string;
 }
 
@@ -26,146 +22,376 @@ export function AgentDetail({
 }: AgentDetailProps) {
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            {/* Agent avatar */}
-            <div className="rounded-full bg-[var(--color-attention-subtle)] p-3 text-[var(--color-attention-fg)]">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--color-fg-default)]">
-                {agent.name}
-              </h1>
-              {agent.role && (
-                <p className="text-sm text-[var(--color-fg-muted)]">{agent.role}</p>
-              )}
-            </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-bold text-[var(--tkc-ink)]">{agent.name}</h1>
+            <Badge variant="accent">{agent.versionRange}</Badge>
+            <Badge variant="outline">{agent.runtimeFamily ?? "runtime"}</Badge>
+            <Badge variant="secondary">{agent.releaseChannel}</Badge>
           </div>
-          <p className="text-[var(--color-fg-muted)]">{agent.description}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            {agent.domainName && (
-              <Tag variant="domain">{agent.domainName}</Tag>
-            )}
-            {agent.specializationName && (
-              <Tag variant="category">{agent.specializationName}</Tag>
-            )}
+          <p className="max-w-3xl text-[var(--tkc-ink-soft)]">{agent.description}</p>
+          <div className="flex flex-wrap gap-2">
+            {agent.providers.map((provider) => (
+              <Tag key={provider.providerId} variant="domain">
+                {provider.displayName}
+              </Tag>
+            ))}
+            {agent.modalities.map((modality) => (
+              <Tag key={modality.modalityId} variant="category">
+                {modality.label}
+              </Tag>
+            ))}
           </div>
         </div>
 
-        <QuickActions
-          entityId={agent.name}
-          entityType="agent"
-          filePath={agent.filePath}
-        />
+        <QuickActions entityId={agent.slug} entityType="agent" filePath={agent.filePath} />
       </div>
 
       <Separator />
 
-      {/* Capability Badges */}
-      {agent.expertise && agent.expertise.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Capabilities ({agent.expertise.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {agent.expertise.map((exp, index) => (
-                <Badge key={index} variant="warning" className="text-sm">
-                  {exp}
-                </Badge>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
+        <div className="space-y-6">
+          <SectionCard title="Ontology Matrix">
+            <div className="grid gap-4 md:grid-cols-2">
+              <FacetList
+                title="Models"
+                items={agent.models.map((model) => ({
+                  key: model.modelId,
+                  label: model.label,
+                  meta: model.versionRange,
+                }))}
+              />
+              <FacetList
+                title="Transports"
+                items={agent.transports.map((transport) => ({
+                  key: transport.transportId,
+                  label: transport.label,
+                  meta: [
+                    transport.persistentSession ? "persistent" : "ephemeral",
+                    transport.stdinInjection ? "stdin" : null,
+                    transport.blockingStopHook ? "blocking-stop" : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · "),
+                }))}
+              />
+              <FacetList
+                title="Hooks"
+                items={agent.hooks.map((hook) => ({
+                  key: hook.hookId,
+                  label: hook.canonicalName,
+                  meta: hook.requiresRuntimeHooks ? "runtime-hooks required" : "direct surface",
+                }))}
+              />
+              <FacetList
+                title="Plugin Targets"
+                items={agent.pluginTargets.map((target) => ({
+                  key: target.targetId,
+                  label: target.displayName,
+                  meta: `${target.manifestFormat} · ${target.commandFormat}`,
+                }))}
+              />
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Capability Matrix">
+            <div className="space-y-3">
+              {agent.capabilityMatrix.map((assertion) => (
+                <div
+                  key={assertion.supportId}
+                  className="rounded-lg border border-[rgba(179,126,62,0.18)] bg-[rgba(255,255,255,0.55)] p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-[var(--tkc-ink)]">
+                        {agent.capabilities.find((capability) => capability.capabilityId === assertion.capabilityId)?.label ??
+                          assertion.capabilityId}
+                      </p>
+                      <p className="text-sm text-[var(--tkc-ink-soft)]">{assertion.notes ?? "No notes."}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">{assertion.supportLevel}</Badge>
+                      <Badge
+                        variant={
+                          assertion.evidenceStrength === "corroborated"
+                            ? "success"
+                            : assertion.evidenceStrength === "partial"
+                              ? "warning"
+                              : "destructive"
+                        }
+                      >
+                        {assertion.evidenceStrength}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                    <Badge variant="secondary">{assertion.versionRange}</Badge>
+                    <Badge variant="secondary">{assertion.evidenceIds.length} evidence refs</Badge>
+                    <Badge variant="secondary">{assertion.supportingClaims.length} claims</Badge>
+                  </div>
+                  {assertion.unresolvedGaps.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {assertion.unresolvedGaps.map((gap) => (
+                        <Tag key={gap} variant="outline" size="sm">
+                          {gap}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </SectionCard>
 
-      {/* Content/Documentation */}
-      {agent.content && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Documentation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              {/* Render markdown content as pre-formatted for now */}
-              <div className="whitespace-pre-wrap text-sm text-[var(--color-fg-default)]">
-                {agent.content}
+          <SectionCard title="Session Semantics">
+            <div className="space-y-4">
+              {agent.sessionSemantics.map((session) => (
+                <SemanticCard
+                  key={session.nuanceId}
+                  title={session.versionRange}
+                  description={session.resumeSemantics}
+                  rows={[
+                    ["Session dir", session.sessionDirStrategy],
+                    ["PID marker policy", session.pidMarkerPolicy],
+                    ["Signals", session.envSignals.join(", ") || "None"],
+                    ["State files", session.stateFilePatterns.join(", ") || "None"],
+                    [
+                      "Metadata fields",
+                      session.metadataFields
+                        .map((field) => `${field.key}: ${field.envVars.join(", ")}`)
+                        .join(" | ") || "None",
+                    ],
+                  ]}
+                />
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Lifecycle Semantics">
+            <div className="space-y-4">
+              {agent.lifecycleSemantics.map((lifecycle) => (
+                <SemanticCard
+                  key={lifecycle.nuanceId}
+                  title={lifecycle.versionRange}
+                  rows={[
+                    ["Runtime hooks", lifecycle.runtimeHookMode],
+                    ["Stop hook", lifecycle.stopHookMode],
+                    ["Background tasks", lifecycle.backgroundTaskMode],
+                    ["Checkpointing", lifecycle.checkpointMode],
+                    ["Plugin context", lifecycle.pluginContextMode],
+                    ["Platform nuances", lifecycle.platformNuances.join(", ") || "None"],
+                  ]}
+                />
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Evidence And Provenance">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="space-y-3">
+                <p className="text-sm font-medium uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+                  Claims
+                </p>
+                {agent.claims.map((claim) => (
+                  <div
+                    key={claim.claimId}
+                    className="rounded-lg border border-[rgba(179,126,62,0.18)] bg-[rgba(255,255,255,0.55)] p-4"
+                  >
+                    <p className="text-sm font-medium text-[var(--tkc-ink)]">{claim.statement}</p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <Badge variant="outline">{claim.provenanceKind}</Badge>
+                      <Badge variant="outline">{claim.evidenceStrength}</Badge>
+                      <Badge variant="outline">{claim.confidence}</Badge>
+                    </div>
+                    {claim.unresolvedGaps.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {claim.unresolvedGaps.map((gap) => (
+                          <Tag key={gap} variant="outline" size="sm">
+                            {gap}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-medium uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">
+                  Evidence
+                </p>
+                {agent.evidence.map((evidence) => (
+                  <div
+                    key={evidence.evidenceId}
+                    className="rounded-lg border border-[rgba(179,126,62,0.18)] bg-[rgba(255,255,255,0.55)] p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={evidence.kind === "web" ? "accent" : "secondary"}>
+                        {evidence.kind}
+                      </Badge>
+                      <span className="text-xs text-[var(--tkc-ink-quiet)]">{evidence.evidenceId}</span>
+                    </div>
+                    <p className="mt-2 text-sm text-[var(--tkc-ink)]">{evidence.claim}</p>
+                    <p className="mt-1 text-xs text-[var(--tkc-ink-soft)]">{evidence.sourcePathOrUrl}</p>
+                    <p className="text-xs text-[var(--tkc-ink-quiet)]">{evidence.excerptLocator}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </SectionCard>
+        </div>
 
-      {/* Frontmatter/Metadata */}
-      {agent.frontmatter && Object.keys(agent.frontmatter).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Metadata</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MetadataDisplay data={agent.frontmatter} />
-          </CardContent>
-        </Card>
-      )}
+        <div className="space-y-6">
+          <SectionCard title="Version Metadata">
+            <MetadataRows
+              rows={[
+                ["Slug", agent.slug],
+                ["Agent ID", agent.agentId],
+                ["Aliases", agent.aliases.join(", ") || "None"],
+                ["Source package", agent.sourcePackage],
+                ["OS support", agent.osSupport.join(", ") || "Unknown"],
+                ["Evidence summary", `${agent.evidenceSummary.evidenceCount} evidence / ${agent.evidenceSummary.claimCount} claims`],
+                ["Graph generated", new Date(agent.generatedAt).toISOString()],
+              ]}
+            />
+          </SectionCard>
 
-      {/* File Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">File Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--color-fg-muted)]">Path:</span>
-              <code className="rounded bg-[var(--color-canvas-subtle)] px-2 py-0.5 text-xs">
-                {agent.filePath}
-              </code>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--color-fg-muted)]">Directory:</span>
-              <code className="rounded bg-[var(--color-canvas-subtle)] px-2 py-0.5 text-xs">
-                {agent.directory}
-              </code>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--color-fg-muted)]">Last Updated:</span>
-              <span className="text-[var(--color-fg-default)]">
-                {new Date(agent.updatedAt).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          {(agent.supersedes.length > 0 || agent.supersededBy.length > 0) && (
+            <SectionCard title="Version Lineage">
+              <div className="space-y-4 text-sm text-[var(--tkc-ink-soft)]">
+                {agent.supersedes.length > 0 && (
+                  <div>
+                    <p className="mb-2 font-medium text-[var(--tkc-ink)]">Supersedes</p>
+                    <div className="flex flex-wrap gap-2">
+                      {agent.supersedes.map((entry) => (
+                        <Tag key={entry.slug} href={`/agents/${encodeURIComponent(entry.slug)}`}>
+                          {entry.name} {entry.versionRange}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {agent.supersededBy.length > 0 && (
+                  <div>
+                    <p className="mb-2 font-medium text-[var(--tkc-ink)]">Superseded By</p>
+                    <div className="flex flex-wrap gap-2">
+                      {agent.supersededBy.map((entry) => (
+                        <Tag key={entry.slug} href={`/agents/${encodeURIComponent(entry.slug)}`}>
+                          {entry.name} {entry.versionRange}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+          )}
 
-      {/* Related Agents */}
-      {relatedAgents.length > 0 && (
-        <RelatedItems
-          title="Related Agents"
-          items={relatedAgents.map((a) => ({
-            id: a.id,
-            name: a.name,
-            description: a.description,
-            subtitle: a.role || undefined,
-            href: `/agents/${encodeURIComponent(a.name)}`,
-            type: "agent" as const,
-          }))}
-        />
+          <SectionCard title="Catalog Source">
+            <MetadataRows
+              rows={[
+                ["Path", agent.filePath],
+                ["Directory", agent.directory],
+                ["Schema version", agent.schemaVersion],
+              ]}
+            />
+          </SectionCard>
+
+          {relatedAgents.length > 0 && (
+            <RelatedItems
+              title="Related Versions"
+              items={relatedAgents.map((entry) => ({
+                id: entry.id,
+                name: entry.name,
+                description: entry.description,
+                subtitle: entry.versionRange || undefined,
+                href: `/agents/${encodeURIComponent(entry.id)}`,
+                type: "agent" as const,
+              }))}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function FacetList({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ key: string; label: string; meta?: string }>;
+}) {
+  return (
+    <div className="space-y-2 rounded-lg border border-[rgba(179,126,62,0.18)] bg-[rgba(255,255,255,0.55)] p-4">
+      <p className="text-sm font-medium uppercase tracking-[0.14em] text-[var(--tkc-ink-quiet)]">{title}</p>
+      {items.length === 0 ? (
+        <p className="text-sm text-[var(--tkc-ink-soft)]">None</p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <div key={item.key}>
+              <p className="text-sm font-medium text-[var(--tkc-ink)]">{item.label}</p>
+              {item.meta && <p className="text-xs text-[var(--tkc-ink-soft)]">{item.meta}</p>}
+            </div>
+          ))}
+        </div>
       )}
+    </div>
+  );
+}
+
+function SemanticCard({
+  title,
+  description,
+  rows,
+}: {
+  title: string;
+  description?: string;
+  rows: Array<[string, string]>;
+}) {
+  return (
+    <div className="rounded-lg border border-[rgba(179,126,62,0.18)] bg-[rgba(255,255,255,0.55)] p-4">
+      <p className="font-medium text-[var(--tkc-ink)]">{title}</p>
+      {description && <p className="mt-1 text-sm text-[var(--tkc-ink-soft)]">{description}</p>}
+      <MetadataRows rows={rows} className="mt-3" />
+    </div>
+  );
+}
+
+function MetadataRows({
+  rows,
+  className,
+}: {
+  rows: Array<[string, string]>;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-2 text-sm", className)}>
+      {rows.map(([label, value]) => (
+        <div key={label} className="grid gap-1 md:grid-cols-[140px_minmax(0,1fr)]">
+          <span className="text-[var(--tkc-ink-quiet)]">{label}</span>
+          <span className="break-words text-[var(--tkc-ink)]">{value}</span>
+        </div>
+      ))}
     </div>
   );
 }

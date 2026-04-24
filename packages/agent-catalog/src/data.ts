@@ -177,6 +177,12 @@ function toSessionNuance(node: GraphNode): SessionNuance {
     sessionDirStrategy: valueAsString(node.sessionDirStrategy) || FALLBACK_SESSION_DIR,
     envSignals: stringArray(node.sessionIdSources),
     resumeSemantics: valueAsString(node.resumeSemantics),
+    stateFilePatterns: stringArray(node.stateFilePatterns),
+    pidMarkerPolicy: valueAsString(node.pidMarkerPolicy),
+    metadataFields: (Array.isArray(node.metadataFields) ? node.metadataFields : []).map((field) => ({
+      key: valueAsString((field as HostMetadataField).key),
+      envVars: stringArray((field as HostMetadataField).envVars),
+    })),
     evidenceIds: nodeEvidenceIds(node),
   };
 }
@@ -188,7 +194,10 @@ function toLifecycleNuance(node: GraphNode): LifecycleNuance {
     versionRange: valueAsString(node.versionRange),
     runtimeHookMode: valueAsString(node.runtimeHookMode),
     stopHookMode: valueAsString(node.stopHookMode),
+    backgroundTaskMode: valueAsString(node.backgroundTaskMode),
+    checkpointMode: valueAsString(node.checkpointMode),
     pluginContextMode: valueAsString(node.pluginContextMode),
+    platformNuances: stringArray(node.platformNuances),
     evidenceIds: nodeEvidenceIds(node),
   };
 }
@@ -269,7 +278,11 @@ function toAgentVersion(node: GraphNode): AgentVersion {
     agentId: valueAsString(node.agentId),
     aliases: stringArray(node.aliases),
     versionRange: valueAsString(node.versionRange),
+    releaseChannel: valueAsString(node.releaseChannel),
+    since: valueAsString(node.since) || null,
+    until: valueAsString(node.until) || null,
     runtimeFamily: valueAsString(node.runtimeFamily),
+    osSupport: stringArray(node.osSupport),
     displayName: valueAsString(node.displayName),
     summary: valueAsString(node.summary),
     sourcePackage: valueAsString(node.sourcePackage),

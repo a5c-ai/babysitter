@@ -34,7 +34,8 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 ## Deliverables
 
 - Updated seam map for runtime, session, and hook responsibilities in current packages
-- ADR-ready candidate slices for any extraction or rename still worth considering
+- ADR-backed first executable slice for the accepted `@a5c-ai/babysitter-agent` seam contract
+- ADR-ready candidate slices for any later extraction or rename still worth considering
 - Hook and packaging flows validated against existing commands and plugin outputs
 - Any reduced-filesystem claim stated with a baseline, command, and rollback note
 
@@ -43,6 +44,8 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 **Documentation Consistency**: Foundation work must remain consistent with [V6 Architecture Specification](../v6-architecture-specification.md) and [Package Specifications](../package-specs.md)
 
 **Current-Behavior Checks**: Use current build, test, and plugin packaging commands as the source of truth for whether a seam is real
+
+**Current Slice Command**: `npm run verify:v6:seams` is the repo-level validation gate for the accepted seam-contract slice
 
 **Packaging Validation**: Compare compiler changes against existing manifest and install surfaces
 

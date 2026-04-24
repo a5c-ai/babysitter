@@ -39,7 +39,20 @@ The documentation set should be judged with concrete checks:
 - markdown links resolve,
 - placeholder markers are absent,
 - normative, deferred, and invalidated ideas are distinguishable,
-- roadmap claims have validation and rollback framing.
+- roadmap claims have validation and rollback framing,
+- architectural or readiness claims name the exact command or workflow that proves them.
+
+## Validation Framing For Testing And Readiness Claims
+
+Testing, architecture, and readiness language follows the same evidence rules as performance targets.
+
+If a document claims that a boundary, contract, or operational posture is enforced, it should also name:
+
+- the repository command or workflow that performs the check,
+- the scope of the check,
+- what failure would block promotion of the claim.
+
+If the document cannot do that, the claim should be marked as deferred, exploratory, or absent. Architectural intent alone is not validation evidence.
 
 ## Failure Handling
 
@@ -56,7 +69,8 @@ Performance sections in V6 docs should avoid:
 - numbers detached from measurement method,
 - claims about packages that do not yet exist,
 - performance promises that assume broad decomposition is automatically faster,
-- "production ready" language without operational evidence.
+- "production ready" language without operational evidence,
+- architecture-compliance language without a named proving surface.
 
 ## Recommended Metrics For Real Slices
 

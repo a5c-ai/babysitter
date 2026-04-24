@@ -73,6 +73,8 @@ That seam contract lives at `packages/babysitter-agent/src/seams/contract.ts` an
 
 The contract is only useful if it stays executable. Changes to `packages/babysitter-agent/src` should therefore keep the seam manifest, package subpath exports, and seam validation tests aligned before any broader extraction is proposed.
 
+This slice is formally accepted in [ADR-001: Babysitter-Agent Seam Contract As The First Executable V6 Slice](decisions/ADR-001-babysitter-agent-seam-contract.md). The repo-level validation entrypoint for that slice is `npm run verify:v6:seams`.
+
 ---
 
 **Related Documents**: [System Overview](system-overview.md) | [V6 Vision](v6-vision.md) | [Package Specifications](package-specs.md)

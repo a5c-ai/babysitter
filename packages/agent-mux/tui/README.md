@@ -95,16 +95,15 @@ current working directory.
 | `5` | models     | model registry per adapter                    |
 | `6` | profiles   | run-options profiles                          |
 | `7` | plugins    | native plugins per adapter                    |
-| `8` | runs       | active/recent runs                            |
 | `9` | help       | keybindings + tips                            |
 | `0` | mcp        | registered MCP servers                        |
 | `-` | doctor     | capability matrix / diagnostics               |
 | `l` | logs       | observability metrics + filtered log stream   |
-| `a` | auth       | auth status per adapter                       |
-| `c` | config     | config view                                   |
-| `k` | skills     | installed skills (d: delete, r: refresh)      |
-| `g` | agents     | installed sub-agents (d: delete, r: refresh)  |
-| `h` | hooks      | registered hooks (d: remove, r: refresh)      |
+| `A` | auth       | auth status per adapter                       |
+| `C` | config     | config view                                   |
+| `K` | skills     | installed skills (d: delete, r: refresh)      |
+| `G` | agents     | installed sub-agents (d: delete, r: refresh)  |
+| `H` | hooks      | registered hooks (d: remove, r: refresh)      |
 
 Global: `p` prompt, `/` filter, `:` / Ctrl-K palette, `m` model picker,
 `P` profile picker, `i` interrupt, `y`/`n` approval, `q` quit.

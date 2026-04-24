@@ -38,8 +38,27 @@ function listYamlFilesRecursively(targetPath: string): string[] {
 
 let cachedGraph: CatalogGraph | undefined;
 
+function findExistingRoot(relativeCheckPath: string): string {
+  const candidates = [
+    (() => {
+      try {
+        return path.dirname(require.resolve("@a5c-ai/agent-catalog/package.json"));
+      } catch {
+        return undefined;
+      }
+    })(),
+    path.resolve(process.cwd(), "node_modules", "@a5c-ai", "agent-catalog"),
+    path.resolve(process.cwd(), "..", "agent-catalog"),
+    path.resolve(process.cwd(), "..", "..", "packages", "agent-catalog"),
+    path.resolve(__dirname, ".."),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+
+  const match = candidates.find((candidate) => fs.existsSync(path.join(candidate, relativeCheckPath)));
+  return match ?? path.resolve(__dirname, "..");
+}
+
 function packageRoot(): string {
-  return path.resolve(__dirname, "..");
+  return findExistingRoot(path.join("graph", "agent-catalog.graph.yaml"));
 }
 
 function graphRoot(): string {

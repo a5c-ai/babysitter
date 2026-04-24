@@ -1,1 +1,6 @@
-export { getUiAgentCards } from "./sdk";
+export {
+  getAgentVersionSlug,
+  getUiAgentCards,
+  getUiAgentOntologyEntry,
+  getUiAgentOntologyList,
+} from "./sdk";

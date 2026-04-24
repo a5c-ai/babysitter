@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   AGENT_CATALOG,
   getCliNodeQuery,
+  findProcessesByPath,
+  getAgentVersion,
+  getAgentVersionTopology,
   getCatalogGraphDocument,
   getCatalogGraphSnapshot,
   getCatalogOntologySchema,
@@ -18,14 +21,26 @@ import {
   listCliGraphNodes,
   listCliPackageRelations,
   listCliProcessRelations,
+  getOntologyClaim,
+  getOntologyEvidenceSource,
   getPluginTargetDescriptor,
+  getPackageTopology,
+  getPathDescriptor,
+  getProviderModelTopology,
+  getSubjectProvenance,
   getOntologyEvidenceManifest,
   getOntologyEvidenceSnapshot,
   getUiAgentCards,
+  listCapabilitySupportByAgentVersion,
+  listClaimsForSubject,
+  listEvidenceForSubject,
   listOntologyNodesByKind,
   listOntologyClaims,
+  listPackageSurfaces,
   lookupHarnessImage,
   listAgentVersions,
+  supportsAgentCapability,
+  searchOntologyEvidence,
 } from "./index";
 
 describe("agent-catalog graph-backed ontology", () => {
@@ -79,6 +94,22 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(getUiAgentCards().length).toBe(AGENT_CATALOG.agents.length);
     expect(getUiAgentCards()[0].filePath).toContain("graph/nodes/agents/versions.yaml");
     expect(lookupHarnessImage("codex")?.image).toContain("codex");
+  });
+
+  it("exposes richer ontology list/detail projections for UI consumers", async () => {
+    const { getUiAgentOntologyEntry, getUiAgentOntologyList } = await import("./sdk");
+    const list = getUiAgentOntologyList();
+    const codexPost119 = getUiAgentOntologyEntry("codex--ge-0-119-0");
+
+    expect(list.length).toBe(AGENT_CATALOG.agents.length);
+    expect(list.find((entry) => entry.slug === "codex--ge-0-0-0-lt-0-119-0")).toBeDefined();
+    expect(codexPost119).toBeDefined();
+    expect(codexPost119?.capabilityMatrix.find((entry) => entry.capabilityId === "runtime-hooks")?.versionRange).toBe(
+      ">=0.119.0",
+    );
+    expect(codexPost119?.lifecycleSemantics[0]?.runtimeHookMode).toContain("windows-support");
+    expect(codexPost119?.sessionSemantics.length).toBeGreaterThan(0);
+    expect(codexPost119?.evidenceSummary.partialCount).toBeGreaterThan(0);
   });
 
   it("keeps provider catalog scoped to model providers rather than harness vendors", () => {
@@ -259,5 +290,67 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(catalogProcess[0].paths).toContain("packages/catalog/process-library-catalog.js");
     expect(catalogProcess[0].paths).toContain("packages/catalog/src/app");
     expect(catalogProcess[0].paths).toContain("packages/catalog/src/lib");
+  });
+
+  it("resolves version-scoped capability support by agent version", () => {
+    const codexMatrices = listCapabilitySupportByAgentVersion("codex");
+    expect(codexMatrices).toHaveLength(2);
+    expect(codexMatrices.every((entry) => entry.capabilitySupport.length > 0)).toBe(true);
+
+    expect(getAgentVersion("codex", "0.118.0")?.versionRange).toBe(">=0.0.0 <0.119.0");
+    expect(getAgentVersion("codex", "0.119.0")?.versionRange).toBe(">=0.119.0");
+    expect(supportsAgentCapability("codex", "runtime-hooks", "0.119.0")).toBe(true);
+    expect(supportsAgentCapability("codex", "mcp", "0.119.0")).toBe(false);
+  });
+
+  it("traverses provider, model, transport, modality, lifecycle, and session relationships for an agent version", () => {
+    const topology = getAgentVersionTopology("codex", "0.119.0");
+    expect(topology).toBeDefined();
+    expect(topology!.providers.map((provider) => provider.providerId)).toContain("openai");
+    expect(topology!.defaultModels.map((model) => model.modelId)).toContain("codex-default");
+    expect(topology!.transportRuntimes.map((transport) => transport.transportId)).toContain("terminal-cli");
+    expect(topology!.transportProtocols.map((transport) => transport.transportId)).toContain("shell-hook-runtime");
+    expect(topology!.modalities.map((modality) => modality.modalityId)).toContain("image");
+    expect(topology!.sessionSemantics.map((nuance) => nuance.nuanceId)).toContain("sessionSemantics:codex:ge-0-0-0");
+    expect(topology!.lifecycleSemantics.map((nuance) => nuance.versionRange)).toContain(">=0.119.0");
+    expect(topology!.discoverySignals.map((signal) => signal.key)).toContain("codex");
+    expect(topology!.pluginTargets.map((target) => target.targetId)).toContain("codex");
+  });
+
+  it("traverses provider-model relationships without rebuilding joins downstream", () => {
+    const openai = getProviderModelTopology("openai");
+    expect(openai).toBeDefined();
+    expect(openai!.models.map((model) => model.modelId)).toContain("codex-default");
+    expect(openai!.capabilities.map((capability) => capability.capabilityId)).toContain("tool-calling");
+    expect(openai!.agents.map((agent) => agent.agentId)).toContain("codex");
+  });
+
+  it("exposes package, process, and path discovery helpers", () => {
+    expect(listPackageSurfaces().map((pkg) => pkg.packageId)).toContain("@a5c-ai/catalog");
+
+    const topology = getPackageTopology("@a5c-ai/catalog");
+    expect(topology).toBeDefined();
+    expect(topology!.processes.map((process) => process.processId)).toContain("packages/catalog/process-library-catalog");
+    expect(topology!.processPaths.map((entry) => entry.path)).toContain("packages/catalog/src/app");
+    expect(topology!.wrapsGraphIds).toContain("graph:agent-catalog");
+
+    expect(getPathDescriptor("packages/catalog/src/app")?.ownerId).toBe("process:packages/catalog/process-library-catalog");
+    expect(findProcessesByPath("packages/catalog/src/app").map((process) => process.processId)).toContain(
+      "packages/catalog/process-library-catalog",
+    );
+  });
+
+  it("exposes targeted provenance and evidence helpers without full-snapshot callers", () => {
+    expect(getOntologyEvidenceSource("repo-sdk-fallback")?.sourcePathOrUrl).toContain("packages/sdk/src/harness");
+    expect(getOntologyClaim("repo-sdk-fallback")?.statement).toContain("fallback metadata");
+
+    const subjectId = "agentVersion:codex:ge-0-119-0";
+    expect(listClaimsForSubject(subjectId).length).toBeGreaterThanOrEqual(5);
+    expect(listEvidenceForSubject(subjectId).map((entry) => entry.evidenceId)).toContain("repo-sdk-fallback");
+    expect(getSubjectProvenance(subjectId).claims.length).toBeGreaterThanOrEqual(5);
+
+    const search = searchOntologyEvidence("web-codex-hooks");
+    expect(search.evidence.map((entry) => entry.evidenceId)).toContain("web-codex-hooks");
+    expect(search.claims.some((entry) => entry.claimId === "web-codex-hooks")).toBe(true);
   });
 });

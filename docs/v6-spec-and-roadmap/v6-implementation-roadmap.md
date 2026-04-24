@@ -98,6 +98,23 @@ Ship one small architecture improvement that proves the V6 method works.
 - compatibility notes are written,
 - the slice reduces ambiguity or coupling in a way that can be demonstrated.
 
+### Selected Slice
+
+The currently selected first executable slice is documented in [ADR-001: Babysitter-Agent Seam Contract As The First Executable V6 Slice](decisions/ADR-001-babysitter-agent-seam-contract.md).
+
+Current validation command:
+
+```bash
+npm run verify:v6:seams
+```
+
+Why this slice was selected:
+
+- it already exists in code,
+- it stays within one package boundary,
+- rollback is cheap,
+- it converts V6 seam language into an executable validation gate.
+
 ### Kill Criteria
 
 - the slice forces unrelated packages to move together,
@@ -160,6 +177,27 @@ Recommended validation categories:
 - documentation consistency checks for renamed concepts,
 - performance spot checks when bundle or startup claims are involved.
 
+Current V6-facing commands that can be cited today are:
+
+- `npm run verify:v6:seams`
+- `npm run lint --workspace=@a5c-ai/babysitter-sdk`
+- `npm run build:sdk`
+- `npm run test:sdk`
+- `npm run build:hooks-mux`
+- `npm run test:hooks-mux`
+- `npm run build:agent-mux`
+- `npm run test:agent-mux`
+- `npm run build --workspace=@a5c-ai/breakpoints-mux`
+- `npm run typecheck --workspace=@a5c-ai/breakpoints-mux`
+- `npm run test --workspace=@a5c-ai/breakpoints-mux`
+- `npm run build --workspace=@a5c-ai/agent-plugins-mux`
+- `npm run test --workspace=@a5c-ai/agent-plugins-mux`
+- `npm run verify:metadata`
+- `npm run docs:build`
+- `npm run validate:ci --prefix plugins/<plugin>`
+
+Those commands justify build, test, packaging, metadata, and docs-build claims only. They do not yet justify architectural-boundary or interface-contract enforcement claims.
+
 ## 8. Measurement Expectations
 
 Performance and packaging claims must specify:
@@ -172,6 +210,44 @@ Performance and packaging claims must specify:
 If a claim cannot meet that bar, it should be phrased as a hypothesis instead of a target.
 
 Repo-wide targets such as "all performance targets met", "zero regressions", or trend-based regression detection are not minimum-acceptable V6 gates unless a concrete slice owner, measurement command, and enforcement point already exist.
+
+## 8A. Deferred Future Slice: Architecture-Gate Validation
+
+This slice is intentionally deferred until the repo is ready to add and maintain explicit enforcement.
+
+### Purpose
+
+Turn architecture-boundary and interface-contract language into executable gates instead of documentation intent.
+
+### Owners
+
+- SDK maintainers own the new gate commands.
+- CI maintainers own workflow wiring in `.github/workflows/ci.yml`.
+- V6 documentation owners own promotion of related claims after the gates exist.
+
+### Planned Commands
+
+- `npm run test:architecture` for repository architecture-boundary checks
+- `npm run test:contracts` for repository interface-contract checks
+- `npm run test:e2e:docker` if a promoted slice depends on end-to-end runtime proof
+
+These command names are part of the proposed slice definition, not current repository guarantees.
+
+### Entry Criteria
+
+- an owner is assigned for each command,
+- the target boundary or contract is written down precisely enough to fail deterministically,
+- the CI cost and rollback path are documented.
+
+### Exit Criteria
+
+- the new commands exist and pass locally,
+- the new commands run in CI,
+- V6 docs are updated to cite those commands explicitly where claims depend on them.
+
+### Until This Slice Lands
+
+V6 docs should describe architecture-boundary and contract validation as deferred work rather than current enforcement.
 
 ## 9. Deliverables By Maturity Level
 
@@ -206,6 +282,8 @@ The roadmap is overreaching if it starts requiring:
 3. Select the smallest executable slice with real payoff.
 4. Validate it through repository commands and plugin/runtime behavior.
 5. Reassess whether a second slice is justified.
+
+For the current revision, steps 3 and 4 are anchored by ADR-001 and `npm run verify:v6:seams`; the next open question is whether any second slice is earned.
 
 ---
 

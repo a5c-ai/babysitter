@@ -1,7 +1,3 @@
-import { promises as fs } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-
 import {
   buildKanbanBoardSnapshot,
   buildKanbanBacklogSnapshot,
@@ -26,9 +22,15 @@ import {
 import { AppError } from '../error-handler';
 import { ReviewService } from '../review-service';
 import { RunQueryService } from './run-query-service';
-
-const BACKLOG_FILE_PATH =
-  process.env.KANBAN_BACKLOG_FILE ?? path.join(os.homedir(), '.a5c', 'kanban-backlog.json');
+import {
+  KANBAN_BACKLOG_FILE_PATH,
+  defaultKanbanStorageDeps,
+  readKanbanStorageFile,
+  writeKanbanStorageFile,
+  type KanbanStorageDeps,
+  type StoredKanbanIssue,
+  type StoredKanbanProject,
+} from './kanban-storage';
 
 const SOURCE_PATH = 'packages/kanban/gaps-and-debt.md';
 const PROJECT_ID = 'kanban-app';
@@ -50,10 +52,8 @@ export interface BacklogOverview {
   summary: BacklogOverviewSummary;
 }
 
-type BacklogSeedProject = Omit<KanbanProject, 'metrics'>;
-type BacklogSeedIssue = Omit<KanbanIssue, 'dispatch'> & {
-  readonly dispatch?: Partial<KanbanIssue['dispatch']>;
-};
+type BacklogSeedProject = StoredKanbanProject;
+type BacklogSeedIssue = StoredKanbanIssue;
 
 const debtLabel = {
   id: 'label-debt',
@@ -645,48 +645,19 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
   },
 ];
 
-interface BacklogFilePayload {
-  projects?: readonly BacklogSeedProject[];
-  issues?: readonly BacklogSeedIssue[];
-}
-
-interface BacklogQueryServiceDeps {
+interface BacklogQueryServiceDeps extends KanbanStorageDeps {
   runQueryService: Pick<RunQueryService, 'listProjects'>;
   reviewService: Pick<ReviewService, 'listReviews'>;
-  readFile: typeof fs.readFile;
-  writeFile: typeof fs.writeFile;
-  backlogFilePath: string;
   now: () => string;
 }
 
 const defaultDeps: BacklogQueryServiceDeps = {
+  ...defaultKanbanStorageDeps,
   runQueryService: new RunQueryService(),
   reviewService: new ReviewService(),
-  readFile: fs.readFile,
-  writeFile: fs.writeFile,
-  backlogFilePath: BACKLOG_FILE_PATH,
+  backlogFilePath: KANBAN_BACKLOG_FILE_PATH,
   now: () => new Date().toISOString(),
 };
-
-async function readBacklogFile(deps: BacklogQueryServiceDeps): Promise<BacklogFilePayload | null> {
-  try {
-    const raw = await deps.readFile(deps.backlogFilePath, 'utf8');
-    return JSON.parse(raw) as BacklogFilePayload;
-  } catch (error) {
-    const errno = error as NodeJS.ErrnoException;
-    if (errno.code === 'ENOENT') {
-      return null;
-    }
-    throw error;
-  }
-}
-
-async function writeBacklogFile(
-  deps: BacklogQueryServiceDeps,
-  payload: BacklogFilePayload,
-): Promise<void> {
-  await deps.writeFile(deps.backlogFilePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-}
 
 function buildSummary(snapshot: KanbanBacklogSnapshot): BacklogOverviewSummary {
   return snapshot.projects.reduce<BacklogOverviewSummary>(
@@ -783,7 +754,7 @@ export class BacklogQueryService {
     projects: readonly BacklogSeedProject[];
     issues: readonly BacklogSeedIssue[];
   }> {
-    const backlogFile = await readBacklogFile(this.deps);
+    const backlogFile = await readKanbanStorageFile(this.deps);
     return {
       projects: backlogFile?.projects?.length ? backlogFile.projects : defaultProjects,
       issues: backlogFile?.issues?.length ? backlogFile.issues : defaultIssues,
@@ -820,7 +791,12 @@ export class BacklogQueryService {
     projects: readonly BacklogSeedProject[];
     issues: readonly BacklogSeedIssue[];
   }): Promise<BacklogOverview> {
-    await writeBacklogFile(this.deps, payload);
+    const existingPayload = (await readKanbanStorageFile(this.deps)) ?? {};
+    await writeKanbanStorageFile(this.deps, {
+      ...existingPayload,
+      projects: payload.projects,
+      issues: payload.issues,
+    });
     return this.buildOverviewFromPayload(payload);
   }
 

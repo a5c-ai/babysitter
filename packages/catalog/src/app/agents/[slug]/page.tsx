@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Breadcrumb, type BreadcrumbItem } from "@/components/layout/Breadcrumb";
 import { AgentDetail } from "@/components/catalog/DetailView/AgentDetail";
-import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Breadcrumb, type BreadcrumbItem } from "@/components/layout/Breadcrumb";
+import { PageContainer } from "@/components/layout/PageContainer";
 import type { AgentDetail as AgentDetailType, AgentListItem } from "@/lib/api/types";
 
 interface PageProps {
@@ -13,38 +11,36 @@ interface PageProps {
 async function getAgent(slug: string): Promise<AgentDetailType | null> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/agents/${encodeURIComponent(slug)}`, {
+    const response = await fetch(`${baseUrl}/api/agents/${encodeURIComponent(slug)}`, {
       cache: "no-store",
     });
-    if (!res.ok) return null;
-    const json = await res.json();
+    if (!response.ok) return null;
+    const json = await response.json();
     return json.data;
   } catch {
     return null;
   }
 }
 
-async function getRelatedAgents(
-  domainName: string | null,
-  specializationName: string | null,
-  currentId: number
-): Promise<AgentListItem[]> {
+async function getRelatedAgents(agent: AgentDetailType): Promise<AgentListItem[]> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const params = new URLSearchParams({ limit: "6" });
-    if (specializationName) {
-      params.set("specialization", specializationName);
-    } else if (domainName) {
-      params.set("domain", domainName);
+    const params = new URLSearchParams({ limit: "8" });
+    const primaryProvider = agent.providers[0]?.displayName;
+    const primaryCapability = agent.capabilities[0]?.label;
+
+    if (primaryProvider) {
+      params.set("provider", primaryProvider);
+    } else if (primaryCapability) {
+      params.set("capability", primaryCapability);
     }
 
-    const res = await fetch(`${baseUrl}/api/agents?${params.toString()}`, {
+    const response = await fetch(`${baseUrl}/api/agents?${params.toString()}`, {
       cache: "no-store",
     });
-    if (!res.ok) return [];
-    const json = await res.json();
-    // Filter out current agent and limit to 5
-    return (json.data || []).filter((a: AgentListItem) => a.id !== currentId).slice(0, 5);
+    if (!response.ok) return [];
+    const json = await response.json();
+    return (json.data || []).filter((entry: AgentListItem) => entry.slug !== agent.slug).slice(0, 5);
   } catch {
     return [];
   }
@@ -58,57 +54,30 @@ export default async function AgentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const relatedAgents = await getRelatedAgents(
-    agent.domainName,
-    agent.specializationName,
-    agent.id
-  );
-
-  // Build breadcrumb items
+  const relatedAgents = await getRelatedAgents(agent);
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Home", href: "/" },
     { label: "Agents", href: "/agents" },
   ];
 
-  if (agent.domainName) {
-    breadcrumbItems.push({
-      label: agent.domainName,
-    });
+  if (agent.providers[0]) {
+    breadcrumbItems.push({ label: agent.providers[0].displayName });
   }
 
-  if (agent.specializationName) {
-    breadcrumbItems.push({
-      label: agent.specializationName,
-    });
-  }
-
-  breadcrumbItems.push({ label: agent.name });
+  breadcrumbItems.push({ label: `${agent.name} ${agent.versionRange}` });
 
   return (
     <PageContainer>
       <Breadcrumb items={breadcrumbItems} />
-
       <AgentDetail
         agent={agent}
-        relatedAgents={relatedAgents.map((a) => ({
-          id: a.id,
-          name: a.name,
-          description: a.description,
-          role: a.role,
+        relatedAgents={relatedAgents.map((entry) => ({
+          id: entry.slug,
+          name: entry.name,
+          description: entry.description,
+          versionRange: entry.versionRange,
         }))}
       />
-
-      {/* Rendered Markdown Content */}
-      {agent.content && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MarkdownRenderer content={agent.content} />
-          </CardContent>
-        </Card>
-      )}
     </PageContainer>
   );
 }
@@ -118,13 +87,11 @@ export async function generateMetadata({ params }: PageProps) {
   const agent = await getAgent(decodeURIComponent(slug));
 
   if (!agent) {
-    return {
-      title: "Agent Not Found",
-    };
+    return { title: "Agent Not Found" };
   }
 
   return {
-    title: `${agent.name} - Agent Catalog`,
-    description: agent.description || `View details for the ${agent.name} agent`,
+    title: `${agent.name} ${agent.versionRange} - Agent Catalog`,
+    description: agent.description,
   };
 }

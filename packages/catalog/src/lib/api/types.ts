@@ -2,6 +2,11 @@
  * API request and response types for the catalog API routes
  */
 
+import type {
+  AgentOntologyDetail as CatalogAgentOntologyDetail,
+  AgentOntologyListItem as CatalogAgentOntologyListItem,
+} from "@a5c-ai/agent-catalog";
+
 // =============================================================================
 // COMMON TYPES
 // =============================================================================
@@ -277,37 +282,21 @@ export interface SkillDetail extends SkillListItem {
  * Agent query parameters
  */
 export interface AgentQueryParams extends ListQueryParams {
-  specialization?: string;
-  domain?: string;
-  expertise?: string;
+  provider?: string;
+  transport?: string;
+  modality?: string;
+  capability?: string;
 }
 
 /**
  * Agent list item
  */
-export interface AgentListItem {
-  id: number;
-  name: string;
-  description: string;
-  filePath: string;
-  directory: string;
-  role: string | null;
-  expertise: string[];
-  specializationId: number | null;
-  specializationName: string | null;
-  domainId: number | null;
-  domainName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type AgentListItem = CatalogAgentOntologyListItem;
 
 /**
  * Full agent detail
  */
-export interface AgentDetail extends AgentListItem {
-  content: string;
-  frontmatter: Record<string, unknown>;
-}
+export type AgentDetail = CatalogAgentOntologyDetail;
 
 // =============================================================================
 // ANALYTICS TYPES
