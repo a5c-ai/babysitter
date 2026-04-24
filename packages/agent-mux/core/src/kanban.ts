@@ -29,6 +29,24 @@ export type KanbanDecompositionKind =
   | 'validation'
   | 'coordination';
 
+export type KanbanRepositoryProvider = 'github' | 'gitlab' | 'bitbucket' | 'local';
+
+export type KanbanPullRequestStatus =
+  | 'draft'
+  | 'open'
+  | 'in-review'
+  | 'approved'
+  | 'changes-requested'
+  | 'merged';
+
+export type KanbanReviewStatus = 'unlinked' | 'pending' | 'approved' | 'changes-requested';
+
+export type KanbanMergeStatus = 'not-ready' | 'blocked' | 'ready' | 'merged';
+
+export type KanbanCiGateStatus = 'pending' | 'passing' | 'failing' | 'skipped';
+
+export type KanbanPublishStatus = 'not-ready' | 'pending' | 'ready' | 'published' | 'failed';
+
 export interface KanbanLabel {
   readonly id: string;
   readonly name: string;
@@ -77,6 +95,70 @@ export interface KanbanIssueSource {
   readonly externalId?: string;
 }
 
+export interface KanbanPullRequestReviewLink {
+  readonly id: string;
+  readonly label: string;
+  readonly reviewer?: string;
+  readonly status: Exclude<KanbanReviewStatus, 'unlinked'>;
+  readonly url?: string;
+}
+
+export interface KanbanCiGate {
+  readonly id: string;
+  readonly name: string;
+  readonly provider?: string;
+  readonly required: boolean;
+  readonly status: KanbanCiGateStatus;
+  readonly summary?: string;
+  readonly url?: string;
+}
+
+export interface KanbanRepositorySettings {
+  readonly baseBranch: string;
+  readonly autoMerge: boolean;
+  readonly requiredApprovals: number;
+  readonly ciProvider?: string;
+  readonly publishTarget?: string;
+}
+
+export interface KanbanRepositoryContext {
+  readonly id: string;
+  readonly name: string;
+  readonly owner: string;
+  readonly fullName: string;
+  readonly provider: KanbanRepositoryProvider;
+  readonly url?: string;
+  readonly defaultBranch: string;
+  readonly linkedAt: string;
+  readonly settings: KanbanRepositorySettings;
+}
+
+export interface KanbanPullRequest {
+  readonly id: string;
+  readonly number: number;
+  readonly title: string;
+  readonly status: KanbanPullRequestStatus;
+  readonly branchName: string;
+  readonly baseBranch: string;
+  readonly mergeStatus: KanbanMergeStatus;
+  readonly reviewLinks: readonly KanbanPullRequestReviewLink[];
+  readonly url?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface KanbanIssueRepositoryLifecycle {
+  readonly repositoryId: string;
+  readonly branchName: string;
+  readonly reviewStatus: KanbanReviewStatus;
+  readonly mergeStatus: KanbanMergeStatus;
+  readonly publishStatus: KanbanPublishStatus;
+  readonly ciGates: readonly KanbanCiGate[];
+  readonly pullRequest?: KanbanPullRequest;
+  readonly publishUrl?: string;
+  readonly lastPublishedAt?: string;
+}
+
 export interface KanbanIssue {
   readonly id: string;
   readonly projectId: string;
@@ -96,6 +178,7 @@ export interface KanbanIssue {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly dispatch: KanbanIssueDispatchState;
+  readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle;
   readonly source?: KanbanIssueSource;
 }
 
@@ -135,6 +218,7 @@ export interface KanbanProject {
   readonly labels: readonly KanbanLabel[];
   readonly assignees: readonly KanbanAssignee[];
   readonly statuses: readonly KanbanStatusDefinition[];
+  readonly repositories: readonly KanbanRepositoryContext[];
   readonly linkedRunProjectName?: string;
   readonly linkedRunSummary?: LinkedRunSummary;
   readonly metrics: KanbanProjectMetrics;
@@ -188,6 +272,8 @@ export interface KanbanBoardCard {
     readonly satisfied: number;
     readonly total: number;
   };
+  readonly repository?: KanbanRepositoryContext;
+  readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle;
   readonly moveTargets: readonly KanbanBoardMoveTarget[];
   readonly policySignals: readonly KanbanBoardPolicySignal[];
 }
@@ -286,6 +372,27 @@ const DEFAULT_BOARD_POLICY_HOOKS: readonly KanbanBoardPolicyHook[] = [
     blocking: true,
     columnIds: ['done'],
   },
+  {
+    id: 'repo-ci',
+    name: 'CI gate visibility',
+    description: 'Repository-scoped CI results should be visible on each work item.',
+    scope: 'card',
+    blocking: false,
+  },
+  {
+    id: 'merge-status',
+    name: 'Merge readiness',
+    description: 'PR review and merge readiness should be visible from the board.',
+    scope: 'card',
+    blocking: false,
+  },
+  {
+    id: 'publish-status',
+    name: 'Publish lifecycle',
+    description: 'Merged work should expose publish readiness and release state.',
+    scope: 'card',
+    blocking: false,
+  },
 ];
 
 function uniqueById<T extends { readonly id: string }>(items: readonly T[]): T[] {
@@ -301,6 +408,181 @@ function uniqueById<T extends { readonly id: string }>(items: readonly T[]): T[]
 
 function uniqueStrings(values: readonly string[]): string[] {
   return Array.from(new Set(values));
+}
+
+function normalizeRepositorySettings(
+  settings: Partial<KanbanRepositorySettings> | undefined,
+  defaultBranch: string,
+): KanbanRepositorySettings {
+  return {
+    baseBranch: settings?.baseBranch?.trim() || defaultBranch,
+    autoMerge: settings?.autoMerge ?? false,
+    requiredApprovals:
+      typeof settings?.requiredApprovals === 'number' && settings.requiredApprovals >= 0
+        ? Math.floor(settings.requiredApprovals)
+        : 1,
+    ciProvider: settings?.ciProvider?.trim() || undefined,
+    publishTarget: settings?.publishTarget?.trim() || undefined,
+  };
+}
+
+function normalizeRepositoryContext(repository: KanbanRepositoryContext): KanbanRepositoryContext {
+  const owner = repository.owner.trim();
+  const name = repository.name.trim();
+  const fullName = repository.fullName?.trim() || `${owner}/${name}`;
+  const defaultBranch = repository.defaultBranch?.trim() || 'main';
+  return {
+    ...repository,
+    owner,
+    name,
+    fullName,
+    defaultBranch,
+    url: repository.url?.trim() || undefined,
+    settings: normalizeRepositorySettings(repository.settings, defaultBranch),
+  };
+}
+
+function resolveReviewStatus(
+  pullRequest?: Pick<KanbanPullRequest, 'status' | 'reviewLinks'>,
+): KanbanReviewStatus {
+  if (!pullRequest) {
+    return 'unlinked';
+  }
+
+  if (pullRequest.reviewLinks.some((review) => review.status === 'changes-requested')) {
+    return 'changes-requested';
+  }
+  if (pullRequest.reviewLinks.length > 0 && pullRequest.reviewLinks.every((review) => review.status === 'approved')) {
+    return 'approved';
+  }
+  if (pullRequest.reviewLinks.length > 0 || pullRequest.status === 'in-review') {
+    return 'pending';
+  }
+  if (pullRequest.status === 'approved') {
+    return 'approved';
+  }
+  if (pullRequest.status === 'changes-requested') {
+    return 'changes-requested';
+  }
+  return 'pending';
+}
+
+function resolveMergeStatus(
+  lifecycle: Pick<KanbanIssueRepositoryLifecycle, 'ciGates' | 'pullRequest' | 'reviewStatus'>,
+): KanbanMergeStatus {
+  if (!lifecycle.pullRequest) {
+    return 'not-ready';
+  }
+  if (lifecycle.pullRequest.status === 'merged') {
+    return 'merged';
+  }
+
+  const blockingGate = lifecycle.ciGates.some(
+    (gate) => gate.required && gate.status !== 'passing' && gate.status !== 'skipped',
+  );
+  if (blockingGate) {
+    return 'blocked';
+  }
+
+  return lifecycle.reviewStatus === 'approved' ? 'ready' : 'blocked';
+}
+
+function resolvePublishStatus(
+  lifecycle: Pick<KanbanIssueRepositoryLifecycle, 'mergeStatus' | 'publishStatus' | 'lastPublishedAt'>,
+): KanbanPublishStatus {
+  if (lifecycle.publishStatus === 'published' || lifecycle.lastPublishedAt) {
+    return 'published';
+  }
+  if (lifecycle.publishStatus === 'failed') {
+    return 'failed';
+  }
+  if (lifecycle.publishStatus === 'pending') {
+    return 'pending';
+  }
+  if (lifecycle.mergeStatus === 'merged') {
+    return 'ready';
+  }
+  return 'not-ready';
+}
+
+function normalizeIssueRepositoryLifecycle(
+  lifecycle: KanbanIssueRepositoryLifecycle | undefined,
+  repositoryMap: ReadonlyMap<string, KanbanRepositoryContext>,
+): KanbanIssueRepositoryLifecycle | undefined {
+  if (!lifecycle) {
+    return undefined;
+  }
+
+  const repository = repositoryMap.get(lifecycle.repositoryId);
+  const branchName = lifecycle.branchName?.trim() || repository?.defaultBranch || 'main';
+  const ciGates = uniqueById(
+    lifecycle.ciGates.map((gate) => ({
+      ...gate,
+      name: gate.name.trim(),
+      provider: gate.provider?.trim() || repository?.settings.ciProvider,
+      summary: gate.summary?.trim() || undefined,
+      url: gate.url?.trim() || undefined,
+    })),
+  );
+
+  const pullRequest = lifecycle.pullRequest
+    ? {
+        ...lifecycle.pullRequest,
+        title: lifecycle.pullRequest.title.trim(),
+        branchName: lifecycle.pullRequest.branchName?.trim() || branchName,
+        baseBranch:
+          lifecycle.pullRequest.baseBranch?.trim() ||
+          repository?.settings.baseBranch ||
+          repository?.defaultBranch ||
+          'main',
+        reviewLinks: uniqueById(
+          lifecycle.pullRequest.reviewLinks.map((reviewLink) => ({
+            ...reviewLink,
+            label: reviewLink.label.trim(),
+            reviewer: reviewLink.reviewer?.trim() || undefined,
+            url: reviewLink.url?.trim() || undefined,
+          })),
+        ),
+        url: lifecycle.pullRequest.url?.trim() || undefined,
+      }
+    : undefined;
+
+  const reviewStatus = resolveReviewStatus(pullRequest);
+  const mergeStatus = resolveMergeStatus({
+    ciGates,
+    pullRequest,
+    reviewStatus,
+  });
+  const publishStatus = resolvePublishStatus({
+    mergeStatus,
+    publishStatus: lifecycle.publishStatus,
+    lastPublishedAt: lifecycle.lastPublishedAt,
+  });
+
+  return {
+    ...lifecycle,
+    branchName,
+    ciGates,
+    pullRequest: pullRequest
+      ? {
+          ...pullRequest,
+          mergeStatus,
+          status:
+            mergeStatus === 'merged'
+              ? 'merged'
+              : reviewStatus === 'approved'
+                ? 'approved'
+                : reviewStatus === 'changes-requested'
+                  ? 'changes-requested'
+                  : pullRequest.status,
+        }
+      : undefined,
+    reviewStatus,
+    mergeStatus,
+    publishStatus,
+    publishUrl: lifecycle.publishUrl?.trim() || undefined,
+    lastPublishedAt: lifecycle.lastPublishedAt,
+  };
 }
 
 function getColumnName(state: KanbanWorkflowState): string {
@@ -421,6 +703,7 @@ function resolveBlockedReasons(
 export function normalizeKanbanIssue(
   issue: Omit<KanbanIssue, 'dispatch'> & { readonly dispatch?: Partial<KanbanIssueDispatchState> },
   issuesById: ReadonlyMap<string, KanbanIssue>,
+  repositoryMap: ReadonlyMap<string, KanbanRepositoryContext> = new Map(),
 ): KanbanIssue {
   const labels = uniqueById(issue.labels);
   const assignees = uniqueById(issue.assignees);
@@ -444,6 +727,7 @@ export function normalizeKanbanIssue(
       sessionIds: Array.from(new Set(issue.dispatch?.sessionIds ?? [])),
       lastDispatchedAt: issue.dispatch?.lastDispatchedAt,
     },
+    repositoryLifecycle: normalizeIssueRepositoryLifecycle(issue.repositoryLifecycle, repositoryMap),
   };
 }
 
@@ -631,7 +915,9 @@ export function computeKanbanProjectMetrics(issues: readonly KanbanIssue[]): Kan
 
 export function buildKanbanBacklogSnapshot(input: {
   readonly generatedAt?: string;
-  readonly projects: readonly Omit<KanbanProject, 'metrics'>[];
+  readonly projects: readonly (Omit<KanbanProject, 'metrics'> & {
+    readonly repositories?: readonly KanbanRepositoryContext[];
+  })[];
   readonly issues: readonly (Omit<KanbanIssue, 'dispatch'> & {
     readonly dispatch?: Partial<KanbanIssueDispatchState>;
   })[];
@@ -649,10 +935,23 @@ export function buildKanbanBacklogSnapshot(input: {
     });
   }
 
-  const normalizedIssues = input.issues.map((issue) => normalizeKanbanIssue(issue, issueSeedMap));
+  const projects = input.projects.map((project) => ({
+    ...project,
+    labels: uniqueById(project.labels),
+    assignees: uniqueById(project.assignees),
+    statuses: project.statuses.length > 0 ? project.statuses : DEFAULT_PROJECT_STATUSES,
+    repositories: uniqueById((project.repositories ?? []).map(normalizeRepositoryContext)),
+  }));
+  const repositoryMapByProject = new Map(
+    projects.map((project) => [project.id, new Map(project.repositories.map((repository) => [repository.id, repository]))]),
+  );
+
+  const normalizedIssues = input.issues.map((issue) =>
+    normalizeKanbanIssue(issue, issueSeedMap, repositoryMapByProject.get(issue.projectId)),
+  );
   const normalizedIssueMap = new Map(normalizedIssues.map((issue) => [issue.id, issue]));
 
-  const projects = input.projects.map((project) => {
+  const projectsWithMetrics = projects.map((project) => {
     const statuses = project.statuses.length > 0 ? project.statuses : DEFAULT_PROJECT_STATUSES;
     const issueIds = Array.from(
       new Set([
@@ -668,8 +967,6 @@ export function buildKanbanBacklogSnapshot(input: {
 
     return {
       ...project,
-      labels: uniqueById(project.labels),
-      assignees: uniqueById(project.assignees),
       statuses,
       issueIds,
       metrics: computeKanbanProjectMetrics(projectIssues),
@@ -678,7 +975,7 @@ export function buildKanbanBacklogSnapshot(input: {
 
   return {
     generatedAt: input.generatedAt ?? new Date().toISOString(),
-    projects,
+    projects: projectsWithMetrics,
     issues: normalizedIssues,
   };
 }
@@ -689,11 +986,17 @@ export function buildKanbanProjectBoard(input: {
   readonly issues: readonly KanbanIssue[];
 }): KanbanProjectBoard {
   const projectIssues = input.issues.filter((issue) => issue.projectId === input.project.id);
+  const repositoryMap = new Map(
+    input.project.repositories.map((repository) => [repository.id, repository]),
+  );
   const cards: KanbanBoardCard[] = projectIssues.map((issue) => {
     const workflowState = resolveKanbanWorkflowState(issue);
     const swimlaneId = resolveKanbanSwimlane(issue);
     const signals: KanbanBoardPolicySignal[] = [];
     const progress = acceptanceProgress(issue);
+    const repository = issue.repositoryLifecycle
+      ? repositoryMap.get(issue.repositoryLifecycle.repositoryId)
+      : undefined;
 
     if (isBlockedIssue(issue)) {
       for (const reason of issue.dispatch.blockedReasons) {
@@ -727,6 +1030,28 @@ export function buildKanbanProjectBoard(input: {
       }
     }
 
+    if (issue.repositoryLifecycle?.ciGates.some((gate) => gate.required && gate.status === 'failing')) {
+      signals.push(createPolicySignal('repo-ci', `${issue.key} has failing required CI gates.`, false));
+    }
+    if (issue.repositoryLifecycle?.pullRequest && issue.repositoryLifecycle.mergeStatus === 'ready') {
+      signals.push(
+        createPolicySignal(
+          'merge-status',
+          `${issue.key} is approved and ready to merge.`,
+          false,
+        ),
+      );
+    }
+    if (issue.repositoryLifecycle?.publishStatus === 'published') {
+      signals.push(
+        createPolicySignal(
+          'publish-status',
+          `${issue.key} has already been published.`,
+          false,
+        ),
+      );
+    }
+
     return {
       issueId: issue.id,
       issueKey: issue.key,
@@ -744,6 +1069,8 @@ export function buildKanbanProjectBoard(input: {
       dependencyCount: issue.dependencies.length,
       childCount: issue.childIssueIds.length,
       acceptanceProgress: progress,
+      repository,
+      repositoryLifecycle: issue.repositoryLifecycle,
       moveTargets: getAllowedMoveStates(workflowState).map((state) => {
         const evaluation = evaluateKanbanIssueMove({
           project: input.project,
@@ -805,5 +1132,135 @@ export function buildKanbanBoardSnapshot(snapshot: KanbanBacklogSnapshot): Kanba
         issues: snapshot.issues,
       }),
     ),
+  };
+}
+
+export function upsertKanbanProjectRepository<
+  TProject extends { readonly repositories?: readonly KanbanRepositoryContext[] },
+>(project: TProject, repository: KanbanRepositoryContext): TProject {
+  const repositories = uniqueById([
+    ...(project.repositories ?? []).filter((candidate) => candidate.id !== repository.id),
+    normalizeRepositoryContext(repository),
+  ]);
+  return {
+    ...project,
+    repositories,
+  };
+}
+
+export function updateKanbanProjectRepositorySettings<
+  TProject extends { readonly repositories?: readonly KanbanRepositoryContext[] },
+>(
+  project: TProject,
+  input: {
+    readonly repositoryId: string;
+    readonly settings: Partial<KanbanRepositorySettings>;
+  },
+): TProject {
+  return {
+    ...project,
+    repositories: (project.repositories ?? []).map((repository) =>
+      repository.id === input.repositoryId
+        ? {
+            ...repository,
+            settings: normalizeRepositorySettings(
+              {
+                ...repository.settings,
+                ...input.settings,
+              },
+              repository.defaultBranch,
+            ),
+          }
+        : repository,
+    ),
+  };
+}
+
+export function linkKanbanIssueRepository<
+  TIssue extends { readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle },
+>(
+  issue: TIssue,
+  input: {
+    readonly repositoryId: string;
+    readonly branchName: string;
+  },
+): TIssue {
+  return {
+    ...issue,
+    repositoryLifecycle: {
+      repositoryId: input.repositoryId,
+      branchName: input.branchName.trim(),
+      reviewStatus: issue.repositoryLifecycle?.reviewStatus ?? 'unlinked',
+      mergeStatus: issue.repositoryLifecycle?.mergeStatus ?? 'not-ready',
+      publishStatus: issue.repositoryLifecycle?.publishStatus ?? 'not-ready',
+      ciGates: issue.repositoryLifecycle?.ciGates ?? [],
+      pullRequest: issue.repositoryLifecycle?.pullRequest,
+      publishUrl: issue.repositoryLifecycle?.publishUrl,
+      lastPublishedAt: issue.repositoryLifecycle?.lastPublishedAt,
+    },
+  };
+}
+
+export function createKanbanIssuePullRequest<
+  TIssue extends { readonly repositoryLifecycle?: KanbanIssueRepositoryLifecycle },
+>(
+  issue: TIssue,
+  input: {
+    readonly title: string;
+    readonly number: number;
+    readonly now: string;
+    readonly baseBranch: string;
+    readonly branchName: string;
+    readonly reviewLinks?: readonly Omit<KanbanPullRequestReviewLink, 'id'>[];
+    readonly url?: string;
+  },
+): TIssue {
+  if (!issue.repositoryLifecycle) {
+    return issue;
+  }
+
+  const reviewLinks = (input.reviewLinks ?? []).map((reviewLink, index) => ({
+    ...reviewLink,
+    id: `${issue.repositoryLifecycle!.repositoryId}-review-${index + 1}`,
+  }));
+
+  return {
+    ...issue,
+    repositoryLifecycle: {
+      ...issue.repositoryLifecycle,
+      branchName: input.branchName.trim(),
+      reviewStatus: reviewLinks.length > 0 ? 'pending' : 'unlinked',
+      mergeStatus: 'blocked',
+      ciGates:
+        issue.repositoryLifecycle.ciGates.length > 0
+          ? issue.repositoryLifecycle.ciGates
+          : [
+              {
+                id: `${issue.repositoryLifecycle.repositoryId}-ci-build`,
+                name: 'Build',
+                required: true,
+                status: 'pending',
+              },
+              {
+                id: `${issue.repositoryLifecycle.repositoryId}-ci-tests`,
+                name: 'Tests',
+                required: true,
+                status: 'pending',
+              },
+            ],
+      pullRequest: {
+        id: `${issue.repositoryLifecycle.repositoryId}-pr-${input.number}`,
+        number: input.number,
+        title: input.title.trim(),
+        status: reviewLinks.length > 0 ? 'in-review' : 'open',
+        branchName: input.branchName.trim(),
+        baseBranch: input.baseBranch.trim(),
+        mergeStatus: 'blocked',
+        reviewLinks,
+        url: input.url?.trim() || undefined,
+        createdAt: input.now,
+        updatedAt: input.now,
+      },
+    },
   };
 }

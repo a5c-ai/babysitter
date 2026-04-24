@@ -3,18 +3,23 @@
 import type {
   KanbanBoardCard,
   KanbanProjectBoard,
+  KanbanPullRequestReviewLink,
   KanbanWorkflowState,
 } from "@a5c-ai/agent-mux-core/kanban";
 import {
   AlertCircle,
   ArrowRight,
   CheckCircle2,
+  FolderGit2,
   GitBranch,
+  Github,
   Layers,
+  Settings,
   ShieldAlert,
   TimerReset,
   Workflow,
 } from "lucide-react";
+import { useState } from "react";
 
 import { useBacklog } from "@/hooks/use-backlog";
 
@@ -76,8 +81,352 @@ function findCardsForCell(
   );
 }
 
+function lifecycleTone(status: string): string {
+  switch (status) {
+    case "approved":
+    case "ready":
+    case "passing":
+    case "published":
+    case "merged":
+      return "border-success/25 bg-success-muted text-success";
+    case "pending":
+    case "in-review":
+      return "border-warning/25 bg-warning-muted text-warning";
+    case "changes-requested":
+    case "blocked":
+    case "failing":
+    case "failed":
+      return "border-error/25 bg-error-muted text-error";
+    default:
+      return "border-border bg-background text-foreground-muted";
+  }
+}
+
+function lifecycleLabel(status: string): string {
+  return status
+    .split("-")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+}
+
+function reviewTone(review: KanbanPullRequestReviewLink): string {
+  return lifecycleTone(review.status);
+}
+
+interface RepositoryLifecyclePanelProps {
+  card: KanbanBoardCard;
+  mutating: boolean;
+  onLinkRepository: (input: {
+    issueId: string;
+    owner: string;
+    name: string;
+    branchName: string;
+    defaultBranch?: string;
+  }) => Promise<void>;
+  onUpdateRepositorySettings: (input: {
+    issueId: string;
+    baseBranch: string;
+    ciProvider?: string;
+    publishTarget?: string;
+    autoMerge: boolean;
+    requiredApprovals: number;
+  }) => Promise<void>;
+  onCreatePullRequest: (input: {
+    issueId: string;
+    title: string;
+    reviewers?: string;
+  }) => Promise<void>;
+}
+
+function RepositoryLifecyclePanel({
+  card,
+  mutating,
+  onLinkRepository,
+  onUpdateRepositorySettings,
+  onCreatePullRequest,
+}: RepositoryLifecyclePanelProps) {
+  const repository = card.repository;
+  const lifecycle = card.repositoryLifecycle;
+  const [owner, setOwner] = useState(repository?.owner ?? "a5c-ai");
+  const [name, setName] = useState(repository?.name ?? "babysitter");
+  const [branchName, setBranchName] = useState(
+    lifecycle?.branchName ?? `feature/${card.issueKey.toLowerCase()}`,
+  );
+  const [defaultBranch, setDefaultBranch] = useState(repository?.defaultBranch ?? "main");
+  const [baseBranch, setBaseBranch] = useState(repository?.settings.baseBranch ?? "main");
+  const [ciProvider, setCiProvider] = useState(repository?.settings.ciProvider ?? "GitHub Actions");
+  const [publishTarget, setPublishTarget] = useState(repository?.settings.publishTarget ?? "npm");
+  const [requiredApprovals, setRequiredApprovals] = useState(
+    repository?.settings.requiredApprovals ?? 1,
+  );
+  const [autoMerge, setAutoMerge] = useState(repository?.settings.autoMerge ?? false);
+  const [pullRequestTitle, setPullRequestTitle] = useState(`${card.issueKey}: ${card.title}`);
+  const [reviewers, setReviewers] = useState(
+    lifecycle?.pullRequest?.reviewLinks.map((review) => review.reviewer ?? review.label).join(", ") ??
+      "kanban-maintainers",
+  );
+
+  if (!repository || !lifecycle) {
+    return (
+      <div className="mt-4 rounded-2xl border border-dashed border-border/80 bg-background/80 p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <FolderGit2 className="h-4 w-4" />
+          Repository lifecycle
+        </div>
+        <p className="mt-2 text-sm leading-6 text-foreground-muted">
+          Link this work item to a shared repository context before opening a PR or surfacing CI,
+          merge, and publish state.
+        </p>
+        <form
+          className="mt-4 grid gap-3 md:grid-cols-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onLinkRepository({
+              issueId: card.issueId,
+              owner,
+              name,
+              branchName,
+              defaultBranch,
+            });
+          }}
+        >
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Repo owner
+            <input
+              value={owner}
+              onChange={(event) => setOwner(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Repo name
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Branch
+            <input
+              value={branchName}
+              onChange={(event) => setBranchName(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Default branch
+            <input
+              value={defaultBranch}
+              onChange={(event) => setDefaultBranch(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={mutating}
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-50"
+          >
+            Link repository
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 rounded-2xl border border-border/80 bg-background/80 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Github className="h-4 w-4" />
+            {repository.fullName}
+          </div>
+          <div className="mt-1 text-xs text-foreground-muted">
+            Branch `{lifecycle.branchName}` into `{repository.settings.baseBranch}`
+          </div>
+        </div>
+        <span className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground-muted">
+          {repository.provider}
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className={`rounded-full border px-2.5 py-1 text-xs ${lifecycleTone(lifecycle.reviewStatus)}`}>
+          Review {lifecycleLabel(lifecycle.reviewStatus)}
+        </span>
+        <span className={`rounded-full border px-2.5 py-1 text-xs ${lifecycleTone(lifecycle.mergeStatus)}`}>
+          Merge {lifecycleLabel(lifecycle.mergeStatus)}
+        </span>
+        <span className={`rounded-full border px-2.5 py-1 text-xs ${lifecycleTone(lifecycle.publishStatus)}`}>
+          Publish {lifecycleLabel(lifecycle.publishStatus)}
+        </span>
+      </div>
+
+      {lifecycle.pullRequest ? (
+        <div className="mt-4 rounded-2xl border border-border bg-card/80 p-4">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
+            <GitBranch className="h-4 w-4" />
+            PR #{lifecycle.pullRequest.number}
+            <span className={`rounded-full border px-2.5 py-1 text-xs ${lifecycleTone(lifecycle.pullRequest.status)}`}>
+              {lifecycleLabel(lifecycle.pullRequest.status)}
+            </span>
+          </div>
+          <div className="mt-2 text-sm text-foreground">{lifecycle.pullRequest.title}</div>
+          {lifecycle.pullRequest.reviewLinks.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {lifecycle.pullRequest.reviewLinks.map((review) => (
+                <span
+                  key={review.id}
+                  className={`rounded-full border px-2.5 py-1 text-xs ${reviewTone(review)}`}
+                >
+                  {review.label}: {lifecycleLabel(review.status)}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <form
+          className="mt-4 grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onCreatePullRequest({
+              issueId: card.issueId,
+              title: pullRequestTitle,
+              reviewers,
+            });
+          }}
+        >
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            PR title
+            <input
+              value={pullRequestTitle}
+              onChange={(event) => setPullRequestTitle(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Reviewers
+            <input
+              value={reviewers}
+              onChange={(event) => setReviewers(event.target.value)}
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={mutating}
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-50"
+          >
+            Create PR
+          </button>
+        </form>
+      )}
+
+      <div className="mt-4">
+        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          CI gates
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {lifecycle.ciGates.map((gate) => (
+            <span
+              key={gate.id}
+              className={`rounded-full border px-2.5 py-1 text-xs ${lifecycleTone(gate.status)}`}
+            >
+              {gate.name}: {lifecycleLabel(gate.status)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <form
+        className="mt-4 grid gap-3 md:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void onUpdateRepositorySettings({
+            issueId: card.issueId,
+            baseBranch,
+            ciProvider,
+            publishTarget,
+            autoMerge,
+            requiredApprovals,
+          });
+        }}
+      >
+        <div className="col-span-full flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          <Settings className="h-4 w-4" />
+          Repo settings
+        </div>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Base branch
+          <input
+            value={baseBranch}
+            onChange={(event) => setBaseBranch(event.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          CI provider
+          <input
+            value={ciProvider}
+            onChange={(event) => setCiProvider(event.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Publish target
+          <input
+            value={publishTarget}
+            onChange={(event) => setPublishTarget(event.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Required approvals
+          <input
+            type="number"
+            min={0}
+            value={requiredApprovals}
+            onChange={(event) => setRequiredApprovals(Number(event.target.value) || 0)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+        <label className="col-span-full flex items-center gap-2 text-sm text-foreground-muted">
+          <input
+            type="checkbox"
+            checked={autoMerge}
+            onChange={(event) => setAutoMerge(event.target.checked)}
+            className="h-4 w-4 rounded border border-border"
+          />
+          Enable auto-merge when approvals and CI gates pass
+        </label>
+        <button
+          type="submit"
+          disabled={mutating}
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+        >
+          Save repo settings
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function BacklogOverview() {
-  const { snapshot, board, summary, loading, error, moveIssue, movingIssueId } = useBacklog();
+  const {
+    snapshot,
+    board,
+    summary,
+    loading,
+    error,
+    moveIssue,
+    linkRepository,
+    updateRepositorySettings,
+    createPullRequest,
+    movingIssueId,
+    mutatingIssueId,
+  } = useBacklog();
 
   if (loading && !snapshot) {
     return (
@@ -213,6 +562,58 @@ export function BacklogOverview() {
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 {criterion.title}
               </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {primaryProject.repositories.length > 0 ? (
+        <div className="mt-5 rounded-3xl border border-border bg-background p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
+                Repository context
+              </p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">
+                Shared repository settings stay below `packages/kanban`
+              </h3>
+            </div>
+            <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">
+              {primaryProject.repositories.length} linked repos
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-3 xl:grid-cols-2">
+            {primaryProject.repositories.map((repository) => (
+              <article
+                key={repository.id}
+                className="rounded-2xl border border-border bg-card p-4"
+                data-testid={`repository-context-${repository.id}`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Github className="h-4 w-4" />
+                    {repository.fullName}
+                  </div>
+                  <span className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground-muted">
+                    {repository.provider}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-foreground-muted">
+                  <span className="rounded-full border border-border px-2.5 py-1">
+                    Base {repository.settings.baseBranch}
+                  </span>
+                  <span className="rounded-full border border-border px-2.5 py-1">
+                    CI {repository.settings.ciProvider ?? "Unconfigured"}
+                  </span>
+                  <span className="rounded-full border border-border px-2.5 py-1">
+                    Publish {repository.settings.publishTarget ?? "Unconfigured"}
+                  </span>
+                  <span className="rounded-full border border-border px-2.5 py-1">
+                    {repository.settings.requiredApprovals} approvals
+                  </span>
+                </div>
+              </article>
             ))}
           </div>
         </div>
@@ -374,6 +775,14 @@ export function BacklogOverview() {
                                 )}
                               </div>
                             ) : null}
+
+                            <RepositoryLifecyclePanel
+                              card={card}
+                              mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
+                              onLinkRepository={linkRepository}
+                              onUpdateRepositorySettings={updateRepositorySettings}
+                              onCreatePullRequest={createPullRequest}
+                            />
                           </article>
                         ))}
                       </div>
