@@ -46,6 +46,7 @@ export interface ConfigValidationResult {
  */
 export const CONFIG_ENV_VARS = {
   RUNS_DIR: "BABYSITTER_RUNS_DIR",
+  RUNS_SCOPE: "BABYSITTER_RUNS_SCOPE",
   MAX_ITERATIONS: "BABYSITTER_MAX_ITERATIONS",
   QUALITY_THRESHOLD: "BABYSITTER_QUALITY_THRESHOLD",
   TIMEOUT: "BABYSITTER_TIMEOUT",
@@ -57,7 +58,7 @@ export const CONFIG_ENV_VARS = {
 
 /** Default SDK configuration values; env vars and explicit overrides can replace them. */
 export const DEFAULTS: Readonly<BabysitterConfig> = {
-  runsDir: ".a5c/runs",
+  runsDir: path.join(getConfiguredGlobalStateRoot(), "runs"),
   maxIterations: 256,
   qualityThreshold: 80,
   timeout: 120000,
@@ -71,7 +72,7 @@ export const DEFAULTS: Readonly<BabysitterConfig> = {
   largeResultPreviewLimit: 1024 * 1024,
 } as const;
 
-function getConfiguredGlobalStateRoot(): string {
+export function getConfiguredGlobalStateRoot(): string {
   return process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
     ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
     : path.join(os.homedir(), ".a5c");

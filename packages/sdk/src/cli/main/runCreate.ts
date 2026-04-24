@@ -143,7 +143,7 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           runDir: result.runDir,
           pluginRoot: adapter.resolvePluginRoot(parsed),
           stateDir: parsed.stateDir,
-          runsDir: parsed.runsDir,
+          runsDir,
           maxIterations: parsed.maxIterations,
           prompt: parsed.prompt ?? "",
           verbose: parsed.verbose,
@@ -173,7 +173,7 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           pluginRoot: discoverPluginRoot,
           libraryPath: libraryPath || undefined,
           runId: result.runId,
-          runsDir: parsed.runsDir,
+          runsDir,
           processPath: absoluteImportPath,
         });
         discoveredSkills = discoverResult.skills.map((skill) => ({ name: skill.name, file: skill.file }));

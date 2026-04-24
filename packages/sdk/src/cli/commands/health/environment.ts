@@ -1,4 +1,5 @@
 import { DEFAULTS, CONFIG_ENV_VARS } from "../../../config/defaults";
+import { getRunsScope, resolveRunsDir } from "../../../config";
 import type { HealthCheck } from "../health";
 
 export function checkEnvironmentVariables(): HealthCheck {
@@ -12,13 +13,22 @@ export function checkEnvironmentVariables(): HealthCheck {
   }> = [];
 
   const runsDir = process.env[CONFIG_ENV_VARS.RUNS_DIR];
+  const runsScope = getRunsScope();
   envChecks.push({
     name: "BABYSITTER_RUNS_DIR",
     key: CONFIG_ENV_VARS.RUNS_DIR,
     value: runsDir,
     required: false,
     valid: true,
-    note: runsDir ? `Custom runs directory: ${runsDir}` : `Using default: ${DEFAULTS.runsDir}`,
+    note: runsDir ? `Custom runs directory: ${runsDir}` : `Using ${runsScope} scope default: ${resolveRunsDir()}`,
+  });
+  envChecks.push({
+    name: "BABYSITTER_RUNS_SCOPE",
+    key: CONFIG_ENV_VARS.RUNS_SCOPE,
+    value: process.env[CONFIG_ENV_VARS.RUNS_SCOPE],
+    required: false,
+    valid: true,
+    note: `Runs scope: ${runsScope}`,
   });
 
   const maxIterations = process.env[CONFIG_ENV_VARS.MAX_ITERATIONS];

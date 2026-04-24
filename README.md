@@ -402,7 +402,7 @@ It executes processes using the SDK's built-in engine, supports all effect types
 - **Process as Code:** Your workflow is JavaScript - the orchestrator can ONLY do what this code permits
 - **Mandatory Stop:** Claude cannot "keep running" - every step ends with a forced stop, then the process decides what's next
 - **Enforcement, not Assistance:** Gates block progression until satisfied - they're not suggestions
-- **Event-Sourced Journal:** All state in `.a5c/runs/` - deterministic replay and resume from any point
+- **Event-Sourced Journal:** All run state in `~/.a5c/runs/` by default, with repo-local `.a5c/runs/` compatibility reads - deterministic replay and resume from any point
 
 ---
 

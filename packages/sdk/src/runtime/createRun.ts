@@ -10,11 +10,12 @@ import type { CreateRunOptions, CreateRunResult } from "./types";
 import { callRuntimeHook } from "./hooks/runtime";
 import { validateAgainstSchema } from "./schemaValidator";
 import { BabysitterRuntimeError } from "./exceptions";
+import { resolveProjectRootForRun, resolveRunsDir } from "../config";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
   validateRunId(runId);
-  const runsDir = path.resolve(options.runsDir);
+  const runsDir = path.resolve(options.runsDir ?? resolveRunsDir());
   const runDir = getRunDir(runsDir, runId);
   const normalizedEntrypoint = normalizeEntrypoint(runDir, options.process.importPath, options.process.exportName);
   const requestId = options.request ?? options.process.processId ?? runId;
@@ -103,10 +104,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     ? `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`
     : metadata.entrypoint.importPath;
 
-  // Call hook from project root (parent of .a5c dir) where plugins/ is located
-  // runDir is like: /path/to/project/.a5c/runs/<runId>
-  // So we need 3 levels up: runs -> .a5c -> project
-  const projectRoot = path.dirname(path.dirname(path.dirname(runDir)));
+  const projectRoot = resolveProjectRootForRun(runDir, metadata.entrypoint?.importPath);
   if (!options.nested?.skipRunStartHook) {
     await callRuntimeHook(
       "on-run-start",

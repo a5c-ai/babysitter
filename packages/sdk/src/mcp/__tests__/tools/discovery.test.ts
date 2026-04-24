@@ -100,7 +100,7 @@ describe("configure_show", () => {
   it("returns current configuration", async () => {
     mockedConfigureShow.mockReturnValue({
       values: {
-        runsDir: ".a5c/runs",
+        runsDir: "~/.a5c/runs",
         maxIterations: 256,
         qualityThreshold: 80,
       },
@@ -112,7 +112,7 @@ describe("configure_show", () => {
 
     expect(result.isError).toBeUndefined();
     const data = parseResult(result) as { values: Record<string, unknown>; timestamp: string };
-    expect(data.values.runsDir).toBe(".a5c/runs");
+    expect(data.values.runsDir).toBe("~/.a5c/runs");
     expect(data.values.maxIterations).toBe(256);
     expect(data.timestamp).toBe("2026-03-15T12:00:00Z");
   });

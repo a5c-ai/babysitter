@@ -22,6 +22,7 @@ import { densityFilterText, estimateTokens } from "../../compression/density-fil
 import { getOrCompressFile } from "../../compression/library-cache";
 import { getActiveProcessLibraryPath } from "../../processLibrary/active";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
+import { getReadableRunsDirs, resolveExistingRunDir } from "../../config";
 import type { HookLogger } from "./utils";
 import { countPendingByKind, isOnlyBreakpoints, safeStr } from "./utils";
 
@@ -104,9 +105,10 @@ function resolveCandidateRunDir(
   if (path.isAbsolute(runId)) {
     candidates.push(runId);
   } else {
-    candidates.push(path.join(runsDir, runId));
-    candidates.push(path.resolve(path.join(".a5c", ".a5c", "runs", runId)));
-    candidates.push(path.resolve(path.join(".a5c", "runs", runId)));
+    candidates.push(resolveExistingRunDir(runId, { override: runsDir }));
+    for (const readableRoot of getReadableRunsDirs({ override: runsDir })) {
+      candidates.push(path.join(readableRoot, runId));
+    }
   }
 
   const uniqueCandidates = candidates.filter((candidate, index) =>

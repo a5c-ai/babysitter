@@ -5,6 +5,7 @@ import { readRunMetadata } from "../../storage/runFiles";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { deriveObservedRunState } from "../../runtime/runLifecycleState";
 import { resolveCompletionProof } from "../../cli/completionProof";
+import { resolveExistingRunDir } from "../../config";
 import { countPendingByKind, isOnlyBreakpoints } from "./utils";
 
 export interface HookRunStateSummary {
@@ -15,23 +16,9 @@ export interface HookRunStateSummary {
 }
 
 function resolveRunDir(runId: string, runsDir: string, log?: { info(message: string): void }): string {
-  let runDir = path.isAbsolute(runId) ? runId : path.join(runsDir, runId);
+  const runDir = resolveExistingRunDir(runId, { override: runsDir });
   if (!existsSync(path.join(runDir, "run.json")) && !path.isAbsolute(runId)) {
-    const alternatives = [
-      path.join(".a5c", ".a5c", "runs", runId),
-      path.join(".a5c", "runs", runId),
-    ];
-    for (const candidate of alternatives) {
-      const resolved = path.resolve(candidate);
-      if (
-        resolved !== path.resolve(runDir) &&
-        existsSync(path.join(resolved, "run.json"))
-      ) {
-        log?.info(`Run not found at ${runDir}, using fallback: ${resolved}`);
-        runDir = resolved;
-        break;
-      }
-    }
+    log?.info(`Run ${runId} was not found in the primary runs root; continuing with compatibility lookup result ${runDir}`);
   }
   return runDir;
 }

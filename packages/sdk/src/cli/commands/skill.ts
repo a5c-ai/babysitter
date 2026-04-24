@@ -27,6 +27,7 @@ import {
   fetchRemoteSkillsBySource,
 } from './skill/remoteDiscovery';
 import { getActiveProcessLibraryPath } from '../../processLibrary/active';
+import { resolveRunsDir } from '../../config';
 import type {
   AgentMetadata,
   DiscoverSkillsResult,
@@ -66,7 +67,7 @@ export async function discoverSkillsInternal(options: {
     libraryPath,
     runId = '',
     cacheTtl = DEFAULT_CACHE_TTL,
-    runsDir = '.a5c/runs',
+    runsDir = resolveRunsDir(),
     includeRemote = false,
     processPath,
     includeProcesses = false,

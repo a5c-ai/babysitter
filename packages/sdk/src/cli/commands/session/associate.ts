@@ -1,4 +1,4 @@
-import * as path from "node:path";
+import { resolveExistingRunDir, resolveRunsDir } from "../../../config";
 import type { SessionAssociateResult } from "../../../session";
 import {
   SessionError,
@@ -61,9 +61,10 @@ export async function handleSessionAssociate(args: SessionAssociateArgs): Promis
 
     const oldRunId = existing.state.runId;
     let isTerminal = true;
-    if (args.runsDir) {
+    if (args.runsDir || oldRunId) {
       try {
-        const journal = await loadJournal(path.join(args.runsDir, oldRunId));
+        const runDir = resolveExistingRunDir(oldRunId, { override: args.runsDir ?? resolveRunsDir() });
+        const journal = await loadJournal(runDir);
         isTerminal = journal.some(
           (event) => event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED",
         );

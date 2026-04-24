@@ -659,8 +659,8 @@ Configure Babysitter behavior through environment variables:
       babysitter@a5c.ai
 
   env:
-    # Configure runs directory
-    BABYSITTER_RUNS_DIR: .a5c/runs
+    # Keep runs under the checked-out repository for easy artifact upload
+    BABYSITTER_RUNS_SCOPE: repo
 
     # Set maximum iterations (default: 256)
     BABYSITTER_MAX_ITERATIONS: 100

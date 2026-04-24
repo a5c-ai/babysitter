@@ -9,10 +9,11 @@ import { promises as fs } from "fs";
 import {
   commitEffectResult,
   createRun,
-  getRunDir,
   loadJournal,
   orchestrateIteration,
   readRunMetadata,
+  resolveExistingRunDir,
+  resolveRunsDir,
   type EffectAction,
   type IterationResult,
   type JournalEvent,
@@ -38,7 +39,7 @@ function fail<T>(code: string, message: string): ApiResult<T> {
 export interface ApiCreateRunInput {
   processId: string;
   entrypoint: string;
-  runsDir: string;
+  runsDir?: string;
   inputs?: unknown;
   prompt?: string;
   harness?: string;
@@ -113,14 +114,10 @@ export async function apiCreateRun(
     if (!input.entrypoint || typeof input.entrypoint !== "string") {
       return fail("INVALID_INPUT", "entrypoint must be a non-empty string");
     }
-    if (!input.runsDir || typeof input.runsDir !== "string") {
-      return fail("INVALID_INPUT", "runsDir must be a non-empty string");
-    }
-
     const { importPath, exportName } = parseEntrypoint(input.entrypoint);
 
     const result = await createRun({
-      runsDir: input.runsDir,
+      runsDir: input.runsDir ?? resolveRunsDir(),
       process: {
         processId: input.processId,
         importPath,
@@ -222,10 +219,10 @@ export async function apiCommitEffect(
 }
 
 export async function apiRunStatus(
-  input: { runId: string; runsDir: string },
+  input: { runId: string; runsDir?: string },
 ): Promise<ApiResult<RunStatusOutput>> {
   try {
-    const runDir = getRunDir(input.runsDir, input.runId);
+    const runDir = resolveExistingRunDir(input.runId, { override: input.runsDir ?? resolveRunsDir() });
 
     if (!(await pathExists(runDir))) {
       return fail("RUN_NOT_FOUND", `Run not found: ${input.runId}`);
@@ -250,14 +247,14 @@ export async function apiRunStatus(
 }
 
 export async function apiRunEvents(
-  input: { runId: string; runsDir: string; limit?: number; filterType?: string },
+  input: { runId: string; runsDir?: string; limit?: number; filterType?: string },
 ): Promise<ApiResult<RunEventsOutput>> {
   try {
     if (input.limit !== undefined && input.limit < 0) {
       return fail("INVALID_INPUT", "limit must be a non-negative number");
     }
 
-    const runDir = getRunDir(input.runsDir, input.runId);
+    const runDir = resolveExistingRunDir(input.runId, { override: input.runsDir ?? resolveRunsDir() });
 
     if (!(await pathExists(runDir))) {
       return fail("RUN_NOT_FOUND", `Run not found: ${input.runId}`);

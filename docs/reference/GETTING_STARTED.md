@@ -244,7 +244,7 @@ See [PROCESS_SELECTION.md](./PROCESS_SELECTION.md) for help choosing the right m
 Babysitter creates a run directory with all artifacts:
 
 ```
-.a5c/runs/<runId>/
+~/.a5c/runs/<runId>/   # default; use <repo>/.a5c/runs/<runId>/ when BABYSITTER_RUNS_SCOPE=repo
 ├── run.json           # Run metadata
 ├── inputs.json        # Your inputs
 ├── journal.jsonl      # Event log (append-only)

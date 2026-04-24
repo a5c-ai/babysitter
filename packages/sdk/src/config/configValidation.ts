@@ -5,6 +5,7 @@
 
 import type { BabysitterConfig, ConfigValidationResult, LogLevel } from "./defaults";
 import { DEFAULTS, CONFIG_ENV_VARS } from "./defaults";
+import { resolveRunsDir } from "./runs";
 
 /**
  * Valid log levels for validation
@@ -49,7 +50,7 @@ export function getConfig(overrides?: Partial<BabysitterConfig>): BabysitterConf
   const env = typeof process !== "undefined" ? process.env : {};
 
   return {
-    runsDir: overrides?.runsDir ?? env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir,
+    runsDir: overrides?.runsDir ?? resolveRunsDir(),
 
     maxIterations:
       overrides?.maxIterations ??

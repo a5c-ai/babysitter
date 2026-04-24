@@ -29,6 +29,7 @@ import {
   resolveStopHookRunState,
   type StopHookRunStateDetails,
 } from "./stopHookContinuation";
+import { resolveRunsDir } from "../../config";
 
 export interface StopHookCommonResult {
   shouldContinue: boolean;
@@ -135,7 +136,7 @@ export async function handleStopHookCommon(
     process.stdout.write("{}\n");
     return makeExit(log, 0, "no_state_dir");
   }
-  const runsDir = path.resolve(args.runsDir || ".a5c/runs");
+  const runsDir = path.resolve(args.runsDir || resolveRunsDir());
   let activeSessionId = sessionId;
   let filePath = getSessionFilePath(stateDir, activeSessionId);
   log.info(`Checking session file at: ${filePath}`);

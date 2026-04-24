@@ -44,15 +44,15 @@ export type CommandCategory =
 const COMMANDS: CommandInfo[] = [
   // Run commands
   { name: "run:create", description: "Create a new run", category: "run", tags: ["create", "new", "start"], example: "babysitter run:create --process-id my-process --entry ./process.js#process --inputs inputs.json" },
-  { name: "run:iterate", description: "Iterate a run until pending effects", category: "run", tags: ["iterate", "execute", "replay"], example: "babysitter run:iterate .a5c/runs/<runId>" },
-  { name: "run:status", description: "Show run status and progress", category: "run", tags: ["status", "inspect", "progress"], example: "babysitter run:status .a5c/runs/<runId>" },
-  { name: "run:events", description: "Show run journal events", category: "run", tags: ["events", "journal", "history"], example: "babysitter run:events .a5c/runs/<runId> --limit 50" },
-  { name: "run:rebuild-state", description: "Rebuild state cache from journal", category: "run", tags: ["rebuild", "repair", "recovery", "state"], example: "babysitter run:rebuild-state .a5c/runs/<runId>" },
-  { name: "run:repair-journal", description: "Repair corrupt journal entries", category: "run", tags: ["repair", "journal", "recovery"], example: "babysitter run:repair-journal .a5c/runs/<runId>" },
+  { name: "run:iterate", description: "Iterate a run until pending effects", category: "run", tags: ["iterate", "execute", "replay"], example: "babysitter run:iterate ~/.a5c/runs/<runId>" },
+  { name: "run:status", description: "Show run status and progress", category: "run", tags: ["status", "inspect", "progress"], example: "babysitter run:status ~/.a5c/runs/<runId>" },
+  { name: "run:events", description: "Show run journal events", category: "run", tags: ["events", "journal", "history"], example: "babysitter run:events ~/.a5c/runs/<runId> --limit 50" },
+  { name: "run:rebuild-state", description: "Rebuild state cache from journal", category: "run", tags: ["rebuild", "repair", "recovery", "state"], example: "babysitter run:rebuild-state ~/.a5c/runs/<runId>" },
+  { name: "run:repair-journal", description: "Repair corrupt journal entries", category: "run", tags: ["repair", "journal", "recovery"], example: "babysitter run:repair-journal ~/.a5c/runs/<runId>" },
   // Task commands
-  { name: "task:post", description: "Post a task result", category: "task", tags: ["post", "result", "resolve"], example: "babysitter task:post .a5c/runs/<runId> <effectId> --status ok --value-inline '{...}'" },
-  { name: "task:list", description: "List tasks in a run", category: "task", tags: ["list", "pending", "tasks"], example: "babysitter task:list .a5c/runs/<runId> --pending" },
-  { name: "task:show", description: "Show task details", category: "task", tags: ["show", "detail", "inspect"], example: "babysitter task:show .a5c/runs/<runId> <effectId>" },
+  { name: "task:post", description: "Post a task result", category: "task", tags: ["post", "result", "resolve"], example: "babysitter task:post ~/.a5c/runs/<runId> <effectId> --status ok --value-inline '{...}'" },
+  { name: "task:list", description: "List tasks in a run", category: "task", tags: ["list", "pending", "tasks"], example: "babysitter task:list ~/.a5c/runs/<runId> --pending" },
+  { name: "task:show", description: "Show task details", category: "task", tags: ["show", "detail", "inspect"], example: "babysitter task:show ~/.a5c/runs/<runId> <effectId>" },
   // Session commands
   { name: "session-history", description: "Browse persisted session history", category: "session", tags: ["session", "history", "browse"] },
   // Harness commands

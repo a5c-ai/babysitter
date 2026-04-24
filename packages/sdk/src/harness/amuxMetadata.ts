@@ -1,4 +1,5 @@
 import { builtinModules } from "node:module";
+import { resolveRunsDir } from "../config";
 import { STATIC_FALLBACK_METADATA } from "./amuxFallbackMetadata";
 
 /**
@@ -269,7 +270,7 @@ export function getAmuxAdapterMetadata(harnessName: string): AmuxAdapterMetadata
     },
     sessionDir: typeof adapter.sessionDir === "function"
       ? adapter.sessionDir()
-      : ".a5c/runs",
+      : resolveRunsDir(),
   };
 
   cache.set(amuxName, metadata);

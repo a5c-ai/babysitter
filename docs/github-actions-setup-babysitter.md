@@ -131,7 +131,7 @@ model: claude-sonnet-4-20250514
 | `process-path` | No | — | Path to process definition (skips Phase 1) |
 | `workspace` | No | `$GITHUB_WORKSPACE` | Working directory |
 | `max-iterations` | No | `256` | Max orchestration iterations |
-| `runs-dir` | No | `.a5c/runs` | Run state directory |
+| `runs-dir` | No | `~/.a5c/runs` | Run state directory |
 | `timeout-minutes` | No | `30` | Step timeout |
 | `verbose` | No | `false` | Enable debug output |
 | `anthropic-api-key` | No | — | Anthropic API key |
@@ -437,7 +437,8 @@ Configure babysitter behavior via environment variables on the workflow step:
 | `BABYSITTER_QUALITY_THRESHOLD` | `80` | Quality gate threshold (0-100) |
 | `BABYSITTER_LOG_LEVEL` | `info` | Logging: info, debug, warn, error |
 | `BABYSITTER_TIMEOUT` | `120000` | Operation timeout in ms |
-| `BABYSITTER_RUNS_DIR` | `.a5c/runs` | Run state directory |
+| `BABYSITTER_RUNS_DIR` | `~/.a5c/runs` | Run state directory override |
+| `BABYSITTER_RUNS_SCOPE` | `global` | Set to `repo` to keep runs under `<repo>/.a5c/runs` |
 
 ## Artifacts and Outputs
 
@@ -451,7 +452,7 @@ The action automatically uploads babysitter run artifacts (journals, task result
   if: always()
   with:
     name: babysitter-runs
-    path: .a5c/runs/
+    path: ~/.a5c/runs/
     retention-days: 14
 ```
 

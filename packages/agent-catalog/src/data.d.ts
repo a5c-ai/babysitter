@@ -1,0 +1,21 @@
+import type { AgentCatalog, AgentVersion, CapabilityDescriptor, EvidenceRecord, HarnessFallbackMetadata, HarnessImageEntry, HookDescriptor, HooksMuxDetectionRule, HostMetadataField, LifecycleNuance, ModelProviderVersion, ModelVersion, ModalityDescriptor, ProcessDescriptor, SessionNuance, TransportDescriptor } from "./models";
+export declare const GRAPH_DOCUMENT: import("./models").GraphDocument;
+export declare const ONTOLOGY_SCHEMA: import("./models").OntologySchema;
+export declare const EVIDENCE: EvidenceRecord[];
+export declare const PROVIDERS: ModelProviderVersion[];
+export declare const MODELS: ModelVersion[];
+export declare const TRANSPORTS: TransportDescriptor[];
+export declare const CAPABILITIES: CapabilityDescriptor[];
+export declare const MODALITIES: ModalityDescriptor[];
+export declare const HOOKS: HookDescriptor[];
+export declare const SESSION_NUANCES: SessionNuance[];
+export declare const LIFECYCLE_NUANCES: LifecycleNuance[];
+export declare const PROCESSES: ProcessDescriptor[];
+export declare const AGENTS: AgentVersion[];
+export declare const HOST_SIGNAL_MAP: Record<string, string[]>;
+export declare const HOST_METADATA_FIELDS: Record<string, HostMetadataField[]>;
+export declare const HOOKS_MUX_DETECTION_RULES: HooksMuxDetectionRule[];
+export declare const FALLBACK_METADATA: Record<string, HarnessFallbackMetadata>;
+export declare const HARNESS_IMAGES: HarnessImageEntry[];
+export declare const AGENT_CATALOG: AgentCatalog;
+//# sourceMappingURL=data.d.ts.map

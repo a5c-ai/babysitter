@@ -11,7 +11,7 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { DEFAULTS, CONFIG_ENV_VARS } from "../../config/defaults";
+import { getReadableRunsDirs, resolveExistingRunDir } from "../../config";
 import { loadJournal } from "../../storage";
 import { computeRunCostStats } from "../../cost/journal";
 import type {
@@ -50,8 +50,8 @@ function col(text: string, color: keyof typeof COLORS, useColors: boolean): stri
 // Single Run
 // ============================================================================
 
-async function costStatsForRun(runsDir: string, runId: string): Promise<RunCostStats | null> {
-  const runDir = path.join(runsDir, runId);
+async function costStatsForRun(runId: string, runsDirOverride?: string): Promise<RunCostStats | null> {
+  const runDir = resolveExistingRunDir(runId, { override: runsDirOverride });
 
   let stat;
   try {
@@ -69,27 +69,38 @@ async function costStatsForRun(runsDir: string, runId: string): Promise<RunCostS
 // All Runs
 // ============================================================================
 
-async function costStatsForAllRuns(runsDir: string): Promise<AggregateCostStats> {
-  let entries: string[];
-  try {
-    entries = await fs.readdir(runsDir);
-  } catch {
-    entries = [];
-  }
-
+async function costStatsForAllRuns(readableRunsDirs: string[]): Promise<AggregateCostStats> {
   const runs: RunCostStats[] = [];
-  for (const entry of entries) {
-    const runDir = path.join(runsDir, entry);
+  const seenRunDirs = new Set<string>();
+
+  for (const runsDir of readableRunsDirs) {
+    let entries: string[];
     try {
-      const s = await fs.stat(runDir);
-      if (!s.isDirectory()) continue;
+      entries = await fs.readdir(runsDir);
     } catch {
-      continue;
+      entries = [];
     }
-    const events = await loadJournal(runDir);
-    const stats = computeRunCostStats(entry, events);
-    if (stats.eventCount === 0) continue;
-    runs.push(stats);
+
+    for (const entry of entries) {
+      const runDir = path.join(runsDir, entry);
+      let normalizedRunDir: string;
+      try {
+        const s = await fs.stat(runDir);
+        if (!s.isDirectory()) continue;
+        normalizedRunDir = path.resolve(runDir);
+      } catch {
+        continue;
+      }
+      if (seenRunDirs.has(normalizedRunDir)) {
+        continue;
+      }
+      seenRunDirs.add(normalizedRunDir);
+
+      const events = await loadJournal(runDir);
+      const stats = computeRunCostStats(entry, events);
+      if (stats.eventCount === 0) continue;
+      runs.push(stats);
+    }
   }
 
   let totalInputTokens = 0;
@@ -269,12 +280,11 @@ function printAggregateTable(agg: AggregateCostStats, useColors: boolean): void 
 // ============================================================================
 
 export async function handleCostStats(options: CostStatsOptions): Promise<number> {
-  const runsDir = options.runsDir ?? process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir;
-  const resolvedRunsDir = path.resolve(runsDir);
+  const readableRunsDirs = getReadableRunsDirs({ override: options.runsDir });
   const useColors = supportsColors();
 
   if (options.all) {
-    const agg = await costStatsForAllRuns(resolvedRunsDir);
+    const agg = await costStatsForAllRuns(readableRunsDirs);
     if (options.json) {
       console.log(JSON.stringify(agg, null, 2));
     } else {
@@ -284,9 +294,9 @@ export async function handleCostStats(options: CostStatsOptions): Promise<number
   }
 
   if (options.runId) {
-    const stats = await costStatsForRun(resolvedRunsDir, options.runId);
+    const stats = await costStatsForRun(options.runId, options.runsDir);
     if (!stats) {
-      const msg = `Run not found: ${options.runId} (looked in ${resolvedRunsDir})`;
+      const msg = `Run not found: ${options.runId} (looked in ${readableRunsDirs.join(", ")})`;
       if (options.json) {
         console.error(JSON.stringify({ error: msg }));
       } else {

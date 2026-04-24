@@ -1,7 +1,7 @@
 ### 3. Run Iteration
 
 ```bash
-$CLI run:iterate .a5c/runs/<runId> --json --iteration <n>{{iterateFlagsSuffix}}
+$CLI run:iterate <runDir> --json --iteration <n>{{iterateFlagsSuffix}}
 ```
 
 **Output:**

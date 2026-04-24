@@ -212,11 +212,11 @@ export function buildFollowupMessage(
   prompt: string,
 ): string {
   if (completionProof) {
-    return `Babysitter iteration ${nextIteration} | Run completed! To finish: call 'babysitter run:status .a5c/runs/${runId} --json', extract 'completionProof' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise.\n\n${prompt}`;
+    return `Babysitter iteration ${nextIteration} | Run completed! To finish: call 'babysitter run:status ${runId} --json', extract 'completionProof' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise.\n\n${prompt}`;
   } else if (runState === "waiting" && pendingKinds) {
-    return `Babysitter iteration ${nextIteration} | Waiting on: ${pendingKinds}. Check if pending effects are resolved, then call 'babysitter run:iterate .a5c/runs/${runId} --json'.\n\n${prompt}`;
+    return `Babysitter iteration ${nextIteration} | Waiting on: ${pendingKinds}. Check if pending effects are resolved, then call 'babysitter run:iterate ${runId} --json'.\n\n${prompt}`;
   } else if (runState === "failed") {
     return `Babysitter iteration ${nextIteration} | Run failed. Inspect the run journal and fix the issue, then proceed.\n\n${prompt}`;
   }
-  return `Babysitter iteration ${nextIteration} | Continue orchestration: call 'babysitter run:iterate .a5c/runs/${runId} --json'.\n\n${prompt}`;
+  return `Babysitter iteration ${nextIteration} | Continue orchestration: call 'babysitter run:iterate ${runId} --json'.\n\n${prompt}`;
 }

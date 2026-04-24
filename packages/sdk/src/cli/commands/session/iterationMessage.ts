@@ -1,4 +1,3 @@
-import * as path from "node:path";
 import { resolveCompletionProof } from "../../completionProof";
 import { discoverSkillsInternal } from "../skill";
 import { buildEffectIndex } from "../../../runtime/replay/effectIndex";
@@ -7,6 +6,7 @@ import type { EffectRecord } from "../../../runtime/types";
 import { loadJournal } from "../../../storage/journal";
 import { readRunMetadata } from "../../../storage/runFiles";
 import { getActiveProcessLibraryPath } from "../../../processLibrary/active";
+import { resolveExistingRunDir } from "../../../config";
 
 export interface SessionIterationMessageArgs {
   runId?: string;
@@ -55,12 +55,12 @@ export async function handleSessionIterationMessage(
   let entrypointImportPath: string | undefined;
 
   if (args.runId) {
-    const runDir = path.isAbsolute(args.runId) ? args.runId : path.join(args.runsDir, args.runId);
+    const resolvedRunDir = resolveExistingRunDir(args.runId, { override: args.runsDir });
     try {
-      const metadata = await readRunMetadata(runDir);
+      const metadata = await readRunMetadata(resolvedRunDir);
       entrypointImportPath = metadata?.entrypoint?.importPath;
-      const journal = await loadJournal(runDir);
-      const index = await buildEffectIndex({ runDir, events: journal });
+      const journal = await loadJournal(resolvedRunDir);
+      const index = await buildEffectIndex({ runDir: resolvedRunDir, events: journal });
       const pendingRecords = index.listPendingEffects();
       runState = deriveObservedRunState(journal, pendingRecords.length);
       if (runState === "completed") {

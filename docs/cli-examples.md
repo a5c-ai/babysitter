@@ -1,6 +1,6 @@
 # Babysitter CLI & SDK Examples
 
-This guide walks through a realistic flow that exercises the `babysitter` CLI and the new deterministic test harness exposed from `@a5c-ai/babysitter-sdk/testing`. The examples assume you are standing in the repo root (or a project that already vendored the CLI + SDK) and that `.a5c/runs` is the default runs directory.
+This guide walks through a realistic flow that exercises the `babysitter` CLI and the new deterministic test harness exposed from `@a5c-ai/babysitter-sdk/testing`. The examples assume you are standing in the repo root (or a project that already vendored the CLI + SDK) and that `~/.a5c/runs` is the default runs directory. Set `BABYSITTER_RUNS_SCOPE=repo` if you want repo-local `<repo>/.a5c/runs` instead.
 
 > **Tip:** All CLI paths in this document are rendered with POSIX separators (matching the CLI output convention) even when running on Windows.
 
@@ -21,7 +21,7 @@ Typical JSON response (`--json`):
 ```json
 {
   "runId": "run-20260112-130455",
-  "runDir": ".a5c/runs/run-20260112-130455",
+  "runDir": "~/.a5c/runs/run-20260112-130455",
   "process": {
     "processId": "dev/build",
     "entry": "processes/build/process.mjs#process"
@@ -192,10 +192,10 @@ test("build pipeline converges", async () => {
 
 ## 8. Cleaning up run artifacts
 
-All examples above write into `.a5c/runs/<runId>`. After a tutorial or test completes, remove the directory (or move it under `runs/archive/`) to keep your repository tidy:
+All examples above write into `~/.a5c/runs/<runId>` by default. After a tutorial or test completes, remove the directory (or move it under an archive location) to keep your environment tidy:
 
 ```bash
-rm -rf .a5c/runs/run-20260112-130455
+rm -rf ~/.a5c/runs/run-20260112-130455
 ```
 
 ---
@@ -213,12 +213,12 @@ The CLI transcripts above are **not** hand-edited—they are captured via the de
 ```bash
 # macOS/Linux
 pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli \
-  -- --runs-dir .a5c/runs/docs-cli \
+  -- --runs-dir ~/.a5c/runs/docs-cli \
      --record docs/cli-examples/baselines
 
 # Windows (PowerShell wrapper)
 pwsh -File scripts/docs/run_cli_examples.ps1 `
-  -RunsDir .a5c/runs/docs-cli `
+  -RunsDir ~/.a5c/runs/docs-cli `
   -BaselineDir docs/cli-examples/baselines
 ```
 

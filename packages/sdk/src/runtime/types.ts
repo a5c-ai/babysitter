@@ -109,7 +109,7 @@ export interface EffectAction {
 }
 
 export interface CreateRunOptions {
-  runsDir: string;
+  runsDir?: string;
   runId?: string;
   harness?: string;
   process: {

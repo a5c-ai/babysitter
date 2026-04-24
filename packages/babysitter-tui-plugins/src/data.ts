@@ -1,11 +1,12 @@
 /**
  * Data access layer for babysitter TUI plugins.
  *
- * Reads run metadata, journals, and task definitions from the .a5c/runs/
- * directory using the babysitter SDK storage utilities.
+ * Reads run metadata, journals, and task definitions from the resolved
+ * babysitter runs directory.
  */
 
 import { promises as fs } from 'node:fs';
+import os from 'node:os';
 import * as path from 'node:path';
 import type {
   RunSummary,
@@ -301,8 +302,27 @@ export async function scanRunCosts(runDir: string): Promise<CostSummary> {
 }
 
 /**
- * Resolve the default runs directory relative to a workspace.
+ * Resolve the default runs directory using the babysitter env policy.
  */
 export function resolveRunsDir(workspace?: string): string {
-  return path.resolve(workspace ?? process.cwd(), '.a5c', 'runs');
+  const cwd = workspace ?? process.cwd();
+  const globalRoot = process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()
+    ? path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR)
+    : path.join(os.homedir(), '.a5c');
+  const runsScope = process.env.BABYSITTER_RUNS_SCOPE?.trim().toLowerCase();
+  const runsDirOverride = process.env.BABYSITTER_RUNS_DIR?.trim();
+
+  if (runsDirOverride) {
+    if (path.isAbsolute(runsDirOverride)) {
+      return path.resolve(runsDirOverride);
+    }
+    const baseDir = runsScope === 'repo' ? cwd : globalRoot;
+    return path.resolve(baseDir, runsDirOverride);
+  }
+
+  if (runsScope === 'repo') {
+    return path.resolve(cwd, '.a5c', 'runs');
+  }
+
+  return path.join(globalRoot, 'runs');
 }

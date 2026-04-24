@@ -8,11 +8,11 @@ complicate the run history.
 
 1. List recent run directories:
    ```bash
-   ls -lt .a5c/runs/ | head -20
+   ls -lt ~/.a5c/runs/ | head -20
    ```
 2. For each run created within the last 30 minutes, read its metadata:
    ```bash
-   cat .a5c/runs/<runId>/run.json
+   cat ~/.a5c/runs/<runId>/run.json
    ```
 3. Compare the candidate run's `prompt` and `processId` against the new
    request:
@@ -21,7 +21,7 @@ complicate the run history.
    - **Process match**: does `processId` match the process you intend to use?
 4. If overlap is detected, check its current status:
    ```bash
-   $CLI run:status .a5c/runs/<runId>
+   $CLI run:status ~/.a5c/runs/<runId>
    ```
 
 **If an overlapping run is found:**
@@ -38,7 +38,7 @@ Surface a clear warning to the user with the similar run's details:
 Ask the user to choose one of:
 1. **Proceed** — create a new run anyway (e.g., intentional retry or variant)
 2. **Skip** — abort run creation; the existing run already covers the request
-3. **Resume** — resume the existing run via `$CLI run:iterate .a5c/runs/<runId>`
+3. **Resume** — resume the existing run via `$CLI run:iterate ~/.a5c/runs/<runId>`
 
 Do not proceed with `run:create` until the user has responded.
 {{/interactive}}
@@ -49,6 +49,8 @@ on overlap — the caller is responsible for deduplication.
 {{/interactive}}
 
 **No overlap found:** proceed directly to `$CLI run:create` as normal.
+
+If the current repo is still using legacy repo-local runs, the SDK will also read `<repo>/.a5c/runs` automatically for compatibility.
 
 **Tracking run chains:**
 

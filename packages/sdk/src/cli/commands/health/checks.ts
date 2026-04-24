@@ -6,6 +6,7 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import type { HealthCheck } from "../health";
+import { resolveRunsDir } from "../../../config";
 
 // ============================================================================
 // Version Utilities
@@ -109,7 +110,7 @@ export function checkNodeVersion(): HealthCheck {
 
 export async function checkA5cDirectory(cwd: string): Promise<HealthCheck> {
   const a5cDir = path.join(cwd, ".a5c");
-  const runsDir = path.join(a5cDir, "runs");
+  const runsDir = resolveRunsDir({ cwd });
 
   try {
     const stats = await fs.stat(a5cDir);
@@ -121,7 +122,7 @@ export async function checkA5cDirectory(cwd: string): Promise<HealthCheck> {
         message: `.a5c exists but is not a directory at ${a5cDir}`,
         nextSteps: [
           "Remove the .a5c file and let the SDK create the directory",
-          "Or run: rm .a5c && mkdir -p .a5c/runs",
+          "Or run: rm .a5c && mkdir -p .a5c",
         ],
         details: { path: a5cDir, isDirectory: false },
       };
@@ -157,8 +158,8 @@ export async function checkA5cDirectory(cwd: string): Promise<HealthCheck> {
       name: "a5c-directory",
       description: ".a5c directory exists and is writable",
       status: "pass",
-      message: `.a5c directory is ready at ${a5cDir}`,
-      details: { path: a5cDir, runsDir, runsExists, writable: true },
+        message: `.a5c directory is ready at ${a5cDir}`,
+        details: { path: a5cDir, runsDir, runsExists, writable: true },
     };
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
@@ -170,7 +171,7 @@ export async function checkA5cDirectory(cwd: string): Promise<HealthCheck> {
         message: `.a5c directory does not exist at ${a5cDir}`,
         nextSteps: [
           "The directory will be created automatically when running babysitter commands",
-          "Or create it manually: mkdir -p .a5c/runs",
+          "Or create it manually: mkdir -p .a5c",
         ],
         details: { path: a5cDir, exists: false },
       };

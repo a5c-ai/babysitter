@@ -25,29 +25,29 @@ type HarnessRunPromptKind =
 
 export function formatAgentHelp(_surface: "agent" | "human"): string {
   const commandName = AGENT_PROGRAM.commandName;
-  return `  ${commandName} create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+  return `  ${commandName} create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
   ${commandName} call [...]                          (alias for create-run)
   ${commandName} yolo [...]                          (alias for create-run --non-interactive)
   ${commandName} plan [...]                          (alias for create-run, stops after PhasePlanProcess)
   ${commandName} forever [...]                       (alias for create-run, infinite loop process)
-  ${commandName} resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
+  ${commandName} resume-run [--run-id <id>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
   ${commandName} resume [...]                        (alias for resume-run)
-  ${commandName} retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-  ${commandName} cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-  ${commandName} assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-  ${commandName} doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
-  ${commandName} contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  ${commandName} retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
+  ${commandName} cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
+  ${commandName} assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
+  ${commandName} doctor [--run-id <id>] [--json] [--verbose]
+  ${commandName} contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
   ${commandName} anycli --service <name> [--scope <scopes>] [--mcp] [--auth-file <path>] [--transport <type>] [--prompt <text>] [--workspace <dir>] [--json] [--verbose]
   ${commandName} session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
-  ${commandName} jsonl:interactive [--runs-dir <dir>]
+  ${commandName} jsonl:interactive
   ${commandName} daemon:start [--workspace <dir>] [--daemon-dir <dir>] [--config-path <path>] [--foreground] [--json]
   ${commandName} daemon:stop [--daemon-dir <dir>] [--grace-period-ms <n>] [--json]
   ${commandName} daemon:status [--daemon-dir <dir>] [--json]
   ${commandName} start-server [--transport <stdio|websocket>] [--port <n>] [--host <host>] [--json]
   ${commandName} help [<topic>]
   ${commandName} observe [--workspace <dir>] [--tui]
-  ${commandName} user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-  ${commandName} project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+  ${commandName} user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
+  ${commandName} project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
   ${commandName} discover [--json]
   ${commandName} list [--json]
   ${commandName} invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
@@ -266,7 +266,7 @@ function renderPrompt(kind: HarnessRunPromptKind, parsed: HarnessParsedArgs): st
       return renderCommandTemplate("forever", { additionalInstructions: parsed.prompt ?? "" });
     case "retrospect": {
       const targetRunText = parsed.retrospectAll
-        ? "Target: ALL completed/failed runs in .a5c/runs/"
+        ? "Target: ALL completed/failed runs in the resolved runs root"
         : parsed.runIds && parsed.runIds.length > 1
           ? `Target run IDs: ${parsed.runIds.join(", ")}`
           : parsed.runIdOverride

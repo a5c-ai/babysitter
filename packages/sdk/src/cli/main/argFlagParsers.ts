@@ -4,6 +4,7 @@
  */
 
 import type { ParsedArgs } from "./types";
+import { resolveRunsDir } from "../../config";
 
 type FlagParser = (parsed: ParsedArgs, args: string[], index: number) => number;
 
@@ -52,7 +53,7 @@ function readOptionalSessionId(args: string[], index: number): { sessionId?: str
 
 export const FLAG_PARSERS: Record<string, FlagParser> = {
   "--runs-dir": (parsed, args, index) => {
-    parsed.runsDir = expectFlagValue(args, index + 1, "--runs-dir");
+    parsed.runsDir = resolveRunsDir({ override: expectFlagValue(args, index + 1, "--runs-dir") });
     return index + 1;
   },
   "--kind": (parsed, args, index) => {

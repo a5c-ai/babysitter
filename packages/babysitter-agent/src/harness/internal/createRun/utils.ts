@@ -27,7 +27,7 @@ export interface HarnessCreateRunArgs {
   workspace?: string;
   model?: string;
   maxIterations?: number;
-  runsDir: string;
+  runsDir?: string;
   json: boolean;
   verbose: boolean;
   interactive?: boolean;

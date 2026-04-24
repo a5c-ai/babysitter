@@ -20,6 +20,7 @@ import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { callRuntimeHook } from "./hooks/runtime";
 import { getNewEffectRequestCount, resetNewEffectRequestCount } from "./intrinsics/task";
+import { resolveProjectRootForRun } from "../config";
 import {
   asWaitingResult,
   resolveNow,
@@ -52,7 +53,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
     const inputs = options.inputs ?? engine.inputs;
     let finalStatus: IterationResult["status"] = "failed";
     const logger = engine.internalContext.logger ?? options.logger;
-    const projectRoot = path.dirname(path.dirname(path.dirname(options.runDir)));
+    const projectRoot = resolveProjectRootForRun(options.runDir, engine.metadata.entrypoint?.importPath);
 
     await callRuntimeHook("on-iteration-start", { runId: engine.runId, iteration: engine.replayCursor.value }, { cwd: projectRoot, logger });
 

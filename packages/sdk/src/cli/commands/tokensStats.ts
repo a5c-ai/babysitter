@@ -11,7 +11,7 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { DEFAULTS, CONFIG_ENV_VARS } from "../../config/defaults";
+import { getReadableRunsDirs, resolveExistingRunDir } from "../../config";
 import {
   supportsColors,
   printSingleRunTable,
@@ -170,8 +170,8 @@ function computeRunStats(runId: string, events: CompressionEvent[]): RunCompress
 // Single Run
 // ============================================================================
 
-async function statsForRun(runsDir: string, runId: string): Promise<RunCompressionStats | null> {
-  const runDir = path.join(runsDir, runId);
+async function statsForRun(runId: string, runsDirOverride?: string): Promise<RunCompressionStats | null> {
+  const runDir = resolveExistingRunDir(runId, { override: runsDirOverride });
   const journalDir = path.join(runDir, "journal");
 
   let stat;
@@ -191,28 +191,39 @@ async function statsForRun(runsDir: string, runId: string): Promise<RunCompressi
 // All Runs
 // ============================================================================
 
-async function statsForAllRuns(runsDir: string): Promise<AggregateStats> {
-  let entries: string[];
-  try {
-    entries = await fs.readdir(runsDir);
-  } catch {
-    entries = [];
-  }
-
+async function statsForAllRuns(readableRunsDirs: string[]): Promise<AggregateStats> {
   const runs: RunCompressionStats[] = [];
-  for (const entry of entries) {
-    const runDir = path.join(runsDir, entry);
+  const seenRunDirs = new Set<string>();
+
+  for (const runsDir of readableRunsDirs) {
+    let entries: string[];
     try {
-      const s = await fs.stat(runDir);
-      if (!s.isDirectory()) continue;
+      entries = await fs.readdir(runsDir);
     } catch {
-      continue;
+      entries = [];
     }
-    const journalDir = path.join(runDir, "journal");
-    const events = await readJournalDir(journalDir);
-    const compressionEvents = extractCompressionEvents(events);
-    if (compressionEvents.length === 0) continue;
-    runs.push(computeRunStats(entry, compressionEvents));
+
+    for (const entry of entries) {
+      const runDir = path.join(runsDir, entry);
+      let normalizedRunDir: string;
+      try {
+        const s = await fs.stat(runDir);
+        if (!s.isDirectory()) continue;
+        normalizedRunDir = path.resolve(runDir);
+      } catch {
+        continue;
+      }
+      if (seenRunDirs.has(normalizedRunDir)) {
+        continue;
+      }
+      seenRunDirs.add(normalizedRunDir);
+
+      const journalDir = path.join(runDir, "journal");
+      const events = await readJournalDir(journalDir);
+      const compressionEvents = extractCompressionEvents(events);
+      if (compressionEvents.length === 0) continue;
+      runs.push(computeRunStats(entry, compressionEvents));
+    }
   }
 
   let totalOriginal = 0;
@@ -242,12 +253,11 @@ async function statsForAllRuns(runsDir: string): Promise<AggregateStats> {
 // ============================================================================
 
 export async function handleTokensStats(options: TokensStatsOptions): Promise<number> {
-  const runsDir = options.runsDir ?? process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir;
-  const resolvedRunsDir = path.resolve(runsDir);
+  const readableRunsDirs = getReadableRunsDirs({ override: options.runsDir });
   const useColors = supportsColors();
 
   if (options.all) {
-    const agg = await statsForAllRuns(resolvedRunsDir);
+    const agg = await statsForAllRuns(readableRunsDirs);
     if (options.json) {
       console.log(JSON.stringify(agg, null, 2));
     } else {
@@ -257,9 +267,9 @@ export async function handleTokensStats(options: TokensStatsOptions): Promise<nu
   }
 
   if (options.runId) {
-    const stats = await statsForRun(resolvedRunsDir, options.runId);
+    const stats = await statsForRun(options.runId, options.runsDir);
     if (!stats) {
-      const msg = `Run not found: ${options.runId} (looked in ${resolvedRunsDir})`;
+      const msg = `Run not found: ${options.runId} (looked in ${readableRunsDirs.join(", ")})`;
       if (options.json) {
         console.error(JSON.stringify({ error: msg }));
       } else {

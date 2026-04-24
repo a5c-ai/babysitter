@@ -10,6 +10,7 @@
  */
 
 import * as crypto from "node:crypto";
+import { getReadableRunsDirs, resolveRunsDir } from "../../config";
 import { readRules, addRule, removeRule, listRules } from "../../breakpoints/rules";
 import { evaluateAutoApproval } from "../../breakpoints/evaluator";
 import type { BreakpointRule, BreakpointRuleAction } from "../../breakpoints/types";
@@ -149,7 +150,7 @@ async function handleHistory(args: BreakpointCommandArgs): Promise<number> {
   // Scan journal directories for breakpoint EFFECT_RESOLVED events
   const { promises: fs } = await import("node:fs");
   const path = await import("node:path");
-  const runsDir = args.runsDir ?? ".a5c/runs";
+  const runsDir = args.runsDir ?? resolveRunsDir();
   const limit = args.limit ?? 50;
 
   interface HistoryEntry {
@@ -163,33 +164,35 @@ async function handleHistory(args: BreakpointCommandArgs): Promise<number> {
   const entries: HistoryEntry[] = [];
 
   try {
-    const runDirs = await fs.readdir(runsDir);
-    for (const runId of runDirs.slice(-limit * 2)) {
-      const journalDir = path.join(runsDir, runId, "journal");
-      let journalFiles: string[];
-      try {
-        journalFiles = await fs.readdir(journalDir);
-      } catch {
-        continue;
-      }
-      for (const jf of journalFiles) {
+    for (const candidateRunsDir of getReadableRunsDirs({ override: runsDir })) {
+      const runDirs = await fs.readdir(candidateRunsDir).catch(() => []);
+      for (const runId of runDirs.slice(-limit * 2)) {
+        const journalDir = path.join(candidateRunsDir, runId, "journal");
+        let journalFiles: string[];
         try {
-          const raw = await fs.readFile(path.join(journalDir, jf), "utf-8");
-          const event = JSON.parse(raw) as Record<string, unknown>;
-          const data = event.data as Record<string, unknown> | undefined;
-          if (event.type === "EFFECT_RESOLVED" && data?.breakpointId) {
-            const bpId = data.breakpointId as string;
-            if (args.breakpointId && bpId !== args.breakpointId) continue;
-            entries.push({
-              runId,
-              breakpointId: bpId,
-              effectId: data.effectId as string,
-              status: data.status as string,
-              resolvedAt: event.recordedAt as string,
-            });
-          }
+          journalFiles = await fs.readdir(journalDir);
         } catch {
           continue;
+        }
+        for (const jf of journalFiles) {
+          try {
+            const raw = await fs.readFile(path.join(journalDir, jf), "utf-8");
+            const event = JSON.parse(raw) as Record<string, unknown>;
+            const data = event.data as Record<string, unknown> | undefined;
+            if (event.type === "EFFECT_RESOLVED" && data?.breakpointId) {
+              const bpId = data.breakpointId as string;
+              if (args.breakpointId && bpId !== args.breakpointId) continue;
+              entries.push({
+                runId,
+                breakpointId: bpId,
+                effectId: data.effectId as string,
+                status: data.status as string,
+                resolvedAt: event.recordedAt as string,
+              });
+            }
+          } catch {
+            continue;
+          }
         }
       }
     }

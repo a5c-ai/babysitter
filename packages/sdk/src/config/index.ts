@@ -9,7 +9,7 @@
  * import { DEFAULTS, getConfig, validateConfig } from "@a5c-ai/babysitter-sdk/config";
  *
  * // Use defaults directly
- * console.log(DEFAULTS.runsDir); // ".a5c/runs"
+ * console.log(DEFAULTS.runsDir); // "/home/alice/.a5c/runs"
  *
  * // Get merged config with env overrides
  * const config = getConfig({ maxIterations: 500 });
@@ -36,8 +36,24 @@ export {
   getConfig,
   getGlobalLogDir,
   getGlobalStateDir,
+  getConfiguredGlobalStateRoot,
   normalizeSessionStateDir,
   validateConfig,
   getDefaults,
   isValidLogLevel,
 } from "./defaults";
+
+export {
+  type RunsScope,
+  findRepoRoot,
+  getGlobalRunsDir,
+  getReadableRunsDirs,
+  getRepoRoot,
+  getRepoRunsDir,
+  getRunsScope,
+  parseRunsScope,
+  resolveExistingRunDir,
+  resolveProjectRootForRun,
+  resolveRunRootFromRunDir,
+  resolveRunsDir,
+} from "./runs";

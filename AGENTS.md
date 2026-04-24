@@ -33,25 +33,25 @@ npm run build --workspace=@a5c-ai/babysitter-agent # Build optional agent runtim
 
 ```bash
 # Run Management
-babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--non-interactive] [--json] [--dry-run]
-babysitter run:status <runDir> [--runs-dir <dir>] [--json]
-babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
-babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
-babysitter run:repair-journal <runDir> [--runs-dir <dir>] [--json] [--dry-run]
-babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
-babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
+babysitter run:create --process-id <id> --entry <path#export> [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--non-interactive] [--json] [--dry-run]
+babysitter run:status <runDir> [--json]
+babysitter run:events <runDir> [--json] [--limit <n>] [--reverse] [--filter-type <type>]
+babysitter run:rebuild-state <runDir> [--json] [--dry-run]
+babysitter run:repair-journal <runDir> [--json] [--dry-run]
+babysitter run:iterate <runDir> [--json] [--verbose] [--iteration <n>]
+babysitter run:execute-tasks <runDir> [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
 
 babysitter session:whoami [--harness <name>] [--json]
-babysitter session:resume --session-id <id> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
-babysitter session:cleanup [--harness <name>] [--dry-run] [--runs-dir <dir>] [--json]
+babysitter session:resume --session-id <id> --run-id <id> [--max-iterations <n>] [--json]
+babysitter session:cleanup [--harness <name>] [--dry-run] [--json]
 
 # Task Management
-babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
-babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
-babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+babysitter task:post <runDir> <effectId> --status <ok|error> [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
+babysitter task:list <runDir> [--pending] [--kind <kind>] [--json]
+babysitter task:show <runDir> <effectId> [--json]
 
 # Skill Discovery
-babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
+babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
 babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
 
 # Harness Management
@@ -62,28 +62,28 @@ babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run
 
 # Optional Agent Runtime CLI (`@a5c-ai/babysitter-agent`)
 babysitter-agent invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
-babysitter-agent create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+babysitter-agent create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
 babysitter-agent call [...]                         # Alias for create-run
 babysitter-agent yolo [...]                         # Alias for create-run --non-interactive
 babysitter-agent plan [...]                         # Alias for create-run, stops after PhasePlanProcess
 babysitter-agent forever [...]                      # Alias for create-run, infinite loop process
-babysitter-agent resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
+babysitter-agent resume-run [--run-id <id>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
 babysitter-agent resume [...]                       # Alias for resume-run
-babysitter-agent retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-agent cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-agent assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-agent doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-agent contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
+babysitter-agent cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
+babysitter-agent assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
+babysitter-agent doctor [--run-id <id>] [--json] [--verbose]
+babysitter-agent contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--json] [--verbose]
 babysitter-agent session-history --session-id <id> --state-dir <dir> [--run-id <id>] [--json]
 babysitter-agent daemon:start [--workspace <dir>] [--daemon-dir <dir>] [--config-path <path>] [--foreground] [--json]
 babysitter-agent daemon:stop [--daemon-dir <dir>] [--grace-period-ms <n>] [--json]
 babysitter-agent daemon:status [--daemon-dir <dir>] [--json]
-babysitter-agent cost:stats [runId] [--all] [--runs-dir <dir>] [--json]
+babysitter-agent cost:stats [runId] [--all] [--json]
 babysitter-agent start-server [--transport <stdio|websocket>] [--port <n>] [--host <host>] [--json]
 babysitter-agent help [<topic>]
 babysitter-agent observe [--workspace <dir>] [--tui]
-babysitter-agent user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
-babysitter-agent project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter-agent user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
+babysitter-agent project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--json] [--verbose]
 babysitter-agent tui [--run-id <id>] [--verbosity <level>] [--workspace <dir>] [--json]
 
 # Plugin Management
@@ -111,7 +111,7 @@ babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
 babysitter profile:render --user|--project [--dir <dir>] [--json]
 
 # Token & Compression Management
-babysitter tokens:stats [runId] [--all] [--runs-dir <dir>] [--json]
+babysitter tokens:stats [runId] [--all] [--json]
 babysitter compression:status [--json]
 babysitter compression:toggle <layer> <on|off> [--json]
 babysitter compression:set <layer.key> <value> [--json]
@@ -120,14 +120,14 @@ babysitter compression:reset [--json]
 # Logging & Hooks
 babysitter log --type <process|hook|cli> --message <msg> [--run-id <id>] [--label <label>] [--level <level>] [--source <src>] [--json]
 babysitter hook:log --hook-type <type> --log-file <path> [--json]
-babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
+babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--json] [--verbose]
 
 # Breakpoint Auto-Approval
 babysitter breakpoint:approve-rule <pattern> [--action auto-approve|never-auto-approve] [--source <source>] [--note <note>] [--json]
 babysitter breakpoint:remove-rule <ruleId> [--json]
 babysitter breakpoint:list-rules [--json]
 babysitter breakpoint:should-auto-approve <breakpointId> [--tags <csv>] [--expert <expert>] [--json]
-babysitter breakpoint:history [--breakpoint-id <id>] [--runs-dir <dir>] [--limit <n>] [--json]
+babysitter breakpoint:history [--breakpoint-id <id>] [--limit <n>] [--json]
 
 # Instruction Generation
 babysitter instructions:babysit-skill --harness <name> [--interactive|--no-interactive] [--json]
@@ -142,7 +142,7 @@ babysitter configure [show|validate|paths] [--json] [--defaults-only]
 babysitter version
 ```
 
-Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `harness:install`, `compress-output`, etc.), `--version`/`-v`.
+Global flags: `--runs-dir` (advanced override; default root is `~/.a5c/runs`, or `<repo>/.a5c/runs` when `BABYSITTER_RUNS_SCOPE=repo`), `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h` (agent-facing usage; default — also shown on bare invocation or wrong syntax), `--help-human` (human-facing usage covering `harness:install`, `compress-output`, etc.), `--version`/`-v`.
 
 ### Catalog (`packages/catalog` / `process-library-catalog`)
 
@@ -246,8 +246,10 @@ Process functions request effects via `ProcessContext` intrinsics:
 
 ## Run Directory Layout
 
+Default run storage is global under `~/.a5c/runs/`. The SDK still reads repo-local `.a5c/runs/` for backward compatibility, and `BABYSITTER_RUNS_SCOPE=repo` switches new writes back to repo scope.
+
 ```
-.a5c/runs/<runId>/
+~/.a5c/runs/<runId>/
 ├── run.json            # Metadata: runId, processId, entrypoint, layoutVersion, createdAt, prompt
 ├── inputs.json         # Process inputs
 ├── run.lock            # Exclusive lock: { pid, owner, acquiredAt }
@@ -324,7 +326,8 @@ Project-level reusable processes go in `.a5c/processes/`.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BABYSITTER_RUNS_DIR` | `.a5c/runs` | Root directory for run storage |
+| `BABYSITTER_RUNS_DIR` | `~/.a5c/runs` | Root directory for run storage |
+| `BABYSITTER_RUNS_SCOPE` | `global` | When set to `repo`, resolve relative/default runs storage under `<repo>/.a5c/runs` |
 | `BABYSITTER_MAX_ITERATIONS` | `256` | Maximum orchestration iterations per run |
 | `BABYSITTER_QUALITY_THRESHOLD` | `80` | Minimum quality score to pass |
 | `BABYSITTER_TIMEOUT` | `120000` (2min) | General operation timeout in ms |

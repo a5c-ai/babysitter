@@ -6,7 +6,7 @@
  */
 
 import * as crypto from "node:crypto";
-import * as path from "node:path";
+import { resolveExistingRunDir, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import { createJournalWatcher, type JournalWatcher } from "../storage/journalWatcher";
 import { ok, fail, pathExists } from "./utils";
 import type { ApiResult } from "./runs";
@@ -16,7 +16,7 @@ import type { JournalEvent } from "../storage/types";
 
 export interface SubscribeRunEventsInput {
   runId: string;
-  runsDir: string;
+  runsDir?: string;
   afterSeq?: number;
   pollIntervalMs?: number;
   onEvent: (event: JournalEvent) => void;
@@ -51,11 +51,7 @@ export async function apiSubscribeRunEvents(
     if (!input.runId) {
       return fail("INVALID_INPUT", "runId must be a non-empty string");
     }
-    if (!input.runsDir) {
-      return fail("INVALID_INPUT", "runsDir must be a non-empty string");
-    }
-
-    const runDir = path.join(input.runsDir, input.runId);
+    const runDir = resolveExistingRunDir(input.runId, { override: input.runsDir ?? resolveRunsDir() });
     if (!(await pathExists(runDir))) {
       return fail("RUN_NOT_FOUND", `Run not found: ${input.runId}`);
     }

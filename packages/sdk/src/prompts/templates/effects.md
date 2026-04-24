@@ -1,7 +1,7 @@
 ### 4. Get Effects
 
 ```bash
-$CLI task:list .a5c/runs/<runId> --pending --json
+$CLI task:list <runDir> --pending --json
 ```
 
 **Output:**

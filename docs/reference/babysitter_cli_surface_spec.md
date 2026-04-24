@@ -11,7 +11,7 @@ Behavior
 --------
 1. **Global invocation**
    - Binary name `babysitter`. Subcommands follow `babysitter <area>:<verb>` (e.g., `run:continue`).
-   - Supported top-level flags on every command: `--runs-dir <path>` (default `.`), `--json`, `--dry-run` (commands that mutate state must honor it), and `--verbose` (when set, log filesystem paths and resolved options to stderr).
+   - Supported top-level flags on every command: `--runs-dir <path>` (advanced override; default root is `~/.a5c/runs`, or `<repo>/.a5c/runs` when `BABYSITTER_RUNS_SCOPE=repo`), `--json`, `--dry-run` (commands that mutate state must honor it), and `--verbose` (when set, log filesystem paths and resolved options to stderr).
    - Exit codes: `0` for success, `1` for expected user errors (bad args, missing run), `>1` for unexpected crashes. `--json` never changes exit semantics.
    - All paths returned to the user are normalized to POSIX separators relative to `<runDir>` even on Windows; CLI accepts either slash style as input.
 
@@ -38,7 +38,7 @@ Behavior
 
 Acceptance Criteria
 -------------------
-1. **Flag & path consistency** – Every command honors `--runs-dir`, validates required positional args, and prints actionable errors with non-zero exit codes when resolution fails. Tests cover Windows-style and POSIX-style inputs.
+1. **Flag & path consistency** – Every command resolves runs through the central default path policy, honors `--runs-dir` when explicitly provided, validates required positional args, and prints actionable errors with non-zero exit codes when resolution fails. Tests cover Windows-style and POSIX-style inputs.
 2. **Deterministic JSON contracts** – `run:create`, `run:status`, `run:events`, `run:iterate`, `task:list`, `task:show`, and `task:post` emit the schemas described above; snapshot tests guard against accidental drift.
 3. **Safe automation loops** – orchestration loops are owned by the caller (skill/hook/worker). The CLI provides deterministic primitives (`run:iterate`, `task:list`, `task:post`) and never embeds task-execution policy.
 4. **State repair tooling** – `run:rebuild-state` rebuilds derived state when `state/state.json` is missing or stale and reports the rebuild result in both human and JSON modes. Subsequent `run:status` reflects the rebuilt `stateVersion`.
@@ -51,6 +51,7 @@ Edge Cases
 - Empty journals: `run:status` reports `created` with `last=none` and `pending[total]=0`; `run:events --json` returns an empty array.
 - Task output blobs larger than 1 MiB: `task:list` and `task:show` print refs to blob files rather than dumping whole payloads; `task:post --json` points to `stdoutRef`, `stderrRef`, and `resultRef`.
 - Windows drive letters and UNC paths: `--runs-dir` and `<runDir>` may include drive prefixes; CLI resolves them but continues to emit POSIX-style refs in JSON/logs.
+- Legacy compatibility: when the active runs root is global, commands that read existing runs should also probe `<repo>/.a5c/runs` before reporting a missing run.
 
 Non-Goals
 ---------

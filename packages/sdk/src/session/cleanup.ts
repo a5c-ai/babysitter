@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, unlinkSync } from "node:fs";
 import * as path from "node:path";
-import { getGlobalStateDir, DEFAULTS } from "../config";
+import { getGlobalStateDir, getReadableRunsDirs, resolveRunsDir } from "../config";
 import { isProcessAlive } from "../utils/processLiveness";
 import { readSessionFile, writeSessionFile } from "./index";
 
@@ -82,25 +82,30 @@ function listMarkerFiles(stateDir: string, harnessFilter?: string): MarkerInfo[]
   return out;
 }
 
-function isRunTerminal(runsDir: string, runId: string): boolean | undefined {
-  const journalDir = path.join(runsDir, runId, "journal");
-  let files: string[];
-  try {
-    files = readdirSync(journalDir);
-  } catch {
-    return undefined;
+function isRunTerminal(runsDirs: string[], runId: string): boolean | undefined {
+  for (const runsDir of runsDirs) {
+    const journalDir = path.join(runsDir, runId, "journal");
+    let files: string[];
+    try {
+      files = readdirSync(journalDir);
+    } catch {
+      continue;
+    }
+    const jsonFiles = files.filter((file) => file.endsWith(".json")).sort();
+    const last = jsonFiles.at(-1);
+    if (!last) {
+      return false;
+    }
+    try {
+      const parsed = JSON.parse(
+        readFileSync(path.join(journalDir, last), "utf8"),
+      ) as { type?: string };
+      return parsed.type === "RUN_COMPLETED" || parsed.type === "RUN_FAILED";
+    } catch {
+      return false;
+    }
   }
-  const jsonFiles = files.filter((file) => file.endsWith(".json")).sort();
-  const last = jsonFiles.at(-1);
-  if (!last) return false;
-  try {
-    const parsed = JSON.parse(
-      readFileSync(path.join(journalDir, last), "utf8"),
-    ) as { type?: string };
-    return parsed.type === "RUN_COMPLETED" || parsed.type === "RUN_FAILED";
-  } catch {
-    return false;
-  }
+  return undefined;
 }
 
 function isStaleByTime(lastIterationAt: string): boolean {
@@ -115,7 +120,8 @@ export async function runSessionCleanup(
 ): Promise<SessionCleanupResult> {
   const dryRun = Boolean(args.dryRun);
   const stateDir = args.stateDir ?? getGlobalStateDir();
-  const runsDir = args.runsDir ?? process.env.BABYSITTER_RUNS_DIR ?? DEFAULTS.runsDir;
+  const runsDir = args.runsDir ?? resolveRunsDir();
+  const readableRunsDirs = getReadableRunsDirs({ override: runsDir });
 
   const markers = listMarkerFiles(stateDir, args.harness);
   const deadMarkers = markers.filter((marker) => !marker.alive);
@@ -166,7 +172,7 @@ export async function runSessionCleanup(
     let qualifies = false;
     let terminal: boolean | undefined;
     if (state.runId) {
-      terminal = isRunTerminal(runsDir, state.runId);
+      terminal = isRunTerminal(readableRunsDirs, state.runId);
     }
     if (terminal === true) {
       qualifies = true;

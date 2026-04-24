@@ -10,7 +10,6 @@
  * The command does NOT loop - it handles exactly one iteration.
  */
 
-import * as path from "path";
 import { readRunMetadata } from "../../storage/runFiles";
 import { callRuntimeHook } from "../../runtime/hooks/runtime";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
@@ -19,6 +18,7 @@ import type { JsonRecord } from "../../storage/types";
 import { resolveCompletionProof } from "../completionProof";
 import { groupActionsByParallelGroup } from "../../tasks/grouping";
 import { classifyWaitingActions } from "../../runtime/asyncEffects";
+import { resolveProjectRootForRun } from "../../config";
 import {
   detectIterationCount,
   deriveIterationReason,
@@ -74,7 +74,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   const iterationCount = await detectIterationCount(runDir);
   const iteration = options.iteration ?? (iterationCount + 1);
 
-  const projectRoot = path.dirname(path.dirname(path.dirname(runDir)));
+  const projectRoot = resolveProjectRootForRun(runDir, metadata.entrypoint?.importPath);
 
   if (verbose) {
     console.error(`[run:iterate] Starting iteration ${iteration} for run ${runId}`);

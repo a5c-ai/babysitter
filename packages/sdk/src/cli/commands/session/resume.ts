@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
-import { getGlobalStateDir } from '../../../config';
+import { getGlobalStateDir, resolveExistingRunDir, resolveRunsDir } from '../../../config';
 import { loadJournal } from '../../../storage/journal';
 import { countPendingEffectsFromJournal, deriveObservedRunState } from '../../../runtime/runLifecycleState';
 import {
@@ -50,8 +50,8 @@ export async function handleSessionResume(args: SessionResumeArgs): Promise<numb
 
   const stateDir = args.stateDir ?? getGlobalStateDir();
   const maxIterations = args.maxIterations ?? 256;
-  const runsDir = args.runsDir ?? '.a5c/runs';
-  const runDir = path.join(runsDir, runId);
+  const runsDir = args.runsDir ?? resolveRunsDir();
+  const runDir = resolveExistingRunDir(runId, { override: runsDir });
 
   try {
     await fs.access(runDir);

@@ -4,7 +4,9 @@
  * Tests the pure functions that extract structured data from journal events.
  */
 
-import { describe, it, expect } from 'vitest';
+import os from 'node:os';
+import path from 'node:path';
+import { afterEach, describe, it, expect } from 'vitest';
 import { extractEffects, extractGovernanceDecisions, resolveRunsDir } from '../data.js';
 
 describe('extractEffects', () => {
@@ -209,18 +211,40 @@ describe('extractGovernanceDecisions', () => {
 });
 
 describe('resolveRunsDir', () => {
-  it('defaults to .a5c/runs in cwd', () => {
-    const result = resolveRunsDir();
-    expect(result).toContain('.a5c');
-    expect(result).toContain('runs');
+  const originalGlobalStateDir = process.env.BABYSITTER_GLOBAL_STATE_DIR;
+  const originalRunsDir = process.env.BABYSITTER_RUNS_DIR;
+  const originalRunsScope = process.env.BABYSITTER_RUNS_SCOPE;
+
+  afterEach(() => {
+    if (originalGlobalStateDir === undefined) {
+      delete process.env.BABYSITTER_GLOBAL_STATE_DIR;
+    } else {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = originalGlobalStateDir;
+    }
+    if (originalRunsDir === undefined) {
+      delete process.env.BABYSITTER_RUNS_DIR;
+    } else {
+      process.env.BABYSITTER_RUNS_DIR = originalRunsDir;
+    }
+    if (originalRunsScope === undefined) {
+      delete process.env.BABYSITTER_RUNS_SCOPE;
+    } else {
+      process.env.BABYSITTER_RUNS_SCOPE = originalRunsScope;
+    }
   });
 
-  it('resolves relative to given workspace', () => {
+  it('defaults to the global runs root', () => {
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = path.join(os.tmpdir(), 'babysitter-tui-global');
+    delete process.env.BABYSITTER_RUNS_DIR;
+    delete process.env.BABYSITTER_RUNS_SCOPE;
+    const result = resolveRunsDir();
+    expect(result).toBe(path.join(process.env.BABYSITTER_GLOBAL_STATE_DIR, 'runs'));
+  });
+
+  it('uses repo scope when requested', () => {
+    delete process.env.BABYSITTER_RUNS_DIR;
+    process.env.BABYSITTER_RUNS_SCOPE = 'repo';
     const result = resolveRunsDir('/some/workspace');
-    // Normalize to forward slashes for cross-platform comparison
-    const normalized = result.replace(/\\/g, '/');
-    expect(normalized).toContain('/some/workspace');
-    expect(normalized).toContain('.a5c');
-    expect(normalized).toContain('runs');
+    expect(result).toBe(path.resolve('/some/workspace', '.a5c', 'runs'));
   });
 });

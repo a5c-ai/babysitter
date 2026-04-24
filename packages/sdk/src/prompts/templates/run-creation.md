@@ -17,7 +17,7 @@ $CLI run:create \
 **Optional flags:**
 - `--inputs <file>` -- path to a JSON file with process inputs
 - `--run-id <id>` -- override auto-generated run ID
-- `--runs-dir <dir>` -- override runs directory (default: `.a5c/runs`)
+- `--runs-dir <dir>` -- advanced compatibility override for the runs directory (default: `~/.a5c/runs`, or `<repo>/.a5c/runs` when `BABYSITTER_RUNS_SCOPE=repo`)
 - `--non-interactive` -- auto-approve breakpoints without human interaction (yolo mode)
 
 {{sessionIdNote}}
@@ -32,5 +32,5 @@ $CLI run:create \
 ```bash
 $CLI session:resume \
   --session-id <id> \{{resumeFlagsLine}}
-  --run-id <runId> --runs-dir .a5c/runs --json
+  --run-id <runId> --json
 ```

@@ -8,6 +8,7 @@ import * as path from "node:path";
 import { Type } from "@sinclair/typebox";
 import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/agent-core";
 import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
+import { resolveExistingRunDir, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import type { AgentCoreSessionEvent } from "../../../harness/types";
 import { handleHarnessCreateRun } from "./createRun";
 import {
@@ -33,7 +34,7 @@ export interface SessionResumeArgs {
   workspace?: string;
   model?: string;
   maxIterations?: number;
-  runsDir: string;
+  runsDir?: string;
   json: boolean;
   verbose: boolean;
   interactive?: boolean;
@@ -89,11 +90,11 @@ function buildResumeUserPrompt(runIdHint?: string): string {
 
 export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<number> {
   const {
-    runsDir,
     json,
     verbose,
     interactive = true,
   } = args;
+  const runsDir = args.runsDir ?? resolveRunsDir({ cwd: args.workspace ?? process.cwd() });
 
   const outputMode = args.outputMode;
   const writeVerbose = (message: string): void => {
@@ -174,7 +175,10 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
         params: { runId: string },
       ): Promise<ToolResultShape> => {
         writeVerboseData("resume tool babysitter_assess_run", params);
-        const runDir = path.join(runsDir, params.runId);
+        const runDir = resolveExistingRunDir(params.runId, {
+          cwd: args.workspace ?? process.cwd(),
+          override: runsDir,
+        });
         try {
           const assessment = await assessRun(runDir);
           return formatToolResult(
@@ -219,7 +223,10 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
           return errorResult("Resume has already been triggered for this session.");
         }
 
-        const runDir = path.join(runsDir, params.runId);
+        const runDir = resolveExistingRunDir(params.runId, {
+          cwd: args.workspace ?? process.cwd(),
+          override: runsDir,
+        });
         try {
           const assessment = await assessRun(runDir);
           const selectedRun = assessment.run;

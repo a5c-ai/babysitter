@@ -28,11 +28,13 @@ Initialize a results tracker with these 14 checks, all starting as PENDING:
 
 **Goal:** Identify the target run and display its metadata.
 
-- List all runs by running: `ls -lt .a5c/runs/`
+Use the resolved runs root for all commands in this guide. By default that is `~/.a5c/runs`, and the SDK also reads `<repo>/.a5c/runs` for backward compatibility.
+
+- List all runs by running: `ls -lt ~/.a5c/runs/`
 - If the user provided a run ID argument, use that as the run ID. Otherwise, use the most recent run directory (the first entry from the listing).
-- Store the resolved run ID and construct the run directory path: `.a5c/runs/<runId>`
+- Store the resolved run ID and construct the run directory path: `~/.a5c/runs/<runId>`
 - Verify the run directory exists. If it does not exist, report FAIL for this check and stop the entire diagnostic (no run to diagnose).
-- Show run metadata by running: `npx babysitter run:status .a5c/runs/<runId> --json`
+- Show run metadata by running: `npx babysitter run:status ~/.a5c/runs/<runId> --json`
 - Parse and display: runId, processId, entrypoint/importPath, createdAt, current state.
 - Mark this check as PASS.
 
@@ -42,8 +44,8 @@ Initialize a results tracker with these 14 checks, all starting as PENDING:
 
 **Goal:** Verify the append-only event journal is well-formed and uncorrupted.
 
-- List all journal events by running: `npx babysitter run:events .a5c/runs/<runId> --json`
-- List all files in `.a5c/runs/<runId>/journal/` sorted by name.
+- List all journal events by running: `npx babysitter run:events ~/.a5c/runs/<runId> --json`
+- List all files in `~/.a5c/runs/<runId>/journal/` sorted by name.
 - If the journal directory is empty or missing, mark as FAIL and note "No journal entries found."
 
 For each journal file (named `<seq>.<ulid>.json`):
@@ -89,19 +91,19 @@ If all sub-checks pass, mark as PASS. If any sub-check is WARN, mark as WARN. If
 
 **Goal:** Verify the derived state cache matches the current journal.
 
-- Check if `.a5c/runs/<runId>/state/state.json` exists.
-- If it does not exist, mark as WARN and recommend: `npx babysitter run:rebuild-state .a5c/runs/<runId>`
+- Check if `~/.a5c/runs/<runId>/state/state.json` exists.
+- If it does not exist, mark as WARN and recommend: `npx babysitter run:rebuild-state ~/.a5c/runs/<runId>`
 
 If it exists:
 - Read `state.json` and extract the `journalHead` field (contains `seq`, `ulid`, and `checksum`).
-- Determine the actual last journal entry by reading the last file in `.a5c/runs/<runId>/journal/` (highest sequence number).
+- Determine the actual last journal entry by reading the last file in `~/.a5c/runs/<runId>/journal/` (highest sequence number).
 - Extract the sequence number and ULID from the last journal filename, and the checksum from its content.
 - Compare:
   - `journalHead.seq` should match the last journal file's sequence number.
   - `journalHead.ulid` should match the last journal file's ULID.
   - `journalHead.checksum` should match the last journal file's checksum.
 - If all match, mark as PASS.
-- If any mismatch, mark as WARN and recommend: `npx babysitter run:rebuild-state .a5c/runs/<runId>`
+- If any mismatch, mark as WARN and recommend: `npx babysitter run:rebuild-state ~/.a5c/runs/<runId>`
 - Also verify `schemaVersion` field is present and report its value.
 
 ---
@@ -110,8 +112,8 @@ If it exists:
 
 **Goal:** Identify stuck, errored, or pending effects.
 
-- Run: `npx babysitter task:list .a5c/runs/<runId> --json`
-- Run: `npx babysitter task:list .a5c/runs/<runId> --pending --json`
+- Run: `npx babysitter task:list ~/.a5c/runs/<runId> --json`
+- Run: `npx babysitter task:list ~/.a5c/runs/<runId> --pending --json`
 - Parse the JSON output from both commands.
 
 **All effects summary:**
@@ -138,7 +140,7 @@ Mark as PASS if no stuck or errored effects. Mark as WARN if there are pending e
 
 **Goal:** Detect stale or orphaned run locks.
 
-- Check if `.a5c/runs/<runId>/run.lock` exists.
+- Check if `~/.a5c/runs/<runId>/run.lock` exists.
 - If it does not exist, mark as PASS ("No lock held -- run is not actively being iterated").
 
 If it exists:
@@ -147,7 +149,7 @@ If it exists:
 - Check if the PID is still alive by running: `kill -0 <pid> 2>/dev/null; echo $?` (exit code 0 means alive, non-zero means dead). On Windows/MINGW, use `tasklist //FI "PID eq <pid>" 2>/dev/null` or equivalent.
 - If the process is alive, mark as PASS ("Lock held by active process").
 - If the process is dead, mark as FAIL ("Stale lock detected -- process <pid> is no longer running").
-  - Recommend: `rm .a5c/runs/<runId>/run.lock`
+  - Recommend: `rm ~/.a5c/runs/<runId>/run.lock`
 
 ---
 
@@ -217,18 +219,18 @@ Mark as PASS if no ERROR lines found and stderr logs are empty. Mark as WARN if 
 
 **Goal:** Report disk consumption and identify oversized files.
 
-- Run `du -sh .a5c/runs/<runId>` for the total run directory size.
+- Run `du -sh ~/.a5c/runs/<runId>` for the total run directory size.
 - Run `du -sh` on each subdirectory:
-  - `.a5c/runs/<runId>/journal/`
-  - `.a5c/runs/<runId>/tasks/`
-  - `.a5c/runs/<runId>/blobs/`
-  - `.a5c/runs/<runId>/state/`
-  - `.a5c/runs/<runId>/process/` (if it exists)
+  - `~/.a5c/runs/<runId>/journal/`
+  - `~/.a5c/runs/<runId>/tasks/`
+  - `~/.a5c/runs/<runId>/blobs/`
+  - `~/.a5c/runs/<runId>/state/`
+  - `~/.a5c/runs/<runId>/process/` (if it exists)
 
 - Display results in a table: directory, size.
 
 **Large file detection:**
-- Find individual files larger than 10MB within the run directory: `find .a5c/runs/<runId> -type f -size +10M -exec ls -lh {} \;`
+- Find individual files larger than 10MB within the run directory: `find ~/.a5c/runs/<runId> -type f -size +10M -exec ls -lh {} \;`
 - If any found, list them with their paths and sizes.
 
 - Report the total run directory size prominently.
@@ -241,7 +243,7 @@ Mark as PASS if total size < 500MB and no files > 10MB. Mark as WARN if total si
 
 **Goal:** Verify the process entrypoint and SDK dependency are valid.
 
-- Read `.a5c/runs/<runId>/run.json` and extract the `importPath` (or `entrypoint`) field.
+- Read `~/.a5c/runs/<runId>/run.json` and extract the `importPath` (or `entrypoint`) field.
 - Check if the referenced process file exists on disk. Use Glob or file read to verify.
 - If the file does not exist, mark as FAIL ("Process entrypoint not found on disk").
 
@@ -504,7 +506,7 @@ babysitter session:cleanup             # apply
 unset AGENT_SESSION_ID
 
 # 3. Re-bind a run explicitly if needed
-babysitter session:resume --session-id <fresh-id> --state-dir ~/.a5c --run-id <runId> --runs-dir .a5c/runs
+babysitter session:resume --session-id <fresh-id> --state-dir ~/.a5c --run-id <runId>
 
 # 4. Start a fresh Claude Code session (closes and reopens the session)
 ```

@@ -102,7 +102,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
     fields: [
       { key: 'defaultHarness', label: 'Default harness', type: 'string' as const, default: 'claude-code' },
       { key: 'maxIterations', label: 'Max iterations', type: 'number' as const, default: 256 },
-      { key: 'runsDir', label: 'Runs directory', type: 'string' as const, default: '.a5c/runs' },
+      { key: 'runsDir', label: 'Runs directory', type: 'string' as const, default: '~/.a5c/runs' },
     ],
     configFormat: 'json',
     supportsProjectConfig: true,

@@ -147,7 +147,7 @@ export interface SessionResumeOptions {
   maxIterations?: number;
   /** Directory to store state files */
   stateDir: string;
-  /** Runs directory (default: .a5c/runs) */
+  /** Runs directory (default: ~/.a5c/runs, or <repo>/.a5c/runs when BABYSITTER_RUNS_SCOPE=repo) */
   runsDir?: string;
 }
 

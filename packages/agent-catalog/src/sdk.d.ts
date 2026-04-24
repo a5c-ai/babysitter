@@ -1,0 +1,21 @@
+import type { AgentCatalog, AgentVersion, CatalogGraph, GraphNode, HarnessFallbackMetadata, HarnessImageEntry, HookDescriptor, HooksMuxDetectionRule, HostMetadataField, OntologySchema, UiAgentCard } from "./models";
+export declare function getCatalogGraphSnapshot(): CatalogGraph;
+export declare function getCatalogGraphDocument(): import("./models").GraphDocument;
+export declare function getCatalogOntologySchema(): OntologySchema;
+export declare function getAgentCatalog(): AgentCatalog;
+export declare function listAgentVersions(): AgentVersion[];
+export declare function getAgentVersions(agentIdOrAlias: string): AgentVersion[];
+export declare function listOntologyNodesByKind(kind: GraphNode["kind"]): GraphNode[];
+export declare function listOntologyRelations(relation: string): import("./models").GraphRelationship[];
+export declare function getFallbackHarnessMetadata(harnessName: string): HarnessFallbackMetadata | undefined;
+export declare function listFallbackHarnessMetadata(): Record<string, HarnessFallbackMetadata>;
+export declare function getHostSignalMap(): Record<string, string[]>;
+export declare function getHostMetadataFields(): Record<string, HostMetadataField[]>;
+export declare function getHooksMuxDetectionRules(): HooksMuxDetectionRule[];
+export declare function getHarnessImages(): HarnessImageEntry[];
+export declare function lookupHarnessImage(harness: string): HarnessImageEntry | undefined;
+export declare function listPluginTargets(): string[];
+export declare function getHookCatalog(): HookDescriptor[];
+export declare function getHookNameMap(): Record<string, Record<string, string>>;
+export declare function getUiAgentCards(): UiAgentCard[];
+//# sourceMappingURL=sdk.d.ts.map

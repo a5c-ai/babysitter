@@ -1,4 +1,4 @@
-import { CONFIG_ENV_VARS, DEFAULTS } from "@a5c-ai/babysitter-sdk";
+import { resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import type { HarnessParsedArgs } from "./types";
 import { BOOLEAN_FLAGS, FLAG_PARSERS } from "./argFlags";
 import { applyPositionalArgs } from "./argPositionals";
@@ -6,7 +6,7 @@ import { applyPositionalArgs } from "./argPositionals";
 function createDefaultParsedArgs(initialCommand?: string): HarnessParsedArgs {
   return {
     command: initialCommand,
-    runsDir: process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir,
+    runsDir: resolveRunsDir(),
     json: false,
     dryRun: false,
     verbose: false,

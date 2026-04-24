@@ -30,6 +30,7 @@ import {
   emitProgress,
   discoverHarnesses,
 } from "./utils";
+import { resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import { getProcessOutputDir, runPlanProcessPhase } from "./planProcess";
 import { runOrchestrationPhase } from "./orchestration";
 
@@ -53,10 +54,11 @@ export async function handleHarnessCreateRun(
     workspace,
     model,
     maxIterations = 256,
-    runsDir,
+    runsDir: requestedRunsDir,
     json,
     verbose,
   } = parsed;
+  const runsDir = requestedRunsDir ?? resolveRunsDir({ cwd: workspace ?? process.cwd() });
 
   const mode: OutputMode = resolveOutputMode(json, parsed.outputMode);
   const interactive = parsed.interactive ?? (mode === "cli" && process.stdin.isTTY === true);

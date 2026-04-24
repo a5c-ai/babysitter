@@ -27,7 +27,7 @@ export function composeBabysitSkillPrompt(ctx: PromptContext): string {
   const header = [
     '# babysit',
     '',
-    'Orchestrate `.a5c/runs/<runId>/` through iterative execution.',
+    'Orchestrate the resolved run directory (`~/.a5c/runs/<runId>/` by default, with repo-local fallback compatibility) through iterative execution.',
     'Use the SDK CLI to drive the orchestration loop.',
   ].join('\n');
 

@@ -279,7 +279,7 @@ Codex offers several sandbox configurations:
     prompt: "..."
   env:
     # Babysitter configuration
-    BABYSITTER_RUNS_DIR: .a5c/runs
+    BABYSITTER_RUNS_SCOPE: repo
     BABYSITTER_MAX_ITERATIONS: 100
     BABYSITTER_QUALITY_THRESHOLD: 85
     BABYSITTER_LOG_LEVEL: debug
