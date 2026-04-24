@@ -55,8 +55,8 @@ vi.mock('next/dynamic', () => {
   return { __esModule: true, default: dynamic };
 });
 
-// Mock lucide-react to avoid React version mismatch in monorepo
-// (observer has React 18 locally, root has React 19)
+// Mock lucide-react to avoid React version mismatch in the monorepo
+// (the package has React 18 locally, root has React 19)
 vi.mock('lucide-react', () => {
   const createIconMock = (name: string) => {
     const Icon = React.forwardRef<SVGSVGElement, any>(

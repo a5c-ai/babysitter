@@ -123,7 +123,7 @@ export async function approveBreakpoint(
       value: {
         answer: answer.trim(),
         approvedAt: now,
-        approvedBy: "observer-dashboard",
+        approvedBy: "kanban",
       },
       startedAt: now,
       finishedAt: now,

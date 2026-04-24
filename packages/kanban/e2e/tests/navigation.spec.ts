@@ -1,7 +1,7 @@
 import { test, expect } from "../fixtures";
 
 /**
- * Navigation E2E tests for the Observer dashboard.
+ * Navigation E2E tests for the kanban dashboard.
  *
  * Covers user journeys between the Dashboard (/) and Run Detail (/runs/[runId])
  * pages, including filter interactions, direct URL access, error states,

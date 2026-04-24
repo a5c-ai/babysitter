@@ -78,7 +78,7 @@ export function useRunDashboard(): UseRunDashboardReturn {
   refreshRef.current = refresh;
 
   const [statusFilter, setStatusFilter] = useState<DashboardStatusFilter>("all");
-  const [sortMode, setSortMode] = usePersistedState<DashboardSortMode>("observer:sort-mode", "status");
+  const [sortMode, setSortMode] = usePersistedState<DashboardSortMode>("sort-mode", "status");
   const [dismissedFingerprint, setDismissedFingerprint] = usePersistedState<string | null>("banner-dismissed-fingerprint", null);
 
   // Toggle filter from metric tile: clicking active filter clears it
@@ -172,7 +172,7 @@ export function useRunDashboard(): UseRunDashboardReturn {
   }, [filteredProjects, recentCompletionWindowMs, sortMode]);
 
   const [historyCollapsed, setHistoryCollapsed] = usePersistedState(
-    "observer:history-collapsed",
+    "history-collapsed",
     historyProjects.length > 5
   );
 

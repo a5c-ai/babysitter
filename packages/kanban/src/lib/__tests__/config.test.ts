@@ -25,14 +25,19 @@ describe('config', () => {
     vi.resetAllMocks();
     // Reset env vars
     process.env = { ...originalEnv };
+    delete process.env.KANBAN_REGISTRY;
+    delete process.env.KANBAN_WATCH_DIR;
     delete process.env.OBSERVER_REGISTRY;
     delete process.env.OBSERVER_WATCH_DIR;
     delete process.env.WATCH_DIR;
     delete process.env.WATCH_DIRS;
+    delete process.env.KANBAN_PORT;
     delete process.env.OBSERVER_PORT;
     delete process.env.PORT;
+    delete process.env.KANBAN_POLL_INTERVAL;
     delete process.env.OBSERVER_POLL_INTERVAL;
     delete process.env.POLL_INTERVAL;
+    delete process.env.KANBAN_DEFAULT_THEME;
     delete process.env.OBSERVER_DEFAULT_THEME;
     delete process.env.THEME;
     // Invalidate any cached config/discovery from previous test
@@ -93,14 +98,25 @@ describe('config', () => {
       expect(config.sources[0].depth).toBe(3);
     });
 
-    it('uses OBSERVER_WATCH_DIR env var when set', async () => {
+    it('uses KANBAN_WATCH_DIR env var when set', async () => {
       mockReadFile.mockRejectedValue(new Error('ENOENT'));
-      process.env.OBSERVER_WATCH_DIR = '/custom/watch/dir';
+      process.env.KANBAN_WATCH_DIR = '/custom/watch/dir';
       invalidateConfigCache();
 
       const config = await getConfig();
 
       expect(config.sources[0].path).toBe('/custom/watch/dir');
+      expect(config.sources[0].label).toBe('cli');
+    });
+
+    it('falls back to OBSERVER_WATCH_DIR for legacy installs', async () => {
+      mockReadFile.mockRejectedValue(new Error('ENOENT'));
+      process.env.OBSERVER_WATCH_DIR = '/legacy/watch/dir';
+      invalidateConfigCache();
+
+      const config = await getConfig();
+
+      expect(config.sources[0].path).toBe('/legacy/watch/dir');
       expect(config.sources[0].label).toBe('cli');
     });
 
@@ -168,14 +184,24 @@ describe('config', () => {
       expect(config.sources[0].depth).toBe(2);
     });
 
-    it('reads port from OBSERVER_PORT env var', async () => {
+    it('reads port from KANBAN_PORT env var', async () => {
       mockReadFile.mockRejectedValue(new Error('ENOENT'));
-      process.env.OBSERVER_PORT = '4000';
+      process.env.KANBAN_PORT = '4000';
       invalidateConfigCache();
 
       const config = await getConfig();
 
       expect(config.port).toBe(4000);
+    });
+
+    it('falls back to OBSERVER_PORT for legacy installs', async () => {
+      mockReadFile.mockRejectedValue(new Error('ENOENT'));
+      process.env.OBSERVER_PORT = '4100';
+      invalidateConfigCache();
+
+      const config = await getConfig();
+
+      expect(config.port).toBe(4100);
     });
 
     it('reads port from PORT env var as fallback', async () => {
@@ -201,14 +227,24 @@ describe('config', () => {
       expect(config.pollInterval).toBe(5000);
     });
 
-    it('reads pollInterval from OBSERVER_POLL_INTERVAL env var', async () => {
+    it('reads pollInterval from KANBAN_POLL_INTERVAL env var', async () => {
       mockReadFile.mockResolvedValue(JSON.stringify({ sources: [] }));
-      process.env.OBSERVER_POLL_INTERVAL = '3000';
+      process.env.KANBAN_POLL_INTERVAL = '3000';
       invalidateConfigCache();
 
       const config = await getConfig();
 
       expect(config.pollInterval).toBe(3000);
+    });
+
+    it('falls back to OBSERVER_POLL_INTERVAL for legacy installs', async () => {
+      mockReadFile.mockResolvedValue(JSON.stringify({ sources: [] }));
+      process.env.OBSERVER_POLL_INTERVAL = '3500';
+      invalidateConfigCache();
+
+      const config = await getConfig();
+
+      expect(config.pollInterval).toBe(3500);
     });
 
     it('reads theme from registry file', async () => {
@@ -224,7 +260,17 @@ describe('config', () => {
       expect(config.theme).toBe('light');
     });
 
-    it('reads theme from OBSERVER_DEFAULT_THEME env var', async () => {
+    it('reads theme from KANBAN_DEFAULT_THEME env var', async () => {
+      mockReadFile.mockResolvedValue(JSON.stringify({ sources: [] }));
+      process.env.KANBAN_DEFAULT_THEME = 'light';
+      invalidateConfigCache();
+
+      const config = await getConfig();
+
+      expect(config.theme).toBe('light');
+    });
+
+    it('falls back to OBSERVER_DEFAULT_THEME for legacy installs', async () => {
       mockReadFile.mockResolvedValue(JSON.stringify({ sources: [] }));
       process.env.OBSERVER_DEFAULT_THEME = 'light';
       invalidateConfigCache();
@@ -261,7 +307,7 @@ describe('config', () => {
           sources: [{ path: '/registry/path', depth: 1 }],
         }),
       );
-      process.env.OBSERVER_WATCH_DIR = '/env/path';
+      process.env.KANBAN_WATCH_DIR = '/env/path';
 
       const config = await getConfig();
 

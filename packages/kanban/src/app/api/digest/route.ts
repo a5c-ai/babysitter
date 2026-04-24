@@ -12,7 +12,7 @@ export async function GET() {
     } catch (initError) {
       console.error("Server initialization failed:", initError);
       return NextResponse.json(
-        { error: "Server initialization failed. Check observer configuration and watch sources.", code: "INIT_FAILED" },
+        { error: "Server initialization failed. Check kanban configuration and watch sources.", code: "INIT_FAILED" },
         { status: 500 }
       );
     }

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useCallback, useLayoutEffect, useEffect } from "react";
 
-const NAMESPACE = "observer:";
+const NAMESPACE = "kanban:";
+const LEGACY_NAMESPACE = "observer:";
 
 // useLayoutEffect on client (runs before paint → no flash),
 // useEffect on server (suppresses Next.js SSR warning).
@@ -11,7 +12,7 @@ const useIsomorphicLayoutEffect =
 /**
  * Custom hook that wraps useState with localStorage persistence.
  * Values are serialized with JSON.stringify/parse and namespaced
- * under the "observer:" prefix to avoid collisions.
+ * under the "kanban:" prefix to avoid collisions.
  *
  * Hydration-safe: first render uses defaultValue (matching SSR),
  * then useLayoutEffect reads localStorage before the browser paints
@@ -21,7 +22,13 @@ export function usePersistedState<T>(
   key: string,
   defaultValue: T
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const prefixedKey = key.startsWith(NAMESPACE) ? key : `${NAMESPACE}${key}`;
+  const baseKey = key.startsWith(NAMESPACE)
+    ? key.slice(NAMESPACE.length)
+    : key.startsWith(LEGACY_NAMESPACE)
+      ? key.slice(LEGACY_NAMESPACE.length)
+      : key;
+  const prefixedKey = `${NAMESPACE}${baseKey}`;
+  const legacyKey = `${LEGACY_NAMESPACE}${baseKey}`;
 
   // Always start with defaultValue to match SSR output (hydration-safe).
   const [state, setState] = useState<T>(defaultValue);
@@ -29,7 +36,9 @@ export function usePersistedState<T>(
   // Read localStorage before paint — avoids both hydration mismatch and flash.
   useIsomorphicLayoutEffect(() => {
     try {
-      const stored = window.localStorage.getItem(prefixedKey);
+      const stored =
+        window.localStorage.getItem(prefixedKey) ??
+        window.localStorage.getItem(legacyKey);
       if (stored !== null) {
         const parsed = JSON.parse(stored) as T;
         setState(parsed);

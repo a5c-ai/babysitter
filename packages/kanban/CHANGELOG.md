@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Changed
-- Repositioned the package as `@a5c-ai/kanban`, a Babysitter and agent-mux kanban surface rather than an observer-only dashboard
+- Repositioned the package as `@a5c-ai/kanban`, a Babysitter and agent-mux kanban surface rather than a legacy dashboard carryover
 - Added Compendium-based shell and form primitives for login, session creation, header, footer, and settings flows
 - Added release and staging publish coverage in CI for `packages/kanban`
 
@@ -32,7 +32,7 @@ All notable changes to this project will be documented in this file.
 - **Run dashboard hook** — centralized state management for dashboard filtering, sorting, and pagination
 - **Animated number transitions** — smooth count animations in KPI displays
 - **Batched updates hook** — debounced batch processing (1500ms) to prevent UI thrash from rapid SSE events
-- **Config loader** — dedicated module for loading and validating observer configuration
+- **Config loader** — dedicated module for loading and validating kanban configuration
 - **Source discovery** — automatic detection of babysitter project directories
 - **Global registry** — shared singleton registry for cross-component state
 - **Smart JSON tree viewer** — refactored into submodules (categorize, json-node, smart-summary, tree-controls) with AI-friendly summaries
@@ -270,9 +270,9 @@ All notable changes to this project will be documented in this file.
 - Log viewer stdout/stderr/output sections had same 256px limitation -- now uses 60vh
 - Cache pruning cleans up ghost entries from prior deduplication misses
 ### Configuration
-- New environment variable: `OBSERVER_RETENTION_DAYS` (default: 30) -- number of days to retain completed/failed runs
-- New environment variable: `OBSERVER_RECENT_WINDOW_MS` (default: 14400000 / 4 hours) -- recency window for completed projects
-- New registry fields in `~/.a5c/observer.json`: `retentionDays`, `recentCompletionWindowMs`
+- New environment variable: `KANBAN_RETENTION_DAYS` (default: 30) -- number of days to retain completed/failed runs
+- New environment variable: `KANBAN_RECENT_WINDOW_MS` (default: 14400000 / 4 hours) -- recency window for completed projects
+- New registry fields in `~/.a5c/kanban.json`: `retentionDays`, `recentCompletionWindowMs`
 
 ## [0.3.0] - 2026-02-17
 ### Added
@@ -353,9 +353,9 @@ All notable changes to this project will be documented in this file.
 - Log viewer stdout/stderr/output sections had same 256px height limitation
 
 ### Configuration
-- New environment variable: `OBSERVER_RETENTION_DAYS` (default: 30) -- number of days to retain completed/failed runs in the dashboard
-- New environment variable: `OBSERVER_RECENT_WINDOW_MS` (default: 14400000 / 4 hours) -- how long recently completed projects stay in the Active section
-- New registry fields in `~/.a5c/observer.json`: `retentionDays`, `recentCompletionWindowMs`
+- New environment variable: `KANBAN_RETENTION_DAYS` (default: 30) -- number of days to retain completed/failed runs in the dashboard
+- New environment variable: `KANBAN_RECENT_WINDOW_MS` (default: 14400000 / 4 hours) -- how long recently completed projects stay in the Active section
+- New registry fields in `~/.a5c/kanban.json`: `retentionDays`, `recentCompletionWindowMs`
 
 ## [0.1.0-alpha.0] - 2026-02-17
 

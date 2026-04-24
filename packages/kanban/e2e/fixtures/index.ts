@@ -4,7 +4,7 @@ import { RunDetailPage } from "../pages/run-detail.page";
 
 /**
  * Extended Playwright test fixtures that provide pre-constructed
- * page objects for the Observer dashboard.
+ * page objects for the kanban dashboard.
  *
  * Usage:
  *   import { test, expect } from "../fixtures";
@@ -14,12 +14,12 @@ import { RunDetailPage } from "../pages/run-detail.page";
  *     await dashboardPage.waitForData();
  *   });
  */
-type ObserverFixtures = {
+type KanbanFixtures = {
   dashboardPage: DashboardPage;
   runDetailPage: RunDetailPage;
 };
 
-export const test = base.extend<ObserverFixtures>({
+export const test = base.extend<KanbanFixtures>({
   dashboardPage: async ({ page }, use) => {
     const dashboardPage = new DashboardPage(page);
     await use(dashboardPage);

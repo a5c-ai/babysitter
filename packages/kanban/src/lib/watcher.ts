@@ -8,7 +8,7 @@ import { getGlobal } from "./global-registry";
 
 // Persist event emitter across HMR reloads via typed global registry
 function getWatcherEvents(): EventEmitter {
-  return getGlobal('__observer_watcher_events__', () => new EventEmitter());
+  return getGlobal('__kanban_watcher_events__', () => new EventEmitter());
 }
 
 export const watcherEvents = getWatcherEvents();
@@ -30,7 +30,7 @@ interface WatcherState {
 }
 
 function getWatcherState(): WatcherState {
-  return getGlobal('__observer_watchers__', () => ({
+  return getGlobal('__kanban_watchers__', () => ({
     activeWatchers: new Map<string, FSWatcher>(),
     debounceTimers: new Map<string, NodeJS.Timeout>(),
     rescanTimer: null,

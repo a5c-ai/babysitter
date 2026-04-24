@@ -2,10 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 import path from "path";
 
 /**
- * Playwright E2E configuration for the Observer dashboard.
+ * Playwright E2E configuration for the kanban dashboard.
  *
  * The webServer is started with WATCH_DIR pointing to the fixture runs
- * directory so that the observer dashboard displays deterministic test data.
+ * directory so that the kanban dashboard displays deterministic test data.
  *
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -14,7 +14,7 @@ const fixtureRunsDir = path.resolve(__dirname, "e2e/fixtures/runs");
 
 // Use a dedicated test port to avoid collisions with a running dev server.
 // The dev server on port 4800 uses real data; the E2E server on 4173 uses fixtures.
-const testPort = parseInt(process.env.OBSERVER_PORT || "4173", 10);
+const testPort = parseInt(process.env.KANBAN_PORT || process.env.OBSERVER_PORT || "4173", 10);
 
 export default defineConfig({
   testDir: "e2e/tests",
@@ -48,9 +48,9 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       WATCH_DIR: fixtureRunsDir,
-      OBSERVER_REGISTRY: path.resolve(__dirname, "e2e/fixtures/.observer-test.json"),
+      KANBAN_REGISTRY: path.resolve(__dirname, "e2e/fixtures/.kanban-test.json"),
       PORT: String(testPort),
-      OBSERVER_STALE_THRESHOLD_MS: "999999999999",
+      KANBAN_STALE_THRESHOLD_MS: "999999999999",
     },
   },
 });

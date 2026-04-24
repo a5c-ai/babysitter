@@ -6,7 +6,7 @@ import {
   discoverAndCacheAll as defaultDiscoverAndCacheAll,
 } from "@/lib/run-cache";
 import type { Run, ProjectSummary } from "@/types";
-import type { ObserverConfig, WatchSource } from "@/lib/config-loader";
+import type { KanbanConfig, WatchSource } from "@/lib/config-loader";
 import type { DiscoveredRun } from "@/lib/source-discovery";
 
 // ---------------------------------------------------------------------------
@@ -160,7 +160,7 @@ export function toLightRuns(runs: Run[]): LightRun[] {
 // ---------------------------------------------------------------------------
 
 export interface RunQueryDeps {
-  getConfig: () => Promise<ObserverConfig>;
+  getConfig: () => Promise<KanbanConfig>;
   discoverAllRunDirs: () => Promise<DiscoveredRun[]>;
   getProjectSummaries: () => ProjectSummary[];
   getRunCached: (runDir: string, source: WatchSource, projectName: string) => Promise<Run>;

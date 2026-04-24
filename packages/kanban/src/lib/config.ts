@@ -4,6 +4,7 @@
 export {
   isNotFoundError,
   type WatchSource,
+  type KanbanConfig,
   type ObserverConfig,
   invalidateConfigCache,
   writeConfig,

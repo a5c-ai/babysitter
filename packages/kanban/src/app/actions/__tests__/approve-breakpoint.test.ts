@@ -141,7 +141,7 @@ describe("approveBreakpoint", () => {
     const parsed = JSON.parse(resultContent as string);
     expect(parsed.status).toBe("ok");
     expect(parsed.value.answer).toBe("Deploy approved");
-    expect(parsed.value.approvedBy).toBe("observer-dashboard");
+    expect(parsed.value.approvedBy).toBe("kanban");
     expect(parsed.value.approvedAt).toBeDefined();
     expect(parsed.startedAt).toBeDefined();
     expect(parsed.finishedAt).toBeDefined();

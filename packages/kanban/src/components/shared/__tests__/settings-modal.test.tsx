@@ -195,7 +195,7 @@ describe('SettingsModal', () => {
     renderWithTheme(true);
 
     await waitFor(() => {
-      expect(screen.getByText('~/.a5c/observer.json')).toBeInTheDocument();
+      expect(screen.getByText('~/.a5c/kanban.json')).toBeInTheDocument();
     });
   });
 });

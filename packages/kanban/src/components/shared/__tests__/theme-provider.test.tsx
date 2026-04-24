@@ -19,6 +19,7 @@ describe('ThemeProvider', () => {
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.className = '';
     localStorage.removeItem('observer-theme');
+    localStorage.removeItem('kanban-theme');
   });
 
   it('renders children', () => {
@@ -88,7 +89,8 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     );
     fireEvent.click(screen.getByText('Toggle'));
-    expect(localStorage.getItem('observer-theme')).toBe('light');
+    expect(localStorage.getItem('kanban-theme')).toBe('light');
+    expect(localStorage.getItem('observer-theme')).toBeNull();
   });
 });
 

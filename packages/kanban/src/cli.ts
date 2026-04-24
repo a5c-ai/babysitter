@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CLI entry point for the babysitter observer dashboard.
+ * CLI entry point for the kanban package.
  *
  * Parses command-line flags, maps them to environment variables,
  * then execs into `next dev` or `next start`.
@@ -44,10 +44,10 @@ function getVersion(): string {
 
 function printUsage(): void {
   const usage = `
-babysitter-observer-dashboard — CLI for the observer dashboard
+kanban — CLI for the kanban dashboard
 
 Usage:
-  observer [options]
+  kanban [options]
 
 Options:
   --port <number>           Port to listen on (default: 4800)
@@ -59,17 +59,17 @@ Options:
   --help                    Show this help message
 
 Environment variable mapping:
-  --port           -> OBSERVER_PORT
-  --watch-dir      -> OBSERVER_WATCH_DIR
-  --poll-interval  -> OBSERVER_POLL_INTERVAL
-  --theme          -> OBSERVER_DEFAULT_THEME
+  --port           -> KANBAN_PORT
+  --watch-dir      -> KANBAN_WATCH_DIR
+  --poll-interval  -> KANBAN_POLL_INTERVAL
+  --theme          -> KANBAN_DEFAULT_THEME
 
 Examples:
   # Start dashboard on port 3002 watching a specific directory
-  observer --port 3002 --watch-dir /home/user/projects
+  kanban --port 3002 --watch-dir /home/user/projects
 
   # Start with light theme
-  observer --theme light
+  kanban --theme light
 `.trim();
 
   console.log(usage);
@@ -209,7 +209,7 @@ function main(): void {
   const opts = parseArgs(process.argv);
 
   if (opts.version) {
-    console.log(`babysitter-observer-dashboard v${getVersion()}`);
+    console.log(`kanban v${getVersion()}`);
     process.exit(0);
   }
 
@@ -220,31 +220,31 @@ function main(): void {
 
   // Map CLI flags to environment variables
   if (opts.port) {
-    process.env.OBSERVER_PORT = opts.port;
+    process.env.KANBAN_PORT = opts.port;
   }
 
   // Default watch directory to the user's cwd (not the package root, which is
   // where Next.js will run). Without this, the config falls back to
   // process.cwd() inside the Next.js process, which points at the package
   // root — useless for npx / global installs.
-  process.env.OBSERVER_WATCH_DIR = opts.watchDir || process.cwd();
+  process.env.KANBAN_WATCH_DIR = opts.watchDir || process.cwd();
 
   if (opts.pollInterval) {
-    process.env.OBSERVER_POLL_INTERVAL = opts.pollInterval;
+    process.env.KANBAN_POLL_INTERVAL = opts.pollInterval;
   }
 
   if (opts.theme) {
-    process.env.OBSERVER_DEFAULT_THEME = opts.theme;
+    process.env.KANBAN_DEFAULT_THEME = opts.theme;
   }
 
   // Determine the Next.js command — use local binary for global installs
-  const port = opts.port || process.env.OBSERVER_PORT || "4800";
+  const port = opts.port || process.env.KANBAN_PORT || process.env.OBSERVER_PORT || "4800";
   const nextBin = findNextBin();
   const nextCmd = opts.dev
     ? `"${nextBin}" dev --port ${port}`
     : `"${nextBin}" start --port ${port}`;
 
-  console.log(`Starting observer: ${nextCmd}`);
+  console.log(`Starting kanban: ${nextCmd}`);
 
   if (opts.watchDir) {
     console.log(`  Watch directory: ${opts.watchDir}`);

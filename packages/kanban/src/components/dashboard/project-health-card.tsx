@@ -119,7 +119,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
   }, [project.projectName, onHide]);
 
   const [expanded, setExpanded] = usePersistedState(
-    `observer:project-expanded:${project.projectName}`,
+    `project-expanded:${project.projectName}`,
     false
   );
   const [page, setPage] = useState(0);

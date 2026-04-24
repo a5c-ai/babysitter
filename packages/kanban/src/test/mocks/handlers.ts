@@ -127,7 +127,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, approved: body.approved });
   }),
 
-  // GET /api/config — returns observer config
+  // GET /api/config — returns kanban config
   http.get('/api/config', () => {
     return HttpResponse.json({
       sources: [{ path: '/tmp/test-project', depth: 2, label: 'test' }],
@@ -138,7 +138,7 @@ export const handlers = [
     });
   }),
 
-  // POST /api/config — update observer config
+  // POST /api/config — update kanban config
   http.post('/api/config', async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({

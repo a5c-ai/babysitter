@@ -32,7 +32,7 @@ interface CacheEntry {
 
 // Persist cache across HMR reloads via typed global registry
 function getCache(): Map<string, CacheEntry> {
-  return getGlobal('__observer_run_cache__', () => new Map<string, CacheEntry>()) as Map<string, CacheEntry>;
+  return getGlobal('__kanban_run_cache__', () => new Map<string, CacheEntry>()) as Map<string, CacheEntry>;
 }
 
 // Cache size limit to prevent unbounded memory growth

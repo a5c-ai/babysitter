@@ -1,7 +1,7 @@
 /**
  * E2E Fixture Generator
  *
- * Generates 50 realistic run directories for performance testing the observer dashboard.
+ * Generates 50 realistic run directories for performance testing the kanban dashboard.
  * Each run directory mirrors the exact filesystem layout used by babysitter:
  *
  *   <runId>/

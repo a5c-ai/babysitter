@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 // Inline script to set theme before first paint (avoids flash)
-const themeScript = `(function(){try{var t=localStorage.getItem("kanban-theme");var theme=(t==="light"||t==="dark")?t:"dark";document.documentElement.setAttribute("data-theme",theme);document.documentElement.dataset.compendiumTheme=theme==="light"?"vellum":"void";document.documentElement.className=theme}catch(e){}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem("kanban-theme")||localStorage.getItem("observer-theme");var theme=(t==="light"||t==="dark")?t:"dark";document.documentElement.setAttribute("data-theme",theme);document.documentElement.dataset.compendiumTheme=theme==="light"?"vellum":"void";document.documentElement.className=theme}catch(e){}})()`;
 
 export default function RootLayout({
   children,

@@ -468,7 +468,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             {serverConfig && (
               <div className="flex items-center justify-between border-t border-border px-4 py-3">
                 <p className="text-xs text-foreground-muted">
-                  Config file: <span className="font-mono">~/.a5c/observer.json</span>
+                  Config file: <span className="font-mono">~/.a5c/kanban.json</span>
                 </p>
                 <div className="flex items-center gap-2">
                   <button

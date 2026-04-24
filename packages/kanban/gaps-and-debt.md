@@ -125,9 +125,8 @@ These are additions that should exist beyond Vibe Kanban parity because this pac
 
 ### Identity drift from observer-dashboard bootstrap
 
-- docs and comments were copied from `observer-dashboard`
-- some package history still reflects observer-dashboard lineage rather than kanban scope
-- copied internal components still carry observer-era assumptions
+- package-facing naming, docs, comments, and persistence keys were normalized in `KANBAN-DEBT-001`
+- legacy observer env vars, config files, and localStorage keys are still read as compatibility fallbacks
 
 ### Partial design-system adoption
 

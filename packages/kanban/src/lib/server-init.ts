@@ -6,7 +6,7 @@ import { getGlobal } from "./global-registry";
 
 // Shared event bus for SSE endpoints — persist across HMR via typed global registry
 function getServerEvents(): EventEmitter {
-  return getGlobal('__observer_server_events__', () => new EventEmitter());
+  return getGlobal('__kanban_server_events__', () => new EventEmitter());
 }
 
 export const serverEvents = getServerEvents();
@@ -37,7 +37,7 @@ interface DebounceState {
 }
 
 function getDebounceState(): DebounceState {
-  return getGlobal('__observer_sse_debounce__', () => ({
+  return getGlobal('__kanban_sse_debounce__', () => ({
     pendingRunDirs: new Set<string>(),
     timer: null,
     windowOpen: false,
@@ -118,7 +118,7 @@ interface InitState {
 }
 
 function getInitState(): InitState {
-  return getGlobal('__observer_init__', () => ({
+  return getGlobal('__kanban_init__', () => ({
     initialized: false,
     initPromise: null,
     cleanup: null,

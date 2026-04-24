@@ -68,7 +68,7 @@ function NoProjectsState() {
         >
           Settings
         </button>{" "}
-        or edit <span className="font-mono">~/.a5c/observer.json</span>
+        or edit <span className="font-mono">~/.a5c/kanban.json</span>
       </p>
     </div>
   );

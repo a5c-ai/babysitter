@@ -52,7 +52,7 @@ The package also publishes a `kanban` CLI entrypoint:
 kanban --help
 ```
 
-The CLI launches the packaged Next.js app in the same way the observer dashboard package does.
+The CLI launches the packaged Next.js app for the kanban surface with the same packaging flow used in the monorepo.
 
 ## Design System
 
