@@ -6,7 +6,7 @@
 
 The V6 architecture refactoring success is measured across multiple dimensions with specific, measurable criteria for each implementation phase.
 
-### Quantitative Success Metrics
+### Contract-Governed Success Metrics
 
 #### Performance Contract Status
 
@@ -21,11 +21,11 @@ Package-level bundle goals, broad memory targets, and generic startup latency go
 The linked [Performance Considerations](../performance-docs.md) document is the source of truth for when a performance number becomes a target instead of a planning hypothesis.
 
 #### Quality Metrics
-| Aspect | Target | Validation | Success Threshold |
-|--------|--------|------------|------------------|
-| Test Coverage | > 80% | Automated coverage tools | All packages pass |
-| API Compatibility | 100% | Compatibility test suite → [Testing Framework](../testing-framework.md) | Zero breaking changes |
-| Security Validation | Zero critical issues | Security scanning → [Security Architecture](../security-architecture.md) | Clean security audit |
+| Aspect | Normative Rule | Validation | Success Condition |
+|--------|----------------|------------|-------------------|
+| Test Coverage | Only package-scoped coverage gates declared by the owning package are normative | Automated coverage tools and package CI jobs | Each declared package gate passes |
+| API Compatibility | Compatibility claims must be tied to an explicit compatibility surface and test suite | Compatibility test suite → [Testing Framework](../testing-framework.md) | Declared compatibility checks pass and documented breaking changes are intentional |
+| Security Validation | Security release claims require documented scanning and review scope | Security scanning → [Security Architecture](../security-architecture.md) | Release-blocking findings are resolved or explicitly accepted |
 
 ### Functional Success Criteria
 
@@ -51,7 +51,7 @@ The linked [Performance Considerations](../performance-docs.md) document is the 
 
 **Phase 4: Optimization & Polish** → [Optimization & Polish](optimization-polish.md)
 - Any accepted performance target validated through a slice-specific contract
-- 90%+ test coverage achieved across all packages
+- Package-scoped coverage gates satisfied where they are explicitly declared
 - Complete documentation published with user validation
 - Migration tooling validated with real-world scenarios
 
@@ -97,34 +97,34 @@ interface ComplianceResult {
 
 | Risk Category | Probability | Impact | Mitigation Status | Success Criteria |
 |---------------|-------------|--------|------------------|------------------|
-| Foundation Phase Risks | Medium | High | Active monitoring | Zero critical functionality loss |
-| Platform Phase Risks | Low | Medium | Performance monitoring | Any overhead claim backed by a slice-specific contract |
-| Application Phase Risks | Medium | Medium | Comprehensive testing | 100% feature parity achieved |
-| Release Phase Risks | Low | High | Staged deployment | Zero production incidents |
+| Foundation Phase Risks | Medium | High | Active monitoring | Critical functionality regressions are identified and addressed before phase acceptance |
+| Platform Phase Risks | Low | Medium | Performance monitoring | Any overhead claim is backed by a slice-specific contract |
+| Application Phase Risks | Medium | Medium | Comprehensive testing | Feature parity claims are validated against an explicit workflow inventory |
+| Release Phase Risks | Low | High | Staged deployment | Release-blocking incidents are resolved or trigger rollback decisions |
 
 ### Rollback Validation
 
 **Rollback Procedures Testing**
-- Each phase has validated rollback procedure with time limits
+- Each phase has a validated rollback procedure with explicit preconditions, restoration steps, and acceptance evidence
 - Data migration rollback tested with consistency validation
 - Configuration rollback verified with environment restoration
 - User workflow rollback validated with minimal disruption
 
-**Recovery Time Objectives**
-- Foundation rollback: < 1 hour with zero data loss
-- Platform rollback: < 2 hours with session preservation  
-- Application rollback: < 4 hours with full functionality restoration
-- Complete system rollback: < 8 hours with data integrity maintained
+**Rollback Readiness Expectations**
+- Foundation rollback expectations are documented against the actual phase scope and data-safety constraints
+- Platform rollback expectations document how session preservation is validated for the tested slice
+- Application rollback expectations document which workflows must be restored before the phase is considered recoverable
+- Full-system rollback expectations document integrity checks and operator decision points rather than generic time promises
 
 ## User Experience Success
 
 ### Developer Experience Metrics
 
 **Plugin Development Efficiency**
-- Plugin development time reduced by > 50% from baseline
-- Plugin marketplace onboarding time < 1 day
-- Developer documentation satisfaction > 80% positive feedback
-- Plugin certification process completion rate > 90%
+- Plugin development workflow is demonstrably simpler in documented comparison scenarios
+- Marketplace onboarding steps are documented and validated against a real setup path
+- Developer documentation feedback is collected and reviewed with explicit follow-up actions
+- Plugin certification flow is validated against the actual certification procedure in scope
 
 **Deployment Simplification**
 - Deployment complexity reduced through selective deployment capability
@@ -134,7 +134,7 @@ interface ComplianceResult {
 ### End-User Impact
 
 **Functionality Preservation**
-- 100% feature parity with existing monolithic solution maintained
+- Feature parity with the existing monolithic solution is validated against an explicit workflow inventory
 - User workflow disruption minimized during transition
 - Performance improvements measurable in user-facing operations
 - Error rates maintained or improved compared to baseline

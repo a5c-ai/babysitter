@@ -122,7 +122,7 @@ Coverage thresholds in this phase are package-scoped and must be enforced by the
 
 **Automated Quality Gates**
 - Package-scoped coverage gates enforced by package-local test configuration and CI jobs where numeric thresholds are declared
-- Performance benchmarks within target ranges
+- Performance benchmarks executed only for slices with explicit measurement contracts
 - Security vulnerability scanning with zero critical issues
 - API compatibility validation with breaking change detection
 
