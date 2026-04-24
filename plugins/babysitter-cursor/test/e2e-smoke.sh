@@ -17,13 +17,14 @@ set -uo pipefail
 
 PASS=0
 FAIL=0
-SKIP=0
 ERRORS=()
 
 PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$PLUGIN_DIR/../.." && pwd)"
 WORK_DIR="$(mktemp -d)"
 STATE_DIR="$WORK_DIR/state"
 RUNS_DIR="$WORK_DIR/runs"
+HOOK_HARNESS="unified"
 mkdir -p "$STATE_DIR" "$RUNS_DIR"
 
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -31,7 +32,11 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 # ---------------------------------------------------------------------------
 # Resolve babysitter CLI
 # ---------------------------------------------------------------------------
-if command -v babysitter &>/dev/null; then
+if [[ -n "${BABYSITTER_CLI:-}" ]]; then
+  CLI="$BABYSITTER_CLI"
+elif [[ -f "$REPO_ROOT/packages/sdk/dist/cli/main.js" ]]; then
+  CLI="node $REPO_ROOT/packages/sdk/dist/cli/main.js"
+elif command -v babysitter &>/dev/null; then
   CLI="babysitter"
 elif [ -x "$HOME/.local/bin/babysitter" ]; then
   CLI="$HOME/.local/bin/babysitter"
@@ -51,7 +56,6 @@ echo ""
 
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); ERRORS+=("$1"); echo "  FAIL: $1"; }
-skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
 assert_file_exists() {
   local label="$1" path="$2"
@@ -77,35 +81,28 @@ assert_decision_block() {
   [[ "$decision" == "block" ]] && pass "$label (decision=block)" || fail "$label: expected block, got decision=$decision"
 }
 
-# Check if cursor harness is supported by hook:run
-HARNESS_SUPPORTED=true
-HARNESS_CHECK=$(echo '{}' | $CLI hook:run --hook-type stop --harness cursor --json 2>&1 || true)
-if echo "$HARNESS_CHECK" | grep -q "UNSUPPORTED_HARNESS"; then
-  HARNESS_SUPPORTED=false
-  echo "NOTE: cursor harness not yet registered in hook:run."
-  echo "      hook:run tests will be skipped. Session lifecycle tests will still run."
-  echo ""
-fi
-
 # Run a hook:run command with a JSON payload from a temp file
 run_hook() {
   local hook_type="$1" payload="$2"
   shift 2
-  if [[ "$HARNESS_SUPPORTED" != "true" ]]; then
-    echo "__SKIPPED__"
-    return
-  fi
   local tmp_input
   tmp_input=$(mktemp)
   echo "$payload" > "$tmp_input"
   local result
+  local status
   result=$($CLI hook:run \
     --hook-type "$hook_type" \
-    --harness cursor \
+    --harness "$HOOK_HARNESS" \
     --state-dir "$STATE_DIR" \
     --runs-dir "$RUNS_DIR" \
-    --json < "$tmp_input" 2>/dev/null) || result="{}"
+    --json < "$tmp_input" 2>&1)
+  status=$?
   rm -f "$tmp_input"
+  if [[ $status -ne 0 ]]; then
+    fail "hook:run ${hook_type} failed: $result"
+    echo "{}"
+    return
+  fi
   echo "$result"
 }
 
@@ -120,33 +117,22 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Test 2: harness:discover includes cursor
+# Test 2: plugin.json schema validation
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 2: harness:discover includes cursor ==="
-DISCOVER_OUT=$($CLI harness:discover --json 2>/dev/null || echo '{}')
-if echo "$DISCOVER_OUT" | grep -qi "cursor"; then
-  pass "harness:discover output mentions cursor"
-else
-  # cursor may not be installed on CI; skip rather than fail
-  skip "harness:discover does not mention cursor (cursor CLI may not be installed)"
-fi
-
-# ---------------------------------------------------------------------------
-# Test 3: plugin.json schema validation
-# ---------------------------------------------------------------------------
-echo ""
-echo "=== Test 3: plugin.json schema ==="
+echo "=== Test 2: plugin.json schema ==="
 PLUGIN_VALID=$(node -e "
   const p = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
   const errors = [];
   if (typeof p.name !== 'string') errors.push('name must be string');
   if (typeof p.version !== 'string') errors.push('version must be string');
   if (typeof p.description !== 'string') errors.push('description must be string');
-  if (typeof p.hooks !== 'object') errors.push('hooks must be object');
-  if (!Array.isArray(p.skills)) errors.push('skills must be array');
-  for (const s of (p.skills || [])) {
-    if (!s.name || !s.file) errors.push('skill missing name or file: ' + JSON.stringify(s));
+  if (typeof p.hooks !== 'object' && typeof p.hooks !== 'string') errors.push('hooks must be object or string');
+  if (!Array.isArray(p.skills) && typeof p.skills !== 'string') errors.push('skills must be array or string');
+  if (Array.isArray(p.skills)) {
+    for (const s of p.skills) {
+      if (!s.name || !s.file) errors.push('skill missing name or file: ' + JSON.stringify(s));
+    }
   }
   if (errors.length) console.log('ERRORS:' + errors.join('; '));
   else console.log('OK');
@@ -159,10 +145,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Test 4: Hook script shebangs
+# Test 3: Hook script shebangs
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 4: Hook script shebangs ==="
+echo "=== Test 3: Hook script shebangs ==="
 for hook_file in "$PLUGIN_DIR"/hooks/*.sh; do
   [[ ! -f "$hook_file" ]] && continue
   basename_file=$(basename "$hook_file")
@@ -175,10 +161,10 @@ for hook_file in "$PLUGIN_DIR"/hooks/*.sh; do
 done
 
 # ---------------------------------------------------------------------------
-# Test 5: Hook scripts pass syntax check (bash -n)
+# Test 4: Hook scripts pass syntax check (bash -n)
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 5: Hook script syntax (bash -n) ==="
+echo "=== Test 4: Hook script syntax (bash -n) ==="
 for hook_file in "$PLUGIN_DIR"/hooks/*.sh; do
   [[ ! -f "$hook_file" ]] && continue
   basename_file=$(basename "$hook_file")
@@ -190,10 +176,10 @@ for hook_file in "$PLUGIN_DIR"/hooks/*.sh; do
 done
 
 # ---------------------------------------------------------------------------
-# Test 6: versions.json has valid sdkVersion
+# Test 5: versions.json has valid sdkVersion
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 6: versions.json sdkVersion ==="
+echo "=== Test 5: versions.json sdkVersion ==="
 SDK_VER=$(node -e "
   const v = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
   if (v.sdkVersion && typeof v.sdkVersion === 'string' && v.sdkVersion.length > 0) {
@@ -210,10 +196,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Test 7: session:init creates state file
+# Test 6: session:init creates state file
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 7: session:init ==="
+echo "=== Test 6: session:init ==="
 SESSION_ID="cursor-smoke-$$"
 $CLI session:init \
   --session-id "$SESSION_ID" \
@@ -229,16 +215,23 @@ assert_contains "state file has iteration:1" "$(cat "$STATE_FILE" 2>/dev/null)" 
 assert_contains "state file has prompt" "$(cat "$STATE_FILE" 2>/dev/null)" "Build a Cursor test plugin"
 
 # ---------------------------------------------------------------------------
+# Test 7: hook:run session-start -- creates baseline state
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 7: hook:run session-start ==="
+NEW_SESSION="cursor-start-$$"
+OUTPUT=$(AGENT_SESSION_ID="$NEW_SESSION" run_hook "session-start" '{}')
+NEW_STATE="$STATE_DIR/${NEW_SESSION}.md"
+assert_file_exists "hook:run session-start creates state file" "$NEW_STATE"
+[[ "$OUTPUT" == "{}" ]] && pass "session-start outputs {}" || fail "session-start: expected {}, got: $OUTPUT"
+
+# ---------------------------------------------------------------------------
 # Test 8: hook:run stop -- no session, outputs approve
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Test 8: hook:run stop (no session) ==="
 OUTPUT=$(run_hook "stop" '{}')
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (empty payload) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (empty payload)" "$OUTPUT"
-fi
+assert_no_decision "hook:run stop (empty payload)" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
 # Test 9: hook:run stop -- unknown session, outputs approve
@@ -246,11 +239,7 @@ fi
 echo ""
 echo "=== Test 9: hook:run stop (unknown session) ==="
 OUTPUT=$(run_hook "stop" '{"session_id":"nonexistent-999"}')
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (unknown session) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (unknown session)" "$OUTPUT"
-fi
+assert_no_decision "hook:run stop (unknown session)" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
 # Test 10: session:init re-entrant guard
@@ -305,17 +294,7 @@ Max iteration test
 EOF
 
 OUTPUT=$(run_hook "stop" "{\"session_id\":\"${MAX_SESSION}\"}")
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (max iterations) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (max iterations -> approve)" "$OUTPUT"
-  if [[ ! -f "$MAX_STATE" ]]; then
-    pass "state file cleaned up after max iterations"
-  else
-    # State file cleanup is harness-dependent; not all harnesses remove it
-    skip "state file not cleaned up (may be harness-specific behavior)"
-  fi
-fi
+assert_no_decision "hook:run stop (max iterations -> approve)" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
 # Test 13: session:resume -- creates state for existing run
@@ -362,7 +341,6 @@ echo "  CURSOR PLUGIN SMOKE TEST RESULTS"
 echo "============================================"
 echo "  PASS: $PASS"
 echo "  FAIL: $FAIL"
-echo "  SKIP: $SKIP"
 
 if [[ $FAIL -gt 0 ]]; then
   echo ""
@@ -375,10 +353,6 @@ if [[ $FAIL -gt 0 ]]; then
 fi
 
 echo ""
-if [[ $SKIP -gt 0 ]]; then
-  echo "  All non-skipped smoke tests passed! ($SKIP skipped -- cursor harness not yet registered)"
-else
-  echo "  All smoke tests passed!"
-fi
+echo "  All smoke tests passed!"
 echo ""
 exit 0

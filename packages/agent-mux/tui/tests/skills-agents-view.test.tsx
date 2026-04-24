@@ -4,8 +4,6 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'ink-testing-library';
-import SkillsPlugin from '../src/plugins/skills-view.js';
-import AgentsPlugin from '../src/plugins/agents-view.js';
 import { EventStream } from '../src/event-stream.js';
 import type { TuiPlugin } from '../src/plugin.js';
 
@@ -18,7 +16,9 @@ const SUPPORTED_SUBAGENT_AGENTS = [
   { agent: 'copilot', projectDir: ['.github', 'agents'] },
 ] as const;
 
-function extract(plugin: TuiPlugin) {
+async function extract(modulePath: string) {
+  const mod = (await import(modulePath)) as { default: TuiPlugin };
+  const plugin = mod.default;
   const views: { component: React.ComponentType<unknown> }[] = [];
   plugin.register({
     client: {} as never,
@@ -63,7 +63,7 @@ afterEach(() => {
 describe('skills-view', () => {
   it('lists installed project skills', async () => {
     fs.mkdirSync(path.join(tmp, '.claude', 'skills', 'foo'), { recursive: true });
-    const View = extract(SkillsPlugin);
+    const View = await extract('../src/plugins/skills-view.js');
     const stream = new EventStream();
     const { lastFrame, rerender } = render(<View client={{} as never} active={true} eventStream={stream} emit={() => {}} />);
     await new Promise((r) => setTimeout(r, 20));
@@ -78,7 +78,7 @@ describe('skills-view', () => {
     const skillDir = path.join(tmp, '.claude', 'skills', 'zap');
     fs.mkdirSync(skillDir, { recursive: true });
     fs.writeFileSync(path.join(skillDir, 'SKILL.md'), 'x');
-    const View = extract(SkillsPlugin);
+    const View = await extract('../src/plugins/skills-view.js');
     const stream = new EventStream();
     const { stdin, rerender } = render(<View client={{} as never} active={true} eventStream={stream} emit={() => {}} />);
     await new Promise((r) => setTimeout(r, 20));
@@ -98,7 +98,7 @@ describe('agents-view', () => {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, `${entry.agent}.md`), entry.agent);
     }
-    const View = extract(AgentsPlugin);
+    const View = await extract('../src/plugins/agents-view.js');
     const stream = new EventStream();
     const { lastFrame, rerender } = render(<View client={{} as never} active={true} eventStream={stream} emit={() => {}} />);
     await new Promise((r) => setTimeout(r, 20));
@@ -115,7 +115,7 @@ describe('agents-view', () => {
     const file = path.join(tmp, '.claude', 'agents', 'zap.md');
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, 'x');
-    const View = extract(AgentsPlugin);
+    const View = await extract('../src/plugins/agents-view.js');
     const stream = new EventStream();
     const { stdin, rerender } = render(<View client={{} as never} active={true} eventStream={stream} emit={() => {}} />);
     await new Promise((r) => setTimeout(r, 20));
@@ -128,7 +128,7 @@ describe('agents-view', () => {
   });
 
   it('supports add flow for each supported harness and keeps claude-code as a non-picker alias', async () => {
-    const View = extract(AgentsPlugin);
+    const View = await extract('../src/plugins/agents-view.js');
     const stream = new EventStream();
     const { stdin, lastFrame, rerender } = render(<View client={{} as never} active={true} eventStream={stream} emit={() => {}} />);
     await new Promise((r) => setTimeout(r, 20));
@@ -142,6 +142,7 @@ describe('agents-view', () => {
 
     for (const [index, entry] of SUPPORTED_SUBAGENT_AGENTS.entries()) {
       const source = path.join(tmp, `${entry.agent}-source.md`);
+      const inputSource = path.basename(source);
       fs.writeFileSync(source, entry.agent);
 
       stdin.write('a');
@@ -149,7 +150,7 @@ describe('agents-view', () => {
       for (let i = 0; i < index; i += 1) stdin.write('l');
       stdin.write('\r');
       await new Promise((r) => setTimeout(r, 20));
-      stdin.write(source);
+      stdin.write(inputSource);
       stdin.write('\r');
       await new Promise((r) => setTimeout(r, 30));
 

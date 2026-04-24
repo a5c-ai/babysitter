@@ -29,3 +29,19 @@ babysitter harness:install claude-code
 babysitter harness:install-plugin claude-code
 babysitter session:state --session-id demo --state-dir .a5c
 ```
+
+## Local Build
+
+From the repo root, run:
+
+```bash
+npm run build --workspace=@a5c-ai/babysitter-agent
+```
+
+This package now builds with `tsc --build` project references for workspace-owned TypeScript packages, and it explicitly invokes the root `build:runtime:babysitter-agent-deps` entrypoint to prepare the runtime chain, including the `@a5c-ai/agent-mux` SDK surface. A fresh-checkout build no longer requires prebuilt upstream `dist/` output.
+
+For the release/CI runtime chain, use the shared root entrypoint:
+
+```bash
+npm run build:runtime
+```

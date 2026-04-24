@@ -19,9 +19,11 @@ FAIL=0
 ERRORS=()
 
 PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$PLUGIN_DIR/../.." && pwd)"
 WORK_DIR="$(mktemp -d)"
 STATE_DIR="$WORK_DIR/state"
 RUNS_DIR="$WORK_DIR/runs"
+HOOK_HARNESS="unified"
 mkdir -p "$STATE_DIR" "$RUNS_DIR"
 
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -29,7 +31,11 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 # ---------------------------------------------------------------------------
 # Resolve babysitter CLI
 # ---------------------------------------------------------------------------
-if command -v babysitter &>/dev/null; then
+if [[ -n "${BABYSITTER_CLI:-}" ]]; then
+  CLI="$BABYSITTER_CLI"
+elif [[ -f "$REPO_ROOT/packages/sdk/dist/cli/main.js" ]]; then
+  CLI="node $REPO_ROOT/packages/sdk/dist/cli/main.js"
+elif command -v babysitter &>/dev/null; then
   CLI="babysitter"
 elif [ -x "$HOME/.local/bin/babysitter" ]; then
   CLI="$HOME/.local/bin/babysitter"
@@ -74,38 +80,28 @@ assert_decision_block() {
   [[ "$decision" == "block" ]] && pass "$label (decision=block)" || fail "$label: expected block, got decision=$decision"
 }
 
-# Check if github-copilot harness is supported by hook:run
-HARNESS_SUPPORTED=true
-HARNESS_CHECK=$(echo '{}' | $CLI hook:run --hook-type stop --harness github-copilot --json 2>&1 || true)
-if echo "$HARNESS_CHECK" | grep -q "UNSUPPORTED_HARNESS"; then
-  HARNESS_SUPPORTED=false
-  echo "NOTE: github-copilot harness not yet registered in hook:run."
-  echo "      hook:run tests will be skipped. Session lifecycle tests will still run."
-  echo ""
-fi
-
-SKIP=0
-skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
-
 # Run a hook:run command with a JSON payload from a temp file
 run_hook() {
   local hook_type="$1" payload="$2"
   shift 2
-  if [[ "$HARNESS_SUPPORTED" != "true" ]]; then
-    echo "__SKIPPED__"
-    return
-  fi
   local tmp_input
   tmp_input=$(mktemp)
   echo "$payload" > "$tmp_input"
   local result
+  local status
   result=$($CLI hook:run \
     --hook-type "$hook_type" \
-    --harness github-copilot \
+    --harness "$HOOK_HARNESS" \
     --state-dir "$STATE_DIR" \
     --runs-dir "$RUNS_DIR" \
-    --json < "$tmp_input" 2>/dev/null) || result="{}"
+    --json < "$tmp_input" 2>&1)
+  status=$?
   rm -f "$tmp_input"
+  if [[ $status -ne 0 ]]; then
+    fail "hook:run ${hook_type} failed: $result"
+    echo "{}"
+    return
+  fi
   echo "$result"
 }
 
@@ -130,10 +126,12 @@ PLUGIN_VALID=$(node -e "
   if (typeof p.name !== 'string') errors.push('name must be string');
   if (typeof p.version !== 'string') errors.push('version must be string');
   if (typeof p.description !== 'string') errors.push('description must be string');
-  if (typeof p.hooks !== 'object') errors.push('hooks must be object');
-  if (!Array.isArray(p.skills)) errors.push('skills must be array');
-  for (const s of (p.skills || [])) {
-    if (!s.name || !s.file) errors.push('skill missing name or file: ' + JSON.stringify(s));
+  if (typeof p.hooks !== 'object' && typeof p.hooks !== 'string') errors.push('hooks must be object or string');
+  if (!Array.isArray(p.skills) && typeof p.skills !== 'string') errors.push('skills must be array or string');
+  if (Array.isArray(p.skills)) {
+    for (const s of p.skills) {
+      if (!s.name || !s.file) errors.push('skill missing name or file: ' + JSON.stringify(s));
+    }
   }
   if (errors.length) console.log('ERRORS:' + errors.join('; '));
   else console.log('OK');
@@ -201,28 +199,20 @@ assert_contains "state file has iteration:1" "$(cat "$STATE_FILE" 2>/dev/null)" 
 assert_contains "state file has prompt" "$(cat "$STATE_FILE" 2>/dev/null)" "Build a GitHub test app"
 
 # ---------------------------------------------------------------------------
-# Test 6: hook:run stop -- no session, outputs approve
+# Test 6: hook:run session-end -- no session, outputs approve
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 6: hook:run stop (no session) ==="
-OUTPUT=$(run_hook "stop" '{}')
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (empty payload) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (empty payload)" "$OUTPUT"
-fi
+echo "=== Test 6: hook:run session-end (no session) ==="
+OUTPUT=$(run_hook "session-end" '{}')
+assert_no_decision "hook:run session-end (empty payload)" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
-# Test 7: hook:run stop -- unknown session, outputs approve
+# Test 7: hook:run session-end -- unknown session, outputs approve
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 7: hook:run stop (unknown session) ==="
-OUTPUT=$(run_hook "stop" '{"session_id":"nonexistent-999"}')
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (unknown session) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (unknown session)" "$OUTPUT"
-fi
+echo "=== Test 7: hook:run session-end (unknown session) ==="
+OUTPUT=$(run_hook "session-end" '{"session_id":"nonexistent-999"}')
+assert_no_decision "hook:run session-end (unknown session)" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
 # Test 8: hook:run session-start -- creates baseline state
@@ -230,20 +220,24 @@ fi
 echo ""
 echo "=== Test 8: hook:run session-start ==="
 NEW_SESSION="github-start-$$"
-OUTPUT=$(run_hook "session-start" "{\"session_id\":\"${NEW_SESSION}\"}")
+OUTPUT=$(AGENT_SESSION_ID="$NEW_SESSION" run_hook "session-start" '{}')
 NEW_STATE="$STATE_DIR/${NEW_SESSION}.md"
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run session-start -- harness not supported"
-else
-  assert_file_exists "hook:run session-start creates state file" "$NEW_STATE"
-  [[ "$OUTPUT" == "{}" ]] && pass "session-start outputs {}" || fail "session-start: expected {}, got: $OUTPUT"
-fi
+assert_file_exists "hook:run session-start creates state file" "$NEW_STATE"
+[[ "$OUTPUT" == "{}" ]] && pass "session-start outputs {}" || fail "session-start: expected {}, got: $OUTPUT"
 
 # ---------------------------------------------------------------------------
-# Test 9: session:init re-entrant guard
+# Test 9: hook:run user-prompt-submit -- passthrough JSON
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 9: session:init (re-entrant guard) ==="
+echo "=== Test 9: hook:run user-prompt-submit ==="
+OUTPUT=$(run_hook "user-prompt-submit" '{"prompt":"Short GitHub prompt","session_id":"github-user-prompt"}')
+assert_contains "user-prompt-submit preserves prompt" "$OUTPUT" "Short GitHub prompt"
+
+# ---------------------------------------------------------------------------
+# Test 10: session:init re-entrant guard
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 10: session:init (re-entrant guard) ==="
 GUARD_SESSION="github-guard-$$"
 $CLI session:init \
   --session-id "$GUARD_SESSION" \
@@ -258,10 +252,10 @@ REINIT_OUT=$($CLI session:init \
 assert_contains "session:init blocks re-entrant init" "$REINIT_OUT" "SESSION_EXISTS"
 
 # ---------------------------------------------------------------------------
-# Test 10: session:associate -- links run to session
+# Test 11: session:associate -- links run to session
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 10: session:associate ==="
+echo "=== Test 11: session:associate ==="
 ASSOC_OUT=$($CLI session:associate \
   --session-id "$SESSION_ID" \
   --state-dir "$STATE_DIR" \
@@ -271,10 +265,10 @@ assert_contains "session:associate outputs run-id" "$ASSOC_OUT" "github-run-"
 assert_contains "state file has run_id" "$(cat "$STATE_FILE" 2>/dev/null)" "github-run-"
 
 # ---------------------------------------------------------------------------
-# Test 11: hook:run stop -- max iterations guard
+# Test 12: hook:run session-end -- max iterations guard
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 11: hook:run stop (max iterations guard) ==="
+echo "=== Test 12: hook:run session-end (max iterations guard) ==="
 MAX_SESSION="github-max-$$"
 MAX_STATE="$STATE_DIR/${MAX_SESSION}.md"
 cat > "$MAX_STATE" <<EOF
@@ -291,19 +285,15 @@ iteration_times:
 Max iteration test
 EOF
 
-OUTPUT=$(run_hook "stop" "{\"session_id\":\"${MAX_SESSION}\"}")
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (max iterations) -- harness not supported"
-else
-  assert_no_decision "hook:run stop (max iterations -> approve)" "$OUTPUT"
-  [[ ! -f "$MAX_STATE" ]] && pass "state file cleaned up after max iterations" || fail "state file should be cleaned up"
-fi
+OUTPUT=$(run_hook "session-end" "{\"session_id\":\"${MAX_SESSION}\"}")
+assert_no_decision "hook:run session-end (max iterations -> approve)" "$OUTPUT"
+[[ ! -f "$MAX_STATE" ]] && pass "state file cleaned up after max iterations" || fail "state file should be cleaned up"
 
 # ---------------------------------------------------------------------------
-# Test 12: session:resume -- creates state for existing run
+# Test 13: session:resume -- creates state for existing run
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 12: session:resume ==="
+echo "=== Test 13: session:resume ==="
 FAKE_RUN="github-resume-run-$$"
 FAKE_RUN_DIR="$RUNS_DIR/$FAKE_RUN"
 mkdir -p "$FAKE_RUN_DIR/journal"
@@ -336,10 +326,10 @@ assert_file_exists "session:resume creates state file" "$RESUME_STATE"
 assert_contains "resume state has run_id" "$(cat "$RESUME_STATE" 2>/dev/null)" "$FAKE_RUN"
 
 # ---------------------------------------------------------------------------
-# Test 13: hook:run stop -- active run triggers block
+# Test 14: hook:run session-end -- active run triggers block
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Test 13: hook:run stop (active run -> block) ==="
+echo "=== Test 14: hook:run session-end (active run -> block) ==="
 ACTIVE_SESSION="github-active-$$"
 ACTIVE_RUN="github-active-run-$$"
 ACTIVE_RUN_DIR="$RUNS_DIR/$ACTIVE_RUN"
@@ -370,14 +360,10 @@ $CLI session:associate \
   --run-id "$ACTIVE_RUN" \
   --json >/dev/null 2>&1 || true
 
-OUTPUT=$(run_hook "stop" "{\"session_id\":\"${ACTIVE_SESSION}\",\"prompt_response\":\"I ran the iteration.\"}")
-if [[ "$OUTPUT" == "__SKIPPED__" ]]; then
-  skip "hook:run stop (active run -> block) -- harness not supported"
-else
-  assert_decision_block "hook:run stop (active run -> block)" "$OUTPUT"
-  assert_contains "block response has systemMessage" "$OUTPUT" "systemMessage"
-  assert_contains "block response has reason with prompt" "$OUTPUT" "Active run test"
-fi
+OUTPUT=$(run_hook "session-end" "{\"session_id\":\"${ACTIVE_SESSION}\",\"prompt_response\":\"I ran the iteration.\"}")
+assert_decision_block "hook:run session-end (active run -> block)" "$OUTPUT"
+assert_contains "block response has systemMessage" "$OUTPUT" "systemMessage"
+assert_contains "block response has reason with prompt" "$OUTPUT" "Active run test"
 
 # ---------------------------------------------------------------------------
 # Summary
@@ -388,7 +374,6 @@ echo "  GITHUB PLUGIN SMOKE TEST RESULTS"
 echo "============================================"
 echo "  PASS: $PASS"
 echo "  FAIL: $FAIL"
-echo "  SKIP: $SKIP"
 
 if [[ $FAIL -gt 0 ]]; then
   echo ""
@@ -401,10 +386,6 @@ if [[ $FAIL -gt 0 ]]; then
 fi
 
 echo ""
-if [[ $SKIP -gt 0 ]]; then
-  echo "  All non-skipped smoke tests passed! ($SKIP skipped -- github-copilot harness not yet registered)"
-else
-  echo "  All smoke tests passed!"
-fi
+echo "  All smoke tests passed!"
 echo ""
 exit 0

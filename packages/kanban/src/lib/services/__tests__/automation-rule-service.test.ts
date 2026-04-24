@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AutomationRuleService } from "../automation-rule-service";
+import { BacklogQueryService } from "../backlog-query-service";
 
 const tempDirs: string[] = [];
 
@@ -28,11 +29,39 @@ function createBacklogOverview() {
 }
 
 function createService(backlogFilePath: string) {
+  const realBacklogQueryService = new BacklogQueryService({
+    backlogFilePath,
+    now: () => "2026-04-24T12:00:00.000Z",
+    reviewService: {
+      listReviews: async () => ({
+        generatedAt: "2026-04-24T12:00:00.000Z",
+        artifacts: [],
+        queue: [],
+        summary: {
+          total: 0,
+          issueCount: 0,
+          workspaceCount: 0,
+          pendingCount: 0,
+          changesRequestedCount: 0,
+          approvedCount: 0,
+          openCommentCount: 0,
+        },
+      }),
+    } as never,
+    runQueryService: {
+      listProjects: async () => ({
+        recentCompletionWindowMs: 14400000,
+        projects: [],
+      }),
+    } as never,
+  });
+
   return new AutomationRuleService({
     backlogFilePath,
     now: () => "2026-04-24T12:00:00.000Z",
     backlogQueryService: {
       getOverview: async () => createBacklogOverview(),
+      createIssue: (...args) => realBacklogQueryService.createIssue(...args),
     },
   });
 }
@@ -72,6 +101,28 @@ function createTimerRuleInput(overrides: Record<string, unknown> = {}): Record<s
         boardProjectId: "kanban-app",
       },
       mutateBoardDirectly: false,
+    },
+    ...overrides,
+  };
+}
+
+function createTriggerEventBody(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    triggeredBy: "automation-daemon",
+    triggerEvent: {
+      id: "evt-001",
+      summary: "Daily digest fired",
+      sourceEvent: "digest.ready",
+      receivedAt: "2026-04-24T11:59:00.000Z",
+      payload: {
+        digestId: "digest-42",
+      },
+      metadata: {
+        source: "scheduler",
+      },
+    },
+    metadata: {
+      requestId: "req-123",
     },
     ...overrides,
   };
@@ -205,6 +256,131 @@ describe("AutomationRuleService", () => {
     ).rejects.toMatchObject({
       code: "BAD_REQUEST",
       status: 400,
+    });
+  });
+
+  it("materializes fired automation events into canonical issues and execution records", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-automation-rules-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
+    const service = createService(backlogFilePath);
+    const created = await service.createRule(
+      createTimerRuleInput({
+        state: "active",
+        template: {
+          ...createTimerTemplate(),
+          status: "ready",
+          labelIds: ["label-debt"],
+          metadata: {
+            automationTemplate: true,
+          },
+          issueSource: {
+            kind: "run-derived",
+            externalId: "digest-job",
+            metadata: {
+              upstream: "digest",
+            },
+          },
+        },
+      }),
+    );
+
+    const materialized = await service.materializeEvent(
+      created.rule.id,
+      createTriggerEventBody(),
+    );
+
+    expect(materialized.issue.key).toMatch(/^KANBAN-AUTO-\d{3}$/);
+    expect(materialized.issue.projectId).toBe("kanban-app");
+    expect(materialized.issue.status).toBe("ready");
+    expect(materialized.issue.dispatch.readiness).toBe("ready");
+    expect(materialized.issue.source?.metadata).toMatchObject({
+      upstream: "digest",
+      automationRuleId: created.rule.id,
+      triggerEventId: "evt-001",
+      routeProjectId: "kanban-app",
+      routeBoardProjectId: "kanban-app",
+    });
+    expect(materialized.execution.issueId).toBe(materialized.issue.id);
+    expect(materialized.execution.projectId).toBe("kanban-app");
+    expect(materialized.execution.boardProjectId).toBe("kanban-app");
+    expect(materialized.execution.metadata).toMatchObject({
+      requestId: "req-123",
+      triggerEventId: "evt-001",
+      triggerEventSource: "digest.ready",
+    });
+    expect(materialized.rule.audit.lastTriggeredBy).toBe("automation-daemon");
+
+    const persisted = JSON.parse(await fs.readFile(backlogFilePath, "utf8")) as {
+      issues: Array<{
+        id: string;
+        source?: { metadata?: { automationRuleId?: string; triggerEventId?: string } };
+        metadata?: { automationTemplate?: boolean };
+      }>;
+      automationExecutions: Array<{ issueId?: string; boardProjectId: string }>;
+      automationRules: Array<{ id: string; audit?: { lastTriggeredBy?: string } }>;
+    };
+
+    expect(
+      persisted.issues.find((issue) => issue.id === materialized.issue.id)?.source?.metadata,
+    ).toMatchObject({
+      automationRuleId: created.rule.id,
+      triggerEventId: "evt-001",
+    });
+    expect(
+      persisted.issues.find((issue) => issue.id === materialized.issue.id)?.metadata
+        ?.automationTemplate,
+    ).toBe(true);
+    expect(persisted.automationExecutions[0]?.issueId).toBe(materialized.issue.id);
+    expect(persisted.automationExecutions[0]?.boardProjectId).toBe("kanban-app");
+    expect(
+      persisted.automationRules.find((rule) => rule.id === created.rule.id)?.audit?.lastTriggeredBy,
+    ).toBe("automation-daemon");
+  });
+
+  it("surfaces routing failures as explicit errors", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-automation-rules-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
+    const service = createService(backlogFilePath);
+    const created = await service.createRule(
+      createTimerRuleInput({
+        state: "active",
+      }),
+    );
+
+    await fs.writeFile(
+      backlogFilePath,
+      JSON.stringify({
+        projects: [
+          {
+            id: "other-project",
+            key: "OTHER",
+            name: "Other Project",
+            issueIds: [],
+            labels: [],
+            assignees: [],
+            statuses: [],
+            repositories: [],
+          },
+        ],
+        issues: [],
+        automationRules: [
+          {
+            ...(created.rule as Record<string, unknown>),
+          },
+        ],
+      }),
+      "utf8",
+    );
+
+    await expect(
+      service.materializeEvent(created.rule.id, createTriggerEventBody()),
+    ).rejects.toMatchObject({
+      code: "AUTOMATION_ROUTING_FAILED",
+      status: 409,
     });
   });
 });

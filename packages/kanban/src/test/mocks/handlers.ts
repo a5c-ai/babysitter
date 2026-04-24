@@ -30,6 +30,23 @@ const mockBacklogOverview = {
         issueIds: ['KANBAN-DEBT-003'],
         labels: [],
         assignees: [],
+        team: {
+          id: 'team-kanban',
+          name: 'Kanban Core',
+          members: [],
+          settings: {
+            visibility: 'team',
+            defaultRole: 'contributor',
+            allowSelfAssign: true,
+          },
+        },
+        settings: {
+          reviewRequiredForDone: true,
+          activityScope: 'all-board-entities',
+          workspaceProvisioning: 'owners-maintainers',
+        },
+        permissions: [],
+        activity: [],
         statuses: [],
         repositories: [
           {
@@ -89,6 +106,8 @@ const mockBacklogOverview = {
           runIds: [],
           sessionIds: [],
         },
+        collaborators: [],
+        activity: [],
         repositoryLifecycle: {
           repositoryId: 'repo-github-a5c-ai-babysitter',
           branchName: 'feat/mock-kanban',
@@ -158,8 +177,11 @@ const mockBacklogOverview = {
             blockedReasons: [],
             labelNames: [],
             assigneeNames: [],
+            collaboratorNames: [],
             dependencyCount: 0,
             childCount: 3,
+            activityCount: 0,
+            latestActivityAt: undefined,
             acceptanceProgress: { satisfied: 1, total: 1 },
             repository: {
               id: 'repo-github-a5c-ai-babysitter',

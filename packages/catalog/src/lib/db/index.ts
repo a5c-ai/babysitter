@@ -11,6 +11,11 @@
  * @module db
  */
 
+import { initializeDatabase, type CatalogDatabase } from './client';
+import { CatalogQueries } from './queries';
+import { getSchemaInfo, getSchemaVersion } from './schema';
+import type { DatabaseStats } from './types';
+
 // =============================================================================
 // TYPE EXPORTS
 // =============================================================================
@@ -130,12 +135,9 @@ export {
  * Initialize the database and return the query interface
  */
 export function initializeCatalog(): {
-  db: import('./client').CatalogDatabase;
-  queries: import('./queries').CatalogQueries;
+  db: CatalogDatabase;
+  queries: CatalogQueries;
 } {
-  const { initializeDatabase } = require('./client');
-  const { CatalogQueries } = require('./queries');
-
   const db = initializeDatabase();
   const queries = new CatalogQueries(db);
 
@@ -147,12 +149,9 @@ export function initializeCatalog(): {
  */
 export function getCatalogSummary(): {
   version: number;
-  stats: import('./types').DatabaseStats;
-  schema: ReturnType<typeof import('./schema').getSchemaInfo>;
+  stats: DatabaseStats;
+  schema: ReturnType<typeof getSchemaInfo>;
 } {
-  const { initializeDatabase } = require('./client');
-  const { getSchemaVersion, getSchemaInfo } = require('./schema');
-
   const db = initializeDatabase();
   const stats = db.getStats();
   const version = getSchemaVersion(db.getDb());

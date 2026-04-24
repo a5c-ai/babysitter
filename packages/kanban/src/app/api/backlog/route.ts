@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import type { KanbanWorkflowState } from '@a5c-ai/agent-mux-core/kanban';
+import type {
+  KanbanCollaboratorRole,
+  KanbanEntityVisibility,
+  KanbanPermissionGrant,
+  KanbanProjectSettings,
+  KanbanWorkflowState,
+} from '@a5c-ai/agent-mux-core/kanban';
 
 import { AppError, normalizeError } from '@/lib/error-handler';
 import { ensureInitialized } from '@/lib/server-init';
@@ -14,6 +20,24 @@ const service = new BacklogQueryService();
 
 function isWorkflowState(value: unknown): value is KanbanWorkflowState {
   return value === 'todo' || value === 'in-progress' || value === 'review' || value === 'done';
+}
+
+function isCollaboratorRole(value: unknown): value is KanbanCollaboratorRole {
+  return value === 'owner' || value === 'maintainer' || value === 'contributor' || value === 'viewer';
+}
+
+function isVisibility(value: unknown): value is KanbanEntityVisibility {
+  return value === 'private' || value === 'team' || value === 'workspace-shared';
+}
+
+function isActivityScope(value: unknown): value is KanbanProjectSettings['activityScope'] {
+  return value === 'project-and-issues' || value === 'all-board-entities';
+}
+
+function isWorkspaceProvisioning(
+  value: unknown,
+): value is KanbanProjectSettings['workspaceProvisioning'] {
+  return value === 'owners-maintainers' || value === 'contributors-and-up';
 }
 
 export async function GET() {
@@ -97,6 +121,77 @@ export async function POST(request: Request) {
           issueId: body.issueId,
           title: body.title,
           reviewers: typeof body.reviewers === 'string' ? body.reviewers : undefined,
+        });
+        break;
+      case 'update-project-collaboration':
+        if (typeof body.projectId !== 'string') {
+          throw new AppError('projectId is required.', 'BAD_REQUEST', 400);
+        }
+        overview = await service.updateProjectCollaboration({
+          projectId: body.projectId,
+          teamName: typeof body.teamName === 'string' ? body.teamName : undefined,
+          visibility: isVisibility(body.visibility) ? body.visibility : undefined,
+          defaultRole: isCollaboratorRole(body.defaultRole) ? body.defaultRole : undefined,
+          allowSelfAssign:
+            typeof body.allowSelfAssign === 'boolean' ? body.allowSelfAssign : undefined,
+          reviewRequiredForDone:
+            typeof body.reviewRequiredForDone === 'boolean'
+              ? body.reviewRequiredForDone
+              : undefined,
+          activityScope: isActivityScope(body.activityScope) ? body.activityScope : undefined,
+          workspaceProvisioning: isWorkspaceProvisioning(body.workspaceProvisioning)
+            ? body.workspaceProvisioning
+            : undefined,
+          members: Array.isArray(body.members)
+            ? body.members
+                .map((member) => {
+                  if (!member || typeof member !== 'object') return null;
+                  const entry = member as Record<string, unknown>;
+                  if (typeof entry.id !== 'string' || typeof entry.displayName !== 'string') {
+                    return null;
+                  }
+                  return {
+                    id: entry.id,
+                    displayName: entry.displayName,
+                    email: typeof entry.email === 'string' ? entry.email : undefined,
+                    role: isCollaboratorRole(entry.role) ? entry.role : undefined,
+                  };
+                })
+                .filter(Boolean) as {
+                id: string;
+                displayName: string;
+                email?: string;
+                role?: KanbanCollaboratorRole;
+              }[]
+            : undefined,
+          permissions: Array.isArray(body.permissions)
+            ? (body.permissions.filter(
+                (grant): grant is KanbanPermissionGrant =>
+                  Boolean(
+                    grant &&
+                      typeof grant === 'object' &&
+                      typeof (grant as Record<string, unknown>).action === 'string' &&
+                      Array.isArray((grant as Record<string, unknown>).roles),
+                  ),
+              ) as KanbanPermissionGrant[])
+            : undefined,
+        });
+        break;
+      case 'update-issue-collaboration':
+        if (typeof body.issueId !== 'string') {
+          throw new AppError('issueId is required.', 'BAD_REQUEST', 400);
+        }
+        overview = await service.updateIssueCollaboration({
+          issueId: body.issueId,
+          assigneeIds:
+            Array.isArray(body.assigneeIds) && body.assigneeIds.every((id) => typeof id === 'string')
+              ? (body.assigneeIds as string[])
+              : [],
+          collaboratorIds:
+            Array.isArray(body.collaboratorIds) &&
+            body.collaboratorIds.every((id) => typeof id === 'string')
+              ? (body.collaboratorIds as string[])
+              : [],
         });
         break;
       default:

@@ -95,8 +95,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist",
+    "build": "npm run build:runtime:babysitter-agent-deps --prefix ../.. && tsc --build tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run --config vitest.config.ts",
     "test:seams": "vitest run --config vitest.config.ts src/seams/contract.test.ts"

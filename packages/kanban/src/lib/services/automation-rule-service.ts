@@ -1,6 +1,7 @@
 import { monotonicFactory } from 'ulid';
 
 import type {
+  AutomationExecutionRecord,
   AutomationDerivedBoardRoute,
   AutomationIssueCreateRoute,
   AutomationRule,
@@ -15,6 +16,7 @@ import type {
 import type {
   KanbanDecompositionKind,
   KanbanDecompositionStatus,
+  KanbanIssue,
   KanbanIssueSource,
   KanbanPriority,
 } from '@a5c-ai/agent-mux-core/kanban';
@@ -113,8 +115,15 @@ export interface DeleteAutomationRuleResponse {
   readonly deletedAt: string;
 }
 
+export interface MaterializeAutomationEventResponse {
+  readonly generatedAt: string;
+  readonly rule: AutomationRuleRecord;
+  readonly execution: AutomationExecutionRecord;
+  readonly issue: KanbanIssue;
+}
+
 interface AutomationRuleServiceDeps extends KanbanStorageDeps {
-  backlogQueryService: Pick<BacklogQueryService, 'getOverview'>;
+  backlogQueryService: Pick<BacklogQueryService, 'getOverview' | 'createIssue'>;
   now: () => string;
 }
 
@@ -154,6 +163,19 @@ function readOptionalStringArray(value: unknown, fieldName: string): readonly st
     throw new AppError(`${fieldName} must be an array of strings.`, 'BAD_REQUEST', 400);
   }
   return value.map((entry, index) => readRequiredString(entry, `${fieldName}[${index}]`));
+}
+
+function readOptionalMetadata(
+  value: unknown,
+  fieldName: string,
+): Readonly<Record<string, unknown>> | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!isRecord(value)) {
+    throw new AppError(`${fieldName} must be an object.`, 'BAD_REQUEST', 400);
+  }
+  return value;
 }
 
 function readState(value: unknown, fieldName: string): AutomationRuleLifecycleState {
@@ -299,6 +321,7 @@ function readTemplate(value: unknown): AutomationTaskTemplate {
       kind: kind as KanbanIssueSource['kind'],
       path: readOptionalString(issueSource.path, 'template.issueSource.path'),
       externalId: readOptionalString(issueSource.externalId, 'template.issueSource.externalId'),
+      metadata: readOptionalMetadata(issueSource.metadata, 'template.issueSource.metadata'),
     };
   }
 
@@ -336,11 +359,6 @@ function readTemplate(value: unknown): AutomationTaskTemplate {
     });
   }
 
-  const metadata = value.metadata;
-  if (metadata !== undefined && !isRecord(metadata)) {
-    throw new AppError('template.metadata must be an object.', 'BAD_REQUEST', 400);
-  }
-
   return {
     title: readRequiredString(value.title, 'template.title'),
     summary: readOptionalString(value.summary, 'template.summary'),
@@ -355,7 +373,7 @@ function readTemplate(value: unknown): AutomationTaskTemplate {
     ),
     decomposition,
     issueSource: normalizedIssueSource,
-    metadata: metadata as Readonly<Record<string, unknown>> | undefined,
+    metadata: readOptionalMetadata(value.metadata, 'template.metadata'),
   };
 }
 
@@ -386,6 +404,30 @@ function readSource(
     provider: readOptionalString(value.provider, 'source.provider'),
     externalId: readOptionalString(value.externalId, 'source.externalId'),
     metadata: metadata as Readonly<Record<string, unknown>> | undefined,
+  };
+}
+
+interface MaterializedTriggerEvent {
+  readonly id: string;
+  readonly summary?: string;
+  readonly sourceEvent?: string;
+  readonly receivedAt?: string;
+  readonly payload?: Readonly<Record<string, unknown>>;
+  readonly metadata?: Readonly<Record<string, unknown>>;
+}
+
+function readTriggerEvent(value: unknown): MaterializedTriggerEvent {
+  if (!isRecord(value)) {
+    throw new AppError('triggerEvent is required.', 'BAD_REQUEST', 400);
+  }
+
+  return {
+    id: readRequiredString(value.id, 'triggerEvent.id'),
+    summary: readOptionalString(value.summary, 'triggerEvent.summary'),
+    sourceEvent: readOptionalString(value.sourceEvent, 'triggerEvent.sourceEvent'),
+    receivedAt: readOptionalString(value.receivedAt, 'triggerEvent.receivedAt'),
+    payload: readOptionalMetadata(value.payload, 'triggerEvent.payload'),
+    metadata: readOptionalMetadata(value.metadata, 'triggerEvent.metadata'),
   };
 }
 
@@ -582,6 +624,21 @@ export class AutomationRuleService {
     }
   }
 
+  private async assertMaterializationTargetExists(target: AutomationTarget): Promise<void> {
+    try {
+      await this.assertTargetExists(target);
+    } catch (error) {
+      if (error instanceof AppError && error.code === 'NOT_FOUND') {
+        throw new AppError(
+          `Automation routing failed: ${error.message}`,
+          'AUTOMATION_ROUTING_FAILED',
+          409,
+        );
+      }
+      throw error;
+    }
+  }
+
   private async persistRules(
     storage: KanbanStoragePayload,
     rules: readonly AutomationRule[],
@@ -762,6 +819,145 @@ export class AutomationRuleService {
     return {
       deletedRuleId: ruleId,
       deletedAt: this.deps.now(),
+    };
+  }
+
+  async materializeEvent(
+    ruleId: string,
+    body: Record<string, unknown>,
+  ): Promise<MaterializeAutomationEventResponse> {
+    const storage = await this.readStorage();
+    const existingRule = this.readExistingRule(storage.automationRules ?? [], ruleId);
+    if (existingRule.state !== 'active') {
+      throw new AppError(
+        `Automation rule ${ruleId} is ${existingRule.state} and cannot materialize work.`,
+        'AUTOMATION_RULE_NOT_ACTIVE',
+        409,
+      );
+    }
+
+    assertRoutingMatchesTarget(existingRule.target, existingRule.routing);
+    await this.assertMaterializationTargetExists(existingRule.target);
+
+    const triggeredAt =
+      body.triggeredAt === undefined
+        ? this.deps.now()
+        : readRequiredString(body.triggeredAt, 'triggeredAt');
+    const triggeredBy =
+      body.triggeredBy === undefined
+        ? 'automation'
+        : readRequiredString(body.triggeredBy, 'triggeredBy');
+    const triggerEvent = readTriggerEvent(body.triggerEvent);
+    const executionMetadata = readOptionalMetadata(body.metadata, 'metadata');
+    const executionId = `automation-execution-${createId().toLowerCase()}`;
+    const triggerEventSource =
+      triggerEvent.sourceEvent ??
+      (existingRule.trigger.type === 'webhook' ? existingRule.trigger.sourceEvent : undefined);
+
+    const source: KanbanIssueSource = {
+      kind: existingRule.template.issueSource?.kind ?? 'run-derived',
+      path: existingRule.template.issueSource?.path,
+      externalId: existingRule.template.issueSource?.externalId ?? triggerEvent.id,
+      metadata: {
+        ...(existingRule.template.issueSource?.metadata ?? {}),
+        automationRuleId: existingRule.id,
+        automationRuleName: existingRule.name,
+        automationExecutionId: executionId,
+        triggerType: existingRule.trigger.type,
+        triggerEventId: triggerEvent.id,
+        triggerEventSummary: triggerEvent.summary,
+        triggerEventSource,
+        triggerEventReceivedAt: triggerEvent.receivedAt,
+        triggeredAt,
+        triggeredBy,
+        routeProjectId: existingRule.routing.issue.projectId,
+        routeBoardProjectId: existingRule.routing.board.boardProjectId,
+      },
+    };
+
+    let issue: KanbanIssue;
+    try {
+      ({ issue } = await this.deps.backlogQueryService.createIssue({
+        projectId: existingRule.routing.issue.projectId,
+        title: existingRule.template.title,
+        summary: existingRule.template.summary,
+        description: existingRule.template.description,
+        status: existingRule.template.status ?? 'backlog',
+        priority: existingRule.template.priority,
+        labelIds: existingRule.template.labelIds,
+        assigneeIds: existingRule.template.assigneeIds,
+        acceptanceCriteria: existingRule.template.acceptanceCriteria,
+        decomposition: existingRule.template.decomposition,
+        source,
+        metadata: existingRule.template.metadata,
+      }));
+    } catch (error) {
+      if (error instanceof AppError && error.code === 'NOT_FOUND') {
+        throw new AppError(
+          `Automation routing failed: ${error.message}`,
+          'AUTOMATION_ROUTING_FAILED',
+          409,
+        );
+      }
+      throw error;
+    }
+
+    const refreshedStorage = await this.readStorage();
+    const execution: AutomationExecutionRecord = {
+      id: executionId,
+      ruleId: existingRule.id,
+      ruleName: existingRule.name,
+      triggerType: existingRule.trigger.type,
+      status: 'created',
+      triggeredAt,
+      triggeredBy,
+      source: existingRule.source,
+      projectId: existingRule.routing.issue.projectId,
+      boardProjectId: existingRule.routing.board.boardProjectId,
+      issueId: issue.id,
+      issueKey: issue.key,
+      issueSource: issue.source,
+      stateAtExecution: existingRule.state,
+      inputs: triggerEvent.payload,
+      metadata: {
+        ...(executionMetadata ?? {}),
+        triggerEventId: triggerEvent.id,
+        triggerEventSummary: triggerEvent.summary,
+        triggerEventSource,
+        triggerEventReceivedAt: triggerEvent.receivedAt,
+        triggerEventMetadata: triggerEvent.metadata,
+      },
+    };
+    const audit = {
+      ...existingRule.audit,
+      lastTriggeredAt: triggeredAt,
+      lastTriggeredBy: triggeredBy,
+      updatedAt: this.deps.now(),
+      updatedBy: triggeredBy,
+    };
+    const nextRules = (refreshedStorage.automationRules ?? []).map((candidate) =>
+      candidate.id === existingRule.id
+        ? {
+            ...candidate,
+            audit,
+          }
+        : candidate,
+    );
+
+    await writeKanbanStorageFile(this.deps, {
+      ...refreshedStorage,
+      automationRules: nextRules,
+      automationExecutions: [...(refreshedStorage.automationExecutions ?? []), execution],
+    });
+
+    return {
+      generatedAt: this.deps.now(),
+      rule: toRuleRecord({
+        ...existingRule,
+        audit,
+      }),
+      execution,
+      issue,
     };
   }
 }

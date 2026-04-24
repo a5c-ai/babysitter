@@ -14,9 +14,6 @@ export default defineConfig({
       exclude: [
         'packages/agent-mux/*/src/**/*.test.ts',
         '**/index.ts',
-        // TODO: re-include once these packages have test coverage
-        'packages/agent-mux/observability/src/**',
-        'packages/agent-mux/harness-mock/src/multi-execution.ts',
       ],
       reporter: ['text', 'json-summary', 'html'],
       thresholds: {

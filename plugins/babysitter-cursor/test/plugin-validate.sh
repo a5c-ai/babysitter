@@ -389,6 +389,31 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Test 14: Hook smoke coverage
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Test 14: Hook smoke coverage ==="
+REPO_ROOT="$(cd "$PLUGIN_DIR/../.." && pwd)"
+SDK_CLI_JS="$REPO_ROOT/packages/sdk/dist/cli/main.js"
+
+if [[ ! -f "$SDK_CLI_JS" ]]; then
+  if (cd "$REPO_ROOT" && npm run build --workspace=@a5c-ai/babysitter-sdk >/dev/null 2>&1); then
+    :
+  fi
+fi
+
+if [[ -f "$SDK_CLI_JS" ]]; then
+  pass "local babysitter SDK CLI is available for smoke coverage"
+  if BABYSITTER_CLI="node $SDK_CLI_JS" bash "$PLUGIN_DIR/test/e2e-smoke.sh"; then
+    pass "hook smoke coverage passes against local SDK CLI"
+  else
+    fail "hook smoke coverage failed"
+  fi
+else
+  fail "local babysitter SDK CLI is unavailable for smoke coverage"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""

@@ -1,10 +1,10 @@
 # transport-mux
 
-`transport-mux` is an internal placeholder workspace for a future TypeScript transport/provider seam. It is not the published or executable runtime behind `amux-proxy` today.
+`transport-mux` now exports a minimal TypeScript config/server/runtime surface that satisfies the package contract tests, but it is still not the published or cut-over runtime behind `amux-proxy` today.
 
 ## Current status
 
-This workspace currently carries design intent, tests, and package scaffolding, but its package entrypoint is still skeletal. Until the real server/config/runtime surface is exported from `src/` and validated end to end, this package should not be treated as the runtime truth for proxy execution or publication.
+This workspace now carries design intent, tests, and a real testable server/config/runtime surface in `src/`. Until launcher ownership, packaging, and CI cut over to it, it should still not be treated as the runtime truth for proxy execution or publication.
 
 ## Intended seam
 
@@ -20,6 +20,7 @@ That is still a target architecture, not a completed cutover.
 ## What this package does mean right now
 
 - the package name reserves the seam inside the workspace
+- `src/config.ts`, `src/server.ts`, and `src/types.ts` provide the test-backed contract runtime used by this workspace
 - the docs capture the intended protocol/provider split
 - the tests describe the surface that a future executable implementation must satisfy
 

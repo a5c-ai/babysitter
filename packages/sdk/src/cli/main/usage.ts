@@ -35,7 +35,7 @@ function coreAgentUsage(commandName: string): string {
 function coreHumanUsage(commandName: string): string {
   return `  ${commandName} log --type <process|hook|cli> --message <msg> [--run-id <id>] [--label <label>] [--level <level>] [--source <src>] [--json]
   ${commandName} hook:log --hook-type <type> --log-file <path> [--json]
-  ${commandName} hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--state-dir <dir>] [--json] [--verbose]
+  ${commandName} hook:run --hook-type <stop|session-end|session-start|user-prompt-submit|pre-tool-use> [--harness <name>] [--state-dir <dir>] [--json] [--verbose]
   ${commandName} session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
   ${commandName} session:associate --session-id <id> --state-dir <dir> --run-id <id> [--force] [--json]
   ${commandName} session:resume --session-id <id> [--state-dir <dir>] --run-id <id> [--max-iterations <n>] [--json]

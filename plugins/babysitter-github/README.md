@@ -136,6 +136,19 @@ instead of local `~/.copilot/hooks.json`.
 The process library is fetched and bound through the SDK CLI in
 `~/.a5c/active/process-library.json`.
 
+### `hook:run` Support Status
+
+The packaged GitHub Copilot plugin does not smoke-test a direct
+`babysitter hook:run --harness github-copilot ...` path. The installed hook
+scripts proxy through the shipped unified hook surface instead:
+
+- `sessionStart` -> `babysitter hook:run --harness unified --hook-type session-start`
+- `sessionEnd` -> `babysitter hook:run --harness unified --hook-type session-end`
+- `userPromptSubmitted` -> `babysitter hook:run --harness unified --hook-type user-prompt-submit`
+
+CI validates that proxied surface directly. A failing smoke test now indicates
+that the packaged GitHub hook integration regressed.
+
 ### Active Process-Library Model
 
 Process discovery prefers active roots in this order:
@@ -165,10 +178,10 @@ CLI:
 | `help` | Show documentation for Babysitter command usage, processes, skills, agents, and methodologies. |
 | `user-install` | Set up Babysitter for yourself -- installs dependencies, interviews you about preferences, and configures user-level defaults. |
 
-## How the Hook-Driven Orchestration Loop Works
+## How the Hook Surface Works
 
 GitHub Copilot CLI supports plugin lifecycle hooks. This plugin registers
-three hooks that drive the orchestration loop:
+three hooks that integrate Babysitter with the Copilot session:
 
 ### SessionStart
 
@@ -181,18 +194,16 @@ Fires when a new Copilot CLI session begins. The hook:
 
 ### SessionEnd
 
-The orchestration loop driver. Registered as `sessionEnd` in `hooks.json`,
-this hook fires when the Copilot CLI session ends and:
+Registered as `sessionEnd` in `hooks.json`, this hook fires when the Copilot
+CLI session ends and:
 
 1. Checks whether the active run has completed or emitted a completion proof
-2. If the run is still in progress, re-injects the next orchestration step
-   to continue iteration
-3. Only allows the session to exit when the run finishes or reaches a
-   breakpoint requiring human input
+2. Computes the next continuation payload through `babysitter hook:run --harness unified --hook-type session-end`
+3. Keeps the packaged hook contract exercised in CI so regressions fail fast
 
-This is what keeps Babysitter iterating autonomously within the Copilot CLI
-session -- each turn performs one orchestration phase, and the Stop hook
-decides whether to loop or yield.
+GitHub Copilot CLI still requires in-turn iteration for reliable orchestration.
+The `sessionEnd` hook path is supported and smoke-tested, but Copilot does not
+provide Claude-style stop-hook blocking semantics.
 
 ### UserPromptSubmitted
 

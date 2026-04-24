@@ -271,7 +271,13 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
 
     installFixturePlugin(path.join(homeDir, '.amux', 'tui-plugins'));
 
-    const harness = spawnBinary({ homeDir, stateDir });
+    const harness = spawnBinary({
+      homeDir,
+      stateDir,
+      env: {
+        AMUX_TUI_NO_AUTO_PROMPT: '1',
+      },
+    });
 
     await harness.waitFor('No messages yet.');
     harness.write('\u001B');
@@ -295,6 +301,9 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
       homeDir,
       stateDir,
       args: ['--user-plugins-dir', pluginDir],
+      env: {
+        AMUX_TUI_NO_AUTO_PROMPT: '1',
+      },
     });
 
     await harness.waitFor('No messages yet.');
@@ -319,6 +328,9 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
       homeDir,
       stateDir,
       args: ['--user-plugins-dir', pluginDir, '--no-user-plugins'],
+      env: {
+        AMUX_TUI_NO_AUTO_PROMPT: '1',
+      },
     });
 
     await harness.waitFor('No messages yet.');
@@ -348,6 +360,7 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
         HOME: homeDir,
         AMUX_TUI_PLUGINS_DIR: pluginDir,
         AMUX_TUI_NO_BUILTIN_ADAPTERS: '1',
+        AMUX_TUI_NO_AUTO_PROMPT: '1',
         AMUX_TUI_E2E_STATE_DIR: stateDir,
         FORCE_COLOR: '0',
         NO_COLOR: '1',

@@ -20,10 +20,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/copy-template-assets.cjs",
+    "build": "tsc --build tsconfig.json && node scripts/copy-template-assets.cjs",
     "sync:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs",
     "check:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs --check",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",

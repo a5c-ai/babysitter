@@ -13,17 +13,39 @@ interface Row {
   fullPath: string;
 }
 
+function resolveHomeDir(): string {
+  const env = Reflect.get(process, 'env') as NodeJS.ProcessEnv | undefined;
+  return env?.HOME || env?.USERPROFILE || os.homedir() || '.';
+}
+
+function resolveSearchBoundaryRoots(): Set<string> {
+  const roots = new Set<string>();
+  try {
+    roots.add(path.resolve(os.userInfo().homedir));
+  } catch {
+    roots.add(path.resolve(os.homedir() || '.'));
+  }
+  roots.add(path.resolve(os.tmpdir() || '.'));
+  return roots;
+}
+
 
 function findProjectRoot(startDir = process.cwd()) {
-  const path = require('node:path');
-  const fs = require('node:fs');
-  let current = path.resolve(startDir);
+  const start = path.resolve(startDir);
+  const boundaryRoots = resolveSearchBoundaryRoots();
+  let current = start;
   while (true) {
+    if (current !== start && boundaryRoots.has(current)) {
+      return startDir;
+    }
     if (
       fs.existsSync(path.join(current, '.git')) ||
       fs.existsSync(path.join(current, '.a5c')) ||
       fs.existsSync(path.join(current, '.claude.json')) ||
-      fs.existsSync(path.join(current, '.claude'))
+      (
+        current === start &&
+        fs.existsSync(path.join(current, '.claude'))
+      )
     ) {
       return current;
     }
@@ -34,7 +56,7 @@ function findProjectRoot(startDir = process.cwd()) {
 }
 
 function buildRegistry(): Record<string, { global: string; project: string }> {
-  const HOME = os.homedir() || '.';
+  const HOME = resolveHomeDir();
   return {
     'claude-code': { global: path.join(HOME, '.claude', 'skills'), project: path.join('.claude', 'skills') },
     claude: { global: path.join(HOME, '.claude', 'skills'), project: path.join('.claude', 'skills') },
@@ -58,10 +80,13 @@ function readDir(dir: string): string[] {
 function scan(): Row[] {
   const all: Row[] = [];
   for (const [agent, paths] of Object.entries(buildRegistry())) {
-    for (const name of readDir(paths.global)) {
-      all.push({ agent, scope: 'global', name, dir: paths.global, fullPath: path.join(paths.global, name) });
-    }
     const proj = path.isAbsolute(paths.project) ? paths.project : path.join(findProjectRoot(), paths.project);
+    const sameDir = path.resolve(paths.global) === path.resolve(proj);
+    if (!sameDir) {
+      for (const name of readDir(paths.global)) {
+        all.push({ agent, scope: 'global', name, dir: paths.global, fullPath: path.join(paths.global, name) });
+      }
+    }
     for (const name of readDir(proj)) {
       all.push({ agent, scope: 'project', name, dir: proj, fullPath: path.join(proj, name) });
     }
@@ -90,6 +115,7 @@ function SkillsView({ active }: TuiViewProps) {
   const [addMode, setAddMode] = useState<null | 'agent' | 'source'>(null);
   const [addAgentIdx, setAddAgentIdx] = useState(0);
   const [addSource, setAddSource] = useState('');
+  const addSourceRef = React.useRef('');
 
   const refresh = useCallback(() => {
     const r = scan();
@@ -126,7 +152,11 @@ function SkillsView({ active }: TuiViewProps) {
       if (key.escape) { setAddMode(null); setStatus('Cancelled'); return; }
       if (key.leftArrow || input === 'h') setAddAgentIdx((i) => Math.max(i - 1, 0));
       else if (key.rightArrow || input === 'l') setAddAgentIdx((i) => Math.min(i + 1, AGENT_NAMES.length - 1));
-      else if (key.return) { setAddMode('source'); setAddSource(''); }
+      else if (key.return) {
+        setAddMode('source');
+        addSourceRef.current = '';
+        setAddSource('');
+      }
       return;
     }
     if (addMode === 'source') {
@@ -134,11 +164,18 @@ function SkillsView({ active }: TuiViewProps) {
       if (key.return) {
         const agent = AGENT_NAMES[addAgentIdx]!;
         setAddMode(null);
-        performAdd(agent, addSource);
+        performAdd(agent, addSourceRef.current);
         return;
       }
-      if (key.backspace || key.delete) { setAddSource((s) => s.slice(0, -1)); return; }
-      if (input && !key.ctrl && !key.meta) setAddSource((s) => s + input);
+      if (key.backspace || key.delete) {
+        addSourceRef.current = addSourceRef.current.slice(0, -1);
+        setAddSource(addSourceRef.current);
+        return;
+      }
+      if (input && !key.ctrl && !key.meta) {
+        addSourceRef.current += input;
+        setAddSource(addSourceRef.current);
+      }
       return;
     }
     if (confirmDelete) {

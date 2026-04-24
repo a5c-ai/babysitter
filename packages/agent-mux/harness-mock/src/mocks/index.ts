@@ -7,6 +7,9 @@ export type {
   MockConnection,
   ProgrammaticMockBuilder,
   RemoteMockBuilder,
+  ScriptableTransportBuilder,
+  ScriptableTransportResponse,
+  ScriptableTransportStep,
   MockConfigFactory,
   MockScenarios,
 } from './mock-types.js';
@@ -29,6 +32,11 @@ export {
   remoteMocks,
 } from './remote-mocks.js';
 
+export {
+  ScriptableTransportBuilderImpl,
+  createScriptableTransportBuilder,
+} from './scriptable-transport.js';
+
 import {
   ProgrammaticMockEngine,
   createProgrammaticMockBuilder,
@@ -45,6 +53,9 @@ import {
   CodexWebSocketMock,
   remoteMocks,
 } from './remote-mocks.js';
+import {
+  createScriptableTransportBuilder,
+} from './scriptable-transport.js';
 import type { MockConfigFactory, MockScenarios } from './mock-types.js';
 
 export class AdapterMockFactory implements MockConfigFactory {
@@ -74,6 +85,10 @@ export class AdapterMockFactory implements MockConfigFactory {
 
   remote() {
     return createRemoteMockBuilder();
+  }
+
+  scriptedTransport() {
+    return createScriptableTransportBuilder();
   }
 }
 
@@ -186,6 +201,7 @@ export const adapterMocks = {
   testScenario: testMockScenario,
   programmatic: createProgrammaticMockBuilder,
   remote: createRemoteMockBuilder,
+  scriptedTransport: createScriptableTransportBuilder,
   programmaticMocks,
   remoteMocks,
   MockServer,

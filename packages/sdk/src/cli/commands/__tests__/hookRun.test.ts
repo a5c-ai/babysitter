@@ -252,6 +252,17 @@ describe("handleHookRun dispatcher", () => {
     const output = JSON.parse(getStdout().trim());
     expect(output.decision).toBeUndefined();
   });
+
+  it("treats session-end as a stop-hook alias", async () => {
+    const code = await callWithStdin("{}", {
+      hookType: "session-end",
+      harness: "codex",
+      json: true,
+    });
+    expect(code).toBe(0);
+    const output = JSON.parse(getStdout().trim());
+    expect(output.decision).toBeUndefined();
+  });
 });
 
 describe("handleHookRun stop", () => {

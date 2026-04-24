@@ -50,10 +50,10 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
 
-      - name: Build
+      - name: Build runtime graph
         run: |
           set -euo pipefail
-          npm run build:sdk 2>&1 | tee artifacts/test-logs/build.log
+          npm run build:runtime 2>&1 | tee artifacts/test-logs/build.log
 
       - name: Unit tests
         run: |
@@ -140,6 +140,93 @@ jobs:
         with:
           name: test-logs
           path: artifacts/test-logs
+          if-no-files-found: error
+
+  workspace-coverage:
+    name: Workspace Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifact directories
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/workspace-coverage-logs
+
+      - name: Declare active workspace coverage
+        run: |
+          set -euo pipefail
+          cat <<'EOF' | tee artifacts/workspace-coverage-logs/coverage-manifest.log
+          Active workspace coverage map
+          ===========================
+
+          Release-critical workspaces validated in other CI/release jobs:
+          - @a5c-ai/babysitter-sdk -> test + packages-sdk + release/staging publish
+          - @a5c-ai/breakpoints-mux -> test + release/staging publish
+          - @a5c-ai/agent-plugins-mux -> test + release/staging publish
+          - @a5c-ai/kanban -> kanban + release/staging publish
+          - @a5c-ai/babysitter-observer-dashboard -> observer-dashboard + release/staging publish
+          - @a5c-ai/hooks-mux-* -> test + release/staging publish
+          - @a5c-ai/agent-mux-* -> test + release/staging publish
+          - @a5c-ai/babysitter + harness plugin packages -> test + release/staging publish paths
+
+          Internal-only active workspaces validated in this job:
+          - @a5c-ai/agent-catalog
+          - process-library-catalog
+          - @a5c-ai/babysitter-tui-plugins
+          - @a5c-ai/transport-mux (build + migration scorecard)
+
+          Explicitly excluded validation surfaces:
+          - @a5c-ai/transport-mux test script (placeholder tests currently import non-existent source .js modules)
+          EOF
+
+      - name: Validate agent-catalog
+        run: |
+          set -euo pipefail
+          npm run ci:test --workspace=@a5c-ai/agent-catalog 2>&1 | tee artifacts/workspace-coverage-logs/agent-catalog.log
+
+      - name: Validate catalog
+        run: |
+          set -euo pipefail
+          npm run lint --workspace=process-library-catalog 2>&1 | tee artifacts/workspace-coverage-logs/catalog-lint.log
+          npm run type-check --workspace=process-library-catalog 2>&1 | tee artifacts/workspace-coverage-logs/catalog-type-check.log
+          npm run build --workspace=process-library-catalog 2>&1 | tee artifacts/workspace-coverage-logs/catalog-build.log
+
+      - name: Validate babysitter-tui-plugins
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/workspace-coverage-logs/agent-mux-tui-build.log
+          npm run build --workspace=@a5c-ai/babysitter-tui-plugins 2>&1 | tee artifacts/workspace-coverage-logs/babysitter-tui-plugins-build.log
+          npm run lint --workspace=@a5c-ai/babysitter-tui-plugins 2>&1 | tee artifacts/workspace-coverage-logs/babysitter-tui-plugins-lint.log
+          npm run test --workspace=@a5c-ai/babysitter-tui-plugins 2>&1 | tee artifacts/workspace-coverage-logs/babysitter-tui-plugins-test.log
+
+      - name: Validate transport-mux placeholder seam
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-build.log
+          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-scorecard.log
+
+      - name: Upload workspace coverage logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace-coverage-logs
+          path: artifacts/workspace-coverage-logs
           if-no-files-found: error
 
   packages-sdk:

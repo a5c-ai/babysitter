@@ -243,6 +243,7 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
   let exitCode: number;
   switch (hookType) {
     case "stop":
+    case "session-end":
       exitCode = await adapter.handleStopHook(args);
       break;
     case "session-start":
@@ -251,14 +252,14 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
     default: {
       const error = {
         error: "UNKNOWN_HOOK_TYPE",
-        message: `Unknown hook type: ${hookType}. Supported: stop, session-start, user-prompt-submit`,
+        message: `Unknown hook type: ${hookType}. Supported: stop, session-end, session-start, user-prompt-submit, pre-tool-use`,
       };
       logHookEvent(hookType, error.message, { error: error.error });
       if (json) {
         process.stderr.write(JSON.stringify(error, null, 2) + "\n");
       } else {
         process.stderr.write(
-          `Error: Unknown hook type: ${hookType}. Supported: stop, session-start, user-prompt-submit\n`,
+          `Error: Unknown hook type: ${hookType}. Supported: stop, session-end, session-start, user-prompt-submit, pre-tool-use\n`,
         );
       }
       return 1;

@@ -130,6 +130,17 @@ plugins/babysitter-cursor/
 The plugin declares lifecycle hooks in `hooks/hooks-cursor.json` using the version 1
 format. Hook event names use camelCase (e.g., `sessionStart`, `stop`).
 
+### `hook:run` Support Status
+
+The packaged Cursor plugin smoke-tests the hook commands it actually installs:
+
+- `sessionStart` -> `babysitter hook:run --harness unified --hook-type session-start`
+- `stop` -> `babysitter hook:run --harness unified --hook-type stop`
+
+The repo also contains a `cursor` SDK adapter, but CI coverage for this package
+is defined by the proxied unified hook commands above because those are the
+commands the installed plugin wrappers execute.
+
 ```json
 {
   "version": 1,

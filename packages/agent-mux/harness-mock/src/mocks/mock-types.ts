@@ -116,6 +116,28 @@ export interface RemoteMockBuilder {
   build(): RemoteMockConfig;
 }
 
+export interface ScriptableTransportResponse {
+  status?: number;
+  headers?: Record<string, string>;
+  body?: string | object | ((req: unknown) => unknown);
+  delayMs?: number;
+}
+
+export interface ScriptableTransportStep {
+  method?: string;
+  path: string;
+  response?: ScriptableTransportResponse;
+}
+
+export interface ScriptableTransportBuilder {
+  name(name: string): this;
+  http(config?: { port?: number; enableCors?: boolean }): this;
+  websocket(config?: { port?: number; reconnectDelayMs?: number }): this;
+  onRequest(path: string, response: ScriptableTransportResponse, method?: string): this;
+  emitEvent(type: string, data: Record<string, unknown>, delayMs?: number): this;
+  build(): import('../types.js').HarnessScenario;
+}
+
 export interface MockConfigFactory {
   claudeAgentSdk(): ProgrammaticMockBuilder;
   codexSdk(): ProgrammaticMockBuilder;
@@ -124,6 +146,7 @@ export interface MockConfigFactory {
   codexWebSocket(): RemoteMockBuilder;
   programmatic(): ProgrammaticMockBuilder;
   remote(): RemoteMockBuilder;
+  scriptedTransport(): ScriptableTransportBuilder;
 }
 
 export interface MockScenarios {

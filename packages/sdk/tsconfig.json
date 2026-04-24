@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",

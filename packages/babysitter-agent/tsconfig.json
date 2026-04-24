@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
@@ -24,5 +25,9 @@
     "src/harness/agenticTools/**",
     "src/harness/backgroundProcessRegistry.ts",
     "src/harness/deferredToolRegistry.ts"
+  ],
+  "references": [
+    { "path": "../sdk" },
+    { "path": "../agent-core" }
   ]
 }

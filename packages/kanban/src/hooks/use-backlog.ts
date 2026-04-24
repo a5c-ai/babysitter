@@ -7,8 +7,11 @@ import { resilientFetch } from "@/lib/fetcher";
 import type {
   KanbanBacklogSnapshot,
   KanbanBoardSnapshot,
+  KanbanCollaboratorRole,
+  KanbanPermissionGrant,
+  KanbanProjectSettings,
   KanbanWorkflowState,
-} from "@a5c-ai/agent-mux-core/kanban";
+} from "../../../agent-mux/core/src/kanban.js";
 
 import { useSmartPolling } from "./use-smart-polling";
 
@@ -97,6 +100,34 @@ export function useBacklog(interval = 15000) {
     await mutateBacklog({ action: "create-pull-request", ...input }, input.issueId);
   }
 
+  async function updateProjectCollaboration(input: {
+    projectId: string;
+    teamName: string;
+    visibility: "private" | "team" | "workspace-shared";
+    defaultRole: KanbanCollaboratorRole;
+    allowSelfAssign: boolean;
+    reviewRequiredForDone: boolean;
+    activityScope: KanbanProjectSettings["activityScope"];
+    workspaceProvisioning: KanbanProjectSettings["workspaceProvisioning"];
+    members: Array<{
+      id: string;
+      displayName: string;
+      email?: string;
+      role: KanbanCollaboratorRole;
+    }>;
+    permissions: KanbanPermissionGrant[];
+  }): Promise<void> {
+    await mutateBacklog({ action: "update-project-collaboration", ...input }, input.projectId);
+  }
+
+  async function updateIssueCollaboration(input: {
+    issueId: string;
+    assigneeIds: string[];
+    collaboratorIds: string[];
+  }): Promise<void> {
+    await mutateBacklog({ action: "update-issue-collaboration", ...input }, input.issueId);
+  }
+
   return {
     snapshot: data?.snapshot,
     board: data?.board,
@@ -108,6 +139,8 @@ export function useBacklog(interval = 15000) {
     linkRepository,
     updateRepositorySettings,
     createPullRequest,
+    updateProjectCollaboration,
+    updateIssueCollaboration,
     movingIssueId,
     mutatingIssueId,
   };

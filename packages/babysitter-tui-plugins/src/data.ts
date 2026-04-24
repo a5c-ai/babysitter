@@ -44,7 +44,8 @@ function deriveRunState(
 
 async function readJsonFile(filePath: string): Promise<unknown> {
   const content = await fs.readFile(filePath, 'utf-8');
-  return JSON.parse(content);
+  const parsed: unknown = JSON.parse(content);
+  return parsed;
 }
 
 async function readJournal(runDir: string): Promise<JournalEvent[]> {

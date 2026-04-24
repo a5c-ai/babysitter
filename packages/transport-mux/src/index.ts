@@ -1,11 +1,12 @@
-/**
- * Internal placeholder metadata until this workspace grows a real executable
- * transport-mux surface and a validated cutover plan.
- */
-export const TRANSPORT_MUX_PLACEHOLDER = {
+export * from './types.js';
+export * from './config.js';
+export * from './server.js';
+
+export const TRANSPORT_MUX_RUNTIME = {
   packageName: '@a5c-ai/transport-mux',
-  status: 'internal-placeholder',
+  status: 'contract-runtime',
   publishable: false,
+  cutoverComplete: false,
 } as const;
 
-export const TRANSPORT_MUX_PACKAGE = TRANSPORT_MUX_PLACEHOLDER.packageName;
+export const TRANSPORT_MUX_PACKAGE = TRANSPORT_MUX_RUNTIME.packageName;

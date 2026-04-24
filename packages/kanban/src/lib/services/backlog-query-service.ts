@@ -7,17 +7,23 @@ import {
   upsertKanbanProjectRepository,
   updateKanbanProjectRepositorySettings,
   summarizeKanbanReviewArtifact,
+  type KanbanActivityEntry,
+  type KanbanCollaborator,
+  type KanbanCollaboratorRole,
   type KanbanBoardSnapshot,
   type KanbanBacklogSnapshot,
   type KanbanIssue,
+  type KanbanPermissionGrant,
   type KanbanProject,
+  type KanbanProjectSettings,
   type KanbanRepositoryContext,
   type KanbanRepositoryProvider,
   type KanbanRepositorySettings,
   type KanbanReviewSnapshot,
+  type KanbanTeamSettings,
   type KanbanWorkflowState,
   type LinkedRunSummary,
-} from '@a5c-ai/agent-mux-core/kanban';
+} from '../../../../agent-mux/core/src/kanban.js';
 
 import { AppError } from '../error-handler';
 import { ReviewService } from '../review-service';
@@ -52,6 +58,26 @@ export interface BacklogOverview {
   summary: BacklogOverviewSummary;
 }
 
+export interface CreateBacklogIssueInput {
+  readonly projectId: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly description?: string;
+  readonly status?: KanbanIssue['status'];
+  readonly priority?: KanbanIssue['priority'];
+  readonly labelIds?: readonly string[];
+  readonly assigneeIds?: readonly string[];
+  readonly acceptanceCriteria?: readonly string[];
+  readonly decomposition?: readonly Pick<KanbanIssue['decomposition'][number], 'title' | 'kind' | 'status'>[];
+  readonly source?: KanbanIssue['source'];
+  readonly metadata?: Readonly<Record<string, unknown>>;
+}
+
+export interface CreateBacklogIssueResult {
+  readonly overview: BacklogOverview;
+  readonly issue: KanbanIssue;
+}
+
 type BacklogSeedProject = StoredKanbanProject;
 type BacklogSeedIssue = StoredKanbanIssue;
 
@@ -59,6 +85,84 @@ const debtLabel = {
   id: 'label-debt',
   name: 'debt',
   description: 'Work tracked to close parity or structural debt.',
+};
+
+const defaultCollaborators: readonly KanbanCollaborator[] = [
+  {
+    id: 'tal',
+    displayName: 'Tal Muskal',
+    email: 'tal@a5c.ai',
+    role: 'owner',
+  },
+  {
+    id: 'nora',
+    displayName: 'Nora PM',
+    email: 'nora@a5c.ai',
+    role: 'maintainer',
+  },
+  {
+    id: 'marc',
+    displayName: 'Marc Design',
+    email: 'marc@a5c.ai',
+    role: 'contributor',
+  },
+  {
+    id: 'ivy',
+    displayName: 'Ivy QA',
+    email: 'ivy@a5c.ai',
+    role: 'viewer',
+  },
+] as const;
+
+const defaultPermissionMatrix: readonly KanbanPermissionGrant[] = [
+  {
+    action: 'manage-project-settings',
+    roles: ['owner', 'maintainer'],
+    description: 'Only elevated roles can change project-wide policy and visibility.',
+  },
+  {
+    action: 'manage-team-members',
+    roles: ['owner', 'maintainer'],
+    description: 'Roster and role changes stay with owners and maintainers.',
+  },
+  {
+    action: 'edit-board',
+    roles: ['owner', 'maintainer', 'contributor'],
+    description: 'Contributors can shape board flow without full admin access.',
+  },
+  {
+    action: 'assign-issues',
+    roles: ['owner', 'maintainer', 'contributor'],
+    description: 'Assignee and collaborator changes are shared team operations.',
+  },
+  {
+    action: 'review-work',
+    roles: ['owner', 'maintainer', 'contributor', 'viewer'],
+    description: 'All collaborators can see and participate in shared review context.',
+  },
+  {
+    action: 'manage-workspaces',
+    roles: ['owner', 'maintainer'],
+    description: 'Workspace lifecycle remains restricted beyond possession of a gateway token.',
+  },
+];
+
+const defaultTeamSettings: KanbanTeamSettings = {
+  visibility: 'team',
+  defaultRole: 'contributor',
+  allowSelfAssign: true,
+};
+
+const defaultProjectSettings: KanbanProjectSettings = {
+  reviewRequiredForDone: true,
+  activityScope: 'all-board-entities',
+  workspaceProvisioning: 'owners-maintainers',
+};
+
+const systemActor = {
+  kind: 'system' as const,
+  id: 'kanban-seed',
+  displayName: 'Kanban seed data',
 };
 
 function buildRepositoryId(
@@ -98,6 +202,48 @@ function parseReviewerList(value: string): string[] {
   );
 }
 
+function parseRole(value: unknown): KanbanCollaboratorRole {
+  switch (value) {
+    case 'owner':
+    case 'maintainer':
+    case 'contributor':
+    case 'viewer':
+      return value;
+    default:
+      return 'contributor';
+  }
+}
+
+function buildActivityEntry(
+  id: string,
+  entityType: KanbanActivityEntry['entityType'],
+  entityId: string,
+  action: string,
+  summary: string,
+  actor: KanbanActivityEntry['actor'],
+  createdAt: string,
+): KanbanActivityEntry {
+  return {
+    id,
+    entityType,
+    entityId,
+    action,
+    summary,
+    actor,
+    createdAt,
+  };
+}
+
+function resolveCollaboratorsById(
+  members: readonly KanbanCollaborator[],
+  ids: readonly string[],
+): KanbanCollaborator[] {
+  const roster = new Map(members.map((member) => [member.id, member]));
+  return ids
+    .map((id) => roster.get(id))
+    .filter((member): member is KanbanCollaborator => Boolean(member));
+}
+
 function nextPullRequestNumber(issues: readonly BacklogSeedIssue[]): number {
   return (
     Math.max(
@@ -105,6 +251,57 @@ function nextPullRequestNumber(issues: readonly BacklogSeedIssue[]): number {
       ...issues.map((issue) => issue.repositoryLifecycle?.pullRequest?.number ?? 0),
     ) + 1
   );
+}
+
+function nextAutomationIssueKey(
+  project: Pick<BacklogSeedProject, 'key'>,
+  issues: readonly BacklogSeedIssue[],
+): string {
+  const prefix = `${project.key}-AUTO-`;
+  const nextNumber =
+    Math.max(
+      0,
+      ...issues.map((issue) => {
+        if (!issue.key.startsWith(prefix)) {
+          return 0;
+        }
+
+        const suffix = Number.parseInt(issue.key.slice(prefix.length), 10);
+        return Number.isFinite(suffix) ? suffix : 0;
+      }),
+    ) + 1;
+
+  return `${prefix}${String(nextNumber).padStart(3, '0')}`;
+}
+
+function readProjectLabels(
+  project: BacklogSeedProject,
+  labelIds: readonly string[],
+): BacklogSeedIssue['labels'] {
+  return labelIds.map((labelId) => {
+    const label = project.labels.find((candidate) => candidate.id === labelId);
+    if (!label) {
+      throw new AppError(`Label ${labelId} not found on project ${project.id}.`, 'BAD_REQUEST', 400);
+    }
+    return label;
+  });
+}
+
+function readProjectAssignees(
+  project: BacklogSeedProject,
+  assigneeIds: readonly string[],
+): BacklogSeedIssue['assignees'] {
+  return assigneeIds.map((assigneeId) => {
+    const assignee = project.assignees.find((candidate) => candidate.id === assigneeId);
+    if (!assignee) {
+      throw new AppError(
+        `Assignee ${assigneeId} not found on project ${project.id}.`,
+        'BAD_REQUEST',
+        400,
+      );
+    }
+    return assignee;
+  });
 }
 
 const defaultProjects: readonly BacklogSeedProject[] = [
@@ -129,7 +326,26 @@ const defaultProjects: readonly BacklogSeedProject[] = [
       'KANBAN-GAP-007',
     ],
     labels: [debtLabel],
-    assignees: [],
+    assignees: defaultCollaborators,
+    team: {
+      id: 'team-kanban',
+      name: 'Kanban Core',
+      members: defaultCollaborators,
+      settings: defaultTeamSettings,
+    },
+    settings: defaultProjectSettings,
+    permissions: defaultPermissionMatrix,
+    activity: [
+      buildActivityEntry(
+        'activity-project-seed',
+        'project',
+        PROJECT_ID,
+        'seeded-project-model',
+        'Initialized a shared team, project settings surface, and permission policy for the kanban app.',
+        systemActor,
+        '2026-04-24T00:00:00.000Z',
+      ),
+    ],
     statuses: [],
     repositories: [
       {
@@ -634,13 +850,46 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     status: 'backlog',
     priority: 'medium',
     labels: [debtLabel],
-    assignees: [],
+    assignees: [defaultCollaborators[0], defaultCollaborators[1]],
+    collaborators: [defaultCollaborators[0], defaultCollaborators[1], defaultCollaborators[2]],
     dependencies: [{ issueId: 'KANBAN-GAP-001', type: 'blocked-by' }],
-    acceptanceCriteria: [],
+    acceptanceCriteria: [
+      {
+        id: 'KANBAN-GAP-007-ac-1',
+        title: 'Expose team and project settings as first-class shared surfaces.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-007-ac-2',
+        title: 'Support collaborators and assignees on issue cards.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-007-ac-3',
+        title: 'Persist shared activity feeds scoped to project and issue entities.',
+        satisfied: false,
+      },
+      {
+        id: 'KANBAN-GAP-007-ac-4',
+        title: 'Define permission policy beyond gateway-token possession.',
+        satisfied: false,
+      },
+    ],
     decomposition: [],
     childIssueIds: [],
     createdAt: '2026-04-24T00:00:00.000Z',
     updatedAt: '2026-04-24T00:00:00.000Z',
+    activity: [
+      buildActivityEntry(
+        'activity-gap-007-seed',
+        'issue',
+        'KANBAN-GAP-007',
+        'seeded-collaboration-gap',
+        'Tracked the missing collaboration primitives for team settings, assignees, activity, and permissions.',
+        systemActor,
+        '2026-04-24T00:00:00.000Z',
+      ),
+    ],
     source: { kind: 'seed', path: SOURCE_PATH, externalId: 'KANBAN-GAP-007' },
   },
 ];
@@ -825,6 +1074,70 @@ export class BacklogQueryService {
     return this.buildOverviewFromPayload({ projects, issues });
   }
 
+  async createIssue(input: CreateBacklogIssueInput): Promise<CreateBacklogIssueResult> {
+    const payload = await this.readSeedPayload();
+    const project = this.findProject(payload, input.projectId);
+
+    if (!input.title.trim()) {
+      throw new AppError('title is required.', 'BAD_REQUEST', 400);
+    }
+
+    const key = nextAutomationIssueKey(project, payload.issues);
+    const createdAt = this.deps.now();
+    const issue: BacklogSeedIssue = {
+      id: key,
+      key,
+      projectId: project.id,
+      title: input.title.trim(),
+      summary: input.summary?.trim() || undefined,
+      description: input.description?.trim() || undefined,
+      status: input.status ?? 'backlog',
+      priority: input.priority ?? 'medium',
+      labels: readProjectLabels(project, input.labelIds ?? []),
+      assignees: readProjectAssignees(project, input.assigneeIds ?? []),
+      dependencies: [],
+      acceptanceCriteria: (input.acceptanceCriteria ?? []).map((title, index) => ({
+        id: `${key}-ac-${index + 1}`,
+        title,
+        satisfied: false,
+      })),
+      decomposition: (input.decomposition ?? []).map((item, index) => ({
+        id: `${key}-decomp-${index + 1}`,
+        title: item.title,
+        kind: item.kind,
+        status: item.status,
+      })),
+      childIssueIds: [],
+      createdAt,
+      updatedAt: createdAt,
+      source: input.source,
+      metadata: input.metadata,
+    };
+
+    const nextProjects = payload.projects.map((candidate) =>
+      candidate.id === project.id
+        ? {
+            ...candidate,
+            issueIds: [...candidate.issueIds, issue.id],
+          }
+        : candidate,
+    );
+    const nextIssues = [...payload.issues, issue];
+    const overview = await this.persistPayload({
+      projects: nextProjects,
+      issues: nextIssues,
+    });
+    const createdIssue = overview.snapshot.issues.find((candidate) => candidate.id === issue.id);
+    if (!createdIssue) {
+      throw new AppError(`Created issue ${issue.id} could not be reloaded.`, 'INTERNAL_ERROR', 500);
+    }
+
+    return {
+      overview,
+      issue: createdIssue,
+    };
+  }
+
   async moveIssue(input: {
     readonly issueId: string;
     readonly toState: KanbanWorkflowState;
@@ -958,6 +1271,166 @@ export class BacklogQueryService {
     return this.persistPayload({
       projects: nextProjects,
       issues: payload.issues,
+    });
+  }
+
+  async updateProjectCollaboration(input: {
+    readonly projectId: string;
+    readonly teamName?: string;
+    readonly visibility?: KanbanTeamSettings['visibility'];
+    readonly defaultRole?: KanbanCollaboratorRole;
+    readonly allowSelfAssign?: boolean;
+    readonly reviewRequiredForDone?: boolean;
+    readonly activityScope?: KanbanProjectSettings['activityScope'];
+    readonly workspaceProvisioning?: KanbanProjectSettings['workspaceProvisioning'];
+    readonly members?: readonly {
+      readonly id: string;
+      readonly displayName: string;
+      readonly email?: string;
+      readonly role?: KanbanCollaboratorRole;
+    }[];
+    readonly permissions?: readonly KanbanPermissionGrant[];
+  }): Promise<BacklogOverview> {
+    const payload = await this.readSeedPayload();
+    const project = this.findProject(payload, input.projectId);
+    const updatedAt = this.deps.now();
+    const nextMembers =
+      input.members?.map((member) => ({
+        id: member.id.trim(),
+        displayName: member.displayName.trim(),
+        email: member.email?.trim() || undefined,
+        role: parseRole(member.role),
+      })) ?? project.team?.members ?? defaultCollaborators;
+
+    const nextProjects = payload.projects.map((candidate) =>
+      candidate.id === input.projectId
+        ? {
+            ...candidate,
+            assignees: nextMembers,
+            team: {
+              id: candidate.team?.id ?? `team-${candidate.id}`,
+              name: input.teamName?.trim() || candidate.team?.name || `${candidate.name} Team`,
+              members: nextMembers,
+              settings: {
+                visibility: input.visibility ?? candidate.team?.settings?.visibility ?? defaultTeamSettings.visibility,
+                defaultRole: parseRole(input.defaultRole ?? candidate.team?.settings?.defaultRole),
+                allowSelfAssign:
+                  input.allowSelfAssign ??
+                  candidate.team?.settings?.allowSelfAssign ??
+                  defaultTeamSettings.allowSelfAssign,
+              },
+            },
+            settings: {
+              reviewRequiredForDone:
+                input.reviewRequiredForDone ??
+                candidate.settings?.reviewRequiredForDone ??
+                defaultProjectSettings.reviewRequiredForDone,
+              activityScope:
+                input.activityScope ??
+                candidate.settings?.activityScope ??
+                defaultProjectSettings.activityScope,
+              workspaceProvisioning:
+                input.workspaceProvisioning ??
+                candidate.settings?.workspaceProvisioning ??
+                defaultProjectSettings.workspaceProvisioning,
+            },
+            permissions: input.permissions?.length ? input.permissions : candidate.permissions ?? defaultPermissionMatrix,
+            activity: [
+              buildActivityEntry(
+                `activity-project-collab-${updatedAt}`,
+                'project',
+                candidate.id,
+                'updated-project-collaboration',
+                'Updated shared team settings, roster, and permission policy.',
+                {
+                  kind: 'human',
+                  id: 'tal',
+                  displayName: 'Tal Muskal',
+                  role: 'owner',
+                },
+                updatedAt,
+              ),
+              ...(candidate.activity ?? []),
+            ],
+          }
+        : candidate,
+    );
+
+    return this.persistPayload({
+      projects: nextProjects,
+      issues: payload.issues,
+    });
+  }
+
+  async updateIssueCollaboration(input: {
+    readonly issueId: string;
+    readonly assigneeIds: readonly string[];
+    readonly collaboratorIds: readonly string[];
+  }): Promise<BacklogOverview> {
+    const payload = await this.readSeedPayload();
+    const issue = this.findIssue(payload, input.issueId);
+    const project = this.findProject(payload, issue.projectId);
+    const members = project.team?.members ?? defaultCollaborators;
+    const assignees = resolveCollaboratorsById(members, input.assigneeIds);
+    const collaborators = resolveCollaboratorsById(members, input.collaboratorIds);
+    const updatedAt = this.deps.now();
+
+    const nextIssues = payload.issues.map((candidate) =>
+      candidate.id === input.issueId
+        ? {
+            ...candidate,
+            assignees,
+            collaborators,
+            updatedAt,
+            activity: [
+              buildActivityEntry(
+                `activity-issue-collab-${updatedAt}`,
+                'issue',
+                candidate.id,
+                'updated-issue-collaboration',
+                `Set ${assignees.length} assignees and ${collaborators.length} collaborators for ${candidate.key}.`,
+                {
+                  kind: 'human',
+                  id: 'tal',
+                  displayName: 'Tal Muskal',
+                  role: 'owner',
+                },
+                updatedAt,
+              ),
+              ...(candidate.activity ?? []),
+            ],
+          }
+        : candidate,
+    );
+
+    const nextProjects = payload.projects.map((candidate) =>
+      candidate.id === project.id
+        ? {
+            ...candidate,
+            activity: [
+              buildActivityEntry(
+                `activity-project-issue-collab-${updatedAt}`,
+                'project',
+                candidate.id,
+                'updated-issue-collaboration',
+                `Updated issue collaboration on ${issue.key}.`,
+                {
+                  kind: 'human',
+                  id: 'tal',
+                  displayName: 'Tal Muskal',
+                  role: 'owner',
+                },
+                updatedAt,
+              ),
+              ...(candidate.activity ?? []),
+            ],
+          }
+        : candidate,
+    );
+
+    return this.persistPayload({
+      projects: nextProjects,
+      issues: nextIssues,
     });
   }
 

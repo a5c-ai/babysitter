@@ -11,7 +11,7 @@
 
 export type RunState = 'completed' | 'failed' | 'waiting' | 'created';
 
-export type EffectKind = 'node' | 'breakpoint' | 'orchestrator_task' | 'sleep' | (string & {});
+export type EffectKind = string;
 export type EffectStatus = 'pending' | 'resolved' | 'failed';
 
 export interface EffectSummary {

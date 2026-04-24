@@ -733,7 +733,7 @@ export function getAgentCatalog(): AgentCatalog {
   return clone(AGENT_CATALOG);
 }
 
-export function listOntologyClaims(): ClaimRecord[] {
+export function listCatalogClaims(): ClaimRecord[] {
   return clone(CLAIMS);
 }
 

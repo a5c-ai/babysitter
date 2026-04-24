@@ -2,11 +2,15 @@
 
 import type {
   KanbanBoardCard,
+  KanbanCollaboratorRole,
+  KanbanPermissionGrant,
+  KanbanProject,
   KanbanProjectBoard,
   KanbanPullRequestReviewLink,
   KanbanWorkflowState,
-} from "@a5c-ai/agent-mux-core/kanban";
+} from "../../../../agent-mux/core/src/kanban.js";
 import {
+  Activity,
   AlertCircle,
   ArrowRight,
   CheckCircle2,
@@ -16,7 +20,11 @@ import {
   Layers,
   Settings,
   ShieldAlert,
+  ShieldCheck,
   TimerReset,
+  Trash2,
+  UserRoundPlus,
+  Users,
   Workflow,
 } from "lucide-react";
 import { useState } from "react";
@@ -113,6 +121,466 @@ function lifecycleLabel(status: string): string {
 
 function reviewTone(review: KanbanPullRequestReviewLink): string {
   return lifecycleTone(review.status);
+}
+
+function roleLabel(role: KanbanCollaboratorRole): string {
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+function formatActivity(timestamp?: string): string {
+  if (!timestamp) {
+    return "No activity yet";
+  }
+  return new Date(timestamp).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+interface ProjectCollaborationPanelProps {
+  project: KanbanProject;
+  mutating: boolean;
+  onSave: (input: {
+    projectId: string;
+    teamName: string;
+    visibility: "private" | "team" | "workspace-shared";
+    defaultRole: KanbanCollaboratorRole;
+    allowSelfAssign: boolean;
+    reviewRequiredForDone: boolean;
+    activityScope: "project-and-issues" | "all-board-entities";
+    workspaceProvisioning: "owners-maintainers" | "contributors-and-up";
+    members: Array<{ id: string; displayName: string; email?: string; role: KanbanCollaboratorRole }>;
+    permissions: KanbanPermissionGrant[];
+  }) => Promise<void>;
+}
+
+function ProjectCollaborationPanel({ project, mutating, onSave }: ProjectCollaborationPanelProps) {
+  const [teamName, setTeamName] = useState(project.team.name);
+  const [visibility, setVisibility] = useState(project.team.settings.visibility);
+  const [defaultRole, setDefaultRole] = useState<KanbanCollaboratorRole>(
+    project.team.settings.defaultRole,
+  );
+  const [allowSelfAssign, setAllowSelfAssign] = useState(project.team.settings.allowSelfAssign);
+  const [reviewRequiredForDone, setReviewRequiredForDone] = useState(
+    project.settings.reviewRequiredForDone,
+  );
+  const [activityScope, setActivityScope] = useState(project.settings.activityScope);
+  const [workspaceProvisioning, setWorkspaceProvisioning] = useState(
+    project.settings.workspaceProvisioning,
+  );
+  const [members, setMembers] = useState(
+    project.team.members.map((member) => ({
+      id: member.id,
+      displayName: member.displayName,
+      email: member.email ?? "",
+      role: member.role,
+    })),
+  );
+
+  return (
+    <div className="mt-5 rounded-3xl border border-border bg-background p-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
+            Team and permissions
+          </p>
+          <h3 className="mt-1 text-lg font-semibold text-foreground">
+            Shared collaboration state now lives beside the board model
+          </h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground-muted">
+            Team roster, project policy, activity visibility, and role-based permissions now
+            exist as shared kanban primitives instead of implicit gateway-token access.
+          </p>
+        </div>
+        <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">
+          {project.team.members.length} collaborators
+        </span>
+      </div>
+
+      <form
+        className="mt-4 grid gap-3 xl:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void onSave({
+            projectId: project.id,
+            teamName,
+            visibility,
+            defaultRole,
+            allowSelfAssign,
+            reviewRequiredForDone,
+            activityScope,
+            workspaceProvisioning,
+            members: members.map((member) => ({
+              ...member,
+              email: member.email || undefined,
+            })),
+            permissions: [...project.permissions],
+          });
+        }}
+      >
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Team name
+          <input
+            value={teamName}
+            onChange={(event) => setTeamName(event.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Visibility
+          <select
+            value={visibility}
+            onChange={(event) =>
+              setVisibility(event.target.value as "private" | "team" | "workspace-shared")
+            }
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            <option value="private">Private</option>
+            <option value="team">Team</option>
+            <option value="workspace-shared">Workspace shared</option>
+          </select>
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Default role
+          <select
+            value={defaultRole}
+            onChange={(event) => setDefaultRole(event.target.value as KanbanCollaboratorRole)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            <option value="owner">Owner</option>
+            <option value="maintainer">Maintainer</option>
+            <option value="contributor">Contributor</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Workspace provisioning
+          <select
+            value={workspaceProvisioning}
+            onChange={(event) =>
+              setWorkspaceProvisioning(
+                event.target.value as "owners-maintainers" | "contributors-and-up",
+              )
+            }
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            <option value="owners-maintainers">Owners and maintainers</option>
+            <option value="contributors-and-up">Contributors and up</option>
+          </select>
+        </label>
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Activity scope
+          <select
+            value={activityScope}
+            onChange={(event) =>
+              setActivityScope(
+                event.target.value as "project-and-issues" | "all-board-entities",
+              )
+            }
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            <option value="project-and-issues">Project and issues</option>
+            <option value="all-board-entities">All board entities</option>
+          </select>
+        </label>
+        <label className="col-span-full flex items-center gap-2 text-sm text-foreground-muted">
+          <input
+            type="checkbox"
+            checked={allowSelfAssign}
+            onChange={(event) => setAllowSelfAssign(event.target.checked)}
+            className="h-4 w-4 rounded border border-border"
+          />
+          Allow contributors to self-assign issues
+        </label>
+        <label className="col-span-full flex items-center gap-2 text-sm text-foreground-muted">
+          <input
+            type="checkbox"
+            checked={reviewRequiredForDone}
+            onChange={(event) => setReviewRequiredForDone(event.target.checked)}
+            className="h-4 w-4 rounded border border-border"
+          />
+          Require review completion before cards can reach done
+        </label>
+
+        <div className="col-span-full rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Users className="h-4 w-4" />
+              Team roster
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setMembers((current) => [
+                  ...current,
+                  {
+                    id: `member-${current.length + 1}`,
+                    displayName: "",
+                    email: "",
+                    role: defaultRole,
+                  },
+                ])
+              }
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-foreground"
+            >
+              <UserRoundPlus className="h-3.5 w-3.5" />
+              Add member
+            </button>
+          </div>
+
+          <div className="mt-3 space-y-3">
+            {members.map((member, index) => (
+              <div key={`${member.id}-${index}`} className="grid gap-3 xl:grid-cols-[1fr_1fr_180px_auto]">
+                <input
+                  value={member.displayName}
+                  onChange={(event) =>
+                    setMembers((current) =>
+                      current.map((entry, entryIndex) =>
+                        entryIndex === index ? { ...entry, displayName: event.target.value } : entry,
+                      ),
+                    )
+                  }
+                  placeholder="Display name"
+                  className="h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+                />
+                <input
+                  value={member.email}
+                  onChange={(event) =>
+                    setMembers((current) =>
+                      current.map((entry, entryIndex) =>
+                        entryIndex === index ? { ...entry, email: event.target.value } : entry,
+                      ),
+                    )
+                  }
+                  placeholder="email@example.com"
+                  className="h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+                />
+                <select
+                  value={member.role}
+                  onChange={(event) =>
+                    setMembers((current) =>
+                      current.map((entry, entryIndex) =>
+                        entryIndex === index
+                          ? { ...entry, role: event.target.value as KanbanCollaboratorRole }
+                          : entry,
+                      ),
+                    )
+                  }
+                  className="h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+                >
+                  <option value="owner">Owner</option>
+                  <option value="maintainer">Maintainer</option>
+                  <option value="contributor">Contributor</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMembers((current) => current.filter((_, entryIndex) => entryIndex !== index))
+                  }
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-border px-3 text-sm text-foreground-muted"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="col-span-full rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <ShieldCheck className="h-4 w-4" />
+            Permission matrix
+          </div>
+          <div className="mt-3 grid gap-3 xl:grid-cols-2">
+            {project.permissions.map((permission) => (
+              <div key={permission.action} className="rounded-2xl border border-border bg-background p-3">
+                <div className="text-sm font-semibold text-foreground">{permission.action}</div>
+                <div className="mt-1 text-sm text-foreground-muted">{permission.description}</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {permission.roles.map((role) => (
+                    <span key={`${permission.action}-${role}`} className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground-muted">
+                      {roleLabel(role)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={mutating}
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-50"
+        >
+          Save collaboration settings
+        </button>
+      </form>
+
+      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Activity className="h-4 w-4" />
+          Project activity
+        </div>
+        <div className="mt-3 space-y-3">
+          {project.activity.slice(0, 4).map((entry) => (
+            <div key={entry.id} className="rounded-2xl border border-border bg-background px-3 py-3">
+              <div className="flex items-center justify-between gap-3 text-xs text-foreground-muted">
+                <span>{entry.actor.displayName}</span>
+                <span>{formatActivity(entry.createdAt)}</span>
+              </div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{entry.summary}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface IssueCollaborationPanelProps {
+  card: KanbanBoardCard;
+  project: KanbanProject;
+  activityEntries: KanbanProject["activity"];
+  mutating: boolean;
+  onSave: (input: { issueId: string; assigneeIds: string[]; collaboratorIds: string[] }) => Promise<void>;
+}
+
+function IssueCollaborationPanel({
+  card,
+  project,
+  activityEntries,
+  mutating,
+  onSave,
+}: IssueCollaborationPanelProps) {
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(
+    project.team.members
+      .filter((member) => card.assigneeNames.includes(member.displayName))
+      .map((member) => member.id),
+  );
+  const [collaboratorIds, setCollaboratorIds] = useState<string[]>(
+    project.team.members
+      .filter((member) => card.collaboratorNames.includes(member.displayName))
+      .map((member) => member.id),
+  );
+
+  return (
+    <div className="mt-4 rounded-2xl border border-border/80 bg-background/80 p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Users className="h-4 w-4" />
+        Collaboration
+      </div>
+      <div className="mt-2 text-sm text-foreground-muted">
+        {card.assigneeNames.length} assignees, {card.collaboratorNames.length} collaborators,{" "}
+        {card.activityCount} activity entries
+      </div>
+      <form
+        className="mt-4 grid gap-4 lg:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void onSave({
+            issueId: card.issueId,
+            assigneeIds,
+            collaboratorIds,
+          });
+        }}
+      >
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Assignees
+          </div>
+          <div className="mt-3 space-y-2">
+            {project.team.members.map((member) => (
+              <label key={`assignee-${member.id}`} className="flex items-center gap-2 text-sm text-foreground-muted">
+                <input
+                  type="checkbox"
+                  checked={assigneeIds.includes(member.id)}
+                  onChange={(event) =>
+                    setAssigneeIds((current) =>
+                      event.target.checked
+                        ? [...current, member.id]
+                        : current.filter((id) => id !== member.id),
+                    )
+                  }
+                  className="h-4 w-4 rounded border border-border"
+                />
+                <span className="text-foreground">{member.displayName}</span>
+                <span className="text-xs text-foreground-muted">{roleLabel(member.role)}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Collaborators
+          </div>
+          <div className="mt-3 space-y-2">
+            {project.team.members.map((member) => (
+              <label key={`collaborator-${member.id}`} className="flex items-center gap-2 text-sm text-foreground-muted">
+                <input
+                  type="checkbox"
+                  checked={collaboratorIds.includes(member.id)}
+                  onChange={(event) =>
+                    setCollaboratorIds((current) =>
+                      event.target.checked
+                        ? [...current, member.id]
+                        : current.filter((id) => id !== member.id),
+                    )
+                  }
+                  className="h-4 w-4 rounded border border-border"
+                />
+                <span className="text-foreground">{member.displayName}</span>
+                <span className="text-xs text-foreground-muted">{roleLabel(member.role)}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={mutating}
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+        >
+          Save collaboration
+        </button>
+      </form>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {card.assigneeNames.map((name) => (
+          <span key={`assignee-chip-${name}`} className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground-muted">
+            Assignee {name}
+          </span>
+        ))}
+        {card.collaboratorNames.map((name) => (
+          <span key={`collaborator-chip-${name}`} className="rounded-full border border-border px-2.5 py-1 text-xs text-foreground-muted">
+            Collaborator {name}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-border bg-card p-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Activity className="h-4 w-4" />
+          Issue activity
+        </div>
+        <div className="mt-3 space-y-2">
+          {activityEntries.slice(0, 3).map((entry) => (
+            <div key={entry.id} className="rounded-2xl border border-border bg-background px-3 py-2">
+              <div className="flex items-center justify-between gap-3 text-xs text-foreground-muted">
+                <span>{entry.actor.displayName}</span>
+                <span>{formatActivity(entry.createdAt)}</span>
+              </div>
+              <div className="mt-1 text-sm text-foreground">{entry.summary}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface RepositoryLifecyclePanelProps {
@@ -426,6 +894,8 @@ export function BacklogOverview() {
     linkRepository,
     updateRepositorySettings,
     createPullRequest,
+    updateProjectCollaboration,
+    updateIssueCollaboration,
     movingIssueId,
     mutatingIssueId,
     refresh,
@@ -625,6 +1095,12 @@ export function BacklogOverview() {
         </div>
       ) : null}
 
+      <ProjectCollaborationPanel
+        project={primaryProject}
+        mutating={Boolean(mutatingIssueId)}
+        onSave={updateProjectCollaboration}
+      />
+
       <div className="mt-5 flex flex-wrap gap-2">
         {primaryBoard.policyHooks.map((hook) => (
           <span
@@ -799,6 +1275,15 @@ export function BacklogOverview() {
                               onLinkRepository={linkRepository}
                               onUpdateRepositorySettings={updateRepositorySettings}
                               onCreatePullRequest={createPullRequest}
+                            />
+                            <IssueCollaborationPanel
+                              card={card}
+                              project={primaryProject}
+                              activityEntries={
+                                snapshot.issues.find((issue) => issue.id === card.issueId)?.activity ?? []
+                              }
+                              mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
+                              onSave={updateIssueCollaboration}
                             />
                           </article>
                         ))}

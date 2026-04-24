@@ -52,10 +52,10 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/logs/metadata.log
 
-      - name: Build SDK
+      - name: Build runtime graph
         run: |
           set -euo pipefail
-          npm run build:sdk 2>&1 | tee artifacts/logs/build.log
+          npm run build:runtime 2>&1 | tee artifacts/logs/build.log
 
       - name: Lint SDK
         run: |

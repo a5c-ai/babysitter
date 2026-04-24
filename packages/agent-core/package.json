@@ -11,8 +11,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist",
+    "build": "npm run build:runtime:agent-core-deps --prefix ../.. && tsc --build tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {

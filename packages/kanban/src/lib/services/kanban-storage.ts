@@ -6,14 +6,33 @@ import type {
   AutomationExecutionRecord,
   AutomationRule,
 } from '@a5c-ai/agent-mux-core';
-import type { KanbanIssue, KanbanProject } from '@a5c-ai/agent-mux-core/kanban';
+
+import type {
+  KanbanActivityEntry,
+  KanbanCollaborator,
+  KanbanIssue,
+  KanbanPermissionGrant,
+  KanbanProject,
+  KanbanProjectSettings,
+  KanbanTeam,
+} from '@a5c-ai/agent-mux-core/kanban';
 
 export const KANBAN_BACKLOG_FILE_PATH =
   process.env.KANBAN_BACKLOG_FILE ?? path.join(os.homedir(), '.a5c', 'kanban-backlog.json');
 
-export type StoredKanbanProject = Omit<KanbanProject, 'metrics'>;
+export type StoredKanbanProject = Omit<
+  KanbanProject,
+  'metrics' | 'team' | 'settings' | 'permissions' | 'activity'
+> & {
+  readonly team?: Partial<KanbanTeam>;
+  readonly settings?: Partial<KanbanProjectSettings>;
+  readonly permissions?: readonly KanbanPermissionGrant[];
+  readonly activity?: readonly KanbanActivityEntry[];
+};
 
-export type StoredKanbanIssue = Omit<KanbanIssue, 'dispatch'> & {
+export type StoredKanbanIssue = Omit<KanbanIssue, 'dispatch' | 'collaborators' | 'activity'> & {
+  readonly collaborators?: readonly KanbanCollaborator[];
+  readonly activity?: readonly KanbanActivityEntry[];
   readonly dispatch?: Partial<KanbanIssue['dispatch']>;
 };
 

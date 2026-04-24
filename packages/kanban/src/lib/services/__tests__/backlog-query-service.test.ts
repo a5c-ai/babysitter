@@ -131,6 +131,91 @@ describe("BacklogQueryService", () => {
     );
   });
 
+  it("creates canonical issues through the shared backlog model", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-backlog-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
+    const service = new BacklogQueryService({
+      backlogFilePath,
+      now: () => "2026-04-24T12:00:00.000Z",
+      reviewService: {
+        listReviews: vi.fn().mockResolvedValue({
+          generatedAt: "2026-04-24T12:00:00.000Z",
+          artifacts: [],
+          queue: [],
+          summary: {
+            total: 0,
+            issueCount: 0,
+            workspaceCount: 0,
+            pendingCount: 0,
+            changesRequestedCount: 0,
+            approvedCount: 0,
+            openCommentCount: 0,
+          },
+        }),
+      } as never,
+      runQueryService: {
+        listProjects: vi.fn().mockResolvedValue({
+          recentCompletionWindowMs: 14400000,
+          projects: [],
+        }),
+      } as never,
+    });
+
+    const created = await service.createIssue({
+      projectId: "kanban-app",
+      title: "Materialize webhook triage follow-up",
+      status: "ready",
+      priority: "high",
+      labelIds: ["label-debt"],
+      acceptanceCriteria: ["Webhook payload is triaged"],
+      decomposition: [
+        {
+          title: "Inspect the payload",
+          kind: "research",
+          status: "todo",
+        },
+      ],
+      source: {
+        kind: "run-derived",
+        externalId: "evt-webhook-1",
+        metadata: {
+          automationRuleId: "automation-1",
+          triggerEventId: "evt-webhook-1",
+          routeProjectId: "kanban-app",
+          routeBoardProjectId: "kanban-app",
+        },
+      },
+      metadata: {
+        template: "automation",
+      },
+    });
+
+    expect(created.issue.key).toMatch(/^KANBAN-AUTO-\d{3}$/);
+    expect(created.issue.projectId).toBe("kanban-app");
+    expect(created.issue.status).toBe("ready");
+    expect(created.issue.dispatch.readiness).toBe("needs-decomposition");
+    expect(created.issue.labels.map((label) => label.id)).toEqual(["label-debt"]);
+    expect(created.issue.source?.metadata).toMatchObject({
+      automationRuleId: "automation-1",
+      triggerEventId: "evt-webhook-1",
+      routeProjectId: "kanban-app",
+      routeBoardProjectId: "kanban-app",
+    });
+
+    const persisted = JSON.parse(await fs.readFile(backlogFilePath, "utf8")) as {
+      projects: Array<{ issueIds: string[] }>;
+      issues: Array<{ key: string; metadata?: { template?: string } }>;
+    };
+    expect(
+      persisted.projects[0]?.issueIds.some((issueId) => issueId.startsWith("KANBAN-AUTO-")),
+    ).toBe(true);
+    expect(
+      persisted.issues.find((issue) => issue.key === created.issue.key)?.metadata?.template,
+    ).toBe("automation");
+  });
+
   it("links a repository and creates a pull request through persisted backlog data", async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-backlog-"));
     tempDirs.push(tempDir);
@@ -228,6 +313,84 @@ describe("BacklogQueryService", () => {
       autoMerge: true,
       requiredApprovals: 3,
     });
+  });
+
+  it("persists project collaboration policy, roster changes, and issue collaborators", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-backlog-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
+    const service = new BacklogQueryService({
+      backlogFilePath,
+      now: () => "2026-04-24T14:00:00.000Z",
+      runQueryService: {
+        listProjects: vi.fn().mockResolvedValue({
+          recentCompletionWindowMs: 14400000,
+          projects: [],
+        }),
+      } as never,
+      reviewService: {
+        listReviews: vi.fn().mockResolvedValue({
+          generatedAt: "2026-04-24T14:00:00.000Z",
+          artifacts: [],
+          queue: [],
+          summary: {
+            total: 0,
+            issueCount: 0,
+            workspaceCount: 0,
+            pendingCount: 0,
+            changesRequestedCount: 0,
+            approvedCount: 0,
+            openCommentCount: 0,
+          },
+        }),
+      } as never,
+    });
+
+    await service.updateProjectCollaboration({
+      projectId: "kanban-app",
+      teamName: "Board Systems",
+      visibility: "workspace-shared",
+      defaultRole: "viewer",
+      allowSelfAssign: false,
+      reviewRequiredForDone: false,
+      activityScope: "all-board-entities",
+      workspaceProvisioning: "contributors-and-up",
+      members: [
+        { id: "tal", displayName: "Tal Muskal", email: "tal@a5c.ai", role: "owner" },
+        { id: "qa", displayName: "QA Lead", email: "qa@a5c.ai", role: "maintainer" },
+        { id: "ops", displayName: "Ops Partner", email: "ops@a5c.ai", role: "viewer" },
+      ],
+      permissions: [
+        {
+          action: "manage-project-settings",
+          roles: ["owner"],
+          description: "Only owners may change project settings.",
+        },
+      ],
+    });
+
+    const overview = await service.updateIssueCollaboration({
+      issueId: "KANBAN-GAP-007",
+      assigneeIds: ["tal", "qa"],
+      collaboratorIds: ["tal", "qa", "ops"],
+    });
+
+    const project = overview.snapshot.projects[0];
+    const issue = overview.snapshot.issues.find((candidate) => candidate.id === "KANBAN-GAP-007");
+
+    expect(project?.team.name).toBe("Board Systems");
+    expect(project?.team.settings.visibility).toBe("workspace-shared");
+    expect(project?.settings.workspaceProvisioning).toBe("contributors-and-up");
+    expect(project?.permissions[0]?.roles).toEqual(["owner"]);
+    expect(project?.activity[0]?.action).toBe("updated-issue-collaboration");
+    expect(issue?.assignees.map((assignee) => assignee.id)).toEqual(["tal", "qa"]);
+    expect(issue?.collaborators.map((collaborator) => collaborator.id)).toEqual([
+      "tal",
+      "qa",
+      "ops",
+    ]);
+    expect(issue?.activity[0]?.action).toBe("updated-issue-collaboration");
   });
 
   it("rejects moves that violate board policy", async () => {
