@@ -2,7 +2,13 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@a5c-ai/transport-mux": [
+        "../../transport-mux/src/index.ts"
+      ]
+    }
   },
   "include": ["src"],
   "references": [

@@ -12,6 +12,7 @@ const packages = [
   'packages/agent-mux/harness-mock',
   'packages/agent-mux/ui',
   'packages/agent-mux/gateway',
+  'packages/transport-mux',
   'packages/agent-mux/cli',
   'packages/agent-mux/webui',
   'packages/agent-mux/sdk',
