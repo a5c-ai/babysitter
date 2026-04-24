@@ -2,239 +2,145 @@
 
 → [Implementation Index](../README.md#implementation) | Related: [Success Metrics](success-metrics.md) | [Security Architecture](../security-architecture.md)
 
-## Risk Assessment Framework
+## Purpose
 
-The V6 architecture refactoring involves significant structural changes requiring comprehensive risk identification, assessment, and mitigation strategies across all implementation phases.
+This document describes how V6 implementation risk is reduced without implying a more operationally mature program than the roadmap currently authorizes.
 
-### Risk Categories and Assessment
+The current V6 posture is intentionally narrow:
 
-#### Foundation Phase Risks
+- bound each accepted phase or slice before coding,
+- validate only the touched surface,
+- document rollback before rollout,
+- defer monitoring and automation claims until real owners and gates exist.
 
-**Risk**: Runtime extraction breaks existing functionality  
-**Probability**: Medium | **Impact**: High  
-**Mitigation**: Extensive testing with comprehensive integration validation → [Testing Framework](../testing-framework.md)
+## Current Risk Posture
 
-**Risk**: Agent-core integration introduces compatibility issues  
-**Probability**: Medium | **Impact**: Medium  
-**Mitigation**: Gradual migration with parallel compatibility layer maintenance
+V6 does not currently assume:
 
-**Risk**: Hook system redesign disrupts existing workflows  
-**Probability**: Low | **Impact**: High  
-**Mitigation**: Backward compatibility preservation with deprecation timeline
+- real-time performance monitoring,
+- automated regression detection across the whole repo,
+- predictive scaling or leak-detection systems,
+- automatic rollback systems,
+- production-grade observability for every proposed slice.
 
-#### Platform Phase Risks
+Those may become part of a later slice, but today they are deferred capabilities rather than active safeguards.
 
-**Risk**: Plugin system performance overhead exceeds targets  
-**Probability**: Medium | **Impact**: Medium  
-**Mitigation**: Continuous performance monitoring and optimization throughout development → [Performance Considerations](../performance-docs.md)
+## Phase Risk Framing
 
-**Risk**: Session management migration causes data loss  
-**Probability**: Low | **Impact**: High  
-**Mitigation**: Comprehensive backup procedures and migration validation testing
+### Phase 0: Baseline And Decision Framing
 
-**Risk**: Plugin isolation failures create security vulnerabilities  
-**Probability**: Low | **Impact**: High  
-**Mitigation**: Rigorous security testing and sandbox validation → [Security Architecture](../security-architecture.md)
+Primary risks:
 
-#### Application Phase Risks
+- candidate work cannot be bounded cleanly,
+- current behavior is not measurable enough to validate later claims,
+- proposed changes depend on simultaneous repo-wide churn.
 
-**Risk**: Functionality loss during plugin conversion  
-**Probability**: Medium | **Impact**: Medium  
-**Mitigation**: Comprehensive testing and validation of plugin ecosystem
+Mitigation expectations:
 
-**Risk**: Agent-mux integration introduces breaking changes  
-**Probability**: Medium | **Impact**: Medium  
-**Mitigation**: API compatibility maintenance with gradual transition strategy → [Agent-Mux Integration](../agent-mux-integration.md)
+- capture the commands, install paths, and compatibility surfaces that matter,
+- define rollback before implementation begins,
+- stop rather than widen scope when a candidate cannot be made narrow.
 
-**Risk**: Performance degradation from plugin overhead  
-**Probability**: Low | **Impact**: Medium  
-**Mitigation**: Resource monitoring and optimization with performance budgets
+### Phase 1: Documentation And Naming Stabilization
 
-#### Release Phase Risks
+Primary risks:
 
-**Risk**: Performance regression in production environments  
-**Probability**: Low | **Impact**: High  
-**Mitigation**: Thorough validation and staged deployment approach
+- docs continue to mix current reality with deferred architecture,
+- target vocabulary implies accepted package or platform moves that do not exist,
+- compatibility expectations remain unclear for readers planning changes.
 
-**Risk**: User workflow disruption during migration  
-**Probability**: Medium | **Impact**: Medium  
-**Mitigation**: Comprehensive migration tooling and user communication
+Mitigation expectations:
 
-**Risk**: Rollback complexity in production environment  
-**Probability**: Low | **Impact**: High  
-**Mitigation**: Tested rollback procedures with automated recovery systems
+- align architecture, roadmap, package, and implementation docs around the same normative/deferred boundary,
+- remove speculative API, monitoring, or readiness language from core explanations,
+- treat unresolved ideas as explicitly deferred or invalidated rather than half-committed.
 
-## Risk Mitigation Strategies
+### Phase 2: First Executable Slice
 
-### Technical Risk Mitigation
+Primary risks:
 
-#### Compatibility Preservation
+- the chosen slice touches more surfaces than planned,
+- compatibility breaks escape the touched seam,
+- validation commands do not actually prove the claim being made.
 
-```typescript
-// Compatibility Validation Framework
-interface CompatibilityValidator {
-  validateAPICompatibility(oldVersion: string, newVersion: string): Promise<CompatibilityResult>;
-  validateDataMigration(source: DataSource, target: DataSource): Promise<MigrationResult>;
-  validateWorkflowCompatibility(workflows: Workflow[]): Promise<WorkflowValidationResult>;
-}
+Mitigation expectations:
 
-// Rollback Capability Framework
-interface RollbackManager {
-  createCheckpoint(phase: ImplementationPhase): Promise<Checkpoint>;
-  validateRollback(checkpoint: Checkpoint): Promise<RollbackValidation>;
-  executeRollback(checkpoint: Checkpoint): Promise<RollbackResult>;
-  verifyRollback(checkpoint: Checkpoint): Promise<VerificationResult>;
-}
-```
+- keep the file set and subsystem narrow,
+- tie compatibility notes to the exact touched surface,
+- only promote performance or packaging claims that have a measurement contract.
 
-#### Performance Risk Mitigation
+### Phase 3: Evaluate Whether Further Extraction Is Earned
 
-**Continuous Performance Monitoring**
-- Real-time performance metrics collection with alerting thresholds
-- Automated performance regression detection with immediate notification
-- Resource usage monitoring with predictive scaling recommendations
-- Memory leak detection with automatic cleanup procedures
+Primary risks:
 
-**Performance Budget Enforcement**
+- the repo keeps extracting based on architectural preference instead of evidence,
+- migration cost outweighs the payoff from the first slice,
+- docs continue to describe optional follow-on work as inevitable.
 
-| Component | Budget Limit | Monitoring Method | Alert Threshold |
-|-----------|--------------|------------------|-----------------|
-| Bundle Size | Package targets | CI/CD size checking | >5% increase |
-| Memory Usage | Layer baselines | Runtime profiling | >10% increase |
-| Load Time | Response targets | User experience monitoring | >50ms regression |
-| Plugin Overhead | 10% maximum | Resource monitoring | >15% overhead |
+Mitigation expectations:
 
-### Operational Risk Mitigation
+- compare the first slice's cost and payoff explicitly,
+- approve one next bounded slice or stop,
+- document why further extraction is or is not justified.
 
-#### Deployment Risk Management
+### Phase 4: Optional Follow-On Slices
 
-**Staged Deployment Strategy**
-- Development environment validation with comprehensive test coverage
-- Staging environment validation with production-like data
-- Canary deployment with gradual traffic shifting
-- Full production deployment with monitoring and rollback readiness
+Primary risks:
 
-**Rollback Procedures by Phase**
+- broader quality, performance, or readiness claims are promoted without new gates,
+- separate slices inherit assumptions that were never validated,
+- optional polish becomes de facto required scope.
 
-```typescript
-// Phase-Specific Rollback Procedures
-interface PhaseRollback {
-  phase: ImplementationPhase;
-  triggerConditions: RollbackTrigger[];
-  rollbackSteps: RollbackStep[];
-  validationChecks: ValidationCheck[];
-  recoveryTime: number; // minutes
-}
+Mitigation expectations:
 
-// Automated Rollback Triggers
-enum RollbackTrigger {
-  PerformanceDegradation = 'performance_degradation',
-  FunctionalityLoss = 'functionality_loss',
-  SecurityBreach = 'security_breach',
-  DataCorruption = 'data_corruption'
-}
-```
+- require a named owner, command, threshold, and rollback path for each stronger claim,
+- keep optimization and hardening work optional unless tied to an approved slice or release gate,
+- reject repo-wide guarantees that do not yet have enforcement.
 
-#### Data Risk Mitigation
+## Current Risk Categories
 
-**Data Preservation Strategy**
-- Comprehensive backup procedures before each phase transition
-- Data migration validation with consistency checking
-- Session state preservation with corruption recovery
-- Configuration backup with environment restoration capability
+| Risk Category | Current Concern | Bounded Mitigation |
+|---------------|-----------------|--------------------|
+| Scope inflation | A slice grows into cross-repo churn | Stop and re-scope before implementation continues |
+| Documentation drift | Support docs reintroduce speculative maturity language | Keep all V6 docs aligned on normative vs deferred status |
+| Compatibility ambiguity | Readers assume broader guarantees than the slice provides | Document the exact touched surface and validation evidence |
+| Measurement inflation | Metrics are presented without a baseline, owner, or gate | Treat them as hypotheses until a contract exists |
+| Rollback overstatement | Recovery language promises more than the repo can prove | Document preconditions, restoration steps, and acceptance evidence only |
 
-**Data Migration Validation**
+## Rollback Expectations
 
-```typescript
-// Data Migration Framework
-interface DataMigrator {
-  validateMigrationPlan(plan: MigrationPlan): Promise<ValidationResult>;
-  executeMigration(plan: MigrationPlan): Promise<MigrationResult>;
-  validateMigrationResult(result: MigrationResult): Promise<ConsistencyCheck>;
-  rollbackMigration(migrationId: string): Promise<RollbackResult>;
-}
-```
+Rollback is a required mitigation, but it must stay proportional to the accepted scope.
 
-### Business Risk Mitigation
+- each accepted phase or slice needs a documented rollback path,
+- rollback notes should name the affected surface and the validation used to confirm recovery,
+- recovery language should describe operator decisions and verification steps rather than automatic failover claims,
+- if rollback cannot be kept cheap, the slice is probably too large for current V6 scope.
 
-#### User Impact Minimization
+## Measurement And Monitoring Risk
 
-**Communication Strategy**
-- Proactive user communication with migration timeline and impact assessment
-- Training and documentation provision with hands-on support
-- Feedback collection and rapid response with issue resolution
-- Support escalation procedures with expert availability
+Performance, observability, and regression language is a common source of maturity drift. Use the following rules:
 
-**Workflow Preservation**
-- Existing workflow compatibility maintenance during transition
-- Alternative workflow provision for disrupted processes
-- Gradual migration with user choice timing
-- Rollback availability for user workflow restoration
+- do not describe continuous monitoring unless a real monitoring system, owner, and response path exist,
+- do not describe automated regression detection unless a maintained benchmark or validation gate is already in place,
+- do not set bundle, latency, or memory budgets unless the slice defines the baseline, command, threshold, and fallback,
+- defer broad operational dashboards and alerting narratives until the repo accepts a slice that actually installs them.
 
-#### Stakeholder Risk Management
+## Operational And User Impact
 
-**Stakeholder Engagement**
-- Regular progress reporting with transparent metrics → [Success Metrics](success-metrics.md)
-- Risk status communication with mitigation updates
-- Decision point coordination with stakeholder approval
-- Issue escalation with resolution tracking
+Current risk mitigation for rollout and user impact should stay narrow:
 
-## Contingency Planning
+- validate the touched workflow rather than claiming generalized migration readiness,
+- use staged rollout language only where a real release process exists for the slice,
+- tie workflow-preservation claims to an explicit inventory,
+- describe communication and support expectations only where an implementation phase actually changes user-facing behavior.
 
-### Critical Path Risk Management
+## Review Cadence
 
-**Dependency Risk Mitigation**
-- Alternative implementation approaches for high-risk components
-- Vendor diversification for external dependencies
-- Timeline buffer allocation for unexpected complexity
-- Resource allocation flexibility for rapid response capability
+Risk review for the current V6 maturity level is simple:
 
-### Emergency Response Procedures
-
-#### Incident Response Framework
-
-```typescript
-// Incident Classification
-enum IncidentSeverity {
-  Critical = 'critical',    // Complete system failure
-  High = 'high',           // Major functionality loss
-  Medium = 'medium',       // Performance degradation
-  Low = 'low'              // Minor issues
-}
-
-// Response Procedures
-interface IncidentResponse {
-  severity: IncidentSeverity;
-  detectionMethod: DetectionMethod;
-  responseTeam: ResponsibilityMatrix;
-  escalationProcedure: EscalationStep[];
-  communicationPlan: CommunicationStrategy;
-}
-```
-
-#### Recovery Procedures
-
-**System Recovery Framework**
-- Automated failure detection with immediate alerting
-- Rollback execution with validation checkpoints
-- Service restoration with functionality verification
-- Post-incident analysis with prevention strategy development
-
-## Risk Monitoring and Review
-
-### Continuous Risk Assessment
-
-**Risk Monitoring Dashboard**
-- Real-time risk indicator tracking with trend analysis
-- Performance metric monitoring with regression detection
-- Security posture assessment with threat intelligence integration
-- User impact measurement with satisfaction tracking
-
-**Periodic Risk Review**
-- Weekly risk assessment updates during implementation phases
-- Monthly stakeholder risk communication with mitigation status
-- Quarterly risk framework review with strategy adjustment
-- Post-implementation risk assessment with lessons learned
+- revisit risks when a phase boundary changes,
+- revisit risks when a slice adds a new compatibility, performance, or rollout claim,
+- downgrade claims back to deferred if the enforcing command, owner, or rollback path is missing.
 
 ---
 
