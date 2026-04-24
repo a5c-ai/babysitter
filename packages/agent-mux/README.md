@@ -17,7 +17,6 @@ This directory is the unified parent for all content migrated from the former
 - `scripts/` for the old repo-level maintenance scripts
 - `processes/` for imported `.a5c/processes` workflows and plans
 - `skills/` for migrated skills
-- `website/` for the old standalone docs site source
 - `meta/` for repo-level docs, config, and GitHub metadata that no longer live at monorepo root
 
 The standalone checkout at `/home/a5cdev/work/agent-mux` is now only a moved notice.

@@ -72,4 +72,4 @@ for (const tr of filterEvents(events, 'tool_result')) console.log(tr.toolName, t
 
 ## Docs site
 
-A Docusaurus site is scaffolded under `website/`. It sources these markdown files directly — keep edits here, not in the site.
+The main docs site now consumes these markdown files directly. Keep edits here.

@@ -33,7 +33,7 @@ This design addresses multiple documentation quality issues and implements a pro
 ### 1. Automated Link Checking Infrastructure
 
 **CI Integration:**
-- Add `mlc` (Markup Link Checker) GitHub Action to `.github/workflows/docs.yml`
+- Add `mlc` (Markup Link Checker) GitHub Action to the docs CI workflow
 - Configure to run on all PRs and main branch pushes that touch documentation
 - Set to fail builds on broken links (strict mode)
 
@@ -43,8 +43,8 @@ This design addresses multiple documentation quality issues and implements a pro
   - Set timeout values appropriate for CI
   - Configure to check both markdown files and generated HTML
 
-**Docusaurus Integration:**
-- Update `docusaurus.config.ts` to change `onBrokenLinks: 'warn'` → `onBrokenLinks: 'throw'`
+**Docs Build Integration:**
+- Ensure the docs build treats broken links as errors
 - This ensures local development catches broken links before CI
 
 **Testing Strategy:**

@@ -51,7 +51,6 @@ const packageFamilies = {
     "@a5c-ai/hooks-mux-adapter-pi",
   ],
   "downstream-consumers": [
-    "agent-mux-website",
     "@a5c-ai/babysitter-observer-dashboard",
     "@a5c-ai/babysitter-tui-plugins",
     "@a5c-ai/kanban",

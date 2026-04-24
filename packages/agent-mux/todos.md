@@ -15,8 +15,7 @@ Legend: [x] done · [~] initial pass done, deep-dive process authored · [>] pro
 - [x] 12 × ~20 `docs/19-capabilities-matrix.md`.
 - [x] **Config-file auth detection** for codex/gemini/cursor/opencode (new `adapters/src/auth-config.ts`).
 - [x] Tutorials added: `docs/tutorials/sessions.md`, `docs/tutorials/remote-bootstrap.md`; sidebar updated.
-- [x] README `Features` + SDK examples mirrored into `docs/README.md` and `website/src/pages/index.md`.
-- [x] Docusaurus Progress Plugin error worked around by pinning `@docusaurus/core@3.7.0` + `overrides.webpack=5.97.1`.
+- [x] README `Features` + SDK examples mirrored into `docs/README.md`.
 
 ## Next
 
@@ -54,8 +53,8 @@ then perform the same research and analysis as mentioned above for these new ref
 [x] - publish script for packages, including the core package and the harnesses, with support for publishing to npm and other registries, with proper versioning, changelog generation, and release notes. (using a tool like changesets or standard-version)
 → Changesets (.changeset/config.json fixed group), npm provenance in publish.yml, release.yml runs changesets/action@v1. Scripts: npm run changeset / version-packages / release.
 
-[x] - create a comprehensive documentation for the core package and the harnesses, including installation guides, usage examples, API reference, contribution guidelines, and troubleshooting tips. ( in docs/). and also create a documentation website using a tool like Docusaurus or Gatsby, and host it on GitHub Pages. for this repo (@a5c-ai/agent-mux)
-→ docs/README.md index, docs/16-reference-comparison.md, CONTRIBUTING.md updated, SECURITY.md, CODE_OF_CONDUCT.md, issue+PR templates. Docusaurus in website/ with .github/workflows/docs.yml (Pages deploy). Per-adapter pages + tutorials: 
+[x] - create comprehensive documentation for the core package and the harnesses, including installation guides, usage examples, API reference, contribution guidelines, and troubleshooting tips in `docs/` for this repo (`@a5c-ai/agent-mux`)
+→ docs/README.md index, docs/16-reference-comparison.md, CONTRIBUTING.md updated, SECURITY.md, CODE_OF_CONDUCT.md, issue+PR templates. Per-adapter pages + tutorials:
 
 [ ] - research a5c-ai/babysitter (staging branch) for the harnesses adapters in sdk there. see if we missed any generic features or functionalities that we can integrate into this sdk. also look for parities and inconsistencies in our implementation compared to the ones in babysitter, and address them accordingly. also look for any caveats and nuances in the implementation of the harnesses adapters in babysitter, such as error handling, edge cases, etc. and make sure we have proper handling for those in our implementation as well.
 
