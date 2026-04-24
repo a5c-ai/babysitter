@@ -2,17 +2,18 @@
  * `amux launch` command implementation.
  *
  * Resolves a launch plan for a given harness+provider combination,
- * optionally spawns amux-proxy, then exec-forks the harness with
+ * optionally starts the transport-mux runtime, then exec-forks the harness with
  * stdin/stdout passthrough and proper signal forwarding.
  */
 
 import type { AgentMuxClient } from '@a5c-ai/agent-mux-core';
 import {
   resolveProvider,
-  processTracker,
 } from '@a5c-ai/agent-mux-core';
 import type { ProviderId, TransportId } from '@a5c-ai/agent-mux-core';
 import { translateForHarness } from '@a5c-ai/agent-mux-adapters';
+import { startTransportMuxRuntime } from '@a5c-ai/transport-mux';
+import type { TransportMuxRuntime } from '@a5c-ai/transport-mux';
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagStr, flagNum, flagBool, flagArr } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
@@ -192,97 +193,6 @@ function appendHarnessSessionArgs(plan: LaunchPlan, session: SessionArgs): void 
       // OpenCode has no non-interactive prompt flag; prompt delivered via stdin after launch
       break;
   }
-}
-
-// ---------------------------------------------------------------------------
-// Proxy helpers
-// ---------------------------------------------------------------------------
-
-function updateEnvForProxy(
-  env: Record<string, string>,
-  transport: TransportId,
-  proxyUrl: string,
-  authToken: string,
-): void {
-  switch (transport) {
-    case 'anthropic':
-      env['ANTHROPIC_BASE_URL'] = proxyUrl;
-      env['ANTHROPIC_API_KEY'] = authToken;
-      env['ANTHROPIC_AUTH_TOKEN'] = authToken;
-      break;
-    case 'openai-chat':
-    case 'openai-responses':
-      env['OPENAI_BASE_URL'] = proxyUrl;
-      env['OPENAI_API_KEY'] = authToken;
-      break;
-    case 'google':
-      env['CODE_ASSIST_ENDPOINT'] = proxyUrl;
-      env['GEMINI_API_KEY'] = authToken;
-      break;
-  }
-}
-
-async function launchProxy(
-  proxy: ProxyPlan,
-  harnessEnv: Record<string, string>,
-  opts: { logLevel: string },
-): Promise<import('node:child_process').ChildProcess> {
-  const { spawn } = await import('node:child_process');
-
-  const proxyEnv: Record<string, string> = {
-    ...(process.env as Record<string, string>),
-    AMUX_PROXY_TARGET_PROVIDER: proxy.targetProvider,
-    AMUX_PROXY_TARGET_MODEL: `${proxy.targetProvider}/${proxy.targetModel}`,
-    AMUX_PROXY_EXPOSED_TRANSPORT: proxy.exposedTransport,
-    AMUX_PROXY_PORT: String(proxy.port),
-    AMUX_PROXY_LOG_LEVEL: opts.logLevel,
-  };
-
-  const proc = spawn('amux-proxy', [], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    env: proxyEnv,
-    detached: false,
-  });
-
-  return new Promise<import('node:child_process').ChildProcess>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      proc.kill('SIGKILL');
-      reject(new Error('Proxy health check timed out after 15s'));
-    }, 15_000);
-
-    let buffer = '';
-    proc.stdout!.on('data', (chunk: Buffer) => {
-      buffer += chunk.toString();
-      const newlineIdx = buffer.indexOf('\n');
-      if (newlineIdx >= 0) {
-        const line = buffer.slice(0, newlineIdx);
-        try {
-          const msg = JSON.parse(line) as Record<string, unknown>;
-          if (msg['event'] === 'ready') {
-            clearTimeout(timeout);
-            updateEnvForProxy(
-              harnessEnv,
-              proxy.exposedTransport,
-              msg['url'] as string,
-              msg['auth_token'] as string,
-            );
-            proc.stdout!.pipe(process.stderr);
-            resolve(proc);
-          }
-        } catch { /* not JSON, ignore */ }
-      }
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timeout);
-      reject(err);
-    });
-    proc.on('exit', (code) => {
-      clearTimeout(timeout);
-      reject(new Error(`Proxy exited with code ${code} before becoming ready`));
-    });
-    proc.stderr!.pipe(process.stderr);
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -503,35 +413,21 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     plan.args.push(...process.argv.slice(dashDashIdx + 1));
   }
 
-  // Launch proxy if needed
-  let proxyProcess: import('node:child_process').ChildProcess | undefined;
-  if (plan.proxyNeeded && plan.proxy) {
-    // Pre-check proxy installation
-    const { execSync } = await import('node:child_process');
-    let proxyInstalled = false;
-    try { execSync('amux-proxy --version', { stdio: 'ignore', timeout: 5000 }); proxyInstalled = true; } catch {}
-    if (!proxyInstalled) {
-      try { execSync('python -m amux_proxy --version', { stdio: 'ignore', timeout: 5000 }); proxyInstalled = true; } catch {}
-    }
-    if (!proxyInstalled) {
-      const msg = 'amux-proxy is not installed. Install with: pip install amux-proxy';
-      if (jsonMode) printJsonError('SPAWN_ERROR', msg);
-      else printError(msg);
-      return ExitCode.GENERAL_ERROR;
-    }
-  }
+  // Launch runtime if needed
+  let proxyRuntime: TransportMuxRuntime | undefined;
   if (plan.proxyNeeded && plan.proxy) {
     try {
-      proxyProcess = await launchProxy(plan.proxy, plan.env, {
-        logLevel: flagStr(args.flags, 'proxy-log-level') ?? 'warn',
+      proxyRuntime = await startTransportMuxRuntime({
+        targetProvider: plan.proxy.targetProvider,
+        targetModel: `${plan.proxy.targetProvider}/${plan.proxy.targetModel}`,
+        exposedTransport: plan.proxy.exposedTransport,
+        port: plan.proxy.port,
       });
-      if (proxyProcess?.pid) {
-        processTracker.register(proxyProcess.pid, proxyProcess.pid, 'amux-proxy');
-      }
+      proxyRuntime.applyHarnessEnv(plan.env);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (jsonMode) printJsonError('SPAWN_ERROR', `Failed to launch proxy: ${msg}`);
-      else printError(`Failed to launch proxy: ${msg}`);
+      if (jsonMode) printJsonError('SPAWN_ERROR', `Failed to launch transport runtime: ${msg}`);
+      else printError(`Failed to launch transport runtime: ${msg}`);
       return ExitCode.GENERAL_ERROR;
     }
   }
@@ -643,21 +539,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   process.off('SIGINT', forwardSignal);
   process.off('SIGTERM', forwardSignal);
 
-  if (proxyProcess) {
-    proxyProcess.kill('SIGTERM');
-    await new Promise<void>((resolve) => {
-      const killTimeout = setTimeout(() => {
-        proxyProcess!.kill('SIGKILL');
-        resolve();
-      }, 5000);
-      proxyProcess!.on('exit', () => {
-        clearTimeout(killTimeout);
-        if (proxyProcess!.pid) {
-          processTracker.unregister(proxyProcess!.pid);
-        }
-        resolve();
-      });
-    });
+  if (proxyRuntime) {
+    await proxyRuntime.stop();
   }
 
   return exitCode;

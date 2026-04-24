@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Internal placeholder workspace for a future transport/provider mux seam",
+  "description": "TypeScript transport runtime seam for agent-mux launcher proxying",
   "author": "a5c-ai",
   "homepage": "https://github.com/a5c-ai/babysitter#readme",
   "repository": {
@@ -33,6 +33,22 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
     }
   },
   "files": [
@@ -46,7 +62,7 @@
     "scorecard:migration": "node ./scripts/migration-scorecard.mjs",
     "test:unit": "vitest run --root ../.. --config vitest.config.ts packages/transport-mux/tests",
     "test:e2e": "vitest run --root ../.. --config vitest.config.ts packages/transport-mux/tests/e2e",
-    "test": "npm run test:unit",
+    "test": "npm run test:unit && npm run test:e2e",
     "prepack": "npm run build"
   },
   "dependencies": {

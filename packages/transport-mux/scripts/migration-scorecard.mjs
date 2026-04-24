@@ -24,6 +24,7 @@ function countFiles(relativeDir, suffix) {
 const migrationDoc = read('packages/transport-mux/migration.md');
 const readmeDoc = read('packages/transport-mux/README.md');
 const packageJson = JSON.parse(read('packages/transport-mux/package.json'));
+const packageEntrypoint = read('packages/transport-mux/src/index.ts');
 const launchCommand = read('packages/agent-mux/cli/src/commands/launch.ts');
 const releaseWorkflow = read('.github/workflows/release.yml');
 const stagingWorkflow = read('.github/workflows/staging-publish.yml');
@@ -55,10 +56,16 @@ const scorecard = [
   },
   {
     gate: 'Launcher/runtime cutover is complete',
-    status: launchCommand.includes('@a5c-ai/transport-mux') ? 'green' : 'red',
-    evidence: launchCommand.includes('@a5c-ai/transport-mux')
-      ? 'launch.ts imports transport-mux directly'
-      : 'launch.ts still resolves provider config and proxy env without importing the transport-mux runtime surface',
+    status:
+      launchCommand.includes('@a5c-ai/transport-mux') &&
+      packageEntrypoint.includes("export * from './runtime.js';")
+        ? 'green'
+        : 'red',
+    evidence:
+      launchCommand.includes('@a5c-ai/transport-mux') &&
+      packageEntrypoint.includes("export * from './runtime.js';")
+        ? 'launch.ts imports transport-mux directly and the package entrypoint exports the runtime module'
+        : 'launch.ts still bypasses the transport-mux runtime surface or the package entrypoint does not export it',
     retireWhen: 'launch.ts resolves into the runtime exported by packages/transport-mux instead of an independent proxy path.',
   },
   {
@@ -66,11 +73,12 @@ const scorecard = [
     status:
       migrationDoc.includes('Migration scorecard') &&
       migrationDoc.includes('Retire legacy truth only when every row below is green.') &&
-      readmeDoc.includes('internal placeholder workspace')
+      readmeDoc.includes('launcher-owned runtime surface') &&
+      readmeDoc.includes('not the fully cut-over publish, CI, or container truth')
         ? 'green'
         : 'red',
-    evidence: 'migration.md and README.md both describe transport-mux as a placeholder seam and record the scorecard/cutover criteria.',
-    retireWhen: 'Docs can switch from placeholder language only after the runtime, launcher, CI, and packaging surfaces converge.',
+    evidence: 'migration.md and README.md describe transport-mux as the launcher-owned runtime while keeping the remaining cutover criteria explicit.',
+    retireWhen: 'Docs can treat the migration as done only after the runtime, launcher, CI, and packaging surfaces fully converge.',
   },
   {
     gate: 'Publish and CI surfaces are converged',

@@ -5,7 +5,7 @@ const DEFAULT_PORT = 0;
 const DEFAULT_STREAM = true;
 
 export function createProxyConfig(overrides: Partial<ProxyConfig> = {}): ProxyConfig {
-  return {
+  const config = {
     targetProvider: '',
     targetModel: '',
     exposedTransport: 'openai-chat',
@@ -14,8 +14,15 @@ export function createProxyConfig(overrides: Partial<ProxyConfig> = {}): ProxyCo
     host: DEFAULT_HOST,
     port: DEFAULT_PORT,
     stream: DEFAULT_STREAM,
-    ...overrides,
-  };
+  } satisfies ProxyConfig;
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value !== undefined) {
+      (config as Record<string, unknown>)[key] = value;
+    }
+  }
+
+  return config;
 }
 
 export function readProxyConfigFromEnv(env: NodeJS.ProcessEnv = process.env): ProxyConfig {

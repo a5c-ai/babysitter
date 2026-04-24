@@ -173,7 +173,7 @@ but never raw protocol-specific payloads across the layer boundary.
 
 1. `agent-mux` resolves canonical provider config.
 2. `translate-for-harness.ts` decides the exposed protocol expected by the harness.
-3. `launch.ts` spawns `amux-proxy` with `AMUX_PROXY_*`.
+3. `launch.ts` starts the `transport-mux` runtime when a proxy bridge is needed.
 4. `transport-mux` boots the protocol codec and provider adapter implied by that config.
 
 ### Data plane
@@ -324,7 +324,7 @@ The normalized stream model should cover at least:
 
 ## Server/runtime API
 
-The tests already pin two runtime entrypoints.
+The tests already pin two runtime entrypoints, and launcher integration now adds a third runtime helper.
 
 ### In-process app creation
 
@@ -346,6 +346,20 @@ await server.stop();
 ```
 
 Use this for live HTTP/e2e verification and launcher integration.
+
+### Launcher-managed runtime startup
+
+```ts
+const runtime = await startTransportMuxRuntime({
+  targetProvider: 'bedrock',
+  targetModel: 'bedrock/anthropic.claude-sonnet-4-20250514-v1:0',
+  exposedTransport: 'openai-responses',
+});
+runtime.applyHarnessEnv(env);
+await runtime.stop();
+```
+
+Use this when `agent-mux` needs the package-owned runtime to serve a harness-facing transport surface directly.
 
 ## Capability negotiation
 
