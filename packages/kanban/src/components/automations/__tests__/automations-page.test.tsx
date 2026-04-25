@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 
-import { render, setupUser } from "@/test/test-utils";
+import { render } from "@/test/test-utils";
 import { AutomationsPage } from "../automations-page";
 
 vi.mock("next/link", () => ({
@@ -191,7 +191,6 @@ describe("AutomationsPage", () => {
   });
 
   it("creates a webhook rule using the existing API contract", async () => {
-    const user = setupUser();
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -218,20 +217,34 @@ describe("AutomationsPage", () => {
 
     await screen.findByText("Daily digest");
 
-    await user.clear(screen.getByLabelText("Rule name"));
-    await user.type(screen.getByLabelText("Rule name"), "Incoming webhook triage");
-    await user.selectOptions(screen.getByLabelText("Trigger type"), "webhook");
-    await user.clear(screen.getByLabelText("Webhook port"));
-    await user.type(screen.getByLabelText("Webhook port"), "4201");
-    await user.clear(screen.getByLabelText("Webhook path"));
-    await user.type(screen.getByLabelText("Webhook path"), "/hooks/github");
-    await user.selectOptions(screen.getByLabelText("Auth"), "bearer");
-    await user.type(screen.getByLabelText("Bearer token"), "super-secret");
-    await user.type(screen.getByLabelText("Source event"), "github.issue.opened");
-    await user.clear(screen.getByLabelText("Task title"));
-    await user.type(screen.getByLabelText("Task title"), "Triage webhook issue");
+    fireEvent.change(screen.getByLabelText("Rule name"), {
+      target: { value: "Incoming webhook triage" },
+    });
+    fireEvent.change(screen.getByLabelText("Trigger type"), {
+      target: { value: "webhook" },
+    });
+    fireEvent.change(screen.getByLabelText("Webhook port"), {
+      target: { value: "4201" },
+    });
+    fireEvent.change(screen.getByLabelText("Webhook path"), {
+      target: { value: "/hooks/github" },
+    });
+    fireEvent.change(screen.getByLabelText("Auth"), {
+      target: { value: "bearer" },
+    });
+    fireEvent.change(screen.getByLabelText("Bearer token"), {
+      target: { value: "super-secret" },
+    });
+    fireEvent.change(screen.getByLabelText("Source event"), {
+      target: { value: "github.issue.opened" },
+    });
+    fireEvent.change(screen.getByLabelText("Task title"), {
+      target: { value: "Triage webhook issue" },
+    });
 
-    await user.click(screen.getByRole("button", { name: "Create rule" }));
+    const createForm = screen.getByRole("button", { name: "Create rule" }).closest("form");
+    expect(createForm).not.toBeNull();
+    fireEvent.submit(createForm!);
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
 
@@ -261,7 +274,6 @@ describe("AutomationsPage", () => {
   });
 
   it("edits timer and webhook rules and posts lifecycle actions through the shared endpoints", async () => {
-    const user = setupUser();
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -311,10 +323,13 @@ describe("AutomationsPage", () => {
     render(<AutomationsPage />);
     await screen.findByText("Daily digest");
 
-    await user.click(screen.getAllByRole("button", { name: "Edit" })[0]);
-    await user.clear(screen.getByLabelText("Cron schedule"));
-    await user.type(screen.getByLabelText("Cron schedule"), "0 7 * * *");
-    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Edit" })[0]);
+    fireEvent.change(screen.getByLabelText("Cron schedule"), {
+      target: { value: "0 7 * * *" },
+    });
+    const editForm = screen.getByRole("button", { name: "Save changes" }).closest("form");
+    expect(editForm).not.toBeNull();
+    fireEvent.submit(editForm!);
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     const patchTimerCall = fetchMock.mock.calls[1];
@@ -328,10 +343,11 @@ describe("AutomationsPage", () => {
       },
     });
 
-    await user.click(screen.getAllByRole("button", { name: "Edit" })[1]);
-    await user.clear(screen.getByLabelText("Webhook path"));
-    await user.type(screen.getByLabelText("Webhook path"), "/hooks/issues");
-    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Edit" })[1]);
+    fireEvent.change(screen.getByLabelText("Webhook path"), {
+      target: { value: "/hooks/issues" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Save changes" }).closest("form")!);
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
     const patchWebhookCall = fetchMock.mock.calls[3];
@@ -345,7 +361,7 @@ describe("AutomationsPage", () => {
       },
     });
 
-    await user.click(screen.getByRole("button", { name: "Pause" }));
+    fireEvent.click(screen.getByRole("button", { name: "Pause" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(7));
     const lifecycleCall = fetchMock.mock.calls[5];

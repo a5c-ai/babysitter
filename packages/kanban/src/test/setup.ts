@@ -105,6 +105,7 @@ expect.extend(matchers);
 // (e.g. use-animated-number) call vi.restoreAllMocks() which removes stubs
 // including cancelAnimationFrame. React's passive-effect cleanup still needs it.
 afterEach(() => {
+  vi.useRealTimers();
   if (typeof globalThis.cancelAnimationFrame !== 'function') {
     globalThis.cancelAnimationFrame = (id: number) => clearTimeout(id);
   }

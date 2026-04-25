@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Field, Input } from "@a5c-ai/compendium";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,7 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
     });
   }
 
-  function handleCustomSubmit(e: React.FormEvent) {
+  function handleCustomSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     handleApprove(customAnswer);
   }
@@ -70,9 +69,13 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
 
       {/* Free-text input */}
       <form onSubmit={handleCustomSubmit} className="space-y-2">
-        <Field label={options.length > 0 ? "Or provide a custom answer" : "Provide an answer"}>
+        <label
+          htmlFor="custom-answer"
+          className="grid gap-2 text-xs font-medium text-foreground-muted"
+        >
+          <span>{options.length > 0 ? "Or provide a custom answer" : "Provide an answer"}</span>
           <div className="flex gap-2">
-            <Input
+            <input
               className="flex-1"
               id="custom-answer"
               data-testid="custom-answer-input"
@@ -99,7 +102,7 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
               )}
             </Button>
           </div>
-        </Field>
+        </label>
       </form>
 
       {/* Result feedback */}

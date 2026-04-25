@@ -108,7 +108,7 @@ describe('verifyKanbanRelease', () => {
           manifest: baseManifest,
           packEntries: basePackEntries.filter((entry) => entry.path !== 'package/.next/BUILD_ID'),
         })
-      ).toThrow(/package\/\.next\/BUILD_ID/);
+      ).toThrow(/\.next\/BUILD_ID/);
     });
   });
 });

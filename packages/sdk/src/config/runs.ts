@@ -4,8 +4,16 @@ import { CONFIG_ENV_VARS, getConfiguredGlobalStateRoot } from "./defaults";
 
 export type RunsScope = "global" | "repo";
 
-function normalizeComparablePath(value: string): string {
+function normalizeResolvedPath(value: string): string {
   const normalized = path.normalize(path.resolve(value));
+  if (process.platform === "darwin" && normalized.startsWith("/private/var/")) {
+    return normalized.slice("/private".length);
+  }
+  return normalized;
+}
+
+function normalizeComparablePath(value: string): string {
+  const normalized = normalizeResolvedPath(value);
   return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 }
 
@@ -18,7 +26,7 @@ function dedupePaths(values: string[]): string[] {
       continue;
     }
     seen.add(comparable);
-    result.push(path.resolve(value));
+    result.push(normalizeResolvedPath(value));
   }
   return result;
 }
@@ -55,7 +63,7 @@ export function getRunsScope(): RunsScope {
 }
 
 export function findRepoRoot(startDir = process.cwd()): string | undefined {
-  let current = path.resolve(startDir);
+  let current = normalizeResolvedPath(startDir);
   let reachedRoot = false;
   while (!reachedRoot) {
     if (isPresentPath(path.join(current, ".git")) || isPresentPath(path.join(current, ".a5c"))) {
@@ -73,7 +81,7 @@ export function findRepoRoot(startDir = process.cwd()): string | undefined {
 }
 
 export function getRepoRoot(startDir = process.cwd()): string {
-  return findRepoRoot(startDir) ?? path.resolve(startDir);
+  return findRepoRoot(startDir) ?? normalizeResolvedPath(startDir);
 }
 
 export function getRepoRunsDir(startDir = process.cwd()): string {
@@ -129,7 +137,7 @@ export function resolveExistingRunDir(
   const repoRoot = getRepoRoot(cwd);
 
   if (path.isAbsolute(runRef)) {
-    return path.resolve(runRef);
+    return normalizeResolvedPath(runRef);
   }
 
   const normalizedRef = runRef.replace(/\\/g, "/");

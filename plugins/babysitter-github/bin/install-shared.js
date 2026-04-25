@@ -206,6 +206,9 @@ const LEGACY_HOOK_SCRIPT_NAMES = [
   'user-prompt-submit.sh',
 ];
 const HOOK_SCRIPT_NAMES = [
+  'session-start.sh',
+  'session-end.sh',
+  'user-prompt-submitted.sh',
   'babysitter-proxied-session-start.sh',
   'babysitter-proxied-session-start.ps1',
   'babysitter-proxied-session-end.sh',
