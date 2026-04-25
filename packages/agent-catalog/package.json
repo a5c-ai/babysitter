@@ -20,7 +20,7 @@
     "validate:graph": "node ./scripts/validate-graph.cjs",
     "validate:evidence:freshness": "node ./scripts/validate-evidence-freshness.cjs",
     "build": "npm run clean && npm run check:src-artifacts && npm run generate:evidence && tsc -p tsconfig.json && npm run generate:discovery-snapshot && npm run validate:graph",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "test": "npm run check:src-artifacts && npm run generate:evidence && npm run validate:graph && cd ../.. && npm run test:agent-catalog-contracts",
     "ci:evidence": "npm run validate:evidence:freshness",
     "ci:test": "npm run clean && npm run build && npm run ci:evidence && npm run test",

@@ -6,23 +6,27 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..');
+const npmExecPath =
+  typeof process.env.npm_execpath === 'string' && process.env.npm_execpath.trim() !== ''
+    ? process.env.npm_execpath
+    : undefined;
 
 const REQUIRED_PACKED_PATHS = [
-  'package/package.json',
-  'package/README.md',
-  'package/LICENSE',
-  'package/next.config.mjs',
-  'package/postcss.config.mjs',
-  'package/tsconfig.json',
-  'package/src/cli.ts',
-  'package/dist/cli.js',
-  'package/.next/BUILD_ID',
-  'package/.next/package.json',
+  'package.json',
+  'README.md',
+  'LICENSE',
+  'next.config.mjs',
+  'postcss.config.mjs',
+  'tsconfig.json',
+  'src/cli.ts',
+  'dist/cli.js',
+  '.next/BUILD_ID',
+  '.next/package.json',
 ];
 
 const REQUIRED_PACKED_PREFIXES = [
-  'package/.next/server/',
-  'package/.next/static/',
+  '.next/server/',
+  '.next/static/',
 ];
 
 const REQUIRED_BUILD_PATHS = [
@@ -50,10 +54,14 @@ function readStringRecord(value) {
   return isRecord(value) ? value : {};
 }
 
+function normalizePackedPath(value) {
+  return value.replace(/^package\//, '');
+}
+
 export function verifyKanbanRelease({ packageRoot, manifest, packEntries }) {
   const scripts = readStringRecord(manifest.scripts);
   const bin = readStringRecord(manifest.bin);
-  const packedPaths = new Set(packEntries.map((entry) => entry.path));
+  const packedPaths = new Set(packEntries.map((entry) => normalizePackedPath(entry.path)));
 
   expect(manifest.name === '@a5c-ai/kanban', 'packages/kanban/package.json name must stay @a5c-ai/kanban');
   expect(manifest.private === false, 'packages/kanban/package.json private must stay false');
@@ -89,17 +97,22 @@ export function verifyKanbanRelease({ packageRoot, manifest, packEntries }) {
   }
 
   for (const packedPrefix of REQUIRED_PACKED_PREFIXES) {
-    const hasMatch = packEntries.some((entry) => entry.path.startsWith(packedPrefix));
+    const hasMatch = packEntries.some((entry) => normalizePackedPath(entry.path).startsWith(packedPrefix));
     expect(hasMatch, `npm pack output is missing files under ${packedPrefix}`);
   }
 }
 
 function main() {
   const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
-  const packOutput = execFileSync('npm', ['pack', '--json', '--dry-run'], {
-    cwd: packageRoot,
-    encoding: 'utf8',
-  });
+  const packOutput = npmExecPath
+    ? execFileSync(process.execPath, [npmExecPath, 'pack', '--json', '--dry-run'], {
+        cwd: packageRoot,
+        encoding: 'utf8',
+      })
+    : execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['pack', '--json', '--dry-run'], {
+        cwd: packageRoot,
+        encoding: 'utf8',
+      });
   const [packResult] = JSON.parse(packOutput);
   const packEntries = Array.isArray(packResult?.files) ? packResult.files : [];
 

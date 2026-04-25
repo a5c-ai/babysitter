@@ -16,7 +16,7 @@ function getICloudWarningKey(candidatePath: string): string {
   if (markerIndex === -1) {
     return normalized;
   }
-  return normalized.slice(0, markerIndex + ICLOUD_DRIVE_MARKER.length);
+  return ICLOUD_DRIVE_MARKER;
 }
 
 function isICloudDrivePath(candidatePath: string): boolean {

@@ -20,7 +20,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --build tsconfig.json && node scripts/copy-template-assets.cjs",
+    "build": "tsc --build --force tsconfig.json && node scripts/copy-template-assets.cjs",
     "sync:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs",
     "check:command-templates": "node ../../scripts/sync-sdk-command-templates.cjs --check",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
