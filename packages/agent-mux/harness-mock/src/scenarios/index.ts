@@ -33,7 +33,7 @@ export function resolveScenario(name: string): HarnessScenario | undefined {
     if (meta) return meta.scenario;
   }
   if (name.startsWith('interactive:')) {
-    const m = name.slice('interactive:'.length) as 'yolo' | 'prompt' | 'deny';
+    const m = name.slice('interactive:'.length) as 'yolo' | 'prompt' | 'deny' | 'timeout';
     if (INTERACTION_SCENARIOS[m]) return INTERACTION_SCENARIOS[m];
   }
   if (RUNTIME_HOOK_SCENARIOS[name]) return RUNTIME_HOOK_SCENARIOS[name];

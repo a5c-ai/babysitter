@@ -45,6 +45,13 @@ Pick one with `--scenario`:
 amux run claude --use-mock-harness --scenario tool-call --prompt "x"
 ```
 
+Interactive approval scenarios under `packages/agent-mux/harness-mock` now model real gating semantics rather than timer-only replay:
+
+- `interactive:yolo` auto-approves and then emits the post-approval output.
+- `interactive:prompt` waits for stdin before it emits the post-approval output and exits.
+- `interactive:deny` auto-denies, emits the denial path, and exits non-zero.
+- `interactive:timeout` waits for approval until the configured timeout, emits a timeout error, and exits non-zero.
+
 ## Why use it
 
 - **CI**: No API keys, no flakiness.

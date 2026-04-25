@@ -11,6 +11,8 @@ import type {
   MockExecutionResult,
   OutputChunk,
   FileOperation,
+  InteractionResolution,
+  StdinInteraction,
   SubprocessMockHandle,
   SubprocessResult,
 } from './types.js';
@@ -38,6 +40,12 @@ export class MockProcess extends EventEmitter implements SubprocessMockHandle {
   private _fileChanges: FileOperation[] = [];
   private _timers: ReturnType<typeof setTimeout>[] = [];
   private _stdinBuffer = '';
+  private _pendingInteraction: {
+    interaction: StdinInteraction;
+    nextIndex: number;
+    timeoutTimer?: ReturnType<typeof setTimeout>;
+    resolved: boolean;
+  } | null = null;
   private readonly _startedAt = Date.now();
 
   constructor(scenario: HarnessScenario) {
@@ -68,8 +76,7 @@ export class MockProcess extends EventEmitter implements SubprocessMockHandle {
 
   write(data: string): void {
     if (this._exited) throw new Error('Cannot write to exited process');
-    this._stdinBuffer += data;
-    this.emit('stdin', data);
+    this._acceptInput(data);
   }
 
   kill(signal = 'SIGTERM'): void {
@@ -178,7 +185,9 @@ export class MockProcess extends EventEmitter implements SubprocessMockHandle {
           this._stderr += chunk.data;
           this.emit('stderr', chunk.data);
         }
-        this._checkInteractions(chunk);
+        if (this._beginInteraction(chunk, index + 1)) {
+          return;
+        }
         this._emitOutputChunks(index + 1);
       };
 
@@ -221,22 +230,119 @@ export class MockProcess extends EventEmitter implements SubprocessMockHandle {
     }
   }
 
-  private _checkInteractions(chunk: OutputChunk): void {
-    if (!this.scenario.interactions) return;
+  private _beginInteraction(chunk: OutputChunk, nextIndex: number): boolean {
+    if (!this.scenario.interactions || this._pendingInteraction) return false;
     for (const interaction of this.scenario.interactions) {
       const pattern = typeof interaction.triggerPattern === 'string'
         ? new RegExp(interaction.triggerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
         : interaction.triggerPattern;
 
-      if (pattern.test(chunk.data)) {
-        const delay = interaction.delayMs ?? 0;
-        this._schedule(delay, () => {
-          if (!this._exited) {
-            this.emit('auto-response', interaction.response);
+      if (!pattern.test(chunk.data)) {
+        continue;
+      }
+
+      this._pendingInteraction = {
+        interaction,
+        nextIndex,
+        resolved: false,
+      };
+
+      if (interaction.timeoutMs !== undefined) {
+        const timer = setTimeout(() => {
+          if (!this._pendingInteraction?.resolved) {
+            this._resolveInteraction('timeout');
           }
+        }, interaction.timeoutMs);
+        this._timers.push(timer);
+        this._pendingInteraction.timeoutTimer = timer;
+      }
+
+      if (interaction.response) {
+        this._schedule(interaction.delayMs ?? 0, () => {
+          if (this._exited || !this._pendingInteraction || this._pendingInteraction.resolved) return;
+          this.emit('auto-response', interaction.response);
+          this._acceptInput(interaction.response);
         });
       }
+
+      return true;
     }
+    return false;
+  }
+
+  private _acceptInput(data: string): void {
+    this._stdinBuffer += data;
+    this.emit('stdin', data);
+    if (!this._pendingInteraction || this._pendingInteraction.resolved) {
+      return;
+    }
+
+    const interaction = this._pendingInteraction.interaction;
+    const allowPattern = this._toInputPattern(interaction.allowPattern, /^y(?:es)?\s*$/i);
+    const denyPattern = this._toInputPattern(interaction.denyPattern, /^n(?:o)?\s*$/i);
+
+    if (allowPattern.test(data.trim())) {
+      this._resolveInteraction('allow');
+      return;
+    }
+    if (denyPattern.test(data.trim())) {
+      this._resolveInteraction('deny');
+    }
+  }
+
+  private _resolveInteraction(decision: 'allow' | 'deny' | 'timeout'): void {
+    if (!this._pendingInteraction || this._pendingInteraction.resolved) return;
+
+    const pending = this._pendingInteraction;
+    pending.resolved = true;
+    if (pending.timeoutTimer) {
+      clearTimeout(pending.timeoutTimer);
+    }
+
+    const resolution = decision === 'allow'
+      ? pending.interaction.onAllow
+      : decision === 'deny'
+        ? pending.interaction.onDeny
+        : pending.interaction.onTimeout;
+
+    this._pendingInteraction = null;
+    this._emitResolution(resolution, pending.nextIndex);
+  }
+
+  private _emitResolution(resolution: InteractionResolution | undefined, nextIndex: number): void {
+    const output = resolution?.output ?? [];
+    const emitAt = (index: number) => {
+      if (this._exited) return;
+      if (index >= output.length) {
+        if (resolution?.exitCode !== undefined) {
+          this._exit(resolution.exitCode);
+          return;
+        }
+        this._emitOutputChunks(nextIndex);
+        return;
+      }
+
+      const chunk = output[index]!;
+      this._schedule(chunk.delayMs ?? 0, () => {
+        if (this._exited) return;
+        if (chunk.stream === 'stdout') {
+          this._stdout += chunk.data;
+          this.emit('stdout', chunk.data);
+        } else {
+          this._stderr += chunk.data;
+          this.emit('stderr', chunk.data);
+        }
+        emitAt(index + 1);
+      });
+    };
+
+    emitAt(0);
+  }
+
+  private _toInputPattern(pattern: string | RegExp | undefined, fallback: RegExp): RegExp {
+    if (!pattern) return fallback;
+    if (pattern instanceof RegExp) return pattern;
+    return new RegExp(pattern, 'i');
   }
 
   private _emitSimulatedTelemetry(): void {
@@ -310,6 +416,7 @@ export class MockProcess extends EventEmitter implements SubprocessMockHandle {
   }
 
   private _cleanup(): void {
+    this._pendingInteraction = null;
     for (const timer of this._timers) {
       clearTimeout(timer);
     }

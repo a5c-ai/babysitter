@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { MockProcess } from '../src/mock-process.js';
 import type { HarnessScenario } from '../src/types.js';
+import { buildInteractiveScenario } from '../src/scenarios/interactive.js';
 
 function simpleScenario(overrides?: Partial<HarnessScenario>): HarnessScenario {
   return {
@@ -11,6 +12,10 @@ function simpleScenario(overrides?: Partial<HarnessScenario>): HarnessScenario {
     ],
     ...overrides,
   };
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 describe('MockProcess', () => {
@@ -145,6 +150,45 @@ describe('MockProcess', () => {
       proc.start();
       await proc.waitForExit();
       expect(() => proc.write('late')).toThrow('Cannot write to exited process');
+    });
+
+    it('prompt interactions block later output until stdin approval arrives', async () => {
+      const proc = new MockProcess(buildInteractiveScenario('prompt'));
+      proc.start();
+
+      await wait(140);
+      expect(proc.stderr).toContain('Do you want to allow this tool call?');
+      expect(proc.stdout).not.toContain('"type":"result"');
+      expect(proc.exited).toBe(false);
+
+      proc.write('y\n');
+      const result = await proc.waitForExit();
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('"subtype":"success"');
+    });
+
+    it('deny interactions exit non-zero and do not emit a success result', async () => {
+      const proc = new MockProcess(buildInteractiveScenario('deny'));
+      proc.start();
+
+      const result = await proc.waitForExit();
+      expect(result.exitCode).toBeGreaterThan(0);
+      expect(result.stderr).toContain('Do you want to allow this tool call?');
+      expect(result.stdout).not.toContain('"subtype":"success"');
+      expect(result.stdout).toContain('denied');
+    });
+
+    it('timeout interactions terminate after the approval deadline', async () => {
+      const proc = new MockProcess(buildInteractiveScenario('timeout'));
+      proc.start();
+
+      await wait(40);
+      expect(proc.exited).toBe(false);
+
+      const result = await proc.waitForExit();
+      expect(result.exitCode).toBeGreaterThan(0);
+      expect(result.stderr).toContain('timed out');
+      expect(result.stdout).not.toContain('"subtype":"success"');
     });
   });
 

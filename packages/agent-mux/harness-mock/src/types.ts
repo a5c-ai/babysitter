@@ -104,15 +104,41 @@ export interface OutputChunk {
 }
 
 /** An expected stdin prompt and the mock's response behavior. */
+export interface InteractionResolution {
+  /** Output to emit after the interaction resolves. */
+  output?: OutputChunk[];
+
+  /** Exit code to use after resolution. If omitted, resume the base scenario. */
+  exitCode?: number;
+}
+
 export interface StdinInteraction {
-  /** Pattern to match on stdout before this interaction fires. */
+  /** Pattern to match on stdout/stderr before this interaction fires. */
   triggerPattern: string | RegExp;
 
-  /** Response to write to stdin. */
+  /** Auto-response to feed into stdin when the prompt appears. */
   response: string;
 
   /** Delay before responding (ms). */
   delayMs?: number;
+
+  /** Explicit allow matcher for manual stdin input. Defaults to /^y(es)?\\s*$/i. */
+  allowPattern?: string | RegExp;
+
+  /** Explicit deny matcher for manual stdin input. Defaults to /^n(o)?\\s*$/i. */
+  denyPattern?: string | RegExp;
+
+  /** How long to wait for approval input before timing out. */
+  timeoutMs?: number;
+
+  /** Output/exit behavior once the interaction is allowed. */
+  onAllow?: InteractionResolution;
+
+  /** Output/exit behavior once the interaction is denied. */
+  onDeny?: InteractionResolution;
+
+  /** Output/exit behavior once the interaction times out. */
+  onTimeout?: InteractionResolution;
 }
 
 // ---------------------------------------------------------------------------

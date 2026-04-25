@@ -43,6 +43,7 @@ describe('resolveScenario / listScenarioNames', () => {
     expect(all).toContain('qwen:tool-call');
     expect(all).toContain('error:rate-limit');
     expect(all).toContain('interactive:yolo');
+    expect(all).toContain('interactive:timeout');
   });
 
   it('returns undefined for unknown', () => {
@@ -125,6 +126,27 @@ describe('Interaction scenarios', () => {
 
   it('prompt mode has no auto-response configured', () => {
     const scen = buildInteractiveScenario('prompt');
-    expect(scen.interactions).toBeUndefined();
+    expect(scen.interactions).toHaveLength(1);
+    expect(scen.interactions?.[0]?.response).toBe('');
+  });
+
+  it('deny mode is modeled as a real rejection, not a successful completion', async () => {
+    const proc = new MockProcess(buildInteractiveScenario('deny'));
+    proc.start();
+    const res = await proc.waitForExit();
+    expect(res.exitCode).toBeGreaterThan(0);
+    expect(res.stdout).not.toContain('"subtype":"success"');
+    expect(res.stdout).toContain('denied');
+  });
+
+  it('timeout mode is available as an explicit interactive scenario', async () => {
+    const scen = buildInteractiveScenario('timeout');
+    expect(scen.name).toBe('interactive:timeout');
+
+    const proc = new MockProcess(scen);
+    proc.start();
+    const res = await proc.waitForExit();
+    expect(res.exitCode).toBeGreaterThan(0);
+    expect(res.stderr).toContain('timed out');
   });
 });

@@ -14,6 +14,7 @@
 
 import { resolveScenario, listScenarioNames } from '../scenarios/index.js';
 import type { HarnessScenario } from '../types.js';
+import { MockProcess } from '../mock-process.js';
 
 interface Args {
   scenario?: string;
@@ -102,33 +103,18 @@ export async function runMockHarness(
     });
   }
 
-  await replayScenario(scenario, streams);
-  return scenario.process?.exitCode ?? 0;
-}
-
-async function replayScenario(
-  scenario: HarnessScenario,
-  streams: { stdout: NodeJS.WritableStream; stderr: NodeJS.WritableStream },
-): Promise<void> {
-  const proc = scenario.process;
-  const startup = proc?.startupDelayMs ?? 0;
-  if (startup > 0) await wait(startup);
-
-  for (const chunk of scenario.output ?? []) {
-    if (chunk.delayMs && chunk.delayMs > 0) await wait(chunk.delayMs);
-    if (chunk.stream === 'stdout') streams.stdout.write(chunk.data);
-    else streams.stderr.write(chunk.data);
+  const proc = new MockProcess(scenario);
+  proc.on('stdout', (data: string) => streams.stdout.write(data));
+  proc.on('stderr', (data: string) => streams.stderr.write(data));
+  if (streams.stdin) {
+    streams.stdin.on('data', (chunk: Buffer | string) => {
+      const s = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+      proc.write(s);
+    });
   }
-
-  if (proc?.hang) {
-    await new Promise<void>(() => { /* never resolves */ });
-  }
-  const shutdown = proc?.shutdownDelayMs ?? 0;
-  if (shutdown > 0) await wait(shutdown);
-}
-
-function wait(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
+  proc.start();
+  const result = await proc.waitForExit();
+  return result.exitCode;
 }
 
 function helpText(): string {

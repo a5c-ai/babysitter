@@ -12,10 +12,10 @@
  * MockProcess fires when it sees the prompt pattern.
  */
 
-import type { HarnessScenario } from '../types.js';
+import type { HarnessScenario, StdinInteraction } from '../types.js';
 import { claudeSystemInit, claudeAssistantText, claudeResult, stderrChunk, stdoutChunk } from './wire-format.js';
 
-export type InteractionMode = 'yolo' | 'prompt' | 'deny';
+export type InteractionMode = 'yolo' | 'prompt' | 'deny' | 'timeout';
 
 export function buildInteractiveScenario(mode: InteractionMode): HarnessScenario {
   const prompt = 'Do you want to allow this tool call? (y/n)';
@@ -27,21 +27,40 @@ export function buildInteractiveScenario(mode: InteractionMode): HarnessScenario
     stderrChunk(prompt + '\n', 10),
   ];
 
-  // Only auto-respond in yolo/deny modes. In prompt mode the driver
-  // (user / test) writes to stdin explicitly.
+  const interaction: StdinInteraction = {
+    triggerPattern: 'Do you want to allow',
+    response,
+    delayMs: 20,
+    timeoutMs: mode === 'timeout' ? 80 : undefined,
+    onAllow: {
+      output: [
+        stdoutChunk(claudeResult('sess_interact', 'done'), 0),
+      ],
+      exitCode: 0,
+    },
+    onDeny: {
+      output: [
+        stdoutChunk(claudeAssistantText('Tool call denied.'), 0),
+      ],
+      exitCode: 1,
+    },
+    onTimeout: {
+      output: [
+        stderrChunk('Approval timed out.\n', 0),
+      ],
+      exitCode: 1,
+    },
+  };
+
   const base: HarnessScenario = {
     harness: 'claude-code',
     name: `interactive:${mode}`,
-    process: { exitCode: 0, shutdownDelayMs: 50 },
-    output: [
-      ...output,
-      stdoutChunk(claudeResult('sess_interact', mode === 'deny' ? 'denied' : 'done'), 80),
-    ],
+    process: { exitCode: mode === 'deny' || mode === 'timeout' ? 1 : 0, shutdownDelayMs: 50 },
+    output,
+    interactions: [interaction],
   };
-  if (response) {
-    base.interactions = [
-      { triggerPattern: 'Do you want to allow', response, delayMs: 20 },
-    ];
+  if (mode === 'prompt' || mode === 'timeout') {
+    base.interactions = [{ ...interaction, response: '' }];
   }
   return base;
 }
@@ -50,4 +69,5 @@ export const INTERACTION_SCENARIOS: Record<InteractionMode, HarnessScenario> = {
   yolo: buildInteractiveScenario('yolo'),
   prompt: buildInteractiveScenario('prompt'),
   deny: buildInteractiveScenario('deny'),
+  timeout: buildInteractiveScenario('timeout'),
 };

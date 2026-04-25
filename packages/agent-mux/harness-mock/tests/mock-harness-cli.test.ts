@@ -10,6 +10,10 @@ function collectStream(): { stream: PassThrough; text: () => string } {
   return { stream: s, text: () => Buffer.concat(chunks).toString('utf8') };
 }
 
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 describe('mock-harness parseArgs', () => {
   it('parses flags', () => {
     const a = parseArgs(['--scenario', 'x:y', '--delay', '5', '--stdin-echo', '--exit-code', '7', '--fail-after', '2']);
@@ -99,6 +103,52 @@ describe('mock-harness runMockHarness', () => {
     const code = await p;
     expect(code).toBe(0);
     expect(so.text()).toContain('stdin:hello');
+  });
+
+  it('interactive:prompt waits for stdin before completing', async () => {
+    const so = collectStream(); const se = collectStream();
+    const stdin = new PassThrough();
+    let settled = false;
+    const run = runMockHarness(
+      { stdinEcho: false, list: false, help: false, scenario: 'interactive:prompt', delay: 0 },
+      { stdout: so.stream, stderr: se.stream, stdin },
+    ).then((code) => {
+      settled = true;
+      return code;
+    });
+
+    await wait(140);
+    expect(settled).toBe(false);
+    expect(se.text()).toContain('Do you want to allow this tool call?');
+    expect(so.text()).not.toContain('"type":"result"');
+
+    stdin.write('y\n');
+    const code = await run;
+    expect(code).toBe(0);
+    expect(so.text()).toContain('"subtype":"success"');
+  });
+
+  it('interactive:deny exits non-zero without a success result', async () => {
+    const so = collectStream(); const se = collectStream();
+    const code = await runMockHarness(
+      { stdinEcho: false, list: false, help: false, scenario: 'interactive:deny', delay: 0 },
+      { stdout: so.stream, stderr: se.stream },
+    );
+    expect(code).toBeGreaterThan(0);
+    expect(se.text()).toContain('Do you want to allow this tool call?');
+    expect(so.text()).not.toContain('"subtype":"success"');
+    expect(so.text()).toContain('denied');
+  });
+
+  it('interactive:timeout exits after the approval window closes', async () => {
+    const so = collectStream(); const se = collectStream();
+    const code = await runMockHarness(
+      { stdinEcho: false, list: false, help: false, scenario: 'interactive:timeout', delay: 0 },
+      { stdout: so.stream, stderr: se.stream, stdin: new PassThrough() },
+    );
+    expect(code).toBeGreaterThan(0);
+    expect(se.text()).toContain('timed out');
+    expect(so.text()).not.toContain('"subtype":"success"');
   });
 
   it('--help returns 0 and prints usage', async () => {
