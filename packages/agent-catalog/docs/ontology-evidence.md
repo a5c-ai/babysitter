@@ -46,6 +46,18 @@
 - `manifest.json` lists the shard files; SDK consumers can assemble them through `getOntologyEvidenceSnapshot()`
 - the shard files are grouped into small batches by evidence domain so the derived export does not regress back into a single monolith
 
+## Package asset access
+
+Downstream consumers should use the package's exported graph and evidence subpaths instead of rebuilding paths from `process.cwd()` or repository layout.
+
+- raw graph entrypoint: `require.resolve("@a5c-ai/agent-catalog/graph/agent-catalog.graph.yaml")`
+- raw evidence manifest: `require.resolve("@a5c-ai/agent-catalog/evidence/ontology-evidence/manifest.json")`
+- runtime helpers exported by the package:
+  - `resolveCatalogGraphAssetPath("agent-catalog.graph.yaml")`
+  - `resolveCatalogEvidenceAssetPath("ontology-evidence/manifest.json")`
+
+The package runtime uses the same resolver internally, so monorepo source usage and installed-package usage follow one asset resolution path.
+
 ## Refresh workflow
 
 1. Update the relevant YAML source under `packages/agent-catalog/graph/nodes/evidence/`.

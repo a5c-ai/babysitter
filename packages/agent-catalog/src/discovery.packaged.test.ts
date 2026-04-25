@@ -100,6 +100,45 @@ describe("agent-catalog packaged discovery", () => {
     expect(result.processCount).toBe(result.counts.processes);
   });
 
+  it("publishes graph and evidence assets through explicit subpath exports", () => {
+    const output = exec(
+      "node",
+      [
+        "-e",
+        [
+          'const catalog = require("@a5c-ai/agent-catalog");',
+          'const graphExport = require.resolve("@a5c-ai/agent-catalog/graph/agent-catalog.graph.yaml");',
+          'const evidenceExport = require.resolve("@a5c-ai/agent-catalog/evidence/ontology-evidence/manifest.json");',
+          "process.stdout.write(JSON.stringify({",
+          "  graphExport,",
+          "  evidenceExport,",
+          '  helperGraph: catalog.resolveCatalogGraphAssetPath("agent-catalog.graph.yaml"),',
+          '  helperEvidence: catalog.resolveCatalogEvidenceAssetPath("ontology-evidence/manifest.json"),',
+          "  graphId: catalog.getCatalogGraphDocument().graphId,",
+          "  shardCount: catalog.getOntologyEvidenceManifest().shards.length,",
+          "}));",
+        ].join("\n"),
+      ],
+      consumerRoot,
+    );
+
+    const result = JSON.parse(output) as {
+      graphExport: string;
+      evidenceExport: string;
+      helperGraph: string;
+      helperEvidence: string;
+      graphId: string;
+      shardCount: number;
+    };
+
+    expect(result.graphExport).toBe(result.helperGraph);
+    expect(result.evidenceExport).toBe(result.helperEvidence);
+    expect(result.graphExport).toContain(path.join("@a5c-ai", "agent-catalog", "graph", "agent-catalog.graph.yaml"));
+    expect(result.evidenceExport).toContain(path.join("@a5c-ai", "agent-catalog", "evidence", "ontology-evidence", "manifest.json"));
+    expect(result.graphId).toBe("graph:agent-catalog");
+    expect(result.shardCount).toBeGreaterThan(0);
+  });
+
   it("fails explicitly when packaged discovery assets are unavailable", () => {
     const installedRoot = path.join(consumerRoot, "node_modules", "@a5c-ai", "agent-catalog");
     const snapshotPath = path.join(installedRoot, "dist", "discovery-snapshot.json");

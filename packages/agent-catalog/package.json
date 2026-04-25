@@ -7,6 +7,20 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./graph": "./graph/agent-catalog.graph.yaml",
+    "./graph/*": "./graph/*",
+    "./evidence": "./evidence/ontology-evidence/manifest.json",
+    "./evidence/*": "./evidence/*",
+    "./docs": "./docs/ontology-evidence.md",
+    "./docs/*": "./docs/*"
+  },
   "files": [
     "dist",
     "graph",

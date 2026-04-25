@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   AGENT_CATALOG,
@@ -39,6 +42,8 @@ import {
   listPackageSurfaces,
   lookupHarnessImage,
   listAgentVersions,
+  resolveCatalogEvidenceAssetPath,
+  resolveCatalogGraphAssetPath,
   supportsAgentCapability,
   searchOntologyEvidence,
 } from "./index";
@@ -48,6 +53,25 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(getCatalogGraphDocument().graphId).toBe("graph:agent-catalog");
     expect(getCatalogOntologySchema().version).toContain("agent-catalog-v2");
     expect(getCatalogGraphSnapshot().nodes.length).toBeGreaterThan(50);
+  });
+
+  it("resolves graph and evidence assets from the package runtime path instead of process.cwd()", () => {
+    const previousCwd = process.cwd();
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "agent-catalog-runtime-"));
+
+    process.chdir(tempRoot);
+    try {
+      const graphPath = resolveCatalogGraphAssetPath("agent-catalog.graph.yaml");
+      const evidenceManifestPath = resolveCatalogEvidenceAssetPath("ontology-evidence", "manifest.json");
+
+      expect(graphPath).toBe(path.resolve(__dirname, "..", "graph", "agent-catalog.graph.yaml"));
+      expect(evidenceManifestPath).toBe(path.resolve(__dirname, "..", "evidence", "ontology-evidence", "manifest.json"));
+      expect(getCatalogGraphDocument().graphId).toBe("graph:agent-catalog");
+      expect(getOntologyEvidenceManifest().shards.length).toBeGreaterThan(0);
+    } finally {
+      process.chdir(previousCwd);
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("keeps version-scoped codex rows", () => {

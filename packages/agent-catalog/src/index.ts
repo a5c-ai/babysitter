@@ -1,4 +1,5 @@
 export * from "./models";
+export * from "./assets";
 export * from "./data";
 export * from "./evidence";
 export { listOntologyClaims } from "./evidence";
