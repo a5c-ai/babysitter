@@ -123,6 +123,38 @@ export async function POST(request: Request) {
           reviewers: typeof body.reviewers === 'string' ? body.reviewers : undefined,
         });
         break;
+      case 'create-issue': {
+        if (typeof body.projectId !== 'string' || typeof body.title !== 'string') {
+          throw new AppError('projectId and title are required.', 'BAD_REQUEST', 400);
+        }
+        const created = await service.createIssue({
+          projectId: body.projectId,
+          title: body.title,
+          summary: typeof body.summary === 'string' ? body.summary : undefined,
+          description: typeof body.description === 'string' ? body.description : undefined,
+          status:
+            body.status === 'backlog' ||
+            body.status === 'ready' ||
+            body.status === 'in-progress' ||
+            body.status === 'review' ||
+            body.status === 'done'
+              ? body.status
+              : undefined,
+          priority:
+            body.priority === 'critical' ||
+            body.priority === 'high' ||
+            body.priority === 'medium' ||
+            body.priority === 'low'
+              ? body.priority
+              : undefined,
+          metadata:
+            body.metadata && typeof body.metadata === 'object'
+              ? (body.metadata as Record<string, unknown>)
+              : undefined,
+        });
+
+        return NextResponse.json(created, { headers: NO_CACHE_HEADERS });
+      }
       case 'update-project-collaboration':
         if (typeof body.projectId !== 'string') {
           throw new AppError('projectId is required.', 'BAD_REQUEST', 400);

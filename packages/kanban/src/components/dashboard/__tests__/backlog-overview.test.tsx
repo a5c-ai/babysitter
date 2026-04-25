@@ -1,7 +1,19 @@
-import { render, screen } from "@/test/test-utils";
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { render, screen, setupUser, waitFor, within } from "@/test/test-utils";
 
 import { BacklogOverview } from "../backlog-overview";
+
+const moveIssueMock = vi.fn();
+const linkRepositoryMock = vi.fn();
+const updateRepositorySettingsMock = vi.fn();
+const createPullRequestMock = vi.fn();
+const updateProjectCollaborationMock = vi.fn();
+const updateIssueCollaborationMock = vi.fn();
+const refreshMock = vi.fn();
+const createIssueMock = vi.fn();
+
+let creatingIssueState = false;
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
@@ -169,15 +181,17 @@ vi.mock("@/hooks/use-backlog", () => ({
     },
     loading: false,
     error: undefined,
-    moveIssue: vi.fn(),
-    linkRepository: vi.fn(),
-    updateRepositorySettings: vi.fn(),
-    createPullRequest: vi.fn(),
-    updateProjectCollaboration: vi.fn(),
-    updateIssueCollaboration: vi.fn(),
+    moveIssue: moveIssueMock,
+    linkRepository: linkRepositoryMock,
+    updateRepositorySettings: updateRepositorySettingsMock,
+    createPullRequest: createPullRequestMock,
+    createIssue: createIssueMock,
+    updateProjectCollaboration: updateProjectCollaborationMock,
+    updateIssueCollaboration: updateIssueCollaborationMock,
     movingIssueId: null,
     mutatingIssueId: null,
-    refresh: vi.fn(),
+    creatingIssue: creatingIssueState,
+    refresh: refreshMock,
   }),
 }));
 
@@ -194,6 +208,19 @@ vi.mock("@/hooks/use-reviews", () => ({
 }));
 
 describe("BacklogOverview", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    creatingIssueState = false;
+    moveIssueMock.mockReset();
+    linkRepositoryMock.mockReset();
+    updateRepositorySettingsMock.mockReset();
+    createPullRequestMock.mockReset();
+    updateProjectCollaborationMock.mockReset();
+    updateIssueCollaborationMock.mockReset();
+    createIssueMock.mockReset();
+    refreshMock.mockReset();
+  });
+
   it("renders collaboration settings, permission policy, and issue activity", () => {
     render(<BacklogOverview />);
 
@@ -202,5 +229,113 @@ describe("BacklogOverview", () => {
     expect(screen.getByText("Issue activity")).toBeInTheDocument();
     expect(screen.getByText("Updated shared team settings, roster, and permission policy.")).toBeInTheDocument();
     expect(screen.getByText("Set 1 assignees and 2 collaborators for KANBAN-GAP-007.")).toBeInTheDocument();
+  });
+
+  it("opens create mode from the board header and resets the draft after close and reopen", async () => {
+    const user = setupUser();
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByTestId("board-header-create"));
+    expect(screen.getByText("Draft is empty.")).toBeInTheDocument();
+
+    const title = screen.getByLabelText("Issue title");
+    await user.type(title, "Draft that should be cleared");
+
+    expect(screen.getByTestId("create-issue-panel")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Draft autosaved locally.")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByTestId("create-issue-panel")).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId("board-header-create"));
+    expect(screen.getByLabelText("Issue title")).toHaveValue("");
+    expect(screen.getByText("Draft is empty.")).toBeInTheDocument();
+  });
+
+  it("opens create mode from a column header, seeds the target column, and blocks invalid submit", async () => {
+    const user = setupUser();
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByTestId("create-column-standard-review"));
+    const panel = screen.getByTestId("create-issue-panel");
+
+    expect(screen.getByLabelText("Target column")).toHaveValue("review");
+
+    await user.click(within(panel).getByRole("button", { name: "Create issue" }));
+
+    expect(screen.getByText("Title is required before the issue can be created.")).toBeInTheDocument();
+    expect(createIssueMock).not.toHaveBeenCalled();
+  });
+
+  it("submits through the canonical create path and keeps the create panel beside list view", async () => {
+    const user = setupUser();
+    createIssueMock.mockResolvedValue({
+      overview: {},
+      issue: { id: "KANBAN-AUTO-101", key: "KANBAN-AUTO-101", title: "List-view create" },
+    });
+
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByRole("button", { name: "List view" }));
+    await user.click(screen.getByTestId("board-header-create"));
+
+    expect(screen.getByTestId("kanban-list")).toBeInTheDocument();
+    const panel = screen.getByTestId("create-issue-panel");
+
+    await user.type(screen.getByLabelText("Issue title"), "List-view create");
+    await user.type(screen.getByLabelText("Issue summary"), "Keep panel beside alternate surface");
+    await user.selectOptions(screen.getByLabelText("Target column"), "in-progress");
+    await user.selectOptions(screen.getByLabelText("Priority"), "high");
+    await user.click(within(panel).getByRole("button", { name: "Create issue" }));
+
+    await waitFor(() => {
+      expect(createIssueMock).toHaveBeenCalledWith({
+        projectId: "kanban-app",
+        title: "List-view create",
+        summary: "Keep panel beside alternate surface",
+        priority: "high",
+        status: "in-progress",
+        metadata: {
+          createSource: "header",
+          createWorkflowState: "in-progress",
+          createMode: "board",
+        },
+      });
+    });
+
+    expect(screen.getByText("Created KANBAN-AUTO-101 from board header create mode.")).toBeInTheDocument();
+  });
+
+  it("surfaces partial-save failure state and preserves the draft for retry", async () => {
+    const user = setupUser();
+    createIssueMock.mockRejectedValue(new Error("Backend unavailable"));
+
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByTestId("board-header-create"));
+    await user.type(screen.getByLabelText("Issue title"), "Retry me");
+    await user.type(screen.getByLabelText("Issue summary"), "Draft should remain after failure");
+    await user.click(within(screen.getByTestId("create-issue-panel")).getByRole("button", { name: "Create issue" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Backend unavailable")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Issue save failed. Draft preserved locally for retry.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Issue title")).toHaveValue("Retry me");
+    expect(screen.getByLabelText("Issue summary")).toHaveValue("Draft should remain after failure");
+  });
+
+  it("shows the explicit loading state when issue creation is already in flight", async () => {
+    const user = setupUser();
+    creatingIssueState = true;
+
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByTestId("board-header-create"));
+
+    expect(screen.getByRole("button", { name: "Creating issue…" })).toBeDisabled();
   });
 });

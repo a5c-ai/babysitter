@@ -18,6 +18,8 @@ import {
   GitBranch,
   Github,
   Layers,
+  ListTodo,
+  Plus,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -31,6 +33,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useBacklog } from "@/hooks/use-backlog";
+import { usePersistedState } from "@/hooks/use-persisted-state";
 import { useReviews } from "@/hooks/use-reviews";
 import { ReviewPanel } from "@/components/review/review-panel";
 
@@ -138,6 +141,247 @@ function formatActivity(timestamp?: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+type BoardPresentation = "board" | "list";
+type CreateEntrySource = "header" | "column";
+
+interface CreateIssueDraft {
+  title: string;
+  summary: string;
+  workflowState: KanbanWorkflowState;
+  priority: "critical" | "high" | "medium" | "low";
+}
+
+type AutosaveStatus = "idle" | "saving" | "saved" | "partial";
+
+interface CreateModeState {
+  source: CreateEntrySource;
+  workflowState: KanbanWorkflowState;
+}
+
+function createEmptyDraft(workflowState: KanbanWorkflowState = "todo"): CreateIssueDraft {
+  return {
+    title: "",
+    summary: "",
+    workflowState,
+    priority: workflowState === "in-progress" || workflowState === "review" ? "high" : "medium",
+  };
+}
+
+function workflowStateToIssueStatus(state: KanbanWorkflowState): "backlog" | "in-progress" | "review" | "done" {
+  switch (state) {
+    case "in-progress":
+      return "in-progress";
+    case "review":
+      return "review";
+    case "done":
+      return "done";
+    case "todo":
+    default:
+      return "backlog";
+  }
+}
+
+function autosaveCopy(status: AutosaveStatus): string {
+  switch (status) {
+    case "saving":
+      return "Autosaving draft…";
+    case "saved":
+      return "Draft autosaved locally.";
+    case "partial":
+      return "Issue save failed. Draft preserved locally for retry.";
+    default:
+      return "Draft is empty.";
+  }
+}
+
+interface CreateIssuePanelProps {
+  draft: CreateIssueDraft;
+  autosaveStatus: AutosaveStatus;
+  creatingIssue: boolean;
+  error: string | null;
+  validationError: string | null;
+  onChange: (updater: (current: CreateIssueDraft) => CreateIssueDraft) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}
+
+function CreateIssuePanel({
+  draft,
+  autosaveStatus,
+  creatingIssue,
+  error,
+  validationError,
+  onChange,
+  onClose,
+  onSubmit,
+}: CreateIssuePanelProps) {
+  return (
+    <aside
+      className="rounded-3xl border border-primary/20 bg-background p-5 shadow-lg"
+      data-testid="create-issue-panel"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
+            Create mode
+          </p>
+          <h3 className="mt-1 text-xl font-semibold text-foreground">Create issue beside the board</h3>
+          <p className="mt-2 text-sm leading-6 text-foreground-muted">
+            New issues open from board-level entry points and stay anchored to the planning surface
+            while draft, validation, save, autosave, and failure state remain explicit.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-3 text-sm text-foreground-muted"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground-muted">
+        {autosaveCopy(autosaveStatus)}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2 text-xs text-foreground-muted">
+        <span className="rounded-full border border-border px-2.5 py-1">
+          Target column {stateLabel(draft.workflowState)}
+        </span>
+        <span className="rounded-full border border-border px-2.5 py-1">
+          Priority {draft.priority}
+        </span>
+      </div>
+
+      <form
+        className="mt-4 grid gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Title
+          <input
+            aria-label="Issue title"
+            value={draft.title}
+            onChange={(event) =>
+              onChange((current) => ({
+                ...current,
+                title: event.target.value,
+              }))
+            }
+            placeholder="Summarize the work item"
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          />
+        </label>
+
+        <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+          Summary
+          <textarea
+            aria-label="Issue summary"
+            value={draft.summary}
+            onChange={(event) =>
+              onChange((current) => ({
+                ...current,
+                summary: event.target.value,
+              }))
+            }
+            placeholder="Capture the outcome expected from this issue."
+            className="mt-2 min-h-24 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+          />
+        </label>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Target column
+            <select
+              aria-label="Target column"
+              value={draft.workflowState}
+              onChange={(event) =>
+                onChange((current) => ({
+                  ...current,
+                  workflowState: event.target.value as KanbanWorkflowState,
+                }))
+              }
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            >
+              {workflowOrder.map((state) => (
+                <option key={state} value={state}>
+                  {stateLabel(state)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
+            Priority
+            <select
+              aria-label="Priority"
+              value={draft.priority}
+              onChange={(event) =>
+                onChange((current) => ({
+                  ...current,
+                  priority: event.target.value as CreateIssueDraft["priority"],
+                }))
+              }
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+            >
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+        </div>
+
+        {validationError ? (
+          <div className="rounded-2xl border border-error/30 bg-error-muted px-4 py-3 text-sm text-error">
+            {validationError}
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="rounded-2xl border border-error/30 bg-error-muted px-4 py-3 text-sm text-error">
+            {error}
+          </div>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={creatingIssue}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" />
+          {creatingIssue ? "Creating issue…" : "Create issue"}
+        </button>
+      </form>
+    </aside>
+  );
+}
+
+function renderListCard(card: KanbanBoardCard) {
+  return (
+    <article
+      key={`list-${card.issueId}`}
+      className={`rounded-2xl border p-4 ${issueTone(card)}`}
+      data-testid={`kanban-list-card-${card.issueKey}`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em]">{card.issueKey}</span>
+        <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
+          {stateLabel(card.workflowState)}
+        </span>
+        <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
+          {card.priority}
+        </span>
+      </div>
+      <div className="mt-2 text-base font-semibold">{card.title}</div>
+      {card.summary ? <p className="mt-2 text-sm leading-6 opacity-90">{card.summary}</p> : null}
+    </article>
+  );
 }
 
 interface ProjectCollaborationPanelProps {
@@ -896,15 +1140,30 @@ export function BacklogOverview() {
     linkRepository,
     updateRepositorySettings,
     createPullRequest,
+    createIssue,
     updateProjectCollaboration,
     updateIssueCollaboration,
     movingIssueId,
     mutatingIssueId,
+    creatingIssue,
     refresh,
   } = useBacklog();
   const issueReviews = useReviews({ targetType: "issue" });
   const focusedIssueId = searchParams.get("issueId");
   const focusedIssueKey = searchParams.get("issueKey");
+  const [presentation, setPresentation] = usePersistedState<BoardPresentation>(
+    "backlog-presentation",
+    "board",
+  );
+  const [createMode, setCreateMode] = useState<CreateModeState | null>(null);
+  const [draft, setDraft] = usePersistedState<CreateIssueDraft>(
+    "board-create-draft",
+    createEmptyDraft(),
+  );
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>("idle");
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [createNotice, setCreateNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const issueAnchor = focusedIssueId
@@ -919,6 +1178,31 @@ export function BacklogOverview() {
 
     issueAnchor.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [focusedIssueId, focusedIssueKey]);
+
+  useEffect(() => {
+    if (!createMode) {
+      return;
+    }
+
+    const baselineDraft = createEmptyDraft(createMode.workflowState);
+    const isPristineDraft =
+      draft.title === baselineDraft.title &&
+      draft.summary === baselineDraft.summary &&
+      draft.workflowState === baselineDraft.workflowState &&
+      draft.priority === baselineDraft.priority;
+
+    if (isPristineDraft) {
+      setAutosaveStatus("idle");
+      return;
+    }
+
+    setAutosaveStatus("saving");
+    const timeout = window.setTimeout(() => {
+      setAutosaveStatus("saved");
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [createMode, draft.title, draft.summary, draft.priority, draft.workflowState]);
 
   if (loading && !snapshot) {
     return (
@@ -958,6 +1242,62 @@ export function BacklogOverview() {
 
   if (!primaryProject || !primaryBoard) {
     return null;
+  }
+
+  const boardCards = primaryBoard.swimlanes.flatMap((swimlane) =>
+    workflowOrder.flatMap((state) => findCardsForCell(primaryBoard, swimlane.id, state)),
+  );
+
+  function openCreateMode(source: CreateEntrySource, workflowState: KanbanWorkflowState = "todo") {
+    setCreateMode({ source, workflowState });
+    setDraft(createEmptyDraft(workflowState));
+    setCreateError(null);
+    setValidationError(null);
+    setAutosaveStatus("idle");
+    setCreateNotice(null);
+  }
+
+  function closeCreateMode() {
+    setCreateMode(null);
+    setDraft(createEmptyDraft());
+    setCreateError(null);
+    setValidationError(null);
+    setAutosaveStatus("idle");
+  }
+
+  async function handleCreateIssue() {
+    if (!createMode) {
+      return;
+    }
+
+    if (!draft.title.trim()) {
+      setValidationError("Title is required before the issue can be created.");
+      return;
+    }
+
+    setValidationError(null);
+    setCreateError(null);
+
+    try {
+      const created = await createIssue({
+        projectId: primaryProject.id,
+        title: draft.title.trim(),
+        summary: draft.summary.trim() || undefined,
+        priority: draft.priority,
+        status: workflowStateToIssueStatus(draft.workflowState),
+        metadata: {
+          createSource: createMode.source,
+          createWorkflowState: draft.workflowState,
+          createMode: "board",
+        },
+      });
+
+      setCreateNotice(`Created ${created.issue.key} from ${createMode.source === "column" ? "column header" : "board header"} create mode.`);
+      closeCreateMode();
+    } catch (cause) {
+      setCreateError(cause instanceof Error ? cause.message : "Failed to create issue.");
+      setAutosaveStatus("partial");
+    }
   }
 
   return (
@@ -1131,192 +1471,300 @@ export function BacklogOverview() {
         ))}
       </div>
 
-      <div className="mt-6 space-y-5" data-testid="kanban-board">
-        {primaryBoard.swimlanes
-          .filter((swimlane) => swimlane.issueIds.length > 0)
-          .map((swimlane) => (
-            <section
-              key={swimlane.id}
-              className="rounded-3xl border border-border bg-background/70 p-4"
-              data-testid={`kanban-swimlane-${swimlane.id}`}
-            >
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
-                    Swimlane
-                  </p>
-                  <h3 className="mt-1 text-lg font-semibold text-foreground">{swimlane.name}</h3>
-                </div>
-                <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">
-                  {swimlane.issueIds.length} cards
-                </span>
-              </div>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
+            Planning surface
+          </p>
+          <h3 className="mt-1 text-lg font-semibold text-foreground">
+            Create issues from the board without leaving context
+          </h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setPresentation("board")}
+            className={`inline-flex h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold ${
+              presentation === "board"
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : "border-border bg-background text-foreground-muted"
+            }`}
+          >
+            <Layers className="h-4 w-4" />
+            Board view
+          </button>
+          <button
+            type="button"
+            onClick={() => setPresentation("list")}
+            className={`inline-flex h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold ${
+              presentation === "list"
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : "border-border bg-background text-foreground-muted"
+            }`}
+          >
+            <ListTodo className="h-4 w-4" />
+            List view
+          </button>
+          <button
+            type="button"
+            onClick={() => openCreateMode("header")}
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary"
+            data-testid="board-header-create"
+          >
+            <Plus className="h-4 w-4" />
+            Create issue
+          </button>
+        </div>
+      </div>
 
-              <div className="grid gap-4 xl:grid-cols-4">
-                {workflowOrder.map((state) => {
-                  const column = primaryBoard.columns.find((candidate) => candidate.id === state);
-                  const cards = findCardsForCell(primaryBoard, swimlane.id, state);
+      {createNotice ? (
+        <div className="mt-4 rounded-2xl border border-success/30 bg-success-muted px-4 py-3 text-sm text-success">
+          {createNotice}
+        </div>
+      ) : null}
 
-                  if (!column) {
-                    return null;
-                  }
-
-                  return (
-                    <div
-                      key={`${swimlane.id}-${state}`}
-                      className={`rounded-2xl border p-4 ${columnTone(state, column.isOverLimit)}`}
-                      data-testid={`kanban-column-${swimlane.id}-${state}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="text-sm font-semibold text-foreground">
-                            {stateLabel(state)}
-                          </div>
-                          <div className="mt-1 text-xs text-foreground-muted">
-                            {cards.length} cards in this lane
-                          </div>
-                        </div>
-                        <div className="text-right text-xs text-foreground-muted">
-                          <div>{column.issueCount} total</div>
-                          {typeof column.wipLimit === "number" ? (
-                            <div className={column.isOverLimit ? "text-error" : undefined}>
-                              WIP {column.issueCount}/{column.wipLimit}
-                            </div>
-                          ) : (
-                            <div>No WIP cap</div>
-                          )}
-                        </div>
+      <div
+        className={`mt-6 grid gap-5 ${
+          createMode ? "xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,380px)]" : "grid-cols-1"
+        }`}
+      >
+        <div className="space-y-5">
+          {presentation === "board" ? (
+            <div className="space-y-5" data-testid="kanban-board">
+              {primaryBoard.swimlanes
+                .filter((swimlane) => swimlane.issueIds.length > 0)
+                .map((swimlane) => (
+                  <section
+                    key={swimlane.id}
+                    className="rounded-3xl border border-border bg-background/70 p-4"
+                    data-testid={`kanban-swimlane-${swimlane.id}`}
+                  >
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
+                          Swimlane
+                        </p>
+                        <h3 className="mt-1 text-lg font-semibold text-foreground">{swimlane.name}</h3>
                       </div>
+                      <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">
+                        {swimlane.issueIds.length} cards
+                      </span>
+                    </div>
 
-                      <div className="mt-4 space-y-3">
-                        {cards.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-border p-3 text-sm text-foreground-muted">
-                            No cards
-                          </div>
-                        ) : null}
+                    <div className="grid gap-4 xl:grid-cols-4">
+                      {workflowOrder.map((state) => {
+                        const column = primaryBoard.columns.find((candidate) => candidate.id === state);
+                        const cards = findCardsForCell(primaryBoard, swimlane.id, state);
 
-                        {cards.map((card) => (
-                          <article
-                            key={card.issueId}
-                            id={`kanban-issue-${card.issueId}`}
-                            className={`rounded-2xl border p-4 ${issueTone(card)} ${
-                              focusedIssueId === card.issueId || focusedIssueKey === card.issueKey
-                                ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background"
-                                : ""
-                            }`}
-                            data-testid={`kanban-card-${card.issueKey}`}
+                        if (!column) {
+                          return null;
+                        }
+
+                        return (
+                          <div
+                            key={`${swimlane.id}-${state}`}
+                            className={`rounded-2xl border p-4 ${columnTone(state, column.isOverLimit)}`}
+                            data-testid={`kanban-column-${swimlane.id}-${state}`}
                           >
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs font-semibold uppercase tracking-[0.18em]">
-                                {card.issueKey}
-                              </span>
-                              <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
-                                {card.priority}
-                              </span>
-                              <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
-                                {card.readiness}
-                              </span>
-                            </div>
-
-                            <div className="mt-2 text-base font-semibold">{card.title}</div>
-                            {card.summary ? (
-                              <p className="mt-2 text-sm leading-6 opacity-90">{card.summary}</p>
-                            ) : null}
-
-                            {card.review ? (
-                              <div className="mt-3 flex flex-wrap gap-2 text-xs opacity-90">
-                                <span className="rounded-full border border-current/20 px-2 py-0.5">
-                                  Review {card.review.decision}
-                                </span>
-                                <span className="rounded-full border border-current/20 px-2 py-0.5">
-                                  {card.review.openCommentCount} open comments
-                                </span>
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-semibold text-foreground">
+                                  {stateLabel(state)}
+                                </div>
+                                <div className="mt-1 text-xs text-foreground-muted">
+                                  {cards.length} cards in this lane
+                                </div>
                               </div>
-                            ) : null}
-
-                            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs opacity-80">
-                              <span className="inline-flex items-center gap-1">
-                                <GitBranch className="h-3.5 w-3.5" />
-                                {card.dependencyCount} dependencies
-                              </span>
-                              <span className="inline-flex items-center gap-1">
-                                <Workflow className="h-3.5 w-3.5" />
-                                {card.childCount} child issues
-                              </span>
-                              <span className="inline-flex items-center gap-1">
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                                {card.acceptanceProgress.satisfied}/{card.acceptanceProgress.total} accepted
-                              </span>
-                            </div>
-
-                            {card.policySignals.length > 0 ? (
-                              <div className="mt-3 space-y-2">
-                                {card.policySignals.map((signal, index) => (
-                                  <div
-                                    key={`${card.issueId}-${signal.hookId}-${index}`}
-                                    className="rounded-xl border border-current/15 bg-card/70 px-3 py-2 text-xs"
-                                  >
-                                    {signal.message}
+                              <div className="text-right text-xs text-foreground-muted">
+                                <div>{column.issueCount} total</div>
+                                {typeof column.wipLimit === "number" ? (
+                                  <div className={column.isOverLimit ? "text-error" : undefined}>
+                                    WIP {column.issueCount}/{column.wipLimit}
                                   </div>
-                                ))}
-                              </div>
-                            ) : null}
-
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {card.moveTargets.map((target) => (
-                                <button
-                                  key={`${card.issueId}-${target.state}`}
-                                  disabled={!target.allowed || movingIssueId === card.issueId}
-                                  onClick={() => void moveIssue(card.issueId, target.state)}
-                                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border-hover bg-transparent px-3 text-xs font-medium italic tracking-[0.04em] text-foreground transition-all duration-200 hover:bg-card hover:border-primary/30 hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 font-serif"
-                                  data-testid={`move-${card.issueKey}-${target.state}`}
-                                >
-                                  <ArrowRight className="h-3.5 w-3.5" />
-                                  {stateLabel(target.state)}
-                                </button>
-                              ))}
-                            </div>
-
-                            {card.moveTargets.some((target) => target.signals.length > 0) ? (
-                              <div className="mt-3 space-y-2">
-                                {card.moveTargets.flatMap((target) =>
-                                  target.signals.map((signal, index) => (
-                                    <div
-                                      key={`${card.issueId}-${target.state}-${signal.hookId}-${index}`}
-                                      className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground-muted"
-                                    >
-                                      {stateLabel(target.state)}: {signal.message}
-                                    </div>
-                                  )),
+                                ) : (
+                                  <div>No WIP cap</div>
                                 )}
                               </div>
-                            ) : null}
+                            </div>
 
-                            <RepositoryLifecyclePanel
-                              card={card}
-                              mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
-                              onLinkRepository={linkRepository}
-                              onUpdateRepositorySettings={updateRepositorySettings}
-                              onCreatePullRequest={createPullRequest}
-                            />
-                            <IssueCollaborationPanel
-                              card={card}
-                              project={primaryProject}
-                              activityEntries={
-                                snapshot.issues.find((issue) => issue.id === card.issueId)?.activity ?? []
-                              }
-                              mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
-                              onSave={updateIssueCollaboration}
-                            />
-                          </article>
-                        ))}
-                      </div>
+                            <button
+                              type="button"
+                              onClick={() => openCreateMode("column", state)}
+                              className="mt-4 inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-foreground"
+                              data-testid={`create-column-${swimlane.id}-${state}`}
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                              Add issue
+                            </button>
+
+                            <div className="mt-4 space-y-3">
+                              {cards.length === 0 ? (
+                                <div className="rounded-2xl border border-dashed border-border p-3 text-sm text-foreground-muted">
+                                  No cards
+                                </div>
+                              ) : null}
+
+                              {cards.map((card) => (
+                                <article
+                                  key={card.issueId}
+                                  id={`kanban-issue-${card.issueId}`}
+                                  className={`rounded-2xl border p-4 ${issueTone(card)} ${
+                                    focusedIssueId === card.issueId || focusedIssueKey === card.issueKey
+                                      ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background"
+                                      : ""
+                                  }`}
+                                  data-testid={`kanban-card-${card.issueKey}`}
+                                >
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-xs font-semibold uppercase tracking-[0.18em]">
+                                      {card.issueKey}
+                                    </span>
+                                    <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
+                                      {card.priority}
+                                    </span>
+                                    <span className="rounded-full border border-current/20 px-2 py-0.5 text-xs">
+                                      {card.readiness}
+                                    </span>
+                                  </div>
+
+                                  <div className="mt-2 text-base font-semibold">{card.title}</div>
+                                  {card.summary ? (
+                                    <p className="mt-2 text-sm leading-6 opacity-90">{card.summary}</p>
+                                  ) : null}
+
+                                  {card.review ? (
+                                    <div className="mt-3 flex flex-wrap gap-2 text-xs opacity-90">
+                                      <span className="rounded-full border border-current/20 px-2 py-0.5">
+                                        Review {card.review.decision}
+                                      </span>
+                                      <span className="rounded-full border border-current/20 px-2 py-0.5">
+                                        {card.review.openCommentCount} open comments
+                                      </span>
+                                    </div>
+                                  ) : null}
+
+                                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs opacity-80">
+                                    <span className="inline-flex items-center gap-1">
+                                      <GitBranch className="h-3.5 w-3.5" />
+                                      {card.dependencyCount} dependencies
+                                    </span>
+                                    <span className="inline-flex items-center gap-1">
+                                      <Workflow className="h-3.5 w-3.5" />
+                                      {card.childCount} child issues
+                                    </span>
+                                    <span className="inline-flex items-center gap-1">
+                                      <CheckCircle2 className="h-3.5 w-3.5" />
+                                      {card.acceptanceProgress.satisfied}/{card.acceptanceProgress.total} accepted
+                                    </span>
+                                  </div>
+
+                                  {card.policySignals.length > 0 ? (
+                                    <div className="mt-3 space-y-2">
+                                      {card.policySignals.map((signal, index) => (
+                                        <div
+                                          key={`${card.issueId}-${signal.hookId}-${index}`}
+                                          className="rounded-xl border border-current/15 bg-card/70 px-3 py-2 text-xs"
+                                        >
+                                          {signal.message}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : null}
+
+                                  <div className="mt-4 flex flex-wrap gap-2">
+                                    {card.moveTargets.map((target) => (
+                                      <button
+                                        key={`${card.issueId}-${target.state}`}
+                                        disabled={!target.allowed || movingIssueId === card.issueId}
+                                        onClick={() => void moveIssue(card.issueId, target.state)}
+                                        className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border-hover bg-transparent px-3 text-xs font-medium italic tracking-[0.04em] text-foreground transition-all duration-200 hover:bg-card hover:border-primary/30 hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 font-serif"
+                                        data-testid={`move-${card.issueKey}-${target.state}`}
+                                      >
+                                        <ArrowRight className="h-3.5 w-3.5" />
+                                        {stateLabel(target.state)}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                  {card.moveTargets.some((target) => target.signals.length > 0) ? (
+                                    <div className="mt-3 space-y-2">
+                                      {card.moveTargets.flatMap((target) =>
+                                        target.signals.map((signal, index) => (
+                                          <div
+                                            key={`${card.issueId}-${target.state}-${signal.hookId}-${index}`}
+                                            className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground-muted"
+                                          >
+                                            {stateLabel(target.state)}: {signal.message}
+                                          </div>
+                                        )),
+                                      )}
+                                    </div>
+                                  ) : null}
+
+                                  <RepositoryLifecyclePanel
+                                    card={card}
+                                    mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
+                                    onLinkRepository={linkRepository}
+                                    onUpdateRepositorySettings={updateRepositorySettings}
+                                    onCreatePullRequest={createPullRequest}
+                                  />
+                                  <IssueCollaborationPanel
+                                    card={card}
+                                    project={primaryProject}
+                                    activityEntries={
+                                      snapshot.issues.find((issue) => issue.id === card.issueId)?.activity ?? []
+                                    }
+                                    mutating={movingIssueId === card.issueId || mutatingIssueId === card.issueId}
+                                    onSave={updateIssueCollaboration}
+                                  />
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </section>
+                ))}
+            </div>
+          ) : (
+            <div className="space-y-4" data-testid="kanban-list">
+              <div className="rounded-3xl border border-border bg-background/70 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
+                      List view
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-foreground">
+                      Shared issue inventory in linear order
+                    </h3>
+                  </div>
+                  <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">
+                    {boardCards.length} cards
+                  </span>
+                </div>
               </div>
-            </section>
-          ))}
+              {boardCards.map((card) => renderListCard(card))}
+            </div>
+          )}
+        </div>
+
+        {createMode ? (
+          <CreateIssuePanel
+            draft={draft}
+            autosaveStatus={autosaveStatus}
+            creatingIssue={creatingIssue}
+            error={createError}
+            validationError={validationError}
+            onChange={(updater) => {
+              setValidationError(null);
+              setCreateError(null);
+              setDraft((current) => updater(current));
+            }}
+            onClose={closeCreateMode}
+            onSubmit={() => void handleCreateIssue()}
+          />
+        ) : null}
       </div>
 
       <div className="mt-6">

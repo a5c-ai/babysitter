@@ -98,9 +98,19 @@ export async function deleteTaskTag(taskTagId: string): Promise<TaskTagListRespo
   return result.data;
 }
 
+export interface CreateBacklogIssueResponse {
+  overview: BacklogOverviewResponse;
+  issue: {
+    id: string;
+    key: string;
+    title: string;
+  };
+}
+
 export function useBacklog(interval = 15000) {
   const [movingIssueId, setMovingIssueId] = useState<string | null>(null);
   const [mutatingIssueId, setMutatingIssueId] = useState<string | null>(null);
+  const [creatingIssue, setCreatingIssue] = useState(false);
   const { data, loading, error, refresh } = useSmartPolling<BacklogOverviewResponse>(
     "/api/backlog",
     {
@@ -109,10 +119,10 @@ export function useBacklog(interval = 15000) {
     },
   );
 
-  async function mutateBacklog(body: Record<string, unknown>, issueId: string): Promise<void> {
+  async function mutateBacklog<T>(body: Record<string, unknown>, issueId: string): Promise<T> {
     setMutatingIssueId(issueId);
     try {
-      const result = await resilientFetch<BacklogOverviewResponse>("/api/backlog", {
+      const result = await resilientFetch<T>("/api/backlog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -123,6 +133,7 @@ export function useBacklog(interval = 15000) {
       }
 
       await refresh();
+      return result.data;
     } finally {
       setMutatingIssueId(null);
     }
@@ -131,7 +142,7 @@ export function useBacklog(interval = 15000) {
   async function moveIssue(issueId: string, toState: KanbanWorkflowState): Promise<void> {
     setMovingIssueId(issueId);
     try {
-      await mutateBacklog({ action: "move-issue", issueId, toState }, issueId);
+      await mutateBacklog<BacklogOverviewResponse>({ action: "move-issue", issueId, toState }, issueId);
     } finally {
       setMovingIssueId(null);
     }
@@ -144,7 +155,7 @@ export function useBacklog(interval = 15000) {
     branchName: string;
     defaultBranch?: string;
   }): Promise<void> {
-    await mutateBacklog({ action: "link-repository", ...input }, input.issueId);
+    await mutateBacklog<BacklogOverviewResponse>({ action: "link-repository", ...input }, input.issueId);
   }
 
   async function updateRepositorySettings(input: {
@@ -155,7 +166,7 @@ export function useBacklog(interval = 15000) {
     autoMerge: boolean;
     requiredApprovals: number;
   }): Promise<void> {
-    await mutateBacklog({ action: "update-repository-settings", ...input }, input.issueId);
+    await mutateBacklog<BacklogOverviewResponse>({ action: "update-repository-settings", ...input }, input.issueId);
   }
 
   async function createPullRequest(input: {
@@ -163,7 +174,7 @@ export function useBacklog(interval = 15000) {
     title: string;
     reviewers?: string;
   }): Promise<void> {
-    await mutateBacklog({ action: "create-pull-request", ...input }, input.issueId);
+    await mutateBacklog<BacklogOverviewResponse>({ action: "create-pull-request", ...input }, input.issueId);
   }
 
   async function updateProjectCollaboration(input: {
@@ -183,7 +194,7 @@ export function useBacklog(interval = 15000) {
     }>;
     permissions: KanbanPermissionGrant[];
   }): Promise<void> {
-    await mutateBacklog({ action: "update-project-collaboration", ...input }, input.projectId);
+    await mutateBacklog<BacklogOverviewResponse>({ action: "update-project-collaboration", ...input }, input.projectId);
   }
 
   async function updateIssueCollaboration(input: {
@@ -191,7 +202,26 @@ export function useBacklog(interval = 15000) {
     assigneeIds: string[];
     collaboratorIds: string[];
   }): Promise<void> {
-    await mutateBacklog({ action: "update-issue-collaboration", ...input }, input.issueId);
+    await mutateBacklog<BacklogOverviewResponse>({ action: "update-issue-collaboration", ...input }, input.issueId);
+  }
+
+  async function createIssue(input: {
+    projectId: string;
+    title: string;
+    summary?: string;
+    status?: "backlog" | "ready" | "in-progress" | "review" | "done";
+    priority?: "critical" | "high" | "medium" | "low";
+    metadata?: Record<string, unknown>;
+  }): Promise<CreateBacklogIssueResponse> {
+    setCreatingIssue(true);
+    try {
+      return await mutateBacklog<CreateBacklogIssueResponse>(
+        { action: "create-issue", ...input },
+        input.projectId,
+      );
+    } finally {
+      setCreatingIssue(false);
+    }
   }
 
   return {
@@ -205,9 +235,11 @@ export function useBacklog(interval = 15000) {
     linkRepository,
     updateRepositorySettings,
     createPullRequest,
+    createIssue,
     updateProjectCollaboration,
     updateIssueCollaboration,
     movingIssueId,
     mutatingIssueId,
+    creatingIssue,
   };
 }
