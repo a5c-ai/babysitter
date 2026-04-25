@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { Suspense, useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useRunDetail } from "@/hooks/use-run-detail";
@@ -73,6 +73,14 @@ const TaskDetailPanel = dynamic(
 );
 
 export default function RunDetailPage({ params }: { params: { runId: string } }) {
+  return (
+    <Suspense fallback={null}>
+      <RunDetailPageContent params={params} />
+    </Suspense>
+  );
+}
+
+function RunDetailPageContent({ params }: { params: { runId: string } }) {
   const { runId } = params;
   const router = useRouter();
   const searchParams = useSearchParams();

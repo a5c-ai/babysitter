@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import Link from "next/link";
 import { LogoWordmark } from "@a5c-ai/compendium";
 import { useRunDashboard } from "@/hooks/use-run-dashboard";
@@ -103,7 +104,9 @@ export default function DashboardPage() {
           </article>
         </section>
 
-        <BacklogOverview />
+        <Suspense fallback={null}>
+          <BacklogOverview />
+        </Suspense>
         <BabysitterOverlayPanel />
 
         {/* Global Search */}

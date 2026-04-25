@@ -29,6 +29,7 @@ async function main() {
   const runsRoot = resolveWorkspacePath(options.runsDir);
   const cliEntry = resolveWorkspacePath(options.cliPath);
   const startTime = Date.now();
+  const stateRoot = path.join(runsRoot, "__state__");
 
   try {
     await ensureBuildArtifacts(cliEntry);
@@ -40,6 +41,7 @@ async function main() {
 
     const context = {
       runsRoot,
+      stateRoot,
       runId: RUN_ID,
       cliEntry,
       hookPath,
@@ -506,7 +508,11 @@ function assertPosixRefs(entry) {
 
 async function runCliJson(context, args, options = {}) {
   const spawnArgs = ["-r", context.hookPath, context.cliEntry, ...args];
-  const env = buildEnv(options.env);
+  const env = buildEnv({
+    BABYSITTER_GLOBAL_STATE_DIR: context.stateRoot,
+    BABYSITTER_STATE_DIR: context.stateRoot,
+    ...options.env,
+  });
   const result = await exec(process.execPath, spawnArgs, { cwd: pkgRoot, env });
   if (result.code !== 0) {
     throw new Error(
@@ -539,6 +545,11 @@ function withRunsDir(context, args) {
 
 function buildEnv(overrides = {}) {
   const env = { ...process.env };
+  const stateRoot = overrides.BABYSITTER_GLOBAL_STATE_DIR ?? overrides.BABYSITTER_STATE_DIR;
+  if (stateRoot) {
+    env.BABYSITTER_GLOBAL_STATE_DIR = stateRoot;
+    env.BABYSITTER_STATE_DIR = stateRoot;
+  }
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) {
       delete env[key];

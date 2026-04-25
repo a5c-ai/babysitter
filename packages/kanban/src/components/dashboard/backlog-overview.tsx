@@ -8,7 +8,7 @@ import type {
   KanbanProjectBoard,
   KanbanPullRequestReviewLink,
   KanbanWorkflowState,
-} from "../../../../agent-mux/core/src/kanban.js";
+} from "@a5c-ai/agent-mux-core/kanban";
 import {
   Activity,
   AlertCircle,

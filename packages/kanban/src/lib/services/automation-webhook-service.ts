@@ -14,7 +14,7 @@ import type {
   KanbanDecompositionItem,
   KanbanIssueSource,
   KanbanLabel,
-} from "../../../../agent-mux/core/src/kanban.js";
+} from "@a5c-ai/agent-mux-core/kanban";
 
 import { AppError } from "../error-handler";
 import {
