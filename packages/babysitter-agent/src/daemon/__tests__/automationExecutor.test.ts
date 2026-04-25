@@ -304,4 +304,4 @@ describe("executeAutomationTrigger", () => {
     expect(canonicalProject?.issueIds).toEqual(["CANON-AUTO-001"]);
     expect(boardProject?.issueIds).toEqual(["CANON-AUTO-001"]);
   });
-}
+});

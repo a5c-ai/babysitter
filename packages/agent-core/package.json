@@ -6,12 +6,20 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist/",
     "README.md"
   ],
   "scripts": {
-    "build": "npm run build:runtime:agent-core-deps --prefix ../.. && tsc --build tsconfig.json",
+    "build": "npm run build:runtime:agent-core-deps --prefix ../.. && tsc --build --force tsconfig.json",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "test": "vitest run --config vitest.config.ts"
   },

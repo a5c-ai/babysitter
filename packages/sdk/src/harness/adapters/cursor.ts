@@ -4,6 +4,9 @@
  * Derives all behavior from BaseHarnessAdapter + agent-mux metadata.
  */
 
+import { normalizeSessionStateDir } from "../../config";
+import { buildStopHookContinuation } from "../hooks/stopHookContinuation";
+import { handleStopHookCommon } from "../hooks/stopHookHandler";
 import { HarnessCapability as Cap } from "../types";
 import { BaseHarnessAdapter, type AdapterConfig } from "../BaseAdapter";
 import { getAmuxAdapterMetadata } from "../amuxMetadata";
@@ -45,6 +48,49 @@ function buildConfig(): AdapterConfig {
 class CursorAdapter extends BaseHarnessAdapter {
   constructor() {
     super(buildConfig());
+  }
+
+  override async handleStopHook(
+    args: import("../types").HookHandlerArgs,
+  ): Promise<number> {
+    if (this.config.noHookSupport || !this.supportsHookType("stop")) {
+      process.stdout.write("{}\n");
+      return 0;
+    }
+
+    const common = await handleStopHookCommon(args, {
+      harness: this.config.name,
+      sessionIdFields: ["session_id", "conversation_id"],
+      useDetailedRunState: true,
+      pluginRootEnvVars: this.config.pluginRootEnvVars,
+      resolveStateDir: (a) =>
+        normalizeSessionStateDir(
+          a.stateDir ?? process.env.BABYSITTER_STATE_DIR,
+        ),
+    });
+
+    if (!common.shouldContinue) {
+      return common.exitCode;
+    }
+
+    const { systemMessage } = await buildStopHookContinuation({
+      nextIteration: common.nextIteration,
+      maxIterations: common.state.maxIterations,
+      runState: common.runStateDetails?.runState ?? "",
+      pendingKinds: common.runStateDetails?.pendingKinds ?? "",
+      completionProof: common.runStateDetails?.completionProof ?? "",
+      prompt: common.prompt,
+      resolvedPluginRoot: common.resolvedPluginRoot,
+      runId: common.state.runId ?? undefined,
+      runsDir: common.runsDir,
+      entrypointImportPath: common.runStateDetails?.entrypointImportPath,
+    });
+
+    // Cursor continues a blocked stop-hook flow via followup_message.
+    process.stdout.write(
+      JSON.stringify({ followup_message: systemMessage }) + "\n",
+    );
+    return 0;
   }
 }
 
