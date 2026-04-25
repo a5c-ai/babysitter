@@ -7,8 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "zustand";
 
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
+import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
 import { Button } from "@/components/ui/button";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
+import { useTaskTags } from "@/hooks/use-task-tags";
 import { useAgents, useGateway } from "@/lib/agent-mux-ui";
 
 function firstAgent(agents: string[], preferred: string | null): string {
@@ -38,6 +40,7 @@ function NewSessionContent() {
   const fetchGateway = useGatewayFetch();
   const { client, store } = useGateway();
   const agents = useAgents();
+  const { taskTags } = useTaskTags();
   const requestedAgent = searchParams.get("agent");
   const [agent, setAgent] = useState(() => firstAgent(agents, requestedAgent));
   const [prompt, setPrompt] = useState("");
@@ -143,11 +146,17 @@ function NewSessionContent() {
           ) : null}
 
           <Field label="Prompt">
-            <Textarea
+            <TaskTagAutocompleteTextarea
+              taskTags={taskTags}
               value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              rows={10}
-              placeholder="Describe the task you want the agent to handle..."
+              onValueChange={setPrompt}
+              renderTextarea={(props) => (
+                <Textarea
+                  {...props}
+                  rows={10}
+                  placeholder="Describe the task you want the agent to handle..."
+                />
+              )}
             />
           </Field>
 

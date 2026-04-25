@@ -12,10 +12,12 @@ import { findKanbanExecutionContextEnvelopesForSession } from "@a5c-ai/agent-mux
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
 import { SessionObservabilityPanel } from "@/components/sessions/session-observability-panel";
 import { ExecutionContextPanel } from "@/components/shared/execution-context-panel";
+import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
 import { Button as LocalButton } from "@/components/ui/button";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
 import { useBacklog } from "@/hooks/use-backlog";
+import { useTaskTags } from "@/hooks/use-task-tags";
 import { useGateway } from "@/lib/agent-mux-ui";
 
 type TranscriptNode =
@@ -187,6 +189,7 @@ function SessionDetailContent() {
   const fetchGateway = useGatewayFetch();
   const { snapshot } = useBacklog();
   const { store } = useGateway();
+  const { taskTags } = useTaskTags();
   const session = useStore(store, (state) => state.sessions.byId[sessionId] ?? null);
   const runs = useStore(
     store,
@@ -319,12 +322,18 @@ function SessionDetailContent() {
           <form onSubmit={handleSubmit} className="mt-6 grid gap-3">
             <label className="grid gap-2 text-sm">
               <span className="font-medium">Send another turn</span>
-              <Textarea
+              <TaskTagAutocompleteTextarea
+                taskTags={taskTags}
                 value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                rows={5}
-                className="min-h-32"
-                placeholder="Continue the session..."
+                onValueChange={setPrompt}
+                renderTextarea={(props) => (
+                  <Textarea
+                    {...props}
+                    rows={5}
+                    className="min-h-32"
+                    placeholder="Continue the session..."
+                  />
+                )}
               />
             </label>
             {error ? (

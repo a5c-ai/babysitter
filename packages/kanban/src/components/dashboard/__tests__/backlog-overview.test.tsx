@@ -30,6 +30,33 @@ vi.mock("@/components/review/review-panel", () => ({
   ReviewPanel: () => null,
 }));
 
+vi.mock("@/hooks/use-task-tags", () => ({
+  useTaskTags: () => ({
+    taskTags: [
+      {
+        id: "task-tag-bug-report",
+        key: "bug_report",
+        label: "Bug Report",
+        content: "Describe the bug in detail.",
+        order: 0,
+        createdAt: "2026-04-24T12:00:00.000Z",
+        updatedAt: "2026-04-24T12:00:00.000Z",
+      },
+      {
+        id: "task-tag-deployment-validation",
+        key: "deployment_validation",
+        label: "Deployment Validation",
+        content: "Validate staging deploy, smoke tests, and rollback path.",
+        order: 1,
+        createdAt: "2026-04-24T12:00:00.000Z",
+        updatedAt: "2026-04-24T12:00:00.000Z",
+      },
+    ],
+    loading: false,
+    error: null,
+  }),
+}));
+
 function buildBacklogState() {
   return {
     snapshot: {
@@ -511,6 +538,17 @@ describe("BacklogOverview", () => {
     expect(screen.getByLabelText("Issue summary")).toHaveValue("Draft should remain after failure");
   });
 
+  it("inserts Task Tag snippets into the board issue summary field", async () => {
+    const user = setupUser();
+    render(<BacklogOverview />);
+
+    await user.click(screen.getByTestId("board-header-create"));
+    await user.type(screen.getByLabelText("Issue summary"), "@bug");
+    await user.click(screen.getByText("Bug Report"));
+
+    expect(screen.getByLabelText("Issue summary")).toHaveValue("Describe the bug in detail.");
+  });
+
   it("shows the explicit loading state when issue creation is already in flight", async () => {
     const user = setupUser();
     creatingIssueState = true;
@@ -671,6 +709,19 @@ describe("BacklogOverview", () => {
     expect(screen.getByTestId("issue-tags-empty")).toBeInTheDocument();
   });
 
+  it("inserts Task Tag snippets into the sub-issue summary field", async () => {
+    const user = setupUser();
+    searchParams = new URLSearchParams("issueId=KANBAN-GAP-007&issueKey=KANBAN-GAP-007");
+
+    render(<BacklogOverview />);
+
+    await user.type(screen.getByLabelText("Sub-issue summary"), "@deploy");
+    await user.click(screen.getByText("Deployment Validation"));
+
+    expect(screen.getByLabelText("Sub-issue summary")).toHaveValue(
+      "Validate staging deploy, smoke tests, and rollback path.",
+    );
+  });
   it("navigates back to the parent issue from the child issue panel", async () => {
     const user = setupUser();
     searchParams = new URLSearchParams("issueId=KANBAN-GAP-008&issueKey=KANBAN-GAP-008");

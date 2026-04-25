@@ -11,6 +11,7 @@ import type {
   KanbanProject,
   KanbanProjectBoard,
   KanbanPullRequestReviewLink,
+  KanbanTaskTag,
   KanbanWorkflowState,
 } from "@a5c-ai/agent-mux-core/kanban";
 import {
@@ -40,7 +41,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useBacklog } from "@/hooks/use-backlog";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { useReviews } from "@/hooks/use-reviews";
+import { useTaskTags } from "@/hooks/use-task-tags";
 import { ReviewPanel } from "@/components/review/review-panel";
+import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
 
 const workflowOrder: readonly KanbanWorkflowState[] = ["todo", "in-progress", "review", "done"];
 
@@ -300,6 +303,7 @@ function toggleId(values: readonly string[], id: string): string[] {
 
 interface CreateIssuePanelProps {
   draft: CreateIssueDraft;
+  taskTags: readonly KanbanTaskTag[];
   autosaveStatus: AutosaveStatus;
   creatingIssue: boolean;
   error: string | null;
@@ -311,6 +315,7 @@ interface CreateIssuePanelProps {
 
 function CreateIssuePanel({
   draft,
+  taskTags,
   autosaveStatus,
   creatingIssue,
   error,
@@ -382,17 +387,24 @@ function CreateIssuePanel({
 
         <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
           Summary
-          <textarea
-            aria-label="Issue summary"
+          <TaskTagAutocompleteTextarea
+            taskTags={taskTags}
             value={draft.summary}
-            onChange={(event) =>
+            onValueChange={(summary) =>
               onChange((current) => ({
                 ...current,
-                summary: event.target.value,
+                summary,
               }))
             }
-            placeholder="Capture the outcome expected from this issue."
-            className="mt-2 min-h-24 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+            className="mt-2"
+            renderTextarea={(props) => (
+              <textarea
+                {...props}
+                aria-label="Issue summary"
+                placeholder="Capture the outcome expected from this issue."
+                className="min-h-24 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            )}
           />
         </label>
 
@@ -1472,6 +1484,8 @@ interface IssueDetailPanelProps {
   card?: KanbanBoardCard;
   project: KanbanProject;
   issues: readonly KanbanIssue[];
+  dispatchContextLabels: readonly KanbanDispatchContextLabelDefinition[];
+  taskTags: readonly KanbanTaskTag[];
   loading: boolean;
   mutating: boolean;
   mutationError?: {
@@ -1501,6 +1515,10 @@ interface IssueDetailPanelProps {
     status?: "backlog" | "ready" | "in-progress" | "blocked" | "review" | "done";
   }) => Promise<void>;
   onLinkChildIssue: (input: { parentIssueId: string; childIssueId: string }) => Promise<void>;
+  onSaveDispatchContextLabels: (input: {
+    issueId: string;
+    dispatchContextLabelIds: string[];
+  }) => Promise<void>;
 }
 
 function IssueDetailPanel({
@@ -1508,6 +1526,8 @@ function IssueDetailPanel({
   card,
   project,
   issues,
+  dispatchContextLabels,
+  taskTags,
   loading,
   mutating,
   mutationError,
@@ -1528,6 +1548,7 @@ function IssueDetailPanel({
   onResetField,
   onCreateSubIssue,
   onLinkChildIssue,
+  onSaveDispatchContextLabels,
 }: IssueDetailPanelProps) {
   const issueById = new Map(issues.map((candidate) => [candidate.id, candidate] as const));
   const parentIssue = issue.parentIssueId ? issueById.get(issue.parentIssueId) : undefined;
@@ -2102,6 +2123,13 @@ function IssueDetailPanel({
             </div>
           ) : null}
         </article>
+
+        <IssueDispatchContextPanel
+          issue={issue}
+          dispatchContextLabels={dispatchContextLabels}
+          mutating={mutating}
+          onSave={onSaveDispatchContextLabels}
+        />
       </div>
 
       <section className="mt-5 rounded-2xl border border-border bg-background/80 p-4" data-testid="issue-relationship-panel">
@@ -2237,12 +2265,19 @@ function IssueDetailPanel({
                 placeholder="Break out a child issue"
                 className="h-11 rounded-xl border border-border bg-card px-3 text-sm text-foreground"
               />
-              <textarea
-                aria-label="Sub-issue summary"
+              <TaskTagAutocompleteTextarea
+                taskTags={taskTags}
                 value={childSummary}
-                onChange={(event) => setChildSummary(event.target.value)}
-                placeholder="Optional context for the child issue"
-                className="min-h-24 rounded-xl border border-border bg-card px-3 py-3 text-sm text-foreground"
+                onValueChange={setChildSummary}
+                className="min-h-24"
+                renderTextarea={(props) => (
+                  <textarea
+                    {...props}
+                    aria-label="Sub-issue summary"
+                    placeholder="Optional context for the child issue"
+                    className="min-h-24 rounded-xl border border-border bg-card px-3 py-3 text-sm text-foreground"
+                  />
+                )}
               />
               <div className="grid gap-3 md:grid-cols-2">
                 <label className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground-muted">
@@ -2352,6 +2387,7 @@ function IssueDetailPanel({
 export function BacklogOverview() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { taskTags } = useTaskTags();
   const {
     snapshot,
     board,
@@ -2808,23 +2844,6 @@ export function BacklogOverview() {
         </div>
       </div>
 
-      {focusedIssue ? (
-        <IssueRelationshipPanel
-          issue={focusedIssue}
-          card={focusedIssueCard}
-          project={primaryProject}
-          issues={snapshot.issues.filter((issue) => issue.projectId === primaryProject.id)}
-          dispatchContextLabels={snapshot.dispatchContextLabels}
-          loading={loading}
-          mutating={mutatingIssueId === focusedIssue.id}
-          mutationError={mutationError}
-          onFocusIssue={setFocusedIssue}
-          onClose={clearFocusedIssue}
-          onSaveDispatchContextLabels={updateIssueDispatchContextLabels}
-          onCreateSubIssue={createSubIssue}
-          onLinkChildIssue={linkChildIssue}
-        />
-      ) : null}
       {targetModelIssue ? (
         <div className="mt-5 rounded-2xl border border-border bg-background p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -3240,6 +3259,8 @@ export function BacklogOverview() {
             card={focusedIssueCard}
             project={primaryProject}
             issues={snapshot.issues.filter((candidate) => candidate.projectId === primaryProject.id)}
+            dispatchContextLabels={snapshot.dispatchContextLabels ?? []}
+            taskTags={taskTags}
             loading={loading}
             mutating={mutatingIssueId === focusedIssue.id}
             mutationError={mutationError}
@@ -3260,10 +3281,12 @@ export function BacklogOverview() {
             onResetField={resetIssueField}
             onCreateSubIssue={createSubIssue}
             onLinkChildIssue={linkChildIssue}
+            onSaveDispatchContextLabels={updateIssueDispatchContextLabels}
           />
         ) : createMode ? (
           <CreateIssuePanel
             draft={draft}
+            taskTags={taskTags}
             autosaveStatus={autosaveStatus}
             creatingIssue={creatingIssue}
             error={createError}
