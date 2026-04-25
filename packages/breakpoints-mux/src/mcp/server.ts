@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
 
 import type { HttpMcpServerOptions, HttpMcpServerResult } from "./http-transport.js";
 import {
@@ -68,6 +69,10 @@ function resolveToolBackend(params?: {
   return backend;
 }
 
+function toCompatShape(shape: Record<string, unknown>): ZodRawShapeCompat {
+  return shape as unknown as ZodRawShapeCompat;
+}
+
 /**
  * Create a breakpoints-mux MCP server with all 8 tools registered.
  */
@@ -82,7 +87,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "ask_breakpoint",
     askBreakpointDescription,
-    askBreakpointParams,
+    toCompatShape(askBreakpointParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleAskBreakpoint(args as Parameters<typeof handleAskBreakpoint>[0], backend);
@@ -95,7 +100,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "check_breakpoint_status",
     checkBreakpointStatusDescription,
-    checkBreakpointStatusParams,
+    toCompatShape(checkBreakpointStatusParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleCheckBreakpointStatus(args as Parameters<typeof handleCheckBreakpointStatus>[0], backend);
@@ -108,7 +113,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "list_breakpoints",
     listBreakpointsDescription,
-    listBreakpointsParams,
+    toCompatShape(listBreakpointsParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleListBreakpoints(args as Parameters<typeof handleListBreakpoints>[0], backend);
@@ -121,7 +126,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "answer_breakpoint",
     answerBreakpointDescription,
-    answerBreakpointParams,
+    toCompatShape(answerBreakpointParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleAnswerBreakpoint(args as Parameters<typeof handleAnswerBreakpoint>[0], backend);
@@ -134,7 +139,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "verify_breakpoint_answer",
     verifyBreakpointAnswerDescription,
-    verifyBreakpointAnswerParams,
+    toCompatShape(verifyBreakpointAnswerParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleVerifyBreakpointAnswer(args as Parameters<typeof handleVerifyBreakpointAnswer>[0], backend);
@@ -149,7 +154,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "list_responders",
     listRespondersDescription,
-    listRespondersParams,
+    toCompatShape(listRespondersParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleListResponders(args as Parameters<typeof handleListResponders>[0], backend);
@@ -162,7 +167,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "claim_breakpoint",
     claimBreakpointDescription,
-    claimBreakpointParams,
+    toCompatShape(claimBreakpointParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handleClaimBreakpoint(args as Parameters<typeof handleClaimBreakpoint>[0], backend);
@@ -175,7 +180,7 @@ export function createBreakpointMcpServer(): McpServer {
   server.tool(
     "poll_breakpoints",
     pollBreakpointsDescription,
-    pollBreakpointsParams,
+    toCompatShape(pollBreakpointsParams),
     async (args) => {
       const backend = resolveToolBackend(args);
       const result = await handlePollBreakpoints(args as Parameters<typeof handlePollBreakpoints>[0], backend);
