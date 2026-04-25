@@ -14,6 +14,7 @@ import {
   PLUGIN_TARGETS,
 } from "./data";
 import { getCatalogGraph, listGraphNodes, listRelationshipsByRelation } from "./graph";
+import { effectiveTransportMuxClaimStatus, shouldSurfaceTransportProtocol } from "./transport-mux-cutover";
 import type {
   AgentCapabilitySupportMatrix,
   AgentCatalog,
@@ -276,6 +277,7 @@ function toTransportProtocol(node: GraphNode): TransportProtocolDescriptor {
   return {
     transportId: valueAsString(node.transportId),
     label: valueAsString(node.label),
+    status: effectiveTransportMuxClaimStatus(valueAsString(node.status), nodeEvidenceIds(node)),
     protocolKind: valueAsString(node.protocolKind),
     interactive: Boolean(node.interactive),
     streaming: Boolean(node.streaming),
@@ -820,7 +822,9 @@ export function getAgentVersionTopology(agentIdOrAlias: string, versionSelector?
   );
   const transportRuntimeNodes = outgoingNodes(agentNode.id, "uses_transport").filter((node) => node.kind === "TransportRuntime");
   const transportProtocolNodes = uniqueBy(
-    outgoingNodes(agentNode.id, "uses_transport").filter((node) => node.kind === "TransportProtocol"),
+    outgoingNodes(agentNode.id, "uses_transport").filter(
+      (node) => node.kind === "TransportProtocol" && shouldSurfaceTransportProtocol(nodeEvidenceIds(node)),
+    ),
     (node) => node.id,
   );
   const modalityNodes = outgoingNodes(agentNode.id, "supports_modality").filter((node) => node.kind === "Modality");

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { resolveCatalogEvidenceAssetPath } from "./assets";
 import { getCatalogGraph } from "./graph";
+import { effectiveTransportMuxClaimStatus, effectiveTransportMuxUnresolvedGaps } from "./transport-mux-cutover";
 import type {
   ClaimConfidence,
   ClaimEvidenceStrength,
@@ -127,17 +128,18 @@ for (const edge of GRAPH.edges) {
 }
 
 function toClaimRecord(node: GraphNode): ClaimRecord {
+  const evidenceIds = stringArray(node.evidenceIds);
   return {
     claimId: valueAsString(node.claimId),
     statement: valueAsString(node.statement),
     subjectKind: valueAsString(node.subjectKind),
     subjectId: valueAsString(node.subjectId),
     confidence: claimConfidence(node.confidence),
-    status: valueAsString(node.status),
+    status: effectiveTransportMuxClaimStatus(valueAsString(node.status), evidenceIds),
     provenanceKind: claimProvenanceKind(node.provenanceKind),
     evidenceStrength: claimEvidenceStrength(node.evidenceStrength),
-    evidenceIds: stringArray(node.evidenceIds),
-    unresolvedGaps: stringArray(node.unresolvedGaps),
+    evidenceIds,
+    unresolvedGaps: effectiveTransportMuxUnresolvedGaps(stringArray(node.unresolvedGaps), evidenceIds),
   };
 }
 

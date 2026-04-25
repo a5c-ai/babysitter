@@ -196,6 +196,7 @@ export interface ModelVersion {
 export interface TransportDescriptor {
   transportId: string;
   label: string;
+  status: string;
   interactive: boolean;
   persistentSession: boolean;
   stdinInjection: boolean;
@@ -298,6 +299,7 @@ export interface ModelFamilyDescriptor {
 export interface TransportProtocolDescriptor {
   transportId: string;
   label: string;
+  status: string;
   protocolKind: string;
   interactive: boolean;
   streaming: boolean;

@@ -8,6 +8,12 @@ import {
   listOutgoingTargets,
   listRelationshipsByRelation,
 } from "./graph";
+import {
+  effectiveTransportMuxClaimStatus,
+  effectiveTransportMuxUnresolvedGaps,
+  shouldSurfaceCapabilitySupport,
+  shouldSurfaceTransportRuntime,
+} from "./transport-mux-cutover";
 import type {
   AgentCatalog,
   AgentVersion,
@@ -124,6 +130,7 @@ function toTransportDescriptor(node: GraphNode): TransportDescriptor {
   return {
     transportId: valueAsString(node.runtimeId),
     label: valueAsString(node.label),
+    status: effectiveTransportMuxClaimStatus(valueAsString(node.status), nodeEvidenceIds(node)),
     interactive: Boolean(node.persistentSession) || Boolean(node.stdinInjection),
     persistentSession: Boolean(node.persistentSession),
     stdinInjection: Boolean(node.stdinInjection),
@@ -319,22 +326,27 @@ function toEvidenceRecord(node: GraphNode): EvidenceRecord {
 }
 
 function toClaimRecord(node: GraphNode): ClaimRecord {
+  const evidenceIds = stringArray(node.evidenceIds);
   return {
     claimId: valueAsString(node.claimId),
     statement: valueAsString(node.statement),
     subjectKind: valueAsString(node.subjectKind),
     subjectId: valueAsString(node.subjectId),
     confidence: claimConfidence(node.confidence),
-    status: valueAsString(node.status),
+    status: effectiveTransportMuxClaimStatus(valueAsString(node.status), evidenceIds),
     provenanceKind: claimProvenanceKind(node.provenanceKind),
     evidenceStrength: claimEvidenceStrength(node.evidenceStrength),
-    evidenceIds: stringArray(node.evidenceIds),
-    unresolvedGaps: stringArray(node.unresolvedGaps),
+    evidenceIds,
+    unresolvedGaps: effectiveTransportMuxUnresolvedGaps(stringArray(node.unresolvedGaps), evidenceIds),
   };
 }
 
 function buildCapabilityAssertions(): CapabilityAssertion[] {
-  return listNodesByKind("CapabilitySupport").map((node) => {
+  return listNodesByKind("CapabilitySupport")
+    .filter((node) =>
+      shouldSurfaceCapabilitySupport(valueAsString(node.subjectKind), valueAsString(node.subjectId), nodeEvidenceIds(node)),
+    )
+    .map((node) => {
     const supportingClaims = listOutgoingTargets(node.id, "supported_by_claim")
       .filter((claim): claim is GraphNode => claim.kind === "Claim")
       .map(toClaimRecord);
@@ -574,7 +586,7 @@ export const CLAIMS = listNodesByKind("Claim").map(toClaimRecord);
 export const PROVIDERS = listNodesByKind("ModelProviderVersion").map(toModelProviderVersion);
 export const MODELS = listNodesByKind("ModelVersion").map(toModelVersion);
 export const TRANSPORTS = listNodesByKind("TransportRuntime")
-  .filter((node) => valueAsString(node.runtimeId) !== "amux-proxy")
+  .filter((node) => shouldSurfaceTransportRuntime(valueAsString(node.runtimeId)))
   .map(toTransportDescriptor);
 export const CAPABILITIES = listNodesByKind("Capability").map(toCapabilityDescriptor);
 export const MODALITIES = listNodesByKind("Modality")

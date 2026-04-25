@@ -1,5 +1,6 @@
 import { AGENT_CATALOG, GRAPH_DOCUMENT } from "./data";
 import { getNodeById, listGraphEdges, listGraphNodes, listOutgoingTargets } from "./graph";
+import { effectiveTransportMuxClaimStatus } from "./transport-mux-cutover";
 import type { GraphNode, GraphRelationship } from "./models";
 
 export interface CliCatalogRow {
@@ -271,14 +272,15 @@ function sourceNodesForClaim(claimNodeId: string): GraphNode[] {
 
 function toCliEvidenceClaimRow(node: GraphNode): CliEvidenceClaimRow {
   const sourceIds = sourceNodesForClaim(node.id).map((source) => valueAsString(source.evidenceId)).filter(Boolean);
+  const evidenceIds = stringArray(node.evidenceIds);
   return {
     claimId: valueAsString(node.claimId),
     subjectKind: valueAsString(node.subjectKind),
     subjectId: valueAsString(node.subjectId),
     statement: valueAsString(node.statement),
     confidence: valueAsString(node.confidence),
-    status: valueAsString(node.status),
-    evidenceIds: stringArray(node.evidenceIds),
+    status: effectiveTransportMuxClaimStatus(valueAsString(node.status), evidenceIds),
+    evidenceIds,
     sourceIds: uniqueStrings(sourceIds),
   };
 }

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   AGENT_CATALOG,
   getCliNodeQuery,
@@ -173,6 +173,7 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(claims.get("web-codex-image-input")?.provenanceKind).toBe("vendor-inference");
     expect(claims.get("web-codex-image-input")?.evidenceStrength).toBe("inferred");
     expect(claims.get("web-codex-image-input")?.unresolvedGaps.length).toBeGreaterThan(0);
+    expect(claims.get("repo-transport-mux-readme")?.status).toBe("current");
   });
 
   it("includes babysitter-agent as a distinct non-harness runtime agent and records richer Claude web evidence", () => {
@@ -376,5 +377,32 @@ describe("agent-catalog graph-backed ontology", () => {
     const search = searchOntologyEvidence("web-codex-hooks");
     expect(search.evidence.map((entry) => entry.evidenceId)).toContain("web-codex-hooks");
     expect(search.claims.some((entry) => entry.claimId === "web-codex-hooks")).toBe(true);
+  });
+
+  it("downgrades transport-mux document claims and runtime capability surfacing when the cutover gate is red", async () => {
+    const previousOverride = process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER;
+    process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER = "red";
+    vi.resetModules();
+
+    try {
+      const catalog = await import("./index");
+      const transportMuxClaim = catalog.listOntologyClaims().find((claim) => claim.claimId === "repo-transport-mux-readme");
+      const amuxProxyAssertions = catalog
+        .getCapabilitySupportAssertions()
+        .filter((assertion) => assertion.subjectId === "transportRuntime:amux-proxy");
+
+      expect(transportMuxClaim?.status).toBe("provisional");
+      expect(transportMuxClaim?.unresolvedGaps).toContain(
+        "transport-mux document-backed runtime claims stay provisional until packages/transport-mux scorecard:migration is green.",
+      );
+      expect(amuxProxyAssertions).toHaveLength(0);
+    } finally {
+      if (previousOverride === undefined) {
+        delete process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER;
+      } else {
+        process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER = previousOverride;
+      }
+      vi.resetModules();
+    }
   });
 });

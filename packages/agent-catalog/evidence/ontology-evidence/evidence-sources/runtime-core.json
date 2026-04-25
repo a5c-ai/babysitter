@@ -63,6 +63,16 @@
       "capturedAt": "2026-04-23T00:00:00.000Z",
       "locator": "sections: protocol layer, provider layer, route contract",
       "trustLevel": "repo"
+    },
+    {
+      "id": "evidence:repo-transport-mux-scorecard",
+      "kind": "EvidenceSource",
+      "evidenceId": "repo-transport-mux-scorecard",
+      "kindLabel": "repo",
+      "sourcePathOrUrl": "packages/transport-mux/scripts/migration-scorecard.mjs",
+      "capturedAt": "2026-04-25T00:00:00.000Z",
+      "locator": "checks: docs honesty, launcher ownership, publish/CI convergence, executable ownership",
+      "trustLevel": "repo"
     }
   ]
 }

@@ -31,6 +31,7 @@ nodes:
     kind: TransportProtocol
     transportId: anthropic
     label: Anthropic Messages API
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -39,10 +40,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
   - id: transportProtocol:openai-chat
     kind: TransportProtocol
     transportId: openai-chat
     label: OpenAI Chat Completions
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -51,10 +54,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
   - id: transportProtocol:openai-responses
     kind: TransportProtocol
     transportId: openai-responses
     label: OpenAI Responses API
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -63,10 +68,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
   - id: transportProtocol:google
     kind: TransportProtocol
     transportId: google
     label: Google GenerateContent
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -75,10 +82,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
   - id: transportProtocol:passthrough
     kind: TransportProtocol
     transportId: passthrough
     label: Passthrough upstream protocol
+    status: scorecard-gated
     protocolKind: http-proxy
     interactive: false
     streaming: true
@@ -86,10 +95,12 @@ nodes:
     responseShape: provider-native response
     evidenceRefs:
       - repo-transport-mux-readme
+      - repo-transport-mux-scorecard
   - id: transportProtocol:bedrock-converse
     kind: TransportProtocol
     transportId: bedrock-converse
     label: Bedrock Converse
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -98,10 +109,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
   - id: transportProtocol:vertex-native
     kind: TransportProtocol
     transportId: vertex-native
     label: Vertex native GenerateContent
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -110,10 +123,12 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
   - id: transportProtocol:azure-foundry
     kind: TransportProtocol
     transportId: azure-foundry
     label: Azure Foundry Chat Completions
+    status: scorecard-gated
     protocolKind: http-json
     interactive: false
     streaming: true
@@ -122,6 +137,7 @@ nodes:
     evidenceRefs:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
   - id: transportRuntime:terminal-cli
     kind: TransportRuntime
     runtimeId: terminal-cli
@@ -156,6 +172,7 @@ nodes:
     runtimeId: amux-proxy
     transportId: openai-responses
     label: amux-proxy protocol/provider bridge
+    status: scorecard-gated
     runtimeKind: http-proxy-bridge
     persistentSession: false
     stdinInjection: false
@@ -182,3 +199,4 @@ nodes:
       - repo-transport-mux-readme
       - repo-transport-mux-architecture
       - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
