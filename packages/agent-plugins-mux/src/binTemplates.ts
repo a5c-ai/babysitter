@@ -1,5 +1,5 @@
 // CLI bin script templates for targets with npm distribution
-import { resolveSdkConfig } from './sdkConfig.js';
+import { resolveTargetCliName } from './sdkConfig.js';
 
 import type { A5cPluginManifest, TargetProfile } from './types.js';
 
@@ -7,17 +7,8 @@ function getExt(targetProfile: TargetProfile): string {
   return targetProfile.packageMetadata?.binScriptExt ?? '.js';
 }
 
-function getNpmPkg(manifest: A5cPluginManifest, targetProfile: TargetProfile): string {
-  const override = manifest.targets?.[targetProfile.name]?.npmPackageName;
-  if (typeof override === 'string') return override;
-  if (targetProfile.npmPackageName) return targetProfile.npmPackageName;
-  const sdk = resolveSdkConfig(manifest);
-  return `${sdk.scope}/${manifest.name}-${targetProfile.name}`;
-}
-
 function getCliName(manifest: A5cPluginManifest, targetProfile: TargetProfile): string {
-  const pkg = getNpmPkg(manifest, targetProfile);
-  return pkg.split('/').pop() || `${manifest.name}-${targetProfile.name}`;
+  return resolveTargetCliName(manifest, targetProfile);
 }
 
 export function generateCliBinScript(
@@ -173,7 +164,7 @@ main();
 }
 
 function generateGeminiInstallScript(manifest: A5cPluginManifest): string {
-  const cliName = getNpmPkg(manifest, { name: 'gemini' } as TargetProfile).split('/').pop() || 'plugin-gemini';
+  const cliName = resolveTargetCliName(manifest, { name: 'gemini' });
   return `#!/usr/bin/env node
 'use strict';
 

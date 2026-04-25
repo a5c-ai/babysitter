@@ -1,13 +1,19 @@
 // Manifest generators for all targets
 
-import { resolveSdkConfig } from './sdkConfig.js';
-import type { A5cPluginManifest } from './types.js';
+import {
+  resolveSdkConfig,
+  resolveTargetCliName,
+  resolveTargetNpmPackageName,
+} from './sdkConfig.js';
+import type { A5cPluginManifest, TargetProfile } from './types.js';
 
 // Extended manifest type for resolved manifests that may have been enriched
 // with target-specific fields during resolve phase
 type ResolvedManifest = A5cPluginManifest & {
   npmPackageName?: string;
 };
+
+type TargetName = Pick<TargetProfile, 'name'>;
 
 function normalizeAuthorObject(manifest: A5cPluginManifest): { name: string; email?: string } {
   return typeof manifest.author === 'string'
@@ -57,8 +63,9 @@ export function generateClaudeCodeManifest(manifest: A5cPluginManifest): string 
 }
 
 export function generateCodexManifest(manifest: ResolvedManifest): string {
+  const target: TargetName = { name: 'codex' };
   const packageJson: Record<string, unknown> = {
-    name: manifest.npmPackageName || (() => { const s = resolveSdkConfig(manifest); return `${s.scope}/${manifest.name}-codex`; })(),
+    name: resolveTargetNpmPackageName(manifest, target),
     version: manifest.version,
     description: manifest.description,
     scripts: {
@@ -67,7 +74,7 @@ export function generateCodexManifest(manifest: ResolvedManifest): string {
       deploy: 'npm publish --access public',
       'deploy:staging': 'npm publish --access public --tag staging',
     },
-    bin: { [`${manifest.name}-codex`]: 'bin/cli.js' },
+    bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.js' },
     files: [
       '.codex-plugin/',
       'assets/',
@@ -180,8 +187,9 @@ export function generateGithubCopilotManifest(manifest: A5cPluginManifest): stri
 }
 
 export function generatePiManifest(manifest: ResolvedManifest): string {
+  const target: TargetName = { name: 'pi' };
   const packageJson: Record<string, unknown> = {
-    name: manifest.npmPackageName || (() => { const s = resolveSdkConfig(manifest); return `${s.scope}/${manifest.name}-pi`; })(),
+    name: resolveTargetNpmPackageName(manifest, target),
     version: manifest.version,
     type: 'module',
     description: `${manifest.description} — Pi Coding Agent`,
@@ -198,7 +206,7 @@ export function generatePiManifest(manifest: ResolvedManifest): string {
       'sync:commands': 'node scripts/sync-command-docs.cjs',
       deploy: 'npm publish --access public',
     },
-    bin: { [`${manifest.name}-pi`]: 'bin/cli.cjs' },
+    bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.cjs' },
     files: [
       'bin/',
       'package.json',
@@ -223,8 +231,9 @@ export function generatePiManifest(manifest: ResolvedManifest): string {
 }
 
 export function generateOhMyPiManifest(manifest: ResolvedManifest): string {
+  const target: TargetName = { name: 'oh-my-pi' };
   const packageJson: Record<string, unknown> = {
-    name: manifest.npmPackageName || (() => { const s = resolveSdkConfig(manifest); return `${s.scope}/${manifest.name}-omp`; })(),
+    name: resolveTargetNpmPackageName(manifest, target),
     version: manifest.version,
     type: 'module',
     description: `${manifest.description} — oh-my-pi`,
@@ -241,7 +250,7 @@ export function generateOhMyPiManifest(manifest: ResolvedManifest): string {
       'sync:commands': 'node scripts/sync-command-docs.cjs',
       deploy: 'npm publish --access public',
     },
-    bin: { [`${manifest.name}-omp`]: 'bin/cli.cjs' },
+    bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.cjs' },
     files: [
       'bin/',
       'package.json',
@@ -290,8 +299,10 @@ export function generateOpenCodeManifest(manifest: A5cPluginManifest): string {
 }
 
 export function generateOpenClawPackageManifest(manifest: ResolvedManifest): string {
+  const target: TargetName = { name: 'openclaw' };
+  const packageName = resolveTargetNpmPackageName(manifest, target);
   const packageJson: Record<string, unknown> = {
-    name: manifest.npmPackageName || (() => { const s = resolveSdkConfig(manifest); return `${s.scope}/${manifest.name}-openclaw`; })(),
+    name: packageName,
     version: manifest.version,
     type: 'module',
     description: manifest.description,
@@ -321,7 +332,7 @@ export function generateOpenClawPackageManifest(manifest: ResolvedManifest): str
       deploy: 'npm publish --access public',
       'deploy:staging': 'npm publish --access public --tag staging',
     },
-    bin: { [`${manifest.name}-openclaw`]: 'bin/cli.cjs' },
+    bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.cjs' },
     files: [
       'bin/',
       'package.json',
@@ -344,7 +355,7 @@ export function generateOpenClawPackageManifest(manifest: ResolvedManifest): str
   if (manifest.repository) {
     packageJson.repository = manifest.repository;
     const repoUrl = typeof manifest.repository === 'string' ? manifest.repository : manifest.repository.url;
-    packageJson.homepage = `${repoUrl}/tree/main/plugins/babysitter-openclaw#readme`;
+    packageJson.homepage = `${repoUrl}/tree/main/plugins/${packageName.split('/').pop()}#readme`;
   }
 
   return JSON.stringify(packageJson, null, 2) + '\n';

@@ -26,7 +26,11 @@ import {
   resolveExtraFiles,
 } from './transformHelpers.js';
 import { generateInstallShared } from './installSharedGenerator.js';
-import { resolveSdkConfig } from './sdkConfig.js';
+import {
+  resolveSdkConfig,
+  resolveTargetCliName,
+  resolveTargetNpmPackageName,
+} from './sdkConfig.js';
 import { getCommandPaths } from './transform.js';
 
 function toOutputPath(value: string): string {
@@ -204,8 +208,8 @@ export function generateManifests(
     !files.some(f => f.path === 'package.json')
   ) {
     const packageMetadata = targetProfile.packageMetadata ?? {};
-    const overrideNpmPkg = manifest.targets?.[targetProfile.name]?.npmPackageName;
-    const npmPkg = (typeof overrideNpmPkg === 'string' ? overrideNpmPkg : null) || targetProfile.npmPackageName || `${sdkCfg.scope}/${manifest.name}-${targetProfile.name}`;
+    const npmPkg = resolveTargetNpmPackageName(manifest, targetProfile);
+    const cliName = resolveTargetCliName(manifest, targetProfile);
     const isEsm = packageMetadata.moduleType === 'module';
     const ext = packageMetadata.binScriptExt ?? (isEsm ? '.cjs' : '.js');
     const scripts: Record<string, string> = {
@@ -231,7 +235,7 @@ export function generateManifests(
       version: manifest.version,
       description: manifest.description,
       scripts,
-      bin: { [`${manifest.name}-${targetProfile.name}`]: `bin/cli${ext}` },
+      bin: { [cliName]: `bin/cli${ext}` },
       files: packageFiles,
       keywords: [manifest.name, targetProfile.name, 'orchestration'],
       author: manifest.author,

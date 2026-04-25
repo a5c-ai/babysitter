@@ -3,7 +3,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { A5cPluginManifest, TargetProfile } from './types.js';
-import { resolveSdkConfig } from './sdkConfig.js';
+import {
+  resolveSdkConfig,
+  resolveTargetCliName,
+  resolveTargetNpmPackageName,
+} from './sdkConfig.js';
 
 export function generateInstallInstructions(
   manifest: A5cPluginManifest,
@@ -31,8 +35,8 @@ function renderTemplate(
   targetProfile: TargetProfile
 ): string {
   const sdk = resolveSdkConfig(manifest);
-  const npmPkg = targetProfile.npmPackageName || `${sdk.scope}/${manifest.name}-${targetProfile.name}`;
-  const cliName = `${manifest.name}-${targetProfile.name}`;
+  const npmPkg = resolveTargetNpmPackageName(manifest, targetProfile);
+  const cliName = resolveTargetCliName(manifest, targetProfile);
 
   const skillNames = manifest.skills
     ? manifest.skills.map(s => s.name).join(', ')
@@ -129,8 +133,8 @@ function renderDefault(
   targetProfile: TargetProfile
 ): string {
   const sdk = resolveSdkConfig(manifest);
-  const npmPkg = targetProfile.npmPackageName || `${sdk.scope}/${manifest.name}-${targetProfile.name}`;
-  const cliName = `${manifest.name}-${targetProfile.name}`;
+  const npmPkg = resolveTargetNpmPackageName(manifest, targetProfile);
+  const cliName = resolveTargetCliName(manifest, targetProfile);
   const sections: string[] = [];
 
   sections.push(`# ${manifest.name} — ${targetProfile.displayName} Plugin`);
