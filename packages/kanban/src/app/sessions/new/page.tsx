@@ -131,11 +131,18 @@ function NewSessionContent() {
       <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <Field label="Agent">
-            <Select
-              value={agent}
-              onChange={setAgent}
-              options={sessionAgents.map((item) => ({ label: item, value: item }))}
-            />
+            {sessionAgents.length > 0 ? (
+              <Select
+                value={agent}
+                onChange={setAgent}
+                options={sessionAgents.map((item) => ({ label: item, value: item }))}
+              />
+            ) : (
+              <div className="rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm text-foreground-muted">
+                No session-capable agents are available from the connected gateway yet. Verify the gateway is
+                reachable and that at least one supported agent is installed.
+              </div>
+            )}
           </Field>
 
           {agentRecord ? (
@@ -171,7 +178,7 @@ function NewSessionContent() {
               type="submit"
               variant="primary"
               loading={submitting}
-              disabled={submitting || !prompt.trim()}
+              disabled={submitting || sessionAgents.length === 0 || !prompt.trim()}
             >
               Start session
             </Button>

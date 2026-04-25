@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { GatewayClient, GatewayProvider as UiGatewayProvider, useGateway, type AgentRecord } from "@/lib/agent-mux-ui";
+import { loadGatewayBootstrapSnapshot } from "@/components/agent-mux/gateway-snapshot";
 
 type SavedGatewayAuth = {
   gatewayUrl: string;
@@ -157,32 +158,20 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
       }
 
       const run = (async () => {
-        const [agentsResponse, runsResponse, sessionsResponse] = await Promise.all([
-          fetchAuthorized<{ agents: unknown[]; agentDescriptors?: unknown[] }>(
-            props.gatewayUrl,
-            props.token,
-            "/api/v1/agents",
-          ),
-          fetchAuthorized<{ runs: Array<Record<string, unknown>> }>(
-            props.gatewayUrl,
-            props.token,
-            "/api/v1/runs",
-          ),
-          fetchAuthorized<{ sessions: Array<Record<string, unknown>> }>(
-            props.gatewayUrl,
-            props.token,
-            "/api/v1/sessions",
-          ),
-        ]);
+        const snapshot = await loadGatewayBootstrapSnapshot((pathname) =>
+          fetchAuthorized(props.gatewayUrl, props.token, pathname),
+        );
 
         if (cancelled) {
           return;
         }
 
         const actions = store.getState().actions;
-        actions.setAgents(normalizeAgents(agentsResponse.agentDescriptors ?? agentsResponse.agents));
+        if (snapshot.agents) {
+          actions.setAgents(normalizeAgents(snapshot.agents.agentDescriptors ?? snapshot.agents.agents));
+        }
 
-        for (const run of runsResponse.runs) {
+        for (const run of snapshot.runs?.runs ?? []) {
           const runId = String(run.runId ?? "");
           if (!runId) {
             continue;
@@ -194,7 +183,7 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
         }
 
         const activeRunIds = new Set<string>();
-        for (const session of sessionsResponse.sessions) {
+        for (const session of snapshot.sessions?.sessions ?? []) {
           const sessionId = typeof session.sessionId === "string" ? session.sessionId : "";
           if (!sessionId) {
             continue;

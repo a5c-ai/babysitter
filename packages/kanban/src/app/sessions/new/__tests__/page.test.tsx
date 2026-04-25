@@ -1,12 +1,13 @@
 import type { ReactNode, TextareaHTMLAttributes } from "react";
 import { createStore } from "zustand/vanilla";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { render, screen, setupUser } from "@/test/test-utils";
 
 import NewSessionPage from "../page";
 
 const push = vi.fn();
+let mockAgents = ["codex"];
 
 vi.mock("next/link", () => ({
   default: ({ href, children }: { href: string; children: unknown }) => <a href={href}>{children}</a>,
@@ -101,7 +102,7 @@ const store = createStore(() => ({
 }));
 
 vi.mock("@/lib/agent-mux-ui", () => ({
-  useAgents: () => ["codex"],
+  useAgents: () => mockAgents,
   useGateway: () => ({
     client: { subscribeRun: vi.fn() },
     store,
@@ -109,6 +110,10 @@ vi.mock("@/lib/agent-mux-ui", () => ({
 }));
 
 describe("NewSessionPage", () => {
+  beforeEach(() => {
+    mockAgents = ["codex"];
+  });
+
   it("inserts Task Tag snippets into the new session prompt", async () => {
     const user = setupUser();
     render(<NewSessionPage />);
@@ -118,5 +123,14 @@ describe("NewSessionPage", () => {
     await user.click(screen.getByText("Bug Report"));
 
     expect(prompt).toHaveValue("Describe the bug in detail.");
+  });
+
+  it("shows a clear empty-state message when no agents are available", () => {
+    mockAgents = [];
+
+    render(<NewSessionPage />);
+
+    expect(screen.getByText(/No session-capable agents are available/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start session" })).toBeDisabled();
   });
 });

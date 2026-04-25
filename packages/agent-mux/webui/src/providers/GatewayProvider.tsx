@@ -136,7 +136,7 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
       }
 
       const run = (async () => {
-        const [agentsResponse, runsResponse, sessionsResponse] = await Promise.all([
+        const [agentsResponse, runsResponse, sessionsResponse] = await Promise.allSettled([
           fetchAuthorized<{ agents: unknown[]; agentDescriptors?: unknown[] }>(props.gatewayUrl, props.token, '/api/v1/agents'),
           fetchAuthorized<{ runs: Array<Record<string, unknown>> }>(props.gatewayUrl, props.token, '/api/v1/runs'),
           fetchAuthorized<{ sessions: Array<Record<string, unknown>> }>(props.gatewayUrl, props.token, '/api/v1/sessions'),
@@ -147,9 +147,11 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
         }
 
         const actions = store.getState().actions;
-        actions.setAgents(normalizeAgents(agentsResponse.agentDescriptors ?? agentsResponse.agents));
+        if (agentsResponse.status === 'fulfilled') {
+          actions.setAgents(normalizeAgents(agentsResponse.value.agentDescriptors ?? agentsResponse.value.agents));
+        }
 
-        for (const run of runsResponse.runs) {
+        for (const run of runsResponse.status === 'fulfilled' ? runsResponse.value.runs : []) {
           const runId = String(run['runId'] ?? '');
           if (!runId) continue;
           actions.mergeRun(runId, run);
@@ -161,7 +163,7 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
         }
 
         const activeRunIds = new Set<string>();
-        for (const session of sessionsResponse.sessions) {
+        for (const session of sessionsResponse.status === 'fulfilled' ? sessionsResponse.value.sessions : []) {
           const sessionId = typeof session['sessionId'] === 'string' ? session['sessionId'] : '';
           if (!sessionId) {
             continue;
