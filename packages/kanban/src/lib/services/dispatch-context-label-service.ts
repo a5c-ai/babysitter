@@ -5,7 +5,6 @@ import {
   normalizeKanbanDispatchContextLabelRefs,
   normalizeKanbanDispatchContextLabelKey,
   normalizeKanbanDispatchContextLabels,
-  normalizeKanbanDispatchContextLabelRefs,
   type KanbanDispatchContextLabelDefinition,
 } from "@a5c-ai/agent-mux-core/kanban";
 
