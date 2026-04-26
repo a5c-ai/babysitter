@@ -8,6 +8,10 @@ export interface VerifyOptions {
   outputBaseDir?: string;
 }
 
+function getMarketplaceRootDir(marketplacePath: string): string {
+  return path.resolve(path.dirname(marketplacePath), '..', '..');
+}
+
 export function verify(
   outputDir: string,
   emittedFiles: string[],
@@ -256,7 +260,10 @@ export function verify(
         continue;
       }
 
-      const resolved = path.resolve(path.dirname(fullPath), sourceValue);
+      const resolutionRoot = typeof pluginEntry.source === 'string'
+        ? path.dirname(fullPath)
+        : getMarketplaceRootDir(fullPath);
+      const resolved = path.resolve(resolutionRoot, sourceValue);
       if (!fs.existsSync(resolved)) {
         addDiagnostic(
           `${filePath} marketplace entry source missing: ${sourceValue}`,

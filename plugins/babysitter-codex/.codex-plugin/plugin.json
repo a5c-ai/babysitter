@@ -20,7 +20,7 @@
     "LLM"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./hooks.json",
   "apps": "./.app.json",
   "interface": {
     "displayName": "Babysitter",

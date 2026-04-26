@@ -67,6 +67,9 @@
     "pi-extension": {
       "extensions/index.ts": "file:per-harness/{{targetDir}}/extensions-index.ts"
     },
+    "pi-support-files": {
+      "scripts/sync-command-docs.cjs": "file:per-harness/{{targetDir}}/scripts/sync-command-docs.cjs"
+    },
     "codex-branding": {
       "assets/icon.svg": "file:per-harness/{{targetDir}}/assets/icon.svg",
       "assets/logo.png": "file:per-harness/{{targetDir}}/assets/logo.png",
@@ -74,6 +77,10 @@
     },
     "codex-team-install": {
       "scripts/team-install.js": "file:per-harness/{{targetDir}}/scripts/team-install.js"
+    },
+    "codex-support-files": {
+      "plugin.lock.json": "file:per-harness/{{targetDir}}/plugin.lock.json",
+      "scripts/sync-command-skills.js": "file:per-harness/{{targetDir}}/scripts/sync-command-skills.js"
     },
     "gemini-surface": {
       "GEMINI.md": "file:per-harness/{{targetDir}}/GEMINI.md",
@@ -141,12 +148,13 @@
       "extraFileSets": [
         "babysit-skill",
         "codex-branding",
+        "codex-support-files",
         "readme",
         "codex-team-install"
       ],
       "harnessManifest": {
         "skills": "./skills/",
-        "hooks": "./hooks/hooks.json",
+        "hooks": "./hooks.json",
         "apps": "./.app.json",
         "interface": {
           "displayName": "Babysitter",
@@ -276,6 +284,7 @@
         "agents-file",
         "babysit-skill",
         "pi-extension",
+        "pi-support-files",
         "readme"
       ]
     },
@@ -288,6 +297,7 @@
         "agents-file",
         "babysit-skill",
         "pi-extension",
+        "pi-support-files",
         "readme"
       ]
     },

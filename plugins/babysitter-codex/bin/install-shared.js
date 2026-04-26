@@ -13,16 +13,16 @@ function getUserHome() {
 }
 
 function getHarnessHome() {
-  return path.join(os.homedir(), '.codex');
+  return path.join(os.homedir(), ".codex");
 }
 
 function getHomePluginRoot(scope) {
   if (scope === 'workspace') return path.join(process.cwd(), '.a5c', 'plugins', PLUGIN_NAME);
-  return path.join(path.join(os.homedir(), '.agents', 'plugins'), PLUGIN_NAME);
+  return path.join(path.join(os.homedir(), ".agents/plugins"), PLUGIN_NAME);
 }
 
 function getHomeMarketplacePath() {
-  return path.join(os.homedir(), '.agents', 'plugins', 'marketplace.json');
+  return path.join(os.homedir(), ".agents/plugins/marketplace.json");
 }
 
 function writeFileIfChanged(filePath, contents) {
@@ -771,21 +771,28 @@ module.exports = {
   resolveCliCommand,
   runCli,
   ensureGlobalProcessLibrary,
+  PLUGIN_BUNDLE_ENTRIES,
+  copyRecursive,
+  copyPluginBundle,
+  DEFAULT_MARKETPLACE,
+  normalizeMarketplaceSourcePath,
+  ensureMarketplaceEntry,
+  removeMarketplaceEntry,
+  installManagedSkills,
+  mergeManagedHooksConfig,
+  installManagedHooks,
+  warnWindowsHooks,
   LEGACY_MARKETPLACE_PLUGIN_NAMES,
   LEGACY_SKILL_NAMES,
   LEGACY_PROMPT_NAMES,
   LEGACY_HOOK_SCRIPT_NAMES,
   MANAGED_HOOK_SCRIPT_NAMES,
-  DEFAULT_MARKETPLACE,
-  PLUGIN_BUNDLE_ENTRIES,
   getCodexHome,
   getHomePluginRoot,
   getHomeMarketplacePath,
   getWorkspacePluginRoot,
   getWorkspaceMarketplacePath,
   renderCodexConfigToml,
-  copyRecursive,
-  copyPluginBundle,
   insertRootKey,
   ensureSectionLine,
   ensureWritableRoots,
@@ -795,15 +802,8 @@ module.exports = {
   runBabysitterCli,
   ensureGlobalProcessLibrary,
   getMarketplaceRootDir,
-  normalizeMarketplaceSourcePath,
-  ensureMarketplaceEntry,
-  removeMarketplaceEntry,
   removeLegacyCodexSurface,
-  installManagedSkills,
-  mergeManagedHooksConfig,
-  installManagedHooks,
   installCodexSurface,
   harnessInstall,
   harnessTeamInstall,
-  warnWindowsHooks,
 };

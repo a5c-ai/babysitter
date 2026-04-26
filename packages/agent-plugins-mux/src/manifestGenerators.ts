@@ -69,10 +69,15 @@ export function generateCodexManifest(manifest: ResolvedManifest): string {
     version: manifest.version,
     description: manifest.description,
     scripts: {
-      test: 'node test/integration.test.js && node test/packaged-install.test.js',
+      test: 'npm run validate:ci',
+      'test:integration': 'node test/integration.test.js',
+      'test:packaged-install': 'node test/packaged-install.test.js',
+      'validate:ci': 'npm run test:integration && npm run test:packaged-install',
       'sync:commands': 'node scripts/sync-command-skills.js',
+      'team:install': 'node scripts/team-install.js',
       deploy: 'npm publish --access public',
       'deploy:staging': 'npm publish --access public --tag staging',
+      'sync:skills': 'node scripts/sync-command-skills.js',
     },
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.js' },
     files: [
@@ -202,9 +207,13 @@ export function generatePiManifest(manifest: ResolvedManifest): string {
       '@mariozechner/pi-coding-agent': '*',
     },
     scripts: {
-      test: 'node --test test/integration.test.js && node test/packaged-install.test.cjs',
+      test: 'npm run validate:ci',
+      'test:integration': 'node --test test/integration.test.js',
+      'test:packaged-install': 'node test/packaged-install.test.cjs',
+      'validate:ci': 'npm run test:integration && npm run test:packaged-install',
       'sync:commands': 'node scripts/sync-command-docs.cjs',
       deploy: 'npm publish --access public',
+      'deploy:staging': 'npm publish --access public --tag staging',
     },
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.cjs' },
     files: [
@@ -247,8 +256,10 @@ export function generateOhMyPiManifest(manifest: ResolvedManifest): string {
     },
     scripts: {
       test: 'node --test test/integration.test.js && node test/packaged-install.test.cjs',
+      'validate:ci': 'npm test',
       'sync:commands': 'node scripts/sync-command-docs.cjs',
       deploy: 'npm publish --access public',
+      'deploy:staging': 'npm publish --access public --tag staging',
     },
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.cjs' },
     files: [

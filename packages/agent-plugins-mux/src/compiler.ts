@@ -102,7 +102,8 @@ export function compile(options: CompileOptions): CompilationResult {
     const marketplaceContent = generateMarketplaceJson(
       resolveResult.effectiveManifest,
       resolveResult.targetProfile,
-      output
+      output,
+      outputBaseDir,
     );
     const marketplaceFullPath = path.join(outputBaseDir, resolveResult.targetProfile.marketplacePath);
     fs.mkdirSync(path.dirname(marketplaceFullPath), { recursive: true });

@@ -98,6 +98,9 @@ export function generateJsBridge(
   targetProfile: TargetProfile
 ): string {
   const pluginRootEnvVar = targetProfile.pluginRootEnvVarForExtension || 'PLUGIN_ROOT';
+  const defaultAdapterName = targetProfile.name === 'oh-my-pi'
+    ? targetProfile.name
+    : targetProfile.adapterName;
   return `#!/usr/bin/env node
 "use strict";
 var execSync = require("child_process").execSync;
@@ -114,7 +117,7 @@ try {
     timeout: 30000,
     env: Object.assign({}, process.env, {
       HOOK_TYPE: process.env.HOOK_TYPE || "",
-      ADAPTER_NAME: process.env.ADAPTER_NAME || "${targetProfile.adapterName}",
+      ADAPTER_NAME: process.env.ADAPTER_NAME || "${defaultAdapterName}",
       PLUGIN_ROOT: PLUGIN_ROOT
     })
   });

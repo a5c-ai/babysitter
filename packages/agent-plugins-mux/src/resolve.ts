@@ -59,6 +59,11 @@ export function resolve(
   let effectiveManifest = { ...manifest };
   if (manifest.targets && manifest.targets[targetName]) {
     const override = manifest.targets[targetName];
+    const {
+      extraFileSets: _extraFileSets,
+      harnessInstallSurfaceExportSets: _harnessInstallSurfaceExportSets,
+      ...mergeableOverride
+    } = override;
     // Deep merge handles the override, but TypeScript needs to know that
     // the result may include extended fields like npmPackageName and
     // the skills field may temporarily hold the 'derive-from-commands' directive.
@@ -66,7 +71,7 @@ export function resolve(
     // back to A5cPluginManifest, as we know the merge preserves required fields.
     effectiveManifest = deepMerge(
       effectiveManifest,
-      override as Partial<A5cPluginManifest>
+      mergeableOverride as Partial<A5cPluginManifest>
     ) as unknown as A5cPluginManifest;
   }
 

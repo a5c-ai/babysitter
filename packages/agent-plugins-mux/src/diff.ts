@@ -207,6 +207,7 @@ function collectFiles(dir: string, prefix = ''): string[] {
 
 function isIgnoredExistingFile(file: string) {
   return (
+    file.startsWith('.a5c/') ||
     file.startsWith('test/') ||
     IGNORED_EXISTING_FILES.has(file) ||
     file.endsWith('.legacy') ||

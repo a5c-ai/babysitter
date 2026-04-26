@@ -1,16 +1,22 @@
 // Marketplace file generator
 // Generates marketplace.json for targets that use marketplace distribution
 
+import * as path from 'path';
 import type { A5cPluginManifest, TargetProfile } from './types.js';
 
 export function generateMarketplaceJson(
   manifest: A5cPluginManifest,
   targetProfile: TargetProfile,
-  pluginOutputDir: string
+  pluginOutputDir: string,
+  outputBaseDir: string,
 ): string {
   const authorName = typeof manifest.author === 'string'
     ? manifest.author
     : manifest.author.name;
+  const relativePluginPath = path.relative(outputBaseDir, pluginOutputDir).replace(/\\/g, '/');
+  const pluginSourcePath = relativePluginPath.startsWith('.')
+    ? relativePluginPath
+    : `./${relativePluginPath}`;
 
   if (targetProfile.name === 'codex') {
     return JSON.stringify({
@@ -22,7 +28,7 @@ export function generateMarketplaceJson(
         name: manifest.name,
         source: {
           source: 'local',
-          path: `./${pluginOutputDir}`,
+          path: pluginSourcePath,
         },
         policy: {
           installation: 'AVAILABLE',
@@ -41,7 +47,7 @@ export function generateMarketplaceJson(
     },
     plugins: [{
       name: manifest.name,
-      source: `./${pluginOutputDir}`,
+      source: pluginSourcePath,
       description: manifest.description,
       version: manifest.version,
       author: { name: authorName },
