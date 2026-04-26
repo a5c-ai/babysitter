@@ -90,8 +90,8 @@ export default function DashboardPage() {
             </h2>
             <p className="mt-3 text-sm leading-6 text-foreground-muted">
               {isAuthenticated
-                ? "Live sessions and hook approvals are available now."
-                : "Connect a gateway token to enable session creation, chat continuation, and hook approvals from the same app."}
+                ? "Live sessions and workspace attention are available now."
+                : "Connect a gateway token to enable session creation, chat continuation, and live workspace context from the same app."}
             </p>
             <div className="mt-5">
               <Button asChild variant="outline">

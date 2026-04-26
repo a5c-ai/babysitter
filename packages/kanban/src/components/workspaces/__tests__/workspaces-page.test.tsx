@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, setupUser, waitFor, within } from "@/test/test-utils";
 
-import { getWorkspaceOwnershipLabel, loadInventory, runWorkspaceAction, WorkspacesPageContent } from "../workspaces-page";
+import {
+  getWorkspaceAttentionReasons,
+  getWorkspaceOwnershipLabel,
+  loadInventory,
+  runWorkspaceAction,
+  workspaceNeedsAttention,
+  WorkspacesPageContent,
+} from "../workspaces-page";
 
 let workspaceReviewArtifacts: Array<Record<string, unknown>> = [];
 const mockUseBacklog = vi.fn(() => ({ snapshot: null }));
@@ -120,6 +127,154 @@ describe("workspaces-page helpers", () => {
     );
   });
 
+  it("flags only actionable workspace states for the inbox", () => {
+    expect(
+      workspaceNeedsAttention({
+        path: "/repo/worktrees/review",
+        name: "review",
+        status: "idle",
+        missing: false,
+        archivedAt: null,
+        cleanedAt: null,
+        lastActivityAt: "2026-04-24T12:00:00.000Z",
+        git: {
+          root: "/repo/main",
+          commonDir: "/repo/main/.git",
+          trackingBranch: "origin/vk/review",
+          branch: "vk/review",
+          head: "abc123",
+          ahead: 0,
+          behind: 0,
+          dirty: false,
+          uncommittedCount: 0,
+          isWorktree: true,
+          isPrimary: false,
+        },
+        notes: {
+          value: "",
+          updatedAt: null,
+        },
+        links: {
+          editorHref: "vscode://file/repo/worktrees/review",
+        },
+        sessions: { total: 0, active: 0, items: [] },
+        runs: { total: 0, active: 0, items: [] },
+        actions: {
+          canArchive: true,
+          canCleanup: false,
+          canRecover: false,
+          canRebaseStart: false,
+          canRebaseAutoResolve: false,
+          canRebaseOpenInEditor: false,
+          canRebaseMarkResolved: false,
+          canRebaseAbort: false,
+        },
+        review: {
+          decision: "pending",
+          queueState: "queued",
+          commentCount: 1,
+          openCommentCount: 1,
+          latestActivityAt: "2026-04-24T12:00:00.000Z",
+        },
+      }),
+    ).toBe(true);
+
+    expect(
+      getWorkspaceAttentionReasons({
+        path: "/repo/worktrees/review",
+        name: "review",
+        status: "idle",
+        missing: false,
+        archivedAt: null,
+        cleanedAt: null,
+        lastActivityAt: "2026-04-24T12:00:00.000Z",
+        git: {
+          root: "/repo/main",
+          commonDir: "/repo/main/.git",
+          trackingBranch: "origin/vk/review",
+          branch: "vk/review",
+          head: "abc123",
+          ahead: 0,
+          behind: 0,
+          dirty: false,
+          uncommittedCount: 0,
+          isWorktree: true,
+          isPrimary: false,
+        },
+        notes: {
+          value: "",
+          updatedAt: null,
+        },
+        links: {
+          editorHref: "vscode://file/repo/worktrees/review",
+        },
+        sessions: { total: 0, active: 0, items: [] },
+        runs: { total: 0, active: 0, items: [] },
+        actions: {
+          canArchive: true,
+          canCleanup: false,
+          canRecover: false,
+          canRebaseStart: false,
+          canRebaseAutoResolve: false,
+          canRebaseOpenInEditor: false,
+          canRebaseMarkResolved: false,
+          canRebaseAbort: false,
+        },
+        review: {
+          decision: "pending",
+          queueState: "queued",
+          commentCount: 1,
+          openCommentCount: 1,
+          latestActivityAt: "2026-04-24T12:00:00.000Z",
+        },
+      }),
+    ).toEqual(["Review pending", "1 open comment"]);
+
+    expect(
+      workspaceNeedsAttention({
+        path: "/repo/worktrees/healthy",
+        name: "healthy",
+        status: "idle",
+        missing: false,
+        archivedAt: null,
+        cleanedAt: null,
+        lastActivityAt: "2026-04-24T12:00:00.000Z",
+        git: {
+          root: "/repo/main",
+          commonDir: "/repo/main/.git",
+          trackingBranch: "origin/vk/healthy",
+          branch: "vk/healthy",
+          head: "abc123",
+          ahead: 0,
+          behind: 0,
+          dirty: false,
+          uncommittedCount: 0,
+          isWorktree: true,
+          isPrimary: false,
+        },
+        notes: {
+          value: "",
+          updatedAt: null,
+        },
+        links: {
+          editorHref: "vscode://file/repo/worktrees/healthy",
+        },
+        sessions: { total: 0, active: 0, items: [] },
+        runs: { total: 0, active: 0, items: [] },
+        actions: {
+          canArchive: true,
+          canCleanup: false,
+          canRecover: false,
+          canRebaseStart: false,
+          canRebaseAutoResolve: false,
+          canRebaseOpenInEditor: false,
+          canRebaseMarkResolved: false,
+          canRebaseAbort: false,
+        },
+      }),
+    ).toBe(false);
+  });
+
   it("loads workspace inventory through the workspace API", async () => {
     const payload = {
       summary: { total: 1, active: 1, idle: 0, archived: 0, missing: 0 },
@@ -168,6 +323,146 @@ describe("workspaces-page helpers", () => {
         }),
       }),
     );
+  });
+
+  it("renders only workspaces that need attention in inbox mode", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({
+        summary: { total: 3, active: 0, idle: 2, archived: 0, missing: 1 },
+        workspaces: [
+          {
+            path: "/repo/worktrees/clean",
+            name: "clean",
+            status: "idle",
+            missing: false,
+            archivedAt: null,
+            cleanedAt: null,
+            lastActivityAt: "2026-04-24T12:00:00.000Z",
+            git: {
+              root: "/repo/main",
+              commonDir: "/repo/main/.git",
+              trackingBranch: "origin/vk/clean",
+              branch: "vk/clean",
+              head: "abc123",
+              ahead: 0,
+              behind: 0,
+              dirty: false,
+              uncommittedCount: 0,
+              isWorktree: true,
+              isPrimary: false,
+            },
+            notes: { value: "", updatedAt: null },
+            links: { editorHref: "vscode://file/repo/worktrees/clean" },
+            sessions: { total: 0, active: 0, items: [] },
+            runs: { total: 0, active: 0, items: [] },
+            actions: {
+              canArchive: true,
+              canCleanup: false,
+              canRecover: false,
+              canRebaseStart: false,
+              canRebaseAutoResolve: false,
+              canRebaseOpenInEditor: false,
+              canRebaseMarkResolved: false,
+              canRebaseAbort: false,
+            },
+          },
+          {
+            path: "/repo/worktrees/review",
+            name: "review",
+            status: "idle",
+            missing: false,
+            archivedAt: null,
+            cleanedAt: null,
+            lastActivityAt: "2026-04-24T13:00:00.000Z",
+            git: {
+              root: "/repo/main",
+              commonDir: "/repo/main/.git",
+              trackingBranch: "origin/vk/review",
+              branch: "vk/review",
+              head: "def456",
+              ahead: 0,
+              behind: 0,
+              dirty: false,
+              uncommittedCount: 0,
+              isWorktree: true,
+              isPrimary: false,
+            },
+            notes: { value: "", updatedAt: null },
+            links: { editorHref: "vscode://file/repo/worktrees/review" },
+            sessions: { total: 0, active: 0, items: [] },
+            runs: { total: 0, active: 0, items: [] },
+            actions: {
+              canArchive: true,
+              canCleanup: false,
+              canRecover: false,
+              canRebaseStart: false,
+              canRebaseAutoResolve: false,
+              canRebaseOpenInEditor: false,
+              canRebaseMarkResolved: false,
+              canRebaseAbort: false,
+            },
+            review: {
+              decision: "pending",
+              queueState: "queued",
+              commentCount: 1,
+              openCommentCount: 1,
+              latestActivityAt: "2026-04-24T13:00:00.000Z",
+            },
+          },
+          {
+            path: "/repo/worktrees/recovery",
+            name: "recovery",
+            status: "missing",
+            missing: true,
+            archivedAt: null,
+            cleanedAt: "2026-04-24T11:00:00.000Z",
+            lastActivityAt: "2026-04-24T11:00:00.000Z",
+            git: {
+              root: "/repo/main",
+              commonDir: "/repo/main/.git",
+              trackingBranch: "origin/vk/recovery",
+              branch: "vk/recovery",
+              head: "ghi789",
+              ahead: 0,
+              behind: 0,
+              dirty: null,
+              uncommittedCount: null,
+              isWorktree: true,
+              isPrimary: false,
+            },
+            notes: { value: "", updatedAt: null },
+            links: { editorHref: null },
+            sessions: { total: 0, active: 0, items: [] },
+            runs: { total: 0, active: 0, items: [] },
+            actions: {
+              canArchive: false,
+              canCleanup: false,
+              canRecover: true,
+              canRebaseStart: false,
+              canRebaseAutoResolve: false,
+              canRebaseOpenInEditor: false,
+              canRebaseMarkResolved: false,
+              canRebaseAbort: false,
+            },
+          },
+        ],
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    render(<WorkspacesPageContent isAuthenticated sessions={[]} mode="attention" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Workspaces that need attention")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("review")).toBeInTheDocument();
+    expect(screen.getByText("recovery")).toBeInTheDocument();
+    expect(screen.queryByText("clean")).not.toBeInTheDocument();
+    expect(screen.getByText("Review pending")).toBeInTheDocument();
+    expect(screen.getByText("Recovery required")).toBeInTheDocument();
   });
 
   it("posts lifecycle actions back to the workspace API", async () => {

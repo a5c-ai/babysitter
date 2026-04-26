@@ -232,7 +232,7 @@ export function BabysitterOverlayPanel() {
             </div>
             <div className="mt-4 grid gap-3 text-sm text-foreground-muted">
               <Link href="/inbox" className="rounded-2xl border border-border bg-card px-4 py-3 text-left hover:border-primary/30 hover:text-foreground">
-                Hook inbox now carries run and session context for breakpoint review.
+                Inbox surfaces workspaces that need recovery, rebase, or review action.
               </Link>
               <Link href="/sessions" className="rounded-2xl border border-border bg-card px-4 py-3 text-left hover:border-primary/30 hover:text-foreground">
                 Session detail merges transcript activity with run milestones and artifacts.

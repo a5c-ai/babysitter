@@ -41,6 +41,8 @@ function workspaceDetailHref(value: string): string {
   return `/workspaces?workspace=${encodeURIComponent(value)}`;
 }
 
+type WorkspaceSurfaceMode = "full" | "attention";
+
 function formatUsd(totalUsd: number | null): string {
   if (totalUsd == null || !Number.isFinite(totalUsd)) {
     return "unavailable";
@@ -292,6 +294,76 @@ function providerLabel(provider: KanbanLinkedPullRequestSummary["provider"]): st
   return provider === "azure-repos" ? "Azure Repos" : "GitHub";
 }
 
+export function getWorkspaceAttentionReasons(workspace: WorkspaceInventoryItem): string[] {
+  const reasons: string[] = [];
+
+  if (workspace.status === "missing") {
+    reasons.push("Recovery required");
+  }
+
+  if (workspace.rebase) {
+    reasons.push(`Rebase ${rebaseLabel(workspace.rebase.status)}`);
+  }
+
+  if (workspace.review) {
+    if (workspace.review.decision === "changes-requested") {
+      reasons.push("Changes requested");
+    } else if (workspace.review.decision === "pending" || workspace.review.queueState !== "completed") {
+      reasons.push("Review pending");
+    }
+
+    if (workspace.review.openCommentCount > 0) {
+      reasons.push(
+        `${workspace.review.openCommentCount} open comment${workspace.review.openCommentCount === 1 ? "" : "s"}`,
+      );
+    }
+  }
+
+  return reasons;
+}
+
+export function workspaceNeedsAttention(workspace: WorkspaceInventoryItem): boolean {
+  return getWorkspaceAttentionReasons(workspace).length > 0;
+}
+
+function workspaceAttentionRank(workspace: WorkspaceInventoryItem): number {
+  if (workspace.status === "missing" || workspace.rebase?.status === "rebase-conflicts") {
+    return 0;
+  }
+  if (workspace.review?.decision === "changes-requested") {
+    return 1;
+  }
+  if (
+    workspace.rebase?.status === "rebase-needed" ||
+    workspace.review?.decision === "pending" ||
+    workspace.review?.queueState === "queued" ||
+    workspace.review?.queueState === "in-review" ||
+    (workspace.review?.openCommentCount ?? 0) > 0
+  ) {
+    return 2;
+  }
+  if (workspace.rebase) {
+    return 3;
+  }
+  return 4;
+}
+
+function compareAttentionWorkspaces(left: WorkspaceInventoryItem, right: WorkspaceInventoryItem): number {
+  const rankDiff = workspaceAttentionRank(left) - workspaceAttentionRank(right);
+  if (rankDiff !== 0) {
+    return rankDiff;
+  }
+
+  const leftActivity = Date.parse(left.lastActivityAt ?? "");
+  const rightActivity = Date.parse(right.lastActivityAt ?? "");
+  const activityDiff = (Number.isFinite(rightActivity) ? rightActivity : 0) - (Number.isFinite(leftActivity) ? leftActivity : 0);
+  if (activityDiff !== 0) {
+    return activityDiff;
+  }
+
+  return left.path.localeCompare(right.path);
+}
+
 export function WorkspacesPageContent(props: {
   isAuthenticated: boolean;
   sessions: WorkspaceSessionSnapshot[];
@@ -299,6 +371,7 @@ export function WorkspacesPageContent(props: {
   allRuns?: Array<Record<string, unknown>>;
   eventBuffers?: Record<string, { events: Record<string, unknown>[] } | undefined>;
   onSendPrompt?: (input: { sessionId: string; prompt: string; agent?: string }) => Promise<void>;
+  mode?: WorkspaceSurfaceMode;
 }) {
   const searchParams = useSearchParams();
   const [inventory, setInventory] = useState<WorkspaceInventoryResponse | null>(null);
@@ -314,6 +387,7 @@ export function WorkspacesPageContent(props: {
   const [isPending, startTransition] = useTransition();
   const { snapshot } = useBacklog();
   const workspaceReviews = useReviews({ targetType: "workspace" });
+  const mode = props.mode ?? "full";
   const selectedWorkspacePath =
     props.selectedWorkspacePath ?? (searchParams.get("workspace")?.trim() || null);
 
@@ -358,16 +432,6 @@ export function WorkspacesPageContent(props: {
     };
   }, [props.sessions, sessionFingerprint]);
 
-  const groups = useMemo(() => {
-    const workspaces = inventory?.workspaces ?? [];
-    return {
-      active: workspaces.filter((workspace) => workspace.status === "active"),
-      idle: workspaces.filter((workspace) => workspace.status === "idle"),
-      archived: workspaces.filter((workspace) => workspace.status === "archived"),
-      missing: workspaces.filter((workspace) => workspace.status === "missing"),
-    };
-  }, [inventory]);
-
   const summary = inventory?.summary ?? {
     total: 0,
     active: 0,
@@ -382,6 +446,41 @@ export function WorkspacesPageContent(props: {
   const liveArtifactByPath = useMemo(
     () => buildArtifactByPath(workspaceReviews.artifacts),
     [workspaceReviews.artifacts],
+  );
+  const workspaces = useMemo(
+    () =>
+      (inventory?.workspaces ?? []).map((workspace) => ({
+        ...workspace,
+        review: liveReviewByPath.get(workspace.path) ?? workspace.review,
+      })),
+    [inventory?.workspaces, liveReviewByPath],
+  );
+  const groups = useMemo(() => ({
+    active: workspaces.filter((workspace) => workspace.status === "active"),
+    idle: workspaces.filter((workspace) => workspace.status === "idle"),
+    archived: workspaces.filter((workspace) => workspace.status === "archived"),
+    missing: workspaces.filter((workspace) => workspace.status === "missing"),
+  }), [workspaces]);
+  const attentionWorkspaces = useMemo(
+    () => [...workspaces].filter(workspaceNeedsAttention).sort(compareAttentionWorkspaces),
+    [workspaces],
+  );
+  const attentionSummary = useMemo(
+    () => ({
+      total: attentionWorkspaces.length,
+      recovery: attentionWorkspaces.filter((workspace) => workspace.status === "missing").length,
+      rebase: attentionWorkspaces.filter((workspace) => Boolean(workspace.rebase)).length,
+      review: attentionWorkspaces.filter(
+        (workspace) =>
+          Boolean(workspace.review) &&
+          (
+            workspace.review?.decision !== "approved" ||
+            workspace.review?.queueState !== "completed" ||
+            (workspace.review?.openCommentCount ?? 0) > 0
+          ),
+      ).length,
+    }),
+    [attentionWorkspaces],
   );
   const executionContextsBySessionId = useMemo(() => {
     if (!snapshot) {
@@ -398,9 +497,9 @@ export function WorkspacesPageContent(props: {
   const selectedWorkspace = useMemo(
     () =>
       selectedWorkspacePath
-        ? (inventory?.workspaces.find((workspace) => workspace.path === selectedWorkspacePath) ?? null)
+        ? (workspaces.find((workspace) => workspace.path === selectedWorkspacePath) ?? null)
         : null,
-    [inventory?.workspaces, selectedWorkspacePath],
+    [selectedWorkspacePath, workspaces],
   );
   const workspaceSessions = useMemo(() => {
     if (!selectedWorkspace) {
@@ -777,6 +876,79 @@ export function WorkspacesPageContent(props: {
     );
   }
 
+  if (mode === "attention") {
+    return (
+      <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
+        <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Inbox</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight">Workspaces that need attention</h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground-muted">
+                Only actionable workspaces appear here. Recovery states, rebase workflows, and review handoffs stay in
+                the inbox so active or idle worktrees do not create noise.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild variant="outline">
+                <Link href="/workspaces">Open full inventory</Link>
+              </Button>
+              <Button variant="outline" onClick={refreshInventory} disabled={loading || isPending}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh inbox
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            <SummaryCard label="Needs attention" value={String(attentionSummary.total)} />
+            <SummaryCard label="Recovery" value={String(attentionSummary.recovery)} />
+            <SummaryCard label="Rebase" value={String(attentionSummary.rebase)} />
+            <SummaryCard label="Review" value={String(attentionSummary.review)} />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3 text-sm text-foreground-muted">
+            <span className="rounded-full border border-border px-3 py-1.5">
+              {getWorkspaceOwnershipLabel(props.isAuthenticated, props.sessions)}
+            </span>
+            <span className="rounded-full border border-border px-3 py-1.5">
+              The inbox excludes healthy active and idle workspaces.
+            </span>
+          </div>
+        </section>
+
+        {error ? (
+          <section className="rounded-3xl border border-error/30 bg-error/10 p-4 text-sm text-error">
+            {error}
+          </section>
+        ) : null}
+
+        <WorkspaceColumn
+          title="Needs attention"
+          icon={AlertTriangle}
+          empty="No workspaces currently need attention."
+          workspaces={attentionWorkspaces}
+          artifactByPath={liveArtifactByPath}
+          reviewByPath={liveReviewByPath}
+          executionContextsBySessionId={executionContextsBySessionId}
+          pendingAction={pendingAction}
+          onAction={handleAction}
+          onOpenInEditor={(workspace, href) =>
+            openEditorForWorkspace(workspace, href, `Opened ${workspace.path} in the configured editor.`)
+          }
+          onSaveNote={handleNoteSave}
+          pendingNotePath={pendingNotePath}
+          feedbackByWorkspacePath={feedbackByWorkspacePath}
+          selectedWorkspacePath={selectedWorkspacePath}
+          reviewPendingArtifactId={workspaceReviews.pendingArtifactId}
+          onCreatePullRequest={handleCreatePullRequest}
+          onLinkPullRequest={handleLinkPullRequest}
+          highlightReasons
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
       <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
@@ -1000,6 +1172,7 @@ function WorkspaceColumn(props: {
       baseBranch?: string;
     },
   ) => void;
+  highlightReasons?: boolean;
 }) {
   const Icon = props.icon;
 
@@ -1017,6 +1190,7 @@ function WorkspaceColumn(props: {
 
       <div className="mt-4 grid gap-4">
         {props.workspaces.map((workspace) => {
+          const attentionReasons = props.highlightReasons ? getWorkspaceAttentionReasons(workspace) : [];
           const archiveKey = `archive:${workspace.path}`;
           const cleanupKey = `cleanup:${workspace.path}`;
           const recoverKey = `recover:${workspace.path}`;
@@ -1080,6 +1254,18 @@ function WorkspaceColumn(props: {
                   <p className="mt-2 font-mono text-xs text-foreground-muted" title={workspace.path}>
                     {truncatePath(workspace.path)}
                   </p>
+                  {attentionReasons.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {attentionReasons.map((reason) => (
+                        <span
+                          key={`${workspace.path}:${reason}`}
+                          className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-xs text-warning"
+                        >
+                          {reason}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
