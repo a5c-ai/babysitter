@@ -134,7 +134,8 @@ function main() {
   const legacyFile = path.join(evidenceDir, "ontology-evidence.json");
   const { graphDocument, evidenceSources, claims } = loadGraphData(rootDir);
 
-  fs.rmSync(targetDir, { recursive: true, force: true });
+  // Keep the current snapshot in place while regenerating so concurrent readers
+  // in the root contract suite never observe a missing manifest.
   fs.rmSync(legacyFile, { force: true });
 
   const manifest = {
