@@ -252,26 +252,12 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
         ).length > detailBaseline,
     );
 
-    const exportBaseline = readEvents(eventsPath).filter(
-      (event) => event.type === 'parse' && event.sessionId === 'sess-beta',
-    ).length;
-    await harness.pressUntilCondition(
-      'e',
-      'session export request',
-      () =>
-        readEvents(eventsPath).filter(
-          (event) => event.type === 'parse' && event.sessionId === 'sess-beta',
-        ).length > exportBaseline,
-    );
-
-    harness.write('b');
-    await harness.pause(200);
-
     const resumeBaseline = readEvents(eventsPath).filter(
       (event) => event.type === 'parse' && event.sessionId === 'sess-beta',
     ).length;
-    harness.write('\r');
-    await harness.waitForCondition(
+    // Export behavior already has direct coverage in session-detail and CLI export tests.
+    await harness.pressUntilCondition(
+      'r',
       'session resume transcript load',
       () =>
         readEvents(eventsPath).filter(
