@@ -134,4 +134,23 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("use AskUserQuestion rather than plain-text questions");
     expect(prompt).toContain("ask the next highest-signal AskUserQuestion");
   });
+
+  test("PhasePlanProcess user prompt can forbid shell subtasks for babysitter call flows", () => {
+    const prompt = buildProcessDefinitionUserPrompt("implement the feature", "/tmp/processes", {
+      interactive: false,
+      workspaceAssessment: "empty",
+      workspaceEntries: [],
+      preferAgentOnlyTasks: true,
+    });
+
+    expect(prompt).toContain("Do not generate `shell` tasks for this run shape");
+    expect(prompt).toContain("`agent` or `skill` tasks");
+  });
+
+  test("PhaseOrchestration prompt can bias call flows away from shell effects", () => {
+    const prompt = buildOrchestrationSystemPrompt("pi", context, false, true);
+
+    expect(prompt).toContain("Treat `shell` effects as exceptional compatibility cases");
+    expect(prompt).toContain("`agent`, `skill`, and delegated-task resolution paths");
+  });
 });

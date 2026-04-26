@@ -8,13 +8,20 @@ import { discoverAllRunDirs as defaultDiscoverAllRunDirs, type DiscoveredRun } f
 import { getRunCached as defaultGetRunCached } from "@/lib/run-cache";
 import type { Run } from "@/types";
 import type { WatchSource } from "@/lib/config-loader";
-import type { WorkspaceRebaseSurface, WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
+import {
+  resolveWorkspaceDefaultCwd,
+  WorkspaceService,
+  type WorkspaceRebaseSurface,
+  type WorkspaceRuntimeSurface,
+  type WorkspaceSessionBinding,
+  type WorkspaceSummary as ManagedWorkspaceSummary,
+} from "@a5c-ai/agent-mux-core";
 import type { KanbanReviewSummary } from "@a5c-ai/agent-mux-core";
 
 const execFile = promisify(execFileCallback);
 
 const WORKSPACE_REGISTRY_PATH =
-  process.env.KANBAN_WORKSPACE_REGISTRY_PATH ?? path.join(os.homedir(), ".a5c", "kanban-workspaces.json");
+  process.env.KANBAN_WORKSPACE_REGISTRY_PATH ?? path.join(os.homedir(), ".a5c", "workspaces", "kanban-workspaces.json");
 
 type WorkspaceStatus = "active" | "idle" | "archived" | "missing";
 type WorkspaceAction =
@@ -194,6 +201,10 @@ export interface WorkspaceLifecycleDeps {
   execGit: (args: string[], cwd: string) => Promise<{ stdout: string; stderr: string }>;
   now: () => string;
   cwd: () => string;
+  workspaceService?: Pick<
+    WorkspaceService,
+    "listWorkspaces" | "createWorkspace" | "archiveWorkspace" | "cleanupWorkspace" | "recoverWorkspace" | "resolveWorkspace"
+  >;
 }
 
 const defaultDeps: WorkspaceLifecycleDeps = {
@@ -531,11 +542,46 @@ function toWorkspaceStatus(record: MutableWorkspaceRecord): WorkspaceStatus {
   return "idle";
 }
 
+function toSharedSessionBindings(sessions: readonly WorkspaceSessionSnapshot[]): WorkspaceSessionBinding[] {
+  return sessions.map((session) => ({
+    agent: session.agent,
+    sessionId: session.sessionId,
+    status: session.status === "active" ? "running" : "stopped",
+    cwd: session.cwd,
+    title: session.title,
+    updatedAt:
+      typeof session.updatedAt === "number"
+        ? new Date(session.updatedAt).toISOString()
+        : new Date().toISOString(),
+    activeRunId: session.activeRunId ?? null,
+    latestRunId: session.latestRunId ?? null,
+  }));
+}
+
+function matchesManagedWorkspacePath(workspace: ManagedWorkspaceSummary, targetPath: string): boolean {
+  const normalized = normalizeWorkspacePath(targetPath);
+  if (normalized === workspace.rootPath || normalized === workspace.defaultCwd) {
+    return true;
+  }
+  return workspace.repos.some((repo: ManagedWorkspaceSummary["repos"][number]) =>
+    normalized === repo.targetPath || normalized.startsWith(`${repo.targetPath}${path.sep}`),
+  );
+}
+
+function toManagedWorkspacePath(workspace: ManagedWorkspaceSummary): string {
+  return resolveWorkspaceDefaultCwd(workspace);
+}
+
 export class WorkspaceLifecycleService {
   private deps: WorkspaceLifecycleDeps;
+  private sharedWorkspaceService: Pick<
+    WorkspaceService,
+    "listWorkspaces" | "createWorkspace" | "archiveWorkspace" | "cleanupWorkspace" | "recoverWorkspace" | "resolveWorkspace"
+  >;
 
   constructor(deps?: Partial<WorkspaceLifecycleDeps>) {
     this.deps = { ...defaultDeps, ...deps };
+    this.sharedWorkspaceService = deps?.workspaceService ?? new WorkspaceService();
   }
 
   async listWorkspaces(input: {
@@ -549,10 +595,20 @@ export class WorkspaceLifecycleService {
       input.linkedIssuesByWorkspacePath ?? new Map<string, readonly WorkspaceIssueLink[]>();
     const registry = await readRegistry(this.deps);
     const records = new Map<string, MutableWorkspaceRecord>();
+    let managedWorkspaces: ManagedWorkspaceSummary[] = [];
+
+    try {
+      managedWorkspaces = (await this.sharedWorkspaceService.listWorkspaces({
+        liveSessions: toSharedSessionBindings(sessions),
+      })).workspaces as ManagedWorkspaceSummary[];
+    } catch {
+      managedWorkspaces = [];
+    }
 
     const seedPaths = new Set<string>([
       normalizeWorkspacePath(this.deps.cwd()),
       ...Object.keys(registry.workspaces).map(normalizeWorkspacePath),
+      ...managedWorkspaces.map((workspace) => normalizeWorkspacePath(toManagedWorkspacePath(workspace))),
       ...sessions.flatMap((session) => (session.cwd ? [normalizeWorkspacePath(session.cwd)] : [])),
     ]);
 
@@ -612,12 +668,56 @@ export class WorkspaceLifecycleService {
       }
     }
 
+    for (const workspace of managedWorkspaces) {
+      const workspacePath = normalizeWorkspacePath(toManagedWorkspacePath(workspace));
+      const record = ensureWorkspaceRecord(records, workspacePath);
+      const primaryRepo =
+        workspace.repos.find((repo: ManagedWorkspaceSummary["repos"][number]) => normalizeWorkspacePath(repo.targetPath) === workspacePath) ??
+        (workspace.repos.length === 1 ? workspace.repos[0] : undefined);
+
+      record.name = workspace.name || record.name;
+      record.gitRoot = primaryRepo?.gitRoot ?? record.gitRoot;
+      record.branch = primaryRepo?.branch ?? record.branch;
+      record.head = primaryRepo?.head ?? record.head;
+      record.isWorktree = primaryRepo?.mode === "worktree";
+      record.archivedAt = workspace.archivedAt;
+      record.cleanedAt = workspace.cleanedAt;
+      if (workspace.status === "missing" || workspace.status === "cleaned") {
+        record.missing = true;
+      }
+
+      for (const session of workspace.sessions) {
+        const existing = record.sessions.find(
+          (candidate) => candidate.sessionId === session.sessionId && candidate.agent === session.agent,
+        );
+        if (existing) {
+          continue;
+        }
+        record.sessions.push({
+          sessionId: session.sessionId,
+          agent: session.agent,
+          status: session.status === "running" ? "active" : "inactive",
+          cwd: workspacePath,
+          title: session.title,
+          updatedAt: Date.parse(session.updatedAt),
+          activeRunId: session.activeRunId ?? null,
+          latestRunId: session.latestRunId ?? null,
+        });
+      }
+    }
+
     for (const session of sessions) {
       if (!session.cwd) {
         continue;
       }
-      const workspacePath = normalizeWorkspacePath(session.cwd);
+      const managedWorkspace = managedWorkspaces.find((workspace) => matchesManagedWorkspacePath(workspace, session.cwd!));
+      const workspacePath = managedWorkspace
+        ? normalizeWorkspacePath(toManagedWorkspacePath(managedWorkspace))
+        : normalizeWorkspacePath(session.cwd);
       const record = ensureWorkspaceRecord(records, workspacePath);
+      if (record.sessions.some((candidate) => candidate.sessionId === session.sessionId && candidate.agent === session.agent)) {
+        continue;
+      }
       record.sessions.push({
         ...session,
         cwd: workspacePath,
@@ -790,13 +890,51 @@ export class WorkspaceLifecycleService {
     issueKey: string;
     issueTitle: string;
   }): Promise<WorkspaceProvisionResult> {
-    const registry = await readRegistry(this.deps);
     const seedPath = normalizeWorkspacePath(this.deps.cwd());
     const cluster = await collectGitCluster(this.deps, seedPath);
+    const sourcePath = cluster.gitRoot ?? seedPath;
     const slugBase = slugifyWorkspaceName(input.issueKey || input.issueTitle);
-    const workspaceRoot = cluster.gitRoot
-      ? path.join(path.dirname(cluster.gitRoot), "worktrees")
-      : path.join(path.dirname(seedPath), "workspaces");
+    const requestedBranchName = `vk/${slugBase}`;
+
+    try {
+      const created = await this.sharedWorkspaceService.createWorkspace({
+        name: input.issueKey,
+        repos: [{ path: sourcePath }],
+        mode: "worktree",
+        branchName: requestedBranchName,
+      });
+
+      const workspacePath = normalizeWorkspacePath(resolveWorkspaceDefaultCwd(created));
+      const repo =
+        created.repos.find((candidate: typeof created.repos[number]) => normalizeWorkspacePath(candidate.targetPath) === workspacePath) ??
+        created.repos[0];
+      const registry = await readRegistry(this.deps);
+      registry.workspaces[workspacePath] = {
+        path: workspacePath,
+        name: input.issueKey,
+        gitRoot: repo?.gitRoot ?? cluster.gitRoot,
+        commonDir: cluster.commonDir,
+        branch: repo?.branch ?? requestedBranchName,
+        trackingBranch: null,
+        archivedAt: created.archivedAt,
+        cleanedAt: created.cleanedAt,
+        notes: registry.workspaces[workspacePath]?.notes ?? "",
+        notesUpdatedAt: registry.workspaces[workspacePath]?.notesUpdatedAt ?? null,
+        rebase: registry.workspaces[workspacePath]?.rebase ?? null,
+      };
+      await writeRegistry(this.deps, registry);
+
+      return {
+        workspacePath,
+        workspaceName: input.issueKey,
+        branchName: repo?.branch ?? requestedBranchName,
+      };
+    } catch {
+      // Fall back to the legacy kanban-local worktree path when shared workspace management is unavailable.
+    }
+
+    const registry = await readRegistry(this.deps);
+    const workspaceRoot = path.join(os.homedir(), ".a5c", "workspaces");
     const branchBase = `vk/${slugBase}`;
     const existingPaths = new Set<string>([
       ...Object.keys(registry.workspaces).map(normalizeWorkspacePath),
@@ -878,6 +1016,53 @@ export class WorkspaceLifecycleService {
     }
 
     const now = this.deps.now();
+
+    if (input.action === "archive" || input.action === "cleanup" || input.action === "recover") {
+      try {
+        const managedWorkspace = await this.sharedWorkspaceService.resolveWorkspace(workspacePath);
+        if (managedWorkspace) {
+          const updated =
+            input.action === "archive"
+              ? await this.sharedWorkspaceService.archiveWorkspace(workspacePath)
+              : input.action === "cleanup"
+                ? await this.sharedWorkspaceService.cleanupWorkspace(workspacePath)
+                : await this.sharedWorkspaceService.recoverWorkspace(workspacePath);
+          const managedPath = normalizeWorkspacePath(resolveWorkspaceDefaultCwd(updated));
+          const nextEntry = {
+            ...(registry.workspaces[managedPath] ?? entry),
+            path: managedPath,
+            name: updated.name,
+            gitRoot: updated.repos[0]?.gitRoot ?? entry.gitRoot,
+            commonDir: entry.commonDir,
+            trackingBranch: entry.trackingBranch,
+            branch: updated.repos[0]?.branch ?? entry.branch,
+            archivedAt: updated.archivedAt,
+            cleanedAt: updated.cleanedAt,
+            notes: entry.notes,
+            notesUpdatedAt: entry.notesUpdatedAt,
+            rebase: entry.rebase,
+          } satisfies WorkspaceRegistryEntry;
+          if (managedPath !== workspacePath) {
+            delete registry.workspaces[workspacePath];
+          }
+          registry.workspaces[managedPath] = nextEntry;
+          await writeRegistry(this.deps, registry);
+          return {
+            ok: true,
+            workspacePath: managedPath,
+            action: input.action,
+            message:
+              input.action === "archive"
+                ? `Archived ${managedPath}.`
+                : input.action === "cleanup"
+                  ? `Cleaned up ${managedPath}.`
+                  : `Recovered ${managedPath}.`,
+          };
+        }
+      } catch {
+        // Fall back to the legacy kanban-local lifecycle when the shared workspace service cannot handle the action.
+      }
+    }
 
     if (input.action === "archive") {
       entry.archivedAt = now;

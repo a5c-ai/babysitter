@@ -104,6 +104,7 @@ export async function handleHarnessCreateRun(
     } else {
       const workDir = workspace ?? process.cwd();
       const planReport = await runPlanProcessPhase({
+        invocationCommand: parsed.invocationCommand,
         prompt: prompt!,
         outputDir: getProcessOutputDir(workDir),
         workspace: workDir,
@@ -139,6 +140,7 @@ export async function handleHarnessCreateRun(
     }
 
     return await runOrchestrationPhase({
+      invocationCommand: parsed.invocationCommand,
       processPath,
       prompt,
       workspace,

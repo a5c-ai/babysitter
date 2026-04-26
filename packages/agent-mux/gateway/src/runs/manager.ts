@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
-import type { AgentEvent, FullSession, RunHandle, RunResult, RuntimeHooks, Session, SessionSummary } from '@a5c-ai/agent-mux-core';
+import type { AgentEvent, FullSession, RunHandle, RunResult, RuntimeHooks, Session, SessionSummary, WorkspaceSessionBinding } from '@a5c-ai/agent-mux-core';
+import { WorkspaceService } from '@a5c-ai/agent-mux-core';
 
 import type { GatewayConfig } from '../config.js';
 import { createGatewayRunClient } from '../builtin-adapters.js';
@@ -71,6 +72,7 @@ export class RunManager {
 
   private readonly client;
   private readonly eventLog;
+  private readonly workspaceService = new WorkspaceService();
   private readonly activeRuns = new Map<string, ActiveRun>();
   private readonly observations = new Set<Promise<void>>();
   private readonly subscribers = new Map<string, Map<string, RunSubscriber>>();
@@ -144,12 +146,14 @@ export class RunManager {
       runId: handle.runId,
       agent: input.agent,
       model: input.model,
+      cwd: typeof input.cwd === 'string' ? input.cwd : undefined,
       sessionId: input.sessionId,
       status: 'running',
       createdAt: now,
       startedAt: now,
       endedAt: null,
       owner,
+      workspaceId: input.workspaceId,
       error: null,
     };
     this.eventLog.index.upsertRun(entry);
@@ -160,6 +164,20 @@ export class RunManager {
     };
     this.activeRuns.set(handle.runId, active);
     if (input.sessionId) {
+      if (input.workspaceId) {
+        await this.workspaceService.bindSession({
+          workspaceId: input.workspaceId,
+          session: {
+            agent: input.agent,
+            sessionId: input.sessionId,
+            status: 'running',
+            cwd: typeof input.cwd === 'string' ? input.cwd : undefined,
+            updatedAt: new Date(now).toISOString(),
+            activeRunId: handle.runId,
+            latestRunId: handle.runId,
+          },
+        });
+      }
       await this.attachSessionSubscribersToRun(input.sessionId, handle.runId);
     }
     await this.recordGatewayEvent(handle.runId, {
@@ -237,6 +255,7 @@ export class RunManager {
         model: overrides.model,
         prompt: input,
         sessionId,
+        cwd: session.cwd,
       },
       owner,
     );
@@ -379,6 +398,12 @@ export class RunManager {
       .map(cloneSession);
   }
 
+  async listWorkspaces() {
+    return await this.workspaceService.listWorkspaces({
+      liveSessions: (await this.listSessions()).map((session) => this.toWorkspaceSessionBinding(session)),
+    });
+  }
+
   async subscribe(conn: ClientConn, runId: string, sinceSeq: number = 0): Promise<void> {
     const state = this.eventLog.getSeqState(runId);
     if (state.tailSeq > 0 && sinceSeq < state.headSeq - 1) {
@@ -484,6 +509,20 @@ export class RunManager {
         if (event.type === 'session_start' && 'sessionId' in event && typeof event.sessionId === 'string') {
           active.entry.sessionId = event.sessionId;
           this.eventLog.index.upsertRun(active.entry);
+          if (active.entry.workspaceId) {
+            await this.workspaceService.bindSession({
+              workspaceId: active.entry.workspaceId,
+              session: {
+                agent: active.entry.agent,
+                sessionId: event.sessionId,
+                status: 'running',
+                cwd: active.entry.cwd,
+                updatedAt: new Date().toISOString(),
+                activeRunId: handle.runId,
+                latestRunId: handle.runId,
+              },
+            });
+          }
           await this.attachSessionSubscribersToRun(event.sessionId, handle.runId);
         }
         await this.recordAgentEvent(handle.runId, event);
@@ -500,6 +539,20 @@ export class RunManager {
           }
         : null;
       this.eventLog.index.upsertRun(active.entry);
+      if (active.entry.workspaceId && active.entry.sessionId) {
+        await this.workspaceService.bindSession({
+          workspaceId: active.entry.workspaceId,
+          session: {
+            agent: active.entry.agent,
+            sessionId: active.entry.sessionId,
+            status: 'stopped',
+            cwd: active.entry.cwd,
+            updatedAt: new Date().toISOString(),
+            activeRunId: null,
+            latestRunId: active.entry.runId,
+          },
+        });
+      }
       await this.recordGatewayEvent(handle.runId, {
         type: 'run.finalized',
         exitReason: result.exitReason,
@@ -738,5 +791,18 @@ export class RunManager {
     const sinceSeq = Math.max(0, state.tailSeq - limit);
     const replay = await this.eventLog.readSince(runId, sinceSeq, state.tailSeq);
     return replay.events;
+  }
+
+  private toWorkspaceSessionBinding(session: SessionEntry): WorkspaceSessionBinding {
+    return {
+      agent: session.agent,
+      sessionId: session.sessionId,
+      status: session.status === 'active' ? 'running' : 'stopped',
+      cwd: session.cwd,
+      title: session.title,
+      updatedAt: new Date(session.updatedAt).toISOString(),
+      activeRunId: session.activeRunId,
+      latestRunId: session.latestRunId,
+    };
   }
 }

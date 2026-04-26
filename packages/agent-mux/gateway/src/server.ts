@@ -2,6 +2,7 @@ import * as http from 'node:http';
 
 import { Hono } from 'hono';
 import { WebSocketServer } from 'ws';
+import { resolveWorkspaceDefaultCwd, WorkspaceService } from '@a5c-ai/agent-mux-core';
 
 import { authenticateBearerToken } from './auth/middleware.js';
 import { MemoryTokenStore, SqliteTokenStore, type TokenStore, type TokenRecord } from './auth/tokens.js';
@@ -77,6 +78,7 @@ export function createGatewayServer(
   const gatewayClient = config.client ?? createGatewayRunClient();
   const tokenStore = resolveTokenStore(config);
   const runManager = new RunManager(config, logger);
+  const workspaceService = new WorkspaceService();
   const webuiRoot = config.enableWebui ? resolveWebuiRoot(config.webuiRoot) : null;
   const shortCodeStore = new ShortCodeStore();
   const app = new Hono();
@@ -166,6 +168,64 @@ export function createGatewayServer(
     return context.json({ sessions: await runManager.listSessions() });
   });
 
+  app.get('/api/v1/workspaces', async (context) => {
+    const tokenRecord = await requireAuth(context.req.header('authorization'));
+    if (!tokenRecord) {
+      return context.json({ error: 'unauthorized' }, 401);
+    }
+    return context.json(await runManager.listWorkspaces());
+  });
+
+  app.post('/api/v1/workspaces', async (context) => {
+    const tokenRecord = await requireAuth(context.req.header('authorization'));
+    if (!tokenRecord) {
+      return context.json({ error: 'unauthorized' }, 401);
+    }
+    const body = await context.req.json<Record<string, unknown>>();
+    const action = typeof body['action'] === 'string' ? body['action'] : 'create';
+
+    if (action === 'create') {
+      const name = typeof body['name'] === 'string' ? body['name'] : '';
+      const repos = Array.isArray(body['repos']) ? body['repos'] : [];
+      const workspace = await workspaceService.createWorkspace({
+        name,
+        repos: repos.flatMap((entry) => {
+          if (!entry || typeof entry !== 'object' || typeof (entry as { path?: unknown }).path !== 'string') {
+            return [];
+          }
+          return [{
+            path: String((entry as { path: unknown }).path),
+            alias: typeof (entry as { alias?: unknown }).alias === 'string'
+              ? String((entry as { alias?: unknown }).alias)
+              : undefined,
+          }];
+        }),
+        mode: body['mode'] === 'symlink' ? 'symlink' : 'worktree',
+      });
+      return context.json({ workspace: { ...workspace, defaultCwd: resolveWorkspaceDefaultCwd(workspace) } }, 201);
+    }
+
+    const workspaceId = typeof body['workspaceId'] === 'string' ? body['workspaceId'] : '';
+    if (!workspaceId) {
+      return context.json({ error: 'workspaceId_required' }, 400);
+    }
+
+    if (action === 'archive') {
+      return context.json({ workspace: await workspaceService.archiveWorkspace(workspaceId) });
+    }
+    if (action === 'cleanup') {
+      return context.json({ workspace: await workspaceService.cleanupWorkspace(workspaceId) });
+    }
+    if (action === 'recover') {
+      return context.json({ workspace: await workspaceService.recoverWorkspace(workspaceId) });
+    }
+    if (action === 'delete') {
+      await workspaceService.deleteWorkspace(workspaceId, { forceCleanup: body['force'] === true });
+      return context.json({ deleted: workspaceId });
+    }
+    return context.json({ error: 'unsupported_action' }, 400);
+  });
+
   app.get('/api/v1/sessions/:sessionId', async (context) => {
     const tokenRecord = await requireAuth(context.req.header('authorization'));
     if (!tokenRecord) {
@@ -205,6 +265,8 @@ export function createGatewayServer(
         agent,
         model: typeof body['model'] === 'string' ? body['model'] : undefined,
         prompt: typeof body['prompt'] === 'string' ? body['prompt'] : '',
+        cwd: typeof body['cwd'] === 'string' ? body['cwd'] : undefined,
+        workspaceId: typeof body['workspaceId'] === 'string' ? body['workspaceId'] : undefined,
       },
       {
         tokenId: tokenRecord.id,

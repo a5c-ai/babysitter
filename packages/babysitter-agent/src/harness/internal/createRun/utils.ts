@@ -21,6 +21,7 @@ import type {
 export type OutputMode = "cli" | "json" | "tui" | "amux-events";
 
 export interface HarnessCreateRunArgs {
+  invocationCommand?: string;
   prompt?: string;
   harness?: string;
   processPath?: string;

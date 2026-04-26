@@ -12,12 +12,14 @@ export interface RunStartInput extends Partial<Omit<RunOptions, 'agent' | 'promp
   agent: string;
   prompt: string | string[];
   runId?: string;
+  workspaceId?: string;
 }
 
 export interface RunEntry {
   runId: string;
   agent: string;
   model?: string;
+  cwd?: string;
   status: RunStatus;
   createdAt: number;
   startedAt: number;
@@ -29,6 +31,7 @@ export interface RunEntry {
     message: string;
   } | null;
   owner: RunOwner;
+  workspaceId?: string;
 }
 
 export type SessionStatus = 'active' | 'inactive';

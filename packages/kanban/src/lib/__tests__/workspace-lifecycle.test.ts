@@ -1,4 +1,5 @@
 import path from "node:path";
+import os from "node:os";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -438,8 +439,8 @@ describe("WorkspaceLifecycleService", () => {
     const kanbanPath = repoPath("repo", "packages", "kanban");
     const mainPath = repoPath("repo", "main");
     const commonDirPath = repoPath("repo", "common", ".git");
-    const existingWorkspacePath = repoPath("repo", "worktrees", "kanban-gap-007");
-    const provisionedWorkspacePath = repoPath("repo", "worktrees", "kanban-gap-007-2");
+    const existingWorkspacePath = path.join(os.homedir(), ".a5c", "workspaces", "kanban-gap-007");
+    const provisionedWorkspacePath = path.join(os.homedir(), ".a5c", "workspaces", "kanban-gap-007-2");
     let registry = JSON.stringify({
       version: 1,
       workspaces: {

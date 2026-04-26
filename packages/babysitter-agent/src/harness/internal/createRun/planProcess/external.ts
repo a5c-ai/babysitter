@@ -22,6 +22,7 @@ import { recoverReportedProcessDefinition } from "./recovery";
 import { validateProcessExport } from "./validation";
 
 export async function runExternalProcessDefinitionPhase(args: {
+  invocationCommand?: string;
   prompt: string;
   outputDir: string;
   workspace?: string;
@@ -83,6 +84,7 @@ export async function runExternalProcessDefinitionPhase(args: {
       workspace: args.workspace,
       promptContext: args.promptContext,
       workspaceAssessment,
+      preferAgentOnlyTasks: args.invocationCommand === "call",
     }),
     900_000,
   );

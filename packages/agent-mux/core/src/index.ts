@@ -39,6 +39,22 @@ export { DEFAULT_RETRY_POLICY } from './retry.js';
 // Storage
 export type { StoragePaths, StoragePathOptions } from './storage.js';
 export { resolveStoragePaths } from './storage.js';
+export type {
+  WorkspaceMaterializationMode,
+  WorkspaceSessionStatus,
+  WorkspaceStatus,
+  WorkspaceRepoInput,
+  WorkspaceCreateInput,
+  WorkspaceSessionBinding,
+  WorkspaceRepoRecord,
+  WorkspaceRecord,
+  WorkspaceRepoSummary,
+  WorkspaceActionAvailability,
+  WorkspaceSummary,
+  WorkspaceListResult,
+  WorkspaceServiceDeps,
+} from './workspaces.js';
+export { WorkspaceService, resolveWorkspaceDefaultCwd } from './workspaces.js';
 
 // Events
 export type {

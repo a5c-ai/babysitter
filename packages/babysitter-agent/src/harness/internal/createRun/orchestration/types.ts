@@ -9,6 +9,7 @@ import type {
 import type { SessionBindResult } from "../../../types";
 
 export type RunOrchestrationPhaseArgs = {
+  invocationCommand?: string;
   processPath: string;
   prompt?: string;
   workspace?: string;

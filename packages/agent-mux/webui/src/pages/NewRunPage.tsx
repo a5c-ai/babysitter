@@ -40,6 +40,12 @@ export function NewRunPage(): JSX.Element {
   const requestedAgent = searchParams.get('agent');
   const [agent, setAgent] = useState(() => firstAgent(agents, requestedAgent));
   const [prompt, setPrompt] = useState('');
+  const [workspaceId, setWorkspaceId] = useState('');
+  const [workspaceMode, setWorkspaceMode] = useState<'existing' | 'create' | 'none'>('none');
+  const [workspaceName, setWorkspaceName] = useState('session-workspace');
+  const [workspaceMaterialization, setWorkspaceMaterialization] = useState<'worktree' | 'symlink'>('worktree');
+  const [workspaceRepos, setWorkspaceRepos] = useState('');
+  const [workspaces, setWorkspaces] = useState<Array<{ id: string; name: string; rootPath: string; defaultCwd: string }>>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const agentRecords = useStore(store, (state) => state.agents.byId);
@@ -61,6 +67,27 @@ export function NewRunPage(): JSX.Element {
     });
   }, [requestedAgent, sessionAgents]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetchGateway('/api/v1/workspaces');
+        if (!response.ok) {
+          return;
+        }
+        const body = (await response.json()) as { workspaces?: Array<{ id: string; name: string; rootPath: string; defaultCwd: string }> };
+        if (!cancelled) {
+          setWorkspaces(body.workspaces ?? []);
+        }
+      } catch {
+        // Ignore optional workspace preload failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchGateway]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     if (!prompt.trim() || !agent) {
@@ -69,10 +96,43 @@ export function NewRunPage(): JSX.Element {
     setSubmitting(true);
     setError(null);
     try {
+      let resolvedWorkspaceId: string | undefined;
+      let resolvedWorkspaceCwd: string | undefined;
+      if (workspaceMode === 'create') {
+        const repoLines = workspaceRepos
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+        const createResponse = await fetchGateway('/api/v1/workspaces', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            name: workspaceName,
+            mode: workspaceMaterialization,
+            repos: repoLines.map((repoPath) => ({ path: repoPath })),
+          }),
+        });
+        if (!createResponse.ok) {
+          throw new Error(`Workspace creation failed: ${createResponse.status}`);
+        }
+        const created = (await createResponse.json()) as { workspace?: { id?: string; rootPath?: string; defaultCwd?: string } };
+        resolvedWorkspaceId = typeof created.workspace?.id === 'string' ? created.workspace.id : undefined;
+        resolvedWorkspaceCwd = typeof created.workspace?.defaultCwd === 'string'
+          ? created.workspace.defaultCwd
+          : typeof created.workspace?.rootPath === 'string'
+            ? created.workspace.rootPath
+            : undefined;
+      } else if (workspaceMode === 'existing' && workspaceId) {
+        const selected = workspaces.find((workspace) => workspace.id === workspaceId);
+        resolvedWorkspaceId = workspaceId;
+        resolvedWorkspaceCwd = selected?.defaultCwd ?? selected?.rootPath;
+      }
+
       const response = await fetchGateway('/api/v1/sessions', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ agent, prompt }),
+        body: JSON.stringify({ agent, prompt, workspaceId: resolvedWorkspaceId, cwd: resolvedWorkspaceCwd }),
       });
       if (!response.ok) {
         throw new Error(`Gateway request failed: ${response.status}`);
@@ -156,12 +216,63 @@ export function NewRunPage(): JSX.Element {
             />
           </Field>
 
+          <Field label="Workspace">
+            <Select
+              value={workspaceMode}
+              onChange={(value) => setWorkspaceMode(value === 'create' || value === 'existing' ? value : 'none')}
+              options={[
+                { label: 'No workspace', value: 'none' },
+                { label: 'Use existing workspace', value: 'existing' },
+                { label: 'Create workspace now', value: 'create' },
+              ]}
+            />
+          </Field>
+
+          {workspaceMode === 'existing' ? (
+            <Field label="Existing workspace">
+              <Select
+                value={workspaceId}
+                onChange={setWorkspaceId}
+                options={workspaces.map((workspace) => ({ label: `${workspace.name} · ${workspace.defaultCwd}`, value: workspace.id }))}
+              />
+            </Field>
+          ) : null}
+
+          {workspaceMode === 'create' ? (
+            <>
+              <Field label="Workspace name">
+                <input value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} />
+              </Field>
+              <Field label="Materialization">
+                <Select
+                  value={workspaceMaterialization}
+                  onChange={(value) => setWorkspaceMaterialization(value === 'symlink' ? 'symlink' : 'worktree')}
+                  options={[
+                    { label: 'Git worktrees', value: 'worktree' },
+                    { label: 'Symbolic links', value: 'symlink' },
+                  ]}
+                />
+              </Field>
+              <Field label="Repo paths">
+                <Textarea
+                  value={workspaceRepos}
+                  onChange={(event) => setWorkspaceRepos(event.target.value)}
+                  rows={4}
+                  placeholder={'/abs/path/to/repo-one\n/abs/path/to/repo-two'}
+                />
+              </Field>
+            </>
+          ) : null}
+
           {error ? <p className="error-banner">{error}</p> : null}
 
           <div className="actions">
             <Button type="submit" variant="primary" loading={submitting} disabled={submitting || !prompt.trim()}>
               Start session
             </Button>
+            <Link className="ghost-link" to="/workspaces">
+              Manage workspaces
+            </Link>
             <Link className="ghost-link" to="/sessions">
               Browse sessions
             </Link>

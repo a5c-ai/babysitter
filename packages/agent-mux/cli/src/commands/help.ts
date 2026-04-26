@@ -39,6 +39,7 @@ Commands:
   mcp                     Manage MCP servers
   skill                   Manage agent skills
   agent                   Manage custom sub-agents
+  workspaces              Manage temp workspaces and git worktrees
   launch                  Launch a harness with provider config and stdin/stdout passthrough
   detect-host             Detect which agent harness we are running under
   remote                  Install / update amux on a remote host
@@ -66,6 +67,7 @@ Examples:
   amux models list claude
   amux sessions list claude
   amux config get claude model
+  amux workspaces list
 `;
 
 /** Command-specific help texts. */
@@ -151,6 +153,24 @@ Flags:
   --limit <n>        Maximum results
   --sort <field>     Sort by: date, cost, turns
   --format <fmt>     Output format: json, jsonl, markdown
+  --json             Output as JSON
+`,
+  workspaces: `amux workspaces - Workspace lifecycle
+
+Usage:
+  amux workspaces list [--json]
+  amux workspaces create <name> --repo <path> [--repo <path>...] [--mode worktree|symlink]
+  amux workspaces archive <workspace>
+  amux workspaces cleanup <workspace>
+  amux workspaces recover <workspace>
+  amux workspaces delete <workspace> [--force]
+
+Flags:
+  --repo <path>      Local cloned repository path (repeatable)
+  --mode <mode>      worktree or symlink
+  --branch <name>    Branch prefix for worktree creation
+  --root <path>      Override workspace root directory
+  --force            Allow delete to clean up on disk first
   --json             Output as JSON
 `,
   config: `amux config - Configuration management

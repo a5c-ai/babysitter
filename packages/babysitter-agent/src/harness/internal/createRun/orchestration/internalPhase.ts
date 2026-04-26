@@ -215,6 +215,7 @@ export async function runInternalOrchestrationPhase(
         args.selectedHarnessName,
         args.promptContext,
         args.interactive,
+        args.invocationCommand === "call",
       ),
     ],
     ephemeral: true,

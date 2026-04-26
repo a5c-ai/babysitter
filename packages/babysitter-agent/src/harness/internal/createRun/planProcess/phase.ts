@@ -84,6 +84,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
       interactive: args.interactive,
       workspaceAssessment: workspaceAssessment.kind,
       workspaceEntries: workspaceAssessment.entries,
+      preferAgentOnlyTasks: args.invocationCommand === "call",
     },
   );
   writeVerboseData("phasePlanProcess system prompt", processDefinitionSystemPrompt);

@@ -300,6 +300,7 @@ async function runHarnessCreateRun(
   overrides: { interactive?: boolean; planOnly?: boolean; prompt?: string } = {},
 ): Promise<number> {
   return await handleHarnessCreateRun({
+    invocationCommand: parsed.command,
     prompt: overrides.prompt ?? parsed.prompt,
     harness: parsed.harness,
     processPath: parsed.processPath,

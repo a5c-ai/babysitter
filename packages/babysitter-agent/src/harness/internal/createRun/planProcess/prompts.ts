@@ -11,6 +11,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
   workspace?: string;
   promptContext: SessionCreatePromptContext;
   workspaceAssessment: ExternalWorkspaceAssessment;
+  preferAgentOnlyTasks?: boolean;
 }): string {
   const workspace = path.resolve(args.workspace ?? process.cwd());
   const installedHarnesses = args.promptContext.discoveredHarnesses
@@ -22,13 +23,16 @@ export function buildExternalProcessDefinitionPrompt(args: {
   const workspaceSummary = args.workspaceAssessment.entries.length > 0
     ? args.workspaceAssessment.entries.join(", ")
     : "(no files)";
+  const preferAgentOnlyTasks = args.preferAgentOnlyTasks === true;
   const emptyWorkspaceAuthoringGuide = [
     "",
     "Empty-workspace authoring guide:",
     "- Do not perform extra exploration. You already know the workspace is empty.",
     "- Write a concrete greenfield process immediately.",
     "- Prefer a small process with explicit milestones such as: plan the game, scaffold the project, implement the game, verify the result.",
-    "- Use `agent` tasks for planning and implementation. Use `shell` tasks only for concrete runnable commands such as dependency install, build, or test commands that the later orchestration can execute.",
+    preferAgentOnlyTasks
+      ? "- Use `agent` or `skill` tasks for planning, implementation, and verification. Do not generate `shell` tasks for this run shape unless the user explicitly requires an existing CLI command."
+      : "- Use `agent` tasks for planning and implementation. Use `shell` tasks only for concrete runnable commands such as dependency install, build, or test commands that the later orchestration can execute.",
     "- Keep the process practical for a brand-new directory: it should create the project, build the game, and verify that it runs or tests cleanly.",
   ].join("\n");
 
@@ -59,7 +63,9 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "- The process must orchestrate the work through babysitter tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
     "- Define at least one task with `defineTask(...)`, and invoke tasks from `process(inputs, ctx)` via `await ctx.task(...)`.",
     "- Use `agent` tasks for planning, implementation, analysis, and verification work.",
-    "- Use `shell` tasks only for existing CLI tools such as tests, builds, linters, git, or package managers.",
+    preferAgentOnlyTasks
+      ? "- Do not generate `shell` tasks for this run shape unless the user explicitly requires an existing CLI command. Prefer wrapped `agent` or `skill` tasks for verification too."
+      : "- Use `shell` tasks only for existing CLI tools such as tests, builds, linters, git, or package managers.",
     "- Never use `node` kind effects.",
     "- At least one defined task must be an `agent` task for the main work. Shell tasks are for concrete runnable commands only.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",

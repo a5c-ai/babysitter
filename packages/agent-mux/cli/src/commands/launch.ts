@@ -9,6 +9,8 @@
 import type { AgentMuxClient } from '@a5c-ai/agent-mux-core';
 import {
   resolveProvider,
+  resolveWorkspaceDefaultCwd,
+  WorkspaceService,
 } from '@a5c-ai/agent-mux-core';
 import type { ProviderId, TransportId } from '@a5c-ai/agent-mux-core';
 import { translateForHarness } from '@a5c-ai/agent-mux-adapters';
@@ -42,6 +44,11 @@ export const LAUNCH_FLAGS: Record<string, FlagDef> = {
   'dry-run': { type: 'boolean' },
   'provider-arg': { type: 'string', repeatable: true },
   'observe': { type: 'boolean' },
+  'workspace': { type: 'string' },
+  'workspace-create': { type: 'boolean' },
+  'workspace-mode': { type: 'string' },
+  'workspace-repo': { type: 'string', repeatable: true },
+  'workspace-name': { type: 'string' },
 };
 
 // ---------------------------------------------------------------------------
@@ -398,6 +405,32 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     return ExitCode.SUCCESS;
   }
 
+  const workspaceService = new WorkspaceService();
+  let launchCwd = process.cwd();
+  const workspaceIdentifier = flagStr(args.flags, 'workspace');
+  const workspaceCreate = flagBool(args.flags, 'workspace-create') === true;
+  const workspaceRepos = flagArr(args.flags, 'workspace-repo');
+  const workspaceName = flagStr(args.flags, 'workspace-name') ?? `${harness}-workspace`;
+
+  if (workspaceCreate) {
+    const repos = workspaceRepos.length > 0 ? workspaceRepos : [process.cwd()];
+    const workspace = await workspaceService.createWorkspace({
+      name: workspaceName,
+      repos: repos.map((repo) => ({ path: repo })),
+      mode: flagStr(args.flags, 'workspace-mode') === 'symlink' ? 'symlink' : 'worktree',
+    });
+    launchCwd = resolveWorkspaceDefaultCwd(workspace);
+  } else if (workspaceIdentifier) {
+    const workspace = await workspaceService.resolveWorkspace(workspaceIdentifier);
+    if (!workspace) {
+      const msg = `Unknown workspace '${workspaceIdentifier}'`;
+      if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
+      else printError(msg);
+      return ExitCode.USAGE_ERROR;
+    }
+    launchCwd = resolveWorkspaceDefaultCwd(workspace);
+  }
+
   // Append session/prompt args
   const prompt = flagStr(args.flags, 'prompt');
   appendHarnessSessionArgs(plan, {
@@ -446,7 +479,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         name: 'xterm-256color',
         cols: process.stdout.columns || 80,
         rows: process.stdout.rows || 24,
-        cwd: process.cwd(),
+        cwd: launchCwd,
         env: { ...process.env, ...plan.env } as Record<string, string>,
       });
 
@@ -471,7 +504,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       child = spawn(plan.command, plan.args, {
         stdio: 'inherit',
         env: { ...process.env, ...plan.env },
-        cwd: process.cwd(),
+        cwd: launchCwd,
         shell: false,
       });
     }
@@ -480,7 +513,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     child = spawn(plan.command, plan.args, {
       stdio: ['pipe', 'inherit', 'inherit'],
       env: { ...process.env, ...plan.env },
-      cwd: process.cwd(),
+      cwd: launchCwd,
       shell: false,
     });
   }

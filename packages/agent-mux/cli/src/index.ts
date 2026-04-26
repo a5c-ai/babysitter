@@ -44,6 +44,7 @@ import { skillCommand, SKILL_FLAGS } from './commands/skill.js';
 import { agentCommand, AGENT_FLAGS } from './commands/agent.js';
 import { gatewayCommand, GATEWAY_FLAGS } from './commands/gateway/index.js';
 import { launchCommand, LAUNCH_FLAGS } from './commands/launch.js';
+import { workspacesCommand, WORKSPACE_FLAGS } from './commands/workspaces.js';
 import { registerBuiltInAdapters } from './bootstrap.js';
 import { reconfigureLogger } from '@a5c-ai/agent-mux-observability';
 
@@ -57,7 +58,7 @@ export async function main(argv?: string[]): Promise<number> {
   const rawArgs = argv ?? process.argv.slice(2);
 
   // First pass: parse with all known flags to capture global flags
-  const args = parseArgs(rawArgs, { ...RUN_FLAGS, ...INSTALL_FLAGS, ...REMOTE_FLAGS, ...HOOKS_FLAGS, ...SKILL_FLAGS, ...AGENT_FLAGS, ...GATEWAY_FLAGS, ...LAUNCH_FLAGS });
+  const args = parseArgs(rawArgs, { ...RUN_FLAGS, ...INSTALL_FLAGS, ...REMOTE_FLAGS, ...HOOKS_FLAGS, ...SKILL_FLAGS, ...AGENT_FLAGS, ...GATEWAY_FLAGS, ...LAUNCH_FLAGS, ...WORKSPACE_FLAGS });
 
   // Handle --no-color
   if (flagBool(args.flags, 'no-color') === true) {
@@ -211,6 +212,9 @@ export async function main(argv?: string[]): Promise<number> {
 
       case 'launch':
         return await launchCommand(client, args);
+
+      case 'workspaces':
+        return await workspacesCommand(client, args);
 
       default:
         if (jsonMode) {

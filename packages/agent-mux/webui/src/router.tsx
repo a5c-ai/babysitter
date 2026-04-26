@@ -14,6 +14,7 @@ import { NewRunPage } from './pages/NewRunPage.js';
 import { HookInboxPage } from './pages/HookInboxPage.js';
 import { SettingsPage } from './pages/SettingsPage.js';
 import { PairDevicePage } from './pages/PairDevicePage.js';
+import { WorkspacesPage } from './pages/WorkspacesPage.js';
 import { useGatewayAuth } from './providers/GatewayProvider.js';
 import { useThemeMode } from './providers/ThemeProvider.js';
 import { CommandPalette } from './shell/CommandPalette.js';
@@ -62,6 +63,7 @@ function AppChrome(): JSX.Element {
       { id: 'home', label: 'Open session dashboard', run: () => navigate('/') },
       { id: 'new-session', label: 'Start session', run: () => navigate('/sessions/new') },
       { id: 'sessions', label: 'Browse sessions', run: () => navigate('/sessions') },
+      { id: 'workspaces', label: 'Open workspaces', run: () => navigate('/workspaces') },
       { id: 'inbox', label: 'Open hook inbox', run: () => navigate('/inbox') },
       { id: 'pair', label: 'Pair device', run: () => navigate('/pair-device') },
       { id: 'theme', label: `Switch to ${mode === 'light' ? 'dark' : 'light'} theme`, run: () => toggle() },
@@ -84,6 +86,7 @@ function AppChrome(): JSX.Element {
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/sessions" element={<SessionsPage />} />
             <Route path="/sessions/new" element={<NewRunPage />} />
+            <Route path="/workspaces" element={<WorkspacesPage />} />
             <Route path="/sessions/pending/:runId" element={<SessionPendingPage />} />
             <Route path="/runs/:runId" element={<SessionPendingPage />} />
             <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
@@ -100,6 +103,7 @@ function AppChrome(): JSX.Element {
         <NavLink to="/agents">Agents</NavLink>
         <NavLink to="/sessions">Sessions</NavLink>
         <NavLink to="/sessions/new">New Session</NavLink>
+        <NavLink to="/workspaces">Workspaces</NavLink>
         <NavLink to="/inbox">Inbox</NavLink>
       </nav>
     </div>

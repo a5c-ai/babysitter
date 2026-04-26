@@ -11,6 +11,7 @@ import type {
 } from "../utils";
 
 export interface RunPlanProcessPhaseArgs {
+  invocationCommand?: string;
   prompt: string;
   outputDir: string;
   workspace?: string;

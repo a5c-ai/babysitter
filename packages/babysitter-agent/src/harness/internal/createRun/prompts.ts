@@ -29,6 +29,7 @@ export interface ProcessDefinitionUserPromptOptions {
   interactive: boolean;
   workspaceAssessment?: "empty" | "non-empty";
   workspaceEntries?: string[];
+  preferAgentOnlyTasks?: boolean;
 }
 
 function formatHarnessCatalog(context: HarnessPromptContext): string[] {
@@ -188,6 +189,7 @@ export function buildProcessDefinitionUserPrompt(
   const interactive = options?.interactive ?? true;
   const workspaceAssessment = options?.workspaceAssessment;
   const workspaceEntries = options?.workspaceEntries ?? [];
+  const preferAgentOnlyTasks = options?.preferAgentOnlyTasks === true;
   const workspaceSummary = workspaceEntries.length > 0
     ? workspaceEntries.join(", ")
     : "(no files)";
@@ -222,7 +224,9 @@ export function buildProcessDefinitionUserPrompt(
       "Do not inspect unrelated directories, home-directory configs, or irrelevant global skill/plugin folders.",
       "Keep the process practical for a brand-new workspace: plan, scaffold, implement, verify.",
       "Write a real babysitter process, not a direct one-shot script. The top-level `process()` should orchestrate work through `defineTask(...)` and `ctx.task(...)`.",
-      "Put the main implementation in one or more `agent` tasks. Use `shell` tasks only for concrete runnable verification or tooling commands.",
+      preferAgentOnlyTasks
+        ? "Put all implementation and verification in `agent` or `skill` tasks. Do not generate `shell` tasks for this run shape unless the user explicitly required an existing CLI command."
+        : "Put the main implementation in one or more `agent` tasks. Use `shell` tasks only for concrete runnable verification or tooling commands.",
       "Do not add internal worker guardrail metadata such as `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` unless the task truly requires them.",
       "Keep generated asset strings syntax-safe. If the process writes JS/HTML/CSS files, avoid raw nested template literals inside the process module; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
     );
@@ -247,6 +251,7 @@ export function buildOrchestrationSystemPrompt(
   selectedHarnessName: string,
   context: HarnessPromptContext,
   interactive?: boolean | undefined,
+  preferAgentOnlyTasks?: boolean | undefined,
 ): string {
   const piCtx = createPiContext({ interactive });
   const composedInstructions = composeOrchestrationPrompt(piCtx);
@@ -263,7 +268,9 @@ export function buildOrchestrationSystemPrompt(
     "- Work in bounded turns. In each turn, call babysitter_run_iterate at most once unless the prompt explicitly tells you otherwise.",
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
     "- Shell and legacy node effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
-    "- Whenever a shell effect is requested, execute it through `bash` or another intentional worker path, then post the outcome yourself.",
+    preferAgentOnlyTasks
+      ? "- Prefer wrapped `agent`, `skill`, and delegated-task resolution paths. Treat `shell` effects as exceptional compatibility cases, not the normal plan shape for `/babysitter:call` flows."
+      : "- Whenever a shell effect is requested, execute it through `bash` or another intentional worker path, then post the outcome yourself.",
     "- For delegated or fresh-context work, prefer `task`. For skill-guided execution, prefer `skill`. Use the normal coding tools directly when that is the simplest correct path.",
     "- If a delegated worker, tool call, or interactive question times out, adapt instead of failing the run immediately: increase the timeout when the task is still valid, recover partial progress, or narrow the next step.",
     "- When a tool or delegated worker accepts a `timeout`, use a generous budget by default for meaningful coding or verification work. Substantial delegated work should usually get at least 1800000ms rather than a short interactive default.",
