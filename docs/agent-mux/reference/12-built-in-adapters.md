@@ -4,7 +4,7 @@
 
 > **SCOPE EXTENSION:** hermes-agent (`@NousResearch/hermes-agent`) is included as a 10th supported agent per explicit project requirements from the project owner. It extends the original scope document's 9 built-in agents. All hermes-specific content in this spec is marked with this same scope extension note.
 >
-> **SCOPE EXTENSION (2026-04):** `agent-mux-remote` (11th, transport-only) and `qwen` (12th, Alibaba Qwen Code — a gemini-cli fork with MCP support) were added beyond the original 10. See `docs/02-agents/qwen.md` for qwen usage.
+> **SCOPE EXTENSION (2026-04):** `agent-mux-remote` (11th, transport-only) and `qwen` (12th, Alibaba Qwen Code — a gemini-cli fork with MCP support) were added beyond the original 10. See [agents/qwen.md](agents/qwen.md) for qwen usage.
 
 ---
 

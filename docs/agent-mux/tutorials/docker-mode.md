@@ -62,4 +62,4 @@ This runs `amux run --json --agent claude --prompt ...` inside the container, an
 - Pass secrets via `-e` or Docker secrets, not baked into the image.
 - Session files stay **inside the container** unless you mount the agent's session dir to the host.
 
-See [Invocation Modes](../13-invocation-modes.md) for the full option surface.
+See [Invocation Modes](../reference/13-invocation-modes.md) for the full option surface.

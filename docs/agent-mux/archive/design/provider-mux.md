@@ -1,5 +1,7 @@
 # `amux-proxy` — Transport Protocol Bridge
 
+> Archived design document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 **Specification v1.0** | `amux-proxy` (Python package)
 
 ---

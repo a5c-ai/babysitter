@@ -1,5 +1,7 @@
 # Reference Comparison
 
+> Archived comparison document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 Survey of comparable open-source projects and parity / gap analysis vs agent-mux.
 
 ## Projects surveyed

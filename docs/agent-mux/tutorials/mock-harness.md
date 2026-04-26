@@ -58,4 +58,4 @@ Interactive approval scenarios under `packages/agent-mux/harness-mock` now model
 - **Adapter tests**: Validate `parseEvent` without invoking the real CLI.
 - **Integration tests**: Exercise hooks, session-save paths, and the event stream in isolation.
 
-See [Harness & Mock](../14-harness-mock.md) for the full event script format.
+See [Harness & Mock](../reference/14-harness-mock.md) for the full event script format.

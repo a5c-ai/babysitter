@@ -1,5 +1,7 @@
 # Provider & Model Configuration
 
+> Archived design document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 **Specification v1.0** | `@a5c-ai/agent-mux`
 
 ---

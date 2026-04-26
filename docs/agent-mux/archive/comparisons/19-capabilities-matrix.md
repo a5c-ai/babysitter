@@ -1,5 +1,7 @@
 # Capabilities matrix
 
+> Archived comparison document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 One-glance view of which features each built-in adapter supports. Every row
 is the adapter's declared `capabilities` record — the same data you get at
 runtime via `client.adapter(agent).capabilities`.

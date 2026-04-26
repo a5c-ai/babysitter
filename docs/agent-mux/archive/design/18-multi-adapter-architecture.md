@@ -6,6 +6,8 @@ version: 1.0
 
 # Multi-Adapter Architecture Design
 
+> Archived design document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 ## Overview
 
 Extend agent-mux to support multiple adapter types beyond subprocess-based execution. This enables integration with sophisticated tools that provide HTTP APIs, WebSocket interfaces, or direct SDK access.

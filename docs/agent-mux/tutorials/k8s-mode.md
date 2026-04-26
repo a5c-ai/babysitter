@@ -69,4 +69,4 @@ await client.run({
 - `kubectl` on `PATH` with a context that can `exec` into the target namespace.
 - The pod's container image must include the target agent CLI (or `amux` when using `agent-mux-remote`).
 
-See [Invocation Modes](../13-invocation-modes.md).
+See [Invocation Modes](../reference/13-invocation-modes.md).

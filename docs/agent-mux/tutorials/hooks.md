@@ -52,4 +52,4 @@ type HookDecision =
   | { decision: 'rewrite'; input: unknown };
 ```
 
-See [Hooks reference](../15-hooks.md) for the full context object and examples.
+See [Hooks reference](../reference/15-hooks.md) for the full context object and examples.

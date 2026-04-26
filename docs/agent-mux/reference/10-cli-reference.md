@@ -351,7 +351,7 @@ amux run claude -q "what is 2+2"
 
 Start (or resume) an interactive or non-interactive coding agent session with full stdin/stdout passthrough. Unlike `amux run`, which normalizes output into the `AgentEvent` stream, `amux launch` is a **transparent proxy** — the user interacts directly with the harness as if they invoked it natively. Its key additional capability is unified provider resolution: you can point any supported harness at any LLM provider, with `amux-proxy` bridging the gap when the harness cannot speak the provider's native wire protocol.
 
-See [launcher.md](./launcher.md) for the full specification and [amux-provider-config.md](./amux-provider-config.md) for provider configuration details.
+See [launcher](../archive/design/launcher.md) for the archived launcher specification and [provider & model configuration](../archive/design/amux-provider-config.md) for the archived provider-configuration design.
 
 | Concern | `amux run` | `amux launch` |
 |---|---|---|

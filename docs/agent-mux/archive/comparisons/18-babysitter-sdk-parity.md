@@ -1,5 +1,7 @@
 # 18 — Babysitter SDK Parity Analysis
 
+> Archived parity document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 **Date:** 2026-04-12
 **Upstream:** github.com/a5c-ai/babysitter @ `staging` — `packages/sdk/src/harness/*`
 **Local:** `C:/work/agent-mux/packages/adapters/src/*-adapter.ts`

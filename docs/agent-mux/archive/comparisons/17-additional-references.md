@@ -9,6 +9,8 @@ count: 17
 
 # Additional Reference Projects
 
+> Archived comparison document. Preserved for historical context; not part of the current normative `reference/` contract.
+
 Extension of `16-reference-comparison.md`. Candidates surfaced via WebSearch on 2026-04-12 across four categories:
 
 1. Monitoring/orchestration CLIs wrapping coding-agent CLIs
