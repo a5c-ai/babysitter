@@ -114,6 +114,7 @@ function mockSpawnExit(exitCode = 0, stdoutText = "") {
 describe("agent-core tools", () => {
   afterEach(() => {
     backgroundTaskCounter = 0;
+    vi.useRealTimers();
     vi.clearAllMocks();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -346,6 +347,52 @@ describe("agent-core tools", () => {
     });
   });
 
+  it("normalizes rejected async tool executions into error tool results", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-task-rejection-"));
+    const taskHandler = vi.fn(async () => {
+      throw new Error("worker exploded");
+    });
+    const taskTool = getToolDefinitions(workspace, {
+      taskHandler,
+    }).find((tool) => tool.name === "task");
+
+    if (!taskTool) {
+      throw new Error("Expected task tool to be registered");
+    }
+
+    const result = await taskTool.execute("task-rejection", {
+      task: "run failing worker",
+    });
+
+    expect(getText(result)).toBe("Error: worker exploded");
+    expect(taskHandler).toHaveBeenCalledOnce();
+  });
+
+  it("normalizes timeout-driven fetch aborts into cancellation tool results", async () => {
+    vi.useFakeTimers();
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-fetch-timeout-"));
+    const fetchMock = vi.fn((_url: string, init?: { signal?: AbortSignal }) => new Promise((_, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        const error = new Error("This operation was aborted");
+        error.name = "AbortError";
+        reject(error);
+      }, { once: true });
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const fetchTool = getTool("fetch", workspace);
+    const resultPromise = fetchTool.execute("fetch-timeout", {
+      url: "https://example.com/slow",
+      timeout: 5,
+    });
+
+    await vi.advanceTimersByTimeAsync(5);
+
+    const result = await resultPromise;
+    expect(getText(result)).toBe("Error: Tool execution was cancelled.");
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
   it("caps ast_edit rewrites to the requested file limit", async () => {
     const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-ast-edit-limit-"));
     const srcDir = path.join(workspace, "src");
@@ -434,10 +481,11 @@ describe("agent-core tools", () => {
       description: "session-two-second",
     });
 
-    await expect(sessionOneBash.execute("session-one-over-limit", {
+    const overLimitResult = await sessionOneBash.execute("session-one-over-limit", {
       command: "sleep 1",
       run_in_background: true,
-    })).rejects.toThrow("Max concurrent background processes limit reached (1)");
+    });
+    expect(getText(overLimitResult)).toContain("Max concurrent background processes limit reached (1)");
 
     const sessionOneTasks = JSON.parse(getText(await sessionOneList.execute("session-one-list", {}))) as {
       tasks: Array<{ description?: string }>;

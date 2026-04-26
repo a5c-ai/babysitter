@@ -4,3 +4,4 @@ export declare function showDesktopHookNotification(input: {
     body: string;
     onClick(): void;
 }): void;
+//# sourceMappingURL=desktop-notifications.d.ts.map

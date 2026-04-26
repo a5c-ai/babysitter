@@ -1,2 +1,3 @@
 export { buildSessionTranscript, buildAgentFlowLanes, buildSessionFlowModel, buildNativeTranscript, buildNativeAgentFlowLane, accumulateEventCost, } from '@a5c-ai/agent-mux-ui/session-flow';
 export type { NativeSessionMessage, SessionCost, SessionTranscriptNode, SessionTranscriptNodeKind, AgentFlowSegment, AgentFlowSegmentKind, AgentFlowSegmentStatus, AgentFlowLane, SessionFlowTimelineItem, SessionFlowFileRecord, SessionFlowModel, } from '@a5c-ai/agent-mux-ui/session-flow';
+//# sourceMappingURL=SessionDetailFlow.d.ts.map

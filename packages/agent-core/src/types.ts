@@ -82,10 +82,14 @@ export interface CustomToolDefinition {
   description: string;
   promptSnippet?: string;
   parameters: TObject;
+  /**
+   * Agent-core does not provide a shared AbortSignal to custom tool
+   * implementations. Long-running tools should own their cancellation behavior
+   * through explicit tool parameters, internal timeouts, or background handles.
+   */
   execute: (
     toolCallId: string,
     params: Record<string, unknown>,
-    signal?: AbortSignal,
     onUpdate?: unknown,
     toolContext?: unknown,
   ) => Promise<ToolResult> | ToolResult;

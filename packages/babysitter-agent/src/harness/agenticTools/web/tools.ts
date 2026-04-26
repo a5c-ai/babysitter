@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import type { CustomToolDefinition } from "../types";
 import { DEFAULT_SEARCH_TIMEOUT } from "../shared/process";
-import { errorResult, jsonResult } from "../shared/results";
+import { errorResult, errorResultFor, jsonResult } from "../shared/results";
 import { extractTextFromHtml, filterByRelevance } from "./content";
 import { parseSearchResults } from "./searchHelpers";
 
@@ -57,8 +57,7 @@ export function createWebTools(): CustomToolDefinition[] {
             clearTimeout(timer);
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          return errorResult(`Web search failed: ${message}`);
+          return errorResultFor(error, "Web search failed");
         }
       },
     },
@@ -117,8 +116,7 @@ export function createWebTools(): CustomToolDefinition[] {
             clearTimeout(timer);
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          return errorResult(`Fetch processing failed: ${message}`);
+          return errorResultFor(error, "Fetch processing failed");
         }
       },
     },

@@ -50,6 +50,30 @@ interactive=false.` and agent-core never invokes the handler.
 Host integrations that inject `askUserQuestionHandler` should only expect calls
 when `interactive: true`.
 
+## Tool execution and cancellation
+
+`CustomToolDefinition.execute()` now exposes the supported execution contract:
+
+```ts
+execute(
+  toolCallId: string,
+  params: Record<string, unknown>,
+  onUpdate?: unknown,
+  toolContext?: unknown,
+): Promise<ToolResult> | ToolResult
+```
+
+Agent-core does not inject a shared `AbortSignal` into custom tools. Tool
+authors should only advertise cancellation they actually implement:
+
+- Shell/code tools should bound long-running work with explicit timeouts or
+  background-task handles.
+- Network tools should use tool-owned `AbortController` or timeout paths and
+  convert aborted work into a normal `ToolResult`.
+- Rejected promises and synchronous throws are normalized by the wrapper into
+  `Error: ...` results. Aborted operations use the canonical message
+  `Error: Tool execution was cancelled.`
+
 ## Local Build
 
 From the repo root, run:

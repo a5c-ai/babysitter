@@ -8,3 +8,4 @@ export declare function useThemeMode(): {
     toggle(): void;
 };
 export {};
+//# sourceMappingURL=ThemeProvider.d.ts.map

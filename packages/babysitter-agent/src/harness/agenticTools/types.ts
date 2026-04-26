@@ -12,10 +12,14 @@ export interface CustomToolDefinition {
   description: string;
   promptSnippet?: string;
   parameters: TObject;
+  /**
+   * The harness tool surface does not inject a shared AbortSignal into custom
+   * executions. Long-running tools should own cancellation via timeouts or
+   * explicit task handles.
+   */
   execute: (
     toolCallId: string,
     params: Record<string, unknown>,
-    signal?: AbortSignal,
     onUpdate?: unknown,
     toolContext?: unknown,
   ) => Promise<ToolResult> | ToolResult;
