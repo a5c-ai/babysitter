@@ -1,7 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { LogoMonogram } from "@a5c-ai/compendium";
-import { Columns3, Github, ExternalLink } from "lucide-react";
+import { Github, ExternalLink } from "lucide-react";
+
+import { cn } from "@/lib/cn";
+import { pageShellContainerClassName } from "@/components/shared/page-shell";
 
 export function AppFooter() {
   const [versions, setVersions] = useState({
@@ -27,8 +30,8 @@ export function AppFooter() {
 
   return (
     <footer className="border-t border-border bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto max-w-[1600px] px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground-muted">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className={cn(pageShellContainerClassName, "flex-row flex-wrap items-center justify-between gap-3 py-3 text-xs text-foreground-muted")}>
+        <div className="flex flex-wrap items-center gap-3">
           <LogoMonogram className="h-4 w-4 text-primary/50" />
           <span className="font-medium">
             Kanban{" "}

@@ -4,6 +4,13 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { cn } from "@/lib/cn";
 import { X, CheckCircle2, XCircle, AlertTriangle, Info, Bell, Pin } from "lucide-react";
 import type { AppNotification } from "@/hooks/use-notifications";
+import {
+  dialogBodyClassName,
+  dialogCloseButtonClassName,
+  dialogFloatingPanelClassName,
+  dialogHeaderClassName,
+  dialogOverlayClassName,
+} from "@/components/shared/dialog-shell";
 
 const iconMap: Record<AppNotification["type"], React.ReactNode> = {
   success: <CheckCircle2 className="h-4 w-4 text-success drop-shadow-[var(--drop-glow-success)]" />,
@@ -53,12 +60,9 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
   return (
     <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
-        <Dialog.Content
-          data-testid="notification-panel"
-          className="fixed right-4 top-4 z-50 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-glass w-full max-w-md max-h-[80vh] flex flex-col"
-        >
-          <div className="flex items-center justify-between p-4 border-b border-[var(--glass-border-subtle)]">
+        <Dialog.Overlay className={dialogOverlayClassName} />
+        <Dialog.Content data-testid="notification-panel" className={dialogFloatingPanelClassName}>
+          <div className={dialogHeaderClassName}>
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-primary/60" />
               <Dialog.Title className="text-sm font-medium text-foreground">Notifications</Dialog.Title>
@@ -67,16 +71,14 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
               )}
             </div>
             <Dialog.Close asChild>
-              <button
-                className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-primary transition-colors"
-              >
+              <button className={dialogCloseButtonClassName}>
                 <X className="h-4 w-4" />
               </button>
             </Dialog.Close>
           </div>
-          <div className="flex-1 overflow-y-auto p-2">
+          <div className={cn(dialogBodyClassName, "space-y-2 p-2 sm:p-3")}>
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-foreground-muted">
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-background/50 py-12 text-foreground-muted">
                 <Bell className="h-8 w-8 mb-2 opacity-50" />
                 <p className="text-sm">No notifications</p>
               </div>
@@ -107,7 +109,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); onDismiss(notif.id); }}
-                        className="shrink-0 rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-primary transition-colors"
+                        className={cn(dialogCloseButtonClassName, "shrink-0")}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>

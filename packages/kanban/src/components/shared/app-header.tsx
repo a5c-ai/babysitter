@@ -15,6 +15,7 @@ import { useKeyboard } from "@/hooks/use-keyboard";
 import { useTheme } from "@/components/shared/theme-provider";
 import { cn } from "@/lib/cn";
 import { APP_HEADER_NAV_ITEMS } from "@/components/shared/app-header-nav";
+import { pageShellContainerClassName } from "@/components/shared/page-shell";
 
 export const WORKSPACES_HREF = "/workspaces";
 
@@ -33,7 +34,7 @@ export function AppHeader() {
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-3 px-4 py-3 sm:px-6">
+        <div className={cn(pageShellContainerClassName, "gap-3 py-3")}>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/projects" className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">

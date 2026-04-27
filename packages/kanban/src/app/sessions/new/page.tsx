@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useGatewayFetch } from "@/components/agent-mux/gateway-provider";
 import { useTaskTags } from "@/hooks/use-task-tags";
 import { useAgents, useGateway } from "@/lib/agent-mux-ui";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 function firstAgent(agents: string[], preferred: string | null): string {
   if (preferred && agents.includes(preferred)) {
@@ -118,17 +119,17 @@ function NewSessionContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+    <PageShell>
+      <PageSection>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">New session</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Start a real conversation</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground-muted">
           This creates a live agent-mux session. If the harness emits its real session id later, the
           kanban app keeps the run open until the session becomes addressable.
         </p>
-      </section>
+      </PageSection>
 
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+      <PageSection>
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <Field label="Agent">
             {sessionAgents.length > 0 ? (
@@ -187,7 +188,7 @@ function NewSessionContent() {
             </Button>
           </div>
         </form>
-      </section>
-    </div>
+      </PageSection>
+    </PageShell>
   );
 }

@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { RequireGatewayAuth } from "@/components/agent-mux/require-gateway-auth";
 import { useGateway } from "@/lib/agent-mux-ui";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 function formatUsd(totalUsd: number | null): string | null {
   if (totalUsd == null || !Number.isFinite(totalUsd)) {
@@ -82,8 +83,8 @@ function SessionsContent() {
   const inactiveSessions = rows.filter((session) => session.status !== "active");
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+    <PageShell>
+      <PageSection>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Sessions</p>
@@ -97,13 +98,13 @@ function SessionsContent() {
             <Link href="/sessions/new">Start session</Link>
           </Button>
         </div>
-      </section>
+      </PageSection>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SessionColumn title="Active sessions" empty="No active sessions right now." sessions={activeSessions} />
         <SessionColumn title="Inactive sessions" empty="No inactive sessions yet." sessions={inactiveSessions} />
       </div>
-    </div>
+    </PageShell>
   );
 }
 

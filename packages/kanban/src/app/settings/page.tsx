@@ -15,6 +15,7 @@ import { useStore } from "zustand";
 
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { useNotificationContext } from "@/components/notifications/notification-provider";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 import { SHORTCUT_SECTION_LABELS, SHORTCUTS } from "@/components/shared/shortcuts-help";
 import { useTheme } from "@/components/shared/theme-provider";
 import { Button } from "@/components/ui/button";
@@ -761,8 +762,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+    <PageShell>
+      <PageSection>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
           Settings
         </p>
@@ -776,7 +777,7 @@ export default function SettingsPage() {
           organization, remote-project bindings, agents, MCP, editor integration, git,
           notifications, task tags, and keyboard shortcuts all live as explicit sections.
         </p>
-      </section>
+      </PageSection>
 
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="rounded-3xl border border-border bg-card p-4 shadow-lg">
@@ -2032,7 +2033,7 @@ export default function SettingsPage() {
           ) : null}
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 

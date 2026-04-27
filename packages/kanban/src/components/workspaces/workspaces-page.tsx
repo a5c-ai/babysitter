@@ -23,6 +23,7 @@ import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessi
 import { WorkspaceDetailsSidebar, type WorkspaceSidebarFeedback } from "@/components/workspaces/workspace-details-sidebar";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
 import { WorkspaceDetailShell } from "@/components/workspaces/workspace-detail-shell";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 function formatTimestamp(value: string | null): string {
   if (!value) {
@@ -736,18 +737,18 @@ export function WorkspacesPageContent(props: {
 
     if (loading) {
       return (
-        <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+        <PageShell>
+          <PageSection>
             <p className="text-sm text-foreground-muted">Loading workspace shell…</p>
-          </section>
-        </div>
+          </PageSection>
+        </PageShell>
       );
     }
 
     if (!selectedWorkspace) {
       return (
-        <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-          <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+        <PageShell>
+          <PageSection>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Workspace lifecycle</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">Workspace not found</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground-muted">
@@ -758,8 +759,8 @@ export function WorkspacesPageContent(props: {
                 <Link href="/workspaces">Back to inventory</Link>
               </Button>
             </div>
-          </section>
-        </div>
+          </PageSection>
+        </PageShell>
       );
     }
 
@@ -796,8 +797,8 @@ export function WorkspacesPageContent(props: {
 
   if (mode === "attention") {
     return (
-      <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+      <PageShell>
+        <PageSection>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Inbox</p>
@@ -833,7 +834,7 @@ export function WorkspacesPageContent(props: {
               The inbox excludes healthy active and idle workspaces.
             </span>
           </div>
-        </section>
+        </PageSection>
 
         {error ? (
           <section className="rounded-3xl border border-error/30 bg-error/10 p-4 text-sm text-error">
@@ -863,13 +864,13 @@ export function WorkspacesPageContent(props: {
           onLinkPullRequest={handleLinkPullRequest}
           highlightReasons
         />
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+    <PageShell>
+      <PageSection>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Workspace lifecycle</p>
@@ -909,7 +910,7 @@ export function WorkspacesPageContent(props: {
             Cleanup only unlocks for archived worktrees with no active sessions or pending runs.
           </span>
         </div>
-      </section>
+      </PageSection>
 
       {error ? (
         <section className="rounded-3xl border border-error/30 bg-error/10 p-4 text-sm text-error">
@@ -1027,7 +1028,7 @@ export function WorkspacesPageContent(props: {
           workspaceReviews.actOnReview({ action: "add-comment", ...input }).then(() => refreshInventory())
         }
       />
-    </div>
+    </PageShell>
   );
 }
 

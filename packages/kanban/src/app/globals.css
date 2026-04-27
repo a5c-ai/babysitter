@@ -454,6 +454,13 @@ a:hover {
     linear-gradient(180deg, transparent, color-mix(in srgb, var(--background-secondary) 84%, transparent));
 }
 
+.bg-gradient-brand-subtle {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 36%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 9%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background-secondary) 42%, transparent), transparent 28%);
+}
+
 /* Status pulse animation */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }

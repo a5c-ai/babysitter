@@ -4472,7 +4472,7 @@ export function BacklogOverview({
 
   function clearFocusedIssue() {
     if (routeMode === "issue" || routeMode === "create") {
-      router.push("/");
+      router.push(currentSurfacePath);
       return;
     }
     const params = new URLSearchParams(searchParams.toString());

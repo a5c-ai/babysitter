@@ -4,13 +4,14 @@ import Link from "next/link";
 import { FolderGit2, ListTodo, Layers, Workflow, Users } from "lucide-react";
 
 import { useBacklog } from "@/hooks/use-backlog";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 export default function ProjectsPage() {
   const { snapshot, summary, loading, error } = useBacklog();
 
   if (loading && !snapshot) {
     return (
-      <div className="mx-auto flex w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6">
+      <PageShell>
         <div className="w-full animate-pulse rounded-3xl border border-border bg-card p-6">
           <div className="h-5 w-48 rounded bg-background-secondary" />
           <div className="mt-4 grid gap-4 lg:grid-cols-3">
@@ -19,23 +20,23 @@ export default function ProjectsPage() {
             ))}
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   if (error || !snapshot) {
     return (
-      <div className="mx-auto flex w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6">
+      <PageShell>
         <div className="w-full rounded-3xl border border-error/25 bg-error-muted p-6 text-sm text-error">
           Failed to load project planning workspace.
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-6 sm:px-6">
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+    <PageShell>
+      <PageSection>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Projects</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
           Planning starts from projects and board routes now
@@ -55,7 +56,7 @@ export default function ProjectsPage() {
             {summary?.issueCount ?? 0} issues tracked
           </span>
         </div>
-      </section>
+      </PageSection>
 
       <section className="mt-5 grid gap-4 xl:grid-cols-2">
         {snapshot.projects.map((project) => (
@@ -125,7 +126,6 @@ export default function ProjectsPage() {
           </article>
         ))}
       </section>
-
-    </div>
+    </PageShell>
   );
 }

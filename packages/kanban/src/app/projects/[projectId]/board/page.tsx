@@ -1,4 +1,5 @@
 import { BacklogOverview } from "@/components/dashboard/backlog-overview";
+import { PageShell } from "@/components/shared/page-shell";
 
 export default async function ProjectBoardPage({
   params,
@@ -8,12 +9,12 @@ export default async function ProjectBoardPage({
   const { projectId } = await params;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6">
+    <PageShell className="gap-0">
       <BacklogOverview
         projectId={projectId}
         routeBasePath={`/projects/${projectId}`}
         forcedPresentation="board"
       />
-    </div>
+    </PageShell>
   );
 }

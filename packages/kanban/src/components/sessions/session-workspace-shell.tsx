@@ -25,6 +25,11 @@ import {
   type WorkspacePanelVisibility,
 } from "@/lib/workspace-layout-state";
 import { WorkspaceRuntimePanel } from "@/components/workspaces/workspace-runtime-panel";
+import {
+  dialogCloseButtonClassName,
+  dialogCommandPanelClassName,
+  dialogOverlayClassName,
+} from "@/components/shared/dialog-shell";
 
 type EventBuffer = {
   events: Array<Record<string, unknown>>;
@@ -114,10 +119,10 @@ function WorkspaceCommandBar(props: {
   return (
     <Dialog.Root open={props.open} onOpenChange={props.onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+        <Dialog.Overlay className={dialogOverlayClassName} />
         <Dialog.Content
           data-testid="workspace-command-bar"
-          className="fixed left-1/2 top-20 z-50 w-[min(42rem,calc(100vw-2rem))] -translate-x-1/2 rounded-3xl border border-border bg-card p-4 shadow-2xl"
+          className={dialogCommandPanelClassName}
         >
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3">
             <Search className="h-4 w-4 text-foreground-muted" />
@@ -131,7 +136,7 @@ function WorkspaceCommandBar(props: {
             <button
               type="button"
               onClick={() => props.onOpenChange(false)}
-              className="rounded-full p-2 text-foreground-muted transition-colors hover:text-foreground"
+              className={dialogCloseButtonClassName}
               aria-label="Close command bar"
             >
               <X className="h-4 w-4" />

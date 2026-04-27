@@ -19,6 +19,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { resilientFetch } from "@/lib/fetcher";
 import { useTheme } from "@/components/shared/theme-provider";
+import {
+  dialogBodyClassName,
+  dialogCloseButtonClassName,
+  dialogHeaderClassName,
+  dialogOverlayClassName,
+  dialogSheetPanelClassName,
+  dialogSheetViewportClassName,
+} from "@/components/shared/dialog-shell";
 
 interface WatchSource {
   path: string;
@@ -208,22 +216,17 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   return (
     <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60" />
-        <Dialog.Content
-          className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
-          data-testid="settings-modal"
-        >
-          <div className="relative z-50 flex h-full w-full flex-col border border-border bg-card shadow-xl sm:h-auto sm:max-h-[min(80vh,42rem)] sm:max-w-lg sm:rounded-lg">
+        <Dialog.Overlay className={dialogOverlayClassName} />
+        <Dialog.Content className={dialogSheetViewportClassName} data-testid="settings-modal">
+          <div className={cn(dialogSheetPanelClassName, "sm:max-w-lg")}>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border p-4">
+            <div className={dialogHeaderClassName}>
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4 text-foreground-muted" />
                 <Dialog.Title className="text-sm font-medium text-foreground">Settings</Dialog.Title>
               </div>
               <Dialog.Close asChild>
-                <button
-                  className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-foreground transition-colors"
-                >
+                <button className={dialogCloseButtonClassName}>
                   <X className="h-4 w-4" />
                 </button>
               </Dialog.Close>
@@ -231,7 +234,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
             {/* Body */}
             <Dialog.Description asChild>
-              <div className="flex-1 overflow-y-auto p-4 pb-6">
+              <div className={dialogBodyClassName}>
                 {fetchLoading ? (
                   <div className="flex items-center justify-center py-12 text-foreground-muted">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />

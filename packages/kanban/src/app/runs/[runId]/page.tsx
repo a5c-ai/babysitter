@@ -154,7 +154,7 @@ export default function RunDetailPage({ params }: { params: { runId: string } })
       setShowDetail(false);
       setSelectedEffectId(null);
     } else {
-      router.push("/");
+      router.push("/runs");
     }
   }, [showDetail, router]);
 
@@ -222,11 +222,11 @@ export default function RunDetailPage({ params }: { params: { runId: string } })
       {/* Navigation header with back button */}
       <div className="flex flex-wrap items-center gap-3 border-b border-border bg-background-secondary/40 px-4 py-2">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/runs")}
           className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 min-h-[44px] text-xs font-medium text-foreground-muted hover:text-foreground hover:border-primary/50 hover:shadow-neon-glow-primary-ring transition-all duration-200"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Dashboard
+          Runs
         </button>
         <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto text-xs [scrollbar-width:none]">
           <span className="shrink-0 text-foreground-muted">/</span>

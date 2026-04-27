@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
+import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 type AutomationRuleRecord = AutomationRuleCollectionResponse["rules"][number];
 type AutomationTriggerType = AutomationRuleCollectionResponse["availableTriggerTypes"][number];
@@ -226,16 +227,16 @@ function readExecutionSummaryLabel(execution: AutomationExecutionRecord): string
 }
 
 function buildBoardHref(execution: AutomationExecutionRecord): string {
-  const params = new URLSearchParams({
-    projectId: execution.boardProjectId,
-  });
+  const params = new URLSearchParams();
   if (execution.issueId) {
     params.set("issueId", execution.issueId);
   }
   if (execution.issueKey) {
     params.set("issueKey", execution.issueKey);
   }
-  return `/?${params.toString()}`;
+  const query = params.toString();
+  const boardPath = `/projects/${encodeURIComponent(execution.boardProjectId)}/board`;
+  return query ? `${boardPath}?${query}` : boardPath;
 }
 
 function readTriggerSummary(rule: AutomationRuleRecord): string {
@@ -464,54 +465,53 @@ export function AutomationsPage() {
   }
 
   return (
-    <div className="bg-gradient-brand flex-1">
-      <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-6 py-6">
-        <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
-                Automation control plane
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-                Dedicated rule authoring and operational control
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-foreground-muted">
-                Manage timer and webhook rules here so the board stays focused on generated work.
-                This surface exposes lifecycle state, target routing, and automation authorship
-                through the existing shared automation API.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Button variant="outline" onClick={() => void loadAutomations({ preserveForm: editingRuleId !== null })} disabled={refreshing}>
-                <RefreshCw className={cn("mr-2 h-4 w-4", refreshing && "animate-spin")} />
-                Refresh rules
-              </Button>
-              <Button asChild variant="ghost">
-                <a href="/projects">Back to board</a>
-              </Button>
-            </div>
+    <PageShell>
+      <PageSection>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
+              Automation control plane
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+              Dedicated rule authoring and operational control
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-foreground-muted">
+              Manage timer and webhook rules here so the board stays focused on generated work.
+              This surface exposes lifecycle state, target routing, and automation authorship
+              through the existing shared automation API.
+            </p>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-7">
-            <SummaryTile label="Visible rules" value={String(summary.visibleCount)} tone="info" />
-            <SummaryTile label="Active" value={String(summary.stateCounts.active)} tone="success" />
-            <SummaryTile label="Paused" value={String(summary.stateCounts.paused)} tone="warning" />
-            <SummaryTile label="Failing" value={String(summary.failingCount)} tone="error" />
-            <SummaryTile label="Timers" value={String(summary.triggerCounts.timer)} tone="info" />
-            <SummaryTile label="Webhooks" value={String(summary.triggerCounts.webhook)} tone="warning" />
-            <SummaryTile label="Failures" value={String(summary.failureCount)} tone="error" />
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={() => void loadAutomations({ preserveForm: editingRuleId !== null })} disabled={refreshing}>
+              <RefreshCw className={cn("mr-2 h-4 w-4", refreshing && "animate-spin")} />
+              Refresh rules
+            </Button>
+            <Button asChild variant="ghost">
+              <a href="/projects">Back to board</a>
+            </Button>
           </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-7">
+          <SummaryTile label="Visible rules" value={String(summary.visibleCount)} tone="info" />
+          <SummaryTile label="Active" value={String(summary.stateCounts.active)} tone="success" />
+          <SummaryTile label="Paused" value={String(summary.stateCounts.paused)} tone="warning" />
+          <SummaryTile label="Failing" value={String(summary.failingCount)} tone="error" />
+          <SummaryTile label="Timers" value={String(summary.triggerCounts.timer)} tone="info" />
+          <SummaryTile label="Webhooks" value={String(summary.triggerCounts.webhook)} tone="warning" />
+          <SummaryTile label="Failures" value={String(summary.failureCount)} tone="error" />
+        </div>
+      </PageSection>
+
+      {error ? (
+        <section className="rounded-3xl border border-error/30 bg-error/10 p-4 text-sm text-error">
+          {error}
         </section>
+      ) : null}
 
-        {error ? (
-          <section className="rounded-3xl border border-error/30 bg-error/10 p-4 text-sm text-error">
-            {error}
-          </section>
-        ) : null}
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.4fr)]">
-          <Card className="rounded-3xl">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.4fr)]">
+        <Card className="rounded-3xl">
             <CardHeader className="border-b border-border/70 pb-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -879,9 +879,8 @@ export function AutomationsPage() {
               })
             )}
           </div>
-        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
