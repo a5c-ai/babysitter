@@ -103,6 +103,12 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
     const session = sessionData!['session'] as Record<string, unknown>;
     expect(session['sessionId']).toBe(sessionId);
     expect(session['adapter']).toBe('claude');
+    expect(session['persistedEnv']).toEqual(expect.objectContaining({
+      AGENT_SESSION_ID: sessionId,
+    }));
+
+    const envFileContent = await fs.promises.readFile(envFilePath, 'utf-8');
+    expect(envFileContent).toContain(`export AGENT_SESSION_ID="${sessionId}"`);
   });
 
   it('session-start with handler that adds persistEnv', async () => {

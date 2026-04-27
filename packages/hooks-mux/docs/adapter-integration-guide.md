@@ -93,9 +93,11 @@ Claude also supports the dedicated bootstrap command on `SessionStart`:
 ```
 
 When used as a Claude hook command, `bootstrap --adapter claude` reads the same native
-stdin payload as `invoke`, normalizes it as a `SessionStart`, and resolves the session
-through the Claude adapter's native `session_id` resolver. That keeps bootstrap and later
-invoke calls on the same session unless you explicitly override with `--session-id`.
+stdin payload as `invoke`, normalizes it as a `SessionStart`, resolves the session
+through the Claude adapter's native `session_id` resolver, and stores
+`AGENT_SESSION_ID` in the session baseline. If Claude exposes `CLAUDE_ENV_FILE` for
+that invocation, bootstrap also appends `AGENT_SESSION_ID` there; otherwise the session
+still persists and later `invoke` or `exec` flows can rehydrate it from the store.
 
 ### Capabilities
 

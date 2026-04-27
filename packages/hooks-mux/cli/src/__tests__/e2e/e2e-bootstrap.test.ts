@@ -40,6 +40,8 @@ describe('bootstrap — session initialization (e2e)', { timeout: 30000 }, () =>
 
   it('bootstrap --adapter claude creates session file with JSON output', async () => {
     const sessionId = 'e2e-boot-native-stdin-1';
+    const envFilePath = path.join(tmpRoot, 'bootstrap-claude-env.txt');
+    await fs.promises.writeFile(envFilePath, '', 'utf-8');
     const stdinPayload = JSON.stringify({
       session_id: sessionId,
       source: 'startup',
@@ -54,7 +56,10 @@ describe('bootstrap — session initialization (e2e)', { timeout: 30000 }, () =>
       ],
       {
         stdin: stdinPayload,
-        env: baseEnv(),
+        env: {
+          ...baseEnv(),
+          CLAUDE_ENV_FILE: envFilePath,
+        },
       },
     );
 
@@ -73,6 +78,12 @@ describe('bootstrap — session initialization (e2e)', { timeout: 30000 }, () =>
     expect(session['adapter']).toBe('claude');
     expect(session['version']).toBe('a5c.hooks.session.v1');
     expect(session['cwd']).toBe('/workspace/bootstrap-native');
+    expect(session['persistedEnv']).toEqual(expect.objectContaining({
+      AGENT_SESSION_ID: sessionId,
+    }));
+
+    const envFileContent = await fs.promises.readFile(envFilePath, 'utf-8');
+    expect(envFileContent).toContain(`export AGENT_SESSION_ID="${sessionId}"`);
   });
 
   it('bootstrap without --json outputs human-readable message', async () => {
@@ -94,10 +105,9 @@ describe('bootstrap — session initialization (e2e)', { timeout: 30000 }, () =>
     );
 
     expect(result.exitCode).toBe(0);
-    // The human-readable output goes to console.log which is stdout
-    const combinedOutput = result.stdout + result.stderr;
-    expect(combinedOutput).toContain(sessionId);
-    expect(combinedOutput).toContain('claude');
+    expect(result.stdout.trim()).toBe('');
+    expect(result.stderr).toContain(sessionId);
+    expect(result.stderr).toContain('claude');
   });
 
   it('bootstrap falls back to a synthetic session ID only when no native Claude payload or explicit override is available', async () => {

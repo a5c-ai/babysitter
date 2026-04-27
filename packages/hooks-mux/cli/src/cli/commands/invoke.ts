@@ -29,6 +29,13 @@ import {
   type UnifiedHookEvent,
 } from '@a5c-ai/hooks-mux-core';
 import { loadAdapter } from '../adapter-loader';
+import {
+  prepareBootstrapSession,
+  propagateBootstrapEnv,
+  resolveNativeEnvFilePath,
+  resolveSessionId,
+  tryParseJson,
+} from '../bootstrap-runtime';
 import { createHooksLogger } from '../hooks-logger';
 import { readStdin } from '../stdin';
 
@@ -44,19 +51,6 @@ interface InvokeArgs {
 interface RenderedOutput {
   output: Record<string, unknown>;
   degradedFields: string[];
-}
-
-/**
- * Try to parse a string as JSON, returning undefined on failure.
- */
-function tryParseJson(raw: string): unknown | undefined {
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    return undefined;
-  }
 }
 
 interface RawEventResolution {
@@ -135,35 +129,6 @@ function resolveRawEventName(
   }
 
   return { rawEventName: 'unknown', source: 'default' };
-}
-
-/**
- * Resolve the session ID from explicit flag, env, or stdin payload.
- */
-function resolveSessionId(
-  adapterSessionResolver: ReturnType<typeof loadAdapter>['sessionResolver'],
-  explicitSessionId: string | undefined,
-  normalizedSessionId: string | null | undefined,
-  stdinData: Record<string, unknown> | undefined,
-  env: Record<string, string>,
-): string | null {
-  if (adapterSessionResolver) {
-    const resolved = adapterSessionResolver(stdinData ?? {}, env, explicitSessionId);
-    const adapterSessionId = typeof resolved === 'string'
-      ? resolved
-      : resolved?.sessionId;
-    if (adapterSessionId) {
-      return adapterSessionId;
-    }
-  }
-
-  if (explicitSessionId) return explicitSessionId;
-  if (env['AGENT_SESSION_ID']) return env['AGENT_SESSION_ID'];
-  if (normalizedSessionId) return normalizedSessionId;
-  if (stdinData && typeof stdinData['session_id'] === 'string') {
-    return stdinData['session_id'] as string;
-  }
-  return null;
 }
 
 function renderOutput(
@@ -320,39 +285,42 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
     });
     let session: SessionState | null = null;
     if (sessionId) {
-      session = await loadSession(sessionId);
-      if (!session) {
-        // Create a new session
-        session = {
-          version: 'a5c.hooks.session.v1',
-          sessionId,
-          adapter: args.adapter,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          cwd: event.execution.cwd ?? undefined,
-          transcriptPath: event.execution.transcriptPath ?? undefined,
-          persistedEnv: { ...event.env.persisted },
-          contextVars: {},
-          contextFragments: [],
-          metadata: {},
-        };
-      }
+      const prepared = prepareBootstrapSession({
+        existingSession: await loadSession(sessionId),
+        adapter: args.adapter,
+        event,
+        sessionId,
+      });
+      session = prepared.session;
 
       // Inject session context into event execution
       event.execution.sessionId = sessionId;
-      if (session.persistedEnv) {
+      if (session?.persistedEnv) {
         Object.assign(event.execution.persistedEnv, session.persistedEnv);
       }
     }
 
     // 5. Bootstrap-only mode: persist session and exit
     if (args['bootstrap-only']) {
+      const prepared = prepareBootstrapSession({
+        existingSession: session,
+        adapter: args.adapter,
+        event,
+        sessionId,
+      });
+      session = prepared.session;
       if (session) {
         await saveSession(session);
       }
+      const propagated = await propagateBootstrapEnv(
+        loaded.capabilities.envPersistenceMode,
+        prepared.persistEnv,
+        env,
+      );
       await logger.info('bootstrap-only invoke completed', {
         adapter: args.adapter,
         sessionId,
+        propagated,
       });
       if (args.json) {
         process.stdout.write(JSON.stringify({ status: 'bootstrapped', sessionId }, null, 2) + '\n');
@@ -402,7 +370,7 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
     if (Object.keys(merged.persistEnv).length > 0) {
       const backend = loaded.capabilities.envPersistenceMode;
       await propagateEnv(backend, merged.persistEnv, {
-        nativeEnvFilePath: env['CLAUDE_ENV_FILE'] ?? env['HOOKS_PROXY_ENV_FILE'],
+        nativeEnvFilePath: resolveNativeEnvFilePath(env),
       });
     }
 

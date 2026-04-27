@@ -47,9 +47,9 @@ Or use the dedicated bootstrap command:
 ```
 
 For Claude, the dedicated `bootstrap` command is supported specifically as a native
-`SessionStart` hook target. Claude still sends the same stdin payload to this command,
-so `hooks-mux bootstrap --adapter claude` preserves the native Claude `session_id`
-rather than inventing a synthetic bootstrap session when invoked by the harness.
+`SessionStart` hook target. Claude sends the same stdin payload to this command, so
+`hooks-mux bootstrap --adapter claude` resolves the native Claude `session_id` the
+same way `invoke --bootstrap-only` does.
 
 ---
 
@@ -67,13 +67,17 @@ When bootstrap-only mode runs:
 
 1. The adapter resolves the session ID from the harness-native payload
 2. If no session exists, a new one is created with baseline state
-3. The session is persisted to the session store
-4. If the adapter supports env persistence, `AGENT_SESSION_ID` is propagated
-5. A valid success result is returned to the harness
-6. No user-provided handlers are executed
+3. `AGENT_SESSION_ID` is stored in the session's persisted env baseline
+4. The session is persisted to the session store
+5. If the adapter has a usable native propagation channel for that invocation, `AGENT_SESSION_ID` is propagated
+6. A valid success result is returned to the harness
+7. No user-provided handlers are executed
 
 For Claude, both `invoke --bootstrap-only` and `bootstrap --adapter claude` read the
 native hook stdin payload and resolve the session from Claude's native `session_id`.
+When Claude provides `CLAUDE_ENV_FILE`, both commands append `AGENT_SESSION_ID` there.
+If `CLAUDE_ENV_FILE` is absent for a given invocation, the session is still persisted
+and later `invoke` or `exec` calls can rehydrate it from the session store.
 
 ---
 

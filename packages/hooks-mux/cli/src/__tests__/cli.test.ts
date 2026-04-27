@@ -261,6 +261,7 @@ describe('CLI Commands', () => {
     it('should handle bootstrap-only mode', async () => {
       const { invokeCommand } = await import('../cli/commands/invoke');
       const stdout = captureStdout();
+      process.env.CLAUDE_ENV_FILE = '/tmp/claude-env-file';
 
       try {
         await (invokeCommand.handler as Function)({
@@ -277,7 +278,13 @@ describe('CLI Commands', () => {
         expect(parsed.status).toBe('bootstrapped');
         expect(parsed.sessionId).toBe('test-sess');
         expect(mockSaveSession).toHaveBeenCalled();
+        expect(propagateEnv).toHaveBeenCalledWith(
+          'native_env_file',
+          { AGENT_SESSION_ID: 'test-sess' },
+          { nativeEnvFilePath: '/tmp/claude-env-file' },
+        );
       } finally {
+        delete process.env.CLAUDE_ENV_FILE;
         stdout.restore();
       }
     });
@@ -315,7 +322,7 @@ describe('CLI Commands', () => {
   describe('bootstrap', () => {
     it('should create and persist a new session', async () => {
       const { bootstrapCommand } = await import('../cli/commands/bootstrap');
-      const log = captureConsoleLog();
+      const stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 
       try {
         await (bootstrapCommand.handler as Function)({
@@ -333,11 +340,9 @@ describe('CLI Commands', () => {
           }),
         );
 
-        const output = log.getOutput();
-        expect(output).toContain('boot-123');
-        expect(output).toContain('claude');
+        expect(stderrWrite).toHaveBeenCalledWith(expect.stringContaining('boot-123'));
       } finally {
-        log.restore();
+        stderrWrite.mockRestore();
       }
     });
 
@@ -361,6 +366,40 @@ describe('CLI Commands', () => {
         expect(parsed.adapter).toBe('claude');
       } finally {
         stdout.restore();
+      }
+    });
+
+    it('should propagate Claude bootstrap env when native env file is available', async () => {
+      const { bootstrapCommand } = await import('../cli/commands/bootstrap');
+      const stderrWrite = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      process.env.CLAUDE_ENV_FILE = '/tmp/claude-bootstrap-env';
+
+      try {
+        await (bootstrapCommand.handler as Function)({
+          adapter: 'claude',
+          'session-id': 'boot-claude-env',
+          json: false,
+          _: [],
+          $0: 'a5c-hooks-mux',
+        });
+
+        expect(mockSaveSession).toHaveBeenCalledWith(
+          expect.objectContaining({
+            sessionId: 'boot-claude-env',
+            persistedEnv: expect.objectContaining({
+              AGENT_SESSION_ID: 'boot-claude-env',
+            }),
+          }),
+        );
+        expect(propagateEnv).toHaveBeenCalledWith(
+          'native_env_file',
+          { AGENT_SESSION_ID: 'boot-claude-env' },
+          { nativeEnvFilePath: '/tmp/claude-bootstrap-env' },
+        );
+        expect(stderrWrite).toHaveBeenCalled();
+      } finally {
+        delete process.env.CLAUDE_ENV_FILE;
+        stderrWrite.mockRestore();
       }
     });
   });

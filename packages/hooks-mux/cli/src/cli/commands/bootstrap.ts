@@ -3,8 +3,9 @@
  *
  * Spec section 18.3.
  *
- * Delegates to invoke with --bootstrap-only flag internally.
- * Reads stdin for session discovery, creates/loads session, and persists it.
+ * Reads stdin for session discovery, resolves adapter-native session IDs,
+ * creates/loads session state, persists baseline env, and applies any
+ * supported propagation backend.
  */
 
 import type { CommandModule } from 'yargs';
@@ -14,6 +15,12 @@ import {
   saveSession,
 } from '@a5c-ai/hooks-mux-core';
 import { loadAdapter } from '../adapter-loader';
+import {
+  prepareBootstrapSession,
+  propagateBootstrapEnv,
+  resolveSessionId,
+  tryParseJson,
+} from '../bootstrap-runtime';
 import { createHooksLogger } from '../hooks-logger';
 import { readStdin } from '../stdin';
 
@@ -21,42 +28,6 @@ interface BootstrapArgs {
   adapter: string;
   'session-id'?: string;
   json?: boolean;
-}
-
-function tryParseJson(raw: string): unknown | undefined {
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    return undefined;
-  }
-}
-
-function resolveSessionId(
-  adapterSessionResolver: ReturnType<typeof loadAdapter>['sessionResolver'],
-  explicitSessionId: string | undefined,
-  normalizedSessionId: string | null | undefined,
-  stdinData: Record<string, unknown> | undefined,
-  env: Record<string, string>,
-): string | null {
-  if (adapterSessionResolver) {
-    const resolved = adapterSessionResolver(stdinData ?? {}, env, explicitSessionId);
-    const adapterSessionId = typeof resolved === 'string'
-      ? resolved
-      : resolved?.sessionId;
-    if (adapterSessionId) {
-      return adapterSessionId;
-    }
-  }
-
-  if (explicitSessionId) return explicitSessionId;
-  if (env['AGENT_SESSION_ID']) return env['AGENT_SESSION_ID'];
-  if (normalizedSessionId) return normalizedSessionId;
-  if (stdinData && typeof stdinData['session_id'] === 'string') {
-    return stdinData['session_id'] as string;
-  }
-  return null;
 }
 
 export const bootstrapCommand: CommandModule<object, BootstrapArgs> = {
@@ -93,7 +64,7 @@ export const bootstrapCommand: CommandModule<object, BootstrapArgs> = {
       : 'bootstrap';
 
     const event = loaded.normalizer
-      ? loaded.normalizer(rawEventName, stdinPayload, env)
+      ? loaded.normalizer(rawEventName, rawStdin, env)
       : normalizeEvent({
         adapter: args.adapter,
         rawEventName,
@@ -110,41 +81,40 @@ export const bootstrapCommand: CommandModule<object, BootstrapArgs> = {
       env,
     ) ?? `bootstrap-${Date.now()}`;
 
-    // Load or create session
-    let session = await loadSession(sessionId);
-    if (!session) {
-      session = {
-        version: 'a5c.hooks.session.v1',
-        sessionId,
-        adapter: args.adapter,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        cwd: event.execution.cwd ?? undefined,
-        persistedEnv: { ...event.env.persisted },
-        contextVars: {},
-        contextFragments: [],
-        metadata: {},
-      };
-    }
+    const prepared = prepareBootstrapSession({
+      existingSession: await loadSession(sessionId),
+      adapter: args.adapter,
+      event,
+      sessionId,
+    });
+    const session = prepared.session;
 
-    await saveSession(session);
+    if (session) {
+      await saveSession(session);
+    }
+    const propagated = await propagateBootstrapEnv(
+      loaded.capabilities.envPersistenceMode,
+      prepared.persistEnv,
+      env,
+    );
     await logger.info('bootstrap completed', {
       adapter: args.adapter,
       sessionId,
-      createdAt: session.createdAt,
+      createdAt: session?.createdAt ?? null,
+      propagated,
     });
 
     const output = {
       status: 'bootstrapped',
       sessionId,
       adapter: args.adapter,
-      createdAt: session.createdAt,
+      createdAt: session?.createdAt ?? null,
     };
 
     if (args.json) {
       process.stdout.write(JSON.stringify(output, null, 2) + '\n');
     } else {
-      console.log(`Session bootstrapped: ${sessionId} (adapter: ${args.adapter})`);
+      process.stderr.write(`Session bootstrapped: ${sessionId} (adapter: ${args.adapter})\n`);
     }
   },
 };
