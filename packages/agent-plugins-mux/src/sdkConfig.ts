@@ -7,6 +7,7 @@ export interface SdkConfig {
   package: string;
   cli: string;
   proxyPackage: string;
+  proxyBinary: string;
   scope: string;
   envPrefix: string;
   stateDir: string;
@@ -19,6 +20,7 @@ export const BABYSITTER_DEFAULT_SDK_CONFIG: Readonly<SdkConfig> = {
   package: '@a5c-ai/babysitter-sdk',
   cli: 'babysitter',
   proxyPackage: '@a5c-ai/hooks-mux-cli',
+  proxyBinary: 'a5c-hooks-mux',
   scope: '@a5c-ai',
   envPrefix: 'BABYSITTER',
   stateDir: '.a5c',
@@ -30,6 +32,7 @@ export function resolveSdkConfig(manifest: A5cPluginManifest): SdkConfig {
     package: sdk.package || BABYSITTER_DEFAULT_SDK_CONFIG.package,
     cli: sdk.cli || BABYSITTER_DEFAULT_SDK_CONFIG.cli,
     proxyPackage: sdk.proxyPackage || BABYSITTER_DEFAULT_SDK_CONFIG.proxyPackage,
+    proxyBinary: sdk.proxyBinary || BABYSITTER_DEFAULT_SDK_CONFIG.proxyBinary,
     scope: sdk.scope || BABYSITTER_DEFAULT_SDK_CONFIG.scope,
     envPrefix: sdk.envPrefix || BABYSITTER_DEFAULT_SDK_CONFIG.envPrefix,
     stateDir: sdk.stateDir || BABYSITTER_DEFAULT_SDK_CONFIG.stateDir,

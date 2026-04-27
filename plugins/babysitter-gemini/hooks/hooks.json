@@ -7,7 +7,7 @@
           {
             "name": "babysitter-session-start",
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-mux-cli invoke --adapter gemini --handler \"bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-session-start.sh\" --json",
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter gemini --handler 'bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-session-start.sh' --json\"",
             "timeout": 30000,
             "description": "babysitter SessionStart hook"
           }
@@ -20,7 +20,7 @@
           {
             "name": "babysitter-after-agent",
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-mux-cli invoke --adapter gemini --handler \"bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-after-agent.sh\" --json",
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter gemini --handler 'bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-after-agent.sh' --json\"",
             "timeout": 30000,
             "description": "babysitter AfterAgent hook"
           }

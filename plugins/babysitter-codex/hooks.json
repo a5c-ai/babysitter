@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-session-start.sh\" --json"
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter codex --handler 'bash ./hooks/babysitter-proxied-session-start.sh' --json\""
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-stop.sh\" --json"
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter codex --handler 'bash ./hooks/babysitter-proxied-stop.sh' --json\""
           }
         ]
       }
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler \"bash ./hooks/babysitter-proxied-user-prompt-submit.sh\" --json"
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter codex --handler 'bash ./hooks/babysitter-proxied-user-prompt-submit.sh' --json\""
           }
         ]
       }

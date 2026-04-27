@@ -190,7 +190,7 @@ function workspaceAgents() {
 
 function workspaceHooksConfig(hooksDir) {
   const proxiedCommand = (scriptName) =>
-    `npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler "bash ${path.join(hooksDir, scriptName)}" --json`;
+    `npx -y -p @a5c-ai/hooks-mux-cli -c "a5c-hooks-mux invoke --adapter codex --handler 'bash ${path.join(hooksDir, scriptName)}' --json"`;
   return {
     hooks: {
       SessionStart: [

@@ -47,6 +47,7 @@ export interface A5cPluginManifest {
     package?: string;      // e.g. @a5c-ai/babysitter-sdk
     cli?: string;          // e.g. babysitter
     proxyPackage?: string; // e.g. @a5c-ai/hooks-mux-cli
+    proxyBinary?: string;  // e.g. a5c-hooks-mux (bin name from proxyPackage)
     scope?: string;        // e.g. @a5c-ai
     envPrefix?: string;    // e.g. BABYSITTER (for env vars like BABYSITTER_STATE_DIR)
     stateDir?: string;     // e.g. .a5c (global state directory name)

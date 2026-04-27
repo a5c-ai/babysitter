@@ -41,16 +41,17 @@ function resolveCmd(
   pluginName: string,
   nativeHook: string,
   proxyPkg: string,
+  proxyBin: string,
   pattern?: string
 ): string {
   if (handlerValue === 'proxy') {
-    return `npx -y ${proxyPkg} invoke --adapter ${adapter} --json`;
+    return `npx -y -p ${proxyPkg} -c "${proxyBin} invoke --adapter ${adapter} --json"`;
   }
   const p = resolveHookPath(handlerValue, hookSlug, pluginName, nativeHook, pattern);
   if (p) {
     const scriptRef = rootRef.startsWith('$') || rootRef.startsWith('\\$')
       ? `${rootRef}/${p}` : `./${p}`;
-    return `npx -y ${proxyPkg} invoke --adapter ${adapter} --handler "bash ${scriptRef}" --json`;
+    return `npx -y -p ${proxyPkg} -c "${proxyBin} invoke --adapter ${adapter} --handler 'bash ${scriptRef}' --json"`;
   }
   return `echo '{}'`;
 }
@@ -61,10 +62,12 @@ function _resolvePsCmd(
   adapter: string,
   pluginName: string,
   nativeHook: string,
+  proxyPkg: string,
+  proxyBin: string,
   pattern?: string
 ): string {
   if (handlerValue === 'proxy') {
-    return `a5c-hooks-mux invoke --adapter ${adapter} --json`;
+    return `npx -y -p ${proxyPkg} -c "${proxyBin} invoke --adapter ${adapter} --json"`;
   }
   const p = resolveHookPath(handlerValue, hookSlug, pluginName, nativeHook, pattern);
   if (p) {
@@ -116,7 +119,7 @@ export function generateClaudeCodeHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
-    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, rootRef, manifest.name, native, sdk.proxyPackage, pat);
+    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, rootRef, manifest.name, native, sdk.proxyPackage, sdk.proxyBinary, pat);
     const entry: Record<string, unknown> = {
       hooks: [{ type: 'command', command: cmd }],
     };
@@ -139,7 +142,7 @@ export function generateCodexHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
-    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, '.', manifest.name, native, sdk.proxyPackage, pat);
+    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, '.', manifest.name, native, sdk.proxyPackage, sdk.proxyBinary, pat);
     hooks[native] = [{ matcher: '.*', hooks: [{ type: 'command', command: cmd }] }];
   });
 
@@ -184,7 +187,7 @@ export function generateGeminiHooksJson(
 
   iterateHooks(manifest, targetProfile, (canonical, native, handler) => {
     const slug = slugify(canonical);
-    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, rootRef, manifest.name, native, sdk.proxyPackage, pat);
+    const cmd = resolveCmd(handler, slug, targetProfile.adapterName, rootRef, manifest.name, native, sdk.proxyPackage, sdk.proxyBinary, pat);
     hooks[native] = [{
       hooks: [{
         name: `${manifest.name}-${slug}`,
@@ -235,7 +238,7 @@ export function generateOpenCodeHooksJson(
     if (handler === 'proxy') {
       hooks[native] = [{
         type: 'command',
-        command: `npx -y ${sdk.proxyPackage} invoke --adapter ${adapter} --json`,
+        command: `npx -y -p ${sdk.proxyPackage} -c "${sdk.proxyBinary} invoke --adapter ${adapter} --json"`,
         description: `${manifest.name} ${canonical} hook`,
         timeoutMs: canonical === 'ShellEnv' ? 5000 : 30000,
       }];

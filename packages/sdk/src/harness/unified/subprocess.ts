@@ -50,6 +50,8 @@ function resolveHooksProxyBinary(): string {
   return process.env.AGENT_HOOKS_PROXY_PATH || "a5c-hooks-mux";
 }
 
+const IS_WINDOWS = process.platform === "win32";
+
 // ---------------------------------------------------------------------------
 // Availability check
 // ---------------------------------------------------------------------------
@@ -66,6 +68,7 @@ export async function isHooksProxyAvailable(): Promise<boolean> {
     const child = spawn(binary, ["--version"], {
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
+      shell: IS_WINDOWS,
       timeout: 3000,
     });
 
@@ -108,6 +111,7 @@ export async function invokeHooksProxy(
       env: { ...process.env },
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
+      shell: IS_WINDOWS,
     });
 
     const stdoutChunks: Buffer[] = [];

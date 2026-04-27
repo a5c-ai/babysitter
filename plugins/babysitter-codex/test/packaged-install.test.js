@@ -166,15 +166,15 @@ try {
   const pluginHooks = readJson(path.join(installedPluginRoot, 'hooks.json'));
   assert.strictEqual(
     pluginHooks.hooks.SessionStart[0].hooks[0].command,
-    'npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler "bash ./hooks/babysitter-proxied-session-start.sh" --json',
+    'npx -y -p @a5c-ai/hooks-mux-cli -c "a5c-hooks-mux invoke --adapter codex --handler \'bash ./hooks/babysitter-proxied-session-start.sh\' --json"',
   );
   assert.strictEqual(
     pluginHooks.hooks.UserPromptSubmit[0].hooks[0].command,
-    'npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler "bash ./hooks/babysitter-proxied-user-prompt-submit.sh" --json',
+    'npx -y -p @a5c-ai/hooks-mux-cli -c "a5c-hooks-mux invoke --adapter codex --handler \'bash ./hooks/babysitter-proxied-user-prompt-submit.sh\' --json"',
   );
   assert.strictEqual(
     pluginHooks.hooks.Stop[0].hooks[0].command,
-    'npx -y @a5c-ai/hooks-mux-cli invoke --adapter codex --handler "bash ./hooks/babysitter-proxied-stop.sh" --json',
+    'npx -y -p @a5c-ai/hooks-mux-cli -c "a5c-hooks-mux invoke --adapter codex --handler \'bash ./hooks/babysitter-proxied-stop.sh\' --json"',
   );
 
   assert.ok(fs.existsSync(homeMarketplacePath));
