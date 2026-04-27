@@ -2,6 +2,7 @@ import * as fsp from 'node:fs/promises';
 
 import type { AgentName } from './types.js';
 import type { SessionSummary, SessionListOptions } from './session-types.js';
+import type { WorkspaceSessionContext } from './workspaces.js';
 
 const FAST_LIST_BUFFER = 10;
 
@@ -17,6 +18,8 @@ type SessionShape = {
   model?: string;
   cost?: SessionSummary['cost'];
   cwd?: string;
+  workspace?: WorkspaceSessionContext;
+  workspaceId?: string;
   forkedFrom?: string;
 };
 
@@ -112,6 +115,8 @@ export function buildSummary(
     model: session.model,
     cost: session.cost,
     cwd: session.cwd,
+    workspace: session.workspace,
+    workspaceId: session.workspaceId,
     forkedFrom: session.forkedFrom,
   };
 }

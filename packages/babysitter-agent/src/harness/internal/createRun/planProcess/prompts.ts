@@ -33,6 +33,9 @@ export function buildExternalProcessDefinitionPrompt(args: {
     preferAgentOnlyTasks
       ? "- Use `agent` or `skill` tasks for planning, implementation, and verification. Do not generate `shell` tasks for this run shape unless the user explicitly requires an existing CLI command."
       : "- Use `agent` tasks for planning and implementation. Use `shell` tasks only for concrete runnable commands such as dependency install, build, or test commands that the later orchestration can execute.",
+    preferAgentOnlyTasks
+      ? "- Do not generate `breakpoint` tasks for this run shape. Approval gates are process-authoring bugs unless the user explicitly asked for them."
+      : "- Add `breakpoint` tasks only when the process genuinely needs user input or sign-off.",
     "- Keep the process practical for a brand-new directory: it should create the project, build the game, and verify that it runs or tests cleanly.",
   ].join("\n");
 
@@ -66,6 +69,9 @@ export function buildExternalProcessDefinitionPrompt(args: {
     preferAgentOnlyTasks
       ? "- Do not generate `shell` tasks for this run shape unless the user explicitly requires an existing CLI command. Prefer wrapped `agent` or `skill` tasks for verification too."
       : "- Use `shell` tasks only for existing CLI tools such as tests, builds, linters, git, or package managers.",
+    preferAgentOnlyTasks
+      ? "- Do not generate `breakpoint` tasks for this run shape. Keep the process fully autonomous unless the user explicitly asked for checkpoints."
+      : "- Use `breakpoint` tasks only when the workflow truly requires user input or approval.",
     "- Never use `node` kind effects.",
     "- At least one defined task must be an `agent` task for the main work. Shell tasks are for concrete runnable commands only.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",

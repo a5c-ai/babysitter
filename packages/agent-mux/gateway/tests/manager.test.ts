@@ -4,6 +4,7 @@ import * as path from 'node:path';
 
 import { RunHandleImpl } from '@a5c-ai/agent-mux-core';
 import { afterEach, describe, expect, it } from 'vitest';
+import { WorkspaceService, resolveWorkspaceDefaultCwd } from '@a5c-ai/agent-mux-core';
 
 import { RunManager, resolveGatewayConfig } from '../src/index.js';
 import type { ClientConn } from '../src/fanout/client-conn.js';
@@ -11,6 +12,7 @@ import type { ClientConn } from '../src/fanout/client-conn.js';
 interface FakeClientState {
   handle: RunHandleImpl;
   hooks?: Record<string, (...args: unknown[]) => Promise<unknown>>;
+  options?: Record<string, unknown>;
 }
 
 interface FakeRunClient {
@@ -36,6 +38,7 @@ function createFakeRunClient(): FakeRunClient {
       this.latest = {
         handle,
         hooks: options['hooks'] as FakeClientState['hooks'],
+        options,
       };
       return handle;
     },
@@ -221,5 +224,73 @@ describe('gateway run manager', () => {
 
     fakeClient.latest!.handle.complete('completed', 0, null);
     await manager.shutdown();
+  });
+
+  it('preserves wrapped workspace/worktree context when a session is resumed through gateway messaging', async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gateway-session-workspace-'));
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), 'gateway-session-home-'));
+    const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gateway-session-repo-'));
+    tempDirs.push(tempDir, tempHome, repoDir);
+    const previousHome = process.env.HOME;
+    process.env.HOME = tempHome;
+
+    try {
+      const workspaceService = new WorkspaceService();
+      const workspace = await workspaceService.createWorkspace({
+        name: 'Wrapped Workspace',
+        repos: [{ path: repoDir }],
+        mode: 'symlink',
+      });
+      const workspaceCwd = resolveWorkspaceDefaultCwd(workspace);
+
+      const fakeClient = createFakeRunClient();
+      const manager = new RunManager(
+        resolveGatewayConfig({
+          eventLogDir: tempDir,
+          client: fakeClient,
+        }),
+        { debug() {}, info() {}, warn() {}, error() {} },
+      );
+
+      const initialRun = await manager.start(
+        {
+          runId: '01TESTRUN000000000000000004',
+          agent: 'codex',
+          prompt: 'hello',
+          sessionId: 'session-1',
+          workspaceId: workspace.id,
+          cwd: workspaceCwd,
+        },
+        { tokenId: 'tok-1', name: 'browser' },
+      );
+
+      fakeClient.latest!.handle.complete('completed', 0, null);
+      await waitUntil(() => manager.get(initialRun.runId)?.status === 'completed');
+
+      const resumedRun = await manager.sendSessionInput(
+        'session-1',
+        'follow up',
+        { tokenId: 'tok-1', name: 'browser' },
+      );
+
+      expect(resumedRun).not.toBeNull();
+      expect(fakeClient.latest?.options?.workspaceId).toBe(workspace.id);
+      expect(fakeClient.latest?.options?.cwd).toBe(workspaceCwd);
+      expect(fakeClient.latest?.options?.sessionId).toBe('session-1');
+      expect((await manager.getSession('session-1'))?.workspaceId).toBe(workspace.id);
+      expect((await manager.getSession('session-1'))?.workspace).toMatchObject({
+        workspaceId: workspace.id,
+        workspaceDefaultCwd: workspaceCwd,
+      });
+
+      fakeClient.latest!.handle.complete('completed', 0, null);
+      await manager.shutdown();
+    } finally {
+      if (previousHome == null) {
+        delete process.env.HOME;
+      } else {
+        process.env.HOME = previousHome;
+      }
+    }
   });
 });

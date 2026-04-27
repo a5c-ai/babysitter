@@ -160,6 +160,23 @@ function readRuntime(value: unknown): WorkspaceRuntimeSurface | null {
   return value as WorkspaceRuntimeSurface;
 }
 
+function readWorkspacePath(value: unknown): string | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.currentPath === 'string' && record.currentPath.length > 0) {
+    return record.currentPath;
+  }
+  if (typeof record.workspaceDefaultCwd === 'string' && record.workspaceDefaultCwd.length > 0) {
+    return record.workspaceDefaultCwd;
+  }
+  if (typeof record.workspaceRootPath === 'string' && record.workspaceRootPath.length > 0) {
+    return record.workspaceRootPath;
+  }
+  return null;
+}
+
 function isAbsolutePath(value: string): boolean {
   return value.startsWith('/') || value.startsWith('\\\\') || /^[a-zA-Z]:[\\/]/.test(value);
 }
@@ -291,7 +308,7 @@ export function SessionDetailPage(): JSX.Element {
   const workspacePath =
     typeof session?.cwd === 'string' && session.cwd.length > 0
       ? session.cwd
-      : null;
+      : readWorkspacePath(session?.workspace);
   const runtime = readRuntime(session?.runtime);
   const runtimeHref = pickRuntimeHref(runtime);
   const runActionContexts = useMemo(() => {
@@ -300,7 +317,7 @@ export function SessionDetailPage(): JSX.Element {
       const runWorkspacePath =
         typeof run.cwd === 'string' && run.cwd.length > 0
           ? run.cwd
-          : workspacePath;
+          : readWorkspacePath(run.workspace) ?? workspacePath;
       const runRuntime = readRuntime(run.runtime) ?? runtime;
       const runRuntimeHref = pickRuntimeHref(runRuntime) ?? runtimeHref;
       const fileHref = (filePath: string): string | null => {

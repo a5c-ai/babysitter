@@ -47,6 +47,7 @@ function filterByRunId(history: SessionHistory, runId: string): SessionHistory {
   return {
     notes: history.notes,
     sharedKnowledge: history.sharedKnowledge,
+    worktree: history.worktree,
     decisions: history.decisions.filter((d) => d.runId === runId),
     runSummaries: history.runSummaries.filter((r) => r.runId === runId),
     contextSnapshots: history.contextSnapshots.filter((s) => s.runId === runId),
@@ -54,6 +55,19 @@ function filterByRunId(history: SessionHistory, runId: string): SessionHistory {
 }
 
 function renderTextHistory(history: SessionHistory): void {
+  console.log("=== Session Context ===");
+  if (history.worktree?.workspacePath) {
+    const parts = [`workspace ${history.worktree.workspacePath}`];
+    if (history.worktree.currentPath) parts.push(`current ${history.worktree.currentPath}`);
+    if (history.worktree.mode) parts.push(`mode ${history.worktree.mode}`);
+    if (history.worktree.repoAlias) parts.push(`repo ${history.worktree.repoAlias}`);
+    if (history.worktree.branch) parts.push(`branch ${history.worktree.branch}`);
+    console.log(`  ${parts.join(" | ")}`);
+  } else {
+    console.log("(no worktree metadata)");
+  }
+
+  console.log("");
   console.log("=== Decisions ===");
   if (history.decisions.length === 0) {
     console.log("(none)");

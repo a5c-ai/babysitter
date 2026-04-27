@@ -197,6 +197,8 @@ export class SessionManagerImpl implements SessionManager {
             cost: session.cost,
             tags: session.tags ?? [],
             cwd: session.cwd,
+            workspace: session.workspace,
+            workspaceId: session.workspaceId,
             forkedFrom: session.forkedFrom,
             messages: session.messages ?? [],
             raw: session.raw,

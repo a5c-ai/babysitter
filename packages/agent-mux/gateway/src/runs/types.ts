@@ -1,4 +1,10 @@
-import type { CostRecord, RunOptions, RunResult, WorkspaceRuntimeSurface } from '@a5c-ai/agent-mux-core';
+import type {
+  CostRecord,
+  RunOptions,
+  RunResult,
+  WorkspaceRuntimeSurface,
+  WorkspaceSessionContext,
+} from '@a5c-ai/agent-mux-core';
 
 export type RunStatus = 'running' | 'completed' | 'aborted' | 'failed';
 
@@ -32,6 +38,7 @@ export interface RunEntry {
   } | null;
   owner: RunOwner;
   workspaceId?: string;
+  workspace?: WorkspaceSessionContext;
 }
 
 export type SessionStatus = 'active' | 'inactive';
@@ -53,6 +60,8 @@ export interface SessionEntry {
   model?: string;
   cost?: CostRecord;
   cwd?: string;
+  workspaceId?: string;
+  workspace?: WorkspaceSessionContext;
   runtime?: WorkspaceRuntimeSurface;
   source?: 'gateway' | 'native' | 'merged';
 }

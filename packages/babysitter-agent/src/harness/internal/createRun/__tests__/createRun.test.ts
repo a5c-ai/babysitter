@@ -186,8 +186,10 @@ import {
   orchestrateIteration,
   commitEffectResult,
 } from "@a5c-ai/babysitter-sdk";
+import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/agent-mux-core";
 import { invokeHarness } from "../../../invoker";
 import { createAgentCoreSession } from "@a5c-ai/agent-core";
+import { getSessionContext } from "../../../../session/context";
 
 const detectCallerHarnessMock = detectCallerHarness as Mock;
 
@@ -2723,6 +2725,80 @@ describe("handleHarnessCreateRun", () => {
       const currentStatePath = path.join(globalStateRoot, "state", `${currentSessionId}.md`);
       const leakedStatePath = path.join(globalStateRoot, "state", `${leakedSessionId}.md`);
       expect(existsSync(currentStatePath) || existsSync(leakedStatePath)).toBe(true);
+    });
+
+    it("persists wrapped worktree metadata in session context when the workspace is an agent-mux workspace", async () => {
+      const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-worktree-state-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-worktree-home-"));
+      const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-create-run-worktree-repo-"));
+      tempDirs.push(globalStateRoot, tempHome, repoDir);
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+      process.env.BABYSITTER_STATE_DIR = globalStateRoot;
+      process.env.BABYSITTER_HARNESS_PID = String(process.pid);
+      process.env.AGENT_SESSION_ID = "leaked-session-from-old-shell";
+      const previousHome = process.env.HOME;
+      process.env.HOME = tempHome;
+      __resetCacheForTests();
+      __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+      const currentSessionId = "current-claude-session";
+      const markerPath = getSessionMarkerPath("claude-code", process.pid);
+      await fs.mkdir(path.dirname(markerPath), { recursive: true });
+      await fs.writeFile(markerPath, `${currentSessionId}\n`);
+
+      try {
+        const workspaceService = new WorkspaceService();
+        const workspace = await workspaceService.createWorkspace({
+          name: "Wrapped Workspace",
+          repos: [{ path: repoDir }],
+          mode: "symlink",
+        });
+        const workspacePath = resolveWorkspaceDefaultCwd(workspace);
+        const currentPath = path.join(workspacePath, "packages", "app");
+
+        (discoverHarnesses as Mock).mockResolvedValue([
+          makeDiscoveryResult({ name: "claude-code" }),
+        ]);
+        (createRun as Mock).mockResolvedValue({
+          runId: "run-claude-worktree",
+          runDir: "/tmp/runs/run-claude-worktree",
+          metadata: {},
+        });
+        (orchestrateIteration as Mock).mockResolvedValue({
+          status: "completed",
+          output: "done",
+        });
+
+        const result = await ensureRunAndMaybeBindFromProcessDefinition({
+          processPath: "/tmp/process.js",
+          prompt: "",
+          workspace: currentPath,
+          runsDir: "/tmp/runs",
+          selectedHarnessName: "claude-code",
+          maxIterations: 256,
+          interactive: false,
+          verbose: false,
+          json: false,
+        });
+
+        expect(result.runId).toBe("run-claude-worktree");
+        expect(result.boundSession).toBe(true);
+        await expect(getSessionContext(path.join(globalStateRoot, "state"), currentSessionId)).resolves.toMatchObject({
+          worktree: {
+            workspacePath,
+            currentPath,
+            mode: "symlink",
+            repoAlias: path.basename(repoDir),
+            branch: null,
+          },
+        });
+      } finally {
+        if (previousHome === undefined) {
+          delete process.env.HOME;
+        } else {
+          process.env.HOME = previousHome;
+        }
+      }
     });
   });
 

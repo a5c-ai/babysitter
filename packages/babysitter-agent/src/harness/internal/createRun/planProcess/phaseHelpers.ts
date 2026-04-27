@@ -103,6 +103,7 @@ export function createPlanProcessTools(args: {
           : await createRunAndMaybeBindFromProcessDefinition({
             processPath: normalizedProcessPath,
             prompt: args.prompt,
+            workspace: args.workspace,
             runsDir: args.runsDir,
             selectedHarnessName: args.selectedHarnessName,
             maxIterations: args.maxIterations,

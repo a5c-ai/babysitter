@@ -50,12 +50,14 @@ describe("GAP-SESSION-001: Session Context Persistence", () => {
       const data: SessionContext = {
         notes: ["found bug in auth"],
         sharedKnowledge: { authMethod: "OAuth2" },
+        worktree: { workspacePath: "/repo/worktrees/task-1", mode: "worktree" },
       };
       await fs.writeFile(contextPath, JSON.stringify(data), "utf8");
 
       const ctx = await getSessionContext(testDir, "sess-1");
       expect(ctx.notes).toEqual(["found bug in auth"]);
       expect(ctx.sharedKnowledge).toEqual({ authMethod: "OAuth2" });
+      expect(ctx.worktree).toEqual({ workspacePath: "/repo/worktrees/task-1", mode: "worktree" });
     });
   });
 
@@ -107,6 +109,29 @@ describe("GAP-SESSION-001: Session Context Persistence", () => {
 
       const ctx = await getSessionContext(testDir, "sess-knowledge");
       expect(ctx.sharedKnowledge).toEqual({ a: "updated", b: "2" });
+    });
+
+    it("merges worktree metadata without dropping existing fields", async () => {
+      await updateSessionContext(testDir, "sess-worktree", {
+        worktree: {
+          workspacePath: "/repo/worktrees/task-1",
+          mode: "worktree",
+        },
+      });
+      await updateSessionContext(testDir, "sess-worktree", {
+        worktree: {
+          currentPath: "/repo/worktrees/task-1/packages/app",
+          repoAlias: "app",
+        },
+      });
+
+      const ctx = await getSessionContext(testDir, "sess-worktree");
+      expect(ctx.worktree).toEqual({
+        workspacePath: "/repo/worktrees/task-1",
+        currentPath: "/repo/worktrees/task-1/packages/app",
+        mode: "worktree",
+        repoAlias: "app",
+      });
     });
   });
 });

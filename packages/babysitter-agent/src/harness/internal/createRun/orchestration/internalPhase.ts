@@ -109,6 +109,7 @@ export async function runInternalOrchestrationPhase(
     const runState = await ensureRunAndMaybeBindFromProcessDefinition({
       processPath: args.processPath,
       prompt: args.prompt ?? "",
+      workspace: args.workspace,
       runsDir: args.runsDir,
       selectedHarnessName: args.selectedHarnessName,
       maxIterations: args.maxIterations,

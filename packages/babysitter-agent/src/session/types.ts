@@ -31,11 +31,26 @@ export interface SessionState {
  * Accumulated context shared across runs within a session (GAP-SESSION-001).
  * Persisted as a JSON file alongside the session state file.
  */
+export interface SessionWorktreeContext {
+  /** Workspace or worktree path bound to the session. */
+  workspacePath: string;
+  /** More specific current path within the workspace, when known. */
+  currentPath?: string;
+  /** Materialization mode when the binding is known. */
+  mode?: "worktree" | "symlink";
+  /** Repo alias within a multi-repo workspace, when known. */
+  repoAlias?: string;
+  /** Branch bound to the worktree, when known. */
+  branch?: string | null;
+}
+
 export interface SessionContext {
   /** Accumulated notes from across runs */
   notes: string[];
   /** Shared knowledge key-value pairs accumulated across runs */
   sharedKnowledge: Record<string, string>;
+  /** Bound workspace/worktree metadata carried across runs when available. */
+  worktree?: SessionWorktreeContext;
 }
 
 // ---------------------------------------------------------------------------

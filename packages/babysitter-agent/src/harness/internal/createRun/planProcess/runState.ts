@@ -1,6 +1,8 @@
 import * as path from "node:path";
+import { WorkspaceService } from "@a5c-ai/agent-mux-core";
 import { getAdapterByName } from "../../../";
 import { createRun } from "@a5c-ai/babysitter-sdk";
+import { updateSessionContext } from "../../../../session/context";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -12,6 +14,7 @@ import {
 type EnsureRunAndMaybeBindArgs = {
   processPath: string;
   prompt: string;
+  workspace?: string;
   runsDir: string;
   selectedHarnessName: string;
   maxIterations: number;
@@ -22,6 +25,30 @@ type EnsureRunAndMaybeBindArgs = {
   state?: OrchestrationState;
   requireBoundSession?: boolean;
 };
+
+async function resolveSessionWorktreeContext(workspace: string) {
+  const currentPath = path.resolve(workspace);
+  const fallback = {
+    workspacePath: currentPath,
+    currentPath,
+  };
+
+  try {
+    const context = await new WorkspaceService().resolveSessionContext({ cwd: currentPath });
+    if (!context) {
+      return fallback;
+    }
+    return {
+      workspacePath: context.repo?.targetPath ?? context.workspaceDefaultCwd ?? context.workspaceRootPath,
+      currentPath: context.currentPath ?? currentPath,
+      mode: context.repo?.mode ?? context.workspaceMode,
+      repoAlias: context.repo?.alias,
+      branch: context.repo?.branch,
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 export async function ensureRunAndMaybeBindFromProcessDefinition(
   args: EnsureRunAndMaybeBindArgs,
@@ -112,6 +139,12 @@ export async function ensureRunAndMaybeBindFromProcessDefinition(
   if (args.state) {
     args.state.sessionBound = sessionBound;
   }
+  if (stateDir && args.workspace) {
+    const worktree = await resolveSessionWorktreeContext(args.workspace);
+    await updateSessionContext(stateDir, sessionId, {
+      worktree,
+    });
+  }
 
   return {
     runId,
@@ -125,6 +158,7 @@ export async function ensureRunAndMaybeBindFromProcessDefinition(
 export async function createRunAndMaybeBindFromProcessDefinition(args: {
   processPath: string;
   prompt: string;
+  workspace?: string;
   runsDir: string;
   selectedHarnessName: string;
   maxIterations: number;

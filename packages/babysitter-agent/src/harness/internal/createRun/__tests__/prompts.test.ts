@@ -145,6 +145,7 @@ describe("harnessPrompts", () => {
 
     expect(prompt).toContain("Do not generate `shell` tasks for this run shape");
     expect(prompt).toContain("`agent` or `skill` tasks");
+    expect(prompt).toContain("Do not add `breakpoint` tasks for this run shape");
   });
 
   test("PhaseOrchestration prompt can bias call flows away from shell effects", () => {
@@ -152,5 +153,6 @@ describe("harnessPrompts", () => {
 
     expect(prompt).toContain("Treat `shell` effects as exceptional compatibility cases");
     expect(prompt).toContain("`agent`, `skill`, and delegated-task resolution paths");
+    expect(prompt).toContain("should not emit breakpoint effects");
   });
 });

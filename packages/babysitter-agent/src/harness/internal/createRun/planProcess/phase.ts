@@ -336,6 +336,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
       const runState = await createRunAndMaybeBindFromProcessDefinition({
         processPath: state.report.processPath,
         prompt: args.prompt,
+        workspace: args.workspace,
         runsDir: args.runsDir,
         selectedHarnessName: args.selectedHarnessName,
         maxIterations: args.maxIterations,

@@ -227,6 +227,9 @@ export function buildProcessDefinitionUserPrompt(
       preferAgentOnlyTasks
         ? "Put all implementation and verification in `agent` or `skill` tasks. Do not generate `shell` tasks for this run shape unless the user explicitly required an existing CLI command."
         : "Put the main implementation in one or more `agent` tasks. Use `shell` tasks only for concrete runnable verification or tooling commands.",
+      preferAgentOnlyTasks
+        ? "Do not add `breakpoint` tasks for this run shape. Treat approval gates as process-authoring bugs unless the user explicitly asked for them."
+        : "Use `breakpoint` tasks only when user input or approval is materially required.",
       "Do not add internal worker guardrail metadata such as `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` unless the task truly requires them.",
       "Keep generated asset strings syntax-safe. If the process writes JS/HTML/CSS files, avoid raw nested template literals inside the process module; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
     );
@@ -241,6 +244,9 @@ export function buildProcessDefinitionUserPrompt(
   lines.push(
     "Before writing the process, you MUST search the active process-library with the normal file/search tools to find relevant patterns.",
     "The generated process must directly execute the user's requested work rather than write another babysitter process.",
+    preferAgentOnlyTasks
+      ? "For this `/babysitter:call`-style flow, keep the process fully agent/skill driven: no `shell` tasks unless explicitly required, and no `breakpoint` tasks."
+      : "Keep breakpoints and shell tasks proportionate to real workflow needs.",
     "Write the process with the normal file tools now, then call babysitter_report_process_definition exactly once.",
   );
 
@@ -271,6 +277,9 @@ export function buildOrchestrationSystemPrompt(
     preferAgentOnlyTasks
       ? "- Prefer wrapped `agent`, `skill`, and delegated-task resolution paths. Treat `shell` effects as exceptional compatibility cases, not the normal plan shape for `/babysitter:call` flows."
       : "- Whenever a shell effect is requested, execute it through `bash` or another intentional worker path, then post the outcome yourself.",
+    preferAgentOnlyTasks
+      ? "- `/babysitter:call` flows should not emit breakpoint effects. If one appears, treat it as a process-authoring regression and repair the process instead of normalizing more approval gates into the run."
+      : "- Breakpoint effects are legitimate when the process truly needs user input or approval.",
     "- For delegated or fresh-context work, prefer `task`. For skill-guided execution, prefer `skill`. Use the normal coding tools directly when that is the simplest correct path.",
     "- If a delegated worker, tool call, or interactive question times out, adapt instead of failing the run immediately: increase the timeout when the task is still valid, recover partial progress, or narrow the next step.",
     "- When a tool or delegated worker accepts a `timeout`, use a generous budget by default for meaningful coding or verification work. Substantial delegated work should usually get at least 1800000ms rather than a short interactive default.",

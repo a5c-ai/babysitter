@@ -17,6 +17,7 @@ export function getSessionContextPath(stateDir: string, sessionId: string): stri
 const EMPTY_CONTEXT: SessionContext = {
   notes: [],
   sharedKnowledge: {},
+  worktree: undefined,
 };
 
 /**
@@ -44,6 +45,9 @@ export async function getSessionContext(stateDir: string, sessionId: string): Pr
       sharedKnowledge: data.sharedKnowledge && typeof data.sharedKnowledge === 'object'
         ? data.sharedKnowledge
         : {},
+      worktree: data.worktree && typeof data.worktree === 'object'
+        ? data.worktree
+        : undefined,
     };
   } catch {
     // Corrupt JSON — return empty context rather than crash
@@ -68,6 +72,7 @@ export async function updateSessionContext(
     sharedKnowledge: updates.sharedKnowledge
       ? { ...existing.sharedKnowledge, ...updates.sharedKnowledge }
       : existing.sharedKnowledge,
+    worktree: updates.worktree ? { ...(existing.worktree ?? {}), ...updates.worktree } : existing.worktree,
   };
 
   const filePath = getSessionContextPath(stateDir, sessionId);

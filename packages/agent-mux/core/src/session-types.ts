@@ -8,6 +8,7 @@
  */
 
 import type { AgentName, CostRecord } from './types.js';
+import type { WorkspaceSessionContext } from './workspaces.js';
 
 // ---------------------------------------------------------------------------
 // SessionToolCall
@@ -207,6 +208,12 @@ export interface SessionSummary {
   /** Working directory at session start. */
   readonly cwd?: string;
 
+  /** Workspace/worktree binding inferred or wrapped for this session. */
+  readonly workspace?: WorkspaceSessionContext;
+
+  /** Convenience alias for the bound workspace identifier, when known. */
+  readonly workspaceId?: string;
+
   /** Whether this session was forked from another. */
   readonly forkedFrom?: string;
 
@@ -255,6 +262,12 @@ export interface FullSession {
 
   /** Working directory at session start. */
   readonly cwd?: string;
+
+  /** Workspace/worktree binding inferred or wrapped for this session. */
+  readonly workspace?: WorkspaceSessionContext;
+
+  /** Convenience alias for the bound workspace identifier, when known. */
+  readonly workspaceId?: string;
 
   /** Parent session ID if forked. */
   readonly forkedFrom?: string;
@@ -309,6 +322,12 @@ export interface Session {
 
   /** Working directory at session start. */
   readonly cwd?: string;
+
+  /** Workspace/worktree binding inferred or wrapped for this session. */
+  readonly workspace?: WorkspaceSessionContext;
+
+  /** Convenience alias for the bound workspace identifier, when known. */
+  readonly workspaceId?: string;
 
   /** Parent session ID if forked. */
   readonly forkedFrom?: string;

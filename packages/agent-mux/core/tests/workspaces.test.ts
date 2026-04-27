@@ -147,4 +147,32 @@ describe('WorkspaceService', () => {
     expect(result.workspaces[0]?.status).toBe('active');
     expect(result.workspaces[0]?.sessions[0]?.sessionId).toBe('session-1');
   });
+
+  it('resolves worktree session context from a cwd inside the workspace', async () => {
+    const service = new WorkspaceService(createDeps());
+    const workspace = await service.createWorkspace({
+      name: 'Product Space',
+      branchName: 'vk/product-space',
+      repos: [{ path: repoPath('repo', 'main') }],
+    });
+
+    const context = await service.resolveSessionContext({
+      cwd: path.join(workspace.rootPath, 'main', 'src'),
+    });
+
+    expect(context).toMatchObject({
+      workspaceId: workspace.id,
+      workspaceName: workspace.name,
+      workspaceRootPath: workspace.rootPath,
+      workspaceDefaultCwd: path.join(workspace.rootPath, 'main'),
+      workspaceMode: 'worktree',
+      currentPath: path.join(workspace.rootPath, 'main', 'src'),
+      repo: {
+        alias: 'main',
+        targetPath: path.join(workspace.rootPath, 'main'),
+        mode: 'worktree',
+        branch: 'vk/product-space',
+      },
+    });
+  });
 });

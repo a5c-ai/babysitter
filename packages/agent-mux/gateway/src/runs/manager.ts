@@ -1,6 +1,15 @@
 import * as path from 'node:path';
 
-import type { AgentEvent, FullSession, RunHandle, RunResult, RuntimeHooks, Session, SessionSummary, WorkspaceSessionBinding } from '@a5c-ai/agent-mux-core';
+import type {
+  AgentEvent,
+  FullSession,
+  RunHandle,
+  RunResult,
+  RuntimeHooks,
+  Session,
+  SessionSummary,
+  WorkspaceSessionBinding,
+} from '@a5c-ai/agent-mux-core';
 import { WorkspaceService, detectHostHarness } from '@a5c-ai/agent-mux-core';
 
 import type { GatewayConfig } from '../config.js';
@@ -115,6 +124,10 @@ export class RunManager {
       throw new Error(`maxConcurrentRuns limit reached (${this.config.maxConcurrentRuns})`);
     }
 
+    const workspace = await this.workspaceService.resolveSessionContext({
+      workspaceId: input.workspaceId,
+      cwd: typeof input.cwd === 'string' ? input.cwd : undefined,
+    });
     let handle!: RunHandle;
     const hooks: RuntimeHooks = {
       preToolUse: async (payload) =>
@@ -153,7 +166,8 @@ export class RunManager {
       startedAt: now,
       endedAt: null,
       owner,
-      workspaceId: input.workspaceId,
+      workspaceId: input.workspaceId ?? workspace?.workspaceId,
+      workspace: workspace ?? undefined,
       error: null,
     };
     this.eventLog.index.upsertRun(entry);
@@ -164,9 +178,9 @@ export class RunManager {
     };
     this.activeRuns.set(handle.runId, active);
     if (input.sessionId) {
-      if (input.workspaceId) {
+      if (entry.workspaceId) {
         await this.workspaceService.bindSession({
-          workspaceId: input.workspaceId,
+          workspaceId: entry.workspaceId,
           session: {
             agent: input.agent,
             sessionId: input.sessionId,
@@ -255,7 +269,8 @@ export class RunManager {
         model: overrides.model,
         prompt: input,
         sessionId,
-        cwd: session.cwd,
+        cwd: session.cwd ?? session.workspace?.currentPath ?? session.workspace?.workspaceDefaultCwd,
+        workspaceId: session.workspaceId ?? session.workspace?.workspaceId,
       },
       owner,
     );
@@ -295,6 +310,8 @@ export class RunManager {
       const session = await this.getSession(sessionId);
       return {
         ...cached.value,
+        workspace: session?.workspace,
+        workspaceId: session?.workspaceId,
         runtime: session?.runtime,
       };
     }
@@ -328,6 +345,8 @@ export class RunManager {
     const latest = await this.getSession(sessionId);
     return {
       ...result,
+      workspace: latest?.workspace ?? result.workspace,
+      workspaceId: latest?.workspaceId ?? result.workspaceId,
       runtime: latest?.runtime,
     };
   }
@@ -360,6 +379,9 @@ export class RunManager {
         latestRunEndedAt: latest.endedAt,
         latestExitReason: latest.exitReason,
         model: latest.model,
+        cwd: active?.cwd ?? latest.cwd,
+        workspaceId: active?.workspaceId ?? latest.workspaceId,
+        workspace: active?.workspace ?? latest.workspace,
         source: 'gateway',
       });
     }
@@ -381,6 +403,8 @@ export class RunManager {
         model: existing.model ?? native.model,
         cost: existing.cost ?? native.cost,
         cwd: existing.cwd ?? native.cwd,
+        workspaceId: existing.workspaceId ?? native.workspaceId,
+        workspace: existing.workspace ?? native.workspace,
         source: 'merged',
       });
     }
@@ -686,28 +710,34 @@ export class RunManager {
       }),
     );
 
-    return discovered.flatMap((sessions) =>
-      sessions.map((session) => ({
-        sessionId: session.sessionId,
-        agent: session.agent,
-        status:
-          ambientSession?.agent === session.agent && ambientSession.sessionId === session.sessionId
-            ? 'active' as const
-            : 'inactive' as const,
-        activeRunId: null,
-        latestRunId: null,
-        createdAt: session.createdAt.getTime(),
-        updatedAt: session.updatedAt.getTime(),
-        latestRunStartedAt: null,
-        latestRunEndedAt: null,
-        title: session.title,
-        turnCount: session.turnCount,
-        messageCount: session.messageCount,
-        model: session.model,
-        cost: session.cost,
-        cwd: session.cwd,
-        source: 'native' as const,
-      })),
+    const nativeSessions = discovered.flatMap((sessions) => sessions);
+    return await Promise.all(
+      nativeSessions.map(async (session) => {
+        const workspace = await this.workspaceService.resolveSessionContext({ cwd: session.cwd });
+        return {
+          sessionId: session.sessionId,
+          agent: session.agent,
+          status:
+            ambientSession?.agent === session.agent && ambientSession?.sessionId === session.sessionId
+              ? 'active' as const
+              : 'inactive' as const,
+          activeRunId: null,
+          latestRunId: null,
+          createdAt: session.createdAt.getTime(),
+          updatedAt: session.updatedAt.getTime(),
+          latestRunStartedAt: null,
+          latestRunEndedAt: null,
+          title: session.title,
+          turnCount: session.turnCount,
+          messageCount: session.messageCount,
+          model: session.model,
+          cost: session.cost,
+          cwd: session.cwd,
+          workspace: workspace ?? undefined,
+          workspaceId: workspace?.workspaceId,
+          source: 'native' as const,
+        };
+      }),
     );
   }
 
@@ -736,7 +766,13 @@ export class RunManager {
       return null;
     }
     try {
-      return await client.sessions.get(agent, sessionId);
+      const session = await client.sessions.get(agent, sessionId);
+      const workspace = session.workspace ?? await this.workspaceService.resolveSessionContext({ cwd: session.cwd });
+      return {
+        ...session,
+        workspace: workspace ?? undefined,
+        workspaceId: session.workspaceId ?? workspace?.workspaceId,
+      };
     } catch {
       return null;
     }
@@ -763,6 +799,7 @@ export class RunManager {
 
     try {
       const parsed = await adapter.parseSessionFile(candidate);
+      const workspace = parsed.workspace ?? await this.workspaceService.resolveSessionContext({ cwd: parsed.cwd });
       return {
         agent: parsed.agent,
         sessionId: parsed.sessionId,
@@ -775,6 +812,8 @@ export class RunManager {
         cost: parsed.cost,
         tags: parsed.tags ?? [],
         cwd: parsed.cwd,
+        workspace: workspace ?? undefined,
+        workspaceId: parsed.workspaceId ?? workspace?.workspaceId,
         forkedFrom: parsed.forkedFrom,
         runtime: undefined,
         messages: parsed.messages ?? [],
@@ -786,7 +825,8 @@ export class RunManager {
   }
 
   private async buildRuntimeSurface(session: SessionEntry, runs: RunEntry[]) {
-    if ((!session.cwd || session.cwd.length === 0) && runs.length === 0) {
+    const workspacePath = session.cwd ?? session.workspace?.currentPath ?? session.workspace?.workspaceDefaultCwd;
+    if ((!workspacePath || workspacePath.length === 0) && runs.length === 0) {
       return undefined;
     }
 
@@ -796,7 +836,7 @@ export class RunManager {
     }
 
     return buildWorkspaceRuntimeSurface({
-      cwd: session.cwd,
+      cwd: workspacePath,
       runs,
       eventsByRunId,
     });
@@ -817,7 +857,7 @@ export class RunManager {
       agent: session.agent,
       sessionId: session.sessionId,
       status: session.status === 'active' ? 'running' : 'stopped',
-      cwd: session.cwd,
+      cwd: session.cwd ?? session.workspace?.currentPath ?? session.workspace?.workspaceDefaultCwd,
       title: session.title,
       updatedAt: new Date(session.updatedAt).toISOString(),
       activeRunId: session.activeRunId,

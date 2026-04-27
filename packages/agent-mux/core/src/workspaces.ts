@@ -10,6 +10,26 @@ export type WorkspaceMaterializationMode = 'worktree' | 'symlink';
 export type WorkspaceSessionStatus = 'running' | 'stopped';
 export type WorkspaceStatus = 'active' | 'idle' | 'archived' | 'cleaned' | 'missing';
 
+export interface WorkspaceSessionRepoContext {
+  readonly alias: string;
+  readonly sourcePath: string;
+  readonly targetPath: string;
+  readonly mode: WorkspaceMaterializationMode;
+  readonly gitRoot: string | null;
+  readonly branch: string | null;
+  readonly head: string | null;
+}
+
+export interface WorkspaceSessionContext {
+  readonly workspaceId: string;
+  readonly workspaceName: string;
+  readonly workspaceRootPath: string;
+  readonly workspaceDefaultCwd: string;
+  readonly workspaceMode: WorkspaceMaterializationMode;
+  readonly currentPath?: string;
+  readonly repo?: WorkspaceSessionRepoContext;
+}
+
 export interface WorkspaceRepoInput {
   readonly path: string;
   readonly alias?: string;
@@ -236,6 +256,43 @@ export function resolveWorkspaceDefaultCwd(
     return workspace.repos[0]!.targetPath;
   }
   return workspace.rootPath;
+}
+
+function matchWorkspaceRepoForPath(
+  workspace: Pick<WorkspaceRecord, 'repos'> | Pick<WorkspaceSummary, 'repos'>,
+  cwd?: string,
+): WorkspaceRepoRecord | WorkspaceRepoSummary | undefined {
+  if (!cwd) {
+    return workspace.repos.length === 1 ? workspace.repos[0] : undefined;
+  }
+  const normalized = path.resolve(cwd);
+  return workspace.repos.find((repo) => normalized === repo.targetPath || normalized.startsWith(`${repo.targetPath}${path.sep}`));
+}
+
+function buildWorkspaceSessionContext(
+  workspace: Pick<WorkspaceRecord, 'id' | 'name' | 'rootPath' | 'mode' | 'repos'>,
+  cwd?: string,
+): WorkspaceSessionContext {
+  const repo = matchWorkspaceRepoForPath(workspace, cwd);
+  return {
+    workspaceId: workspace.id,
+    workspaceName: workspace.name,
+    workspaceRootPath: workspace.rootPath,
+    workspaceDefaultCwd: resolveWorkspaceDefaultCwd(workspace),
+    workspaceMode: workspace.mode,
+    currentPath: cwd ? path.resolve(cwd) : undefined,
+    repo: repo
+      ? {
+          alias: repo.alias,
+          sourcePath: repo.sourcePath,
+          targetPath: repo.targetPath,
+          mode: repo.mode,
+          gitRoot: repo.gitRoot,
+          branch: repo.branch,
+          head: repo.head,
+        }
+      : undefined,
+  };
 }
 
 function deriveStatus(record: WorkspaceRecord, repos: readonly WorkspaceRepoSummary[]): WorkspaceStatus {
@@ -645,6 +702,34 @@ export class WorkspaceService {
   async resolveWorkspace(identifier: string): Promise<WorkspaceRecord | null> {
     const registry = await readRegistry(this.deps);
     return resolveWorkspaceRecord(registry, identifier);
+  }
+
+  async resolveSessionContext(input: {
+    readonly workspaceId?: string;
+    readonly cwd?: string;
+  }): Promise<WorkspaceSessionContext | null> {
+    const registry = await readRegistry(this.deps);
+    let record: WorkspaceRecord | null = null;
+
+    if (input.workspaceId) {
+      record = resolveWorkspaceRecord(registry, input.workspaceId);
+    }
+
+    if (!record && input.cwd) {
+      const normalized = path.resolve(input.cwd);
+      for (const candidate of Object.values(registry.workspaces)) {
+        if (matchesWorkspacePath(candidate, normalized)) {
+          record = candidate;
+          break;
+        }
+      }
+    }
+
+    if (!record) {
+      return null;
+    }
+
+    return buildWorkspaceSessionContext(record, input.cwd);
   }
 
   resolveWorkspaceCwd(workspace: Pick<WorkspaceRecord, 'rootPath' | 'repos'> | Pick<WorkspaceSummary, 'rootPath' | 'repos'>): string {

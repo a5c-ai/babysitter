@@ -46,6 +46,8 @@ export type {
   WorkspaceRepoInput,
   WorkspaceCreateInput,
   WorkspaceSessionBinding,
+  WorkspaceSessionContext,
+  WorkspaceSessionRepoContext,
   WorkspaceRepoRecord,
   WorkspaceRecord,
   WorkspaceRepoSummary,
