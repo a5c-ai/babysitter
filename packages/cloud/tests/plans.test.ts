@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDeploymentPlan, environmentPreset, renderKubernetes, renderTerraform } from "../src/index.js";
+import { buildAgentInstallPlan, buildDeploymentPlan, configureProviders, environmentPreset, renderKubernetes, renderTerraform } from "../src/index.js";
 
 describe("cloud deployment plan", () => {
   it("builds a working minikube plan", () => {
@@ -54,5 +54,78 @@ describe("cloud deployment plan", () => {
     expect(rendered.content).toContain("KANBAN_GATEWAY_AUTH_MODE");
     expect(rendered.content).toContain("AMUX_GATEWAY_BOOTSTRAP_ADMIN_PASSWORD");
     expect(rendered.content).toContain("secretKeyRef");
+  });
+
+  it("builds machine-usable provider automation output", () => {
+    const config = {
+      ...environmentPreset("minikube"),
+      components: {
+        ...environmentPreset("minikube").components,
+        babysitterAgent: {
+          enabled: true,
+          replicas: 1,
+          providers: [
+            {
+              id: "openai",
+              credentials: [{ envVar: "OPENAI_API_KEY", value: "test-key" }],
+              defaultModel: "gpt-5.4",
+            },
+          ],
+          modelRouting: [{ provider: "openai", model: "gpt-5.4-mini", agent: "codex" }],
+        },
+      },
+    };
+
+    const providers = configureProviders(config);
+    expect(providers.automation.filePath).toBe(".amux/providers.json");
+    expect(providers.automation.providersFile.defaults).toEqual({
+      provider: "openai",
+      model: "gpt-5.4",
+    });
+    expect(providers.automation.credentials).toEqual([
+      {
+        providerId: "openai",
+        envVar: "OPENAI_API_KEY",
+        value: "test-key",
+        required: true,
+      },
+    ]);
+    expect(providers.env.BABYSITTER_AGENT_AMUX_PROVIDERS_FILE_JSON).toContain("\"profiles\"");
+    expect(providers.env.BABYSITTER_AGENT_AMUX_MODEL_ROUTING_JSON).toContain("\"codex\"");
+  });
+
+  it("builds structured agent install plans with canonical targets", () => {
+    const config = {
+      ...environmentPreset("minikube"),
+      agents: {
+        install: true,
+        targets: ["copilot", "codex"] as const,
+        installBabysitterPlugins: true,
+        scope: "workspace" as const,
+      },
+    };
+
+    const plan = buildAgentInstallPlan(config);
+    expect(plan?.scope).toBe("workspace");
+    expect(plan?.steps).toEqual([
+      {
+        requestedTarget: "copilot",
+        target: "github-copilot",
+        harnessInstaller: "agent-mux",
+        pluginInstall: {
+          installerPackage: "@a5c-ai/babysitter-github",
+          scope: "workspace",
+        },
+      },
+      {
+        requestedTarget: "codex",
+        target: "codex",
+        harnessInstaller: "agent-mux",
+        pluginInstall: {
+          installerPackage: "@a5c-ai/babysitter-codex",
+          scope: "workspace",
+        },
+      },
+    ]);
   });
 });

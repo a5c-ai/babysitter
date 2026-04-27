@@ -4,6 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import {
+  applyProviderConfiguration,
   bootstrapAuth,
   buildAgentInstallPlan,
   buildDeploymentPlan,
@@ -17,7 +18,14 @@ import {
   upgradeEnvironment,
   validateCloudConfig,
 } from "./index.js";
-import type { CloudConfig, CommandExecution, DeploymentEnvironment, InstallOptions } from "./types.js";
+import type {
+  AgentInstallPlan,
+  AgentInstallResult,
+  CloudConfig,
+  CommandExecution,
+  DeploymentEnvironment,
+  InstallOptions,
+} from "./types.js";
 
 interface ParsedCli {
   readonly command: readonly string[];
@@ -99,7 +107,7 @@ function usage(): string {
     "  cloud upgrade [--config <path>] [--env <env>] [--dry-run] [--render-only]",
     "  cloud status [--config <path>] [--env <env>]",
     "  cloud auth bootstrap [--config <path>] [--env <env>]",
-    "  cloud providers configure [--config <path>] [--env <env>]",
+    "  cloud providers configure [--config <path>] [--env <env>] [--execute] [--scope <project|global>]",
     "  cloud agents install [--config <path>] [--env <env>] [--execute]",
     "  cloud cluster create [--config <path>] [--env <env>] [--dry-run]",
     "  cloud cluster destroy [--config <path>] [--env <env>]",
@@ -113,6 +121,7 @@ function usage(): string {
     "  --dry-run            Render without applying",
     "  --render-only        Render files only",
     "  --execute            Execute agent install commands",
+    "  --scope <name>       Provider config scope: project or global",
     "  --json               Emit JSON",
   ].join("\n");
 }
@@ -138,6 +147,30 @@ function printExecutions(io: CliIo, executions: readonly CommandExecution[] | un
     io.stdout(`$ ${execution.command} ${execution.args.join(" ")}\n`);
     if (execution.stdout) io.stdout(execution.stdout);
     if (execution.stderr) io.stderr(execution.stderr);
+  }
+}
+
+function printAgentInstallResult(io: CliIo, result: AgentInstallPlan | AgentInstallResult | undefined): void {
+  if (!result) {
+    return;
+  }
+
+  if ("executed" in result) {
+    for (const step of result.steps) {
+      io.stdout(`${step.target}: ${step.harness.status ?? "unknown"}\n`);
+      if (step.plugin) {
+        io.stdout(`${step.target} plugin: ${step.plugin.status ?? "unknown"}\n`);
+      }
+    }
+    return;
+  }
+
+  for (const step of result.steps) {
+    io.stdout(`${step.target}: agent-mux`);
+    if (step.pluginInstall) {
+      io.stdout(` + plugin (${step.pluginInstall.scope})`);
+    }
+    io.stdout("\n");
   }
 }
 
@@ -231,7 +264,10 @@ async function handleInstallLike(parsed: ParsedCli, io: CliIo, mode: "install" |
   io.stdout(`Kubernetes manifests: ${result.kubernetes.manifests.length}\n`);
   printExecutions(io, result.terraformApply);
   printExecutions(io, result.kubernetesApply);
-  printExecutions(io, result.agentInstalls);
+  if (result.providerConfiguration) {
+    io.stdout(`Provider config: ${result.providerConfiguration.filePath}\n`);
+  }
+  printAgentInstallResult(io, result.agentInstalls);
   return 0;
 }
 
@@ -262,6 +298,14 @@ async function handleAuth(parsed: ParsedCli, io: CliIo): Promise<number> {
 
 async function handleProviders(parsed: ParsedCli, io: CliIo): Promise<number> {
   const config = await resolvedConfig(parsed);
+  if (flagBool(parsed, "execute")) {
+    const scope = flag(parsed, "scope");
+    printJson(io, applyProviderConfiguration(config, {
+      cwd: io.cwd,
+      ...(scope === "project" || scope === "global" ? { scope } : {}),
+    }));
+    return 0;
+  }
   printJson(io, configureProviders(config));
   return 0;
 }
@@ -272,12 +316,17 @@ async function handleAgents(parsed: ParsedCli, io: CliIo): Promise<number> {
     const executions = await installAgents(config, { cwd: io.cwd, execute: true });
     if (flagBool(parsed, "json")) {
       printJson(io, executions);
-      return 0;
+      return executions.success ? 0 : 1;
     }
-    printExecutions(io, executions);
+    printAgentInstallResult(io, executions);
+    return executions.success ? 0 : 1;
+  }
+  const plan = buildAgentInstallPlan(config);
+  if (flagBool(parsed, "json")) {
+    printJson(io, plan);
     return 0;
   }
-  printJson(io, buildAgentInstallPlan(config));
+  printAgentInstallResult(io, plan);
   return 0;
 }
 
@@ -345,4 +394,3 @@ if (executedDirectly) {
     process.exitCode = exitCode;
   });
 }
-

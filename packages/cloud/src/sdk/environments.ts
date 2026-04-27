@@ -29,6 +29,7 @@ const BASE_CONFIG: CloudConfig = {
     install: false,
     targets: [],
     installBabysitterPlugins: true,
+    scope: "workspace",
   },
   storage: {
     className: "standard",
@@ -39,6 +40,8 @@ const BASE_CONFIG: CloudConfig = {
     autoApplyTerraform: true,
     autoApplyKubernetes: true,
     installAgentsOnApply: false,
+    configureProvidersOnApply: false,
+    providerConfigScope: "project",
   },
 };
 
@@ -127,4 +130,3 @@ export function environmentPreset(environment: DeploymentEnvironment): CloudConf
 
   return preset;
 }
-

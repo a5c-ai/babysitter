@@ -2,7 +2,7 @@ import type {
   HarnessInstallOptions,
   HarnessInstallResult,
 } from "../../../harness";
-import { installHarnessViaAmux } from "../../../harness/install";
+import { installHarnessPlugin, installHarnessViaAmux } from "../../../harness/install";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -26,11 +26,17 @@ function formatInstallResult(payload: HarnessInstallResult, json: boolean): void
     return;
   }
 
+  if (payload.status) {
+    console.log(`Status: ${payload.status}`);
+  }
   if (payload.warning) {
     console.log(`Warning: ${payload.warning}`);
   }
   if (payload.summary) {
     console.log(payload.summary);
+  }
+  if (payload.error) {
+    console.log(`Error: ${payload.error}`);
   }
   if (payload.command) {
     console.log(`Command: ${payload.command}`);
@@ -67,25 +73,20 @@ export async function handleHarnessInstall(args: HarnessInstallCommandArgs): Pro
   const harnessName = requireHarnessName(args.harnessName, "harness:install");
   const result = await installHarnessViaAmux(harnessName, args);
   formatInstallResult(result, args.json);
-  return 0;
+  return result.success === false ? 1 : 0;
 }
 
 /**
  * Install a babysitter plugin for a harness.
  *
  * Plugin installation remains harness-specific since it involves babysitter's
- * own plugin packaging, not general CLI installation. This delegates to the
- * babysitter plugin system rather than per-adapter install logic.
+ * own plugin packaging. This uses the published per-harness plugin installer.
  */
-export function handleHarnessInstallPlugin(args: HarnessInstallCommandArgs): number {
+export async function handleHarnessInstallPlugin(args: HarnessInstallCommandArgs): Promise<number> {
   const harnessName = requireHarnessName(args.harnessName, "harness:install-plugin");
-  const result: HarnessInstallResult = {
-    harness: harnessName,
-    summary: `Use "babysitter plugin:install" to install babysitter plugins for ${harnessName}. ` +
-      `Direct harness plugin installation has been consolidated into the plugin system.`,
-  };
+  const result = await installHarnessPlugin(harnessName, args);
   formatInstallResult(result, args.json);
-  return 0;
+  return result.success === false ? 1 : 0;
 }
 
 export function formatHarnessInstallError(error: unknown, json: boolean): number {

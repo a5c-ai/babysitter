@@ -1,6 +1,8 @@
 export type DeploymentEnvironment = "minikube" | "staging" | "prod" | "custom";
 
 export type TargetType = "minikube" | "existing" | "eks" | "aks" | "gke";
+export type AutomationScope = "global" | "workspace";
+export type ProviderAutomationScope = "global" | "project";
 
 export interface ProviderCredentialConfig {
   envVar: string;
@@ -94,6 +96,7 @@ export interface AgentInstallConfig {
   install: boolean;
   targets: readonly HarnessTarget[];
   installBabysitterPlugins: boolean;
+  scope?: AutomationScope;
 }
 
 export interface StorageConfig {
@@ -106,6 +109,8 @@ export interface ExecutionConfig {
   autoApplyTerraform?: boolean;
   autoApplyKubernetes?: boolean;
   installAgentsOnApply?: boolean;
+  configureProvidersOnApply?: boolean;
+  providerConfigScope?: ProviderAutomationScope;
 }
 
 export interface ImageOverrides {
@@ -145,8 +150,14 @@ export type HarnessTarget =
   | "codex"
   | "cursor"
   | "copilot"
+  | "github-copilot"
   | "gemini-cli"
-  | "opencode";
+  | "openclaw"
+  | "oh-my-pi"
+  | "opencode"
+  | "pi";
+
+export type CanonicalHarnessTarget = Exclude<HarnessTarget, "copilot">;
 
 export interface KubernetesManifest {
   readonly apiVersion: string;
@@ -185,17 +196,121 @@ export interface ProviderConfigurationResult {
   readonly manifests: readonly KubernetesManifest[];
   readonly env: Readonly<Record<string, string>>;
   readonly summary: readonly string[];
+  readonly automation: ProviderAutomationPlan;
+}
+
+export interface ProviderCredentialBinding {
+  readonly providerId: string;
+  readonly envVar: string;
+  readonly value?: string;
+  readonly secretRef?: string;
+  readonly required: boolean;
+}
+
+export interface ProviderAutomationPlan {
+  readonly scope: "project";
+  readonly filePath: string;
+  readonly providersFile: AgentMuxProvidersFile;
+  readonly modelRouting: readonly ModelRoutingConfig[];
+  readonly credentials: readonly ProviderCredentialBinding[];
+}
+
+export interface ProviderConfigurationApplyResult {
+  readonly success: boolean;
+  readonly scope: ProviderAutomationScope;
+  readonly filePath: string;
+  readonly providersFile: AgentMuxProvidersFile;
+  readonly modelRouting: readonly ModelRoutingConfig[];
+  readonly credentials: readonly ProviderCredentialBinding[];
+  readonly summary: readonly string[];
+}
+
+export interface ProviderProfileAuth {
+  readonly type?: string;
+  readonly apiKey?: string;
+  readonly token?: string;
+  readonly command?: string;
+  readonly awsProfile?: string;
+  readonly awsRoleArn?: string;
+  readonly awsSessionToken?: string;
+  readonly gcpCredentialsFile?: string;
+  readonly azureTenantId?: string;
+  readonly azureClientId?: string;
+  readonly azureClientSecret?: string;
+}
+
+export interface ProviderProfileEntry {
+  readonly provider?: string;
+  readonly model?: string;
+  readonly transport?: string;
+  readonly auth?: ProviderProfileAuth;
+  readonly params?: Readonly<Record<string, unknown>>;
+}
+
+export interface AgentMuxProvidersFile {
+  readonly version: number;
+  readonly defaults?: {
+    readonly provider?: string;
+    readonly model?: string;
+  };
+  readonly profiles: Readonly<Record<string, ProviderProfileEntry>>;
+}
+
+export interface HarnessInstallOperationResult {
+  readonly harness: string;
+  readonly dryRun?: boolean;
+  readonly success?: boolean;
+  readonly status?: "planned" | "installed" | "skipped" | "unsupported" | "failed";
+  readonly installer?: string;
+  readonly scope?: AutomationScope;
+  readonly warning?: string;
+  readonly summary?: string;
+  readonly command?: string;
+  readonly output?: string;
+  readonly location?: string;
+  readonly exitCode?: number;
+  readonly error?: string;
+}
+
+export interface SupportedHarnessInstallTarget {
+  readonly target: CanonicalHarnessTarget;
+  readonly aliases?: readonly HarnessTarget[];
+  readonly harnessInstaller: "agent-mux";
+  readonly pluginInstallerPackage?: string;
+  readonly pluginScopes: readonly AutomationScope[];
 }
 
 export interface AgentInstallStep {
-  readonly target: HarnessTarget;
-  readonly command: string;
-  readonly pluginCommand?: string;
+  readonly requestedTarget: HarnessTarget;
+  readonly target: CanonicalHarnessTarget;
+  readonly harnessInstaller: "agent-mux";
+  readonly pluginInstall?: {
+    readonly installerPackage: string;
+    readonly scope: AutomationScope;
+  };
 }
 
 export interface AgentInstallPlan {
   readonly enabled: boolean;
+  readonly scope: AutomationScope;
+  readonly supportedTargets: readonly SupportedHarnessInstallTarget[];
   readonly steps: readonly AgentInstallStep[];
+  readonly summary: readonly string[];
+}
+
+export interface AgentInstallStepResult {
+  readonly requestedTarget: HarnessTarget;
+  readonly target: CanonicalHarnessTarget;
+  readonly harness: HarnessInstallOperationResult;
+  readonly plugin?: HarnessInstallOperationResult;
+  readonly success: boolean;
+}
+
+export interface AgentInstallResult {
+  readonly executed: boolean;
+  readonly success: boolean;
+  readonly scope: AutomationScope;
+  readonly steps: readonly AgentInstallStepResult[];
   readonly summary: readonly string[];
 }
 
@@ -266,7 +381,8 @@ export interface InstallResult {
   readonly kubernetes: KubernetesRenderResult;
   readonly terraformApply?: readonly CommandExecution[];
   readonly kubernetesApply?: readonly CommandExecution[];
-  readonly agentInstalls?: readonly CommandExecution[];
+  readonly providerConfiguration?: ProviderConfigurationApplyResult;
+  readonly agentInstalls?: AgentInstallResult;
   readonly status?: EnvironmentStatus;
 }
 

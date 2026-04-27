@@ -3,6 +3,7 @@ import {
   _resetAmuxInstallClientCache,
   _setAmuxInstallModuleForTesting,
   discoverHarnessesViaAmux,
+  installHarnessPlugin,
   installHarnessViaAmux,
 } from "../install";
 
@@ -66,9 +67,31 @@ describe("install amux bridge", () => {
     expect(result).toMatchObject({
       harness: "codex",
       dryRun: true,
+      success: true,
+      status: "planned",
       summary: "installed",
       command: "amux install codex",
       output: "ok",
+    });
+  });
+
+  it("plans a plugin install through the published package installer", async () => {
+    const result = await installHarnessPlugin("codex", {
+      workspace: "/tmp/demo",
+      json: true,
+      dryRun: true,
+      verbose: false,
+    });
+
+    expect(result).toMatchObject({
+      harness: "codex",
+      dryRun: true,
+      success: true,
+      status: "planned",
+      installer: "npx",
+      scope: "workspace",
+      command: "npx --yes @a5c-ai/babysitter-codex install --workspace /tmp/demo",
+      location: "/tmp/demo",
     });
   });
 });

@@ -37,5 +37,34 @@ describe("cloud cli", () => {
     expect(exitCode).toBe(0);
     expect(output.stdout).toContain("Environment: minikube");
   });
-});
 
+  it("emits structured provider automation json", async () => {
+    const sink = createIo();
+    const exitCode = await runCli(["providers", "configure", "--env", "minikube", "--json"], sink.io);
+    const output = sink.read();
+    expect(exitCode).toBe(0);
+    expect(output.stdout).toContain("\"automation\"");
+    expect(output.stdout).toContain("\"providersFile\"");
+  });
+
+  it("emits structured agent install plan json", async () => {
+    const sink = createIo();
+    const exitCode = await runCli([
+      "agents",
+      "install",
+      "--env",
+      "minikube",
+      "--set",
+      "agents.install=true",
+      "--set",
+      "agents.targets[0]=copilot",
+      "--set",
+      "agents.installBabysitterPlugins=true",
+      "--json",
+    ], sink.io);
+    const output = sink.read();
+    expect(exitCode).toBe(0);
+    expect(output.stdout).toContain("\"supportedTargets\"");
+    expect(output.stdout).toContain("\"github-copilot\"");
+  });
+});

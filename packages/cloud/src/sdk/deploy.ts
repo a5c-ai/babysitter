@@ -15,6 +15,7 @@ import { renderKubernetes } from "../kubernetes/render.js";
 import { renderTerraform } from "../terraform/root.js";
 import { buildDeploymentPlan } from "./plans.js";
 import { installAgents } from "./agents.js";
+import { applyProviderConfiguration } from "./providers.js";
 
 function execCommand(
   command: string,
@@ -174,9 +175,12 @@ export async function installEnvironment(config: CloudConfig, options: InstallOp
 
   const terraformApply = config.execution?.autoApplyTerraform === false ? [] : await applyTerraform(plan, terraformDirectory);
   const kubernetesApply = config.execution?.autoApplyKubernetes === false ? [] : await applyKubernetes(plan, manifestPath);
+  const providerConfiguration = config.execution?.configureProvidersOnApply
+    ? applyProviderConfiguration(config, { cwd: rootDir })
+    : undefined;
   const agentInstalls = config.agents?.install && config.execution?.installAgentsOnApply
     ? await installAgents(config, { cwd: rootDir, execute: true })
-    : [];
+    : undefined;
   const status = await getEnvironmentStatus(config);
 
   return {
@@ -185,7 +189,8 @@ export async function installEnvironment(config: CloudConfig, options: InstallOp
     kubernetes,
     ...(terraformApply.length > 0 ? { terraformApply } : {}),
     ...(kubernetesApply.length > 0 ? { kubernetesApply } : {}),
-    ...(agentInstalls.length > 0 ? { agentInstalls } : {}),
+    ...(providerConfiguration ? { providerConfiguration } : {}),
+    ...(agentInstalls ? { agentInstalls } : {}),
     status,
   };
 }

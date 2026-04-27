@@ -3,6 +3,8 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import type { ProviderAuth } from './provider-config.js';
 
+export type ProviderProfilesScope = 'global' | 'project';
+
 export interface ProvidersFile {
   version: number;
   defaults?: {
@@ -18,6 +20,11 @@ export interface ProviderProfileEntry {
   transport?: string;
   auth?: Partial<ProviderAuth>;
   params?: Record<string, unknown>;
+}
+
+export interface ProviderProfilesFileOptions {
+  scope?: ProviderProfilesScope;
+  cwd?: string;
 }
 
 function tryReadJson(filePath: string): ProvidersFile | null {
@@ -37,13 +44,96 @@ function tryReadJson(filePath: string): ProvidersFile | null {
   }
 }
 
+function resolveScopePaths(options: ProviderProfilesFileOptions = {}): {
+  globalPath: string;
+  projectPath: string;
+} {
+  return {
+    globalPath: path.join(os.homedir(), '.amux', 'providers.json'),
+    projectPath: path.join(options.cwd ?? process.cwd(), '.amux', 'providers.json'),
+  };
+}
+
+export function resolveProvidersFilePath(options: ProviderProfilesFileOptions = {}): string {
+  const { globalPath, projectPath } = resolveScopePaths(options);
+  return (options.scope ?? 'project') === 'global' ? globalPath : projectPath;
+}
+
+function normalizeProvidersFile(file: ProvidersFile | null | undefined): ProvidersFile {
+  return {
+    version: 1,
+    profiles: {},
+    ...(file ?? {}),
+    profiles: { ...(file?.profiles ?? {}) },
+  };
+}
+
+export function loadProvidersFile(options: ProviderProfilesFileOptions = {}): ProvidersFile | null {
+  return tryReadJson(resolveProvidersFilePath(options));
+}
+
+export function writeProvidersFile(
+  file: ProvidersFile,
+  options: ProviderProfilesFileOptions = {},
+): { filePath: string; file: ProvidersFile } {
+  const filePath = resolveProvidersFilePath(options);
+  const normalized = normalizeProvidersFile(file);
+
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(normalized, null, 2)}\n`, {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
+  if (process.platform !== 'win32') {
+    fs.chmodSync(filePath, 0o600);
+  }
+
+  return { filePath, file: normalized };
+}
+
+export function upsertProviderProfile(
+  profileName: string,
+  profile: ProviderProfileEntry,
+  options: ProviderProfilesFileOptions = {},
+): { filePath: string; file: ProvidersFile; profile: ProviderProfileEntry } {
+  const current = normalizeProvidersFile(loadProvidersFile(options));
+  current.profiles[profileName] = {
+    ...(current.profiles[profileName] ?? {}),
+    ...profile,
+  };
+  const written = writeProvidersFile(current, options);
+  return {
+    ...written,
+    profile: written.file.profiles[profileName],
+  };
+}
+
+export function updateProviderDefaults(
+  defaults: ProvidersFile['defaults'],
+  options: ProviderProfilesFileOptions = {},
+): { filePath: string; file: ProvidersFile; defaults?: ProvidersFile['defaults'] } {
+  const current = normalizeProvidersFile(loadProvidersFile(options));
+  if (!defaults || (!defaults.provider && !defaults.model)) {
+    delete current.defaults;
+  } else {
+    current.defaults = {
+      ...(current.defaults ?? {}),
+      ...defaults,
+    };
+  }
+  const written = writeProvidersFile(current, options);
+  return {
+    ...written,
+    defaults: written.file.defaults,
+  };
+}
+
 /**
  * Load a named profile from ~/.amux/providers.json and .amux/providers.json.
  * Project-level file takes precedence over global.
  */
 export function loadProfile(profileName: string): ProviderProfileEntry | null {
-  const globalPath = path.join(os.homedir(), '.amux', 'providers.json');
-  const projectPath = path.join(process.cwd(), '.amux', 'providers.json');
+  const { globalPath, projectPath } = resolveScopePaths();
 
   const projectFile = tryReadJson(projectPath);
   if (projectFile?.profiles?.[profileName]) {
@@ -63,8 +153,7 @@ export function loadProfile(profileName: string): ProviderProfileEntry | null {
  * Project-level defaults override global defaults.
  */
 export function loadProviderDefaults(): ProviderProfileEntry | null {
-  const globalPath = path.join(os.homedir(), '.amux', 'providers.json');
-  const projectPath = path.join(process.cwd(), '.amux', 'providers.json');
+  const { globalPath, projectPath } = resolveScopePaths();
 
   const globalFile = tryReadJson(globalPath);
   const projectFile = tryReadJson(projectPath);

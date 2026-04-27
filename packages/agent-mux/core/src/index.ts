@@ -551,8 +551,8 @@ export type { ResolveProviderInput } from './provider-resolver.js';
 export { resolveProvider } from './provider-resolver.js';
 
 // Provider profiles
-export type { ProvidersFile, ProviderProfileEntry } from './provider-profiles.js';
-export { loadProfile, loadProviderDefaults } from './provider-profiles.js';
+export type { ProviderProfilesScope, ProviderProfilesFileOptions, ProvidersFile, ProviderProfileEntry } from './provider-profiles.js';
+export { resolveProvidersFilePath, loadProvidersFile, writeProvidersFile, upsertProviderProfile, updateProviderDefaults, loadProfile, loadProviderDefaults } from './provider-profiles.js';
 
 // Provider support matrix
 export { isNativelySupported, getNativeMechanism, getRequiredProxyTransport, getHarnessDefaultTransport, isTransportCompatible } from './provider-support-matrix.js';

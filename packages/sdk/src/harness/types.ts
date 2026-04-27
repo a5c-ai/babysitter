@@ -139,14 +139,27 @@ export interface HarnessInstallOptions {
   verbose: boolean;
 }
 
+export type HarnessInstallStatus =
+  | "planned"
+  | "installed"
+  | "skipped"
+  | "unsupported"
+  | "failed";
+
 export interface HarnessInstallResult {
   harness: string;
   dryRun?: boolean;
+  success?: boolean;
+  status?: HarnessInstallStatus;
+  installer?: string;
+  scope?: "global" | "workspace";
   warning?: string;
   summary?: string;
   command?: string;
   output?: string;
   location?: string;
+  exitCode?: number;
+  error?: string;
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,6 @@ export { renderKubernetes, serializeManifest } from "./kubernetes/render.js";
 export { installEnvironment, getEnvironmentStatus } from "./sdk/deploy.js";
 export { upgradeEnvironment } from "./sdk/upgrade.js";
 export { bootstrapAuth } from "./sdk/auth.js";
-export { configureProviders } from "./sdk/providers.js";
+export { configureProviders, applyProviderConfiguration } from "./sdk/providers.js";
 export { buildAgentInstallPlan, installAgents } from "./sdk/agents.js";
 export { defaultReleaseTagForEnvironment, environmentPreset } from "./sdk/environments.js";
-

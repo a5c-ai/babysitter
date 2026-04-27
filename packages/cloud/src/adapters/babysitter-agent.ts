@@ -38,9 +38,6 @@ export function buildBabysitterAgentManifests(
     return [];
   }
 
-  const providerJson = JSON.stringify(config.components.babysitterAgent?.providers ?? []);
-  const modelRoutingJson = JSON.stringify(config.components.babysitterAgent?.modelRouting ?? []);
-
   return [
     {
       apiVersion: "apps/v1",
@@ -78,8 +75,6 @@ export function buildBabysitterAgentManifests(
                 ports: [{ containerPort: plan.port, name: "ws" }],
                 env: [
                   { name: "BABYSITTER_AGENT_GATEWAY_URL", value: gatewayInternalUrl },
-                  { name: "BABYSITTER_AGENT_PROVIDER_CONFIG_JSON", value: providerJson },
-                  { name: "BABYSITTER_AGENT_MODEL_ROUTING_JSON", value: modelRoutingJson },
                   { name: "BABYSITTER_AGENT_AMUX_INVOCATION_MODE", value: "k8s" },
                   ...Object.entries(providers.env).map(([name, value]) => ({ name, value })),
                 ],
@@ -111,4 +106,3 @@ export function buildBabysitterAgentManifests(
     },
   ];
 }
-

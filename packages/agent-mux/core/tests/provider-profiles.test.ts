@@ -1,7 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
-import { loadProfile, loadProviderDefaults } from '../src/provider-profiles.js';
+import {
+  loadProfile,
+  loadProviderDefaults,
+  loadProvidersFile,
+  resolveProvidersFilePath,
+  updateProviderDefaults,
+  upsertProviderProfile,
+  writeProvidersFile,
+} from '../src/provider-profiles.js';
 
 vi.mock('node:fs');
 vi.mock('node:os');
@@ -152,5 +160,105 @@ describe('loadProviderDefaults', () => {
     const defaults = loadProviderDefaults();
     expect(defaults!.provider).toBe('anthropic');
     expect(defaults!.model).toBe('project-model');
+  });
+});
+
+describe('providers file persistence helpers', () => {
+  it('resolves the expected scope paths', () => {
+    expect(resolveProvidersFilePath()).toBe(`${process.cwd()}/.amux/providers.json`);
+    expect(resolveProvidersFilePath({ scope: 'global' })).toBe('/home/testuser/.amux/providers.json');
+  });
+
+  it('loads the scoped providers file directly', () => {
+    mockFs.readFileSync.mockImplementation((filePath: unknown) => {
+      if (String(filePath).includes(`${process.cwd()}/.amux/providers.json`)) {
+        return JSON.stringify({
+          version: 1,
+          profiles: {
+            project: {
+              provider: 'openai',
+              model: 'gpt-5.4',
+            },
+          },
+        });
+      }
+      throw new Error('ENOENT');
+    });
+
+    expect(loadProvidersFile()).toEqual({
+      version: 1,
+      profiles: {
+        project: {
+          provider: 'openai',
+          model: 'gpt-5.4',
+        },
+      },
+    });
+  });
+
+  it('writes normalized providers files with secure permissions', () => {
+    const result = writeProvidersFile({
+      version: 1,
+      profiles: {
+        deploy: {
+          provider: 'anthropic',
+        },
+      },
+    });
+
+    expect(result.filePath).toBe(`${process.cwd()}/.amux/providers.json`);
+    expect(mockFs.mkdirSync).toHaveBeenCalledWith(`${process.cwd()}/.amux`, { recursive: true });
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      `${process.cwd()}/.amux/providers.json`,
+      expect.stringContaining('"deploy"'),
+      expect.objectContaining({ mode: 0o600 }),
+    );
+    expect(mockFs.chmodSync).toHaveBeenCalledWith(`${process.cwd()}/.amux/providers.json`, 0o600);
+  });
+
+  it('upserts a provider profile into the scoped file', () => {
+    mockFs.readFileSync.mockImplementation(() => JSON.stringify({
+      version: 1,
+      profiles: {
+        existing: { provider: 'anthropic' },
+      },
+    }));
+
+    const result = upsertProviderProfile('deploy', {
+      provider: 'openai',
+      model: 'gpt-5.4',
+    });
+
+    expect(result.profile).toEqual({
+      provider: 'openai',
+      model: 'gpt-5.4',
+    });
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      `${process.cwd()}/.amux/providers.json`,
+      expect.stringContaining('"deploy"'),
+      expect.any(Object),
+    );
+  });
+
+  it('updates defaults in the scoped file', () => {
+    mockFs.readFileSync.mockImplementation(() => JSON.stringify({
+      version: 1,
+      profiles: {},
+    }));
+
+    const result = updateProviderDefaults({
+      provider: 'openai',
+      model: 'gpt-5.4',
+    });
+
+    expect(result.defaults).toEqual({
+      provider: 'openai',
+      model: 'gpt-5.4',
+    });
+    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      `${process.cwd()}/.amux/providers.json`,
+      expect.stringContaining('"defaults"'),
+      expect.any(Object),
+    );
   });
 });

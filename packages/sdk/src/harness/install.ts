@@ -12,6 +12,7 @@ import type {
   HarnessInstallResult,
 } from "./types";
 import { KNOWN_HARNESSES } from "./registry";
+import { runPackageBinaryViaNpx } from "./installSupport";
 
 // ---------------------------------------------------------------------------
 // Agent name mapping (babysitter harness name -> agent-mux adapter name)
@@ -27,6 +28,22 @@ const HARNESS_TO_AMUX: Readonly<Record<string, string>> = {
   "openclaw": "openclaw",
   "oh-my-pi": "omp",
   "pi": "pi",
+};
+
+interface HarnessPluginInstaller {
+  packageName: string;
+  supportsWorkspace: boolean;
+}
+
+const HARNESS_PLUGIN_INSTALLERS: Readonly<Record<string, HarnessPluginInstaller>> = {
+  "codex": { packageName: "@a5c-ai/babysitter-codex", supportsWorkspace: true },
+  "cursor": { packageName: "@a5c-ai/babysitter-cursor", supportsWorkspace: true },
+  "gemini-cli": { packageName: "@a5c-ai/babysitter-gemini", supportsWorkspace: true },
+  "github-copilot": { packageName: "@a5c-ai/babysitter-github", supportsWorkspace: true },
+  "oh-my-pi": { packageName: "@a5c-ai/babysitter-omp", supportsWorkspace: true },
+  "openclaw": { packageName: "@a5c-ai/babysitter-openclaw", supportsWorkspace: true },
+  "opencode": { packageName: "@a5c-ai/babysitter-opencode", supportsWorkspace: true },
+  "pi": { packageName: "@a5c-ai/babysitter-pi", supportsWorkspace: true },
 };
 
 // ---------------------------------------------------------------------------
@@ -150,6 +167,9 @@ export async function installHarnessViaAmux(
   if (!amuxName) {
     return {
       harness: harnessName,
+      success: false,
+      status: "unsupported",
+      installer: "agent-mux",
       warning: `No agent-mux adapter mapping for "${harnessName}". Cannot install via agent-mux.`,
     };
   }
@@ -160,6 +180,9 @@ export async function installHarnessViaAmux(
   if (!adapter || !adapter.install) {
     return {
       harness: harnessName,
+      success: false,
+      status: "unsupported",
+      installer: "agent-mux",
       warning: `Agent-mux adapter "${amuxName}" does not support install().`,
     };
   }
@@ -172,10 +195,60 @@ export async function installHarnessViaAmux(
   return {
     harness: harnessName,
     dryRun: options.dryRun || undefined,
+    success: result.ok,
+    status: options.dryRun ? "planned" : result.ok ? "installed" : "failed",
+    installer: "agent-mux",
     summary: result.message ?? (result.ok ? `Installed ${harnessName}` : `Failed to install ${harnessName}`),
     command: result.command || undefined,
     output: [result.stdout, result.stderr].filter(Boolean).join("\n") || undefined,
+    exitCode: result.ok ? 0 : 1,
+    error: result.ok ? undefined : (result.message ?? `Failed to install ${harnessName}`),
   };
+}
+
+export async function installHarnessPlugin(
+  harnessName: string,
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  const installer = HARNESS_PLUGIN_INSTALLERS[harnessName];
+  if (!installer) {
+    return {
+      harness: harnessName,
+      success: false,
+      status: "unsupported",
+      installer: "npx",
+      warning: `No Babysitter plugin installer is defined for "${harnessName}".`,
+    };
+  }
+
+  const packageArgs = ["install"];
+  if (options.workspace) {
+    if (!installer.supportsWorkspace) {
+      return {
+        harness: harnessName,
+        success: false,
+        status: "unsupported",
+        installer: "npx",
+        scope: "workspace",
+        warning: `${harnessName} does not support workspace plugin installation.`,
+      };
+    }
+    packageArgs.push("--workspace", options.workspace);
+  } else {
+    packageArgs.push("--global");
+  }
+
+  return await runPackageBinaryViaNpx({
+    harness: harnessName,
+    packageName: installer.packageName,
+    packageArgs,
+    summary: options.workspace
+      ? `Install Babysitter plugin for ${harnessName} into ${options.workspace}`
+      : `Install Babysitter plugin for ${harnessName} globally`,
+    options,
+    cwd: options.workspace,
+    location: options.workspace,
+  });
 }
 
 /**
