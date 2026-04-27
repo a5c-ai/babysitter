@@ -1,7 +1,7 @@
 /**
  * Filesystem-watch helper for SessionManagerImpl.watch().
  *
- * Produces a placeholder `text_delta` event whenever a file matching the
+ * Produces a synthetic `text_delta` event whenever a file matching the
  * session id changes size. Split out of session-manager.ts to keep the
  * main module under the file-size budget — no behavior change.
  */

@@ -5,6 +5,7 @@
  */
 
 import type { AgentName, PluginFormat } from './types.js';
+import type { AuthMethodDescriptor } from './auth-types.js';
 import type { RuntimeHookCapabilities } from './runtime-hooks.js';
 
 // ---------------------------------------------------------------------------
@@ -82,22 +83,6 @@ export interface InstallMethod {
 
   /** A command to run to verify a prerequisite is installed. */
   prerequisiteCheck?: string;
-}
-
-// ---------------------------------------------------------------------------
-// AuthMethod (forward-reference placeholder)
-// ---------------------------------------------------------------------------
-
-/** Authentication method descriptor (placeholder for Phase 8). */
-export interface AuthMethod {
-  /** Method identifier (e.g., 'api-key', 'oauth', 'browser-login'). */
-  type: string;
-
-  /** Human-readable name. */
-  name: string;
-
-  /** Description of the method. */
-  description?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -264,7 +249,7 @@ export interface AgentCapabilities {
   // ── Auth ────────────────────────────────────────────────────────────
 
   /** Authentication methods this agent supports. */
-  authMethods: AuthMethod[];
+  authMethods: AuthMethodDescriptor[];
 
   /** File paths (relative to home) where auth tokens/keys are stored. */
   authFiles: string[];

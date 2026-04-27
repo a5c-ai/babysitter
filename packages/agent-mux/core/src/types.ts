@@ -449,7 +449,7 @@ export interface ApprovalRequestEvent {
 }
 
 // ---------------------------------------------------------------------------
-// Forward-reference placeholders
+// Forward declarations
 // ---------------------------------------------------------------------------
 
 /**

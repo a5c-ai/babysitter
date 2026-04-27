@@ -136,7 +136,7 @@ describe('createClient validation', () => {
   });
 });
 
-describe('AgentMuxClient namespace stubs', () => {
+describe('AgentMuxClient manager namespaces', () => {
   it('has adapters namespace', () => {
     const client = createClient();
     expect(client.adapters).toBeDefined();

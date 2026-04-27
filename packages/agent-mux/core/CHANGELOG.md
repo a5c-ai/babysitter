@@ -1,5 +1,11 @@
 # @a5c-ai/agent-mux-core
 
+## 0.4.9
+
+### Patch Changes
+
+- Clean up the public surface so plugin contracts are owned by `plugin-types`, auth descriptors are owned by `auth-types`, and `resolveRunOptions` is documented as a stable merge helper instead of a placeholder.
+
 ## 0.4.0
 
 ## 0.3.0

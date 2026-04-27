@@ -61,10 +61,6 @@ export class PluginManagerImpl implements PluginManager {
       return [];
     }
     const plugins = await adapter.listPlugins();
-    // The adapter returns the legacy InstalledPlugin shape from adapter.ts.
-    // Map to the spec shape if needed. Since both share the same field names
-    // but the spec adds agent/format/installedAt, we trust the adapter to
-    // return the full shape when available.
     return plugins as unknown as InstalledPlugin[];
   }
 

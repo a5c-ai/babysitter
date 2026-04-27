@@ -89,14 +89,15 @@ export function deepMerge<T extends Record<string, unknown>>(
 }
 
 // ---------------------------------------------------------------------------
-// resolveRunOptions (placeholder)
+// resolveRunOptions
 // ---------------------------------------------------------------------------
 
 /**
  * Resolve run options by merging multiple layers in order.
  *
  * Layers are applied left to right; later layers override earlier ones.
- * This is a placeholder that will be extended in later phases.
+ * Uses the same merge semantics as `deepMerge`, making it the canonical
+ * helper for layering run-option-like objects and defaults.
  *
  * @param layers - Ordered list of option layers to merge.
  * @returns The merged result.

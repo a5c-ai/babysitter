@@ -462,7 +462,7 @@ describe('SessionManagerImpl', () => {
       });
     });
 
-    it('terminates immediately for registered agent (stub)', async () => {
+    it('terminates immediately for registered agent with no watch events', async () => {
       registry.register(mockAdapter('claude', []));
       const events: unknown[] = [];
       for await (const event of manager.watch('claude', 'x')) {

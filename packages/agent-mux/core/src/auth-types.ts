@@ -25,6 +25,18 @@ export type AuthMethod =
   | 'config_file'
   | 'none';
 
+/** Human-readable auth method metadata exposed in capability manifests. */
+export interface AuthMethodDescriptor {
+  /** Method identifier used by auth state and setup guidance. */
+  readonly type: AuthMethod | string;
+
+  /** Human-readable name. */
+  readonly name: string;
+
+  /** Optional description or setup hint. */
+  readonly description?: string;
+}
+
 // ---------------------------------------------------------------------------
 // AuthState
 // ---------------------------------------------------------------------------

@@ -1,20 +1,18 @@
 /**
- * Integration tests verifying Phase 1 (Core Types, Errors, Client Skeleton)
- * and Phase 2 (RunOptions, Validation, Profiles) work together correctly.
+ * Integration tests verifying the core client, run-option validation,
+ * and profile flows work together correctly.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import {
-  // Phase 1 exports
   createClient,
   AgentMuxClient,
   AgentMuxError,
   ValidationError,
   DEFAULT_RETRY_POLICY,
   resolveStoragePaths,
-  // Phase 2 exports
   validateRunOptions,
   validateProfileData,
   PROHIBITED_PROFILE_FIELDS,
@@ -57,7 +55,7 @@ function makeTmpPaths(): { paths: StoragePaths; tmpDir: string } {
   return { paths, tmpDir };
 }
 
-describe('Integration: Phases 1-2', () => {
+describe('Integration: core client and run options', () => {
   let paths: StoragePaths;
   let tmpDir: string;
 
@@ -236,7 +234,7 @@ describe('Integration: Phases 1-2', () => {
   // Type composition
   // -------------------------------------------------------------------------
   describe('Types compose correctly', () => {
-    it('RunOptions accepts all Phase 1 and Phase 2 types', () => {
+    it('RunOptions accepts the composed public types', () => {
       const opts: RunOptions = {
         agent: 'claude',
         prompt: 'test',

@@ -248,7 +248,6 @@ export type {
   SessionControlPlane,
   PluginRegistry,
   InstallMethod,
-  AuthMethod as AuthMethodDescriptor,
   AgentCapabilities,
   ModelCapabilities,
   ModelValidationResult,
@@ -383,6 +382,7 @@ export type {
 // Auth types (canonical from dedicated module)
 export type {
   AuthMethod,
+  AuthMethodDescriptor,
   AuthState,
   AuthSetupGuidance,
   AuthSetupStep,
@@ -402,10 +402,6 @@ export type {
 
 // Adapter
 export type {
-  InstalledPlugin,
-  PluginInstallOptions,
-  PluginSearchOptions,
-  PluginListing,
   SpawnArgs,
   ParseContext,
   InstalledAgentInfo,
@@ -464,7 +460,11 @@ export { AuthManagerImpl } from './auth-manager.js';
 
 // Plugin types (spec §9 — full types from plugin-types.ts)
 export type {
+  InstalledPlugin,
   InstalledPlugin as PluginInfo,
+  PluginInstallOptions,
+  PluginSearchOptions,
+  PluginListing,
   PluginDetail,
   PluginBrowseOptions,
 } from './plugin-types.js';

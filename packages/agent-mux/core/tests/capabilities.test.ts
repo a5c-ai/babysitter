@@ -3,7 +3,7 @@ import type {
   ThinkingEffortLevel,
   PluginRegistry,
   InstallMethod,
-  AuthMethodDescriptor as AuthMethod,
+  AuthMethodDescriptor,
   AgentCapabilities,
   ModelCapabilities,
   ModelValidationResult,
@@ -61,7 +61,7 @@ describe('InstallMethod', () => {
 
 describe('AuthMethod', () => {
   it('has required fields', () => {
-    const method: AuthMethod = {
+    const method: AuthMethodDescriptor = {
       type: 'api-key',
       name: 'API Key',
       description: 'Set ANTHROPIC_API_KEY',
@@ -117,7 +117,7 @@ describe('AgentCapabilities', () => {
     supportedPlatforms: ['darwin', 'linux', 'win32'],
     requiresGitRepo: false,
     requiresPty: false,
-    authMethods: [{ type: 'api-key', name: 'API Key' }],
+    authMethods: [{ type: 'api_key', name: 'API Key' }],
     authFiles: ['.anthropic/auth.json'],
     installMethods: [
       { platform: 'all', type: 'npm', command: 'npm i -g @anthropic-ai/claude-code' },

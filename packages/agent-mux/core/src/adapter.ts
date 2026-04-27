@@ -10,12 +10,18 @@ import type { RunOptions } from './run-options.js';
 import type { AgentEvent } from './events.js';
 import type { StreamAssembler } from './stream-assembler.js';
 import type {
+  InstalledPlugin,
+  PluginInstallOptions,
+  PluginSearchOptions,
+  PluginListing,
+} from './plugin-types.js';
+import type {
   RuntimeHookDispatcher,
   RuntimeHookSetup,
 } from './runtime-hooks.js';
 
 // ---------------------------------------------------------------------------
-// Re-export types from dedicated type modules (Phase 5)
+// Re-export types from dedicated type modules.
 // ---------------------------------------------------------------------------
 
 // Session types
@@ -31,60 +37,12 @@ import type { AuthSetupGuidance } from './auth-types.js';
 export type { AgentConfig, AgentConfigSchema, ConfigField, ValidationResult, ConfigValidationError, ConfigValidationWarning } from './config-types.js';
 import type { AgentConfig } from './config-types.js';
 import type { AgentConfigSchema } from './config-types.js';
-
-/** Installed plugin descriptor (placeholder for Phase 9). */
-export interface InstalledPlugin {
-  /** Plugin identifier. */
-  pluginId: string;
-
-  /** Plugin name. */
-  name: string;
-
-  /** Plugin version. */
-  version: string;
-
-  /** Whether the plugin is currently enabled. */
-  enabled: boolean;
-}
-
-/** Plugin install options (placeholder for Phase 9). */
-export interface PluginInstallOptions {
-  /** Specific version to install. */
-  version?: string;
-
-  /** Registry to install from. */
-  registry?: string;
-
-  /** Install globally (true) vs. project-local (false). */
-  global?: boolean;
-}
-
-/** Plugin search options (placeholder for Phase 9). */
-export interface PluginSearchOptions {
-  /** Registry to search. */
-  registry?: string;
-
-  /** Page number. */
-  page?: number;
-
-  /** Results per page. */
-  limit?: number;
-}
-
-/** Plugin listing from search results (placeholder for Phase 9). */
-export interface PluginListing {
-  /** Plugin identifier. */
-  pluginId: string;
-
-  /** Plugin name. */
-  name: string;
-
-  /** Plugin description. */
-  description: string;
-
-  /** Latest version available. */
-  latestVersion: string;
-}
+export type {
+  InstalledPlugin,
+  PluginInstallOptions,
+  PluginSearchOptions,
+  PluginListing,
+} from './plugin-types.js';
 
 // ---------------------------------------------------------------------------
 // SpawnArgs
@@ -389,7 +347,7 @@ export interface AgentAdapter {
 }
 
 // ---------------------------------------------------------------------------
-// Multi-Adapter Architecture (Phase 5+)
+// Multi-adapter architecture
 // ---------------------------------------------------------------------------
 
 // Export new multi-adapter types
