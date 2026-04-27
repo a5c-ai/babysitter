@@ -179,10 +179,6 @@ const updateLockVersion = (path, version, agentMuxVersion) => {
       version: agentMuxVersion,
       dependencies: { "@a5c-ai/agent-mux-core": agentMuxVersion }
     },
-    "packages/kanban": {
-      version,
-      dependencies: { "@a5c-ai/agent-mux-ui": agentMuxVersion }
-    },
     "packages/cloud": {
       version
     },
@@ -213,7 +209,6 @@ const workspaceManifestPaths = [
   "packages/babysitter/package.json",
   "packages/babysitter-agent/package.json",
   "packages/agent-plugins-mux/package.json",
-  "packages/kanban/package.json",
   "packages/cloud/package.json",
   "packages/observer-dashboard/package.json",
   "packages/hooks-mux/core/package.json",
@@ -361,7 +356,6 @@ for (const path of [
   "packages/agent-mux/ui/package.json",
   "packages/agent-mux/webui/package.json",
   "packages/transport-mux/package.json",
-  "packages/kanban/package.json",
 ]) {
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);

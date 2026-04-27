@@ -1,0 +1,20 @@
+export declare const WORKSPACE_PANEL_ORDER: readonly ["sidebar", "conversation", "context", "details"];
+export type WorkspacePanelKey = (typeof WORKSPACE_PANEL_ORDER)[number];
+export type WorkspacePanelVisibility = Record<WorkspacePanelKey, boolean>;
+export type WorkspacePanelSizes = Record<WorkspacePanelKey, number>;
+export declare const DEFAULT_WORKSPACE_PANEL_VISIBILITY: WorkspacePanelVisibility;
+export declare const DEFAULT_WORKSPACE_PANEL_SIZES: WorkspacePanelSizes;
+export declare const DESKTOP_LAYOUT_BREAKPOINT = 1280;
+export declare const MIN_WORKSPACE_PANEL_SIZE = 14;
+export declare function ensureVisiblePanels(visibility: WorkspacePanelVisibility): WorkspacePanelVisibility;
+export declare function getVisiblePanels(visibility: WorkspacePanelVisibility): WorkspacePanelKey[];
+export declare function toggleWorkspacePanel(visibility: WorkspacePanelVisibility, panel: WorkspacePanelKey): WorkspacePanelVisibility;
+export declare function normalizeWorkspacePanelSizes(sizes: WorkspacePanelSizes, visibility: WorkspacePanelVisibility): WorkspacePanelSizes;
+export declare function resizeWorkspacePanels(args: {
+    sizes: WorkspacePanelSizes;
+    visibility: WorkspacePanelVisibility;
+    leftPanel: WorkspacePanelKey;
+    rightPanel: WorkspacePanelKey;
+    deltaPercentage: number;
+    minPercentage?: number;
+}): WorkspacePanelSizes;

@@ -314,7 +314,6 @@ jobs:
               'package.json',
               'packages/sdk/package.json',
               'packages/babysitter/package.json',
-              'packages/kanban/package.json',
               'packages/observer-dashboard/package.json',
               'packages/cloud/package.json'
             ];
@@ -539,16 +538,6 @@ jobs:
           npm run test:cloud
           npm run verify:cloud-release
 
-      - name: Build and test kanban
-        run: |
-          set -euo pipefail
-          npm run build:kanban
-          npm run build:cli --workspace=@a5c-ai/kanban
-          npm run verify:release --workspace=@a5c-ai/kanban
-          npm run test:realtime --workspace=@a5c-ai/kanban
-          npm run test:dispatch-context-labels --workspace=@a5c-ai/kanban
-          npm run test:kanban
-
       - name: Build and test observer-dashboard
         run: |
           set -euo pipefail
@@ -568,13 +557,6 @@ jobs:
         run: |
           set -euo pipefail
           npm publish --workspace=@a5c-ai/agent-plugins-mux --access public --tag staging
-
-      - name: Publish kanban to npm (staging tag)
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          set -euo pipefail
-          npm publish --workspace=@a5c-ai/kanban --access public --tag staging
 
       - name: Publish observer-dashboard to npm (staging tag)
         env:

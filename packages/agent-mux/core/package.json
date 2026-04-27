@@ -63,6 +63,17 @@
         "default": "./dist/kanban.js"
       },
       "default": "./dist/kanban.js"
+    },
+    "./automation": {
+      "import": {
+        "types": "./dist/automation.d.ts",
+        "default": "./dist/automation.js"
+      },
+      "require": {
+        "types": "./dist/automation.d.ts",
+        "default": "./dist/automation.js"
+      },
+      "default": "./dist/automation.js"
     }
   },
   "files": [

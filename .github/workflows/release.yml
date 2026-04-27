@@ -266,7 +266,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/sdk/package.json packages/babysitter/package.json packages/babysitter-agent/package.json packages/agent-plugins-mux/package.json packages/kanban/package.json packages/observer-dashboard/package.json packages/cloud/package.json packages/breakpoints-mux/package.json packages/hooks-mux/core/package.json packages/hooks-mux/cli/package.json packages/hooks-mux/adapter-claude/package.json packages/hooks-mux/adapter-codex/package.json packages/hooks-mux/adapter-gemini/package.json packages/hooks-mux/adapter-copilot/package.json packages/hooks-mux/adapter-cursor/package.json packages/hooks-mux/adapter-pi/package.json packages/hooks-mux/adapter-oh-my-pi/package.json packages/hooks-mux/adapter-opencode/package.json packages/hooks-mux/adapter-openclaw/package.json packages/agent-mux/adapters/package.json packages/agent-mux/cli/package.json packages/agent-mux/core/package.json packages/agent-mux/gateway/package.json packages/agent-mux/harness-mock/package.json packages/agent-mux/mobile-android-app/package.json packages/agent-mux/mobile-ios-app/package.json packages/agent-mux/observability/package.json packages/agent-mux/sdk/package.json packages/agent-mux/tui/package.json packages/agent-mux/tv-androidtv-app/package.json packages/agent-mux/tv-appletv-app/package.json packages/agent-mux/ui/package.json packages/agent-mux/watch-watchos-app/package.json packages/agent-mux/watch-wearos-app/package.json packages/agent-mux/webui/package.json packages/transport-mux/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/plugin.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/plugin.json plugins/babysitter-openclaw/openclaw.plugin.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/plugin.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/plugin.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json plugins/babysitter-paperclip/package.json plugins/babysitter-paperclip/versions.json .claude-plugin/marketplace.json
+          git add package.json packages/sdk/package.json packages/babysitter/package.json packages/babysitter-agent/package.json packages/agent-plugins-mux/package.json packages/observer-dashboard/package.json packages/cloud/package.json packages/breakpoints-mux/package.json packages/hooks-mux/core/package.json packages/hooks-mux/cli/package.json packages/hooks-mux/adapter-claude/package.json packages/hooks-mux/adapter-codex/package.json packages/hooks-mux/adapter-gemini/package.json packages/hooks-mux/adapter-copilot/package.json packages/hooks-mux/adapter-cursor/package.json packages/hooks-mux/adapter-pi/package.json packages/hooks-mux/adapter-oh-my-pi/package.json packages/hooks-mux/adapter-opencode/package.json packages/hooks-mux/adapter-openclaw/package.json packages/agent-mux/adapters/package.json packages/agent-mux/cli/package.json packages/agent-mux/core/package.json packages/agent-mux/gateway/package.json packages/agent-mux/harness-mock/package.json packages/agent-mux/mobile-android-app/package.json packages/agent-mux/mobile-ios-app/package.json packages/agent-mux/observability/package.json packages/agent-mux/sdk/package.json packages/agent-mux/tui/package.json packages/agent-mux/tv-androidtv-app/package.json packages/agent-mux/tv-appletv-app/package.json packages/agent-mux/ui/package.json packages/agent-mux/watch-watchos-app/package.json packages/agent-mux/watch-wearos-app/package.json packages/agent-mux/webui/package.json packages/transport-mux/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/plugin.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/plugin.json plugins/babysitter-openclaw/openclaw.plugin.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/plugin.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/plugin.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json plugins/babysitter-paperclip/package.json plugins/babysitter-paperclip/versions.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -296,16 +296,6 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/agent-plugins-mux
-
-      - name: Build and test kanban
-        run: |
-          set -euo pipefail
-          npm run build:kanban
-          npm run build:cli --workspace=@a5c-ai/kanban
-          npm run verify:release --workspace=@a5c-ai/kanban
-          npm run test:realtime --workspace=@a5c-ai/kanban
-          npm run test:dispatch-context-labels --workspace=@a5c-ai/kanban
-          npm run test:kanban
 
       - name: Build and test observer-dashboard
         run: |
@@ -370,7 +360,6 @@ jobs:
           set -euo pipefail
           npm pack --workspace=@a5c-ai/babysitter-sdk --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/agent-plugins-mux --pack-destination artifacts/release
-          npm pack --workspace=@a5c-ai/kanban --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/babysitter-observer-dashboard --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/cloud --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/breakpoints-mux --pack-destination artifacts/release
@@ -420,13 +409,6 @@ jobs:
         run: |
           set -euo pipefail
           npm publish --workspace=@a5c-ai/agent-plugins-mux --access public
-
-      - name: Publish kanban to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          set -euo pipefail
-          npm publish --workspace=@a5c-ai/kanban --access public
 
       - name: Publish observer-dashboard to npm
         env:

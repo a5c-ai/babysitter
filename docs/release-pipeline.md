@@ -9,7 +9,6 @@ last_updated: 2026-04-26
 ## Workflow Overview
 - `.github/workflows/release.yml` owns production npm releases from `main`, guarded by the `release-main` concurrency group so only one run executes at a time.
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.
-- `@a5c-ai/kanban` is part of those central workflows; feature work such as Task Tags must keep using the same release ownership surface instead of introducing a package-specific publish path.
 - `@a5c-ai/babysitter-observer-dashboard` is part of those central workflows. The former standalone `.github/workflows/observer-dashboard-publish.yml` path is retired, so observer-dashboard no longer has a separate `main` release workflow.
 - `@a5c-ai/agent-catalog` is intentionally excluded from those central publish workflows. It remains an internal-only workspace package whose compatibility contract is enforced through CI/workspace validation rather than npm release automation.
 - `process-library-catalog` (`packages/catalog`) is intentionally excluded from those central publish workflows. It remains an internal-only workspace UI/API surface whose support contract is enforced through workspace CI rather than npm release automation.
@@ -18,7 +17,6 @@ last_updated: 2026-04-26
 ## Ownership Matrix
 - `release.yml` on `main`: validates the monorepo, bumps versions through `scripts/bump-version.mjs`, packs release artifacts, publishes public npm packages, tags `vX.Y.Z`, and creates the GitHub Release.
 - `staging-publish.yml` on `staging`: validates the monorepo, writes prerelease versions into the publishable package manifests, and publishes the same centrally-owned npm packages with the `staging` dist-tag.
-- `packages/kanban`: validated and published through the same central workflow pair; release-sensitive feature changes should be documented against `npm run build:kanban`, `npm run build:cli --workspace=@a5c-ai/kanban`, `npm run verify:release --workspace=@a5c-ai/kanban`, and `npm run test:kanban`.
 - `packages/catalog`: validated through `npm run ci:test --workspace=process-library-catalog` in `.github/workflows/ci.yml`; no central publish workflow currently owns it.
 - `scripts/bump-version.mjs`: production version source of truth for the centrally versioned workspace packages, including `packages/observer-dashboard/package.json`.
 - `packages/observer-dashboard/README.md`: user-facing install guidance for the published package; it should describe the same central release ownership as this document.
@@ -48,5 +46,4 @@ last_updated: 2026-04-26
 1. Ensure release-notes.md matches the changelog section before approving the release.
 2. Tabletop the rollback script quarterly (Release Eng + Security) to confirm tag deletion + changelog revert steps are still valid.
 3. When adding or removing a public package from the central release set, update all three ownership surfaces together: `release.yml`, `staging-publish.yml`, and `scripts/bump-version.mjs`.
-4. When `packages/kanban` gains new release-relevant surfaces such as Task Tags assets, release verification for `@a5c-ai/kanban` must be updated in the same change rather than relying on documentation-only intent.
-5. If `packages/catalog` is ever promoted from internal-only CI ownership into a public deploy or publish surface, update this document, `docs/workspace-validation.md`, the package README, and the relevant central workflow files in the same change.
+4. If `packages/catalog` is ever promoted from internal-only CI ownership into a public deploy or publish surface, update this document, `docs/workspace-validation.md`, the package README, and the relevant central workflow files in the same change.

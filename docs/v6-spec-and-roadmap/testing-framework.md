@@ -23,7 +23,6 @@ The current repository provides these concrete validation commands and workflow 
 | Agent mux | `npm run build:agent-mux`, `npm run test:agent-mux` | Build and test coverage for the current agent-mux packages |
 | Agent plugins mux | `npm run build --workspace=@a5c-ai/agent-plugins-mux`, `npm run test --workspace=@a5c-ai/agent-plugins-mux` | Build and test coverage for the current compiler package |
 | Breakpoints mux | `npm run build --workspace=@a5c-ai/breakpoints-mux`, `npm run typecheck --workspace=@a5c-ai/breakpoints-mux`, `npm run test --workspace=@a5c-ai/breakpoints-mux` | Build, typecheck, and test coverage for the current breakpoints workspace |
-| Kanban package | `npm run build:kanban`, `npm run build:cli --workspace=@a5c-ai/kanban`, `npm run verify:release --workspace=@a5c-ai/kanban`, `npm run test:kanban` | Build, CLI packaging, release-contract, and unit-test coverage for the published kanban workspace |
 | Architecture boundaries | `npm run test:architecture` | Enforces the `@a5c-ai/babysitter-agent` seam contract and repo package-family dependency rules for the current orchestration, dispatch, support, consumer, and distribution surfaces |
 | Plugin packaging checks | `npm run validate:ci --prefix plugins/<plugin>` for first-class plugins | Packaged-install and integration validation for the listed plugin packages |
 | Metadata checks | `npm run verify:metadata` | Repository/package metadata consistency checks only |
@@ -47,7 +46,6 @@ V6 may still use runtime, platform, and application language as architectural fr
 The nearest concrete validations available now are:
 
 - SDK/package tests for the current runtime and CLI surface,
-- `@a5c-ai/kanban` build, release-contract, and unit-test commands for the published kanban package,
 - `npm run test:architecture` for the current seam contract and documented package-family dependency boundaries,
 - hooks-mux and agent-mux build/test commands for the current integration seams,
 - plugin `validate:ci` checks for packaged plugin behavior,

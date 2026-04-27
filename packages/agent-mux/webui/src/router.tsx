@@ -12,6 +12,23 @@ import { SessionDetailPage } from './pages/SessionDetailPage.js';
 import { SessionPendingPage } from './pages/RunPage.js';
 import { NewRunPage } from './pages/NewRunPage.js';
 import { HookInboxPage } from './pages/HookInboxPage.js';
+import { KanbanLayout } from './pages/KanbanLayout.js';
+import {
+  AutomationsPage,
+  HostWorkspaceCreatePage,
+  IssueDetailPage,
+  IssueWorkspaceCreatePage,
+  KanbanInboxPage,
+  KanbanRunsPage,
+  KanbanSettingsPage,
+  KanbanWorkspacesPage,
+  ProjectBoardPage,
+  ProjectIssueCreatePage,
+  ProjectIssuePage,
+  ProjectListPage,
+  ProjectWorkspaceCreatePage,
+  ProjectsPage,
+} from './pages/KanbanPages.js';
 import { SettingsPage } from './pages/SettingsPage.js';
 import { PairDevicePage } from './pages/PairDevicePage.js';
 import { WorkspacesPage } from './pages/WorkspacesPage.js';
@@ -60,7 +77,8 @@ function AppChrome(): JSX.Element {
 
   const actions = useMemo(
     () => [
-      { id: 'home', label: 'Open session dashboard', run: () => navigate('/') },
+      { id: 'projects', label: 'Open projects', run: () => navigate('/projects') },
+      { id: 'runs', label: 'Open runs', run: () => navigate('/runs') },
       { id: 'new-session', label: 'Start session', run: () => navigate('/sessions/new') },
       { id: 'sessions', label: 'Browse sessions', run: () => navigate('/sessions') },
       { id: 'workspaces', label: 'Open workspaces', run: () => navigate('/workspaces') },
@@ -82,29 +100,49 @@ function AppChrome(): JSX.Element {
         <TopBar pathname={location.pathname} onOpenPalette={() => setPaletteOpen(true)} />
         <div className="webui-page">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Navigate to="/projects" replace />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/sessions" element={<SessionsPage />} />
             <Route path="/sessions/new" element={<NewRunPage />} />
-            <Route path="/workspaces" element={<WorkspacesPage />} />
             <Route path="/sessions/pending/:runId" element={<SessionPendingPage />} />
             <Route path="/runs/:runId" element={<SessionPendingPage />} />
             <Route path="/sessions/:sessionId" element={<SessionDetailPage />} />
             <Route path="/sessions/:agent/:sessionId" element={<LegacySessionRouteRedirect />} />
-            <Route path="/inbox" element={<HookInboxPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/pair-device" element={<PairDevicePage />} />
+            <Route element={<KanbanLayout />}>
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/projects/:projectId/board" element={<ProjectBoardPage />} />
+              <Route path="/projects/:projectId/list" element={<ProjectListPage />} />
+              <Route path="/projects/:projectId/issues/new" element={<ProjectIssueCreatePage />} />
+              <Route path="/projects/:projectId/issues/:issueId" element={<ProjectIssuePage />} />
+              <Route path="/projects/:projectId/workspaces/new" element={<ProjectWorkspaceCreatePage />} />
+              <Route path="/projects/:projectId/issues/:issueId/workspace/new" element={<IssueWorkspaceCreatePage />} />
+              <Route path="/issues/:issueId" element={<IssueDetailPage />} />
+              <Route path="/runs" element={<KanbanRunsPage />} />
+              <Route path="/workspaces" element={<KanbanWorkspacesPage />} />
+              <Route path="/workspaces/new" element={<HostWorkspaceCreatePage />} />
+              <Route path="/inbox" element={<KanbanInboxPage />} />
+              <Route path="/automations" element={<AutomationsPage />} />
+              <Route path="/settings" element={<KanbanSettingsPage />} />
+            </Route>
+            <Route path="/legacy-home" element={<HomePage />} />
+            <Route path="/legacy-workspaces" element={<WorkspacesPage />} />
+            <Route path="/legacy-inbox" element={<HookInboxPage />} />
+            <Route path="/legacy-settings" element={<SettingsPage />} />
           </Routes>
         </div>
       </div>
       <CommandPalette actions={actions} open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <nav className="webui-rail">
-        <NavLink to="/">Sessions</NavLink>
+        <NavLink to="/projects">Projects</NavLink>
+        <NavLink to="/runs">Runs</NavLink>
         <NavLink to="/agents">Agents</NavLink>
         <NavLink to="/sessions">Sessions</NavLink>
         <NavLink to="/sessions/new">New Session</NavLink>
         <NavLink to="/workspaces">Workspaces</NavLink>
         <NavLink to="/inbox">Inbox</NavLink>
+        <NavLink to="/automations">Automations</NavLink>
+        <NavLink to="/settings">Settings</NavLink>
       </nav>
     </div>
   );

@@ -48,7 +48,6 @@ Use it to answer three questions quickly:
 
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
-| `packages/kanban` | Public package | [packages/kanban/README.md](../packages/kanban/README.md) | — | README is the canonical package-level contract. |
 | `packages/observer-dashboard` | Public package | [packages/observer-dashboard/README.md](../packages/observer-dashboard/README.md) | — | README is the canonical package-level contract. |
 
 ## Public package families

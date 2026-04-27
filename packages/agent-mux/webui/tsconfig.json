@@ -9,7 +9,20 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["react", "vite/client"],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@a5c-ai/agent-mux-core": ["../core/src/index.ts"],
+      "@a5c-ai/agent-mux-core/automation": ["../core/src/automation.ts"],
+      "@a5c-ai/agent-mux-core/browser": ["../core/src/browser.ts"],
+      "@a5c-ai/agent-mux-core/kanban": ["../core/src/kanban.ts"],
+      "@a5c-ai/agent-mux-ui": ["../ui/src/index.ts"],
+      "@a5c-ai/agent-mux-ui/gateway": ["../ui/src/gateway.ts"],
+      "@a5c-ai/agent-mux-ui/session-flow": ["../ui/src/session-flow.ts"],
+      "@/*": ["src/kanban/*"],
+      "next/link": ["src/kanban-shims/next-link.tsx"],
+      "next/navigation": ["src/kanban-shims/next-navigation.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],

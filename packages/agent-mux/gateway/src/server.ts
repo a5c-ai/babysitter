@@ -21,6 +21,7 @@ import { decodeFrame } from './protocol/frames.js';
 import { GATEWAY_CLOSE_CODES } from './protocol/errors.js';
 import type { AuthFrame, GatewayFrame } from './protocol/v1.js';
 import { RunManager } from './runs/manager.js';
+import { registerKanbanRoutes } from './kanban/routes.js';
 import { resolveWebuiRoot, serveWebuiRequest } from './static/webui-server.js';
 
 export interface GatewayServer {
@@ -145,6 +146,8 @@ export function createGatewayServer(
       },
     }),
   );
+
+  registerKanbanRoutes(app);
 
   async function requireAuth(authorization: string | undefined): Promise<TokenRecord | null> {
     return await authenticateBearerToken(tokenStore, authorization);

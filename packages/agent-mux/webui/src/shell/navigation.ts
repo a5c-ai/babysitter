@@ -1,13 +1,18 @@
 export function titleForPath(pathname: string): string {
-  if (pathname === '/') return 'Sessions';
+  if (pathname === '/') return 'Projects';
+  if (pathname === '/projects') return 'Projects';
+  if (pathname === '/runs') return 'Runs';
+  if (pathname === '/automations') return 'Automations';
   if (pathname === '/sessions') return 'Sessions';
   if (pathname === '/sessions/new') return 'New Session';
   if (pathname.startsWith('/sessions/pending/')) return 'Creating Session';
   if (pathname.startsWith('/sessions/')) return 'Session Chat';
+  if (pathname.startsWith('/projects/')) return 'Project';
   if (pathname.startsWith('/runs/')) return 'Creating Session';
   if (pathname === '/agents') return 'Agents';
   if (pathname === '/inbox') return 'Hook Inbox';
   if (pathname === '/pair-device') return 'Pair Device';
+  if (pathname === '/workspaces') return 'Workspaces';
   if (pathname === '/settings') return 'Settings';
   return pathname;
 }
