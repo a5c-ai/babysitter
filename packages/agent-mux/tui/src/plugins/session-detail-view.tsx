@@ -77,11 +77,22 @@ export function SessionDetailView({
     }
   }
 
+  async function doWatch() {
+    if (!selection) return;
+    setState((s) => ({
+      ...s,
+      exportNote: 'live watch follows the selected session in chat',
+    }));
+    emit({ type: 'status', message: `Following ${selection.agent}/${selection.sessionId} in chat…` });
+    emit({ type: 'session:select', agent: selection.agent, sessionId: selection.sessionId });
+    emit({ type: 'view:switch', id: 'chat' });
+  }
   useInput(
     (input, key) => {
       if (!selection) return;
       if (input === 'e') void doExport('json');
       else if (input === 'm') void doExport('markdown');
+      else if (input === 'w') void doWatch();
       else if (input === 'r') {
         emit({ type: 'session:select', agent: selection.agent, sessionId: selection.sessionId });
         emit({ type: 'view:switch', id: 'chat' });
@@ -103,8 +114,8 @@ export function SessionDetailView({
     : d.sessionId;
   const backLabel = returnViewId && returnViewId !== 'sessions' ? `back to ${returnViewId}` : 'back';
   const actionLines = compact
-    ? ['e json · m markdown', `r resume · b/Esc ${backLabel}`]
-    : [`e: export json · m: export markdown · r: resume · b/Esc: ${backLabel}`];
+    ? ['e json · m markdown · w follow', `r resume · b/Esc ${backLabel}`]
+    : [`e: export json · m: export markdown · w: follow in chat · r: resume · b/Esc: ${backLabel}`];
   return (
     <Box flexDirection="column">
       {compact ? (

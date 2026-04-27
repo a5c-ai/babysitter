@@ -54,6 +54,7 @@ describe('SessionDetailView', () => {
     expect(f).toContain('$0.1234');
     expect(f).toContain('demo');
     expect(f).toContain('m: export markdown');
+    expect(f).toContain('w: follow in chat');
     expect(f).toContain('r: resume');
   });
 
@@ -132,6 +133,48 @@ describe('SessionDetailView', () => {
       message: 'Exported markdown (12 chars)',
     });
     expect(lastFrame()).toContain('exported markdown (12 chars)');
+  });
+
+  it('w key follows the selected session in chat via session selection', async () => {
+    const client = makeClient();
+    const stream = new EventStream();
+    const emit = vi.fn<(event: unknown) => void>();
+    const { stdin, rerender, lastFrame } = render(
+      <SessionDetailView
+        client={client}
+        active={true}
+        eventStream={stream}
+        emit={emit}
+        selection={{ agent: 'claude-code', sessionId: 's1' }}
+      />,
+    );
+    await flush();
+    rerender(
+      <SessionDetailView
+        client={client}
+        active={true}
+        eventStream={stream}
+        emit={emit}
+        selection={{ agent: 'claude-code', sessionId: 's1' }}
+      />,
+    );
+    stdin.write('w');
+    await flush();
+    expect(lastFrame()).toContain('live watch follows the selected session in chat');
+    expect(emit.mock.calls.map((c) => c[0])).toContainEqual({
+      type: 'status',
+      message: 'Following claude-code/s1 in chat…',
+    });
+    expect(emit.mock.calls.map((c) => c[0])).toContainEqual({
+      type: 'session:select',
+      agent: 'claude-code',
+      sessionId: 's1',
+    });
+    expect(emit.mock.calls.map((c) => c[0])).toContainEqual({
+      type: 'view:switch',
+      id: 'chat',
+    });
+    expect(stream.snapshot()).toEqual([]);
   });
 
   it('r key emits session selection and switches to chat', async () => {
