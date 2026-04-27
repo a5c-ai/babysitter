@@ -34,12 +34,12 @@ describe("kanban workspace MCP tools", () => {
           snapshot: {
             generatedAt: "2026-04-26T00:00:00.000Z",
             projects: [],
-            issues: [
-              {
-                id: "KANBAN-001",
-                key: "KANBAN-001",
-                title: "Wire the workspace list",
-                projectId: "kanban-app",
+              issues: [
+                {
+                  id: "KANBAN-001",
+                  key: "KANBAN-001",
+                  title: "Wire the workspace list",
+                  projectId: "kanban-app",
                 status: "ready",
                 priority: "high",
                 labels: [],
@@ -149,6 +149,7 @@ describe("kanban workspace MCP tools", () => {
 
     expect(result.isError).toBeUndefined();
     expect(workspaces[0]?.issues?.[0]?.issueKey).toBe("KANBAN-001");
+    expect((workspaces[0]?.issues?.[0] as { projectKey?: string } | undefined)?.projectKey).toBe("kanban-app");
   });
 
   it("applies an action and returns the refreshed inventory", async () => {

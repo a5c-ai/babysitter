@@ -110,6 +110,13 @@ export default function ProjectsPage() {
                 <ListTodo className="h-4 w-4" />
                 Open list
               </Link>
+              <Link
+                href={`/projects/${project.id}/workspaces/new`}
+                className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground"
+              >
+                <FolderGit2 className="h-4 w-4" />
+                Create workspace
+              </Link>
               <span className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground-muted">
                 <Users className="h-4 w-4" />
                 {project.team.members.length} teammates on this board

@@ -16,6 +16,10 @@ import type {
 } from "@a5c-ai/agent-mux-core";
 import type { KanbanReviewSummary } from "@a5c-ai/agent-mux-core";
 import type {
+  KanbanWorkspaceOwnershipHostSummary,
+  KanbanWorkspaceOwnershipIssueSummary,
+  KanbanWorkspaceOwnershipProjectSummary,
+  KanbanWorkspaceOwnershipSummary,
   KanbanWorkspaceAction,
   KanbanWorkspaceActionResult,
   KanbanWorkspaceInventory,
@@ -49,6 +53,17 @@ export interface WorkspaceProvisionResult {
   branchName: string;
 }
 
+export interface WorkspaceProvisionOwnershipInput {
+  source:
+    | "created-from-issue"
+    | "linked-existing-workspace"
+    | "created-from-project"
+    | "created-from-host";
+  project?: KanbanWorkspaceOwnershipProjectSummary;
+  issue?: KanbanWorkspaceOwnershipIssueSummary;
+  host?: KanbanWorkspaceOwnershipHostSummary;
+}
+
 interface WorkspaceRegistryEntry {
   path: string;
   name?: string;
@@ -61,6 +76,7 @@ interface WorkspaceRegistryEntry {
   notes?: string | null;
   notesUpdatedAt?: string | null;
   rebase?: WorkspaceRebaseSurface | null;
+  ownership?: WorkspaceProvisionOwnershipInput | null;
 }
 
 interface WorkspaceRegistryFile {
@@ -96,6 +112,7 @@ interface MutableWorkspaceRecord {
   notesUpdatedAt: string | null;
   lastActivityAtMs: number | null;
   rebase?: WorkspaceRebaseSurface;
+  ownership?: KanbanWorkspaceOwnershipSummary;
   sessions: WorkspaceSessionSnapshot[];
   runs: Array<{
     runId: string;
@@ -138,13 +155,8 @@ const defaultDeps: WorkspaceLifecycleDeps = {
   cwd: () => process.cwd(),
 };
 
-const importAgentMuxCore = new Function(
-  "specifier",
-  "return import(specifier)",
-) as (specifier: string) => Promise<typeof import("@a5c-ai/agent-mux-core")>;
-
 async function loadAgentMuxCore() {
-  return await importAgentMuxCore("@a5c-ai/agent-mux-core");
+  return await import("@a5c-ai/agent-mux-core");
 }
 
 function cloneRebaseSurface(rebase: WorkspaceRebaseSurface | null | undefined): WorkspaceRebaseSurface | undefined {
@@ -287,6 +299,66 @@ function buildReadyState(
 
 function normalizeWorkspacePath(workspacePath: string): string {
   return path.resolve(workspacePath);
+}
+
+function normalizeOwnershipValue(
+  ownership: WorkspaceProvisionOwnershipInput | KanbanWorkspaceOwnershipSummary | null | undefined,
+): KanbanWorkspaceOwnershipSummary | undefined {
+  if (!ownership) {
+    return undefined;
+  }
+
+  const project = ownership.project?.projectId
+    ? {
+        projectId: ownership.project.projectId,
+        projectKey: ownership.project.projectKey,
+        projectName: ownership.project.projectName,
+      }
+    : undefined;
+  const issue = ownership.issue?.issueId
+    ? {
+        issueId: ownership.issue.issueId,
+        issueKey: ownership.issue.issueKey,
+        issueTitle: ownership.issue.issueTitle,
+      }
+    : undefined;
+  const host = ownership.host?.provider
+    ? {
+        provider: ownership.host.provider,
+        label: ownership.host.label,
+        accountLabel: ownership.host.accountLabel,
+      }
+    : undefined;
+
+  return {
+    source: ownership.source,
+    project,
+    issue,
+    host,
+  };
+}
+
+function deriveOwnershipFromIssues(
+  linkedIssues: readonly WorkspaceIssueLink[],
+): KanbanWorkspaceOwnershipSummary | undefined {
+  const primaryIssue = linkedIssues[0];
+  if (!primaryIssue) {
+    return undefined;
+  }
+
+  return {
+    source: primaryIssue.source,
+    project: {
+      projectId: primaryIssue.projectId,
+      projectKey: primaryIssue.projectKey,
+      projectName: primaryIssue.projectName,
+    },
+    issue: {
+      issueId: primaryIssue.issueId,
+      issueKey: primaryIssue.issueKey,
+      issueTitle: primaryIssue.issueTitle,
+    },
+  };
 }
 
 function slugifyWorkspaceName(value: string): string {
@@ -604,6 +676,7 @@ export class WorkspaceLifecycleService {
       record.notes = entry.notes ?? "";
       record.notesUpdatedAt = entry.notesUpdatedAt ?? null;
       record.rebase = normalizeRebaseSurface(entry.rebase, record.path) ?? record.rebase;
+      record.ownership = normalizeOwnershipValue(entry.ownership) ?? record.ownership;
       if (entry.notesUpdatedAt) {
         const updatedAt = Date.parse(entry.notesUpdatedAt);
         if (Number.isFinite(updatedAt)) {
@@ -746,6 +819,10 @@ export class WorkspaceLifecycleService {
         const activeRuns = record.runs.filter((run) => isActiveRunStatus(run.status)).length;
         const rebase = normalizeRebaseSurface(record.rebase, record.path);
         const rebaseStatus = rebase?.status;
+        const linkedIssues = [...(linkedIssuesByWorkspacePath.get(record.path) ?? [])].sort((left, right) =>
+          left.issueKey.localeCompare(right.issueKey),
+        );
+        const ownership = record.ownership ?? deriveOwnershipFromIssues(linkedIssues);
 
         return {
           path: record.path,
@@ -804,9 +881,8 @@ export class WorkspaceLifecycleService {
             canRebaseAbort: rebaseStatus === "rebase-conflicts",
           },
           review: reviewByWorkspacePath.get(record.path),
-          issues: [...(linkedIssuesByWorkspacePath.get(record.path) ?? [])].sort((left, right) =>
-            left.issueKey.localeCompare(right.issueKey),
-          ),
+          issues: linkedIssues,
+          ownership,
         };
       })
       .sort((left, right) => {
@@ -835,20 +911,21 @@ export class WorkspaceLifecycleService {
     };
   }
 
-  async provisionWorkspaceForIssue(input: {
-    issueKey: string;
-    issueTitle: string;
+  async provisionWorkspace(input: {
+    workspaceName: string;
+    slugSeed?: string;
+    ownership?: WorkspaceProvisionOwnershipInput;
   }): Promise<WorkspaceProvisionResult> {
     const { resolveWorkspaceDefaultCwd, sharedWorkspaceService } = await this.getWorkspaceCore();
     const seedPath = normalizeWorkspacePath(this.deps.cwd());
     const cluster = await collectGitCluster(this.deps, seedPath);
     const sourcePath = cluster.gitRoot ?? seedPath;
-    const slugBase = slugifyWorkspaceName(input.issueKey || input.issueTitle);
+    const slugBase = slugifyWorkspaceName(input.slugSeed || input.workspaceName);
     const requestedBranchName = `vk/${slugBase}`;
 
     try {
       const created = await sharedWorkspaceService.createWorkspace({
-        name: input.issueKey,
+        name: input.workspaceName,
         repos: [{ path: sourcePath }],
         mode: "worktree",
         branchName: requestedBranchName,
@@ -861,7 +938,7 @@ export class WorkspaceLifecycleService {
       const registry = await readRegistry(this.deps);
       registry.workspaces[workspacePath] = {
         path: workspacePath,
-        name: input.issueKey,
+        name: input.workspaceName,
         gitRoot: repo?.gitRoot ?? cluster.gitRoot,
         commonDir: cluster.commonDir,
         branch: repo?.branch ?? requestedBranchName,
@@ -871,12 +948,13 @@ export class WorkspaceLifecycleService {
         notes: registry.workspaces[workspacePath]?.notes ?? "",
         notesUpdatedAt: registry.workspaces[workspacePath]?.notesUpdatedAt ?? null,
         rebase: registry.workspaces[workspacePath]?.rebase ?? null,
+        ownership: input.ownership ?? registry.workspaces[workspacePath]?.ownership ?? null,
       };
       await writeRegistry(this.deps, registry);
 
       return {
         workspacePath,
-        workspaceName: input.issueKey,
+        workspaceName: input.workspaceName,
         branchName: repo?.branch ?? requestedBranchName,
       };
     } catch {
@@ -915,7 +993,7 @@ export class WorkspaceLifecycleService {
 
     registry.workspaces[workspacePath] = {
       path: workspacePath,
-      name: input.issueKey,
+      name: input.workspaceName,
       gitRoot: cluster.gitRoot,
       commonDir: cluster.commonDir,
       branch: branchName,
@@ -925,14 +1003,27 @@ export class WorkspaceLifecycleService {
       notes: "",
       notesUpdatedAt: null,
       rebase: null,
+      ownership: input.ownership ?? null,
     };
     await writeRegistry(this.deps, registry);
 
     return {
       workspacePath,
-      workspaceName: input.issueKey,
+      workspaceName: input.workspaceName,
       branchName,
     };
+  }
+
+  async provisionWorkspaceForIssue(input: {
+    issueKey: string;
+    issueTitle: string;
+    ownership?: WorkspaceProvisionOwnershipInput;
+  }): Promise<WorkspaceProvisionResult> {
+    return this.provisionWorkspace({
+      workspaceName: input.issueKey,
+      slugSeed: input.issueKey || input.issueTitle,
+      ownership: input.ownership,
+    });
   }
 
   async applyAction(
@@ -960,6 +1051,7 @@ export class WorkspaceLifecycleService {
       notes: workspace?.notes.value ?? "",
       notesUpdatedAt: workspace?.notes.updatedAt ?? null,
       rebase: workspace?.rebase ?? null,
+      ownership: workspace?.ownership ?? null,
     };
 
     if (!workspace) {
@@ -992,6 +1084,7 @@ export class WorkspaceLifecycleService {
             notes: entry.notes,
             notesUpdatedAt: entry.notesUpdatedAt,
             rebase: entry.rebase,
+            ownership: entry.ownership,
           } satisfies WorkspaceRegistryEntry;
           if (managedPath !== workspacePath) {
             delete registry.workspaces[workspacePath];

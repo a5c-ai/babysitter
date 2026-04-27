@@ -169,6 +169,9 @@ describe("WorkspaceLifecycleService", () => {
               issueId: "KANBAN-GAP-008",
               issueKey: "KANBAN-GAP-008",
               issueTitle: "Add parent-child issue panel",
+              projectId: "kanban-app",
+              projectKey: "KANBAN",
+              projectName: "Kanban App",
               linkedAt: "2026-04-24T12:00:00.000Z",
               source: "linked-existing-workspace",
             },
@@ -176,6 +179,9 @@ describe("WorkspaceLifecycleService", () => {
               issueId: "KANBAN-GAP-007",
               issueKey: "KANBAN-GAP-007",
               issueTitle: "Add team and collaboration primitives",
+              projectId: "kanban-app",
+              projectKey: "KANBAN",
+              projectName: "Kanban App",
               linkedAt: "2026-04-24T11:00:00.000Z",
               source: "created-from-issue",
             },
@@ -498,6 +504,19 @@ describe("WorkspaceLifecycleService", () => {
     const result = await service.provisionWorkspaceForIssue({
       issueKey: "KANBAN-GAP-007",
       issueTitle: "Add issue to workspace linking parity",
+      ownership: {
+        source: "created-from-issue",
+        project: {
+          projectId: "kanban-app",
+          projectKey: "KANBAN",
+          projectName: "Kanban App",
+        },
+        issue: {
+          issueId: "KANBAN-GAP-007",
+          issueKey: "KANBAN-GAP-007",
+          issueTitle: "Add issue to workspace linking parity",
+        },
+      },
     });
 
     expect(result).toEqual({
@@ -515,6 +534,15 @@ describe("WorkspaceLifecycleService", () => {
           path: provisionedWorkspacePath,
           branch: "vk/kanban-gap-007-2",
           gitRoot: mainPath,
+          ownership: expect.objectContaining({
+            source: "created-from-issue",
+            project: expect.objectContaining({
+              projectId: "kanban-app",
+            }),
+            issue: expect.objectContaining({
+              issueId: "KANBAN-GAP-007",
+            }),
+          }),
         }),
       },
     });

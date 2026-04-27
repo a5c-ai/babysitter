@@ -104,6 +104,15 @@ function workspaceHref(cwd: string): string {
   return `/workspaces?workspace=${encodeURIComponent(cwd)}`;
 }
 
+function workspaceIssueHref(workspace: WorkspaceInventoryItem, issueId: string): string {
+  const projectId =
+    workspace.ownership?.project?.projectId ??
+    workspace.issues?.find((issue) => issue.issueId === issueId)?.projectId;
+  return projectId
+    ? `/projects/${encodeURIComponent(projectId)}/issues/${encodeURIComponent(issueId)}`
+    : `/issues/${encodeURIComponent(issueId)}`;
+}
+
 function nextActivePanel(
   visibility: WorkspacePanelVisibility,
   current: WorkspacePanelKey,
@@ -680,6 +689,14 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                     Updated {formatSessionUpdatedAt(props.activeSession.updatedAt)}
                   </p>
                 ) : null}
+                {props.workspace.ownership ? (
+                  <div className="mt-3 text-xs text-foreground-muted" data-testid="workspace-ownership-summary">
+                    <span className="font-semibold text-foreground">Owner:</span>{" "}
+                    {props.workspace.ownership.project ? props.workspace.ownership.project.projectKey : "Unassigned"}
+                    {props.workspace.ownership.issue ? ` / ${props.workspace.ownership.issue.issueKey}` : ""}
+                    {props.workspace.ownership.host ? ` · ${props.workspace.ownership.host.label}` : ""}
+                  </div>
+                ) : null}
               </div>
               <label className="w-full xl:max-w-sm">
                 <span className="sr-only">Select workspace session</span>
@@ -705,7 +722,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                 (props.workspace.issues ?? []).map((issue) => (
                   <Link
                     key={`${props.workspace.path}-${issue.issueId}`}
-                    href={`/issues/${encodeURIComponent(issue.issueId)}`}
+                    href={workspaceIssueHref(props.workspace, issue.issueId)}
                     className="rounded-full border border-border px-3 py-1.5 text-xs text-primary"
                     data-testid={`workspace-issue-link-${issue.issueKey}`}
                   >

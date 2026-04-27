@@ -188,16 +188,20 @@ function workspaceShellHref(workspacePath: string): string {
   return `/workspaces?workspace=${encodeURIComponent(workspacePath)}`;
 }
 
-function issuePageHref(issueId: string): string {
-  return `/issues/${encodeURIComponent(issueId)}`;
-}
-
 function projectIssueHref(projectId: string, issueId: string): string {
   return `/projects/${encodeURIComponent(projectId)}/issues/${encodeURIComponent(issueId)}`;
 }
 
 function projectIssueCreateHref(projectId: string): string {
   return `/projects/${encodeURIComponent(projectId)}/issues/new`;
+}
+
+function projectWorkspaceCreateHref(projectId: string): string {
+  return `/projects/${encodeURIComponent(projectId)}/workspaces/new`;
+}
+
+function projectIssueWorkspaceCreateHref(projectId: string, issueId: string): string {
+  return `/projects/${encodeURIComponent(projectId)}/issues/${encodeURIComponent(issueId)}/workspace/new`;
 }
 
 function workspaceLifecycleTone(status: string): string {
@@ -2158,7 +2162,7 @@ interface IssueDetailPanelProps {
   }) => Promise<void>;
   workspaceInventory: IssueWorkspaceInventoryState;
   onRefreshWorkspaceInventory: () => void;
-  onCreateIssueWorkspace: (issueId: string) => Promise<void>;
+  onCreateIssueWorkspace: (issue: KanbanIssue) => void;
   onLinkIssueWorkspace: (input: { issueId: string; workspacePath: string }) => Promise<void>;
   onOpenWorkspacePath: (workspacePath?: string) => void;
 }
@@ -3253,7 +3257,7 @@ function IssueDetailPanel({
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => void onCreateIssueWorkspace(issue.id).then(() => onRefreshWorkspaceInventory())}
+              onClick={() => onCreateIssueWorkspace(issue)}
               disabled={mutating}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 text-xs font-semibold text-primary disabled:opacity-50"
             >
@@ -4157,7 +4161,7 @@ export function BacklogOverview({
           onSaveDispatchContextLabels={updateIssueDispatchContextLabels}
           workspaceInventory={workspaceInventory}
           onRefreshWorkspaceInventory={refreshWorkspaceInventory}
-          onCreateIssueWorkspace={createIssueWorkspace}
+          onCreateIssueWorkspace={openIssueWorkspaceCreate}
           onLinkIssueWorkspace={linkIssueWorkspace}
           onOpenWorkspacePath={openWorkspacePath}
         />
@@ -4454,7 +4458,7 @@ export function BacklogOverview({
     }
   }
 
-  const setFocusedIssue = (issue: KanbanIssue) => {
+  function setFocusedIssue(issue: KanbanIssue) {
     if (routeMode === "issue") {
       router.push(projectIssueHref(issue.projectId, issue.id));
       return;
@@ -4464,9 +4468,9 @@ export function BacklogOverview({
     params.set("issueId", issue.id);
     params.set("issueKey", issue.key);
     router.push(`${currentSurfacePath}?${params.toString()}`);
-  };
+  }
 
-  const clearFocusedIssue = () => {
+  function clearFocusedIssue() {
     if (routeMode === "issue" || routeMode === "create") {
       router.push("/");
       return;
@@ -4476,9 +4480,9 @@ export function BacklogOverview({
     params.delete("issueKey");
     const query = params.toString();
     router.push(query ? `${currentSurfacePath}?${query}` : currentSurfacePath);
-  };
+  }
 
-  const refreshWorkspaceInventory = () => {
+  function refreshWorkspaceInventory() {
     if (!focusedIssue) {
       return;
     }
@@ -4498,11 +4502,15 @@ export function BacklogOverview({
           error: cause instanceof Error ? cause.message : String(cause),
         });
       });
-  };
+  }
 
-  const openWorkspacePath = (workspacePath?: string) => {
+  function openWorkspacePath(workspacePath?: string) {
     router.push(workspacePath ? workspaceShellHref(workspacePath) : "/workspaces");
-  };
+  }
+
+  function openIssueWorkspaceCreate(issue: KanbanIssue) {
+    router.push(projectIssueWorkspaceCreateHref(issue.projectId, issue.id));
+  }
 
   const activeSidePanel = focusedIssue ? "issue" : createMode ? "create" : null;
 
@@ -4719,6 +4727,15 @@ export function BacklogOverview({
           >
             <Plus className="h-4 w-4" />
             Create issue
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push(projectWorkspaceCreateHref(primaryProject.id))}
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground"
+            data-testid="board-header-create-workspace"
+          >
+            <FolderGit2 className="h-4 w-4" />
+            Create workspace
           </button>
         </div>
       </div>
@@ -5231,7 +5248,7 @@ export function BacklogOverview({
             onSaveDispatchContextLabels={updateIssueDispatchContextLabels}
             workspaceInventory={workspaceInventory}
             onRefreshWorkspaceInventory={refreshWorkspaceInventory}
-            onCreateIssueWorkspace={createIssueWorkspace}
+            onCreateIssueWorkspace={openIssueWorkspaceCreate}
             onLinkIssueWorkspace={linkIssueWorkspace}
             onOpenWorkspacePath={openWorkspacePath}
           />

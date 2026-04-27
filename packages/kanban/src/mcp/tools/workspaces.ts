@@ -56,14 +56,19 @@ function buildLinkedIssuesByWorkspacePath(
   overview: BacklogOverview,
 ): ReadonlyMap<string, readonly WorkspaceIssueLink[]> {
   const map = new Map<string, WorkspaceIssueLink[]>();
+  const projectById = new Map(overview.snapshot.projects.map((project) => [project.id, project] as const));
 
   for (const issue of overview.snapshot.issues) {
+    const project = projectById.get(issue.projectId);
     for (const workspaceLink of issue.workspaceLinks ?? []) {
       const current = map.get(workspaceLink.workspacePath) ?? [];
       current.push({
         issueId: issue.id,
         issueKey: issue.key,
         issueTitle: issue.title,
+        projectId: issue.projectId,
+        projectKey: project?.key ?? issue.projectId,
+        projectName: project?.name ?? issue.projectId,
         linkedAt: workspaceLink.linkedAt,
         source: workspaceLink.source,
       });

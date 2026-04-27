@@ -442,6 +442,9 @@ function buildWorkspaceInventoryPayload() {
             issueId: "KANBAN-GAP-007",
             issueKey: "KANBAN-GAP-007",
             issueTitle: "Add team and collaboration primitives",
+            projectId: "kanban-app",
+            projectKey: "KANBAN",
+            projectName: "Kanban App",
             linkedAt: "2026-04-24T14:00:00.000Z",
             source: "created-from-issue",
           },
@@ -746,7 +749,7 @@ describe("BacklogOverview", () => {
     expect(screen.getByTestId("issue-description-editor")).toHaveValue(
       "# Current state\n- [ ] Capture parity behavior",
     );
-    expect(screen.getByText("parity")).toBeInTheDocument();
+    expect(screen.getAllByText("parity").length).toBeGreaterThan(0);
     expect(screen.getByTestId("issue-relationship-panel")).toBeInTheDocument();
     expect(dispatchPanel).toBeInTheDocument();
     expect(within(dispatchPanel).getByText("Dispatch Context Labels")).toBeInTheDocument();
@@ -754,7 +757,7 @@ describe("BacklogOverview", () => {
     expect(screen.getByTestId("child-nav-KANBAN-GAP-008")).toBeInTheDocument();
     expect(screen.getByTestId("create-sub-issue-form")).toBeInTheDocument();
     expect(screen.getByTestId("link-child-issue-form")).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: /KANBAN-GAP-009/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("option", { name: /KANBAN-GAP-009/i }).length).toBeGreaterThan(0);
   });
 
   it("saves dispatch context label attachments from the focused issue panel", async () => {
@@ -819,15 +822,15 @@ describe("BacklogOverview", () => {
     expect(push).toHaveBeenCalledWith("/workspaces?workspace=%2Frepo%2Fworktrees%2Fgap-007");
   });
 
-  it("creates a workspace directly from the issue panel", async () => {
+  it("opens the issue-scoped workspace create route from the issue panel", async () => {
     const user = setupUser();
     searchParams = new URLSearchParams("issueId=KANBAN-GAP-007&issueKey=KANBAN-GAP-007");
-    createIssueWorkspaceMock.mockResolvedValue(undefined);
 
     render(<BacklogOverview />);
 
-    await user.click(await screen.findByRole("button", { name: "Create workspace" }));
-    expect(createIssueWorkspaceMock).toHaveBeenCalledWith("KANBAN-GAP-007");
+    const workspacePanel = await screen.findByTestId("issue-workspace-panel");
+    await user.click(within(workspacePanel).getByRole("button", { name: "Create workspace" }));
+    expect(push).toHaveBeenCalledWith("/projects/kanban-app/issues/KANBAN-GAP-007/workspace/new");
   });
 
   it("links an existing workspace from the issue panel", async () => {
@@ -1184,6 +1187,10 @@ describe("BacklogOverview", () => {
 
     await user.click(screen.getByRole("button", { name: "List view" }));
     expect(push).toHaveBeenCalledWith("/projects/kanban-app/list");
+
+    push.mockReset();
+    await user.click(screen.getByTestId("board-header-create-workspace"));
+    expect(push).toHaveBeenCalledWith("/projects/kanban-app/workspaces/new");
 
     push.mockReset();
     await user.click(screen.getByTestId("open-issue-KANBAN-GAP-007"));

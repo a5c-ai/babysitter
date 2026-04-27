@@ -120,6 +120,12 @@ vi.mock("@/components/workspaces/workspace-runtime-panel", () => ({
   ),
 }));
 
+vi.mock("@/components/sessions/session-conversation-surface", () => ({
+  SessionConversationSurface: ({ sessionId }: { sessionId?: string }) => (
+    <div data-testid="session-conversation-surface">conversation {sessionId ?? "none"}</div>
+  ),
+}));
+
 describe("workspaces-page helpers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -130,12 +136,12 @@ describe("workspaces-page helpers", () => {
     workspaceReviewActionMock.mockResolvedValue(undefined);
   });
 
-  it("describes session-backed ownership when the gateway is connected", () => {
+  it("falls back to session attachment copy before inventory ownership loads", () => {
     expect(
       getWorkspaceOwnershipLabel(true, [
         { sessionId: "session-1", agent: "codex", status: "active", cwd: "/repo/worktrees/task" },
       ]),
-    ).toBe("1 agent-mux sessions enriching workspace ownership");
+    ).toBe("1 live session attached to the current workspace inventory");
   });
 
   it("falls back to local inventory copy when the gateway is disconnected", () => {
@@ -469,7 +475,7 @@ describe("workspaces-page helpers", () => {
       }),
     );
 
-    render(<WorkspacesPageContent isAuthenticated sessions={[]} mode="attention" />);
+    const { container } = render(<WorkspacesPageContent isAuthenticated sessions={[]} mode="attention" />);
 
     await waitFor(() => {
       expect(screen.getByText("Workspaces that need attention")).toBeInTheDocument();
@@ -477,7 +483,7 @@ describe("workspaces-page helpers", () => {
 
     expect(screen.getByText("review")).toBeInTheDocument();
     expect(screen.getByText("recovery")).toBeInTheDocument();
-    expect(screen.queryByText("clean")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-workspace-path="/repo/worktrees/clean"]')).toBeNull();
     expect(screen.getByText("Review pending")).toBeInTheDocument();
     expect(screen.getByText("Recovery required")).toBeInTheDocument();
   });
@@ -1209,6 +1215,9 @@ describe("workspaces-page helpers", () => {
                 issueId: "KANBAN-GAP-007",
                 issueKey: "KANBAN-GAP-007",
                 issueTitle: "Add team and collaboration primitives",
+                projectId: "kanban-app",
+                projectKey: "KANBAN",
+                projectName: "Kanban App",
                 linkedAt: "2026-04-24T12:00:00.000Z",
                 source: "created-from-issue",
               },
@@ -1301,7 +1310,7 @@ describe("workspaces-page helpers", () => {
     expect(screen.getByTestId("workspace-session-select")).toHaveValue("session-1");
     expect(screen.getByTestId("workspace-issue-link-KANBAN-GAP-007")).toHaveAttribute(
       "href",
-      "/issues/KANBAN-GAP-007",
+      "/projects/kanban-app/issues/KANBAN-GAP-007",
     );
     expect(screen.getByText("observability session-1")).toBeInTheDocument();
     expect(screen.getByText("runtime session-1")).toBeInTheDocument();

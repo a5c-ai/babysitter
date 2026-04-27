@@ -81,10 +81,46 @@ function accumulateEventCost(
 export function getWorkspaceOwnershipLabel(
   isAuthenticated: boolean,
   sessions: WorkspaceSessionSnapshot[],
+  workspaces: WorkspaceInventoryItem[] = [],
 ): string {
+  if (workspaces.length > 0) {
+    const issueOwned = workspaces.filter((workspace) => Boolean(workspace.ownership?.issue)).length;
+    const projectOwned = workspaces.filter((workspace) => workspace.ownership?.source === "created-from-project").length;
+    const hostOwned = workspaces.filter((workspace) => workspace.ownership?.source === "created-from-host").length;
+    return `Explicit ownership: ${issueOwned} issue, ${projectOwned} project, ${hostOwned} host`;
+  }
+
   return isAuthenticated
-    ? `${sessions.length} agent-mux sessions enriching workspace ownership`
+    ? `${sessions.length} live session${sessions.length === 1 ? "" : "s"} attached to the current workspace inventory`
     : "Gateway disconnected: inventory falls back to local git worktrees and archived workspace metadata";
+}
+
+function issueHref(
+  workspace: Pick<WorkspaceInventoryItem, "ownership" | "issues">,
+  issueId: string,
+): string {
+  const projectId =
+    workspace.ownership?.project?.projectId ??
+    workspace.issues?.find((issue) => issue.issueId === issueId)?.projectId;
+  return projectId
+    ? `/projects/${encodeURIComponent(projectId)}/issues/${encodeURIComponent(issueId)}`
+    : `/issues/${encodeURIComponent(issueId)}`;
+}
+
+function ownershipSummary(workspace: WorkspaceInventoryItem): string | null {
+  if (workspace.ownership?.issue && workspace.ownership.project) {
+    return `${workspace.ownership.project.projectKey} / ${workspace.ownership.issue.issueKey}`;
+  }
+  if (workspace.ownership?.source === "created-from-host" && workspace.ownership.project && workspace.ownership.host) {
+    return `${workspace.ownership.project.projectKey} / ${workspace.ownership.host.label}`;
+  }
+  if (workspace.ownership?.project) {
+    return `${workspace.ownership.project.projectKey} project`;
+  }
+  if (workspace.ownership?.host) {
+    return `${workspace.ownership.host.label} host`;
+  }
+  return null;
 }
 
 export async function loadInventory(sessions: WorkspaceSessionSnapshot[]): Promise<WorkspaceInventoryResponse> {
@@ -845,7 +881,7 @@ export function WorkspacesPageContent(props: {
           </div>
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="primary">
-              <Link href="/sessions/new">Provision workspace</Link>
+              <Link href="/workspaces/new">Provision workspace</Link>
             </Button>
             <Button variant="outline" onClick={refreshInventory} disabled={loading || isPending}>
               <RefreshCw className="mr-2 h-4 w-4" />
@@ -864,7 +900,10 @@ export function WorkspacesPageContent(props: {
 
         <div className="mt-5 flex flex-wrap gap-3 text-sm text-foreground-muted">
           <span className="rounded-full border border-border px-3 py-1.5">
-            {getWorkspaceOwnershipLabel(props.isAuthenticated, props.sessions)}
+            {getWorkspaceOwnershipLabel(props.isAuthenticated, props.sessions, workspaces)}
+          </span>
+          <span className="rounded-full border border-border px-3 py-1.5">
+            {props.sessions.length} live session{props.sessions.length === 1 ? "" : "s"} attached
           </span>
           <span className="rounded-full border border-border px-3 py-1.5">
             Cleanup only unlocks for archived worktrees with no active sessions or pending runs.
@@ -1136,6 +1175,11 @@ function WorkspaceColumn(props: {
                   <p className="mt-2 font-mono text-xs text-foreground-muted" title={workspace.path}>
                     {truncatePath(workspace.path)}
                   </p>
+                  {ownershipSummary(workspace) ? (
+                    <p className="mt-2 text-sm text-foreground-muted">
+                      Owned by <span className="font-medium text-foreground">{ownershipSummary(workspace)}</span>
+                    </p>
+                  ) : null}
                   {attentionReasons.length > 0 ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {attentionReasons.map((reason) => (
@@ -1196,7 +1240,7 @@ function WorkspaceColumn(props: {
                   {(workspace.issues ?? []).map((issue) => (
                     <Link
                       key={`${workspace.path}-${issue.issueId}`}
-                      href={`/issues/${encodeURIComponent(issue.issueId)}`}
+                      href={issueHref(workspace, issue.issueId)}
                       className="rounded-full border border-border px-2.5 py-1 text-xs text-primary"
                     >
                       {issue.issueKey}

@@ -765,8 +765,40 @@ export interface KanbanWorkspaceIssueSummary {
   readonly issueId: string;
   readonly issueKey: string;
   readonly issueTitle: string;
+  readonly projectId: string;
+  readonly projectKey: string;
+  readonly projectName: string;
   readonly linkedAt: string;
   readonly source: 'created-from-issue' | 'linked-existing-workspace';
+}
+
+export interface KanbanWorkspaceOwnershipProjectSummary {
+  readonly projectId: string;
+  readonly projectKey: string;
+  readonly projectName: string;
+}
+
+export interface KanbanWorkspaceOwnershipIssueSummary {
+  readonly issueId: string;
+  readonly issueKey: string;
+  readonly issueTitle: string;
+}
+
+export interface KanbanWorkspaceOwnershipHostSummary {
+  readonly provider: KanbanIntegrationProvider;
+  readonly label: string;
+  readonly accountLabel?: string;
+}
+
+export interface KanbanWorkspaceOwnershipSummary {
+  readonly source:
+    | 'created-from-issue'
+    | 'linked-existing-workspace'
+    | 'created-from-project'
+    | 'created-from-host';
+  readonly project?: KanbanWorkspaceOwnershipProjectSummary;
+  readonly issue?: KanbanWorkspaceOwnershipIssueSummary;
+  readonly host?: KanbanWorkspaceOwnershipHostSummary;
 }
 
 export interface KanbanWorkspaceRunSummary {
@@ -838,6 +870,7 @@ export interface KanbanWorkspaceSummary {
   readonly actions: KanbanWorkspaceActionAvailability;
   readonly review?: KanbanReviewSummary;
   readonly issues?: readonly KanbanWorkspaceIssueSummary[];
+  readonly ownership?: KanbanWorkspaceOwnershipSummary;
 }
 
 export interface KanbanWorkspaceInventory {
