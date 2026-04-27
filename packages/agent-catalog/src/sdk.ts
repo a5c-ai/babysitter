@@ -12,6 +12,7 @@ import {
   HOST_SIGNAL_MAP,
   ONTOLOGY_SCHEMA,
   PLUGIN_TARGETS,
+  getCatalogDataState,
 } from "./data";
 import { getCatalogGraph, listGraphNodes, listRelationshipsByRelation } from "./graph";
 import { effectiveTransportMuxClaimStatus, shouldSurfaceTransportProtocol } from "./transport-mux-cutover";
@@ -76,27 +77,64 @@ const HARNESS_ALIASES: Record<string, string> = {
   pi: "pi",
 };
 
-const GRAPH = getCatalogGraph();
-const NODE_BY_ID = new Map(GRAPH.nodes.map((node) => [node.id, node] as const));
-const OUTGOING_BY_NODE = groupEdgesBy(GRAPH.edges, "from");
-const INCOMING_BY_NODE = groupEdgesBy(GRAPH.edges, "to");
+interface SdkState {
+  graph: CatalogGraph;
+  nodeById: Map<string, GraphNode>;
+  outgoingByNode: Map<string, GraphRelationship[]>;
+  incomingByNode: Map<string, GraphRelationship[]>;
+  agentByKey: Map<string, AgentVersion>;
+  providerVersionByKey: Map<string, ModelProviderVersion>;
+  modelVersionByKey: Map<string, ModelVersion>;
+  transportById: Map<string, TransportDescriptor>;
+  capabilityById: Map<string, CapabilityDescriptor>;
+  modalityById: Map<string, ModalityDescriptor>;
+  sessionById: Map<string, SessionNuance>;
+  lifecycleById: Map<string, LifecycleNuance>;
+  hookById: Map<string, HookDescriptor>;
+  pluginTargetById: Map<string, PluginTargetDescriptor>;
+}
 
-const AGENT_BY_KEY = new Map(AGENT_CATALOG.agents.map((agent) => [versionKey(agent.agentId, agent.versionRange), agent] as const));
-const PROVIDER_VERSION_BY_KEY = new Map(
-  AGENT_CATALOG.providers.map((provider) => [versionKey(provider.providerId, provider.versionRange), provider] as const),
-);
-const MODEL_VERSION_BY_KEY = new Map(
-  AGENT_CATALOG.models.map((model) => [versionKey(model.modelId, model.versionRange), model] as const),
-);
-const TRANSPORT_BY_ID = new Map(AGENT_CATALOG.transports.map((transport) => [transport.transportId, transport] as const));
-const CAPABILITY_BY_ID = new Map(AGENT_CATALOG.capabilities.map((capability) => [capability.capabilityId, capability] as const));
-const MODALITY_BY_ID = new Map(AGENT_CATALOG.modalities.map((modality) => [modality.modalityId, modality] as const));
-const SESSION_BY_ID = new Map(AGENT_CATALOG.sessionNuances.map((nuance) => [nuance.nuanceId, nuance] as const));
-const LIFECYCLE_BY_ID = new Map(
-  AGENT_CATALOG.lifecycleNuances.map((nuance) => [nuance.nuanceId, nuance] as const),
-);
-const HOOK_BY_ID = new Map(HOOKS.map((hook) => [hook.hookId, hook] as const));
-const PLUGIN_TARGET_BY_ID = new Map(PLUGIN_TARGETS.map((target) => [target.targetId, target] as const));
+let cachedSdkState: SdkState | undefined;
+
+function buildSdkState(): SdkState {
+  const dataState = getCatalogDataState();
+  const graph = getCatalogGraph();
+  return {
+    graph,
+    nodeById: new Map(graph.nodes.map((node) => [node.id, node] as const)),
+    outgoingByNode: groupEdgesBy(graph.edges, "from"),
+    incomingByNode: groupEdgesBy(graph.edges, "to"),
+    agentByKey: new Map(dataState.agentCatalog.agents.map((agent) => [versionKey(agent.agentId, agent.versionRange), agent] as const)),
+    providerVersionByKey: new Map(
+      dataState.agentCatalog.providers.map((provider) => [versionKey(provider.providerId, provider.versionRange), provider] as const),
+    ),
+    modelVersionByKey: new Map(
+      dataState.agentCatalog.models.map((model) => [versionKey(model.modelId, model.versionRange), model] as const),
+    ),
+    transportById: new Map(dataState.agentCatalog.transports.map((transport) => [transport.transportId, transport] as const)),
+    capabilityById: new Map(
+      dataState.agentCatalog.capabilities.map((capability) => [capability.capabilityId, capability] as const),
+    ),
+    modalityById: new Map(dataState.agentCatalog.modalities.map((modality) => [modality.modalityId, modality] as const)),
+    sessionById: new Map(dataState.agentCatalog.sessionNuances.map((nuance) => [nuance.nuanceId, nuance] as const)),
+    lifecycleById: new Map(
+      dataState.agentCatalog.lifecycleNuances.map((nuance) => [nuance.nuanceId, nuance] as const),
+    ),
+    hookById: new Map(dataState.hooks.map((hook) => [hook.hookId, hook] as const)),
+    pluginTargetById: new Map(dataState.pluginTargets.map((target) => [target.targetId, target] as const)),
+  };
+}
+
+function getSdkState(): SdkState {
+  if (!cachedSdkState) {
+    cachedSdkState = buildSdkState();
+  }
+  return cachedSdkState;
+}
+
+export function clearAgentCatalogSdkCache(): void {
+  cachedSdkState = undefined;
+}
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -210,16 +248,16 @@ function uniqueBy<T>(values: T[], key: (value: T) => string): T[] {
 }
 
 function getNode(nodeId: string): GraphNode | undefined {
-  return NODE_BY_ID.get(nodeId);
+  return getSdkState().nodeById.get(nodeId);
 }
 
 function outgoingEdges(nodeId: string, relation?: string): GraphRelationship[] {
-  const edges = OUTGOING_BY_NODE.get(nodeId) ?? [];
+  const edges = getSdkState().outgoingByNode.get(nodeId) ?? [];
   return relation ? edges.filter((edge) => edge.relation === relation) : edges;
 }
 
 function incomingEdges(nodeId: string, relation?: string): GraphRelationship[] {
-  const edges = INCOMING_BY_NODE.get(nodeId) ?? [];
+  const edges = getSdkState().incomingByNode.get(nodeId) ?? [];
   return relation ? edges.filter((edge) => edge.relation === relation) : edges;
 }
 
@@ -467,8 +505,9 @@ function sortVersionScopedNodes<TNode extends GraphNode>(nodes: TNode[]): TNode[
 }
 
 function agentVersionNodes(agentIdOrAlias: string): GraphNode[] {
+  const graph = getSdkState().graph;
   const normalized = normalizeLookup(agentIdOrAlias);
-  const products = GRAPH.nodes.filter(
+  const products = graph.nodes.filter(
     (node) =>
       node.kind === "AgentProduct" &&
       (
@@ -481,7 +520,7 @@ function agentVersionNodes(agentIdOrAlias: string): GraphNode[] {
   const versionNodes = uniqueBy(
     [
       ...products.flatMap((product) => outgoingNodes(product.id, "has_version").filter((node) => node.kind === "AgentVersion")),
-      ...GRAPH.nodes.filter(
+      ...graph.nodes.filter(
         (node) =>
           node.kind === "AgentVersion" &&
           (
@@ -521,43 +560,43 @@ function resolveVersionNode(nodes: GraphNode[], selector?: string): GraphNode | 
 }
 
 function typedAgentVersionFromNode(node: GraphNode): AgentVersion | undefined {
-  return AGENT_BY_KEY.get(versionKey(valueAsString(node.agentId), valueAsString(node.versionRange)));
+  return getSdkState().agentByKey.get(versionKey(valueAsString(node.agentId), valueAsString(node.versionRange)));
 }
 
 function typedProviderVersionFromNode(node: GraphNode): ModelProviderVersion | undefined {
-  return PROVIDER_VERSION_BY_KEY.get(versionKey(valueAsString(node.providerId), valueAsString(node.versionRange)));
+  return getSdkState().providerVersionByKey.get(versionKey(valueAsString(node.providerId), valueAsString(node.versionRange)));
 }
 
 function typedModelVersionFromNode(node: GraphNode): ModelVersion | undefined {
-  return MODEL_VERSION_BY_KEY.get(versionKey(valueAsString(node.modelId), valueAsString(node.versionRange)));
+  return getSdkState().modelVersionByKey.get(versionKey(valueAsString(node.modelId), valueAsString(node.versionRange)));
 }
 
 function typedTransportFromNode(node: GraphNode): TransportDescriptor | undefined {
-  return TRANSPORT_BY_ID.get(valueAsString(node.runtimeId));
+  return getSdkState().transportById.get(valueAsString(node.runtimeId));
 }
 
 function typedCapabilityFromNode(node: GraphNode): CapabilityDescriptor | undefined {
-  return CAPABILITY_BY_ID.get(valueAsString(node.capabilityId));
+  return getSdkState().capabilityById.get(valueAsString(node.capabilityId));
 }
 
 function typedModalityFromNode(node: GraphNode): ModalityDescriptor | undefined {
-  return MODALITY_BY_ID.get(valueAsString(node.modalityId));
+  return getSdkState().modalityById.get(valueAsString(node.modalityId));
 }
 
 function typedSessionFromNode(node: GraphNode): SessionNuance | undefined {
-  return SESSION_BY_ID.get(valueAsString(node.sessionSemanticsId));
+  return getSdkState().sessionById.get(valueAsString(node.sessionSemanticsId));
 }
 
 function typedLifecycleFromNode(node: GraphNode): LifecycleNuance | undefined {
-  return LIFECYCLE_BY_ID.get(valueAsString(node.lifecycleSemanticsId));
+  return getSdkState().lifecycleById.get(valueAsString(node.lifecycleSemanticsId));
 }
 
 function typedHookFromNode(node: GraphNode): HookDescriptor | undefined {
-  return HOOK_BY_ID.get(valueAsString(node.hookId));
+  return getSdkState().hookById.get(valueAsString(node.hookId));
 }
 
 function typedPluginTargetFromNode(node: GraphNode): PluginTargetDescriptor | undefined {
-  return PLUGIN_TARGET_BY_ID.get(valueAsString(node.targetId));
+  return getSdkState().pluginTargetById.get(valueAsString(node.targetId));
 }
 
 function capabilitySupportNodesForSubject(subjectId: string): GraphNode[] {
@@ -922,7 +961,7 @@ export function getProviderModelTopology(providerId: string): ProviderModelTopol
 }
 
 export function listPackageSurfaces(): PackageSurfaceDescriptor[] {
-  return GRAPH.nodes.filter((node) => node.kind === "PackageSurface").map(toPackageSurface).map(clone);
+  return getSdkState().graph.nodes.filter((node) => node.kind === "PackageSurface").map(toPackageSurface).map(clone);
 }
 
 export function getPackageSurface(packageId: string): PackageSurfaceDescriptor | undefined {
@@ -936,7 +975,7 @@ export function listPackagesBySurfaceKind(surfaceKind: string): PackageSurfaceDe
 
 export function findPackageSurfaceByWorkspacePath(workspacePath: string): PackageSurfaceDescriptor | undefined {
   const normalized = workspacePath.trim();
-  const node = GRAPH.nodes.find(
+  const node = getSdkState().graph.nodes.find(
     (candidate) => candidate.kind === "PackageSurface" && valueAsString(candidate.workspacePath) === normalized,
   );
   return node ? clone(toPackageSurface(node)) : undefined;
@@ -960,7 +999,7 @@ export function listProcessesByPackage(packageId: string): ProcessDescriptor[] {
 }
 
 export function listPathDescriptors(): PathDescriptorRecord[] {
-  return GRAPH.nodes.filter((node) => node.kind === "PathDescriptor").map(toPathDescriptor).map(clone);
+  return getSdkState().graph.nodes.filter((node) => node.kind === "PathDescriptor").map(toPathDescriptor).map(clone);
 }
 
 export function getPathDescriptor(pathIdOrPath: string): PathDescriptorRecord | undefined {
@@ -969,9 +1008,9 @@ export function getPathDescriptor(pathIdOrPath: string): PathDescriptorRecord | 
     return clone(toPathDescriptor(directNode));
   }
 
-  const pathNode = GRAPH.nodes.find(
+  const pathNode = getSdkState().graph.nodes.find(
     (node) => node.kind === "PathDescriptor" && valueAsString(node.pathId) === pathIdOrPath,
-  ) ?? GRAPH.nodes.find((node) => node.kind === "PathDescriptor" && valueAsString(node.path) === pathIdOrPath);
+  ) ?? getSdkState().graph.nodes.find((node) => node.kind === "PathDescriptor" && valueAsString(node.path) === pathIdOrPath);
 
   return pathNode ? clone(toPathDescriptor(pathNode)) : undefined;
 }
@@ -986,7 +1025,7 @@ export function listPathsByOwner(ownerId: string): PathDescriptorRecord[] {
 export function findProcessesByPath(pathIdOrPath: string): ProcessDescriptor[] {
   const pathNode =
     getNode(`path:${pathIdOrPath}`) ??
-    GRAPH.nodes.find(
+    getSdkState().graph.nodes.find(
       (node) =>
         node.kind === "PathDescriptor" &&
         (valueAsString(node.pathId) === pathIdOrPath || valueAsString(node.path) === pathIdOrPath),

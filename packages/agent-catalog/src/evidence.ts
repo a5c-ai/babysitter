@@ -28,7 +28,12 @@ function evidenceRoot(): string {
 }
 
 function readJson<T>(filePath: string): T {
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read JSON asset ${filePath}: ${reason}`);
+  }
 }
 
 function manifestPath(): string {
@@ -84,31 +89,68 @@ function loadClaimNodes(manifest: OntologyEvidenceManifest): GraphNode[] {
     .flatMap((descriptor) => loadShard<GraphNode>(descriptor).entries);
 }
 
-const MANIFEST = loadManifest();
-const EVIDENCE_SOURCE_NODES = loadEvidenceNodes(MANIFEST);
-const CLAIM_NODES = loadClaimNodes(MANIFEST);
-const GRAPH = getCatalogGraph();
+interface EvidenceState {
+  manifest: OntologyEvidenceManifest;
+  evidenceSourceNodes: GraphNode[];
+  claimNodes: GraphNode[];
+  claimsById: Map<string, GraphNode>;
+  evidenceById: Map<string, GraphNode>;
+  claimsBySubject: Map<string, GraphNode[]>;
+  claimsByEvidence: Map<string, GraphNode[]>;
+}
 
-const CLAIMS_BY_ID = new Map(CLAIM_NODES.map((node) => [valueAsString(node.claimId), node] as const));
-const EVIDENCE_BY_ID = new Map(EVIDENCE_SOURCE_NODES.map((node) => [valueAsString(node.evidenceId), node] as const));
-const CLAIM_NODE_BY_GRAPH_ID = new Map(CLAIM_NODES.map((node) => [valueAsString(node.id), node] as const));
+let cachedEvidenceState: EvidenceState | undefined;
 
-const CLAIMS_BY_SUBJECT = new Map<string, GraphNode[]>();
-const CLAIMS_BY_EVIDENCE = buildClaimsByEvidence(CLAIM_NODES, EVIDENCE_SOURCE_NODES, GRAPH.edges);
+function buildEvidenceState(): EvidenceState {
+  try {
+    const manifest = loadManifest();
+    const evidenceSourceNodes = loadEvidenceNodes(manifest);
+    const claimNodes = loadClaimNodes(manifest);
+    const graph = getCatalogGraph();
+    const claimsById = new Map(claimNodes.map((node) => [valueAsString(node.claimId), node] as const));
+    const evidenceById = new Map(evidenceSourceNodes.map((node) => [valueAsString(node.evidenceId), node] as const));
+    const claimNodeByGraphId = new Map(claimNodes.map((node) => [valueAsString(node.id), node] as const));
+    const claimsBySubject = new Map<string, GraphNode[]>();
+    const claimsByEvidence = buildClaimsByEvidence(claimNodes, evidenceSourceNodes, graph.edges);
 
-for (const edge of GRAPH.edges) {
-  if (edge.relation === "supported_by_claim") {
-    const claimNode = CLAIM_NODE_BY_GRAPH_ID.get(edge.to);
-    if (!claimNode) {
-      continue;
+    for (const edge of graph.edges) {
+      if (edge.relation !== "supported_by_claim") {
+        continue;
+      }
+      const claimNode = claimNodeByGraphId.get(edge.to);
+      if (!claimNode) {
+        continue;
+      }
+      const subjectBucket = claimsBySubject.get(edge.from);
+      if (subjectBucket) {
+        subjectBucket.push(claimNode);
+      } else {
+        claimsBySubject.set(edge.from, [claimNode]);
+      }
     }
-    const subjectBucket = CLAIMS_BY_SUBJECT.get(edge.from);
-    if (subjectBucket) {
-      subjectBucket.push(claimNode);
-    } else {
-      CLAIMS_BY_SUBJECT.set(edge.from, [claimNode]);
-    }
+
+    return {
+      manifest,
+      evidenceSourceNodes,
+      claimNodes,
+      claimsById,
+      evidenceById,
+      claimsBySubject,
+      claimsByEvidence,
+    };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to load ontology evidence assets for @a5c-ai/agent-catalog. Ensure evidence/ontology-evidence/manifest.json and referenced shards are packaged and valid JSON. Cause: ${reason}`,
+    );
   }
+}
+
+function getEvidenceState(): EvidenceState {
+  if (!cachedEvidenceState) {
+    cachedEvidenceState = buildEvidenceState();
+  }
+  return cachedEvidenceState;
 }
 
 function toClaimRecord(node: GraphNode): ClaimRecord {
@@ -128,6 +170,7 @@ function toClaimRecord(node: GraphNode): ClaimRecord {
 }
 
 function toEvidenceRecord(node: GraphNode): EvidenceRecord {
+  const evidenceState = getEvidenceState();
   const evidenceId = valueAsString(node.evidenceId);
   const freshnessWindowDays =
     typeof node.freshnessWindowDays === "number" && Number.isFinite(node.freshnessWindowDays)
@@ -138,7 +181,7 @@ function toEvidenceRecord(node: GraphNode): EvidenceRecord {
     kind: valueAsString(node.kindLabel) === "web" ? "web" : "repo",
     sourcePathOrUrl: valueAsString(node.sourcePathOrUrl),
     excerptLocator: valueAsString(node.locator),
-    claim: getEvidenceClaimStatement(evidenceId, CLAIMS_BY_EVIDENCE),
+    claim: getEvidenceClaimStatement(evidenceId, evidenceState.claimsByEvidence),
     capturedAt: valueAsString(node.capturedAt),
     trustLevel: valueAsString(node.trustLevel),
     reviewOwner: valueAsString(node.reviewOwner),
@@ -152,42 +195,43 @@ function searchTextMatches(node: GraphNode, normalizedQuery: string, fields: str
 }
 
 export function getOntologyEvidenceManifest(): OntologyEvidenceManifest {
-  return clone(MANIFEST);
+  return clone(getEvidenceState().manifest);
 }
 
 export function getOntologyEvidenceSnapshot(): OntologyEvidenceExport {
+  const evidenceState = getEvidenceState();
   return {
-    generatedAt: MANIFEST.generatedAt,
-    manifest: clone(MANIFEST),
-    evidenceSources: clone(EVIDENCE_SOURCE_NODES),
-    claims: clone(CLAIM_NODES),
+    generatedAt: evidenceState.manifest.generatedAt,
+    manifest: clone(evidenceState.manifest),
+    evidenceSources: clone(evidenceState.evidenceSourceNodes),
+    claims: clone(evidenceState.claimNodes),
   };
 }
 
 export function listOntologyEvidenceSources(): EvidenceRecord[] {
-  return EVIDENCE_SOURCE_NODES.map(toEvidenceRecord).map(clone);
+  return getEvidenceState().evidenceSourceNodes.map(toEvidenceRecord).map(clone);
 }
 
 export function getOntologyEvidenceSource(evidenceId: string): EvidenceRecord | undefined {
-  const node = EVIDENCE_BY_ID.get(evidenceId);
+  const node = getEvidenceState().evidenceById.get(evidenceId);
   return node ? clone(toEvidenceRecord(node)) : undefined;
 }
 
 export function listOntologyClaims(): ClaimRecord[] {
-  return CLAIM_NODES.map(toClaimRecord).map(clone);
+  return getEvidenceState().claimNodes.map(toClaimRecord).map(clone);
 }
 
 export function getOntologyClaim(claimId: string): ClaimRecord | undefined {
-  const node = CLAIMS_BY_ID.get(claimId);
+  const node = getEvidenceState().claimsById.get(claimId);
   return node ? clone(toClaimRecord(node)) : undefined;
 }
 
 export function listClaimsForSubject(subjectId: string): ClaimRecord[] {
-  return (CLAIMS_BY_SUBJECT.get(subjectId) ?? []).map(toClaimRecord).map(clone);
+  return (getEvidenceState().claimsBySubject.get(subjectId) ?? []).map(toClaimRecord).map(clone);
 }
 
 export function listClaimsForEvidence(evidenceId: string): ClaimRecord[] {
-  return (CLAIMS_BY_EVIDENCE.get(evidenceId) ?? []).map(toClaimRecord).map(clone);
+  return (getEvidenceState().claimsByEvidence.get(evidenceId) ?? []).map(toClaimRecord).map(clone);
 }
 
 export function listEvidenceForSubject(subjectId: string): EvidenceRecord[] {
@@ -206,6 +250,7 @@ export function getSubjectProvenance(subjectId: string): SubjectProvenance {
 }
 
 export function searchOntologyEvidence(query: string): OntologyEvidenceSearchResult {
+  const evidenceState = getEvidenceState();
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) {
     return { query, evidence: [], claims: [] };
@@ -213,12 +258,12 @@ export function searchOntologyEvidence(query: string): OntologyEvidenceSearchRes
 
   return {
     query,
-    evidence: EVIDENCE_SOURCE_NODES.filter((node) =>
+    evidence: evidenceState.evidenceSourceNodes.filter((node) =>
       searchTextMatches(node, normalizedQuery, ["evidenceId", "sourcePathOrUrl", "locator", "kindLabel"]),
     )
       .map(toEvidenceRecord)
       .map(clone),
-    claims: CLAIM_NODES.filter((node) =>
+    claims: evidenceState.claimNodes.filter((node) =>
       searchTextMatches(node, normalizedQuery, ["claimId", "statement", "subjectId", "subjectKind", "confidence", "status"]),
     )
       .map(toClaimRecord)

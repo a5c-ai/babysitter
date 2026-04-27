@@ -18,6 +18,7 @@ import {
 import type {
   AgentCatalog,
   AgentVersion,
+  CatalogGraph,
   CapabilityAssertion,
   CapabilityDescriptor,
   ClaimConfidence,
@@ -26,6 +27,7 @@ import type {
   ClaimRecord,
   EvidenceRecord,
   GraphEdge,
+  GraphDocument,
   GraphNode,
   HarnessFallbackMetadata,
   HarnessImageEntry,
@@ -43,14 +45,10 @@ import type {
   ProcessDescriptor,
   SessionNuance,
   TransportDescriptor,
+  OntologySchema,
 } from "./models";
 
 const FALLBACK_SESSION_DIR = ".a5c/runs";
-const EVIDENCE_CLAIMS = buildClaimsByEvidence(
-  listNodesByKind("Claim"),
-  listNodesByKind("EvidenceSource"),
-  listRelationshipsByRelation("sourced_from"),
-);
 
 function valueAsString(value: unknown): string {
   if (typeof value === "string") {
@@ -312,7 +310,7 @@ function toAgentVersion(node: GraphNode): AgentVersion {
   };
 }
 
-function toEvidenceRecord(node: GraphNode): EvidenceRecord {
+function toEvidenceRecord(node: GraphNode, evidenceClaims: Map<string, GraphNode[]>): EvidenceRecord {
   const freshnessWindowDays =
     typeof node.freshnessWindowDays === "number" && Number.isFinite(node.freshnessWindowDays)
       ? node.freshnessWindowDays
@@ -322,7 +320,7 @@ function toEvidenceRecord(node: GraphNode): EvidenceRecord {
     kind: valueAsString(node.kindLabel) === "web" ? "web" : "repo",
     sourcePathOrUrl: valueAsString(node.sourcePathOrUrl),
     excerptLocator: valueAsString(node.locator),
-    claim: getEvidenceClaimStatement(valueAsString(node.evidenceId), EVIDENCE_CLAIMS),
+    claim: getEvidenceClaimStatement(valueAsString(node.evidenceId), evidenceClaims),
     capturedAt: valueAsString(node.capturedAt),
     trustLevel: valueAsString(node.trustLevel),
     reviewOwner: valueAsString(node.reviewOwner),
@@ -409,13 +407,13 @@ function buildHostDetectionRules(): HostDetectionRule[] {
     }));
 }
 
-function buildHostSignalMap(): Record<string, string[]> {
-  const entries = HOST_DETECTION_RULES.map((rule) => [rule.agent, rule.signals] as const);
+function buildHostSignalMap(hostDetectionRules: HostDetectionRule[]): Record<string, string[]> {
+  const entries = hostDetectionRules.map((rule) => [rule.agent, rule.signals] as const);
   return Object.fromEntries(entries);
 }
 
-function buildHostMetadataFields(): Record<string, HostMetadataField[]> {
-  const entries = HOST_DETECTION_RULES.map((rule) => [rule.agent, rule.metadataFields] as const);
+function buildHostMetadataFields(hostDetectionRules: HostDetectionRule[]): Record<string, HostMetadataField[]> {
+  const entries = hostDetectionRules.map((rule) => [rule.agent, rule.metadataFields] as const);
   return Object.fromEntries(entries);
 }
 
@@ -439,9 +437,12 @@ function fallbackHarnessId(agentId: string, aliases: string[]): string {
   return aliases[0] ?? agentId;
 }
 
-function buildFallbackMetadata(): Record<string, HarnessFallbackMetadata> {
-  const sessionNuancesById = new Map(SESSION_NUANCES.map((nuance) => [nuance.nuanceId, nuance]));
-  const metadataEntries = AGENTS.filter((agent) => agent.runtimeFamily === "cli-harness").map((agent) => {
+function buildFallbackMetadata(
+  sessionNuances: SessionNuance[],
+  agents: AgentVersion[],
+): Record<string, HarnessFallbackMetadata> {
+  const sessionNuancesById = new Map(sessionNuances.map((nuance) => [nuance.nuanceId, nuance]));
+  const metadataEntries = agents.filter((agent) => agent.runtimeFamily === "cli-harness").map((agent) => {
     const sessionNuance = sessionNuancesById.get(agent.sessionNuanceIds[0]);
     const harnessId = fallbackHarnessId(agent.agentId, agent.aliases);
     return [
@@ -497,8 +498,8 @@ function buildHarnessImages(): HarnessImageEntry[] {
     }));
 }
 
-function buildPluginTargetDescriptors(): PluginTargetDescriptor[] {
-  const hookNamesById = new Map(HOOKS.map((hook) => [hook.hookId, hook.canonicalName]));
+function buildPluginTargetDescriptors(hooks: HookDescriptor[]): PluginTargetDescriptor[] {
+  const hookNamesById = new Map(hooks.map((hook) => [hook.hookId, hook.canonicalName]));
 
   return listNodesByKind("PluginTarget").map((node) => {
     const targetId = valueAsString(node.targetId);
@@ -583,59 +584,203 @@ function buildPluginTargetDescriptors(): PluginTargetDescriptor[] {
   });
 }
 
-const GRAPH = getCatalogGraph();
-export const GRAPH_DOCUMENT = getGraphDocument();
-export const ONTOLOGY_SCHEMA = getOntologySchema();
+interface AgentCatalogDataState {
+  graph: CatalogGraph;
+  graphDocument: GraphDocument;
+  ontologySchema: OntologySchema;
+  evidence: EvidenceRecord[];
+  claims: ClaimRecord[];
+  providers: ModelProviderVersion[];
+  models: ModelVersion[];
+  transports: TransportDescriptor[];
+  capabilities: CapabilityDescriptor[];
+  modalities: ModalityDescriptor[];
+  hooks: HookDescriptor[];
+  sessionNuances: SessionNuance[];
+  lifecycleNuances: LifecycleNuance[];
+  processes: ProcessDescriptor[];
+  hostDetectionRules: HostDetectionRule[];
+  agents: AgentVersion[];
+  hostSignalMap: Record<string, string[]>;
+  hostMetadataFields: Record<string, HostMetadataField[]>;
+  hooksMuxDetectionRules: HooksMuxDetectionRule[];
+  fallbackMetadata: Record<string, HarnessFallbackMetadata>;
+  harnessImages: HarnessImageEntry[];
+  pluginTargets: PluginTargetDescriptor[];
+  capabilityAssertions: CapabilityAssertion[];
+  agentCatalog: AgentCatalog;
+}
 
-export const EVIDENCE = listNodesByKind("EvidenceSource").map(toEvidenceRecord);
-export const CLAIMS = listNodesByKind("Claim").map(toClaimRecord);
-export const PROVIDERS = listNodesByKind("ModelProviderVersion").map(toModelProviderVersion);
-export const MODELS = listNodesByKind("ModelVersion").map(toModelVersion);
-export const TRANSPORTS = listNodesByKind("TransportRuntime")
-  .filter((node) => shouldSurfaceTransportRuntime(valueAsString(node.runtimeId)))
-  .map(toTransportDescriptor);
-export const CAPABILITIES = listNodesByKind("Capability").map(toCapabilityDescriptor);
-export const MODALITIES = listNodesByKind("Modality")
-  .filter((node) => !["json", "stream-events"].includes(valueAsString(node.modalityId)))
-  .map(toModalityDescriptor);
-export const HOOKS = listNodesByKind("HookSurface").map(toHookDescriptor);
-export const SESSION_NUANCES = listNodesByKind("SessionSemantics").map(toSessionNuance);
-export const LIFECYCLE_NUANCES = listNodesByKind("LifecycleSemantics").map(toLifecycleNuance);
-export const PROCESSES = listNodesByKind("ProcessDescriptor").map(toProcessDescriptor);
-export const HOST_DETECTION_RULES = buildHostDetectionRules();
-export const AGENTS = listNodesByKind("AgentVersion").map(toAgentVersion);
-export const HOST_SIGNAL_MAP = buildHostSignalMap();
-export const HOST_METADATA_FIELDS = buildHostMetadataFields();
-export const HOOKS_MUX_DETECTION_RULES = buildHookDetectionRules();
-export const FALLBACK_METADATA = buildFallbackMetadata();
-export const HARNESS_IMAGES = buildHarnessImages();
-export const PLUGIN_TARGETS = buildPluginTargetDescriptors();
-export const CAPABILITY_ASSERTIONS = buildCapabilityAssertions();
+let cachedDataState: AgentCatalogDataState | undefined;
 
-export const AGENT_CATALOG: AgentCatalog = {
-  schemaVersion: GRAPH_DOCUMENT.schemaVersion,
-  generatedAt: GRAPH_DOCUMENT.generatedAt,
-  evidence: EVIDENCE,
-  claims: CLAIMS,
-  providers: PROVIDERS,
-  models: MODELS,
-  transports: TRANSPORTS,
-  capabilities: CAPABILITIES,
-  modalities: MODALITIES,
-  hooks: HOOKS,
-  sessionNuances: SESSION_NUANCES,
-  lifecycleNuances: LIFECYCLE_NUANCES,
-  processes: PROCESSES,
-  agents: AGENTS,
-  capabilityAssertions: CAPABILITY_ASSERTIONS,
-  graph: GRAPH.edges.map(
-    (edge): GraphEdge => ({
-      edgeId: edge.id,
-      from: edge.from,
-      to: edge.to,
-      relation: edge.relation,
-      versionRange: valueAsString(edge.versionRange) || ">=0.0.0",
-      evidenceIds: stringArray(edge.evidenceRefs),
-    }),
-  ),
-};
+function buildDataState(): AgentCatalogDataState {
+  const graph = getCatalogGraph();
+  const graphDocument = getGraphDocument();
+  const ontologySchema = getOntologySchema();
+  const evidenceNodes = listNodesByKind("EvidenceSource");
+  const claimNodes = listNodesByKind("Claim");
+  const evidenceClaims = buildClaimsByEvidence(claimNodes, evidenceNodes, listRelationshipsByRelation("sourced_from"));
+  const evidence = evidenceNodes.map((node) => toEvidenceRecord(node, evidenceClaims));
+  const claims = claimNodes.map(toClaimRecord);
+  const providers = listNodesByKind("ModelProviderVersion").map(toModelProviderVersion);
+  const models = listNodesByKind("ModelVersion").map(toModelVersion);
+  const transports = listNodesByKind("TransportRuntime")
+    .filter((node) => shouldSurfaceTransportRuntime(valueAsString(node.runtimeId)))
+    .map(toTransportDescriptor);
+  const capabilities = listNodesByKind("Capability").map(toCapabilityDescriptor);
+  const modalities = listNodesByKind("Modality")
+    .filter((node) => !["json", "stream-events"].includes(valueAsString(node.modalityId)))
+    .map(toModalityDescriptor);
+  const hooks = listNodesByKind("HookSurface").map(toHookDescriptor);
+  const sessionNuances = listNodesByKind("SessionSemantics").map(toSessionNuance);
+  const lifecycleNuances = listNodesByKind("LifecycleSemantics").map(toLifecycleNuance);
+  const processes = listNodesByKind("ProcessDescriptor").map(toProcessDescriptor);
+  const hostDetectionRules = buildHostDetectionRules();
+  const agents = listNodesByKind("AgentVersion").map(toAgentVersion);
+  const hostSignalMap = buildHostSignalMap(hostDetectionRules);
+  const hostMetadataFields = buildHostMetadataFields(hostDetectionRules);
+  const hooksMuxDetectionRules = buildHookDetectionRules();
+  const fallbackMetadata = buildFallbackMetadata(sessionNuances, agents);
+  const harnessImages = buildHarnessImages();
+  const pluginTargets = buildPluginTargetDescriptors(hooks);
+  const capabilityAssertions = buildCapabilityAssertions();
+  const agentCatalog: AgentCatalog = {
+    schemaVersion: graphDocument.schemaVersion,
+    generatedAt: graphDocument.generatedAt,
+    evidence,
+    claims,
+    providers,
+    models,
+    transports,
+    capabilities,
+    modalities,
+    hooks,
+    sessionNuances,
+    lifecycleNuances,
+    processes,
+    agents,
+    capabilityAssertions,
+    graph: graph.edges.map(
+      (edge): GraphEdge => ({
+        edgeId: edge.id,
+        from: edge.from,
+        to: edge.to,
+        relation: edge.relation,
+        versionRange: valueAsString(edge.versionRange) || ">=0.0.0",
+        evidenceIds: stringArray(edge.evidenceRefs),
+      }),
+    ),
+  };
+
+  return {
+    graph,
+    graphDocument,
+    ontologySchema,
+    evidence,
+    claims,
+    providers,
+    models,
+    transports,
+    capabilities,
+    modalities,
+    hooks,
+    sessionNuances,
+    lifecycleNuances,
+    processes,
+    hostDetectionRules,
+    agents,
+    hostSignalMap,
+    hostMetadataFields,
+    hooksMuxDetectionRules,
+    fallbackMetadata,
+    harnessImages,
+    pluginTargets,
+    capabilityAssertions,
+    agentCatalog,
+  };
+}
+
+export function clearAgentCatalogDataCache(): void {
+  cachedDataState = undefined;
+}
+
+export function getCatalogDataState(): AgentCatalogDataState {
+  if (!cachedDataState) {
+    cachedDataState = buildDataState();
+  }
+  return cachedDataState;
+}
+
+function createLazyContainer<T extends object>(kind: "array" | "object", resolve: () => T): T {
+  const target = kind === "array" ? [] : {};
+  return new Proxy(target, {
+    get(_target, property) {
+      const resolved = resolve() as object;
+      const value = Reflect.get(resolved, property, resolved);
+      return typeof value === "function" ? value.bind(resolved) : value;
+    },
+    set(_target, property, value) {
+      return Reflect.set(resolve() as object, property, value);
+    },
+    has(_target, property) {
+      return Reflect.has(resolve() as object, property);
+    },
+    ownKeys() {
+      return Reflect.ownKeys(resolve() as object);
+    },
+    getOwnPropertyDescriptor(_target, property) {
+      const descriptor = Reflect.getOwnPropertyDescriptor(resolve() as object, property);
+      return descriptor ? { ...descriptor, configurable: true } : undefined;
+    },
+    defineProperty(_target, property, descriptor) {
+      return Reflect.defineProperty(resolve() as object, property, descriptor);
+    },
+    deleteProperty(_target, property) {
+      return Reflect.deleteProperty(resolve() as object, property);
+    },
+    getPrototypeOf() {
+      return Reflect.getPrototypeOf(resolve() as object);
+    },
+    setPrototypeOf(_target, prototype) {
+      return Reflect.setPrototypeOf(resolve() as object, prototype);
+    },
+    isExtensible() {
+      return Reflect.isExtensible(resolve() as object);
+    },
+    preventExtensions() {
+      return Reflect.preventExtensions(resolve() as object);
+    },
+  }) as T;
+}
+
+function createLazyArray<TValue>(resolve: () => TValue[]): TValue[] {
+  return createLazyContainer("array", resolve);
+}
+
+function createLazyObject<TValue extends object>(resolve: () => TValue): TValue {
+  return createLazyContainer("object", resolve);
+}
+
+export const GRAPH_DOCUMENT = createLazyObject(() => getCatalogDataState().graphDocument);
+export const ONTOLOGY_SCHEMA = createLazyObject(() => getCatalogDataState().ontologySchema);
+export const EVIDENCE = createLazyArray(() => getCatalogDataState().evidence);
+export const CLAIMS = createLazyArray(() => getCatalogDataState().claims);
+export const PROVIDERS = createLazyArray(() => getCatalogDataState().providers);
+export const MODELS = createLazyArray(() => getCatalogDataState().models);
+export const TRANSPORTS = createLazyArray(() => getCatalogDataState().transports);
+export const CAPABILITIES = createLazyArray(() => getCatalogDataState().capabilities);
+export const MODALITIES = createLazyArray(() => getCatalogDataState().modalities);
+export const HOOKS = createLazyArray(() => getCatalogDataState().hooks);
+export const SESSION_NUANCES = createLazyArray(() => getCatalogDataState().sessionNuances);
+export const LIFECYCLE_NUANCES = createLazyArray(() => getCatalogDataState().lifecycleNuances);
+export const PROCESSES = createLazyArray(() => getCatalogDataState().processes);
+export const HOST_DETECTION_RULES = createLazyArray(() => getCatalogDataState().hostDetectionRules);
+export const AGENTS = createLazyArray(() => getCatalogDataState().agents);
+export const HOST_SIGNAL_MAP = createLazyObject(() => getCatalogDataState().hostSignalMap);
+export const HOST_METADATA_FIELDS = createLazyObject(() => getCatalogDataState().hostMetadataFields);
+export const HOOKS_MUX_DETECTION_RULES = createLazyArray(() => getCatalogDataState().hooksMuxDetectionRules);
+export const FALLBACK_METADATA = createLazyObject(() => getCatalogDataState().fallbackMetadata);
+export const HARNESS_IMAGES = createLazyArray(() => getCatalogDataState().harnessImages);
+export const PLUGIN_TARGETS = createLazyArray(() => getCatalogDataState().pluginTargets);
+export const CAPABILITY_ASSERTIONS = createLazyArray(() => getCatalogDataState().capabilityAssertions);
+export const AGENT_CATALOG = createLazyObject(() => getCatalogDataState().agentCatalog);

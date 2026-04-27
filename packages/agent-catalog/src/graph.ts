@@ -44,7 +44,12 @@ function graphRoot(): string {
 }
 
 function readYamlFile<T>(filePath: string): T {
-  return parse(fs.readFileSync(filePath, "utf8")) as T;
+  try {
+    return parse(fs.readFileSync(filePath, "utf8")) as T;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read YAML asset ${filePath}: ${reason}`);
+  }
 }
 
 function ensureArray(value: unknown, label: string): unknown[] {
@@ -74,78 +79,85 @@ function loadCatalogGraph(): CatalogGraph {
     return cachedGraph;
   }
 
-  const rootDir = graphRoot();
-  const document = readYamlFile<GraphDocument>(path.join(rootDir, "agent-catalog.graph.yaml"));
-  const schema = readYamlFile<OntologySchema>(path.join(rootDir, document.schemaPath));
+  try {
+    const rootDir = graphRoot();
+    const document = readYamlFile<GraphDocument>(path.join(rootDir, "agent-catalog.graph.yaml"));
+    const schema = readYamlFile<OntologySchema>(path.join(rootDir, document.schemaPath));
 
-  validateRequiredAttributes(document as unknown as Record<string, unknown>, schema.nodeKinds.GraphDocument.requiredAttributes, "GraphDocument");
-  validateRequiredAttributes(schema as unknown as Record<string, unknown>, schema.nodeKinds.OntologySchema.requiredAttributes, "OntologySchema");
+    validateRequiredAttributes(document as unknown as Record<string, unknown>, schema.nodeKinds.GraphDocument.requiredAttributes, "GraphDocument");
+    validateRequiredAttributes(schema as unknown as Record<string, unknown>, schema.nodeKinds.OntologySchema.requiredAttributes, "OntologySchema");
 
-  const nodes: GraphNode[] = [];
-  const edges: GraphRelationship[] = [];
+    const nodes: GraphNode[] = [];
+    const edges: GraphRelationship[] = [];
 
-  for (const importPath of document.imports) {
-    for (const resolvedPath of listYamlFilesRecursively(path.join(rootDir, importPath))) {
-      const parsed = readYamlFile<NodeDocument | EdgeDocument>(resolvedPath);
-      if (parsed.kind === "NodeDocument") {
-        nodes.push(...parsed.nodes);
-        continue;
+    for (const importPath of document.imports) {
+      for (const resolvedPath of listYamlFilesRecursively(path.join(rootDir, importPath))) {
+        const parsed = readYamlFile<NodeDocument | EdgeDocument>(resolvedPath);
+        if (parsed.kind === "NodeDocument") {
+          nodes.push(...parsed.nodes);
+          continue;
+        }
+        if (parsed.kind === "EdgeDocument") {
+          edges.push(...parsed.edges);
+          continue;
+        }
+        throw new Error(`Unsupported graph document kind in ${resolvedPath}.`);
       }
-      if (parsed.kind === "EdgeDocument") {
-        edges.push(...parsed.edges);
-        continue;
+    }
+
+    const nodeIds = new Set<string>([document.id, schema.id]);
+    const nodeKinds = new Map<string, string>([
+      [document.id, "GraphDocument"],
+      [schema.id, "OntologySchema"],
+    ]);
+
+    for (const node of nodes) {
+      ensureString(node.id, "node.id");
+      ensureString(node.kind, `node.kind for ${node.id}`);
+      const definition = schema.nodeKinds[node.kind];
+      if (!definition) {
+        throw new Error(`Unknown node kind "${node.kind}" for ${node.id}.`);
       }
-      throw new Error(`Unsupported graph document kind in ${resolvedPath}.`);
+      validateRequiredAttributes(node as Record<string, unknown>, definition.requiredAttributes, `node ${node.id}`);
+      nodeIds.add(node.id);
+      nodeKinds.set(node.id, node.kind);
     }
+
+    for (const edge of edges) {
+      ensureString(edge.id, "edge.id");
+      ensureString(edge.relation, `edge.relation for ${edge.id}`);
+      ensureString(edge.from, `edge.from for ${edge.id}`);
+      ensureString(edge.to, `edge.to for ${edge.id}`);
+
+      const definition = schema.edgeKinds[edge.relation];
+      if (!definition) {
+        throw new Error(`Unknown edge relation "${edge.relation}" for ${edge.id}.`);
+      }
+      validateRequiredAttributes(edge as Record<string, unknown>, definition.requiredAttributes, `edge ${edge.id}`);
+
+      if (!nodeIds.has(edge.from)) {
+        throw new Error(`Edge ${edge.id} references unknown source node ${edge.from}.`);
+      }
+      if (!nodeIds.has(edge.to)) {
+        throw new Error(`Edge ${edge.id} references unknown target node ${edge.to}.`);
+      }
+
+      if (definition.from && !definition.from.includes(nodeKinds.get(edge.from) ?? "")) {
+        throw new Error(`Edge ${edge.id} has invalid source kind ${nodeKinds.get(edge.from)} for relation ${edge.relation}.`);
+      }
+      if (definition.to && !definition.to.includes(nodeKinds.get(edge.to) ?? "")) {
+        throw new Error(`Edge ${edge.id} has invalid target kind ${nodeKinds.get(edge.to)} for relation ${edge.relation}.`);
+      }
+    }
+
+    cachedGraph = { document, schema, nodes, edges };
+    return cachedGraph;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to load graph assets for @a5c-ai/agent-catalog. Ensure graph/agent-catalog.graph.yaml and imported YAML files are packaged and valid YAML. Cause: ${reason}`,
+    );
   }
-
-  const nodeIds = new Set<string>([document.id, schema.id]);
-  const nodeKinds = new Map<string, string>([
-    [document.id, "GraphDocument"],
-    [schema.id, "OntologySchema"],
-  ]);
-
-  for (const node of nodes) {
-    ensureString(node.id, "node.id");
-    ensureString(node.kind, `node.kind for ${node.id}`);
-    const definition = schema.nodeKinds[node.kind];
-    if (!definition) {
-      throw new Error(`Unknown node kind "${node.kind}" for ${node.id}.`);
-    }
-    validateRequiredAttributes(node as Record<string, unknown>, definition.requiredAttributes, `node ${node.id}`);
-    nodeIds.add(node.id);
-    nodeKinds.set(node.id, node.kind);
-  }
-
-  for (const edge of edges) {
-    ensureString(edge.id, "edge.id");
-    ensureString(edge.relation, `edge.relation for ${edge.id}`);
-    ensureString(edge.from, `edge.from for ${edge.id}`);
-    ensureString(edge.to, `edge.to for ${edge.id}`);
-
-    const definition = schema.edgeKinds[edge.relation];
-    if (!definition) {
-      throw new Error(`Unknown edge relation "${edge.relation}" for ${edge.id}.`);
-    }
-    validateRequiredAttributes(edge as Record<string, unknown>, definition.requiredAttributes, `edge ${edge.id}`);
-
-    if (!nodeIds.has(edge.from)) {
-      throw new Error(`Edge ${edge.id} references unknown source node ${edge.from}.`);
-    }
-    if (!nodeIds.has(edge.to)) {
-      throw new Error(`Edge ${edge.id} references unknown target node ${edge.to}.`);
-    }
-
-    if (definition.from && !definition.from.includes(nodeKinds.get(edge.from) ?? "")) {
-      throw new Error(`Edge ${edge.id} has invalid source kind ${nodeKinds.get(edge.from)} for relation ${edge.relation}.`);
-    }
-    if (definition.to && !definition.to.includes(nodeKinds.get(edge.to) ?? "")) {
-      throw new Error(`Edge ${edge.id} has invalid target kind ${nodeKinds.get(edge.to)} for relation ${edge.relation}.`);
-    }
-  }
-
-  cachedGraph = { document, schema, nodes, edges };
-  return cachedGraph;
 }
 
 export function getCatalogGraph(): CatalogGraph {
