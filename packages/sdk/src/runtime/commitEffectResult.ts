@@ -13,6 +13,7 @@ import { emitRuntimeMetric } from "./instrumentation";
 import { globalTaskRegistry } from "../tasks/registry";
 import { serializeAndWriteTaskResult } from "../tasks/serializer";
 import { readTaskDefinition } from "../storage/tasks";
+import { rebuildStateCache } from "./replay/stateCache";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -78,6 +79,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
       stderrRef,
       resolvedAt: resolvedEvent.recordedAt,
     });
+    await rebuildStateCache(options.runDir, { reason: "post_effect_resolution" });
 
     emitRuntimeMetric(options.logger, "commit.effect", {
       effectId: options.effectId,
@@ -133,7 +135,7 @@ export async function commitEffectCancellation(
       },
     });
 
-    await appendEvent({
+    const cancelledEvent = await appendEvent({
       runDir: options.runDir,
       eventType: "EFFECT_CANCELLED",
       event: {
@@ -141,11 +143,12 @@ export async function commitEffectCancellation(
         reason: options.reason,
       },
     });
+    await rebuildStateCache(options.runDir, { reason: "post_effect_cancellation" });
 
     globalTaskRegistry.resolveEffect(options.effectId, {
       status: "cancelled",
       resultRef,
-      resolvedAt: new Date().toISOString(),
+      resolvedAt: cancelledEvent.recordedAt,
     });
 
     emitRuntimeMetric(options.logger, "commit.effect.cancel", {

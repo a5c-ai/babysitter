@@ -10,6 +10,7 @@ import { EffectRequestedError, RunFailedError } from "../exceptions";
 import { buildEffectIndex } from "../replay/effectIndex";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { createRunDir } from "../../storage/createRunDir";
+import { readStateCache } from "../replay/stateCache";
 
 let tmpRoot: string;
 
@@ -192,6 +193,30 @@ describe("commitEffectResult", () => {
     });
   });
 
+  test("refreshes the state cache after resolving an effect", async () => {
+    const effect = await requestSampleEffect();
+
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      result: {
+        status: "ok",
+        value: { doubled: 4 },
+      },
+    });
+
+    const stateCache = await readStateCache(effect.runDir);
+    expect(stateCache).not.toBeNull();
+    expect(stateCache?.rebuildReason).toBe("post_effect_resolution");
+    expect(stateCache?.journalHead?.seq).toBe(3);
+    expect(stateCache?.effectsByInvocation[effect.invocationKey]).toMatchObject({
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: "resolved_ok",
+    });
+    expect(stateCache?.pendingEffectsByKind).toEqual({});
+  });
+
   test("logs rejection metrics when payload validation fails", async () => {
     const effect = await requestSampleEffect();
     const metrics: Record<string, unknown>[] = [];
@@ -272,6 +297,34 @@ describe("commitEffectCancellation", () => {
       status: "cancelled",
       reason: "superseded by newer task",
     });
+  });
+
+  test("refreshes the state cache after cancelling an effect", async () => {
+    const mod = await import("../commitEffectResult");
+    const commitEffectCancellation = (mod as Record<string, unknown>).commitEffectCancellation as (options: {
+      runDir: string;
+      effectId: string;
+      reason?: string;
+    }) => Promise<{ resultRef: string }>;
+
+    const effect = await requestSampleEffect();
+
+    await commitEffectCancellation({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      reason: "superseded",
+    });
+
+    const stateCache = await readStateCache(effect.runDir);
+    expect(stateCache).not.toBeNull();
+    expect(stateCache?.rebuildReason).toBe("post_effect_cancellation");
+    expect(stateCache?.journalHead?.seq).toBe(3);
+    expect(stateCache?.effectsByInvocation[effect.invocationKey]).toMatchObject({
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: "cancelled",
+    });
+    expect(stateCache?.pendingEffectsByKind).toEqual({});
   });
 
   test("rejects cancellation of non-requested effects", async () => {
