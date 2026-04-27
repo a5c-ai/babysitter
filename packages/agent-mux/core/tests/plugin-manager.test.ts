@@ -419,9 +419,11 @@ describe('PluginManagerImpl', () => {
         }),
       ];
       const listPlugins = vi.fn().mockResolvedValue(plugins);
-      const installPlugin = vi.fn()
-        .mockResolvedValueOnce(createLegacyInstalledPlugin({ pluginId: 'a', name: 'A', version: '2.0.0' }))
-        .mockResolvedValueOnce(createLegacyInstalledPlugin({ pluginId: 'b', name: 'B', version: '2.0.0' }));
+      const installPlugin = vi.fn(async (pluginId: string) => createLegacyInstalledPlugin({
+        pluginId,
+        name: pluginId.toUpperCase(),
+        version: '2.0.0',
+      }));
 
       const adapter = createMockAdapter('opencode', true, {
         listPlugins,

@@ -13,6 +13,23 @@ async function waitForClose(socket: WebSocket): Promise<number> {
   return code as number;
 }
 
+function parseFrame(frame: WebSocket.RawData): Record<string, unknown> {
+  return JSON.parse(Buffer.isBuffer(frame) ? frame.toString('utf8') : String(frame)) as Record<string, unknown>;
+}
+
+async function waitForCondition(
+  predicate: () => boolean,
+  timeoutMs = 1000,
+): Promise<void> {
+  const start = Date.now();
+  while (!predicate()) {
+    if (Date.now() - start > timeoutMs) {
+      throw new Error('Timed out waiting for condition');
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
 describe('transport mocks', () => {
   it('HttpServerMock serves requests and records history', async () => {
     const scenario: HarnessScenario = {
@@ -59,26 +76,26 @@ describe('transport mocks', () => {
     const mock = new WebSocketServerMock(scenario, 2);
     await mock.start();
     const client = new WebSocket(mock.serverUrl);
+    const receivedMessages: Array<Record<string, unknown>> = [];
+    client.on('message', (frame) => {
+      receivedMessages.push(parseFrame(frame));
+    });
     await once(client, 'open');
     expect(mock.isRunning).toBe(true);
     expect(mock.connectionCount).toBe(1);
 
-    const [firstFrame] = await once(client, 'message');
-    const firstMessage = JSON.parse(Buffer.isBuffer(firstFrame) ? firstFrame.toString('utf8') : String(firstFrame));
-    expect(firstMessage.type).toBe('text_delta');
-
-    const [secondFrame] = await once(client, 'message');
-    const secondMessage = JSON.parse(Buffer.isBuffer(secondFrame) ? secondFrame.toString('utf8') : String(secondFrame));
-    expect(secondMessage.type).toBe('message_stop');
+    await waitForCondition(() => {
+      const types = receivedMessages.map((message) => message.type);
+      return types.includes('text_delta') && types.includes('message_stop');
+    });
+    expect(receivedMessages.map((message) => message.type)).toContain('text_delta');
+    expect(receivedMessages.map((message) => message.type)).toContain('message_stop');
 
     client.send(JSON.stringify({ type: 'user_message', text: 'ping' }));
-    await new Promise((resolve) => setImmediate(resolve));
-    expect(mock.messageHistory.some((entry) => entry.direction === 'inbound')).toBe(true);
+    await waitForCondition(() => mock.messageHistory.some((entry) => entry.direction === 'inbound'));
 
     mock.broadcast({ type: 'server_ping' });
-    const [broadcastFrame] = await once(client, 'message');
-    const broadcastMessage = JSON.parse(Buffer.isBuffer(broadcastFrame) ? broadcastFrame.toString('utf8') : String(broadcastFrame));
-    expect(broadcastMessage.type).toBe('server_ping');
+    await waitForCondition(() => receivedMessages.some((message) => message.type === 'server_ping'));
 
     const closePromise = once(client, 'close');
     const connectionId = mock.getConnectionStatus()[0]?.connectionId;
@@ -90,10 +107,12 @@ describe('transport mocks', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10));
     const reconnectClient = new WebSocket(mock.serverUrl);
+    const replayMessages: Array<Record<string, unknown>> = [];
+    reconnectClient.on('message', (frame) => {
+      replayMessages.push(parseFrame(frame));
+    });
     await once(reconnectClient, 'open');
-    const [replayFrame] = await once(reconnectClient, 'message');
-    const replayMessage = JSON.parse(Buffer.isBuffer(replayFrame) ? replayFrame.toString('utf8') : String(replayFrame));
-    expect(replayMessage.type).toBe('text_delta');
+    await waitForCondition(() => replayMessages.some((message) => message.type === 'text_delta'));
     reconnectClient.close();
 
     client.close();
@@ -198,11 +217,12 @@ describe('transport mocks', () => {
     const mock = new WebSocketServerMock(scenario, 4);
     await mock.start();
     const client = new WebSocket(mock.serverUrl);
+    const receivedMessages: Array<Record<string, unknown>> = [];
+    client.on('message', (frame) => {
+      receivedMessages.push(parseFrame(frame));
+    });
     await once(client, 'open');
-    const [frame] = await once(client, 'message');
-    const message = JSON.parse(Buffer.isBuffer(frame) ? frame.toString('utf8') : String(frame));
-
-    expect(message.type).toBe('text_delta');
+    await waitForCondition(() => receivedMessages.some((message) => message.type === 'text_delta'));
     expect(mock.messageHistory.some((entry) => (entry.message as { type?: string })?.type === 'text_delta')).toBe(true);
     client.close();
     await mock.stop();

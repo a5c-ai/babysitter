@@ -30,6 +30,16 @@ vi.mock('@a5c-ai/agent-mux-core', () => ({
   PROVIDER_DEFAULTS: {
     bedrock: { envKey: undefined },
   },
+  WorkspaceService: class {
+    async createWorkspace() {
+      throw new Error('not used in this test');
+    }
+
+    async resolveWorkspace() {
+      return null;
+    }
+  },
+  resolveWorkspaceDefaultCwd: vi.fn((workspace: { rootPath?: string }) => workspace.rootPath ?? process.cwd()),
   resolveProvider: vi.fn((input: Record<string, unknown>) => ({
     provider: input['provider'] ?? 'anthropic',
     model: input['model'] ?? 'claude-sonnet-4-20250514',

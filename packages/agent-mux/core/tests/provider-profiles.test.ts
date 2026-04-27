@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
+import * as path from 'node:path';
 import {
   loadProfile,
   loadProviderDefaults,
@@ -165,13 +166,14 @@ describe('loadProviderDefaults', () => {
 
 describe('providers file persistence helpers', () => {
   it('resolves the expected scope paths', () => {
-    expect(resolveProvidersFilePath()).toBe(`${process.cwd()}/.amux/providers.json`);
-    expect(resolveProvidersFilePath({ scope: 'global' })).toBe('/home/testuser/.amux/providers.json');
+    expect(resolveProvidersFilePath()).toBe(path.join(process.cwd(), '.amux', 'providers.json'));
+    expect(resolveProvidersFilePath({ scope: 'global' })).toBe(path.join('/home/testuser', '.amux', 'providers.json'));
   });
 
   it('loads the scoped providers file directly', () => {
+    const projectProvidersPath = resolveProvidersFilePath();
     mockFs.readFileSync.mockImplementation((filePath: unknown) => {
-      if (String(filePath).includes(`${process.cwd()}/.amux/providers.json`)) {
+      if (String(filePath) === projectProvidersPath) {
         return JSON.stringify({
           version: 1,
           profiles: {
@@ -197,6 +199,8 @@ describe('providers file persistence helpers', () => {
   });
 
   it('writes normalized providers files with secure permissions', () => {
+    const projectProvidersPath = resolveProvidersFilePath();
+    const projectProvidersDir = path.dirname(projectProvidersPath);
     const result = writeProvidersFile({
       version: 1,
       profiles: {
@@ -206,17 +210,20 @@ describe('providers file persistence helpers', () => {
       },
     });
 
-    expect(result.filePath).toBe(`${process.cwd()}/.amux/providers.json`);
-    expect(mockFs.mkdirSync).toHaveBeenCalledWith(`${process.cwd()}/.amux`, { recursive: true });
+    expect(result.filePath).toBe(projectProvidersPath);
+    expect(mockFs.mkdirSync).toHaveBeenCalledWith(projectProvidersDir, { recursive: true });
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      `${process.cwd()}/.amux/providers.json`,
+      projectProvidersPath,
       expect.stringContaining('"deploy"'),
       expect.objectContaining({ mode: 0o600 }),
     );
-    expect(mockFs.chmodSync).toHaveBeenCalledWith(`${process.cwd()}/.amux/providers.json`, 0o600);
+    if (process.platform !== 'win32') {
+      expect(mockFs.chmodSync).toHaveBeenCalledWith(projectProvidersPath, 0o600);
+    }
   });
 
   it('upserts a provider profile into the scoped file', () => {
+    const projectProvidersPath = resolveProvidersFilePath();
     mockFs.readFileSync.mockImplementation(() => JSON.stringify({
       version: 1,
       profiles: {
@@ -234,13 +241,14 @@ describe('providers file persistence helpers', () => {
       model: 'gpt-5.4',
     });
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      `${process.cwd()}/.amux/providers.json`,
+      projectProvidersPath,
       expect.stringContaining('"deploy"'),
       expect.any(Object),
     );
   });
 
   it('updates defaults in the scoped file', () => {
+    const projectProvidersPath = resolveProvidersFilePath();
     mockFs.readFileSync.mockImplementation(() => JSON.stringify({
       version: 1,
       profiles: {},
@@ -256,7 +264,7 @@ describe('providers file persistence helpers', () => {
       model: 'gpt-5.4',
     });
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      `${process.cwd()}/.amux/providers.json`,
+      projectProvidersPath,
       expect.stringContaining('"defaults"'),
       expect.any(Object),
     );

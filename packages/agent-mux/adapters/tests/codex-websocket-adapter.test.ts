@@ -30,9 +30,13 @@ vi.mock('../src/codex-websocket-connection.js', () => ({
   }),
 }));
 
-vi.mock('node:child_process', () => ({
-  spawn: mockSpawn,
-}));
+vi.mock('node:child_process', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:child_process')>();
+  return {
+    ...actual,
+    spawn: mockSpawn,
+  };
+});
 
 const { CodexWebSocketAdapter } = await import('../src/codex-websocket-adapter.js');
 

@@ -163,7 +163,11 @@ describe('transport-mux e2e http roundtrip', () => {
     });
 
     expect(response.status).toBe(500);
-    expect(response.headers.get('content-type')).toContain('text/plain');
-    await expect(response.text()).resolves.toContain('Internal Server Error');
+    expect(response.headers.get('content-type')).toContain('application/json');
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        message: 'engine exploded',
+      },
+    });
   });
 });

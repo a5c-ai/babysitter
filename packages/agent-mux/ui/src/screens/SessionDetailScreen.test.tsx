@@ -121,15 +121,15 @@ describe('SessionDetailScreen', () => {
     const user = userEvent.setup();
     render(<SessionDetailScreen sessionId="session-1" />);
 
-    expect(screen.getByText('codex')).toBeTruthy();
-    expect(screen.getByText(/run-1/)).toBeTruthy();
-    expect(screen.getByText('Read')).toBeTruthy();
+    expect(await screen.findByText('codex')).toBeTruthy();
+    expect(await screen.findByText(/run-1/)).toBeTruthy();
+    expect(await screen.findByText('Read')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'transcript' }));
-    expect(screen.getByText('Working on it now')).toBeTruthy();
+    expect(await screen.findByText('Working on it now')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'files' }));
-    expect(screen.getByText('src/app.tsx')).toBeTruthy();
+    expect(await screen.findByText('src/app.tsx')).toBeTruthy();
   });
 
   it('shows the per-tab empty states when no realtime data exists', async () => {
@@ -144,15 +144,15 @@ describe('SessionDetailScreen', () => {
     const user = userEvent.setup();
     render(<SessionDetailScreen sessionId="session-empty" />);
 
-    expect(screen.getByText('No structured execution flow is available for this session yet.')).toBeTruthy();
+    expect(await screen.findByText('No structured execution flow is available for this session yet.')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'timeline' }));
-    expect(screen.getByText('No timeline events are available for this session yet.')).toBeTruthy();
+    expect(await screen.findByText('No timeline events are available for this session yet.')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'transcript' }));
-    expect(screen.getByText('No transcript turns are available for this session yet.')).toBeTruthy();
+    expect(await screen.findByText('No transcript turns are available for this session yet.')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'files' }));
-    expect(screen.getByText('File attention will appear here once the session touches the workspace.')).toBeTruthy();
+    expect(await screen.findByText('File attention will appear here once the session touches the workspace.')).toBeTruthy();
   });
 });

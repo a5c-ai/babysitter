@@ -40,11 +40,13 @@ export class EventLogIndex {
         run_id TEXT PRIMARY KEY,
         agent TEXT NOT NULL,
         model TEXT,
+        cwd TEXT,
         status TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         started_at INTEGER NOT NULL,
         ended_at INTEGER,
         session_id TEXT,
+        workspace_id TEXT,
         exit_reason TEXT,
         error_code TEXT,
         error_message TEXT,
@@ -67,24 +69,28 @@ export class EventLogIndex {
       CREATE INDEX IF NOT EXISTS idx_runs_updated_at ON runs (updated_at DESC);
       CREATE INDEX IF NOT EXISTS idx_runs_status ON runs (status);
     `);
+    this.ensureRunsColumn('cwd', 'TEXT');
+    this.ensureRunsColumn('workspace_id', 'TEXT');
   }
 
   upsertRun(entry: RunEntry): void {
     this.db.prepare(`
       INSERT INTO runs (
-        run_id, agent, model, status, created_at, started_at, ended_at, session_id,
+        run_id, agent, model, cwd, status, created_at, started_at, ended_at, session_id, workspace_id,
         exit_reason, error_code, error_message, owner_token_id, owner_name,
         owner_remote_address, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(run_id) DO UPDATE SET
         agent = excluded.agent,
         model = excluded.model,
+        cwd = excluded.cwd,
         status = excluded.status,
         created_at = excluded.created_at,
         started_at = excluded.started_at,
         ended_at = excluded.ended_at,
         session_id = excluded.session_id,
+        workspace_id = excluded.workspace_id,
         exit_reason = excluded.exit_reason,
         error_code = excluded.error_code,
         error_message = excluded.error_message,
@@ -96,11 +102,13 @@ export class EventLogIndex {
       entry.runId,
       entry.agent,
       entry.model ?? null,
+      entry.cwd ?? null,
       entry.status,
       entry.createdAt,
       entry.startedAt,
       entry.endedAt,
       entry.sessionId ?? null,
+      entry.workspaceId ?? null,
       entry.exitReason ?? null,
       entry.error?.code ?? null,
       entry.error?.message ?? null,
@@ -226,11 +234,13 @@ export class EventLogIndex {
       runId: String(row['run_id']),
       agent: String(row['agent']),
       model: row['model'] == null ? undefined : String(row['model']),
+      cwd: row['cwd'] == null ? undefined : String(row['cwd']),
       status: String(row['status']) as RunEntry['status'],
       createdAt: Number(row['created_at']),
       startedAt: Number(row['started_at']),
       endedAt: row['ended_at'] == null ? null : Number(row['ended_at']),
       sessionId: row['session_id'] == null ? undefined : String(row['session_id']),
+      workspaceId: row['workspace_id'] == null ? undefined : String(row['workspace_id']),
       exitReason: row['exit_reason'] == null ? undefined : String(row['exit_reason']) as RunEntry['exitReason'],
       error: row['error_code'] == null
         ? null
@@ -244,5 +254,13 @@ export class EventLogIndex {
         remoteAddress: row['owner_remote_address'] == null ? null : String(row['owner_remote_address']),
       },
     };
+  }
+
+  private ensureRunsColumn(name: string, type: string): void {
+    const columns = this.db.prepare(`PRAGMA table_info(runs)`).all() as Array<Record<string, unknown>>;
+    if (columns.some((column) => String(column['name']) === name)) {
+      return;
+    }
+    this.db.exec(`ALTER TABLE runs ADD COLUMN ${name} ${type}`);
   }
 }
