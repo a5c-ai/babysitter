@@ -5,6 +5,7 @@ const path = require('path');
 const assert = require('assert');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(PROJECT_ROOT, '..', '..');
 const SKILLS_DIR = path.join(PROJECT_ROOT, 'skills');
 const HOOKS_DIR = path.join(PROJECT_ROOT, 'hooks');
 const BIN_DIR = path.join(PROJECT_ROOT, 'bin');
@@ -39,12 +40,12 @@ function testSyntax() {
 }
 
 function testCommandBackedSkills() {
-  execFileSync(process.execPath, [path.join(SCRIPTS_DIR, 'sync-command-skills.js'), '--check'], {
-    cwd: PROJECT_ROOT,
+  execFileSync(process.execPath, [path.join(REPO_ROOT, 'scripts', 'sync-plugin-commands.cjs'), '--target', 'codex', '--check'], {
+    cwd: REPO_ROOT,
     encoding: 'utf8',
     stdio: 'inherit',
   });
-  console.log('  ✓ command-backed skills are synchronized with plugins/babysitter/commands');
+  console.log('  ✓ generated Codex surfaces match the unified compiler output');
 }
 
 // Test: Shell hook scripts have valid syntax

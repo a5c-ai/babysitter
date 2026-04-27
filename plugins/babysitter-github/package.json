@@ -11,8 +11,7 @@
     "test": "npm run validate:ci",
     "test:integration": "bash test/plugin-validate.sh",
     "test:packaged-install": "node test/install-surface.test.js && node test/cloud-agent-install.test.js",
-    "validate:ci": "npm run test:integration && npm run test:packaged-install",
-    "sync:commands": "node scripts/sync-command-surfaces.js"
+    "validate:ci": "npm run test:integration && npm run test:packaged-install"
   },
   "bin": {
     "babysitter-github-copilot": "bin/cli.js"

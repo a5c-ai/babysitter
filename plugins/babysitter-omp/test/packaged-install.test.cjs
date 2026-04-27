@@ -72,7 +72,6 @@ try {
     'bin/cli.cjs',
     'bin/install.cjs',
     'bin/uninstall.cjs',
-    'scripts/sync-command-docs.cjs',
   ].forEach((relativePath) => assertExists(packagedRoot, relativePath));
 
   const skillText = fs.readFileSync(path.join(packagedRoot, 'skills', 'babysit', 'SKILL.md'), 'utf8');

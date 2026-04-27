@@ -128,6 +128,12 @@ describe('e2e: sample plugin compilation', () => {
       expect(result.emittedFiles).toContain('bin/cli.js');
       expect(result.emittedFiles).toContain('bin/install.js');
       expect(result.emittedFiles).toContain('bin/uninstall.js');
+
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(result.outputDir, 'package.json'), 'utf-8')
+      );
+      expect(packageJson.scripts['sync:commands']).toBeUndefined();
+      expect(packageJson.scripts['sync:skills']).toBeUndefined();
     });
 
     it('gemini: should emit TOML command references in plugin.json', () => {
@@ -166,6 +172,7 @@ describe('e2e: sample plugin compilation', () => {
       expect(packageJson.scripts['plugin:uninstall']).toBe('node bin/uninstall.js --global');
       expect(packageJson.scripts.postinstall).toBeUndefined();
       expect(packageJson.scripts.preuninstall).toBeUndefined();
+      expect(packageJson.scripts['sync:commands']).toBeUndefined();
     });
 
     it('github-copilot: should emit author as an object', () => {
@@ -255,6 +262,11 @@ describe('e2e: sample plugin compilation', () => {
       expect(ext).toContain('"help"');
       expect(ext).toContain('"status"');
       expect(result.emittedFiles).toContain('AGENTS.md');
+
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(result.outputDir, 'package.json'), 'utf-8')
+      );
+      expect(packageJson.scripts['sync:commands']).toBeUndefined();
     });
 
     it('pi: should generate hooks.json with ADAPTER_NAME env var', () => {
@@ -282,6 +294,11 @@ describe('e2e: sample plugin compilation', () => {
       );
       expect(ext).toContain('@oh-my-pi/pi-coding-agent');
       expect(result.emittedFiles).toContain('AGENTS.md');
+
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(result.outputDir, 'package.json'), 'utf-8')
+      );
+      expect(packageJson.scripts['sync:commands']).toBeUndefined();
     });
 
     it('marketplace targets should not emit bin/ scripts', () => {

@@ -60,10 +60,11 @@ assert_file_exists "AGENTS.md exists" "$PLUGIN_DIR/AGENTS.md"
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Test 1b: Command sync ==="
-if node "$PLUGIN_DIR/scripts/sync-command-surfaces.js" --check; then
-  pass "command and skill surfaces are synchronized"
+REPO_ROOT="$(cd "$PLUGIN_DIR/../.." && pwd)"
+if node "$REPO_ROOT/scripts/sync-plugin-commands.cjs" --target github-copilot --check; then
+  pass "command and skill surfaces match unified compiler output"
 else
-  fail "command and skill surfaces are not synchronized"
+  fail "command and skill surfaces do not match unified compiler output"
 fi
 
 # ---------------------------------------------------------------------------

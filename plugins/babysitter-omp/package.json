@@ -22,7 +22,6 @@
   "scripts": {
     "test": "node --test test/integration.test.js && node test/packaged-install.test.cjs",
     "validate:ci": "npm test",
-    "sync:commands": "node scripts/sync-command-docs.cjs",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging"
   },

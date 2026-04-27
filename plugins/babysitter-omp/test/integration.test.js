@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PLUGIN_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(PLUGIN_ROOT, '..', '..');
 
 function pluginPath(...segments) {
   return path.join(PLUGIN_ROOT, ...segments);
@@ -35,6 +36,10 @@ describe('package.json', () => {
     assert.ok(pkg.omp);
     assert.ok(Array.isArray(pkg.omp.extensions));
     assert.ok(Array.isArray(pkg.omp.skills));
+  });
+
+  it('does not expose plugin-local sync scripts in package metadata', () => {
+    assert.strictEqual(pkg.scripts['sync:commands'], undefined);
   });
 });
 
@@ -63,14 +68,14 @@ describe('command files', () => {
     });
   }
 
-  it('command docs are synchronized with the OMP command sync script', async () => {
+  it('generated command docs stay aligned with the unified compiler output', async () => {
     const { spawnSync } = await import('node:child_process');
     const result = spawnSync(
       process.execPath,
-      [pluginPath('scripts', 'sync-command-docs.cjs'), '--check'],
-      { cwd: PLUGIN_ROOT, encoding: 'utf8' },
+      [path.join(REPO_ROOT, 'scripts', 'sync-plugin-commands.cjs'), '--target', 'oh-my-pi', '--check'],
+      { cwd: REPO_ROOT, encoding: 'utf8' },
     );
-    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'OMP command sync check failed');
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'OMP compiler surface check failed');
   });
 });
 

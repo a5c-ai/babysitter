@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PLUGIN_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(PLUGIN_ROOT, '..', '..');
 
 function pluginPath(...segments) {
   return path.join(PLUGIN_ROOT, ...segments);
@@ -80,6 +81,10 @@ describe('package.json', () => {
     assert.ok(pkg.scripts['plugin:uninstall'], 'must have plugin:uninstall script');
     assert.strictEqual(pkg.scripts.postinstall, undefined, 'postinstall script should not be defined');
     assert.strictEqual(pkg.scripts.preuninstall, undefined, 'preuninstall script should not be defined');
+  });
+
+  it('does not expose plugin-local sync scripts in package metadata', () => {
+    assert.strictEqual(pkg.scripts['sync:commands'], undefined);
   });
 });
 
@@ -174,14 +179,14 @@ describe('command files', () => {
     assert.strictEqual(mdFiles.length, 16, `expected 16 command files, found ${mdFiles.length}`);
   });
 
-  it('command docs are synchronized with the command sync script', async () => {
+  it('generated command docs stay aligned with the unified compiler output', async () => {
     const { spawnSync } = await import('node:child_process');
     const result = spawnSync(
       process.execPath,
-      [pluginPath('scripts', 'sync-command-docs.cjs'), '--check'],
-      { cwd: PLUGIN_ROOT, encoding: 'utf8' },
+      [path.join(REPO_ROOT, 'scripts', 'sync-plugin-commands.cjs'), '--target', 'openclaw', '--check'],
+      { cwd: REPO_ROOT, encoding: 'utf8' },
     );
-    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'command sync check failed');
+    assert.strictEqual(result.status, 0, result.stderr || result.stdout || 'compiler surface check failed');
   });
 });
 

@@ -91,7 +91,6 @@ try {
     'bin/cli.cjs',
     'bin/install.cjs',
     'bin/uninstall.cjs',
-    'scripts/sync-command-docs.cjs',
   ].forEach((relativePath) => assertExists(packagedRoot, relativePath));
 
   // Validate babysit skill content
