@@ -53,6 +53,10 @@
     "test": "vitest run --root ../../.. --config vitest.config.ts \"packages/agent-mux/harness-mock/tests/**/*.test.ts\" \"packages/agent-mux/harness-mock/tests/**/*.test.tsx\" \"packages/agent-mux/harness-mock/src/**/*.test.ts\" \"packages/agent-mux/harness-mock/src/**/*.test.tsx\""
   },
   "dependencies": {
-    "@a5c-ai/agent-mux-core": "0.4.9"
+    "@a5c-ai/agent-mux-core": "0.4.9",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
   }
 }

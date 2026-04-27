@@ -4,7 +4,7 @@ Mock harness simulator for [agent-mux](https://github.com/a5c-ai/agent-mux) adap
 
 - adapter-faithful subprocess scenarios for the currently supported CLI harnesses: `claude`, `codex`, `gemini`, `copilot`, `cursor`, `opencode`, `pi`, `omp`, `openclaw`, `hermes`, `amp`, `droid`, and `qwen`
 - programmatic SDK mock builders for `claude-agent-sdk`, `codex-sdk`, and `pi-sdk`
-- remote transport mock builders for `opencode-http` and `codex-websocket`
+- bindable remote transport mock builders for `opencode-http` and `codex-websocket`
 
 ## Install
 
@@ -48,6 +48,10 @@ const customRemote = createRemoteMockBuilder().name('custom-remote').addEvents([
 ```
 
 See the [repository README](https://github.com/a5c-ai/agent-mux#readme) for details.
+
+`codex-websocket` scenarios bind a real websocket server on `serverUrl`, so
+external clients can connect, receive scripted frames, and exercise disconnect
+and reconnect flows against the mock over the network.
 
 ## License
 

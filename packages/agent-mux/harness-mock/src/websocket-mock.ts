@@ -3,6 +3,7 @@
  */
 
 import { EventEmitter } from 'node:events';
+import WebSocket, { WebSocketServer } from 'ws';
 import type {
   FileOperation,
   HarnessScenario,
@@ -13,6 +14,7 @@ import type {
 
 interface MockConnectionState {
   connectionId: string;
+  socket: WebSocket;
   connectedAt: Date;
   disconnectedAt?: Date;
   messageCount: number;
@@ -24,8 +26,10 @@ let nextConnectionId = 1;
 export class WebSocketServerMock extends EventEmitter implements WebSocketServerMockHandle {
   readonly scenario: HarnessScenario;
   readonly id: number;
-  readonly serverUrl: string;
-  readonly port: number;
+
+  private _port: number;
+  private _serverUrl: string;
+  private _server: WebSocketServer | null = null;
 
   private _exited = false;
   private _isRunning = false;
@@ -38,13 +42,25 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     timestamp: Date;
   }> = [];
   private readonly _connections = new Map<string, MockConnectionState>();
+  private readonly _completedConnections: MockConnectionState[] = [];
+  private _reconnectAllowedAt: number | null = null;
+  private _reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(scenario: HarnessScenario, id: number) {
     super();
     this.scenario = scenario;
     this.id = id;
-    this.port = scenario.websocketServer?.port ?? 8081;
-    this.serverUrl = `ws://localhost:${this.port}`;
+    this._port = scenario.websocketServer?.port ?? 8081;
+    const host = scenario.websocketServer?.host ?? '127.0.0.1';
+    this._serverUrl = `ws://${host}:${this._port}`;
+  }
+
+  get port(): number {
+    return this._port;
+  }
+
+  get serverUrl(): string {
+    return this._serverUrl;
   }
 
   get exited(): boolean {
@@ -68,7 +84,7 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
   }
 
   async start(): Promise<void> {
-    if (this._isRunning) {
+    if (this._server || this._isRunning) {
       throw new Error('WebSocket server already started');
     }
 
@@ -80,12 +96,86 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
       throw new Error('Mock WebSocket server startup failed');
     }
 
-    this._isRunning = true;
-    this.emit('started');
+    const host = config?.host ?? '127.0.0.1';
+    const port = config?.port ?? 8081;
+    this._port = port;
+    this._serverUrl = `ws://${host}:${port}`;
+    this._server = new WebSocketServer({
+      host,
+      port,
+      maxPayload: 1024 * 1024 * 8,
+    });
 
-    const defaultConnection = this.createConnection();
-    this.emit('connection', defaultConnection.connectionId);
-    this.scheduleScenarioEvents(defaultConnection);
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const server = this._server;
+        if (!server) {
+          reject(new Error('WebSocket server failed to initialize'));
+          return;
+        }
+
+        const cleanup = () => {
+          server.off('error', onError);
+          server.off('listening', onListening);
+        };
+        const onError = (error: Error) => {
+          cleanup();
+          reject(error);
+        };
+        const onListening = () => {
+          cleanup();
+          const address = server.address();
+          if (address && typeof address === 'object' && 'port' in address) {
+            this._port = address.port;
+            this._serverUrl = `ws://${host}:${address.port}`;
+          }
+          this._isRunning = true;
+          this.emit('started');
+          resolve();
+        };
+
+        server.once('error', onError);
+        server.once('listening', onListening);
+      });
+    } catch (error) {
+      this._isRunning = false;
+      if (this._server) {
+        await new Promise<void>((resolve) => this._server?.close(() => resolve()));
+        this._server = null;
+      }
+      throw error;
+    }
+
+    this._server.on('connection', (socket) => {
+      if (!this._isRunning) {
+        socket.close(1012, 'Server stopping');
+        return;
+      }
+
+      const now = Date.now();
+      if (this._reconnectAllowedAt != null && now < this._reconnectAllowedAt) {
+        socket.close(1013, 'Reconnect not yet allowed');
+        return;
+      }
+      const isReconnect = this._reconnectAllowedAt != null && now >= this._reconnectAllowedAt;
+      if (isReconnect) {
+        this._reconnectAllowedAt = null;
+      }
+
+      if (this.scenario.websocketServer?.maxConnections != null
+        && this._connections.size >= this.scenario.websocketServer.maxConnections) {
+        socket.close(1013, 'Mock connection limit reached');
+        return;
+      }
+
+      const connection = this.createConnection(socket);
+      this.emit('connection', connection.connectionId);
+      if (isReconnect) {
+        this.emit('reconnected', connection.connectionId);
+      }
+      this.scheduleScenarioEvents(connection);
+      this.attachSocketHandlers(connection);
+    });
   }
 
   broadcast(message: unknown): void {
@@ -102,8 +192,7 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     if (connection.disconnectedAt) {
       throw new Error(`Connection already closed: ${connectionId}`);
     }
-    this.recordMessage(connection, 'outbound', message);
-    this.emit('message', { connectionId, direction: 'outbound', message });
+    this.sendFrame(connection, message);
   }
 
   receiveFrom(connectionId: string, message: unknown): void {
@@ -116,6 +205,7 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     }
     this.recordMessage(connection, 'inbound', message);
     this.emit('message', { connectionId, direction: 'inbound', message });
+    this.checkForDrop(connection);
   }
 
   dropConnection(connectionId: string): void {
@@ -123,23 +213,21 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     if (!connection || connection.disconnectedAt) {
       return;
     }
-    connection.disconnectedAt = new Date();
-    for (const timer of connection.timers) {
-      clearTimeout(timer);
-    }
-    connection.timers.length = 0;
-    this._connections.delete(connectionId);
-    this.emit('disconnected', connectionId);
+    this.closeConnection(connection, 1011, 'Mock connection dropped');
 
     const drops = this.scenario.websocketServer?.simulateDrops;
     if (drops?.reconnectDelayMs != null) {
-      const timer = setTimeout(() => {
+      this._reconnectAllowedAt = Date.now() + drops.reconnectDelayMs;
+      if (this._reconnectTimer) {
+        clearTimeout(this._reconnectTimer);
+      }
+      this._reconnectTimer = setTimeout(() => {
+        this._reconnectTimer = null;
         if (!this._isRunning) return;
-        const replacement = this.createConnection();
-        this.emit('reconnected', replacement.connectionId);
-        this.scheduleScenarioEvents(replacement);
+        if (this._reconnectAllowedAt != null && Date.now() >= this._reconnectAllowedAt) {
+          this._reconnectAllowedAt = null;
+        }
       }, drops.reconnectDelayMs);
-      connection.timers.push(timer);
     }
   }
 
@@ -157,14 +245,22 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
       return;
     }
     this._isRunning = false;
-    for (const connection of this._connections.values()) {
-      for (const timer of connection.timers) {
-        clearTimeout(timer);
-      }
-      connection.timers.length = 0;
-      connection.disconnectedAt ??= new Date();
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
+    for (const connection of [...this._connections.values()]) {
+      this.closeConnection(connection, 1001, 'Server stopped');
     }
     this._connections.clear();
+    await new Promise<void>((resolve) => {
+      if (!this._server) {
+        resolve();
+        return;
+      }
+      this._server.close(() => resolve());
+      this._server = null;
+    });
     this._exited = true;
     this.emit('stopped');
   }
@@ -179,9 +275,7 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     }
 
     const durationMs = Date.now() - this._startTime;
-    const completedConnections = this.messageHistory.length === 0
-      ? []
-      : this.getHistoricalConnections();
+    const completedConnections = this.getHistoricalConnections();
     const averageConnectionDurationMs = completedConnections.length === 0
       ? durationMs
       : completedConnections.reduce((sum, connection) => sum + connection.durationMs, 0) / completedConnections.length;
@@ -200,10 +294,11 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     };
   }
 
-  private createConnection(): MockConnectionState {
+  private createConnection(socket: WebSocket): MockConnectionState {
     const connectionId = `ws-${nextConnectionId++}`;
     const connection: MockConnectionState = {
       connectionId,
+      socket,
       connectedAt: new Date(),
       messageCount: 0,
       timers: [],
@@ -213,19 +308,16 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
   }
 
   private scheduleScenarioEvents(connection: MockConnectionState): void {
+    let delayMs = 0;
     for (const event of this.scenario.events ?? []) {
+      delayMs += event.delayMs ?? 0;
       const timer = setTimeout(() => {
         if (!this._isRunning || !this._connections.has(connection.connectionId)) {
           return;
         }
-        this.recordMessage(connection, 'outbound', event);
+        this.sendFrame(connection, event);
         this.emit('event', { connectionId: connection.connectionId, event });
-
-        const drops = this.scenario.websocketServer?.simulateDrops;
-        if (drops?.afterMessages != null && connection.messageCount >= drops.afterMessages) {
-          this.dropConnection(connection.connectionId);
-        }
-      }, event.delayMs ?? 0);
+      }, delayMs);
       connection.timers.push(timer);
     }
 
@@ -248,19 +340,87 @@ export class WebSocketServerMock extends EventEmitter implements WebSocketServer
     });
   }
 
-  private getHistoricalConnections(): Array<{ connectionId: string; durationMs: number }> {
-    const byConnection = new Map<string, { first: Date; last: Date }>();
-    for (const item of this._messageHistory) {
-      const existing = byConnection.get(item.connectionId);
-      if (!existing) {
-        byConnection.set(item.connectionId, { first: item.timestamp, last: item.timestamp });
-        continue;
-      }
-      existing.last = item.timestamp;
+  private sendFrame(connection: MockConnectionState, message: unknown): void {
+    if (connection.socket.readyState !== WebSocket.OPEN) {
+      throw new Error(`Connection already closed: ${connection.connectionId}`);
     }
-    return Array.from(byConnection.entries()).map(([connectionId, range]) => ({
-      connectionId,
-      durationMs: Math.max(0, range.last.getTime() - range.first.getTime()),
+    this.recordMessage(connection, 'outbound', message);
+    connection.socket.send(typeof message === 'string' ? message : JSON.stringify(message));
+    this.emit('message', { connectionId: connection.connectionId, direction: 'outbound', message });
+    this.checkForDrop(connection);
+  }
+
+  private attachSocketHandlers(connection: MockConnectionState): void {
+    connection.socket.on('message', (data, isBinary) => {
+      const message = this.decodeMessage(data, isBinary);
+      this.receiveFrom(connection.connectionId, message);
+    });
+
+    connection.socket.once('close', () => {
+      this.finalizeConnection(connection);
+    });
+
+    connection.socket.once('error', (error) => {
+      if (!connection.disconnectedAt) {
+        this.emit('error', error);
+      }
+    });
+  }
+
+  private decodeMessage(data: Buffer | ArrayBuffer | Uint8Array | string, isBinary: boolean): unknown {
+    if (isBinary) {
+      return Buffer.isBuffer(data) ? data : Buffer.from(data as ArrayBuffer | Uint8Array);
+    }
+    const text = typeof data === 'string' ? data : Buffer.from(data as ArrayBuffer | Uint8Array).toString('utf8');
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+
+  private closeConnection(connection: MockConnectionState, code: number, reason: string): void {
+    if (connection.disconnectedAt) {
+      return;
+    }
+    connection.disconnectedAt = new Date();
+    for (const timer of connection.timers) {
+      clearTimeout(timer);
+    }
+    connection.timers.length = 0;
+    if (connection.socket.readyState === WebSocket.OPEN || connection.socket.readyState === WebSocket.CONNECTING) {
+      connection.socket.close(code, reason);
+    }
+    this.finalizeConnection(connection);
+  }
+
+  private finalizeConnection(connection: MockConnectionState): void {
+    if (!this._connections.has(connection.connectionId)) {
+      return;
+    }
+    connection.disconnectedAt ??= new Date();
+    this._connections.delete(connection.connectionId);
+    if (!this._completedConnections.includes(connection)) {
+      this._completedConnections.push(connection);
+    }
+    this.emit('disconnected', connection.connectionId);
+  }
+
+  private checkForDrop(connection: MockConnectionState): void {
+    const drops = this.scenario.websocketServer?.simulateDrops;
+    if (drops?.afterMessages != null && connection.messageCount >= drops.afterMessages) {
+      this.dropConnection(connection.connectionId);
+    }
+  }
+
+  private getHistoricalConnections(): Array<{ connectionId: string; durationMs: number }> {
+    const allConnections = [...this._completedConnections, ...this._connections.values()];
+    return allConnections.map((connection) => ({
+      connectionId: connection.connectionId,
+      durationMs: Math.max(
+        0,
+        (connection.disconnectedAt ?? new Date()).getTime() - connection.connectedAt.getTime(),
+      ),
     }));
   }
 }
