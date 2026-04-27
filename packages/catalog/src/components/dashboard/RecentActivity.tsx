@@ -73,7 +73,7 @@ function getHref(item: ActivityItem): string {
     case "agent":
       return `/agents/${encodeURIComponent(item.name)}`;
     case "skill":
-      return `/skills/${encodeURIComponent(item.name)}`;
+      return `/skills/${encodeURIComponent(item.slug ?? item.name)}`;
     case "process":
       return `/processes/${item.id}`;
     case "domain":

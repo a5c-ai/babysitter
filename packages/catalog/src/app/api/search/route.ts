@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       name: result.name,
       description: result.description,
       path: result.path,
+      slug: result.slug,
       score: result.score,
     }));
 

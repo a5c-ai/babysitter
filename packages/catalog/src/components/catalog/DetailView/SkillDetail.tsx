@@ -14,7 +14,7 @@ export interface SkillDetailProps {
   /** Skill data */
   skill: SkillDetailType;
   /** Related skills */
-  relatedSkills?: Array<{ id: number; name: string; description: string }>;
+  relatedSkills?: Array<{ id: number; slug: string; name: string; description: string }>;
   /** Custom class name */
   className?: string;
 }
@@ -56,7 +56,7 @@ export function SkillDetail({
         </div>
 
         <QuickActions
-          entityId={skill.name}
+          entityId={skill.slug}
           entityType="skill"
           filePath={skill.filePath}
         />
@@ -154,7 +154,7 @@ export function SkillDetail({
             id: s.id,
             name: s.name,
             description: s.description,
-            href: `/skills/${encodeURIComponent(s.name)}`,
+            href: `/skills/${encodeURIComponent(s.slug)}`,
             type: "skill" as const,
           }))}
         />

@@ -45,7 +45,13 @@ export async function GET(_request: NextRequest) {
 
     const recentActivity: RecentActivityItem[] = [
       ...snapshot.agents.map((agent) => ({ type: 'agent' as const, id: agent.id, name: agent.name, updatedAt: agent.updatedAt })),
-      ...snapshot.skills.map((skill) => ({ type: 'skill' as const, id: skill.id, name: skill.name, updatedAt: skill.updatedAt })),
+      ...snapshot.skills.map((skill) => ({
+        type: 'skill' as const,
+        id: skill.id,
+        name: skill.name,
+        slug: skill.slug,
+        updatedAt: skill.updatedAt,
+      })),
       ...snapshot.processes.map((process) => ({ type: 'process' as const, id: process.id, name: process.processId, updatedAt: process.updatedAt })),
       ...snapshot.domains.map((domain) => ({ type: 'domain' as const, id: domain.id, name: domain.name, updatedAt: domain.updatedAt })),
       ...snapshot.specializations.map((specialization) => ({ type: 'specialization' as const, id: specialization.id, name: specialization.name, updatedAt: specialization.updatedAt })),

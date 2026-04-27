@@ -41,7 +41,9 @@ import {
   listOntologyClaims,
   listPackageSurfaces,
   lookupHarnessImage,
+  getCatalogSkillBySlug,
   listAgentVersions,
+  listCatalogSkills,
   resolveCatalogEvidenceAssetPath,
   resolveCatalogGraphAssetPath,
   supportsAgentCapability,
@@ -150,6 +152,28 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(listOntologyNodesByKind("CiSurface").length).toBeGreaterThan(0);
     expect(listOntologyNodesByKind("Claim").length).toBeGreaterThan(5);
     expect(listOntologyNodesByKind("SessionSemantics").length).toBeGreaterThan(3);
+  });
+
+  it("assigns stable unique slugs to duplicated skill names and resolves them by slug", () => {
+    const duplicates = listCatalogSkills()
+      .filter((skill) => skill.name === "test-driven-development")
+      .sort((left, right) => left.slug.localeCompare(right.slug));
+
+    expect(duplicates).toHaveLength(3);
+    expect(duplicates.map((skill) => skill.slug)).toEqual([
+      "methodologies--cc10x--skills--test-driven-development",
+      "methodologies--rpikit--skills--test-driven-development",
+      "methodologies--superpowers--skills--test-driven-development",
+    ]);
+    expect(new Set(duplicates.map((skill) => skill.slug)).size).toBe(duplicates.length);
+
+    for (const skill of duplicates) {
+      expect(getCatalogSkillBySlug(skill.slug)).toMatchObject({
+        slug: skill.slug,
+        filePath: skill.filePath,
+        name: "test-driven-development",
+      });
+    }
   });
 
   it("loads the sharded ontology evidence export through its manifest", () => {

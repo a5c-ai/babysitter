@@ -165,7 +165,7 @@ export function SkillCard({
 
   return (
     <Link
-      href={`/skills/${encodeURIComponent(skill.name)}` as Route}
+      href={`/skills/${encodeURIComponent(skill.slug)}` as Route}
       className={cn(
         "block transition-all duration-200",
         className

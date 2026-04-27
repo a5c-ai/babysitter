@@ -967,7 +967,8 @@ This document captures all functional requirements derived from the existing imp
 
 **Acceptance Criteria:**
 - AC-050.1: List endpoint shall accept: limit, offset, domain, specialization parameters
-- AC-050.2: List endpoint shall return skill list with: id, name, description, domainName, specializationName
+- AC-050.2: List endpoint shall return skill list with: id, slug, name, description, domainName, specializationName
+- AC-050.3: Detail endpoint shall resolve skills by stable slug rather than non-unique display name
 - AC-050.3: Detail endpoint shall return full skill with: content, frontmatter, allowedTools
 - AC-050.4: Return 404 for non-existent skill
 - AC-050.5: Return paginated response with total count

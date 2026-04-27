@@ -94,6 +94,7 @@ export default async function SkillDetailPage({ params }: PageProps) {
         skill={skill}
         relatedSkills={relatedSkills.map((s) => ({
           id: s.id,
+          slug: s.slug,
           name: s.name,
           description: s.description,
         }))}

@@ -1,9 +1,9 @@
 /**
  * Skill Detail API Route
- * GET /api/skills/[slug] - Get single skill by name
+ * GET /api/skills/[slug] - Get single skill by stable slug
  */
 
-import { getCatalogSkillByName } from '@a5c-ai/agent-catalog';
+import { getCatalogSkillBySlug } from '@a5c-ai/agent-catalog';
 import { NextRequest } from 'next/server';
 import {
   validateSlug,
@@ -31,13 +31,14 @@ export async function GET(
     }
     const slug = validation.slug;
 
-    const skill = getCatalogSkillByName(slug);
+    const skill = getCatalogSkillBySlug(slug);
     if (!skill) {
       return notFoundResponse('Skill', slug);
     }
 
     const response: SkillDetail = {
       id: skill.id,
+      slug: skill.slug,
       name: skill.name,
       description: skill.description,
       filePath: skill.filePath,

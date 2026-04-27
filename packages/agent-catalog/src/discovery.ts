@@ -31,6 +31,7 @@ export interface CatalogDiscoveryProcess {
 
 export interface CatalogDiscoverySkill {
   id: number;
+  slug: string;
   name: string;
   description: string;
   filePath: string;
@@ -62,6 +63,7 @@ export interface CatalogDiscoveryAgent {
 
 export interface CatalogDiscoverySkillSummary {
   id: number;
+  slug: string;
   name: string;
   description: string;
 }
@@ -143,6 +145,7 @@ export interface CatalogDiscoverySearchResult {
   name: string;
   description: string;
   path: string;
+  slug?: string;
   score: number;
   updatedAt: string;
 }
@@ -177,6 +180,10 @@ function normalizePath(value: string): string {
 
 function toRepoRelative(filePath: string): string {
   return normalizePath(path.relative(repoRoot(), filePath));
+}
+
+function toLibraryRelative(filePath: string): string {
+  return normalizePath(path.relative(libraryRoot(), filePath));
 }
 
 function readDirNames(dirPath: string): string[] {
@@ -464,6 +471,10 @@ function parseProcessFile(filePath: string): Omit<CatalogDiscoveryProcess, "id" 
 type MutableSkill = Omit<CatalogDiscoverySkill, "id">;
 type MutableAgent = Omit<CatalogDiscoveryAgent, "id">;
 
+function catalogSkillSlugFor(filePath: string): string {
+  return toLibraryRelative(path.dirname(filePath)).replace(/\//g, "--");
+}
+
 function parseSkillFile(filePath: string): MutableSkill {
   const parsed = parseMarkdownEntity(filePath);
   const stats = safeStat(filePath);
@@ -472,6 +483,7 @@ function parseSkillFile(filePath: string): MutableSkill {
     stringValue(parsed.metadata.specialization) ?? extractSpecializationFromPath(filePath);
 
   return {
+    slug: catalogSkillSlugFor(filePath),
     name: parsed.name,
     description: parsed.description,
     filePath: toRepoRelative(filePath),
@@ -622,6 +634,7 @@ function buildSnapshotFromLibrary(libraryDir: string): CatalogDiscoverySnapshot 
       })),
       skills: specializationSkills.map((skill) => ({
         id: skill.id,
+        slug: skill.slug,
         name: skill.name,
         description: skill.description,
       })),
@@ -673,6 +686,7 @@ function buildSnapshotFromLibrary(libraryDir: string): CatalogDiscoverySnapshot 
         })),
         skills: specializationSkills.map((skill) => ({
           id: skill.id,
+          slug: skill.slug,
           name: skill.name,
           description: skill.description,
         })),
@@ -805,8 +819,8 @@ export function listCatalogSkills(): CatalogDiscoverySkill[] {
   return getCatalogDiscoverySnapshot().skills;
 }
 
-export function getCatalogSkillByName(name: string): CatalogDiscoverySkill | undefined {
-  return getCatalogDiscoverySnapshot().skills.find((skill) => skill.name === name);
+export function getCatalogSkillBySlug(slug: string): CatalogDiscoverySkill | undefined {
+  return getCatalogDiscoverySnapshot().skills.find((skill) => skill.slug === slug);
 }
 
 export function listCatalogAgents(): CatalogDiscoveryAgent[] {
@@ -896,6 +910,7 @@ export function searchCatalogDiscovery(query: string, types?: CatalogDiscoverySe
           name: skill.name,
           description: skill.description,
           path: skill.filePath,
+          slug: skill.slug,
           score,
           updatedAt: skill.updatedAt,
         });

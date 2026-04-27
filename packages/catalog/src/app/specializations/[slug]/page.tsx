@@ -183,7 +183,7 @@ export default async function SpecializationDetailPage({ params }: PageProps) {
 function SkillRow({ skill }: { skill: SkillSummary }) {
   return (
     <Link
-      href={`/skills/${encodeURIComponent(skill.name)}` as Route}
+      href={`/skills/${encodeURIComponent(skill.slug)}` as Route}
       className="flex items-start gap-3 rounded-md p-2 hover:bg-muted/50 transition-colors"
     >
       <div className="shrink-0 rounded-md bg-[var(--color-success-subtle)] p-1.5 text-[var(--color-success-fg)]">

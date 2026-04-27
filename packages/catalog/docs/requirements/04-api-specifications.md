@@ -649,19 +649,20 @@ GET /api/skills?domain=development&sort=name&limit=10
 
 ### GET /api/skills/{slug}
 
-Get detailed information about a specific skill by name.
+Get detailed information about a specific skill by stable slug.
 
 #### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `slug` | string | **Yes** | Skill name |
+| `slug` | string | **Yes** | Stable skill slug derived from the skill's library path |
 
 #### Response
 
 ```typescript
 interface SkillDetail {
   id: number;
+  slug: string;
   name: string;
   description: string;
   filePath: string;

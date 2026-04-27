@@ -393,7 +393,7 @@ packages/catalog/
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | GET | `/api/skills` | List skills with filtering |
-| GET | `/api/skills/[slug]` | Get skill by name |
+| GET | `/api/skills/[slug]` | Get skill by stable slug |
 
 **Query Parameters:**
 - `domain`: Filter by domain

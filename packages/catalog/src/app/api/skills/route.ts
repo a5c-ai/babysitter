@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
 
     let skills: SkillListItem[] = listCatalogSkills().map((skill) => ({
       id: skill.id,
+      slug: skill.slug,
       name: skill.name,
       description: skill.description,
       filePath: skill.filePath,

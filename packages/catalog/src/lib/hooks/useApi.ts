@@ -256,7 +256,7 @@ export function useAgents(params: CatalogQueryParams = {}) {
 }
 
 /**
- * Hook for fetching a single agent by slug/name
+ * Hook for fetching a single agent by slug
  */
 export function useAgent(slug: string, options: UseQueryOptions<AgentDetail> = {}) {
   return useQuery<AgentDetail>(`/api/agents/${encodeURIComponent(slug)}`, {
@@ -273,7 +273,7 @@ export function useSkills(params: CatalogQueryParams = {}) {
 }
 
 /**
- * Hook for fetching a single skill by slug/name
+ * Hook for fetching a single skill by slug
  */
 export function useSkill(slug: string, options: UseQueryOptions<SkillDetail> = {}) {
   return useQuery<SkillDetail>(`/api/skills/${encodeURIComponent(slug)}`, {

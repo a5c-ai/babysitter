@@ -623,7 +623,7 @@ function SearchResultCard({ result }: { result: SearchResultItem }) {
       case "agent":
         return `/agents/${encodeURIComponent(result.name)}`;
       case "skill":
-        return `/skills/${encodeURIComponent(result.name)}`;
+        return `/skills/${encodeURIComponent(result.slug ?? result.name)}`;
       case "process":
         return `/processes/${result.id}`;
       case "domain":

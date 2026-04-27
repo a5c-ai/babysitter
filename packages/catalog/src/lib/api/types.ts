@@ -71,6 +71,7 @@ export interface SearchResultItem {
   name: string;
   description: string;
   path: string;
+  slug?: string;
   score: number;
   highlights?: {
     name?: string;
@@ -221,6 +222,7 @@ export interface AgentSummary {
  */
 export interface SkillSummary {
   id: number;
+  slug: string;
   name: string;
   description: string;
 }
@@ -253,6 +255,7 @@ export interface SkillQueryParams extends ListQueryParams {
  */
 export interface SkillListItem {
   id: number;
+  slug: string;
   name: string;
   description: string;
   filePath: string;
@@ -317,6 +320,7 @@ export interface RecentActivityItem {
   type: 'agent' | 'skill' | 'process' | 'domain' | 'specialization';
   id: number;
   name: string;
+  slug?: string;
   updatedAt: string;
 }
 
