@@ -1,7 +1,7 @@
 import * as os from 'node:os';
 import { createRequire } from 'node:module';
 
-import { MemoryTokenStore, SqliteTokenStore, resolveGatewayConfig, resolveGatewayEnvConfig, type GatewayConfig } from '@a5c-ai/agent-mux-gateway';
+import { DEFAULT_GATEWAY_CONFIG, MemoryTokenStore, SqliteTokenStore, resolveGatewayConfig, resolveGatewayEnvConfig, type GatewayConfig } from '@a5c-ai/agent-mux-gateway';
 
 import type { ParsedArgs } from '../../parse-args.js';
 import { flagBool, flagNum, flagStr } from '../../parse-args.js';
@@ -33,6 +33,7 @@ export async function gatewayTokensCommand(args: ParsedArgs): Promise<number> {
     ...envConfig,
     ...fileConfig,
     bootstrapAuth: {
+      ...DEFAULT_GATEWAY_CONFIG.bootstrapAuth,
       ...(envConfig.bootstrapAuth ?? {}),
       ...(fileConfig.bootstrapAuth ?? {}),
     },

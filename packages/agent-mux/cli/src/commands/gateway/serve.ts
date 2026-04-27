@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { createGateway, resolveGatewayConfig, resolveGatewayEnvConfig, type GatewayConfig } from '@a5c-ai/agent-mux-gateway';
+import { createGateway, DEFAULT_GATEWAY_CONFIG, resolveGatewayConfig, resolveGatewayEnvConfig, type GatewayConfig } from '@a5c-ai/agent-mux-gateway';
 import YAML from 'yaml';
 
 import type { ParsedArgs } from '../../parse-args.js';
@@ -42,6 +42,7 @@ export async function serveGatewayCommand(args: ParsedArgs): Promise<number> {
       ? false
       : (fileConfig.enableWebui ?? envConfig.enableWebui ?? true),
     bootstrapAuth: {
+      ...DEFAULT_GATEWAY_CONFIG.bootstrapAuth,
       ...(envConfig.bootstrapAuth ?? {}),
       ...(fileConfig.bootstrapAuth ?? {}),
     },
