@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, setupUser } from "@/test/test-utils";
+import { render, screen } from "@/test/test-utils";
 
 import { AppHeader } from "../app-header";
 import { APP_HEADER_NAV_ITEMS } from "../app-header-nav";
@@ -50,6 +50,24 @@ vi.mock("@/components/shared/theme-provider", () => ({
   }),
 }));
 
+vi.mock("lucide-react", () => ({
+  Activity: () => <svg aria-hidden="true" />,
+  Bell: () => <svg aria-hidden="true" />,
+  Bot: () => <svg aria-hidden="true" />,
+  Columns3: () => <svg aria-hidden="true" />,
+  FolderGit2: () => <svg aria-hidden="true" />,
+  GitBranch: () => <svg aria-hidden="true" />,
+  Github: () => <svg aria-hidden="true" />,
+  Menu: () => <svg aria-hidden="true" />,
+  Moon: () => <svg aria-hidden="true" />,
+  PlaySquare: () => <svg aria-hidden="true" />,
+  Settings: () => <svg aria-hidden="true" />,
+  Settings2: () => <svg aria-hidden="true" />,
+  Sun: () => <svg aria-hidden="true" />,
+  Wifi: () => <svg aria-hidden="true" />,
+  WifiOff: () => <svg aria-hidden="true" />,
+}));
+
 describe("APP_HEADER_NAV_ITEMS", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/");
@@ -81,23 +99,11 @@ describe("APP_HEADER_NAV_ITEMS", () => {
   it("renders settings access, theme toggle, and the main nav links", () => {
     render(<AppHeader />);
 
-    expect(screen.getByRole("button", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open settings" })).toHaveAttribute("href", "/settings");
     expect(screen.getByTestId("theme-toggle")).toHaveAttribute("aria-label", "Switch to light theme");
 
     for (const item of APP_HEADER_NAV_ITEMS) {
       expect(screen.getByRole("link", { name: item.label })).toBeInTheDocument();
     }
-  });
-
-  it("dispatches the global settings event from the header control", async () => {
-    const user = setupUser();
-    const handler = vi.fn();
-    window.addEventListener("open-settings", handler);
-
-    render(<AppHeader />);
-    await user.click(screen.getByRole("button", { name: "Settings" }));
-
-    expect(handler).toHaveBeenCalledTimes(1);
-    window.removeEventListener("open-settings", handler);
   });
 });

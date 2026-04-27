@@ -6,13 +6,13 @@ import { Kbd } from "./kbd";
 import { X } from "lucide-react";
 import { useKeyboard } from "@/hooks/use-keyboard";
 
-interface ShortcutEntry {
+export interface ShortcutEntry {
   keys: string[];
   description: string;
   context: "global" | "dashboard" | "run-detail" | "session-workspace";
 }
 
-const shortcuts: ShortcutEntry[] = [
+export const SHORTCUTS: ShortcutEntry[] = [
   // Global shortcuts (work everywhere)
   { keys: ["?"], description: "Show this help", context: "global" },
   { keys: ["n"], description: "Toggle notifications", context: "global" },
@@ -36,7 +36,7 @@ const shortcuts: ShortcutEntry[] = [
   { keys: ["Ctrl/Cmd", "K"], description: "Open workspace command bar", context: "session-workspace" },
 ];
 
-const sectionLabels: Record<string, string> = {
+export const SHORTCUT_SECTION_LABELS: Record<string, string> = {
   "global": "Global",
   "dashboard": "Dashboard",
   "run-detail": "Run Detail",
@@ -62,7 +62,7 @@ export function ShortcutsHelp() {
   }, []);
 
   // Filter shortcuts to show only relevant ones for current page
-  const visibleShortcuts = shortcuts.filter((s) => {
+  const visibleShortcuts = SHORTCUTS.filter((s) => {
     if (s.context === "global") return true;
     if (s.context === "dashboard" && !isRunDetail) return true;
     if (s.context === "run-detail" && isRunDetail) return true;
@@ -97,7 +97,7 @@ export function ShortcutsHelp() {
             {Object.entries(sections).map(([context, items]) => (
               <div key={context}>
                 <h3 className="text-xs font-medium text-foreground-muted uppercase tracking-wider mb-2">
-                  {sectionLabels[context] ?? context}
+                  {SHORTCUT_SECTION_LABELS[context] ?? context}
                 </h3>
                 <div className="space-y-2">
                   {items.map(({ keys, description }) => (

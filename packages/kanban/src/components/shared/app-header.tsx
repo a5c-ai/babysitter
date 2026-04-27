@@ -75,15 +75,11 @@ export function AppHeader() {
                 {isAuthenticated ? "Gateway connected" : "Gateway disconnected"}
               </span>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label="Settings"
-                onClick={() => window.dispatchEvent(new CustomEvent("open-settings"))}
-              >
-                <Settings2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Settings</span>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/settings" aria-label="Open settings">
+                  <Settings2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Settings</span>
+                </Link>
               </Button>
 
               <Button

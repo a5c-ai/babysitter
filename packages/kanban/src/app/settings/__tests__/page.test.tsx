@@ -15,6 +15,7 @@ const deleteDispatchContextLabelMock = vi.fn();
 const refreshMock = vi.fn();
 const updateProjectCollaborationMock = vi.fn();
 const updateRepositorySettingsMock = vi.fn();
+const requestPermissionMock = vi.fn();
 
 let snapshot = {
   projects: [
@@ -231,6 +232,20 @@ vi.mock("@/lib/agent-mux-ui", () => ({
   }),
 }));
 
+vi.mock("@/components/notifications/notification-provider", () => ({
+  useNotificationContext: () => ({
+    notifications: [],
+    permission: "default",
+    requestPermission: requestPermissionMock,
+  }),
+}));
+
+vi.mock("@/components/shared/theme-provider", () => ({
+  useTheme: () => ({
+    theme: "dark",
+  }),
+}));
+
 describe("SettingsPage", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -244,6 +259,7 @@ describe("SettingsPage", () => {
     refreshMock.mockReset();
     updateProjectCollaborationMock.mockReset();
     updateRepositorySettingsMock.mockReset();
+    requestPermissionMock.mockReset();
 
     snapshot = {
       projects: [
@@ -397,15 +413,26 @@ describe("SettingsPage", () => {
     updateRepositorySettingsMock.mockResolvedValue(undefined);
   });
 
-  it("renders the section nav and organization settings from the backlog snapshot", async () => {
+  it("renders the expanded section nav and general settings by default", async () => {
     const user = setupUser();
     render(<SettingsPage />);
 
+    expect(screen.getByTestId("settings-nav-general")).toBeInTheDocument();
     expect(screen.getByTestId("settings-nav-repositories-projects")).toBeInTheDocument();
     expect(screen.getByTestId("settings-nav-organization")).toBeInTheDocument();
     expect(screen.getByTestId("settings-nav-remote-project")).toBeInTheDocument();
     expect(screen.getByTestId("settings-nav-agent-configuration")).toBeInTheDocument();
     expect(screen.getByTestId("settings-nav-mcp-servers")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-nav-editor-integration")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-nav-git")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-nav-notifications")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-nav-task-tags")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-nav-keyboard-shortcuts")).toBeInTheDocument();
+
+    const generalSection = screen.getByTestId("general-settings");
+    expect(within(generalSection).getByText("General settings")).toBeInTheDocument();
+    expect(within(generalSection).getByText("~/.a5c/kanban.json")).toBeInTheDocument();
+    expect(within(generalSection).getByText("~/.a5c/kanban-settings-sections.json")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("settings-nav-organization"));
 
@@ -433,9 +460,39 @@ describe("SettingsPage", () => {
     expect(screen.getByTestId("missing-host-context")).toBeInTheDocument();
   });
 
-  it("loads and renders reusable Task Tags in deterministic order", async () => {
+  it("renders dedicated editor, git, notifications, and keyboard shortcut sections", async () => {
+    const user = setupUser();
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-editor-integration"));
+    expect(screen.getByTestId("editor-integration-settings")).toBeInTheDocument();
+    expect(screen.getByText("Ctrl/Cmd + K")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open workspaces" })).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("settings-nav-git"));
+    expect(screen.getByTestId("git-settings")).toBeInTheDocument();
+    expect(screen.getByText("Auto-merge enabled")).toBeInTheDocument();
+    expect(screen.getByText("a5c-ai/babysitter")).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("settings-nav-notifications"));
+    expect(screen.getByTestId("notification-settings")).toBeInTheDocument();
+    expect(screen.getByText("Browser notification permission pending")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Enable browser notifications" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("settings-nav-keyboard-shortcuts"));
+    expect(screen.getByTestId("keyboard-shortcut-settings")).toBeInTheDocument();
+    expect(screen.getByText("Keyboard shortcut settings")).toBeInTheDocument();
+    expect(screen.getByText("Show this help")).toBeInTheDocument();
+    expect(screen.getByText("Toggle workspace sidebar")).toBeInTheDocument();
+  });
+
+  it("loads and renders reusable Task Tags in deterministic order", async () => {
+    const user = setupUser();
+    render(<SettingsPage />);
+
+    await user.click(screen.getByTestId("settings-nav-task-tags"));
     const taskTagSection = screen.getByTestId("task-tag-settings");
     await waitFor(() => expect(loadTaskTagsMock).toHaveBeenCalledTimes(1));
 
@@ -475,6 +532,7 @@ describe("SettingsPage", () => {
     });
 
     render(<SettingsPage />);
+    await user.click(screen.getByTestId("settings-nav-task-tags"));
     await waitFor(() => expect(loadTaskTagsMock).toHaveBeenCalledTimes(1));
 
     await user.clear(screen.getByLabelText("Task Tag key"));
@@ -610,6 +668,7 @@ describe("SettingsPage", () => {
     });
 
     render(<SettingsPage />);
+    await user.click(screen.getByTestId("settings-nav-task-tags"));
     await waitFor(() => expect(loadTaskTagsMock).toHaveBeenCalledTimes(1));
 
     await user.click(screen.getAllByRole("button", { name: "Edit" })[1]!);
@@ -645,9 +704,11 @@ describe("SettingsPage", () => {
     expect(await screen.findByText("Deleted @bug_report.")).toBeInTheDocument();
   });
 
-  it("renders dispatch context label definitions and attached issue projections", () => {
+  it("renders dispatch context label definitions and attached issue projections", async () => {
+    const user = setupUser();
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
     const dispatchSection = screen.getByTestId("dispatch-context-label-settings");
     expect(within(dispatchSection).getByText("Dispatch Context Labels")).toBeInTheDocument();
     expect(within(dispatchSection).getByText("Tests First")).toBeInTheDocument();
@@ -664,6 +725,8 @@ describe("SettingsPage", () => {
   it("creates a reusable dispatch context label definition", async () => {
     const user = setupUser();
     render(<SettingsPage />);
+
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
 
     await user.type(screen.getByLabelText("Dispatch Context Label key"), "ui_copy_review");
     await user.type(screen.getByLabelText("Dispatch Context Label name"), "UI Copy Review");
@@ -691,6 +754,8 @@ describe("SettingsPage", () => {
     const user = setupUser();
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
+
     await user.click(screen.getByRole("button", { name: "Edit definition" }));
     await user.clear(screen.getByLabelText("Dispatch Context Label name tests_first"));
     await user.type(
@@ -716,6 +781,8 @@ describe("SettingsPage", () => {
     const user = setupUser();
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
+
     await user.click(screen.getByRole("button", { name: "Delete definition" }));
 
     expect(deleteDispatchContextLabelMock).toHaveBeenCalledWith(
@@ -729,6 +796,7 @@ describe("SettingsPage", () => {
     const user = setupUser();
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
     const baseBranchInput = screen.getByLabelText("Base branch");
     await user.clear(baseBranchInput);
     await user.type(baseBranchInput, "release/next");
@@ -750,6 +818,7 @@ describe("SettingsPage", () => {
     snapshot.projects = [];
     render(<SettingsPage />);
 
+    await user.click(screen.getByTestId("settings-nav-repositories-projects"));
     expect(screen.getByText("Project context is missing")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("settings-nav-organization"));

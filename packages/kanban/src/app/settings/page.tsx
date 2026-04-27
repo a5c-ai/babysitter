@@ -14,6 +14,9 @@ import Link from "next/link";
 import { useStore } from "zustand";
 
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
+import { useNotificationContext } from "@/components/notifications/notification-provider";
+import { SHORTCUT_SECTION_LABELS, SHORTCUTS } from "@/components/shared/shortcuts-help";
+import { useTheme } from "@/components/shared/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   createDispatchContextLabel,
@@ -45,11 +48,17 @@ function createEmptyDispatchContextLabelForm(): DispatchContextLabelFormState {
 }
 
 type SettingsSectionId =
+  | "general"
   | "repositories-projects"
   | "organization"
   | "remote-project"
   | "agent-configuration"
-  | "mcp-servers";
+  | "mcp-servers"
+  | "editor-integration"
+  | "git"
+  | "notifications"
+  | "task-tags"
+  | "keyboard-shortcuts";
 
 interface SettingsSectionDefinition {
   id: SettingsSectionId;
@@ -139,9 +148,15 @@ interface OrganizationDraft {
 
 const SETTINGS_SECTIONS: readonly SettingsSectionDefinition[] = [
   {
+    id: "general",
+    title: "General",
+    summary: "Local Babysitter framing, config locations, theme, gateway access, and runtime overview.",
+    icon: Activity,
+  },
+  {
     id: "repositories-projects",
     title: "Repositories & Projects",
-    summary: "Project policy, linked repositories, task tags, and dispatch-context definitions.",
+    summary: "Project policy, linked repositories, and dispatch-context definitions.",
     icon: Boxes,
   },
   {
@@ -168,7 +183,40 @@ const SETTINGS_SECTIONS: readonly SettingsSectionDefinition[] = [
     summary: "Per-agent MCP transport definitions with draft preservation and validation.",
     icon: ServerCog,
   },
+  {
+    id: "editor-integration",
+    title: "Editor Integration",
+    summary: "Workspace-first editing flow, command-bar shortcuts, and session handoff guidance.",
+    icon: Boxes,
+  },
+  {
+    id: "git",
+    title: "Git",
+    summary: "Branch defaults, review policy, auto-merge posture, and provider readiness context.",
+    icon: ShieldCheck,
+  },
+  {
+    id: "notifications",
+    title: "Notifications",
+    summary: "In-app alerts, browser permission state, and breakpoint/run attention behavior.",
+    icon: Activity,
+  },
+  {
+    id: "task-tags",
+    title: "Task Tags",
+    summary: "Reusable @ snippets kept as a first-class settings surface.",
+    icon: Boxes,
+  },
+  {
+    id: "keyboard-shortcuts",
+    title: "Keyboard Shortcuts",
+    summary: "Current shortcut groups for dashboard, runs, and session workspaces.",
+    icon: Cpu,
+  },
 ];
+
+const KANBAN_CONFIG_PATH = "~/.a5c/kanban.json";
+const SETTINGS_SECTION_STORAGE_PATH = "~/.a5c/kanban-settings-sections.json";
 
 function createEmptyRemoteState<T>(): RemoteSectionState<T> {
   return {
@@ -324,7 +372,9 @@ function isDirty<T>(baseline: T | null, draft: T | null): boolean {
 }
 
 export default function SettingsPage() {
+  const { theme } = useTheme();
   const { auth, logout, isAuthenticated } = useGatewayAuth();
+  const { notifications, permission, requestPermission } = useNotificationContext();
   const {
     snapshot,
     refresh,
@@ -336,7 +386,7 @@ export default function SettingsPage() {
   const project = snapshot?.projects[0];
   const dispatchContextLabels = snapshot?.dispatchContextLabels ?? [];
   const issues = snapshot?.issues ?? [];
-  const [selectedSection, setSelectedSection] = useState<SettingsSectionId>("repositories-projects");
+  const [selectedSection, setSelectedSection] = useState<SettingsSectionId>("general");
   const [pendingSection, setPendingSection] = useState<SettingsSectionId | null>(null);
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | null>(null);
   const [repoProjectBaseline, setRepoProjectBaseline] = useState<RepositoriesProjectsDraft | null>(null);
@@ -371,6 +421,33 @@ export default function SettingsPage() {
     repoProjectDraft?.repositories.find((repository) => repository.id === selectedRepositoryId) ??
     repoProjectDraft?.repositories[0] ??
     null;
+  const linkedRepositoryCount = repoProjectDraft?.repositories.length ?? project?.repositories.length ?? 0;
+  const autoMergeEnabledCount =
+    repoProjectDraft?.repositories.filter((repository) => repository.autoMerge).length ??
+    project?.repositories.filter((repository) => repository.settings.autoMerge).length ??
+    0;
+  const integrationCount = project?.integrations.length ?? 0;
+  const missingIntegrationCount =
+    project?.integrations.filter((integration) =>
+      integration.prerequisites.some((prerequisite) => !prerequisite.satisfied),
+    ).length ?? 0;
+  const connectedIntegrationCount =
+    project?.integrations.filter((integration) => integration.status === "connected").length ?? 0;
+  const shortcutGroups = Object.entries(
+    SHORTCUTS.reduce<Record<string, Array<(typeof SHORTCUTS)[number]>>>((groups, shortcut) => {
+      (groups[shortcut.context] ??= []).push(shortcut);
+      return groups;
+    }, {}),
+  );
+  const sessionWorkspaceShortcuts = SHORTCUTS.filter(
+    (shortcut) => shortcut.context === "session-workspace",
+  );
+  const browserNotificationState =
+    permission === "granted"
+      ? "Browser notifications allowed"
+      : permission === "denied"
+        ? "Browser notifications blocked"
+        : "Browser notification permission pending";
 
   useEffect(() => {
     const nextDraft = createRepositoriesProjectsDraft(project, issues);
@@ -683,8 +760,6 @@ export default function SettingsPage() {
     }
   }
 
-  const connection = isAuthenticated ? <SettingsConnected /> : null;
-
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-6">
       <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
@@ -694,32 +769,13 @@ export default function SettingsPage() {
         <div className="mt-2">
           <LogoWordmark className="h-6 w-auto" />
         </div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Sectioned settings parity</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Settings breadth parity</h1>
         <p className="mt-2 max-w-4xl text-sm leading-6 text-foreground-muted">
-          The local kanban settings surface now treats repositories/projects, organization,
-          remote-project bindings, agent configuration, and MCP servers as explicit navigable
-          sections with coordinated page-level state.
+          The local kanban settings surface keeps its Babysitter-specific framing while expanding
+          to the broader upstream settings breadth: general preferences, repositories/projects,
+          organization, remote-project bindings, agents, MCP, editor integration, git,
+          notifications, task tags, and keyboard shortcuts all live as explicit sections.
         </p>
-      </section>
-
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
-        <h2 className="text-xl font-semibold tracking-tight">Gateway auth</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <SettingCard label="Gateway URL" value={auth?.gatewayUrl ?? "not connected"} />
-          <SettingCard label="Saved access" value={auth ? "configured" : "missing"} />
-        </div>
-        <div className="mt-4 flex gap-3">
-          <Button asChild variant="primary">
-            <Link href="/login">
-              {isAuthenticated ? "Reconnect gateway" : "Connect gateway"}
-            </Link>
-          </Button>
-          {isAuthenticated ? (
-            <Button onClick={logout} variant="ghost" type="button">
-              Forget access
-            </Button>
-          ) : null}
-        </div>
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
@@ -781,6 +837,77 @@ export default function SettingsPage() {
                   Keep editing
                 </Button>
               </div>
+            </section>
+          ) : null}
+
+          {selectedSection === "general" ? (
+            <section className="space-y-6" data-testid="general-settings">
+              <section className="rounded-3xl border border-border bg-card p-6 shadow-lg">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="max-w-3xl">
+                    <h2 className="text-xl font-semibold tracking-tight">General settings</h2>
+                    <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                      This local surface stays opinionated for Babysitter workflows: filesystem-backed
+                      config, gateway connectivity, live runs, and app theme are treated as first-class
+                      operator preferences instead of being hidden behind a runtime-only modal.
+                    </p>
+                  </div>
+                  <div className="grid min-w-[240px] gap-3 sm:grid-cols-2">
+                    <SettingCard label="Theme" value={theme} />
+                    <SettingCard label="Gateway" value={auth?.gatewayUrl ?? "not connected"} />
+                    <SettingCard label="Notifications" value={browserNotificationState} />
+                    <SettingCard label="Config files" value="2 local files" />
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                  <div className="rounded-2xl border border-border bg-background/60 p-4">
+                    <div className="text-sm font-semibold text-foreground">Local runtime framing</div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <SettingCard label="Kanban config" value={KANBAN_CONFIG_PATH} />
+                      <SettingCard label="Section storage" value={SETTINGS_SECTION_STORAGE_PATH} />
+                      <SettingCard
+                        label="Saved access"
+                        value={auth ? "configured" : "missing"}
+                      />
+                      <SettingCard
+                        label="Linked repos"
+                        value={String(linkedRepositoryCount)}
+                      />
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Button asChild variant="primary">
+                        <Link href="/login">
+                          {isAuthenticated ? "Reconnect gateway" : "Connect gateway"}
+                        </Link>
+                      </Button>
+                      {isAuthenticated ? (
+                        <Button onClick={logout} variant="ghost" type="button">
+                          Forget access
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-border bg-background/60 p-4">
+                    <div className="text-sm font-semibold text-foreground">Breadth without losing local voice</div>
+                    <div className="mt-3 space-y-3 text-sm text-foreground-muted">
+                      <p>
+                        Repositories, organization, remote-project bindings, agent configuration,
+                        MCP servers, editor integration, git, notifications, task tags, and keyboard
+                        shortcuts are all navigable here.
+                      </p>
+                      <p>
+                        The local package still centers Babysitter operations: linked repository
+                        defaults, workspace-driven editing, run attention, and filesystem-backed
+                        configuration remain visible instead of being flattened into generic settings copy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <SettingsConnected />
             </section>
           ) : null}
 
@@ -1050,8 +1177,6 @@ export default function SettingsPage() {
                   </div>
                 )}
               </section>
-
-              <TaskTagSettings />
 
               <DispatchContextLabelSettings
                 dispatchContextLabels={dispatchContextLabels}
@@ -1710,7 +1835,201 @@ export default function SettingsPage() {
             </section>
           ) : null}
 
-          {connection}
+          {selectedSection === "editor-integration" ? (
+            <section
+              className="rounded-3xl border border-border bg-card p-6 shadow-lg"
+              data-testid="editor-integration-settings"
+            >
+              <h2 className="text-xl font-semibold tracking-tight">Editor integration</h2>
+              <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                The local package is workspace-first. Editing happens through sessions and workspaces,
+                with keyboard-driven panels and command-bar access layered on top instead of hidden in
+                a separate IDE-only integration surface.
+              </p>
+              <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <SettingCard label="Workspace shortcuts" value={String(sessionWorkspaceShortcuts.length)} />
+                    <SettingCard label="Primary route" value="/workspaces" />
+                    <SettingCard label="Command bar" value="Ctrl/Cmd + K" />
+                    <SettingCard label="Session route" value="/sessions" />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button asChild variant="primary">
+                      <Link href="/workspaces">Open workspaces</Link>
+                    </Button>
+                    <Button asChild variant="ghost">
+                      <Link href="/sessions">Open sessions</Link>
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="text-sm font-semibold text-foreground">Active editor conventions</div>
+                  <div className="mt-3 space-y-3 text-sm text-foreground-muted">
+                    <p>
+                      Session workspaces expose panel toggles for workspace, conversation, context,
+                      and details alongside a command bar for fast navigation.
+                    </p>
+                    <p>
+                      Settings breadth here keeps those local editing conventions visible instead of
+                      pretending editor integration is only an external IDE handshake.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {selectedSection === "git" ? (
+            <section
+              className="rounded-3xl border border-border bg-card p-6 shadow-lg"
+              data-testid="git-settings"
+            >
+              <h2 className="text-xl font-semibold tracking-tight">Git settings</h2>
+              <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                Repository policy is still edited through project-backed seams, but the git section
+                summarizes the current branch, review, merge, and provider readiness posture in one place.
+              </p>
+              <div className="mt-5 grid gap-3 lg:grid-cols-4">
+                <SettingCard label="Linked repos" value={String(linkedRepositoryCount)} />
+                <SettingCard label="Auto-merge enabled" value={String(autoMergeEnabledCount)} />
+                <SettingCard label="Connected providers" value={String(connectedIntegrationCount)} />
+                <SettingCard label="Missing bindings" value={String(missingIntegrationCount)} />
+              </div>
+              <div className="mt-5 grid gap-5 xl:grid-cols-2">
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="text-sm font-semibold text-foreground">Repository defaults</div>
+                  {linkedRepositoryCount === 0 ? (
+                    <div className="mt-3 text-sm text-foreground-muted">
+                      No linked repositories are available yet.
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-3">
+                      {(repoProjectDraft?.repositories ?? []).map((repository) => (
+                        <div
+                          key={repository.id}
+                          className="rounded-xl border border-border bg-card px-3 py-3 text-sm"
+                        >
+                          <div className="font-medium text-foreground">{repository.fullName}</div>
+                          <div className="mt-1 text-xs text-foreground-muted">
+                            Base branch {repository.baseBranch} · approvals {repository.requiredApprovals} · auto-merge{" "}
+                            {repository.autoMerge ? "on" : "off"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="text-sm font-semibold text-foreground">Remote readiness</div>
+                  <div className="mt-3 space-y-3 text-sm text-foreground-muted">
+                    <p>
+                      Provider connectivity and missing project bindings affect linked PR workflows,
+                      review sync, and approval automation.
+                    </p>
+                    <p>
+                      Use the Repositories &amp; Projects and Remote Projects sections to change persisted
+                      policy; this section keeps the current git posture visible at a glance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {selectedSection === "notifications" ? (
+            <section
+              className="rounded-3xl border border-border bg-card p-6 shadow-lg"
+              data-testid="notification-settings"
+            >
+              <h2 className="text-xl font-semibold tracking-tight">Notification settings</h2>
+              <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                Run completion, failure, and waiting-for-review events surface in-app first, with
+                browser notifications available when permission is granted and the tab is hidden.
+              </p>
+              <div className="mt-5 grid gap-3 lg:grid-cols-4">
+                <SettingCard label="Browser permission" value={browserNotificationState} />
+                <SettingCard label="In-app queue" value={String(notifications.length)} />
+                <SettingCard label="Persistent alerts" value="breakpoints stay pinned" />
+                <SettingCard label="Digest polling" value="3s" />
+              </div>
+              <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="text-sm font-semibold text-foreground">Current behavior</div>
+                  <div className="mt-3 space-y-2 text-sm text-foreground-muted">
+                    <p>New runs, completions, failures, and breakpoint attention all publish to the in-app stack.</p>
+                    <p>Browser notifications only fire when permission is granted and the document is hidden.</p>
+                    <p>Breakpoint notifications stay persistent until operators resolve them.</p>
+                  </div>
+                  {permission !== "granted" ? (
+                    <div className="mt-4">
+                      <Button type="button" variant="primary" onClick={requestPermission}>
+                        Enable browser notifications
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <div className="text-sm font-semibold text-foreground">Why this is explicit here</div>
+                  <div className="mt-3 space-y-2 text-sm text-foreground-muted">
+                    <p>
+                      Upstream breadth includes notifications, but the local package needs to explain
+                      the Babysitter-specific attention model: runs can require review, not just passive status updates.
+                    </p>
+                    <p>
+                      This section keeps notification policy visible without forcing operators to infer
+                      it from transient toasts alone.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {selectedSection === "task-tags" ? <TaskTagSettings /> : null}
+
+          {selectedSection === "keyboard-shortcuts" ? (
+            <section
+              className="rounded-3xl border border-border bg-card p-6 shadow-lg"
+              data-testid="keyboard-shortcut-settings"
+            >
+              <h2 className="text-xl font-semibold tracking-tight">Keyboard shortcut settings</h2>
+              <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                Shortcut visibility is explicit here so the app shell, run detail view, and session
+                workspace remain keyboard-driven without hiding the available commands behind memory alone.
+              </p>
+              <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                <SettingCard label="Shortcut groups" value={String(shortcutGroups.length)} />
+                <SettingCard label="Global shortcuts" value={String(SHORTCUTS.filter((shortcut) => shortcut.context === "global").length)} />
+                <SettingCard label="Workspace shortcuts" value={String(sessionWorkspaceShortcuts.length)} />
+              </div>
+              <div className="mt-5 space-y-4">
+                {shortcutGroups.map(([context, items]) => (
+                  <section
+                    key={context}
+                    className="rounded-2xl border border-border bg-background/60 p-4"
+                  >
+                    <div className="text-sm font-semibold text-foreground">
+                      {SHORTCUT_SECTION_LABELS[context] ?? context}
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      {items.map((shortcut) => (
+                        <div
+                          key={`${context}-${shortcut.description}`}
+                          className="rounded-xl border border-border bg-card px-3 py-3 text-sm"
+                        >
+                          <div className="font-medium text-foreground">{shortcut.description}</div>
+                          <div className="mt-1 text-xs text-foreground-muted">
+                            {shortcut.keys.join(" + ")}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { GatewayProvider } from "@/components/agent-mux/gateway-provider";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { NotificationProvider } from "@/components/notifications/notification-provider";
@@ -7,17 +6,8 @@ import { EventStreamProvider } from "@/components/providers/event-stream-provide
 import { ShortcutsHelp } from "@/components/shared/shortcuts-help";
 import { AppHeader } from "@/components/shared/app-header";
 import { AppFooter } from "@/components/shared/app-footer";
-import { SettingsModal } from "@/components/shared/settings-modal";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
-  useEffect(() => {
-    const handleOpen = () => setSettingsOpen(true);
-    window.addEventListener("open-settings", handleOpen);
-    return () => window.removeEventListener("open-settings", handleOpen);
-  }, []);
-
   return (
     <ThemeProvider>
       <GatewayProvider>
@@ -29,7 +19,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <AppFooter />
             </div>
             <ShortcutsHelp />
-            <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
           </EventStreamProvider>
         </NotificationProvider>
       </GatewayProvider>
