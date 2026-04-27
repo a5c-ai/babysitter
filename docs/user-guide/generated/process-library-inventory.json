@@ -1,5 +1,5 @@
 {
-  "refreshedAt": "2026-04-26",
+  "refreshedAt": "2026-04-27",
   "paths": {
     "libraryRoot": "library",
     "methodologiesRoot": "library/methodologies",
@@ -10,7 +10,7 @@
     "socialRoot": "library/specializations/domains/social-sciences-humanities"
   },
   "counts": {
-    "docsMarkdownFiles": 457,
+    "docsMarkdownFiles": 472,
     "allLibraryProcessFiles": 2236,
     "methodologyDirectories": 37,
     "methodologyProcessFiles": 148,

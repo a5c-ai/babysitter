@@ -187,7 +187,7 @@ Process files follow a consistent naming pattern:
 The catalog data in this section is refreshed from the live `library/` tree. The explanatory prose on this page remains hand-written.
 
 <!-- process-library:catalog:start -->
-Snapshot refreshed from the live `library/` tree on 2026-04-26.
+Snapshot refreshed from the live `library/` tree on 2026-04-27.
 
 - [Current snapshot counts](#current-snapshot-counts)
 - [Methodology families](#methodology-families)

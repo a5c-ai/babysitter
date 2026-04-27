@@ -1,11 +1,11 @@
 {
   "generatedDocMaxAgeDays": 45,
   "humanDocReportAgeDays": 120,
-  "generatedDocsChecked": 7,
+  "generatedDocsChecked": 8,
   "staleGeneratedDocs": [],
   "staleHumanUpdatedDocs": [],
-  "publishedDocsChecked": 132,
-  "historicalDocsExcluded": 327,
+  "publishedDocsChecked": 149,
+  "historicalDocsExcluded": 323,
   "landingPagesChecked": 6,
   "metadataFailures": [],
   "invalidCliReferences": [],
@@ -129,82 +129,82 @@
   ],
   "versionClaims": [
     {
-      "file": "docs/agent-mux/01-core-types-and-client.md",
+      "file": "docs/agent-mux/archive/design/amux-provider-config.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/archive/design/launcher.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/archive/design/provider-mux.md",
+      "line": 5,
+      "claim": "v1.0"
+    },
+    {
+      "file": "docs/agent-mux/reference/01-core-types-and-client.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/02-run-options-and-profiles.md",
+      "file": "docs/agent-mux/reference/02-run-options-and-profiles.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/03-run-handle-and-interaction.md",
+      "file": "docs/agent-mux/reference/03-run-handle-and-interaction.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/05-adapter-system.md",
+      "file": "docs/agent-mux/reference/05-adapter-system.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/06-capabilities-and-models.md",
+      "file": "docs/agent-mux/reference/06-capabilities-and-models.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/07-session-manager.md",
+      "file": "docs/agent-mux/reference/07-session-manager.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/08-config-and-auth.md",
+      "file": "docs/agent-mux/reference/08-config-and-auth.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/09-plugin-manager.md",
+      "file": "docs/agent-mux/reference/09-plugin-manager.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/10-cli-reference.md",
+      "file": "docs/agent-mux/reference/10-cli-reference.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/11-process-lifecycle-and-platform.md",
+      "file": "docs/agent-mux/reference/11-process-lifecycle-and-platform.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/12-built-in-adapters.md",
+      "file": "docs/agent-mux/reference/12-built-in-adapters.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/13-invocation-modes.md",
+      "file": "docs/agent-mux/reference/13-invocation-modes.md",
       "line": 3,
       "claim": "v1.0"
     },
     {
-      "file": "docs/agent-mux/14-harness-mock.md",
-      "line": 3,
-      "claim": "v1.0"
-    },
-    {
-      "file": "docs/agent-mux/amux-provider-config.md",
-      "line": 3,
-      "claim": "v1.0"
-    },
-    {
-      "file": "docs/agent-mux/launcher.md",
-      "line": 3,
-      "claim": "v1.0"
-    },
-    {
-      "file": "docs/agent-mux/provider-mux.md",
+      "file": "docs/agent-mux/reference/14-harness-mock.md",
       "line": 3,
       "claim": "v1.0"
     },
@@ -280,7 +280,7 @@
     },
     {
       "file": "docs/user-guide/index.md",
-      "line": 217,
+      "line": 221,
       "claim": "5.0.0"
     },
     {

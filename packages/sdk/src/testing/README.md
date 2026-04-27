@@ -100,23 +100,39 @@ expect(snapshot.state?.effectsByInvocation).toMatchObject({
 
 Sections 10.5 and 13 of `sdk.md`, the CLI walkthrough (`docs/cli-examples.md`), and the SDK quickstart in `README.md` quote the APIs above verbatim. Before changing this README or any referenced snippet:
 
-1. **Run the harness doc suite.**
+1. **Build the SDK package from a fresh checkout.**
 
 ```bash
-pnpm --filter @a5c-ai/babysitter-sdk run docs:testing-readme
+npm ci
+npm run build --workspace=@a5c-ai/babysitter-sdk
 ```
 
-This command executes every fenced example in this file (and any referenced fixtures under `packages/sdk/src/testing/__examples__`) using the deterministic clock/ULID helpers. It produces `_ci_artifacts/testing-harness/<platform>/report.json` so reviewers can diff execution logs, pending counts, and seeds.
+2. **Regenerate the generated docs index and rerun the CLI smoke harness.**
 
-2. **Sync with `sdk.md` and `docs/cli-examples.md`.**
-   - Snippets extracted from sdk.md §§8–13 and this README are compiled via `pnpm --filter @a5c-ai/babysitter-sdk run docs:snippets:tsc`.
-   - The CLI walkthrough records real runs with `pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli` and links back to this README when it references `runToCompletionWithFakeRunner` or `captureRunSnapshot`.
+```bash
+npm run docs:prepare
+npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk
+```
 
-3. **Capture artifacts and hashes.**
-   - Store execution logs, snapshot archives, and deterministic seed data under `_ci_artifacts/testing-harness/`.
-   - Include a short note in your PR describing which snippets were regenerated and how to reproduce them (see `part7_test_plan.md` for the full checklist).
+The generated traceability index at `docs/generated/cli-examples-verification.md` records the current command surface, backing scripts, and reviewable artifacts for the CLI walkthrough.
 
-4. **Respect redaction + platform notes.**
+3. **Sync with `sdk.md` and `docs/cli-examples.md`.**
+   - Repo-published command references and fenced examples are validated via `npm run docs:snippets`.
+   - The CLI walkthrough links back to this README when it references `runToCompletionWithFakeRunner` or `captureRunSnapshot`.
+
+4. **Run the SDK tests that exercise the deterministic harness helpers.**
+
+```bash
+npm run test --workspace=@a5c-ai/babysitter-sdk
+```
+
+The current verification surface for these APIs lives in:
+
+- `packages/sdk/src/testing/__tests__/runHarness.test.ts`
+- `packages/sdk/src/testing/__tests__/parallelHarness.test.ts`
+- `packages/sdk/src/runtime/__tests__/deterministicHarness.test.ts`
+
+5. **Respect redaction + platform notes.**
    - Keep examples redacted unless explicitly describing the `BABYSITTER_ALLOW_SECRET_LOGS` guard (sdk.md §12.4).
    - Mention that CLI output uses POSIX-style paths even on Windows; tests here should normalize separators to match the docs.
 

@@ -25,7 +25,7 @@ npm run lint:hooks-mux
 | `packages/babysitter-agent` | `@a5c-ai/babysitter-agent` | Optional runtime CLI exposed as `babysitter-harness` |
 | `packages/babysitter-tui-plugins` | `@a5c-ai/babysitter-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/catalog` | `process-library-catalog` | Next.js catalog UI for process-library content |
-| `packages/hooks-mux/*` | `@a5c-ai/hooks-mux-*` | Hook normalization, CLI, and harness adapters |
+| `packages/hooks-mux/*` | `hooks-mux workspace packages` | Hook normalization, CLI, and harness adapters |
 
 ## Key Entry Points
 

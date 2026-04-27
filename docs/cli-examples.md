@@ -212,34 +212,38 @@ Need another scenario documented? Open an issue with the desired flow (CLI flags
 
 ## Appendix A. Regenerating this walkthrough (deterministic workflow)
 
-The CLI transcripts above are **not** hand-edited—they are captured via the deterministic smoke harness described in sdk.md §10.6 and the Part 7 verification plan. When you change CLI output, flags, or doc wording that relies on real commands:
+This walkthrough is anchored to the real smoke harness in `packages/sdk/scripts/smoke-cli.js` and the generated traceability index at `docs/generated/cli-examples-verification.md`. When you change CLI output, flags, or wording in this file, use the current repo workflow below from a fresh checkout:
 
-1. **Run the smoke harness for every platform/Node version you support.**
+1. **Install dependencies and build the SDK CLI.**
 
 ```bash
-# macOS/Linux
-pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli \
-  -- --runs-dir ~/.a5c/runs/docs-cli \
-     --record docs/cli-examples/baselines
-
-# Windows (PowerShell wrapper)
-pwsh -File scripts/docs/run_cli_examples.ps1 `
-  -RunsDir ~/.a5c/runs/docs-cli `
-  -BaselineDir docs/cli-examples/baselines
+npm ci
+npm run build --workspace=@a5c-ai/babysitter-sdk
 ```
 
-2. **Commit the refreshed baselines + hashes.**
-   - Every `*.stdout`, `*.stderr`, and `*.json` file in `docs/cli-examples/baselines/` is hashed via `sha256sum > docs/cli-examples/baselines/hashes.json`.  
-   - CI uploads `_ci_artifacts/cli/<os>-node<version>/smoke-cli-report.json` so reviewers can diff outputs and metadata pairs (`stateVersion`, `pending[...]`, `journalHead`).
+2. **Regenerate repo docs artifacts, including the CLI traceability index.**
 
-3. **Respect redaction and Windows guidance.**
-   - CLI output intentionally prints POSIX-style paths even on Windows so docs stay stable; keep the callout near the top of this file.
-   - Task payloads remain redacted unless `BABYSITTER_ALLOW_SECRET_LOGS=true` **and** `--json --verbose` are used together (see sdk.md §12.4). The smoke harness enforces this by scanning for `payloads: redacted`.
+```bash
+npm run docs:prepare
+```
 
-4. **Link back to the deterministic harness.**
-   - When expanding examples, ensure corresponding snippets exist in `packages/sdk/src/testing/README.md` or sdk.md §§8–13 so the snippet extractor and fake-runner tests cover them.
+3. **Run the real CLI smoke harness.**
 
-5. **Archive run metadata.**
-   - Each replay stores `_ci_artifacts/cli/run-metadata.json` with OS, Node version, git commit, and env vars so future contributors can reproduce the walkthrough exactly.
+```bash
+npm run docs:examples:smoke
+```
 
-Failing to regenerate outputs will cause the docs CI jobs (`docs:lint`, `docs:snippets`, `docs:links`, `docs:freshness`) and the SDK smoke job (`pnpm --filter @a5c-ai/babysitter-sdk run smoke:cli`) to fail once the verification matrix runs in CI. When in doubt, run `npm run docs:qa` locally to execute the repository docs gates before opening a PR.
+This delegates to `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`, which stages deterministic fixtures under `packages/sdk/test-fixtures/cli/runs/smoke/`. Add `-- --keep` to the underlying SDK command when you need to inspect the staged run directory after the smoke run finishes.
+
+4. **Run the repo docs checks that validate published command surfaces.**
+
+```bash
+npm run docs:snippets
+npm run docs:qa
+```
+
+5. **Keep the harness API docs aligned.**
+   - `packages/sdk/src/testing/README.md` and `library/reference/sdk.md` should be updated in the same change when this walkthrough references `runToCompletionWithFakeRunner`, `captureRunSnapshot`, or other deterministic harness APIs.
+   - Run `npm run test --workspace=@a5c-ai/babysitter-sdk` after changing those APIs or their examples.
+
+CLI output intentionally uses POSIX-style paths even on Windows so the published examples stay stable across platforms. Task payloads remain redacted unless `BABYSITTER_ALLOW_SECRET_LOGS=1` is set for verbose JSON inspection.

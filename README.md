@@ -242,6 +242,20 @@ npm run build --workspace=@a5c-ai/babysitter-agent
 
 Those package-local builds now use `tsc --build` project references where the runtime packages are owned in this workspace, and they explicitly bootstrap the `@a5c-ai/agent-mux` SDK chain through the root runtime scripts. Fresh-checkout validation no longer assumes prebuilt upstream `dist/` artifacts.
 
+### CLI Walkthrough Verification
+
+The published CLI walkthrough at `docs/cli-examples.md` is verified against the real repo surfaces, not a separate docs-only harness. From a fresh checkout, use:
+
+```bash
+npm ci
+npm run build --workspace=@a5c-ai/babysitter-sdk
+npm run docs:prepare
+npm run docs:examples:smoke
+npm run docs:qa
+```
+
+`npm run docs:examples:verify` runs that docs-focused flow end-to-end. The generated traceability map for the walkthrough lives at `docs/generated/cli-examples-verification.md`.
+
 ---
 
 ## First Steps
