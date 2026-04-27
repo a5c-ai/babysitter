@@ -10,124 +10,38 @@ import type { Run } from "@/types";
 import type { WatchSource } from "@/lib/config-loader";
 import type {
   WorkspaceRebaseSurface,
-  WorkspaceRuntimeSurface,
   WorkspaceService,
   WorkspaceSessionBinding,
   WorkspaceSummary as ManagedWorkspaceSummary,
 } from "@a5c-ai/agent-mux-core";
 import type { KanbanReviewSummary } from "@a5c-ai/agent-mux-core";
+import type {
+  KanbanWorkspaceAction,
+  KanbanWorkspaceActionResult,
+  KanbanWorkspaceInventory,
+  KanbanWorkspaceIssueSummary,
+  KanbanWorkspaceSessionSummary,
+  KanbanWorkspaceStatus,
+  KanbanWorkspaceSummary,
+} from "@a5c-ai/agent-mux-core/kanban";
 
 const execFile = promisify(execFileCallback);
 
 const WORKSPACE_REGISTRY_PATH =
   process.env.KANBAN_WORKSPACE_REGISTRY_PATH ?? path.join(os.homedir(), ".a5c", "workspaces", "kanban-workspaces.json");
 
-type WorkspaceStatus = "active" | "idle" | "archived" | "missing";
-type WorkspaceAction =
-  | "archive"
-  | "cleanup"
-  | "recover"
-  | "notes-save"
-  | "rebase-start"
-  | "rebase-auto-resolve"
-  | "rebase-open-in-editor"
-  | "rebase-mark-resolved"
-  | "rebase-abort";
+type WorkspaceStatus = KanbanWorkspaceStatus;
+type WorkspaceAction = KanbanWorkspaceAction;
 
-export interface WorkspaceSessionSnapshot {
-  sessionId: string;
-  agent: string;
-  status: "active" | "inactive";
-  cwd?: string;
-  title?: string;
-  updatedAt?: number;
-  activeRunId?: string | null;
-  latestRunId?: string | null;
-  runtime?: WorkspaceRuntimeSurface;
-}
+export type WorkspaceSessionSnapshot = KanbanWorkspaceSessionSummary;
 
-export interface WorkspaceIssueLink {
-  issueId: string;
-  issueKey: string;
-  issueTitle: string;
-  linkedAt: string;
-  source: "created-from-issue" | "linked-existing-workspace";
-}
+export type WorkspaceIssueLink = KanbanWorkspaceIssueSummary;
 
-export interface WorkspaceInventoryItem {
-  path: string;
-  name: string;
-  status: WorkspaceStatus;
-  missing: boolean;
-  archivedAt: string | null;
-  cleanedAt: string | null;
-  lastActivityAt: string | null;
-  git: {
-    root: string | null;
-    commonDir: string | null;
-    trackingBranch: string | null;
-    branch: string | null;
-    head: string | null;
-    ahead: number | null;
-    behind: number | null;
-    dirty: boolean | null;
-    uncommittedCount: number | null;
-    isWorktree: boolean;
-    isPrimary: boolean;
-  };
-  notes: {
-    value: string;
-    updatedAt: string | null;
-  };
-  links: {
-    editorHref: string | null;
-  };
-  sessions: {
-    total: number;
-    active: number;
-    items: WorkspaceSessionSnapshot[];
-  };
-  runs: {
-    total: number;
-    active: number;
-    items: Array<{
-      runId: string;
-      status: Run["status"];
-      projectName?: string;
-    }>;
-  };
-  rebase?: WorkspaceRebaseSurface;
-  actions: {
-    canArchive: boolean;
-    canCleanup: boolean;
-    canRecover: boolean;
-    canRebaseStart: boolean;
-    canRebaseAutoResolve: boolean;
-    canRebaseOpenInEditor: boolean;
-    canRebaseMarkResolved: boolean;
-    canRebaseAbort: boolean;
-  };
-  review?: KanbanReviewSummary;
-  issues?: WorkspaceIssueLink[];
-}
+export type WorkspaceInventoryItem = KanbanWorkspaceSummary;
 
-export interface WorkspaceInventoryResponse {
-  workspaces: WorkspaceInventoryItem[];
-  summary: {
-    total: number;
-    active: number;
-    idle: number;
-    archived: number;
-    missing: number;
-  };
-}
+export type WorkspaceInventoryResponse = KanbanWorkspaceInventory;
 
-export interface WorkspaceActionResult {
-  ok: boolean;
-  workspacePath: string;
-  action: WorkspaceAction;
-  message: string;
-}
+export type WorkspaceActionResult = KanbanWorkspaceActionResult;
 
 export interface WorkspaceProvisionResult {
   workspacePath: string;

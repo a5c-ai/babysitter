@@ -16,10 +16,12 @@ import { ModelPicker, type ModelOption } from './model-picker.js';
 import { loadHistory, appendHistory } from './prompt-history-store.js';
 import { resolveSessionDispatchPlan } from './session-dispatch.js';
 import { createViewport, packSegments, type TuiSegment } from './layout.js';
+import type { KanbanControlPlane } from './kanban-control-plane.js';
 
 export interface AppProps {
   client: AgentMuxClient;
   plugins: TuiPlugin[];
+  kanban?: KanbanControlPlane;
   defaultAgent?: string;
   initialViewId?: string;
   disableChatAutoPrompt?: boolean;
@@ -106,6 +108,7 @@ function SegmentLines({ lines }: { lines: TuiSegment[][] }) {
 export function App({
   client,
   plugins,
+  kanban,
   defaultAgent = 'claude',
   initialViewId = 'chat',
   disableChatAutoPrompt = false,
@@ -232,6 +235,7 @@ export function App({
         }
       },
       s,
+      kanban,
     );
     void loadPlugins(plugins, ctx).then(() => {
       setPluginLoadVersion((version) => version + 1);
@@ -648,6 +652,7 @@ export function App({
         {ViewWithRenderers ? (
           <ViewWithRenderers
             client={client}
+            kanban={kanban}
             active={true}
             eventStream={stream}
             emit={viewEmit}

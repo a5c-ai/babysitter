@@ -1,4 +1,5 @@
 import type { AgentMuxClient } from '@a5c-ai/agent-mux';
+import type { KanbanControlPlane } from './kanban-control-plane.js';
 import type { EventStream } from './event-stream.js';
 import type {
   EventRenderer,
@@ -26,9 +27,11 @@ export function createContext(
   registry: Registry,
   emit: (e: TuiInternalEvent) => void,
   eventStream: EventStream,
+  kanban?: KanbanControlPlane,
 ): TuiContext {
   return {
     client,
+    kanban,
     eventStream,
     registerView: (v) => registry.views.push(v),
     registerEventRenderer: (r) => registry.renderers.push(r),

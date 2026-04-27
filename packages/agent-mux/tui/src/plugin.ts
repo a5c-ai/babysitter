@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { AgentMuxClient, AgentEvent, RunHandle } from '@a5c-ai/agent-mux';
+import type { KanbanControlPlane } from './kanban-control-plane.js';
 import type { EventStream } from './event-stream.js';
 import type { TuiViewport } from './layout.js';
 
@@ -7,6 +8,7 @@ export type PromptHandler = (prompt: string) => void | Promise<void>;
 
 export interface TuiContext {
   client: AgentMuxClient;
+  kanban?: KanbanControlPlane;
   eventStream: EventStream;
   registerView(view: TuiView): void;
   registerEventRenderer(renderer: EventRenderer): void;
@@ -24,6 +26,7 @@ export interface TuiView {
 
 export interface TuiViewProps {
   client: AgentMuxClient;
+  kanban?: KanbanControlPlane;
   active: boolean;
   eventStream: EventStream;
   emit: (event: TuiInternalEvent) => void;

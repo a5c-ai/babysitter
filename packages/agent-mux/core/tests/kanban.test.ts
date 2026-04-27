@@ -21,6 +21,8 @@ import {
   type KanbanLabel,
   type KanbanDispatchContextLabelDefinition,
   type KanbanIssue,
+  type KanbanBacklogOverview,
+  type KanbanWorkspaceInventory,
   type KanbanTaskTag,
 } from '../src/kanban.js';
 
@@ -88,6 +90,47 @@ describe('normalizeKanbanTaskTagKey', () => {
   it('converts lookup keys to deterministic snake_case', () => {
     expect(normalizeKanbanTaskTagKey('  Code Review Checklist  ')).toBe('code_review_checklist');
     expect(normalizeKanbanTaskTagKey('deploy---validation')).toBe('deploy_validation');
+  });
+});
+
+describe('kanban integration contracts', () => {
+  it('keeps backlog overview and workspace inventory on shared core types', () => {
+    const overview: KanbanBacklogOverview = {
+      snapshot: {
+        generatedAt: '2026-04-27T00:00:00.000Z',
+        projects: [],
+        issues: [],
+        dispatchContextLabels: [],
+      },
+      board: {
+        generatedAt: '2026-04-27T00:00:00.000Z',
+        projects: [],
+      },
+      summary: {
+        projectCount: 0,
+        issueCount: 0,
+        readyCount: 0,
+        blockedCount: 0,
+        dispatchedCount: 0,
+        completedCount: 0,
+        needsDecompositionCount: 0,
+        inProgressCount: 0,
+      },
+    };
+
+    const inventory: KanbanWorkspaceInventory = {
+      workspaces: [],
+      summary: {
+        total: 0,
+        active: 0,
+        idle: 0,
+        archived: 0,
+        missing: 0,
+      },
+    };
+
+    expect(overview.summary.issueCount).toBe(0);
+    expect(inventory.summary.total).toBe(0);
   });
 });
 

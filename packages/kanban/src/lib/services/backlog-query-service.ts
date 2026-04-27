@@ -10,10 +10,13 @@ import {
   updateKanbanProjectRepositorySettings,
   summarizeKanbanReviewArtifact,
   type KanbanActivityEntry,
+  type KanbanBacklogSnapshot,
+  type KanbanBacklogOverview,
+  type KanbanBacklogSummary,
   type KanbanCollaborator,
   type KanbanCollaboratorRole,
-  type KanbanBoardSnapshot,
-  type KanbanBacklogSnapshot,
+  type KanbanIssueCreateInput,
+  type KanbanIssueCreateResult,
   type KanbanDispatchContextLabelDefinition,
   type KanbanIssue,
   type KanbanIntegrationConnection,
@@ -29,7 +32,9 @@ import {
   type KanbanRepositorySettings,
   type KanbanReviewSnapshot,
   type KanbanTeamSettings,
+  type KanbanIssueUpdateInput,
   type KanbanWorkflowState,
+  type KanbanIssueWorkspaceLinkInput,
   type LinkedRunSummary,
 } from '@a5c-ai/agent-mux-core/kanban';
 
@@ -99,60 +104,17 @@ function normalizeDispatchContextLabelRefs(
   ).map((labelId) => ({ labelId }));
 }
 
-export interface BacklogOverviewSummary {
-  projectCount: number;
-  issueCount: number;
-  readyCount: number;
-  blockedCount: number;
-  dispatchedCount: number;
-  completedCount: number;
-  needsDecompositionCount: number;
-  inProgressCount: number;
-}
+export type BacklogOverviewSummary = KanbanBacklogSummary;
 
-export interface BacklogOverview {
-  snapshot: KanbanBacklogSnapshot;
-  board: KanbanBoardSnapshot;
-  summary: BacklogOverviewSummary;
-}
+export type BacklogOverview = KanbanBacklogOverview;
 
-export interface CreateBacklogIssueInput {
-  readonly projectId?: string;
-  readonly parentIssueId?: string;
-  readonly title: string;
-  readonly summary?: string;
-  readonly description?: string;
-  readonly status?: KanbanIssue['status'];
-  readonly priority?: KanbanIssue['priority'];
-  readonly labelIds?: readonly string[];
-  readonly assigneeIds?: readonly string[];
-  readonly acceptanceCriteria?: readonly string[];
-  readonly decomposition?: readonly Pick<KanbanIssue['decomposition'][number], 'title' | 'kind' | 'status'>[];
-  readonly source?: KanbanIssue['source'];
-  readonly metadata?: Readonly<Record<string, unknown>>;
-}
+export type CreateBacklogIssueInput = KanbanIssueCreateInput;
 
-export interface CreateBacklogIssueResult {
-  readonly overview: BacklogOverview;
-  readonly issue: KanbanIssue;
-}
+export type CreateBacklogIssueResult = KanbanIssueCreateResult;
 
-export interface UpdateIssueDetailInput {
-  readonly issueId: string;
-  readonly expectedUpdatedAt?: string;
-  readonly description?: string;
-  readonly priority?: KanbanIssue['priority'];
-  readonly assigneeIds?: readonly string[];
-  readonly labelIds?: readonly string[];
-}
+export type UpdateIssueDetailInput = KanbanIssueUpdateInput;
 
-export interface LinkIssueWorkspaceInput {
-  readonly issueId: string;
-  readonly workspacePath: string;
-  readonly workspaceName?: string;
-  readonly branchName?: string;
-  readonly source: "created-from-issue" | "linked-existing-workspace";
-}
+export type LinkIssueWorkspaceInput = KanbanIssueWorkspaceLinkInput;
 
 type BacklogSeedProject = StoredKanbanProject;
 type BacklogSeedIssue = StoredKanbanIssue;

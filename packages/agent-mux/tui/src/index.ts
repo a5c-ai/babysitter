@@ -5,6 +5,14 @@ export { EventStream } from './event-stream.js';
 export type { EventSubscriber, Unsubscribe } from './event-stream.js';
 export { PromptInput } from './prompt-input.js';
 export {
+  createKanbanControlPlane,
+  type KanbanControlPlane,
+  type KanbanControlPlaneToolArgsByName,
+  type KanbanControlPlaneToolInvoker,
+  type KanbanControlPlaneToolName,
+  type KanbanControlPlaneToolResultByName,
+} from './kanban-control-plane.js';
+export {
   loadExternalPlugins,
   defaultExternalPluginsDir,
   type LoadResult as ExternalPluginsLoadResult,

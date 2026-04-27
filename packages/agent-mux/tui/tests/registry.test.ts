@@ -39,4 +39,13 @@ describe('tui registry', () => {
     ctx.emit({ type: 'status', message: 'hi' });
     expect(emitted).toEqual([{ type: 'status', message: 'hi' }]);
   });
+
+  it('exposes the optional kanban control plane on the plugin context', () => {
+    const reg = createRegistry();
+    const stream = new EventStream();
+    const kanban = { loadOverview: async () => ({}) } as never;
+    const ctx = createContext({} as never, reg, () => {}, stream, kanban);
+
+    expect(ctx.kanban).toBe(kanban);
+  });
 });

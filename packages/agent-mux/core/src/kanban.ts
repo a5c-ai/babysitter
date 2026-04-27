@@ -1,3 +1,5 @@
+import type { WorkspaceRebaseSurface, WorkspaceRuntimeSurface } from './session-types.js';
+
 export type KanbanPriority = 'critical' | 'high' | 'medium' | 'low';
 export type KanbanCollaboratorRole = 'owner' | 'maintainer' | 'contributor' | 'viewer';
 export type KanbanEntityVisibility = 'private' | 'team' | 'workspace-shared';
@@ -661,6 +663,215 @@ export interface KanbanIssueMoveEvaluation {
   readonly allowed: boolean;
   readonly nextStatus?: KanbanIssueStatus;
   readonly signals: readonly KanbanBoardPolicySignal[];
+}
+
+export interface KanbanBacklogSummary {
+  readonly projectCount: number;
+  readonly issueCount: number;
+  readonly readyCount: number;
+  readonly blockedCount: number;
+  readonly dispatchedCount: number;
+  readonly completedCount: number;
+  readonly needsDecompositionCount: number;
+  readonly inProgressCount: number;
+}
+
+export interface KanbanBacklogOverview {
+  readonly snapshot: KanbanBacklogSnapshot;
+  readonly board: KanbanBoardSnapshot;
+  readonly summary: KanbanBacklogSummary;
+}
+
+export interface KanbanIssueCreateInput {
+  readonly projectId?: string;
+  readonly parentIssueId?: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly description?: string;
+  readonly status?: KanbanIssue['status'];
+  readonly priority?: KanbanIssue['priority'];
+  readonly labelIds?: readonly string[];
+  readonly assigneeIds?: readonly string[];
+  readonly acceptanceCriteria?: readonly string[];
+  readonly decomposition?: readonly Pick<KanbanIssue['decomposition'][number], 'title' | 'kind' | 'status'>[];
+  readonly source?: KanbanIssue['source'];
+  readonly metadata?: Readonly<Record<string, unknown>>;
+}
+
+export interface KanbanIssueCreateResult {
+  readonly overview: KanbanBacklogOverview;
+  readonly issue: KanbanIssue;
+}
+
+export interface KanbanIssueMoveInput {
+  readonly issueId: string;
+  readonly toState: KanbanWorkflowState;
+}
+
+export interface KanbanIssueUpdateInput {
+  readonly issueId: string;
+  readonly expectedUpdatedAt?: string;
+  readonly description?: string;
+  readonly priority?: KanbanIssue['priority'];
+  readonly assigneeIds?: readonly string[];
+  readonly labelIds?: readonly string[];
+}
+
+export interface KanbanIssueWorkspaceRef {
+  readonly path: string;
+  readonly name: string;
+  readonly branchName: string;
+}
+
+export interface KanbanIssueWorkspaceCreateResult {
+  readonly workspace: KanbanIssueWorkspaceRef;
+  readonly overview: KanbanBacklogOverview;
+}
+
+export interface KanbanIssueWorkspaceLinkInput {
+  readonly issueId: string;
+  readonly workspacePath: string;
+  readonly workspaceName?: string;
+  readonly branchName?: string;
+  readonly source: 'created-from-issue' | 'linked-existing-workspace';
+}
+
+export type KanbanWorkspaceStatus = 'active' | 'idle' | 'archived' | 'missing';
+
+export type KanbanWorkspaceAction =
+  | 'archive'
+  | 'cleanup'
+  | 'recover'
+  | 'notes-save'
+  | 'rebase-start'
+  | 'rebase-auto-resolve'
+  | 'rebase-open-in-editor'
+  | 'rebase-mark-resolved'
+  | 'rebase-abort';
+
+export interface KanbanWorkspaceSessionSummary {
+  readonly sessionId: string;
+  readonly agent: string;
+  readonly status: 'active' | 'inactive';
+  readonly cwd?: string;
+  readonly title?: string;
+  readonly updatedAt?: number;
+  readonly activeRunId?: string | null;
+  readonly latestRunId?: string | null;
+  readonly runtime?: WorkspaceRuntimeSurface;
+}
+
+export interface KanbanWorkspaceIssueSummary {
+  readonly issueId: string;
+  readonly issueKey: string;
+  readonly issueTitle: string;
+  readonly linkedAt: string;
+  readonly source: 'created-from-issue' | 'linked-existing-workspace';
+}
+
+export interface KanbanWorkspaceRunSummary {
+  readonly runId: string;
+  readonly status: string;
+  readonly projectName?: string;
+}
+
+export interface KanbanWorkspaceGitSummary {
+  readonly root: string | null;
+  readonly commonDir: string | null;
+  readonly trackingBranch: string | null;
+  readonly branch: string | null;
+  readonly head: string | null;
+  readonly ahead: number | null;
+  readonly behind: number | null;
+  readonly dirty: boolean | null;
+  readonly uncommittedCount: number | null;
+  readonly isWorktree: boolean;
+  readonly isPrimary: boolean;
+}
+
+export interface KanbanWorkspaceNotesSummary {
+  readonly value: string;
+  readonly updatedAt: string | null;
+}
+
+export interface KanbanWorkspaceLinks {
+  readonly editorHref: string | null;
+}
+
+export interface KanbanWorkspaceSessionCollection {
+  readonly total: number;
+  readonly active: number;
+  readonly items: readonly KanbanWorkspaceSessionSummary[];
+}
+
+export interface KanbanWorkspaceRunCollection {
+  readonly total: number;
+  readonly active: number;
+  readonly items: readonly KanbanWorkspaceRunSummary[];
+}
+
+export interface KanbanWorkspaceActionAvailability {
+  readonly canArchive: boolean;
+  readonly canCleanup: boolean;
+  readonly canRecover: boolean;
+  readonly canRebaseStart: boolean;
+  readonly canRebaseAutoResolve: boolean;
+  readonly canRebaseOpenInEditor: boolean;
+  readonly canRebaseMarkResolved: boolean;
+  readonly canRebaseAbort: boolean;
+}
+
+export interface KanbanWorkspaceSummary {
+  readonly path: string;
+  readonly name: string;
+  readonly status: KanbanWorkspaceStatus;
+  readonly missing: boolean;
+  readonly archivedAt: string | null;
+  readonly cleanedAt: string | null;
+  readonly lastActivityAt: string | null;
+  readonly git: KanbanWorkspaceGitSummary;
+  readonly notes: KanbanWorkspaceNotesSummary;
+  readonly links: KanbanWorkspaceLinks;
+  readonly sessions: KanbanWorkspaceSessionCollection;
+  readonly runs: KanbanWorkspaceRunCollection;
+  readonly rebase?: WorkspaceRebaseSurface;
+  readonly actions: KanbanWorkspaceActionAvailability;
+  readonly review?: KanbanReviewSummary;
+  readonly issues?: readonly KanbanWorkspaceIssueSummary[];
+}
+
+export interface KanbanWorkspaceInventory {
+  readonly workspaces: readonly KanbanWorkspaceSummary[];
+  readonly summary: {
+    readonly total: number;
+    readonly active: number;
+    readonly idle: number;
+    readonly archived: number;
+    readonly missing: number;
+  };
+}
+
+export interface KanbanWorkspaceActionResult {
+  readonly ok: boolean;
+  readonly workspacePath: string;
+  readonly action: KanbanWorkspaceAction;
+  readonly message: string;
+}
+
+export interface KanbanWorkspaceActionResponse {
+  readonly result: KanbanWorkspaceActionResult;
+  readonly inventory: KanbanWorkspaceInventory;
+}
+
+export interface KanbanWorkspaceInventoryQuery {
+  readonly sessions?: readonly KanbanWorkspaceSessionSummary[];
+}
+
+export interface KanbanWorkspaceActionInput {
+  readonly action: KanbanWorkspaceAction;
+  readonly workspacePath: string;
+  readonly note?: string;
+  readonly sessions?: readonly KanbanWorkspaceSessionSummary[];
 }
 
 const DEFAULT_PROJECT_STATUSES: readonly KanbanStatusDefinition[] = [
