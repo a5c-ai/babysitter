@@ -9,6 +9,7 @@ const READY_SIGNAL = /\b(ready|listening|local|localhost|127\.0\.0\.1|0\.0\.0\.0
 const HTTP_URL = /https?:\/\/[^\s"'`<>]+/g;
 const LOCALHOST_URL = /\b(?:localhost|127\.0\.0\.1|0\.0\.0\.0):\d{2,5}\b/g;
 const PORT_FLAG = /(?:--port|-p|\sport\s+)(\d{2,5})\b/i;
+const MAX_RETAINED_LOG_LINES = 2000;
 const DEFAULT_DEVICE_PROFILES = [
   { id: 'desktop', label: 'Desktop 1440', width: 1440, height: 960 },
   { id: 'tablet', label: 'Tablet 820', width: 820, height: 1180 },
@@ -43,8 +44,8 @@ function appendLog(target: WorkspaceRuntimeLogLine[], stream: WorkspaceRuntimeLo
       continue;
     }
     target.push({ timestamp, stream, text: cleaned });
-    if (target.length > 12) {
-      target.splice(0, target.length - 12);
+    if (target.length > MAX_RETAINED_LOG_LINES) {
+      target.splice(0, target.length - MAX_RETAINED_LOG_LINES);
     }
   }
 }

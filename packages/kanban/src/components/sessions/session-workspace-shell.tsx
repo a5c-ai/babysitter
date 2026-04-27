@@ -463,7 +463,12 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
         subtitle="Runtime and active workspace surfaces"
       >
         {props.runtime ? (
-          <WorkspaceRuntimePanel runtime={props.runtime} sessionId={props.sessionId} className="border-0 bg-transparent p-0 shadow-none" />
+          <WorkspaceRuntimePanel
+            runtime={props.runtime}
+            sessionId={props.sessionId}
+            sessionStatus={props.sessionStatus}
+            className="border-0 bg-transparent p-0 shadow-none"
+          />
         ) : (
           <div className="grid gap-4">
             <div className="rounded-2xl border border-border bg-background/65 p-4">

@@ -541,6 +541,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
               runtime={runtime}
               rebase={props.workspace.rebase}
               sessionId={props.activeSession?.sessionId}
+              sessionStatus={props.activeSession?.status ?? "inactive"}
               className="border-0 bg-transparent p-0 shadow-none"
             />
           ) : (

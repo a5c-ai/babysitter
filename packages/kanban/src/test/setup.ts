@@ -82,11 +82,12 @@ vi.mock('lucide-react', () => {
     'Columns3', 'CornerDownRight', 'ExternalLink', 'Eye', 'EyeOff', 'FileDiff', 'FileJson', 'FileText', 'FolderGit2', 'FolderOpen',
     'GitBranch', 'Github',
     'Hand', 'Hash', 'HelpCircle', 'History', 'Inbox', 'Info', 'Layers',
-    'GripVertical', 'LayoutDashboard', 'Loader2', 'MessagesSquare', 'MessageSquareText', 'MessageSquareWarning', 'Moon', 'Palette', 'PanelLeft', 'PanelRight', 'PlaySquare',
+    'GripVertical', 'Hammer', 'LayoutDashboard', 'Laptop2', 'Loader2', 'Logs', 'MessagesSquare', 'MessageSquareText', 'MessageSquareWarning', 'Moon', 'Palette', 'PanelLeft', 'PanelRight', 'PlaySquare',
     'Pause', 'Percent', 'Pin', 'Play', 'Plus', 'Power', 'Puzzle', 'RefreshCw', 'Search', 'Settings',
-    'ShieldCheck', 'Siren', 'Sun', 'Tag', 'Terminal', 'Timer', 'TimerReset', 'Trash2',
+    'ShieldCheck', 'Siren', 'Smartphone', 'Sparkles', 'Sun', 'TabletSmartphone', 'Tag', 'Terminal', 'Timer', 'TimerReset', 'Trash2',
     'TerminalSquare', 'UserRoundPlus', 'Users', 'Webhook', 'Wifi', 'WifiOff', 'Workflow',
     'Link2', 'ListTodo', 'Wrench', 'Archive', 'RotateCcw',
+    'Files', 'Radar',
     'X', 'XCircle',
   ];
 

@@ -57,4 +57,48 @@ describe('workspace runtime surface derivation', () => {
       status: 'running',
     });
   });
+
+  it('retains long process buffers instead of truncating them to a tiny tail', () => {
+    const run: RunEntry = {
+      runId: '01TESTRUNTIME000000000000002',
+      agent: 'codex',
+      status: 'running',
+      createdAt: 1,
+      startedAt: 1,
+      endedAt: null,
+      owner: { tokenId: null, name: 'tester' },
+    };
+
+    const events: LoggedRunEvent[] = [
+      {
+        seq: 1,
+        ts: 10,
+        source: 'agent',
+        event: {
+          type: 'shell_start',
+          command: 'pnpm vitest run workspace-runtime-panel.test.tsx',
+          cwd: '/repo/worktrees/task',
+        },
+      },
+      ...Array.from({ length: 30 }, (_, index) => ({
+        seq: index + 2,
+        ts: index + 20,
+        source: 'agent' as const,
+        event: {
+          type: 'shell_stdout_delta',
+          delta: `line ${index + 1}\n`,
+        },
+      })),
+    ];
+
+    const runtime = buildWorkspaceRuntimeSurface({
+      cwd: '/repo/worktrees/task',
+      runs: [run],
+      eventsByRunId: new Map([[run.runId, events]]),
+    });
+
+    expect(runtime?.terminal.commands[0]?.logs).toHaveLength(30);
+    expect(runtime?.terminal.commands[0]?.logs[0]?.text).toBe('line 1');
+    expect(runtime?.terminal.commands[0]?.logs[29]?.text).toBe('line 30');
+  });
 });

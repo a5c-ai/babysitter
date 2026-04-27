@@ -1258,6 +1258,7 @@ function WorkspaceColumn(props: {
                     runtime={runtimeSession.runtime}
                     rebase={workspace.rebase}
                     sessionId={runtimeSession.sessionId}
+                    sessionStatus={runtimeSession.status}
                     executionContexts={props.executionContextsBySessionId.get(runtimeSession.sessionId) ?? []}
                   />
                 ) : null}
