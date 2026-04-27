@@ -372,7 +372,7 @@ describe('renderClaudeOutput', () => {
         'Stop',
       );
       expect(output).toEqual({
-        continueSession: true,
+        continue: true,
         followUpMessage: 'Please also run the linter.',
       });
     });
@@ -413,7 +413,7 @@ describe('renderClaudeOutput', () => {
         'Stop',
         event,
       );
-      expect(output).toEqual({ continueSession: false });
+      expect(output).toEqual({ continue: false });
     });
 
     it('does not interfere when stopHookActive is false', () => {
@@ -424,7 +424,7 @@ describe('renderClaudeOutput', () => {
         event,
       );
       expect(output).toEqual({
-        continueSession: true,
+        continue: true,
         followUpMessage: 'keep going',
       });
     });
@@ -435,7 +435,7 @@ describe('renderClaudeOutput', () => {
         'Stop',
       );
       expect(output).toEqual({
-        continueSession: true,
+        continue: true,
         followUpMessage: 'keep going',
       });
     });

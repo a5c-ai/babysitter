@@ -24,7 +24,7 @@ export interface ClaudePostToolUseOutput {
 /** Stop hook output: continue/stop decision. */
 export interface ClaudeStopOutput {
   /** If true, the session continues instead of stopping. */
-  continueSession?: boolean;
+  continue?: boolean;
   /** Optional reason for the decision. */
   reason?: string;
   /** Follow-up message to send if continuing. */
@@ -53,7 +53,7 @@ export interface ClaudeGenericOutput {
  * safe response is to let the session stop naturally.
  */
 const SAFE_STOP_NOOP: Readonly<Record<string, unknown>> = Object.freeze({
-  continueSession: false,
+  continue: false,
 });
 
 /**
@@ -134,7 +134,7 @@ function renderStopOutput(result: UnifiedHookResult): Record<string, unknown> {
   const output: Record<string, unknown> = {};
 
   if (result.continueSession != null) {
-    output['continueSession'] = result.continueSession;
+    output['continue'] = result.continueSession;
   }
 
   if (result.stopReason != null) {

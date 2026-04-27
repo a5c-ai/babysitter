@@ -56,7 +56,7 @@ vi.mock('@a5c-ai/hooks-mux-core', () => ({
   saveSession: vi.fn(async () => undefined),
   deleteSession: vi.fn(async () => undefined),
   adaptOutput: vi.fn(() => ({
-    output: { decision: 'noop' },
+    output: {},
     degradedFields: [],
   })),
   propagateEnv: vi.fn(async () => undefined),
@@ -194,7 +194,7 @@ describe('CLI Commands', () => {
         expect(mockAdaptOutput).toHaveBeenCalled();
 
         const output = stdout.getOutput();
-        expect(output).toContain('noop');
+        expect(output).toContain('{}');
       } finally {
         stdout.restore();
       }

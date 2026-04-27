@@ -388,7 +388,7 @@ describe('adaptOutput', () => {
     });
 
     expect(result.degradedFields).toContain('decision');
-    expect(result.output['decision']).toBe('noop');
+    expect(result.output['decision']).toBeUndefined();
   });
 
   it('preserves decision when adapter supports blocking', () => {

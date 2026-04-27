@@ -635,14 +635,14 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
 
     expect(result.exitCode).toBe(0);
     expect(parseOutput(result.stdout)).toEqual({
-      continueSession: true,
+      continue: true,
       reason: 'Need one more turn',
       followUpMessage: 'Continue and fix tests',
       additionalContext: 'stop context',
     });
   });
 
-  it('Claude Stop recursion guard suppresses continueSession during stop-hook recursion', async () => {
+  it('Claude Stop recursion guard suppresses continue during stop-hook recursion', async () => {
     const handlerCmd = await writeHandlerScript(tmpRoot, 'claude-stop-recursion', `
       process.stdout.write(JSON.stringify({
         continueSession: true,
@@ -666,7 +666,7 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
 
     expect(result.exitCode).toBe(0);
     expect(parseOutput(result.stdout)).toEqual({
-      continueSession: false,
+      continue: false,
     });
   });
 

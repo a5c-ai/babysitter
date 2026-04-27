@@ -21,8 +21,10 @@ export function adaptOutput(options: AdaptOutputOptions): AdaptedOutput {
   const output: Record<string, unknown> = {};
   const degradedFields: string[] = [];
 
-  // Always include base fields
-  output['decision'] = mergedResult.decision;
+  // Only include decision when it carries a meaningful value
+  if (mergedResult.decision !== 'noop' && mergedResult.decision !== 'continue') {
+    output['decision'] = mergedResult.decision;
+  }
 
   if (mergedResult.reason) {
     output['reason'] = mergedResult.reason;
@@ -52,7 +54,9 @@ export function adaptOutput(options: AdaptOutputOptions): AdaptedOutput {
     output['systemMessage'] = mergedResult.systemMessage;
   }
 
-  output['continueSession'] = mergedResult.continueSession;
+  if (mergedResult.continueSession) {
+    output['continue'] = mergedResult.continueSession;
+  }
 
   if (mergedResult.stopReason) {
     output['stopReason'] = mergedResult.stopReason;
@@ -80,12 +84,9 @@ export function adaptOutput(options: AdaptOutputOptions): AdaptedOutput {
   }
 
   // Decision/blocking support check
-  if (mergedResult.decision !== 'noop') {
-    if (!CAPABILITY_FIELD_MAP['decision'](capabilities)) {
-      degradedFields.push('decision');
-      // Downgrade to noop when adapter doesn't support blocking
-      output['decision'] = 'noop';
-    }
+  if (output['decision'] && !CAPABILITY_FIELD_MAP['decision'](capabilities)) {
+    degradedFields.push('decision');
+    delete output['decision'];
   }
 
   return { output, degradedFields };
