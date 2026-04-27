@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { resolveCatalogEvidenceAssetPath } from "./assets";
+import { buildClaimsByEvidence, getEvidenceClaimStatement } from "./evidence-projection";
 import { getCatalogGraph } from "./graph";
 import { effectiveTransportMuxClaimStatus, effectiveTransportMuxUnresolvedGaps } from "./transport-mux-cutover";
 import type {
@@ -91,10 +92,9 @@ const GRAPH = getCatalogGraph();
 const CLAIMS_BY_ID = new Map(CLAIM_NODES.map((node) => [valueAsString(node.claimId), node] as const));
 const EVIDENCE_BY_ID = new Map(EVIDENCE_SOURCE_NODES.map((node) => [valueAsString(node.evidenceId), node] as const));
 const CLAIM_NODE_BY_GRAPH_ID = new Map(CLAIM_NODES.map((node) => [valueAsString(node.id), node] as const));
-const EVIDENCE_NODE_BY_GRAPH_ID = new Map(EVIDENCE_SOURCE_NODES.map((node) => [valueAsString(node.id), node] as const));
 
 const CLAIMS_BY_SUBJECT = new Map<string, GraphNode[]>();
-const CLAIMS_BY_EVIDENCE = new Map<string, GraphNode[]>();
+const CLAIMS_BY_EVIDENCE = buildClaimsByEvidence(CLAIM_NODES, EVIDENCE_SOURCE_NODES, GRAPH.edges);
 
 for (const edge of GRAPH.edges) {
   if (edge.relation === "supported_by_claim") {
@@ -107,22 +107,6 @@ for (const edge of GRAPH.edges) {
       subjectBucket.push(claimNode);
     } else {
       CLAIMS_BY_SUBJECT.set(edge.from, [claimNode]);
-    }
-    continue;
-  }
-
-  if (edge.relation === "sourced_from") {
-    const claimNode = CLAIM_NODE_BY_GRAPH_ID.get(edge.from);
-    const evidenceNode = EVIDENCE_NODE_BY_GRAPH_ID.get(edge.to);
-    if (!claimNode || !evidenceNode) {
-      continue;
-    }
-    const evidenceId = valueAsString(evidenceNode.evidenceId);
-    const evidenceBucket = CLAIMS_BY_EVIDENCE.get(evidenceId);
-    if (evidenceBucket) {
-      evidenceBucket.push(claimNode);
-    } else {
-      CLAIMS_BY_EVIDENCE.set(evidenceId, [claimNode]);
     }
   }
 }
@@ -145,7 +129,6 @@ function toClaimRecord(node: GraphNode): ClaimRecord {
 
 function toEvidenceRecord(node: GraphNode): EvidenceRecord {
   const evidenceId = valueAsString(node.evidenceId);
-  const supportingClaims = CLAIMS_BY_EVIDENCE.get(evidenceId) ?? [];
   const freshnessWindowDays =
     typeof node.freshnessWindowDays === "number" && Number.isFinite(node.freshnessWindowDays)
       ? node.freshnessWindowDays
@@ -155,7 +138,7 @@ function toEvidenceRecord(node: GraphNode): EvidenceRecord {
     kind: valueAsString(node.kindLabel) === "web" ? "web" : "repo",
     sourcePathOrUrl: valueAsString(node.sourcePathOrUrl),
     excerptLocator: valueAsString(node.locator),
-    claim: valueAsString(supportingClaims[0]?.statement),
+    claim: getEvidenceClaimStatement(evidenceId, CLAIMS_BY_EVIDENCE),
     capturedAt: valueAsString(node.capturedAt),
     trustLevel: valueAsString(node.trustLevel),
     reviewOwner: valueAsString(node.reviewOwner),

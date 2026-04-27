@@ -413,6 +413,14 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(search.claims.some((entry) => entry.claimId === "web-codex-hooks")).toBe(true);
   });
 
+  it("keeps graph-backed evidence exports aligned with dedicated evidence helpers", () => {
+    expect(AGENT_CATALOG.evidence).toHaveLength(getOntologyEvidenceSnapshot().evidenceSources.length);
+
+    for (const evidence of AGENT_CATALOG.evidence) {
+      expect(getOntologyEvidenceSource(evidence.evidenceId)).toEqual(evidence);
+    }
+  });
+
   it("downgrades transport-mux document claims and runtime capability surfacing when the cutover gate is red", async () => {
     const previousOverride = process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER;
     process.env.A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER = "red";

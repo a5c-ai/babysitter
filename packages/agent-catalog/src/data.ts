@@ -8,6 +8,7 @@ import {
   listOutgoingTargets,
   listRelationshipsByRelation,
 } from "./graph";
+import { buildClaimsByEvidence, getEvidenceClaimStatement } from "./evidence-projection";
 import {
   effectiveTransportMuxClaimStatus,
   effectiveTransportMuxUnresolvedGaps,
@@ -45,6 +46,11 @@ import type {
 } from "./models";
 
 const FALLBACK_SESSION_DIR = ".a5c/runs";
+const EVIDENCE_CLAIMS = buildClaimsByEvidence(
+  listNodesByKind("Claim"),
+  listNodesByKind("EvidenceSource"),
+  listRelationshipsByRelation("sourced_from"),
+);
 
 function valueAsString(value: unknown): string {
   if (typeof value === "string") {
@@ -316,7 +322,7 @@ function toEvidenceRecord(node: GraphNode): EvidenceRecord {
     kind: valueAsString(node.kindLabel) === "web" ? "web" : "repo",
     sourcePathOrUrl: valueAsString(node.sourcePathOrUrl),
     excerptLocator: valueAsString(node.locator),
-    claim: valueAsString(getNodeById<GraphNode>(`claim:${valueAsString(node.evidenceId)}`)?.statement),
+    claim: getEvidenceClaimStatement(valueAsString(node.evidenceId), EVIDENCE_CLAIMS),
     capturedAt: valueAsString(node.capturedAt),
     trustLevel: valueAsString(node.trustLevel),
     reviewOwner: valueAsString(node.reviewOwner),

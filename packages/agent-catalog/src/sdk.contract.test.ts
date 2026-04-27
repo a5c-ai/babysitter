@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  getAgentVersion,
   getAgentVersionSlug,
   getFallbackHarnessMetadata,
+  getOntologyEvidenceSource,
   getUiAgentOntologyEntry,
   getUiAgentOntologyList,
   listAgentVersions,
+  listClaimsForEvidence,
   listFallbackHarnessMetadata,
   getHarnessImages,
   lookupHarnessImage,
@@ -53,5 +56,18 @@ describe("agent-catalog sdk contract", () => {
       versionRange: agent!.versionRange,
       name: listEntry!.name,
     });
+  });
+
+  it("assembles ontology detail evidence from the shared evidence projection", () => {
+    const agent = getAgentVersion("codex", ">=0.119.0");
+    const detail = getUiAgentOntologyEntry(getAgentVersionSlug(agent!));
+    const evidenceId = "repo-sdk-fallback";
+
+    expect(agent).toBeDefined();
+    expect(detail).toBeDefined();
+    expect(detail!.evidence.find((entry) => entry.evidenceId === evidenceId)).toEqual(getOntologyEvidenceSource(evidenceId));
+    expect(detail!.evidence.find((entry) => entry.evidenceId === evidenceId)?.claim).toBe(
+      listClaimsForEvidence(evidenceId)[0]?.statement ?? "",
+    );
   });
 });
