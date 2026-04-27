@@ -2,7 +2,7 @@
   "name": "@a5c-ai/hooks-mux-adapter-codex",
   "version": "5.0.0",
   "description": "Codex harness adapter for the hooks-mux system",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,8 @@
     "directory": "packages/hooks-mux/adapter-codex"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

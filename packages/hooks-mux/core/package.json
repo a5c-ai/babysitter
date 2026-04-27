@@ -2,7 +2,7 @@
   "name": "@a5c-ai/hooks-mux-core",
   "version": "5.0.0",
   "description": "Canonical schemas, types, session store, and merge engine for the hooks-mux system",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,8 @@
     "directory": "packages/hooks-mux/core"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

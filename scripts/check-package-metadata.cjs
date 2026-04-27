@@ -55,6 +55,20 @@ const publicWorkspacePackages = [
   'packages/agent-mux/tui/package.json',
 ];
 
+const publicHooksMuxPackages = [
+  'packages/hooks-mux/core/package.json',
+  'packages/hooks-mux/cli/package.json',
+  'packages/hooks-mux/adapter-claude/package.json',
+  'packages/hooks-mux/adapter-codex/package.json',
+  'packages/hooks-mux/adapter-gemini/package.json',
+  'packages/hooks-mux/adapter-copilot/package.json',
+  'packages/hooks-mux/adapter-cursor/package.json',
+  'packages/hooks-mux/adapter-pi/package.json',
+  'packages/hooks-mux/adapter-oh-my-pi/package.json',
+  'packages/hooks-mux/adapter-opencode/package.json',
+  'packages/hooks-mux/adapter-openclaw/package.json',
+];
+
 const publicPluginPackages = [
   'plugins/babysitter-codex/package.json',
   'plugins/babysitter-cursor/package.json',
@@ -67,7 +81,11 @@ const publicPluginPackages = [
   'plugins/babysitter-pi/package.json',
 ];
 
-for (const relativePath of [...publicWorkspacePackages, ...publicPluginPackages]) {
+for (const relativePath of [
+  ...publicWorkspacePackages,
+  ...publicHooksMuxPackages,
+  ...publicPluginPackages,
+]) {
   const manifest = readJson(relativePath);
   const packageDir = path.dirname(relativePath);
   const readmeRelativePath = path.join(packageDir, 'README.md');
