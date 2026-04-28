@@ -37,12 +37,19 @@ export async function runDaemonLoop(
   const activeRuns = new Set<Promise<void>>();
   const queue: TriggerEvent[] = [];
 
+  function scheduleStatusWrite(): void {
+    void writeLoopStatus().catch(() => {
+      // Status persistence is best-effort and must not surface as an
+      // unhandled rejection during trigger dispatch or shutdown races.
+    });
+  }
+
   function drainQueue(): void {
     while (queue.length > 0 && activeRuns.size < maxConcurrent) {
       const next = queue.shift()!;
       dispatchTrigger(next);
     }
-    void writeLoopStatus();
+    scheduleStatusWrite();
   }
 
   function dispatchTrigger(trigger: TriggerEvent): void {
@@ -95,17 +102,19 @@ export async function runDaemonLoop(
         timestamp: new Date().toISOString(),
         event: "TRIGGER_ACTIVATED",
         data,
+      }).catch(() => {
+        // Activation logging is best-effort and should never interrupt the loop.
       });
     }
 
     if (activeRuns.size >= maxConcurrent) {
       queue.push(trigger);
-      void writeLoopStatus();
+      scheduleStatusWrite();
       return;
     }
 
     dispatchTrigger(trigger);
-    void writeLoopStatus();
+    scheduleStatusWrite();
   };
 
   // Set up file triggers

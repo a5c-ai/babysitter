@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AutomationRule } from "../src/automation.js";
+import type { AutomationExecutionRecord, AutomationRule } from "../src/automation.js";
 
 describe("automation rule types", () => {
   it("supports timer rules routed through canonical issue creation and derived boards", () => {
@@ -106,5 +106,78 @@ describe("automation rule types", () => {
     expect(rule.trigger.type).toBe("webhook");
     expect(rule.source.provider).toBe("github");
     expect(rule.audit.updatedBy).toBe("ops");
+  });
+
+  it("preserves split canonical-project and board-project routing semantics in execution records", () => {
+    const rule: AutomationRule = {
+      id: "rule-routed-board",
+      name: "Cross-project routed automation",
+      state: "active",
+      trigger: {
+        type: "timer",
+        cron: "*/15 * * * *",
+        timezone: "UTC",
+      },
+      target: {
+        projectId: "canonical-project",
+        boardProjectId: "board-project",
+      },
+      template: {
+        title: "Materialize routed canonical work",
+        status: "ready",
+        priority: "high",
+      },
+      routing: {
+        issue: {
+          action: "canonical-issue-create",
+          projectId: "canonical-project",
+        },
+        board: {
+          action: "shared-board-derive",
+          boardProjectId: "board-project",
+        },
+        mutateBoardDirectly: false,
+      },
+      source: {
+        kind: "config-file",
+        path: ".a5c/automations.json",
+      },
+      audit: {
+        createdAt: "2026-04-24T00:00:00.000Z",
+      },
+    };
+
+    const execution: AutomationExecutionRecord = {
+      id: "automation-execution-01",
+      ruleId: rule.id,
+      ruleName: rule.name,
+      triggerType: rule.trigger.type,
+      status: "created",
+      triggeredAt: "2026-04-24T12:00:00.000Z",
+      triggeredBy: "daemon-timer",
+      source: rule.source,
+      projectId: rule.routing.issue.projectId,
+      boardProjectId: rule.routing.board.boardProjectId,
+      issueId: "CANON-AUTO-001",
+      issueKey: "CANON-AUTO-001",
+      issueSource: {
+        kind: "run-derived",
+        externalId: "digest-job",
+      },
+      stateAtExecution: rule.state,
+      metadata: {
+        triggerType: "timer",
+        cron: rule.trigger.cron,
+      },
+    };
+
+    expect(rule.target.projectId).toBe("canonical-project");
+    expect(rule.target.boardProjectId).toBe("board-project");
+    expect(rule.routing.issue.projectId).toBe("canonical-project");
+    expect(rule.routing.board.boardProjectId).toBe("board-project");
+    expect(rule.routing.issue.projectId).not.toBe(rule.routing.board.boardProjectId);
+    expect(execution.projectId).toBe("canonical-project");
+    expect(execution.boardProjectId).toBe("board-project");
+    expect(execution.issueKey).toBe("CANON-AUTO-001");
   });
 });

@@ -32,12 +32,65 @@ function createBacklogOverview() {
   } as never;
 }
 
-function createService(backlogFilePath: string) {
+function createOverviewProject(
+  overrides: Partial<{
+    id: string;
+    key: string;
+    name: string;
+    linkedRunProjectName: string;
+  }> = {},
+) {
+  return {
+    id: overrides.id ?? "kanban-app",
+    key: overrides.key ?? "KANBAN",
+    name: overrides.name ?? "Kanban App",
+    linkedRunProjectName: overrides.linkedRunProjectName ?? "kanban",
+  };
+}
+
+function createStoredProject(
+  overrides: Partial<{
+    id: string;
+    key: string;
+    name: string;
+    linkedRunProjectName: string;
+  }> = {},
+) {
+  return {
+    id: overrides.id ?? "kanban-app",
+    key: overrides.key ?? "KANBAN",
+    name: overrides.name ?? "Kanban App",
+    description: "Automation target project",
+    issueIds: [],
+    labels: [{ id: "label-debt", name: "debt" }],
+    assignees: [],
+    statuses: [],
+    repositories: [],
+    linkedRunProjectName: overrides.linkedRunProjectName ?? "kanban",
+  };
+}
+
+function createService(
+  backlogFilePath: string,
+  options?: {
+    overviewProjects?: Array<{
+      id: string;
+      key: string;
+      name: string;
+      linkedRunProjectName?: string;
+    }>;
+  },
+) {
   return new AutomationRuleService({
     backlogFilePath,
     now: () => "2026-04-24T12:00:00.000Z",
     backlogQueryService: {
-      getOverview: async () => createBacklogOverview(),
+      getOverview: async () =>
+        ({
+          snapshot: {
+            projects: options?.overviewProjects ?? createBacklogOverview().snapshot.projects,
+          },
+        }) as never,
       createIssue: async (input: {
         projectId: string;
         title: string;
@@ -338,6 +391,115 @@ describe("AutomationRuleService", () => {
       boardProjectId: "kanban-app",
       key: "KANBAN",
     });
+  });
+
+  it("supports CRUD flows for rules routed to a distinct board project", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-automation-rules-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+    await fs.writeFile(
+      backlogFilePath,
+      JSON.stringify(
+        {
+          projects: [
+            createStoredProject({
+              id: "canonical-project",
+              key: "CANON",
+              name: "Canonical Project",
+              linkedRunProjectName: "canonical",
+            }),
+            createStoredProject({
+              id: "board-project",
+              key: "BOARD",
+              name: "Board Project",
+              linkedRunProjectName: "board",
+            }),
+          ],
+          issues: [],
+          automationRules: [],
+          automationExecutions: [],
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const service = createService(backlogFilePath, {
+      overviewProjects: [
+        createOverviewProject({
+          id: "canonical-project",
+          key: "CANON",
+          name: "Canonical Project",
+          linkedRunProjectName: "canonical",
+        }),
+        createOverviewProject({
+          id: "board-project",
+          key: "BOARD",
+          name: "Board Project",
+          linkedRunProjectName: "board",
+        }),
+      ],
+    });
+
+    const created = await service.createRule({
+      ...createTimerRuleInput({
+        name: "Cross-project digest",
+        state: "active",
+      }),
+      target: {
+        projectId: "canonical-project",
+        boardProjectId: "board-project",
+      },
+      routing: {
+        issue: {
+          action: "canonical-issue-create",
+          projectId: "canonical-project",
+        },
+        board: {
+          action: "shared-board-derive",
+          boardProjectId: "board-project",
+        },
+        mutateBoardDirectly: false,
+      },
+    });
+
+    expect(created.rule.target).toEqual({
+      projectId: "canonical-project",
+      boardProjectId: "board-project",
+    });
+    expect(created.rule.routing.issue.projectId).toBe("canonical-project");
+    expect(created.rule.routing.board.boardProjectId).toBe("board-project");
+
+    const listed = await service.listRules({
+      projectId: ["canonical-project"].at(0),
+      boardProjectId: "board-project",
+    });
+
+    expect(listed.rules).toHaveLength(1);
+    expect(listed.rules[0]?.target.projectId).toBe("canonical-project");
+    expect(listed.rules[0]?.target.boardProjectId).toBe("board-project");
+    expect(listed.targetOptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          projectId: "canonical-project",
+          boardProjectId: "canonical-project",
+        }),
+        expect.objectContaining({
+          projectId: "board-project",
+          boardProjectId: "board-project",
+        }),
+      ]),
+    );
+
+    const updated = await service.updateRule(created.rule.id, {
+      name: "Cross-project digest v2",
+      updatedBy: "ops",
+    });
+
+    expect(updated.rule.name).toBe("Cross-project digest v2");
+    expect(updated.rule.audit.updatedBy).toBe("ops");
+    expect(updated.rule.routing.board.boardProjectId).toBe("board-project");
   });
 
   it("rejects invalid lifecycle transitions and direct state edits", async () => {

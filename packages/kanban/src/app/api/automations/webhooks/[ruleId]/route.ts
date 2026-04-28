@@ -11,12 +11,13 @@ const service = new AutomationWebhookService();
 
 export async function POST(
   request: Request,
-  { params }: { params: { ruleId: string } },
+  { params }: { params: Promise<{ ruleId: string }> },
 ) {
   try {
+    const { ruleId } = await params;
     await ensureInitialized();
     const payload = await service.deliver({
-      ruleId: params.ruleId,
+      ruleId,
       requestPath: new URL(request.url).pathname,
       requestMethod: request.method,
       headers: request.headers,

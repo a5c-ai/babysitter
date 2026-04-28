@@ -2,8 +2,10 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 const packageDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(packageDir, '../..');
+const pkg = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf-8'));
+const agentCatalogSrcDir = path.resolve(packageDir, '../agent-catalog/src');
 const agentMuxUiSrcDir = path.resolve(packageDir, '../agent-mux/ui/src');
 
 /** @type {import('next').NextConfig} */
@@ -36,6 +38,7 @@ const nextConfig = {
     };
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
+      '@a5c-ai/agent-catalog$': path.join(agentCatalogSrcDir, 'index.ts'),
       '@a5c-ai/agent-mux-ui$': path.join(agentMuxUiSrcDir, 'index.ts'),
       '@a5c-ai/agent-mux-ui/gateway$': path.join(agentMuxUiSrcDir, 'gateway.ts'),
       '@a5c-ai/agent-mux-ui/session-flow$': path.join(agentMuxUiSrcDir, 'session-flow.ts'),
