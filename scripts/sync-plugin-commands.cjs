@@ -62,12 +62,11 @@ function normalizeTarget(targetName) {
 
 function ensureCompilerBuilt() {
   if (fs.existsSync(COMPILER_CLI)) return;
-  const catalogPkg = path.join(REPO_ROOT, 'packages', 'agent-catalog');
-  const catalogDist = path.join(catalogPkg, 'dist', 'index.js');
+  const catalogDist = path.join(REPO_ROOT, 'packages', 'agent-catalog', 'dist', 'index.js');
   if (!fs.existsSync(catalogDist)) {
-    spawnSync('npm', ['run', 'build'], { cwd: catalogPkg, stdio: 'inherit' });
+    spawnSync('npm', ['run', 'build', '--workspace=@a5c-ai/agent-catalog'], { cwd: REPO_ROOT, stdio: 'inherit' });
   }
-  spawnSync('npm', ['run', 'build'], { cwd: COMPILER_PKG, stdio: 'inherit' });
+  spawnSync('npm', ['run', 'build', '--workspace=@a5c-ai/agent-plugins-mux'], { cwd: REPO_ROOT, stdio: 'inherit' });
 }
 
 function compileTargets(outputDir, targets) {
