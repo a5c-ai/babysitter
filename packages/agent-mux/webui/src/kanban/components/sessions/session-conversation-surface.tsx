@@ -18,7 +18,7 @@ import { AlertTriangle, Bot, FileImage, FileStack, Files, Hammer, LoaderCircle, 
 
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { useTaskTags } from "@/hooks/use-task-tags";
 import { cx } from "@a5c-ai/compendium";
 import { useGateway } from "@/lib/agent-mux-ui";
@@ -357,7 +357,7 @@ function TranscriptCard(props: {
           <span className="text-xs text-foreground-muted">{formatTimestamp(props.node.timestamp)}</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" size="sm" variant="outline" onClick={() => props.onReuseText(props.node.text)}>
+          <Button type="button" size="sm" variant="ghost" onClick={() => props.onReuseText(props.node.text)}>
             {props.node.kind === "user" ? "Edit" : "Retry"}
           </Button>
         </div>
@@ -414,7 +414,7 @@ function TimelineCard(props: {
             {duration ? ` · ${duration}` : ""}
           </div>
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => props.onReuseText(props.item.detail)}>
+        <Button type="button" size="sm" variant="ghost" onClick={() => props.onReuseText(props.item.detail)}>
           Use output
         </Button>
       </div>
@@ -468,7 +468,7 @@ function FilesCard(props: {
             {props.file.runIds.length} runs · {props.file.tools.length} tools
           </div>
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => props.onMentionFile(props.file.path)}>
+        <Button type="button" size="sm" variant="ghost" onClick={() => props.onMentionFile(props.file.path)}>
           Mention file
         </Button>
       </div>
@@ -667,12 +667,12 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
           </div>
           <div className="flex flex-wrap gap-2">
             {props.openSessionHref ? (
-              <Button asChild size="sm" variant="outline">
+              <Button size="sm" variant="ghost">
                 <Link href={props.openSessionHref}>Open session</Link>
               </Button>
             ) : null}
             {props.workspacePath ? (
-              <Button asChild size="sm" variant="outline">
+              <Button size="sm" variant="ghost">
                 <Link href={`/workspaces?workspace=${encodeURIComponent(props.workspacePath)}`}>Open workspace</Link>
               </Button>
             ) : null}
@@ -698,7 +698,7 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
               key={tab.id}
               type="button"
               size="sm"
-              variant={viewMode === tab.id ? "default" : "outline"}
+              variant={viewMode === tab.id ? "default" : "ghost"}
               onClick={() => setViewMode(tab.id)}
             >
               <Icon className="h-4 w-4" />
@@ -832,7 +832,7 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
                     <Button
                       type="button"
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       disabled={pendingHookId === request.hookRequestId}
                       onClick={() => void handleHookDecision(request.hookRequestId, "deny")}
                     >
@@ -989,7 +989,7 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             disabled={props.disabled || !canAttachAny}
             onClick={() => fileInputRef.current?.click()}
           >

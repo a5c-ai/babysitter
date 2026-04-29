@@ -1,9 +1,8 @@
 "use client";
 import { cx } from "@a5c-ai/compendium";
-import { Badge } from "@/components/ui/badge";
+import { Tag } from "@a5c-ai/compendium";
 import { FilePreview } from "./file-preview";
 import { BreakpointApproval } from "./breakpoint-approval";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Hand, CheckCircle2 } from "lucide-react";
 import { TruncatedId } from "@/components/shared/truncated-id";
 import type { TaskDetail } from "@/types";
@@ -21,7 +20,7 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
   const isWaiting = task.status === "requested";
 
   return (
-    <ScrollArea className="h-full">
+    <div style={{overflowY:'auto'}} className="h-full">
       <div data-testid="breakpoint-panel" className="space-y-5 p-4">
         {/* Header */}
         <div className="space-y-2">
@@ -30,9 +29,9 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
             <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="warning">Breakpoint</Badge>
+            <Tag>Breakpoint</Tag>
             {task.status === "resolved" && (
-              <Badge variant="success">Already Resolved</Badge>
+              <Tag>Already Resolved</Tag>
             )}
           </div>
           <TruncatedId id={task.effectId} chars={4} className="text-foreground-muted" />
@@ -90,6 +89,6 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
           </div>
         )}
       </div>
-    </ScrollArea>
+    </div>
   );
 }

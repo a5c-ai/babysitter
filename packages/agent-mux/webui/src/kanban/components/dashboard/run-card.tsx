@@ -2,7 +2,6 @@
 import { memo } from "react";
 import Link from "next/link";
 import { cx } from "@a5c-ai/compendium";
-import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SessionPill } from "@/components/shared/session-pill";
 import { TruncatedId } from "@/components/shared/truncated-id";
@@ -92,7 +91,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
 
   return (
     <Link href={`/runs/${run.runId}`}>
-      <Card className={cx(
+      <div className={cx("tkc-panel",
         "cursor-pointer p-4 transition-all card-hover-lift",
         "hover:shadow-md",
         selected && "ring-1 ring-primary shadow-glow-primary",
@@ -212,7 +211,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
         {run.totalTasks > 0 && (
           <ProgressBar value={progress} variant={progressVariant(run.status)} glow={isActive && !isStale} className="mt-4" />
         )}
-      </Card>
+      </div>
     </Link>
   );
 }, runCardPropsAreEqual);

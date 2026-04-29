@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { TaskDetail } from "@/types";
 
 import { JsonTreeView } from "./json-node";
@@ -58,7 +57,7 @@ export function JsonTree({ task }: { task: TaskDetail | null }) {
       {/* 1. Input/Output Toggle */}
       <DataToggle showInput={showInput} onToggle={setShowInput} />
 
-      <ScrollArea>
+      <div style={{overflowY:'auto'}}>
         {isPrimitive ? (
           /* For non-object data, just show the raw tree */
           <div className="rounded-md bg-background-secondary p-3">
@@ -92,7 +91,7 @@ export function JsonTree({ task }: { task: TaskDetail | null }) {
             <CollapsibleRawJson data={activeData} />
           </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }

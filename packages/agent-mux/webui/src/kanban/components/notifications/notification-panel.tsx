@@ -70,7 +70,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
                 <span className="text-xs text-primary/70 font-mono">({notifications.length})</span>
               )}
             </div>
-            <Dialog.Close asChild>
+            <Dialog.Close>
               <button className={dialogCloseButtonClassName}>
                 <X className="h-4 w-4" />
               </button>

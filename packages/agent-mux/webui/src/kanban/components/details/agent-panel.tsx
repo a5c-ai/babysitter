@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { DispatchContextAuditPanel } from "@/components/shared/dispatch-context-audit-panel";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { KindBadge } from "@/components/shared/kind-badge";
@@ -172,7 +171,7 @@ export function AgentPanel({
   const resultError = resultData?.error as Record<string, unknown> | undefined;
 
   return (
-    <ScrollArea className="h-full">
+    <div style={{overflowY:'auto'}} className="h-full">
       <div className="space-y-4 p-4">
         <ExecutionContextPanel
           contexts={executionContexts}
@@ -255,6 +254,6 @@ export function AgentPanel({
           <ResultOutput value={resultValue} />
         )}
       </div>
-    </ScrollArea>
+    </div>
   );
 }

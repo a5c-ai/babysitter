@@ -15,7 +15,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { cx } from "@a5c-ai/compendium";
 import { resilientFetch } from "@/lib/fetcher";
 import { useTheme } from "@/components/shared/theme-provider";
@@ -225,7 +225,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 <Settings className="h-4 w-4 text-foreground-muted" />
                 <Dialog.Title className="text-sm font-medium text-foreground">Settings</Dialog.Title>
               </div>
-              <Dialog.Close asChild>
+              <Dialog.Close>
                 <button className={dialogCloseButtonClassName}>
                   <X className="h-4 w-4" />
                 </button>
@@ -233,7 +233,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             {/* Body */}
-            <Dialog.Description asChild>
+            <Dialog.Description>
               <div className={dialogBodyClassName}>
                 {fetchLoading ? (
                   <div className="flex items-center justify-center py-12 text-foreground-muted">

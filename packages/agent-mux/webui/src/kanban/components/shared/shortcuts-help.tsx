@@ -85,7 +85,7 @@ export function ShortcutsHelp() {
         >
           <div className="mb-4 flex items-center justify-between">
             <Dialog.Title className="text-sm font-medium text-foreground">Keyboard Shortcuts</Dialog.Title>
-            <Dialog.Close asChild>
+            <Dialog.Close>
               <button
                 className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-primary transition-colors"
               >

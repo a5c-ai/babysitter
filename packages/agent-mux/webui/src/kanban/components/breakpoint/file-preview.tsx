@@ -2,13 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { cx } from "@a5c-ai/compendium";
 import { resilientFetch } from "@/lib/fetcher";
-import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+import { Accordion, Tag } from "@a5c-ai/compendium";
 import { FileText, Code, FileJson, Loader2 } from "lucide-react";
 import type { BreakpointFile } from "@/types";
 
@@ -166,35 +160,25 @@ export function FilePreview({ files, runId, effectId }: FilePreviewProps) {
         Attached Files
       </h4>
       <Accordion
-        type="single"
-        collapsible
-        onValueChange={(value: string | string[]) => {
-          const v = typeof value === "string" ? value : value[0];
-          if (v) {
-            const file = files.find((f) => f.path === v);
-            if (file) loadFileContent(file.path);
-          }
-        }}
-      >
-        {files.map((file) => (
-          <AccordionItem key={file.path} value={file.path} className="border-border/50">
-            <AccordionTrigger className="py-2 text-xs">
-              <div className="flex items-center gap-2 min-w-0">
-                {getIcon(file.format)}
-                <span className="font-mono text-foreground-secondary truncate">
-                  {file.path}
-                </span>
-                <Badge variant={formatBadgeVariant(file.format)} className="text-xs leading-tight px-1.5 py-0">
-                  {file.format}
-                </Badge>
-                {file.language && (
-                  <Badge variant="pending" className="text-xs leading-tight px-1.5 py-0">
-                    {file.language}
-                  </Badge>
-                )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-1">
+        items={files.map((file) => ({
+          title: (
+            <div className="flex items-center gap-2 min-w-0">
+              {getIcon(file.format)}
+              <span className="font-mono text-foreground-secondary truncate">
+                {file.path}
+              </span>
+              <Tag>
+                {file.format}
+              </Tag>
+              {file.language && (
+                <Tag>
+                  {file.language}
+                </Tag>
+              )}
+            </div>
+          ),
+          body: (
+            <div className="px-1">
               {loadingFiles[file.path] ? (
                 <div className="flex items-center justify-center py-6">
                   <Loader2 className="h-4 w-4 animate-spin text-foreground-muted" />
@@ -206,10 +190,10 @@ export function FilePreview({ files, runId, effectId }: FilePreviewProps) {
                   Expand to load content
                 </div>
               )}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+            </div>
+          ),
+        }))}
+      />
     </div>
   );
 }

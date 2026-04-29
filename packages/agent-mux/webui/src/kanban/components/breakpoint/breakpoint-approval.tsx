@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Field, Input } from "@a5c-ai/compendium";
 
 import { cx } from "@a5c-ai/compendium";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { approveBreakpoint } from "@/app/actions/approve-breakpoint";
 import type { TaskDetail } from "@/types";
@@ -56,7 +56,7 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
             {options.map((option) => (
               <Button
                 key={option}
-                variant="neon"
+                variant="primary"
                 size="sm"
                 disabled={isPending}
                 onClick={() => handleApprove(option)}

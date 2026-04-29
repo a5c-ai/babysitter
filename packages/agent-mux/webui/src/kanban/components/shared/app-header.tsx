@@ -6,7 +6,7 @@ import { useState } from "react";
 import { LogoWordmark } from "@a5c-ai/compendium";
 import { Bell, Columns3, Github, Menu, Moon, Settings2, Sun, Wifi, WifiOff } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { useNotificationContext } from "@/components/notifications/notification-provider";
@@ -76,7 +76,7 @@ export function AppHeader() {
                 {isAuthenticated ? "Gateway connected" : "Gateway disconnected"}
               </span>
 
-              <Button asChild variant="ghost" size="sm">
+              <Button variant="ghost" size="sm">
                 <Link href="/settings" aria-label="Open settings">
                   <Settings2 className="h-4 w-4" />
                   <span className="hidden sm:inline">Settings</span>

@@ -1,6 +1,5 @@
 "use client";
 import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventItem } from "./event-item";
 import { cx } from "@a5c-ai/compendium";
 import { formatDuration } from "@/lib/utils";
@@ -186,7 +185,7 @@ export const EventStream = memo(function EventStream({ events, onEventClick }: E
           </div>
         )}
       </div>
-      <ScrollArea className="flex-1" ref={scrollRef} onScrollCapture={handleScroll}>
+      <div style={{overflowY:'auto'}} className="flex-1" ref={scrollRef} onScrollCapture={handleScroll}>
         <div className="py-1">
           {grouped.map((entry, idx) => {
             if (entry.type === "single") {
@@ -243,7 +242,7 @@ export const EventStream = memo(function EventStream({ events, onEventClick }: E
             <div className="text-xs text-foreground-muted text-center py-8">No events yet</div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 });

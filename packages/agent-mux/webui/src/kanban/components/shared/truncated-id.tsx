@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { formatShortId } from '@/lib/utils';
 import { cx } from '@a5c-ai/compendium';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@a5c-ai/compendium';
 
 interface TruncatedIdProps {
   id: string;
@@ -22,30 +22,23 @@ export function TruncatedId({ id, chars = 4, className }: TruncatedIdProps) {
   };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span
-            className={cx(
-              'inline-flex items-center justify-center rounded px-2 py-1 min-h-[44px] min-w-[44px] font-mono text-xs',
-              'bg-background-secondary text-info/80',
-              'hover:bg-background-tertiary hover:text-info',
-              'cursor-pointer transition-colors select-none',
-              copied && 'text-primary',
-              className
-            )}
-            onClick={handleCopy}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(e as unknown as React.MouseEvent); } }}
-          >
-            {formatShortId(id, chars)}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p className="font-mono text-xs">{copied ? <span className="text-primary font-semibold">Copied!</span> : id}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip text={copied ? "Copied!" : id}>
+      <span
+        className={cx(
+          'inline-flex items-center justify-center rounded px-2 py-1 min-h-[44px] min-w-[44px] font-mono text-xs',
+          'bg-background-secondary text-info/80',
+          'hover:bg-background-tertiary hover:text-info',
+          'cursor-pointer transition-colors select-none',
+          copied && 'text-primary',
+          className
+        )}
+        onClick={handleCopy}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(e as unknown as React.MouseEvent); } }}
+      >
+        {formatShortId(id, chars)}
+      </span>
+    </Tooltip>
   );
 }

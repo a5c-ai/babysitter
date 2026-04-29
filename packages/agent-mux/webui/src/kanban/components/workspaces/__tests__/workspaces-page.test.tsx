@@ -51,14 +51,14 @@ vi.mock("@radix-ui/react-dialog", () => ({
   Close: ({ children }: { children?: unknown }) => <>{children}</>,
 }));
 
-vi.mock("@/components/ui/button", () => ({
+vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,
-    asChild,
+   ,
     ...props
   }: {
     children?: unknown;
-    asChild?: boolean;
+   ?: boolean;
     [key: string]: unknown;
   }) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
 }));

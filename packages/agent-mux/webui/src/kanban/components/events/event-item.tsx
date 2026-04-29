@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { cx } from "@a5c-ai/compendium";
-import { Badge } from "@/components/ui/badge";
+import { Tag } from "@a5c-ai/compendium";
 import { formatRelativeTime, formatDuration } from "@/lib/utils";
 import { TruncatedId } from "@/components/shared/truncated-id";
 import type { JournalEvent } from "@/types";
@@ -58,9 +58,9 @@ export const EventItem = memo(function EventItem({ event, onClick }: EventItemPr
         <span className="font-mono text-xs leading-tight text-secondary shrink-0 tabular-nums w-12 text-right">
           {formatRelativeTime(event.ts)}
         </span>
-        <Badge variant={config.variant} className="text-xs leading-tight shrink-0">
+        <Tag>
           {config.label}
-        </Badge>
+        </Tag>
 
         {event.type === "EFFECT_REQUESTED" && (
           <>

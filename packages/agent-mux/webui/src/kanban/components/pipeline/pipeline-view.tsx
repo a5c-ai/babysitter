@@ -7,7 +7,6 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { SessionPill } from "@/components/shared/session-pill";
 import { TruncatedId } from "@/components/shared/truncated-id";
 import { formatDuration, friendlyProcessName } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Run, TaskEffect } from "@/types";
 import { ChevronRight, Clock, Layers, ChevronDown } from "lucide-react";
 import Link from "next/link";
@@ -135,7 +134,7 @@ export const PipelineView = memo(function PipelineView({ run, selectedEffectId, 
       </div>
 
       {/* Step list */}
-      <ScrollArea className="flex-1 relative">
+      <div style={{overflowY:'auto'}} className="flex-1 relative">
         {/* Subtle top gradient for depth — brand magenta/cyan */}
         <div className="sticky top-0 z-10 h-3 bg-gradient-to-b from-primary/[0.06] via-secondary/[0.03] to-transparent pointer-events-none" />
         <div className="flex flex-col gap-2 px-4 pb-4">
@@ -191,7 +190,7 @@ export const PipelineView = memo(function PipelineView({ run, selectedEffectId, 
             <div className="text-sm text-foreground-muted text-center py-8">No tasks yet</div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 });

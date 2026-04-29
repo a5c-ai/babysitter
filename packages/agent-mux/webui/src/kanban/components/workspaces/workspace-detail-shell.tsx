@@ -8,7 +8,7 @@ import { ChevronLeft, ExternalLink, GripVertical, LayoutDashboard, MessagesSquar
 
 import { SessionConversationSurface } from "@/components/sessions/session-conversation-surface";
 import { SessionObservabilityPanel } from "@/components/sessions/session-observability-panel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-mux-core/kanban";
@@ -587,14 +587,14 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={() => props.onOpenInEditor(props.workspace, props.workspace.links.editorHref)}
             >
               <ExternalLink className="h-4 w-4" />
               Open in editor
             </Button>
             {props.activeSession ? (
-              <Button asChild type="button" variant="outline">
+              <Button type="button" variant="ghost">
                 <Link href={`/sessions/${props.activeSession.sessionId}`}>View session</Link>
               </Button>
             ) : null}
@@ -604,7 +604,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                 <Button
                   key={panel.key}
                   type="button"
-                  variant={visibility[panel.key] ? "default" : "outline"}
+                  variant={visibility[panel.key] ? "default" : "ghost"}
                   size="sm"
                   data-testid={`panel-toggle-${panel.key}`}
                   aria-pressed={visibility[panel.key]}
@@ -617,7 +617,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
             })}
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               data-testid="workspace-command-bar-trigger"
               onClick={() => setCommandBarOpen(true)}
@@ -734,7 +734,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                 key={panel}
                 type="button"
                 data-testid={`workspace-mobile-panel-${panel}`}
-                variant={activeConstrainedPanel === panel ? "default" : "outline"}
+                variant={activeConstrainedPanel === panel ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setActiveConstrainedPanel(panel)}
               >

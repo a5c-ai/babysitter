@@ -1,5 +1,4 @@
 import { cx } from "@a5c-ai/compendium";
-import { Badge } from "@/components/ui/badge";
 import type { RunStatus, TaskStatus } from "@/types";
 import { CheckCircle2, XCircle, Clock, Loader2, Circle, Hand } from "lucide-react";
 
@@ -92,11 +91,10 @@ export function StatusBadge({ status, className, waitingKind, isStale }: StatusB
   const isInterrupted = isStale && (status === "pending" || (status === "waiting" && !waitingKind));
 
   return (
-    <Badge
+    <span
       data-testid={`status-badge-${status}`}
-      variant={isStale ? "default" : config.variant}
       className={cx(
-        "gap-1",
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
         isStale
           ? "opacity-60 text-zinc-500 ring-zinc-500/20 bg-zinc-500/10 shadow-none"
           : config.extraClass,
@@ -105,6 +103,6 @@ export function StatusBadge({ status, className, waitingKind, isStale }: StatusB
     >
       {config.icon}
       {isInterrupted ? "Interrupted" : config.label}
-    </Badge>
+    </span>
   );
 }

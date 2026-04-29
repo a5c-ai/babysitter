@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { useBacklog } from "@/hooks/use-backlog";
 
 import type { KanbanIntegrationProvider } from "@a5c-ai/agent-mux-core/kanban";
@@ -293,7 +293,7 @@ export function WorkspaceProvisioningPage(props: {
             <Button type="submit" variant="primary" disabled={!selectedProject || !workspaceName.trim()} loading={submitting}>
               Create workspace
             </Button>
-            <Button asChild variant="outline">
+            <Button variant="ghost">
               <Link href={cancelHref}>Cancel</Link>
             </Button>
           </div>

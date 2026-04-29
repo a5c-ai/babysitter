@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CheckCircle2, CornerDownRight, FileDiff, MessageSquareText, MessageSquareWarning, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { cx } from "@a5c-ai/compendium";
 
 import type {
@@ -300,7 +300,7 @@ function ReviewSubmissionBar(props: {
       ) : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" onClick={() => void submit("changes-requested")} disabled={props.pending}>
+        <Button type="button" variant="ghost" onClick={() => void submit("changes-requested")} disabled={props.pending}>
           <XCircle className="mr-2 h-4 w-4" />
           Request changes
         </Button>
@@ -914,7 +914,7 @@ export function ReviewPanel(props: {
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  variant={presentation === "unified" ? "default" : "outline"}
+                  variant={presentation === "unified" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setPresentation("unified")}
                 >
@@ -922,7 +922,7 @@ export function ReviewPanel(props: {
                 </Button>
                 <Button
                   type="button"
-                  variant={presentation === "split" ? "default" : "outline"}
+                  variant={presentation === "split" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setPresentation("split")}
                   disabled={!selectedFileSupportsSplit}

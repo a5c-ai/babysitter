@@ -24,7 +24,7 @@ import { ProjectListView } from '../kanban/components/dashboard/project-list-vie
 import { RunFilterBar } from '../kanban/components/dashboard/run-filter-bar.js';
 import { ErrorBoundary } from '../kanban/components/shared/error-boundary.js';
 import { PageHeroGrid, PageSection, PageShell } from '../kanban/components/shared/page-shell.js';
-import { Button } from '../kanban/components/ui/button.js';
+import { Button } from '@a5c-ai/compendium';
 import { WorkspaceProvisioningPage } from '../kanban/components/workspaces/workspace-provisioning-page.js';
 import { WorkspacesPageContent } from '../kanban/components/workspaces/workspaces-page.js';
 import { useRunDashboard } from '../kanban/hooks/use-run-dashboard.js';
@@ -150,16 +150,16 @@ export function KanbanRunsPage(): JSX.Element {
             approvals, search, and status triage available as an execution dashboard.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Button asChild variant="primary">
+            <Button variant="primary">
               <Link href="/projects">Open projects</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button variant="ghost">
               <Link href="/sessions/new">Start session</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button variant="ghost">
               <Link href="/workspaces">Open workspaces</Link>
             </Button>
-            <Button asChild variant="ghost">
+            <Button variant="ghost">
               <Link href="/inbox">Open inbox</Link>
             </Button>
           </div>
@@ -176,7 +176,7 @@ export function KanbanRunsPage(): JSX.Element {
               : 'Connect the gateway to enable session creation, chat continuation, and live workspace context from the same app.'}
           </p>
           <div className="mt-5">
-            <Button asChild variant="outline">
+            <Button variant="ghost">
               <Link href={isAuthenticated ? '/sessions' : '/login'}>
                 {isAuthenticated ? 'Open sessions' : 'Connect gateway'}
               </Link>

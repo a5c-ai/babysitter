@@ -9,7 +9,7 @@ import { ExternalLink, GripVertical, LayoutDashboard, MessagesSquare, PanelLeft,
 
 import { SessionConversationSurface } from "@/components/sessions/session-conversation-surface";
 import { SessionObservabilityPanel } from "@/components/sessions/session-observability-panel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import {
@@ -375,7 +375,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
                   {props.workspacePath}
                 </div>
                 <div className="mt-4">
-                  <Button asChild size="sm" variant="outline">
+                  <Button size="sm" variant="ghost">
                     <Link href={workspaceHref(props.workspacePath)}>
                       Open workspace lifecycle
                     </Link>
@@ -524,7 +524,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
                 <Button
                   key={panel.key}
                   type="button"
-                  variant={visibility[panel.key] ? "default" : "outline"}
+                  variant={visibility[panel.key] ? "default" : "ghost"}
                   size="sm"
                   data-testid={`panel-toggle-${panel.key}`}
                   aria-pressed={visibility[panel.key]}
@@ -537,7 +537,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
             })}
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               data-testid="workspace-command-bar-trigger"
               onClick={() => setCommandBarOpen(true)}
@@ -566,7 +566,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
                 key={panel}
                 type="button"
                 data-testid={`workspace-mobile-panel-${panel}`}
-                variant={activeConstrainedPanel === panel ? "default" : "outline"}
+                variant={activeConstrainedPanel === panel ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setActiveConstrainedPanel(panel)}
               >

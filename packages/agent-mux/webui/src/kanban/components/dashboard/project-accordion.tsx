@@ -1,11 +1,6 @@
 "use client";
 import { useState } from "react";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+import { Accordion } from "@a5c-ai/compendium";
 import { ProjectSectionHeader } from "./project-section-header";
 import { ProjectSection } from "./project-section";
 import type { ProjectSummary } from "@/types";
@@ -35,38 +30,30 @@ export function ProjectAccordion({ projects, statusFilter, className }: ProjectA
 
   return (
     <Accordion
-      type="multiple"
-      defaultValue={defaultOpen}
-      value={expandedProjects}
-      onValueChange={(value) => setExpandedProjects(Array.isArray(value) ? value : [value])}
-      className={className}
-    >
-      {projects.map((project) => {
-        const isExpanded = expandedProjects.includes(project.projectName);
-        return (
-          <AccordionItem key={project.projectName} value={project.projectName}>
-            <AccordionTrigger className="px-2 hover:bg-primary-muted/30 rounded-md transition-colors">
-              <ProjectSectionHeader
-                projectName={project.projectName}
-                activeRuns={project.activeRuns}
-                completedRuns={project.completedRuns}
-                failedRuns={project.failedRuns}
-                totalRuns={project.totalRuns}
-                latestUpdate={project.latestUpdate}
-              />
-            </AccordionTrigger>
-            <AccordionContent className="px-2">
-              <ProjectSection
-                projectName={project.projectName}
-                runs={[]}
-                defaultExpanded
-                statusFilter={statusFilter}
-                enabled={isExpanded}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        );
-      })}
-    </Accordion>
+      items={projects.map((project) => ({
+        key: project.projectName,
+        title: (
+          <ProjectSectionHeader
+            projectName={project.projectName}
+            activeRuns={project.activeRuns}
+            completedRuns={project.completedRuns}
+            failedRuns={project.failedRuns}
+            totalRuns={project.totalRuns}
+            latestUpdate={project.latestUpdate}
+          />
+        ),
+        body: (
+          <div className="px-2">
+            <ProjectSection
+              projectName={project.projectName}
+              runs={[]}
+              defaultExpanded
+              statusFilter={statusFilter}
+              enabled={expandedProjects.includes(project.projectName)}
+            />
+          </div>
+        ),
+      }))}
+    />
   );
 }

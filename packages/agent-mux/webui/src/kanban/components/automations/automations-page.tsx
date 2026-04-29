@@ -31,10 +31,7 @@ import type {
   AutomationRuleTargetOption,
 } from "@/lib/services/automation-rule-service";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { cx } from "@a5c-ai/compendium";
+import { Button, Tag, cx } from "@a5c-ai/compendium";
 import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 type AutomationRuleRecord = AutomationRuleCollectionResponse["rules"][number];
@@ -485,11 +482,11 @@ export function AutomationsPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={() => void loadAutomations({ preserveForm: editingRuleId !== null })} disabled={refreshing}>
+            <Button variant="ghost" onClick={() => void loadAutomations({ preserveForm: editingRuleId !== null })} disabled={refreshing}>
               <RefreshCw className={cx("mr-2 h-4 w-4", refreshing && "animate-spin")} />
               Refresh rules
             </Button>
-            <Button asChild variant="ghost">
+            <Button variant="ghost">
               <a href="/projects">Back to board</a>
             </Button>
           </div>
@@ -513,8 +510,8 @@ export function AutomationsPage() {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.4fr)]">
-        <Card className="rounded-3xl">
-            <CardHeader className="border-b border-border/70 pb-4">
+        <div className="rounded-3xl">
+            <div className="border-b border-border/70 pb-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">
@@ -530,9 +527,9 @@ export function AutomationsPage() {
                   </Button>
                 ) : null}
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="pt-4">
+            <div className="pt-4">
               <form className="grid gap-4" onSubmit={handleSubmit}>
                 <FormField label="Rule name">
                   <input
@@ -766,51 +763,51 @@ export function AutomationsPage() {
                     {saving ? "Saving..." : editingRuleId ? "Save changes" : "Create rule"}
                   </Button>
                   {editingRuleId ? (
-                    <Button type="button" variant="outline" onClick={startCreate}>
+                    <Button type="button" variant="ghost" onClick={startCreate}>
                       Cancel edit
                     </Button>
                   ) : null}
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <div className="grid gap-4">
             {loading ? (
-              <Card className="rounded-3xl p-6 text-sm text-foreground-muted">Loading automation rules…</Card>
+              <div className="rounded-3xl p-6 text-sm text-foreground-muted">Loading automation rules…</div>
             ) : rules.length === 0 ? (
-              <Card className="rounded-3xl p-6">
+              <div className="rounded-3xl p-6">
                 <EmptyState
                   title="No automation rules yet"
                   description="Create a timer or webhook rule to route generated work into the board without crowding the dashboard."
                 />
-              </Card>
+              </div>
             ) : (
               rules.map((rule) => {
                 const trigger = triggerBadge(rule.triggerType);
                 const targetMeta = readTargetOption(rule, targetOptions);
 
                 return (
-                  <Card key={rule.id} className="rounded-3xl">
-                    <CardHeader className="border-b border-border/70 pb-4">
+                  <div key={rule.id} className="tkc-panel rounded-3xl">
+                    <div className="border-b border-border/70 pb-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-xl font-semibold tracking-tight">{rule.name}</h2>
-                            <Badge variant={stateVariant(rule.state)}>{rule.state}</Badge>
+                            <Tag>{rule.state}</Tag>
                             {rule.executionSummary.isFailing ? (
-                              <Badge variant="error">failing</Badge>
+                              <Tag>failing</Tag>
                             ) : null}
-                            <Badge variant={trigger.variant} className="gap-1">
+                            <Tag>
                               {trigger.icon}
                               {trigger.label}
-                            </Badge>
+                            </Tag>
                           </div>
                           <p className="mt-2 text-sm text-foreground-muted">{readTriggerSummary(rule)}</p>
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          <Button variant="outline" onClick={() => startEdit(rule)}>
+                          <Button variant="ghost" onClick={() => startEdit(rule)}>
                             Edit
                           </Button>
                           {rule.allowedActions.map((action) => (
@@ -823,9 +820,9 @@ export function AutomationsPage() {
                           ))}
                         </div>
                       </div>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent className="grid gap-4 pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                    <div className="grid gap-4 pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                       <DetailBlock
                         title="Target routing"
                         icon={<ArrowRightLeft className="h-4 w-4" />}
@@ -875,8 +872,8 @@ export function AutomationsPage() {
                       />
 
                       <ExecutionHistoryBlock rule={rule} />
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 );
               })
             )}
@@ -943,10 +940,10 @@ function ExecutionHistoryBlock(props: { rule: AutomationRuleRecord }) {
           Recent deliveries
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="default">{props.rule.executionSummary.totalCount} total</Badge>
-          <Badge variant="success">{props.rule.executionSummary.createdCount} created</Badge>
-          <Badge variant="warning">{props.rule.executionSummary.coalescedCount} coalesced</Badge>
-          <Badge variant="error">{props.rule.executionSummary.rejectedCount} rejected</Badge>
+          <Tag>{props.rule.executionSummary.totalCount} total</Tag>
+          <Tag>{props.rule.executionSummary.createdCount} created</Tag>
+          <Tag>{props.rule.executionSummary.coalescedCount} coalesced</Tag>
+          <Tag>{props.rule.executionSummary.rejectedCount} rejected</Tag>
         </div>
       </div>
 
@@ -962,20 +959,14 @@ function ExecutionHistoryBlock(props: { rule: AutomationRuleRecord }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={executionStatusVariant(execution.status)}
-                      className="gap-1"
-                    >
+                    <Tag>
                       {executionStatusIcon(execution.status)}
                       {execution.status}
-                    </Badge>
-                    <Badge
-                      variant={execution.triggerType === "timer" ? "info" : "warning"}
-                      className="gap-1"
-                    >
+                    </Tag>
+                    <Tag>
                       {execution.triggerType === "timer" ? <Clock3 className="h-3.5 w-3.5" /> : <Webhook className="h-3.5 w-3.5" />}
                       {execution.triggerType}
-                    </Badge>
+                    </Tag>
                     <span className="text-xs text-foreground-muted">{formatTimestamp(execution.triggeredAt)}</span>
                   </div>
                   <p className="mt-2 text-sm font-medium text-foreground">
@@ -991,7 +982,7 @@ function ExecutionHistoryBlock(props: { rule: AutomationRuleRecord }) {
                 </div>
 
                 {execution.issueId ? (
-                  <Button asChild variant="outline">
+                  <Button variant="ghost">
                     <Link href={buildBoardHref(execution)}>
                       {execution.issueKey ?? execution.issueId}
                       <ExternalLink className="ml-2 h-4 w-4" />
@@ -1023,13 +1014,13 @@ function ActionButton(props: {
         return {
           icon: <Play className="mr-2 h-4 w-4" />,
           label: props.action === "enable" ? "Enable" : "Resume",
-          variant: "outline" as const,
+          variant: "ghost" as const,
         };
       case "pause":
         return {
           icon: <Pause className="mr-2 h-4 w-4" />,
           label: "Pause",
-          variant: "outline" as const,
+          variant: "ghost" as const,
         };
       case "disable":
         return {

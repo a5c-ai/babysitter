@@ -41,13 +41,13 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
 }));
 
-vi.mock("@/components/ui/button", () => ({
+vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
-    asChild,
+   ,
     children,
     ...props
   }: {
-    asChild?: boolean;
+   ?: boolean;
     children: ReactNode;
   } & Record<string, unknown>) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
 }));

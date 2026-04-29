@@ -18,14 +18,14 @@ vi.mock("@/hooks/use-task-tags", () => ({
   }),
 }));
 
-vi.mock("@/components/ui/button", () => ({
+vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,
-    asChild,
+   ,
     ...props
   }: {
     children?: ReactNode;
-    asChild?: boolean;
+   ?: boolean;
     [key: string]: unknown;
   }) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
 }));

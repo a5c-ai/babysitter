@@ -4,7 +4,7 @@ import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-core/kanb
 
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 import { Kbd } from "@/components/shared/kbd";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@a5c-ai/compendium";
 import { useTaskDetail } from "@/hooks/use-run-detail";
 import { Loader2, Hand } from "lucide-react";
 
@@ -95,40 +95,14 @@ export function TaskDetailPanel({
   const defaultTab = isBreakpoint ? "breakpoint" : "agent";
 
   return (
-    <Tabs data-testid="task-detail-tabs" value={activeTab} onValueChange={onTabChange} defaultValue={defaultTab} className="h-full flex flex-col">
-      <TabsList className="shrink-0 mx-4 mt-3">
-        {isBreakpoint && (
-          <TabsTrigger value="breakpoint" className="gap-1.5">
-            <Hand className="h-3 w-3" />
-            Approval
-            <Kbd className="ml-0.5 opacity-50">5</Kbd>
-          </TabsTrigger>
-        )}
-        <TabsTrigger value="agent" className="gap-1.5">Agent <Kbd className="ml-0.5 opacity-50">1</Kbd></TabsTrigger>
-        <TabsTrigger value="timing" className="gap-1.5">Timing <Kbd className="ml-0.5 opacity-50">2</Kbd></TabsTrigger>
-        <TabsTrigger value="logs" className="gap-1.5">Logs <Kbd className="ml-0.5 opacity-50">3</Kbd></TabsTrigger>
-        <TabsTrigger value="data" className="gap-1.5">Data <Kbd className="ml-0.5 opacity-50">4</Kbd></TabsTrigger>
-      </TabsList>
-      <div className="flex-1 overflow-y-auto">
-        {isBreakpoint && task && (
-          <TabsContent value="breakpoint">
-            <BreakpointPanel
-              task={task}
-              runId={runId}
-            />
-          </TabsContent>
-        )}
-        <TabsContent value="agent">
-          <AgentPanel
-            task={task}
-            executionContexts={executionContexts}
-            executionAudits={executionAudits}
-          />
-        </TabsContent>
-        <TabsContent value="timing"><TimingPanel task={task} runDuration={runDuration} allTasks={allTasks} /></TabsContent>
-        <TabsContent value="logs"><LogViewer task={task} /></TabsContent>
-        <TabsContent value="data"><JsonTree task={task} /></TabsContent>
-      </div>
-    </Tabs>
+    <Tabs value={activeTab} onChange={onTabChange} defaultValue={defaultTab}
+      items={[
+        ...(isBreakpoint && task ? [{ value: "breakpoint", label: "Approval", body: (<div><BreakpointPanel task={task} runId={runId} /></div>) }] : []),
+        { value: "agent", label: "Agent", body: (<div><AgentPanel task={task} executionContexts={executionContexts} executionAudits={executionAudits} /></div>) },
+        { value: "timing", label: "Timing", body: (<div><TimingPanel task={task} runDuration={runDuration} allTasks={allTasks} /></div>) },
+        { value: "logs", label: "Logs", body: (<div><LogViewer task={task} /></div>) },
+        { value: "data", label: "Data", body: (<div><JsonTree task={task} /></div>) },
+      ]}
+    />
   );
 }

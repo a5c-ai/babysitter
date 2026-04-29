@@ -21,11 +21,8 @@ import {
   WifiOff,
 } from "lucide-react";
 
-import { cx } from "@a5c-ai/compendium";
+import { Button, Tabs, cx } from "@a5c-ai/compendium";
 import { DispatchContextAuditPanel } from "@/components/shared/dispatch-context-audit-panel";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExecutionContextPanel } from "@/components/shared/execution-context-panel";
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 
@@ -216,18 +213,8 @@ export function WorkspaceRuntimePanel(props: {
         </span>
       </div>
 
-      <Tabs className="mt-5" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex h-auto w-full flex-wrap gap-2 bg-transparent p-0">
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
-          <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          <TabsTrigger value="dev-server">Dev server</TabsTrigger>
-          <TabsTrigger value="rebase">Rebase</TabsTrigger>
-          <TabsTrigger value="execution-context">Execution context</TabsTrigger>
-          <TabsTrigger value="inspect">Inspect</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="preview" className="space-y-4">
+      <Tabs value={activeTab} onChange={setActiveTab} items={[
+        { value: "preview", label: "Preview", body: (<div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
               {devices.map((device) => {
@@ -236,7 +223,7 @@ export function WorkspaceRuntimePanel(props: {
                   <Button
                     key={device.id}
                     type="button"
-                    variant={device.id === selectedDevice.id ? "default" : "outline"}
+                    variant={device.id === selectedDevice.id ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setDeviceId(device.id)}
                   >
@@ -248,7 +235,7 @@ export function WorkspaceRuntimePanel(props: {
             </div>
             {props.runtime.preview.primaryUrl ? (
               <Button
-                asChild
+               
                 variant="ghost"
                 size="sm"
               >
@@ -291,9 +278,8 @@ export function WorkspaceRuntimePanel(props: {
           ) : (
             <EmptyRuntimeState text="No preview URL has been detected from the workspace runtime yet." />
           )}
-        </TabsContent>
-
-        <TabsContent value="logs" className="space-y-4">
+        </div>) },
+        { value: "logs", label: "Logs", body: (<div className="space-y-4">
           {!activeLogProcess && isDisconnected ? (
             <EmptyRuntimeState
               icon={WifiOff}
@@ -307,19 +293,17 @@ export function WorkspaceRuntimePanel(props: {
 
           {activeLogProcess ? (
             <div className="grid gap-4 xl:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
-              <Tabs
-                orientation="vertical"
-                value={activeLogProcess.id}
-                onValueChange={setPreferredLogProcessId}
-                className="space-y-3"
-              >
-                <TabsList className="flex h-auto flex-col items-stretch gap-2 bg-transparent p-0">
+              <div className="flex flex-col gap-2">
                   {logProcesses.map((process) => (
-                    <TabsTrigger
+                    <button
                       key={process.id}
-                      value={process.id}
+                      type="button"
                       aria-label={process.label}
-                      className="h-auto w-full justify-start rounded-2xl border border-border bg-background/70 px-3 py-3 text-left data-[state=active]:border-primary/30 data-[state=active]:bg-primary/8"
+                      onClick={() => setPreferredLogProcessId(process.id)}
+                      className={cx(
+                        "h-auto w-full rounded-2xl border bg-background/70 px-3 py-3 text-left transition-colors",
+                        process.id === activeLogProcess.id ? "border-primary/30 bg-primary/8" : "border-border"
+                      )}
                     >
                       <div className="min-w-0">
                         <div className="truncate text-sm font-medium">{process.label}</div>
@@ -333,10 +317,9 @@ export function WorkspaceRuntimePanel(props: {
                           </span>
                         </div>
                       </div>
-                    </TabsTrigger>
+                    </button>
                   ))}
-                </TabsList>
-              </Tabs>
+              </div>
 
               <div className="grid gap-4">
                 <article className="rounded-2xl border border-border bg-background/70 p-4">
@@ -381,7 +364,7 @@ export function WorkspaceRuntimePanel(props: {
                   ) : null}
                 </article>
 
-                <ScrollArea className="max-h-[460px] rounded-2xl border border-border bg-slate-950">
+                <div style={{overflowY:'auto'}} className="max-h-[460px] rounded-2xl border border-border bg-slate-950">
                   <div className="space-y-2 p-4 font-mono text-xs leading-6 text-slate-100">
                     {activeLogProcess.logs.length === 0 ? (
                       activeLogProcess.status === "failed" || activeLogProcess.status === "error" ? (
@@ -404,15 +387,14 @@ export function WorkspaceRuntimePanel(props: {
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
               </div>
             </div>
           ) : null}
-        </TabsContent>
-
-        <TabsContent value="terminal" className="space-y-4">
+        </div>) },
+        { value: "terminal", label: "Terminal", body: (<div className="space-y-4">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <ScrollArea className="max-h-[420px] rounded-2xl border border-border bg-background/80">
+            <div style={{overflowY:'auto'}} className="max-h-[420px] rounded-2xl border border-border bg-background/80">
               <div className="grid gap-3 p-4">
                 {props.runtime.terminal.commands.map((command, index) => (
                   <article key={command.id} className="rounded-2xl border border-border bg-card/90 p-4">
@@ -443,9 +425,9 @@ export function WorkspaceRuntimePanel(props: {
                   <EmptyRuntimeState text="No shell or terminal commands have been captured for this workspace yet." />
                 ) : null}
               </div>
-            </ScrollArea>
+            </div>
 
-            <ScrollArea className="max-h-[420px] rounded-2xl border border-border bg-slate-950">
+            <div style={{overflowY:'auto'}} className="max-h-[420px] rounded-2xl border border-border bg-slate-950">
               <div className="space-y-2 p-4 font-mono text-xs leading-6 text-slate-100">
                 {props.runtime.terminal.commands.flatMap((command) =>
                   command.logs.map((line, index) => (
@@ -463,11 +445,10 @@ export function WorkspaceRuntimePanel(props: {
                   </div>
                 ) : null}
               </div>
-            </ScrollArea>
+            </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="dev-server" className="space-y-4">
+        </div>) },
+        { value: "dev-server", label: "Dev server", body: (<div className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <article className="rounded-2xl border border-border bg-background/70 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -498,7 +479,7 @@ export function WorkspaceRuntimePanel(props: {
               </div>
             </article>
 
-            <ScrollArea className="max-h-[420px] rounded-2xl border border-border bg-slate-950">
+            <div style={{overflowY:'auto'}} className="max-h-[420px] rounded-2xl border border-border bg-slate-950">
               <div className="space-y-2 p-4 font-mono text-xs leading-6 text-slate-100">
                 {props.runtime.devServer.logs.map((line, index) => (
                   <div key={`${line.timestamp}:${index}`} className="rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2">
@@ -514,11 +495,10 @@ export function WorkspaceRuntimePanel(props: {
                   </div>
                 ) : null}
               </div>
-            </ScrollArea>
+            </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="rebase" className="space-y-4">
+        </div>) },
+        { value: "rebase", label: "Rebase", body: (<div className="space-y-4">
           {props.rebase ? (
             <article className="rounded-2xl border border-border bg-background/70 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -563,9 +543,8 @@ export function WorkspaceRuntimePanel(props: {
           ) : (
             <EmptyRuntimeState text="No rebase workflow state has been detected for this workspace yet." />
           )}
-        </TabsContent>
-
-        <TabsContent value="execution-context" className="space-y-4">
+        </div>) },
+        { value: "execution-context", label: "Execution context", body: (<div className="space-y-4">
           {props.executionContexts && props.executionContexts.length > 0 ? (
             <ExecutionContextPanel
               contexts={props.executionContexts}
@@ -577,9 +556,8 @@ export function WorkspaceRuntimePanel(props: {
           ) : (
             <EmptyRuntimeState text="No linked dispatch-context labels have been associated with this workspace session yet." />
           )}
-        </TabsContent>
-
-        <TabsContent value="inspect" className="space-y-4">
+        </div>) },
+        { value: "inspect", label: "Inspect", body: (<div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <InspectCard icon={Radar} label="Workspace" value={props.runtime.workspacePath ?? "unavailable"} mono />
             <InspectCard icon={Logs} label="Commands" value={String(props.runtime.terminal.commands.length)} />
@@ -596,8 +574,8 @@ export function WorkspaceRuntimePanel(props: {
             The inspect surface keeps the workspace path, preview origin, terminal activity, dev-server status,
             and process logs visible together so the kanban UI can act as the shell while runtime ownership remains in `agent-mux`.
           </article>
-        </TabsContent>
-      </Tabs>
+        </div>) },
+      ]} />
     </section>
   );
 }

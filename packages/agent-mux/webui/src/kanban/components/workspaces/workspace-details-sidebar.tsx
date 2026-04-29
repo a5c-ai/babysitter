@@ -6,8 +6,7 @@ import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
 import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-mux-core/kanban";
 import { AlertCircle, ArrowUpDown, ExternalLink, FileText, GitBranch, Loader2, MessageSquareText, Terminal, Wrench } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { cx } from "@a5c-ai/compendium";
+import { Button, cx } from "@a5c-ai/compendium";
 import type { WorkspaceInventoryItem } from "@/lib/workspace-lifecycle";
 
 type WorkspaceSidebarAction =
@@ -247,7 +246,7 @@ export function WorkspaceDetailsSidebar(props: {
                   Session {selectedSession.sessionId}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Button asChild type="button" size="sm" variant="outline">
+                  <Button type="button" size="sm" variant="ghost">
                     <Link href={`/sessions/${selectedSession.sessionId}`}>Open session</Link>
                   </Button>
                 </div>
@@ -419,7 +418,7 @@ export function WorkspaceDetailsSidebar(props: {
               aria-label={`Notes for ${props.workspace.name}`}
             />
             <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" variant="outline" disabled={props.notesSaving} onClick={() => props.onSaveNote(props.workspace, draftNote)}>
+              <Button type="button" size="sm" variant="ghost" disabled={props.notesSaving} onClick={() => props.onSaveNote(props.workspace, draftNote)}>
                 {props.notesSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save note
               </Button>
@@ -477,7 +476,7 @@ export function WorkspaceDetailsSidebar(props: {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {linkedPullRequest.url ? (
-                    <Button asChild type="button" size="sm" variant="outline">
+                    <Button type="button" size="sm" variant="ghost">
                       <a href={linkedPullRequest.url} target="_blank" rel="noreferrer">
                         Open PR
                         <ExternalLink className="ml-2 h-4 w-4" />
@@ -626,7 +625,7 @@ export function WorkspaceDetailsSidebar(props: {
                   <Button
                     type="submit"
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
                     disabled={quickActionBusy || (integration ? !integration.actions.canManagePullRequest : false)}
                   >
                     Link PR
@@ -701,19 +700,19 @@ export function WorkspaceDetailsSidebar(props: {
                 Open in editor
               </Button>
               {props.sessionId ? (
-                <Button asChild type="button" size="sm" variant="outline">
+                <Button type="button" size="sm" variant="ghost">
                   <Link href={`/sessions/${props.sessionId}`}>View session</Link>
                 </Button>
               ) : null}
               {previewUrl ? (
-                <Button asChild type="button" size="sm" variant="outline">
+                <Button type="button" size="sm" variant="ghost">
                   <a href={previewUrl} target="_blank" rel="noreferrer">
                     Open preview
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
               ) : (
-                <Button type="button" size="sm" variant="outline" disabled>
+                <Button type="button" size="sm" variant="ghost" disabled>
                   Open preview
                 </Button>
               )}

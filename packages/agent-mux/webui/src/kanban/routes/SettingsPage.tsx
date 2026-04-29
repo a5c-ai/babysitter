@@ -18,7 +18,7 @@ import { useNotificationContext } from "@/components/notifications/notification-
 import { PageSection, PageShell } from "@/components/shared/page-shell";
 import { SHORTCUT_SECTION_LABELS, SHORTCUTS } from "@/components/shared/shortcuts-help";
 import { useTheme } from "@/components/shared/theme-provider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@a5c-ai/compendium";
 import {
   createDispatchContextLabel,
   createTaskTag,
@@ -877,7 +877,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Button asChild variant="primary">
+                      <Button variant="primary">
                         <Link href="/login">
                           {isAuthenticated ? "Reconnect gateway" : "Connect gateway"}
                         </Link>
@@ -1856,10 +1856,10 @@ export default function SettingsPage() {
                     <SettingCard label="Session route" value="/sessions" />
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Button asChild variant="primary">
+                    <Button variant="primary">
                       <Link href="/workspaces">Open workspaces</Link>
                     </Button>
-                    <Button asChild variant="ghost">
+                    <Button variant="ghost">
                       <Link href="/sessions">Open sessions</Link>
                     </Button>
                   </div>

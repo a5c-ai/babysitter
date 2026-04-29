@@ -1,7 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
 import { cx } from "@a5c-ai/compendium";
-import { Card } from "@/components/ui/card";
 import { RunCard } from "./run-card";
 import { VirtualizedRunList } from "./virtualized-run-list";
 import { PaginationControls } from "./pagination-controls";
@@ -156,7 +155,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
   };
 
   return (
-    <Card
+    <div
       data-testid={`project-card-${project.projectName}`}
       className={cx(
         "transition-all duration-200 overflow-hidden card-hover-lift",
@@ -504,7 +503,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
           </div>
         );
       })()}
-    </Card>
+    </div>
   );
 }
 

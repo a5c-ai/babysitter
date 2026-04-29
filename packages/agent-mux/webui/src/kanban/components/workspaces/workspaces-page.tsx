@@ -14,8 +14,7 @@ import { findKanbanExecutionContextEnvelopesForSession } from "@a5c-ai/agent-mux
 import { AlertTriangle, Archive, FolderGit2, Pin, PinOff, RefreshCw, RotateCcw, Search, Trash2, Wrench } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Accordion, Button } from "@a5c-ai/compendium";
 import { ReviewPanel } from "@/components/review/review-panel";
 import { cx } from "@a5c-ai/compendium";
 import { useBacklog } from "@/hooks/use-backlog";
@@ -899,7 +898,7 @@ export function WorkspacesPageContent(props: {
               The selected workspace is not present in the current inventory snapshot. Refresh the inventory or return to the workspace list.
             </p>
             <div className="mt-5">
-              <Button asChild variant="outline">
+              <Button variant="ghost">
                 <Link href="/workspaces">Back to inventory</Link>
               </Button>
             </div>
@@ -953,10 +952,10 @@ export function WorkspacesPageContent(props: {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button asChild variant="outline">
+              <Button variant="ghost">
                 <Link href="/workspaces">Open full inventory</Link>
               </Button>
-              <Button variant="outline" onClick={refreshInventory} disabled={loading || isPending}>
+              <Button variant="ghost" onClick={refreshInventory} disabled={loading || isPending}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh inbox
               </Button>
@@ -1025,10 +1024,10 @@ export function WorkspacesPageContent(props: {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button asChild variant="primary">
+            <Button variant="primary">
               <Link href="/workspaces/new">Provision workspace</Link>
             </Button>
-            <Button variant="outline" onClick={refreshInventory} disabled={loading || isPending}>
+            <Button variant="ghost" onClick={refreshInventory} disabled={loading || isPending}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh inventory
             </Button>
@@ -1075,7 +1074,7 @@ export function WorkspacesPageContent(props: {
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              variant={layoutMode === "grouped" ? "primary" : "outline"}
+              variant={layoutMode === "grouped" ? "primary" : "ghost"}
               size="sm"
               onClick={() => setLayoutMode("grouped")}
               aria-pressed={layoutMode === "grouped"}
@@ -1084,7 +1083,7 @@ export function WorkspacesPageContent(props: {
             </Button>
             <Button
               type="button"
-              variant={layoutMode === "flat" ? "primary" : "outline"}
+              variant={layoutMode === "flat" ? "primary" : "ghost"}
               size="sm"
               onClick={() => setLayoutMode("flat")}
               aria-pressed={layoutMode === "flat"}
@@ -1160,14 +1159,10 @@ export function WorkspacesPageContent(props: {
               />
             ) : (
               <Accordion
-                type="multiple"
-                defaultValue={["pinned", "active", "idle", "archived", "missing"]}
-                className="space-y-4"
-              >
-                {filteredGroups.pinned.length > 0 ? (
-                  <AccordionItem value="pinned" className="rounded-3xl border border-border bg-background/50 px-4">
-                    <AccordionTrigger className="rounded-2xl px-2">Pinned workspaces ({filteredGroups.pinned.length})</AccordionTrigger>
-                    <AccordionContent className="border-0 px-0 pt-0">
+                items={[
+                  ...(filteredGroups.pinned.length > 0 ? [{
+                    title:`Pinned workspaces (${filteredGroups.pinned.length})`,
+                    body: (
                       <WorkspaceColumn
                         title="Pinned workspaces"
                         icon={Pin}
@@ -1178,7 +1173,7 @@ export function WorkspacesPageContent(props: {
                         executionContextsBySessionId={executionContextsBySessionId}
                         pendingAction={pendingAction}
                         onAction={handleAction}
-                        onOpenInEditor={(workspace, href) =>
+                        onOpenInEditor={(workspace: WorkspaceInventoryItem, href: string | null) =>
                           openEditorForWorkspace(workspace, href, `Opened ${workspace.path} in the configured editor.`)
                         }
                         onSaveNote={handleNoteSave}
@@ -1190,18 +1185,16 @@ export function WorkspacesPageContent(props: {
                         onLinkPullRequest={handleLinkPullRequest}
                         highlightReasons
                       />
-                    </AccordionContent>
-                  </AccordionItem>
-                ) : null}
-                {[
-                  { key: "active", title: "Active workspaces", icon: FolderGit2, empty: "No active workspaces are currently visible.", workspaces: filteredGroups.active },
-                  { key: "idle", title: "Idle workspaces", icon: Wrench, empty: "No idle workspaces are currently visible.", workspaces: filteredGroups.idle },
-                  { key: "archived", title: "Archived workspaces", icon: Archive, empty: "No archived workspaces are currently visible.", workspaces: filteredGroups.archived },
-                  { key: "missing", title: "Recovery queue", icon: AlertTriangle, empty: "No missing workspaces are currently visible.", workspaces: filteredGroups.missing },
-                ].map((group) => (
-                  <AccordionItem key={group.key} value={group.key} className="rounded-3xl border border-border bg-background/50 px-4">
-                    <AccordionTrigger className="rounded-2xl px-2">{group.title} ({group.workspaces.length})</AccordionTrigger>
-                    <AccordionContent className="border-0 px-0 pt-0">
+                    ),
+                  }] : []),
+                  ...[
+                    { key: "active", title: "Active workspaces", icon: FolderGit2, empty: "No active workspaces are currently visible.", workspaces: filteredGroups.active },
+                    { key: "idle", title: "Idle workspaces", icon: Wrench, empty: "No idle workspaces are currently visible.", workspaces: filteredGroups.idle },
+                    { key: "archived", title: "Archived workspaces", icon: Archive, empty: "No archived workspaces are currently visible.", workspaces: filteredGroups.archived },
+                    { key: "missing", title: "Recovery queue", icon: AlertTriangle, empty: "No missing workspaces are currently visible.", workspaces: filteredGroups.missing },
+                  ].map((group) => ({
+                    title: `${group.title} (${group.workspaces.length})`,
+                    body: (
                       <WorkspaceColumn
                         title={group.title}
                         icon={group.icon}
@@ -1212,7 +1205,7 @@ export function WorkspacesPageContent(props: {
                         executionContextsBySessionId={executionContextsBySessionId}
                         pendingAction={pendingAction}
                         onAction={handleAction}
-                        onOpenInEditor={(workspace, href) =>
+                        onOpenInEditor={(workspace: WorkspaceInventoryItem, href: string | null) =>
                           openEditorForWorkspace(workspace, href, `Opened ${workspace.path} in the configured editor.`)
                         }
                         onSaveNote={handleNoteSave}
@@ -1224,10 +1217,10 @@ export function WorkspacesPageContent(props: {
                         onLinkPullRequest={handleLinkPullRequest}
                         highlightReasons
                       />
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+                    ),
+                  })),
+                ]}
+              />
             )}
           </div>
         ) : null}
@@ -1463,7 +1456,7 @@ function WorkspaceColumn(props: {
                     <Trash2 className="mr-2 h-4 w-4" />
                     Cleanup
                   </Button>
-                  <Button asChild variant="outline" size="sm">
+                  <Button variant="ghost" size="sm">
                     <Link href={workspaceDetailHref(workspace.path)}>Open shell</Link>
                   </Button>
                 </div>
