@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..');
+const npmExecPath = process.env.npm_execpath;
 
 const REQUIRED_BUILD_PATHS = [
   'dist/index.html',
@@ -50,8 +51,8 @@ export function verifyAgentMuxWebuiRelease({ packageRoot, manifest, packEntries 
     'packages/agent-mux/webui/package.json build:realtime must remain the package-local realtime build entrypoint'
   );
   expect(
-    scripts.test === 'vitest run --root ../../.. --config vitest.config.ts packages/agent-mux/webui',
-    'packages/agent-mux/webui/package.json test must keep the package-local Vitest filter stable'
+    scripts.test === 'vitest run --config vitest.config.ts',
+    'packages/agent-mux/webui/package.json test must keep the package-local Vitest config entrypoint stable'
   );
   expect(
     typeof scripts['test:realtime'] === 'string' &&
@@ -89,10 +90,15 @@ export function verifyAgentMuxWebuiRelease({ packageRoot, manifest, packEntries 
 
 function main() {
   const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
-  const packOutput = execFileSync('npm', ['pack', '--json', '--dry-run'], {
-    cwd: packageRoot,
-    encoding: 'utf8',
-  });
+  const packOutput = npmExecPath
+    ? execFileSync(process.execPath, [npmExecPath, 'pack', '--json', '--dry-run'], {
+        cwd: packageRoot,
+        encoding: 'utf8',
+      })
+    : execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['pack', '--json', '--dry-run'], {
+        cwd: packageRoot,
+        encoding: 'utf8',
+      });
   const [packResult] = JSON.parse(packOutput);
   const packEntries = Array.isArray(packResult?.files) ? packResult.files : [];
 
