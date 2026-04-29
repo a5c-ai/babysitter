@@ -1,8 +1,8 @@
 import path from "path";
 import { EventEmitter } from "events";
-import { initWatcher, watcherEvents, type WatcherEvent } from "./watcher";
-import { discoverAndCacheAll } from "./run-cache";
-import { getGlobal } from "./global-registry";
+import { initWatcher, watcherEvents, type WatcherEvent } from "./watcher.js";
+import { discoverAndCacheAll } from "./run-cache.js";
+import { getGlobal } from "./global-registry.js";
 
 // Shared event bus for SSE endpoints — persist across HMR via typed global registry
 function getServerEvents(): EventEmitter {

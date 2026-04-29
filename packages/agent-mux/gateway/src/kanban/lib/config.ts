@@ -9,13 +9,13 @@ export {
   invalidateConfigCache,
   writeConfig,
   getConfig,
-} from "./config-loader";
+} from "./config-loader.js";
 
 export {
   type DiscoveredRun,
   invalidateDiscoveryCache,
   discoverAllRunDirs,
   discoverAllRunsParentDirs,
-} from "./source-discovery";
+} from "./source-discovery.js";
 
-export { findRunDir } from "./path-resolver";
+export { findRunDir } from "./path-resolver.js";

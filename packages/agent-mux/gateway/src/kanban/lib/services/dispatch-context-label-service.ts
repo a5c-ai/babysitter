@@ -8,14 +8,14 @@ import {
   type KanbanDispatchContextLabelDefinition,
 } from "@a5c-ai/agent-mux-core/kanban";
 
-import { AppError } from "../error-handler";
+import { AppError } from "../error-handler.js";
 import {
   defaultKanbanStorageDeps,
   readKanbanStorageFile,
   writeKanbanStorageFile,
   type KanbanStorageDeps,
   type KanbanStoragePayload,
-} from "./kanban-storage";
+} from "./kanban-storage.js";
 
 export interface CreateDispatchContextLabelInput {
   readonly key: string;

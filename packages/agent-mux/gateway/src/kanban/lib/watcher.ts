@@ -2,9 +2,9 @@ import { watch, type FSWatcher } from "fs";
 import { promises as fs } from "fs";
 import path from "path";
 import { EventEmitter } from "events";
-import { discoverAllRunDirs, invalidateDiscoveryCache, discoverAllRunsParentDirs } from "./source-discovery";
-import { invalidateRun, requestDiscovery } from "./run-cache";
-import { getGlobal } from "./global-registry";
+import { discoverAllRunDirs, invalidateDiscoveryCache, discoverAllRunsParentDirs } from "./source-discovery.js";
+import { invalidateRun, requestDiscovery } from "./run-cache.js";
+import { getGlobal } from "./global-registry.js";
 
 // Persist event emitter across HMR reloads via typed global registry
 function getWatcherEvents(): EventEmitter {

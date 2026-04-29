@@ -1,5 +1,5 @@
 import path from "path";
-import { discoverAllRunDirs, invalidateDiscoveryCache, type DiscoveredRun } from "./source-discovery";
+import { discoverAllRunDirs, invalidateDiscoveryCache, type DiscoveredRun } from "./source-discovery.js";
 
 // Find a specific run directory by runId across all sources.
 // On cache miss, invalidates the discovery cache and retries once

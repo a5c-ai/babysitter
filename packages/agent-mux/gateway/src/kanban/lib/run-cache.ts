@@ -1,11 +1,11 @@
-import { getRunDigest, parseRunDir } from "./parser";
-import type { ParseRunResult } from "./parser";
-import { discoverAllRunDirs, type DiscoveredRun } from "./source-discovery";
-import type { WatchSource } from "./config-loader";
+import { getRunDigest, parseRunDir } from "./parser.js";
+import type { ParseRunResult } from "./parser.js";
+import { discoverAllRunDirs, type DiscoveredRun } from "./source-discovery.js";
+import type { WatchSource } from "./config-loader.js";
 import type { RunDigest, Run, ProjectSummary } from "../types/index.js";
 import { promises as fs } from "fs";
 import path from "path";
-import { getGlobal } from "./global-registry";
+import { getGlobal } from "./global-registry.js";
 
 /** Return true when err represents a "file/directory not found" filesystem error. */
 function isNotFoundError(err: unknown): boolean {

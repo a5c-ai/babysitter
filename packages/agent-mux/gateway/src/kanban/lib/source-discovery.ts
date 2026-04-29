@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { isNotFoundError, getConfig, type WatchSource } from "./config-loader";
+import { isNotFoundError, getConfig, type WatchSource } from "./config-loader.js";
 
 export interface DiscoveredRun {
   runDir: string;

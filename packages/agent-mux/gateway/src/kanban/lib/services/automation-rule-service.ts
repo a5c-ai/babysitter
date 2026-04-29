@@ -21,8 +21,8 @@ import type {
   KanbanPriority,
 } from '@a5c-ai/agent-mux-core/kanban';
 
-import { AppError } from '../error-handler';
-import { BacklogQueryService } from './backlog-query-service';
+import { AppError } from '../error-handler.js';
+import { BacklogQueryService } from './backlog-query-service.js';
 import {
   KANBAN_BACKLOG_FILE_PATH,
   defaultKanbanStorageDeps,
@@ -30,7 +30,7 @@ import {
   writeKanbanStorageFile,
   type KanbanStorageDeps,
   type KanbanStoragePayload,
-} from './kanban-storage';
+} from './kanban-storage.js';
 
 const createId = monotonicFactory();
 

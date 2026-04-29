@@ -16,7 +16,7 @@ import type {
   KanbanLabel,
 } from "@a5c-ai/agent-mux-core/kanban";
 
-import { AppError } from "../error-handler";
+import { AppError } from "../error-handler.js";
 import {
   defaultKanbanStorageDeps,
   readKanbanStorageFile,
@@ -25,7 +25,7 @@ import {
   type KanbanStoragePayload,
   type StoredKanbanIssue,
   type StoredKanbanProject,
-} from "./kanban-storage";
+} from "./kanban-storage.js";
 
 const createId = monotonicFactory();
 

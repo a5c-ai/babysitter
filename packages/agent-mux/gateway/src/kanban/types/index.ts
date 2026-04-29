@@ -1,5 +1,5 @@
 // Re-export breakpoint types
-export * from "./breakpoint";
+export * from "./breakpoint.js";
 
 // Run status
 export type RunStatus = "pending" | "waiting" | "completed" | "failed";

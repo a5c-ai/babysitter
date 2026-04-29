@@ -36,9 +36,9 @@ import {
   type LinkedRunSummary,
 } from '@a5c-ai/agent-mux-core/kanban';
 
-import { AppError } from '../error-handler';
-import { ReviewService } from '../review-service';
-import { RunQueryService } from './run-query-service';
+import { AppError } from '../error-handler.js';
+import { ReviewService } from '../review-service.js';
+import { RunQueryService } from './run-query-service.js';
 import {
   KANBAN_BACKLOG_FILE_PATH,
   defaultKanbanStorageDeps,
@@ -47,7 +47,7 @@ import {
   type KanbanStorageDeps,
   type StoredKanbanIssue,
   type StoredKanbanProject,
-} from './kanban-storage';
+} from './kanban-storage.js';
 
 const SOURCE_PATH = 'packages/kanban/gaps-and-debt.md';
 const PROJECT_ID = 'kanban-app';
