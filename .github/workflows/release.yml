@@ -224,12 +224,15 @@ jobs:
           path: artifacts/logs
           if-no-files-found: warn
 
-  version_and_release:
+  prepare_release:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      release_ref: ${{ steps.release_ref.outputs.release_ref }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -296,6 +299,10 @@ jobs:
               git rebase --abort 2>/dev/null || true
             fi
           fi
+
+      - name: Capture release ref
+        id: release_ref
+        run: echo "release_ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Build SDK package
         run: |
@@ -441,78 +448,386 @@ jobs:
           fi
           (cd artifacts/release && sha256sum *.tgz > artifacts.sha256)
 
-      - name: Publish foundation, hooks, and agent-mux packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Bundle release publish workspace
         run: |
           set -euo pipefail
-          run_batch() {
-            local batch_name="$1"
-            shift
-            local -a pids=()
-            local -a labels=()
-            echo "::group::$batch_name"
-            while (($#)); do
-              local label="$1"
-              local cmd="$2"
-              shift 2
-              echo "Starting $label"
-              bash -lc "set -euo pipefail; $cmd" &
-              pids+=($!)
-              labels+=("$label")
-            done
-            local failed=0
-            for idx in "${!pids[@]}"; do
-              if ! wait "${pids[$idx]}"; then
-                echo "::error::${labels[$idx]} failed in ${batch_name}"
-                failed=1
-              fi
-            done
-            echo "::endgroup::"
-            if [[ $failed -ne 0 ]]; then
-              return 1
-            fi
-          }
-          run_batch "foundation publishes" \
-            "agent-plugins-mux" "npm publish --workspace=@a5c-ai/agent-plugins-mux --access public" \
-            "observer-dashboard" "npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public" \
-            "cloud" "npm publish --workspace=@a5c-ai/cloud --access public" \
-            "breakpoints-mux" "npm publish --workspace=@a5c-ai/breakpoints-mux --access public" \
-            "hooks-mux-core" "npm publish --workspace=@a5c-ai/hooks-mux-core --access public" \
-            "agent-mux-observability" "npm publish --workspace=@a5c-ai/agent-mux-observability --access public"
-          run_batch "hooks and agent-mux core publishes" \
-            "agent-mux-core" "npm publish --workspace=@a5c-ai/agent-mux-core --access public" \
-            "hooks-mux-cli" "npm publish --workspace=@a5c-ai/hooks-mux-cli --access public" \
-            "hooks-mux-adapter-claude" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-claude --access public" \
-            "hooks-mux-adapter-codex" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-codex --access public" \
-            "hooks-mux-adapter-gemini" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-gemini --access public" \
-            "hooks-mux-adapter-copilot" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-copilot --access public" \
-            "hooks-mux-adapter-cursor" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-cursor --access public" \
-            "hooks-mux-adapter-pi" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-pi --access public" \
-            "hooks-mux-adapter-oh-my-pi" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-oh-my-pi --access public" \
-            "hooks-mux-adapter-opencode" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-opencode --access public" \
-            "hooks-mux-adapter-openclaw" "npm publish --workspace=@a5c-ai/hooks-mux-adapter-openclaw --access public"
-          run_batch "agent-mux leaf publishes" \
-            "agent-mux-adapters" "npm publish --workspace=@a5c-ai/agent-mux-adapters --access public" \
-            "agent-mux-harness-mock" "npm publish --workspace=@a5c-ai/agent-mux-harness-mock --access public" \
-            "agent-mux-ui" "npm publish --workspace=@a5c-ai/agent-mux-ui --access public" \
-            "transport-mux" "npm publish --workspace=@a5c-ai/transport-mux --access public"
-          run_batch "agent-mux gateway surfaces" \
-            "agent-mux-gateway" "npm publish --workspace=@a5c-ai/agent-mux-gateway --access public" \
-            "agent-mux-webui" "npm publish --workspace=@a5c-ai/agent-mux-webui --access public"
-          run_batch "agent-mux cli" \
-            "agent-mux-cli" "npm publish --workspace=@a5c-ai/agent-mux-cli --access public"
-          run_batch "agent-mux root" \
-            "agent-mux" "npm publish --workspace=@a5c-ai/agent-mux --access public"
-          run_batch "sdk and agent-mux tui" \
-            "babysitter-sdk" "npm publish --workspace=@a5c-ai/babysitter-sdk --access public" \
-            "agent-mux-tui" "npm publish --workspace=@a5c-ai/agent-mux-tui --access public"
+          mkdir -p artifacts/publish-source
+          tar --exclude=.git --exclude=node_modules --exclude=artifacts -czf artifacts/publish-source/release-publish-source.tgz .
+
+      - name: Upload release publish workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source/release-publish-source.tgz
+          if-no-files-found: error
+
+      - name: Upload release bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundles
+          path: |
+            artifacts/release
+            release-notes.md
+          if-no-files-found: error
+
+  publish_release_foundation:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Foundation - ${{ matrix.name }}
+    needs: prepare_release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: babysitter-sdk
+            publish: npm publish --workspace=@a5c-ai/babysitter-sdk --access public
+          - name: agent-plugins-mux
+            publish: npm publish --workspace=@a5c-ai/agent-plugins-mux --access public
+          - name: observer-dashboard
+            publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public
+          - name: cloud
+            publish: npm publish --workspace=@a5c-ai/cloud --access public
+          - name: breakpoints-mux
+            publish: npm publish --workspace=@a5c-ai/breakpoints-mux --access public
+          - name: hooks-mux-core
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-core --access public
+          - name: agent-mux-observability
+            publish: npm publish --workspace=@a5c-ai/agent-mux-observability --access public
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_release_hooks_and_core:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Hooks And Core - ${{ matrix.name }}
+    needs: publish_release_foundation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: agent-mux-core
+            publish: npm publish --workspace=@a5c-ai/agent-mux-core --access public
+          - name: hooks-mux-cli
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-cli --access public
+          - name: hooks-mux-adapter-claude
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-claude --access public
+          - name: hooks-mux-adapter-codex
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-codex --access public
+          - name: hooks-mux-adapter-gemini
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-gemini --access public
+          - name: hooks-mux-adapter-copilot
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-copilot --access public
+          - name: hooks-mux-adapter-cursor
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-cursor --access public
+          - name: hooks-mux-adapter-pi
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-pi --access public
+          - name: hooks-mux-adapter-oh-my-pi
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-oh-my-pi --access public
+          - name: hooks-mux-adapter-opencode
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-opencode --access public
+          - name: hooks-mux-adapter-openclaw
+            publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-openclaw --access public
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_release_agent_mux_leaf:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Agent Mux Leaf - ${{ matrix.name }}
+    needs: publish_release_hooks_and_core
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: agent-mux-adapters
+            publish: npm publish --workspace=@a5c-ai/agent-mux-adapters --access public
+          - name: agent-mux-harness-mock
+            publish: npm publish --workspace=@a5c-ai/agent-mux-harness-mock --access public
+          - name: agent-mux-ui
+            publish: npm publish --workspace=@a5c-ai/agent-mux-ui --access public
+          - name: transport-mux
+            publish: npm publish --workspace=@a5c-ai/transport-mux --access public
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_release_agent_mux_gateway:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Agent Mux Gateway - ${{ matrix.name }}
+    needs: publish_release_agent_mux_leaf
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: agent-mux-gateway
+            publish: npm publish --workspace=@a5c-ai/agent-mux-gateway --access public
+          - name: agent-mux-webui
+            publish: npm publish --workspace=@a5c-ai/agent-mux-webui --access public
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.publish }}
+
+  publish_release_agent_mux_cli:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Agent Mux CLI
+    needs: publish_release_agent_mux_gateway
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish agent-mux CLI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/agent-mux-cli --access public
+
+  publish_release_agent_mux_root:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Agent Mux Root
+    needs: publish_release_agent_mux_cli
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish agent-mux root
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/agent-mux --access public
+
+  publish_release_agent_mux_tui:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Agent Mux TUI
+    needs: publish_release_agent_mux_root
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish agent-mux TUI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/agent-mux-tui --access public
+
+  deploy_release_cloud:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Deploy Cloud Production
+    needs:
+      - prepare_release
+      - publish_release_foundation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Run cloud production deploy hook
         if: ${{ vars.A5C_CLOUD_PROD_DEPLOY_ENABLED == 'true' }}
         env:
           A5C_CLOUD_ENVIRONMENT: prod
-          A5C_CLOUD_RELEASE_TAG: ${{ steps.bump.outputs.version }}
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_release.outputs.version }}
           A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_PROD_TARGET_TYPE }}
           A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_PROD_KUBE_CONTEXT }}
           A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_PROD_NAMESPACE }}
@@ -527,48 +842,118 @@ jobs:
           set -euo pipefail
           npm run deploy:cloud:prod
 
-      - name: Publish harness plugins
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish_release_plugins:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Publish Release Plugin - ${{ matrix.name }}
+    needs: publish_release_foundation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: babysitter-codex
+            command: cd plugins/babysitter-codex && npm run deploy
+          - name: babysitter-github
+            command: cd plugins/babysitter-github && npm run deploy
+          - name: babysitter-cursor
+            command: cd plugins/babysitter-cursor && npm run deploy
+          - name: babysitter-gemini
+            command: cd plugins/babysitter-gemini && npm run deploy
+          - name: babysitter-pi
+            command: cd plugins/babysitter-pi && npm run deploy
+          - name: babysitter-omp
+            command: cd plugins/babysitter-omp && npm run deploy
+          - name: babysitter-opencode
+            command: cd plugins/babysitter-opencode && npm run deploy
+          - name: babysitter-openclaw
+            command: cd plugins/babysitter-openclaw && npm run deploy
+          - name: babysitter-paperclip
+            command: cd plugins/babysitter-paperclip && npm run deploy
+    steps:
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
         run: |
           set -euo pipefail
-          run_batch() {
-            local batch_name="$1"
-            shift
-            local -a pids=()
-            local -a labels=()
-            echo "::group::$batch_name"
-            while (($#)); do
-              local label="$1"
-              local cmd="$2"
-              shift 2
-              echo "Starting $label"
-              bash -lc "set -euo pipefail; $cmd" &
-              pids+=($!)
-              labels+=("$label")
-            done
-            local failed=0
-            for idx in "${!pids[@]}"; do
-              if ! wait "${pids[$idx]}"; then
-                echo "::error::${labels[$idx]} failed in ${batch_name}"
-                failed=1
-              fi
-            done
-            echo "::endgroup::"
-            if [[ $failed -ne 0 ]]; then
-              return 1
-            fi
-          }
-          run_batch "harness plugin publishes" \
-            "babysitter-codex" "cd plugins/babysitter-codex && npm run deploy" \
-            "babysitter-github" "cd plugins/babysitter-github && npm run deploy" \
-            "babysitter-cursor" "cd plugins/babysitter-cursor && npm run deploy" \
-            "babysitter-gemini" "cd plugins/babysitter-gemini && npm run deploy" \
-            "babysitter-pi" "cd plugins/babysitter-pi && npm run deploy" \
-            "babysitter-omp" "cd plugins/babysitter-omp && npm run deploy" \
-            "babysitter-opencode" "cd plugins/babysitter-opencode && npm run deploy" \
-            "babysitter-openclaw" "cd plugins/babysitter-openclaw && npm run deploy" \
-            "babysitter-paperclip" "cd plugins/babysitter-paperclip && npm run deploy"
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Publish plugin
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: ${{ matrix.command }}
+
+  finalize_release:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Finalize Release
+    needs:
+      - prepare_release
+      - publish_release_foundation
+      - publish_release_hooks_and_core
+      - publish_release_agent_mux_leaf
+      - publish_release_agent_mux_gateway
+      - publish_release_agent_mux_cli
+      - publish_release_agent_mux_root
+      - publish_release_agent_mux_tui
+      - publish_release_plugins
+      - deploy_release_cloud
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare_release.outputs.release_ref }}
+
+      - name: Download release publish workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: release-publish-source
+          path: artifacts/publish-source
+
+      - name: Extract release publish workspace
+        run: |
+          set -euo pipefail
+          tar -xzf artifacts/publish-source/release-publish-source.tgz -C "$GITHUB_WORKSPACE"
+
+      - name: Download release bundles
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundles
+          path: .
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Publish babysitter metapackage to npm
         env:
@@ -581,7 +966,7 @@ jobs:
       - name: Tag release
         run: |
           set -euo pipefail
-          TAG="v${{ steps.bump.outputs.version }}"
+          TAG="v${{ needs.prepare_release.outputs.version }}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag -d "$TAG"
           fi
@@ -593,7 +978,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          TAG="v${{ steps.bump.outputs.version }}"
+          TAG="v${{ needs.prepare_release.outputs.version }}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release delete "$TAG" -y
           fi
