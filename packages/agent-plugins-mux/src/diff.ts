@@ -76,7 +76,7 @@ export function diffTarget(options: DiffOptions): DiffResult {
       .filter((file) => !compiledFiles.includes(file) && !isIgnoredExistingFile(file))
       .sort();
     const differingFiles = compiledFiles
-      .filter((file) => existingFiles.includes(file))
+      .filter((file) => existingFiles.includes(file) && !isIgnoredExistingFile(file))
       .sort()
       .flatMap((file) => {
         const difference = compareFile(

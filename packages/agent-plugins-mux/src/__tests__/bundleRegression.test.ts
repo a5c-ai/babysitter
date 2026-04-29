@@ -9,6 +9,7 @@ import { verify } from '../verify.js';
 
 const SAMPLE_PLUGIN_DIR = path.resolve(__dirname, '../../examples/sample-plugin');
 const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified');
+const CLAUDE_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter');
 const CODEX_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-codex');
 const OMP_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-omp');
 
@@ -18,6 +19,14 @@ function createTempDir(prefix: string): string {
 
 function readFile(filePath: string): string {
   return fs.readFileSync(filePath, 'utf-8');
+}
+
+function getMeaningfulBundleDifferences(diffResult: ReturnType<typeof diffTarget>) {
+  return {
+    onlyInCompiled: diffResult.onlyInCompiled.filter((file) => file !== 'versions.json'),
+    onlyInExisting: diffResult.onlyInExisting.filter((file) => file !== 'versions.json'),
+    differingFiles: diffResult.differingFiles.filter((file) => file.path !== 'versions.json'),
+  };
 }
 
 describe('bundle regression coverage', () => {
@@ -101,6 +110,7 @@ describe('bundle regression coverage', () => {
 
   it('matches checked-in first-party bundle structure for representative npm and programmatic targets', () => {
     const bundleTargets = [
+      { target: 'claude-code', existingDir: CLAUDE_PLUGIN_DIR },
       { target: 'codex', existingDir: CODEX_PLUGIN_DIR },
       { target: 'oh-my-pi', existingDir: OMP_PLUGIN_DIR },
     ] as const;
@@ -112,7 +122,33 @@ describe('bundle regression coverage', () => {
         existing: bundleTarget.existingDir,
       });
 
-      expect(diffResult.identical, formatDiffResult(diffResult)).toBe(true);
+      const meaningfulDiffs = getMeaningfulBundleDifferences(diffResult);
+
+      expect(
+        meaningfulDiffs.onlyInCompiled,
+        formatDiffResult({
+          ...diffResult,
+          onlyInCompiled: meaningfulDiffs.onlyInCompiled,
+          onlyInExisting: meaningfulDiffs.onlyInExisting,
+          differingFiles: meaningfulDiffs.differingFiles,
+          differenceCount:
+            meaningfulDiffs.onlyInCompiled.length +
+            meaningfulDiffs.onlyInExisting.length +
+            meaningfulDiffs.differingFiles.length,
+          identical:
+            meaningfulDiffs.onlyInCompiled.length === 0 &&
+            meaningfulDiffs.onlyInExisting.length === 0 &&
+            meaningfulDiffs.differingFiles.length === 0,
+          status:
+            meaningfulDiffs.onlyInCompiled.length === 0 &&
+            meaningfulDiffs.onlyInExisting.length === 0 &&
+            meaningfulDiffs.differingFiles.length === 0
+              ? 'match'
+              : 'different',
+        }),
+      ).toEqual([]);
+      expect(meaningfulDiffs.onlyInExisting).toEqual([]);
+      expect(meaningfulDiffs.differingFiles).toEqual([]);
     }
   });
 

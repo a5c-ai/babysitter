@@ -85,4 +85,36 @@ describe('diffTarget', () => {
     expect(text).toContain('README.md');
     expect(text).toContain('content differs at line');
   });
+
+  it('ignores content drift for files marked as ignored existing files', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mux-diff-ignored-'));
+    tempDirs.push(tempDir);
+
+    const existingDir = path.join(tempDir, 'existing');
+    const baseline = compile({
+      source: SAMPLE_PLUGIN_DIR,
+      target: 'codex',
+      output: existingDir,
+    });
+
+    expect(baseline.status).not.toBe('error');
+
+    fs.writeFileSync(
+      path.join(existingDir, 'versions.json'),
+      `${JSON.stringify({ sdkVersion: '9.9.9-staging.ignored' }, null, 2)}\n`,
+      'utf-8',
+    );
+
+    const result = diffTarget({
+      source: SAMPLE_PLUGIN_DIR,
+      target: 'codex',
+      existing: existingDir,
+    });
+
+    expect(result.status).toBe('match');
+    expect(result.identical).toBe(true);
+    expect(result.differingFiles).toEqual([]);
+    expect(result.onlyInExisting).toEqual([]);
+    expect(formatDiffResult(result)).toBe('No differences found for target codex.');
+  });
 });

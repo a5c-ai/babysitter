@@ -275,6 +275,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - slug: babysitter-claude
+            command: node packages/agent-plugins-mux/dist/cli.js diff --target claude-code --source plugins/babysitter-unified --existing plugins/babysitter
+            log: babysitter-claude-diff.log
+            needs_sdk: false
+            needs_plugin_compiler: true
           - slug: babysitter-codex
             command: npm test --prefix plugins/babysitter-codex
             log: babysitter-codex-tests.log
@@ -339,6 +344,13 @@ jobs:
         run: |
           set -euo pipefail
           npm run build:sdk 2>&1 | tee "artifacts/plugin-logs/${{ matrix.slug }}-sdk-prereqs.log"
+
+      - name: Build local plugin compiler prerequisites
+        if: ${{ matrix.needs_plugin_compiler }}
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/agent-catalog 2>&1 | tee "artifacts/plugin-logs/${{ matrix.slug }}-agent-catalog-build.log"
+          npm run build --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee "artifacts/plugin-logs/${{ matrix.slug }}-agent-plugins-mux-build.log"
 
       - name: Run plugin validation
         run: |

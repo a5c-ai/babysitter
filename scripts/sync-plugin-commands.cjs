@@ -121,8 +121,15 @@ function collectFiles(dir, prefix = '') {
   return results.sort();
 }
 
+function isIgnoredGeneratedFile(relativePath) {
+  return relativePath === 'versions.json';
+}
+
 function syncDirectory(sourceDir, targetDir) {
   for (const relativePath of collectFiles(sourceDir)) {
+    if (isIgnoredGeneratedFile(relativePath)) {
+      continue;
+    }
     const sourcePath = path.join(sourceDir, relativePath);
     const targetPath = path.join(targetDir, relativePath);
     const sourceBytes = fs.readFileSync(sourcePath);
@@ -139,6 +146,9 @@ function syncDirectory(sourceDir, targetDir) {
 function checkDirectory(sourceDir, targetDir) {
   const stale = [];
   for (const relativePath of collectFiles(sourceDir)) {
+    if (isIgnoredGeneratedFile(relativePath)) {
+      continue;
+    }
     const sourcePath = path.join(sourceDir, relativePath);
     const targetPath = path.join(targetDir, relativePath);
     const sourceBytes = fs.readFileSync(sourcePath);
