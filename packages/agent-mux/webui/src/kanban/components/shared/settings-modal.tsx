@@ -16,7 +16,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { resilientFetch } from "@/lib/fetcher";
 import { useTheme } from "@/components/shared/theme-provider";
 import {
@@ -218,7 +218,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <Dialog.Portal>
         <Dialog.Overlay className={dialogOverlayClassName} />
         <Dialog.Content className={dialogSheetViewportClassName} data-testid="settings-modal">
-          <div className={cn(dialogSheetPanelClassName, "sm:max-w-lg")}>
+          <div className={cx(dialogSheetPanelClassName, "sm:max-w-lg")}>
             {/* Header */}
             <div className={dialogHeaderClassName}>
               <div className="flex items-center gap-2">
@@ -354,7 +354,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                           <button
                             key={t}
                             onClick={() => setSelectedTheme(t)}
-                            className={cn(
+                            className={cx(
                               "flex-1 px-4 py-1.5 min-h-[44px] text-xs font-medium transition-colors capitalize",
                               selectedTheme === t
                                 ? "bg-primary/15 text-primary"
@@ -416,7 +416,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                                 key={name}
                                 className="flex items-center justify-between rounded-md border border-border bg-background px-2.5 py-1.5"
                               >
-                                <span className={cn(
+                                <span className={cx(
                                   "text-xs font-mono truncate",
                                   isHidden ? "text-foreground-muted line-through" : "text-foreground"
                                 )}>
@@ -430,7 +430,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                                         : [...prev, name]
                                     );
                                   }}
-                                  className={cn(
+                                  className={cx(
                                     "rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors",
                                     isHidden
                                       ? "text-foreground-muted hover:text-foreground hover:bg-background-secondary"
@@ -486,7 +486,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <Button
                     onClick={handleSave}
                     disabled={saving || !hasChanges}
-                    className={cn(
+                    className={cx(
                       !hasChanges && "opacity-60",
                       saving && "opacity-50"
                     )}

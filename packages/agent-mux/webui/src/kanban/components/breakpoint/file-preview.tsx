@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useRef, useEffect } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { resilientFetch } from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -62,7 +62,7 @@ function FileContent({ content, format }: { content: string; format: string }) {
   if (format === "markdown") {
     return (
       <div
-        className={cn(
+        className={cx(
           "rounded-md bg-background border border-border/50 p-4",
           "text-sm text-foreground-secondary leading-relaxed",
           "overflow-x-auto max-h-80 overflow-y-auto",
@@ -89,7 +89,7 @@ function FileContent({ content, format }: { content: string; format: string }) {
 
   return (
     <div
-      className={cn(
+      className={cx(
         "rounded-md bg-background border border-border/50",
         "text-xs font-mono overflow-x-auto max-h-80 overflow-y-auto"
       )}

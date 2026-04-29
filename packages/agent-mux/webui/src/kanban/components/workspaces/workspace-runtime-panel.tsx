@@ -21,7 +21,7 @@ import {
   WifiOff,
 } from "lucide-react";
 
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { DispatchContextAuditPanel } from "@/components/shared/dispatch-context-audit-panel";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -139,7 +139,7 @@ function failedProcessText(process: RuntimeLogProcess): string {
 function ProcessLogState(props: { text: string; tone?: "default" | "error" }) {
   return (
     <div
-      className={cn(
+      className={cx(
         "rounded-2xl border px-4 py-5 text-sm",
         props.tone === "error"
           ? "border-error/20 bg-error/5 text-error"
@@ -201,7 +201,7 @@ export function WorkspaceRuntimePanel(props: {
   }, [activeLogProcess, preferredLogProcessId]);
 
   return (
-    <section className={cn("rounded-3xl border border-border bg-card p-5 shadow-lg", props.className)}>
+    <section className={cx("rounded-3xl border border-border bg-card p-5 shadow-lg", props.className)}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Runtime surfaces</p>
@@ -328,7 +328,7 @@ export function WorkspaceRuntimePanel(props: {
                           className="mt-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-foreground-muted"
                         >
                           <span>{process.sourceLabel}</span>
-                          <span className={cn("rounded-full border px-2 py-0.5", statusClass(process.status))}>
+                          <span className={cx("rounded-full border px-2 py-0.5", statusClass(process.status))}>
                             {process.status}
                           </span>
                         </div>
@@ -344,7 +344,7 @@ export function WorkspaceRuntimePanel(props: {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-semibold text-foreground">{activeLogProcess.label}</h4>
-                        <span className={cn("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(activeLogProcess.status))}>
+                        <span className={cx("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(activeLogProcess.status))}>
                           {activeLogProcess.status}
                         </span>
                         <span className="rounded-full border border-border px-2 py-0.5 text-xs text-foreground-muted">
@@ -417,7 +417,7 @@ export function WorkspaceRuntimePanel(props: {
                 {props.runtime.terminal.commands.map((command, index) => (
                   <article key={command.id} className="rounded-2xl border border-border bg-card/90 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={cn("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(command.status))}>
+                      <span className={cx("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(command.status))}>
                         {command.status}
                       </span>
                       <span className="rounded-full border border-border px-2 py-0.5 text-xs text-foreground-muted">
@@ -471,7 +471,7 @@ export function WorkspaceRuntimePanel(props: {
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
             <article className="rounded-2xl border border-border bg-background/70 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(props.runtime.devServer.status))}>
+                <span className={cx("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(props.runtime.devServer.status))}>
                   {props.runtime.devServer.status}
                 </span>
                 {props.runtime.devServer.port ? (
@@ -522,7 +522,7 @@ export function WorkspaceRuntimePanel(props: {
           {props.rebase ? (
             <article className="rounded-2xl border border-border bg-background/70 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(
+                <span className={cx("rounded-full border px-2 py-0.5 text-xs uppercase", statusClass(
                   props.rebase.status === "rebase-conflicts"
                     ? "failed"
                     : props.rebase.status === "rebase-needed"
@@ -615,7 +615,7 @@ function InspectCard(props: {
         <Icon className="h-4 w-4" />
         {props.label}
       </div>
-      <div className={cn("mt-3 text-sm font-medium", props.mono ? "break-all font-mono text-xs" : "")}>{props.value}</div>
+      <div className={cx("mt-3 text-sm font-medium", props.mono ? "break-all font-mono text-xs" : "")}>{props.value}</div>
     </article>
   );
 }

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 type ProgressVariant = "default" | "success" | "error" | "warning";
 
@@ -27,9 +27,9 @@ export function ProgressBar({ value, variant = "default", glow = false, classNam
   const clamped = Math.min(100, Math.max(0, value));
   const isComplete = clamped === 100;
   return (
-    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-background-muted", className)}>
+    <div className={cx("h-2 w-full overflow-hidden rounded-full bg-background-muted", className)}>
       <div
-        className={cn(
+        className={cx(
           "h-full transition-all duration-500 ease-out",
           variantStyles[variant],
           glow && variantGlow[variant],

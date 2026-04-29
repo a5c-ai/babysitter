@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Field, Input } from "@a5c-ai/compendium";
 
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { approveBreakpoint } from "@/app/actions/approve-breakpoint";
@@ -107,7 +107,7 @@ export function BreakpointApproval({ task, runId }: BreakpointApprovalProps) {
       {result && (
         <div
           data-testid="approval-result"
-          className={cn(
+          className={cx(
             "rounded-lg border p-3 flex items-center gap-2 text-sm",
             result.success
               ? "border-success/30 bg-success-muted text-success"

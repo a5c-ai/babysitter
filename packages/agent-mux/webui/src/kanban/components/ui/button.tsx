@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
 
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 const buttonVariants = cva("tkc-btn whitespace-nowrap", {
   variants: {
@@ -33,7 +33,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   };
 
 export function Button({ className, variant, size, asChild = false, loading = false, disabled, ...props }: ButtonProps) {
-  const classes = cn(buttonVariants({ variant, size }), className);
+  const classes = cx(buttonVariants({ variant, size }), className);
   const Comp = asChild ? Slot : "button";
   return <Comp aria-busy={loading || undefined} className={classes} disabled={loading || disabled} {...props} />;
 }

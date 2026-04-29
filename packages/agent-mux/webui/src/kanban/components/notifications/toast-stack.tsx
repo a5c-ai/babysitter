@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { X, CheckCircle2, XCircle, AlertTriangle, Info, Pin } from "lucide-react";
 import type { AppNotification } from "@/hooks/use-notifications";
 
@@ -39,7 +39,7 @@ export function ToastStack({ notifications, onDismiss }: ToastStackProps) {
         <div
           key={notif.id}
           data-testid={`toast-item-${notif.id}`}
-          className={cn(
+          className={cx(
             "rounded-lg border border-[var(--glass-border-subtle)] bg-[var(--glass-bg-heavy)] backdrop-blur-sm p-3 shadow-lg border-l-2",
             "animate-slide-in-right",
             notif.href && "cursor-pointer hover:bg-card-hover",

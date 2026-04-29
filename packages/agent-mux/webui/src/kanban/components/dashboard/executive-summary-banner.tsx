@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import { CheckCircle2, AlertTriangle, XCircle, X } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { RunStatus } from "@/types";
 
 export interface ExecutiveSummaryMetrics {
@@ -127,14 +127,14 @@ export function ExecutiveSummaryBanner({
       aria-live="polite"
       aria-atomic="true"
       data-testid="executive-summary-banner"
-      className={cn(
+      className={cx(
         "flex items-center gap-2.5 rounded-xl border px-4 py-3 mb-6 shadow-sm transition-all duration-300",
         styles.container
       )}
     >
       <span className={styles.iconColor}>{summary.icon}</span>
       <p
-        className={cn(
+        className={cx(
           "text-sm font-medium leading-snug flex-1",
           styles.text
         )}
@@ -159,7 +159,7 @@ export function ExecutiveSummaryBanner({
         <button
           data-testid="executive-summary-dismiss"
           onClick={onDismiss}
-          className={cn(
+          className={cx(
             "rounded-md p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors",
             styles.iconColor,
             "opacity-60 hover:opacity-100"

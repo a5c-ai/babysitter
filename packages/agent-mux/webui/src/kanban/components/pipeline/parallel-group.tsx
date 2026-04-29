@@ -1,6 +1,6 @@
 "use client";
 import { memo } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { GitBranch } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -18,7 +18,7 @@ interface ParallelGroupProps {
 export const ParallelGroup = memo(function ParallelGroup({ children, count, className }: ParallelGroupProps) {
   return (
     <div
-      className={cn(
+      className={cx(
         "relative rounded-lg border border-dashed border-secondary/20 bg-secondary/[0.03] p-3 pt-7",
         className
       )}

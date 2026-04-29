@@ -13,7 +13,7 @@ import { useNotificationContext } from "@/components/notifications/notification-
 import { useEventStream } from "@/hooks/use-event-stream";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import { useTheme } from "@/components/shared/theme-provider";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { APP_HEADER_NAV_ITEMS } from "@/components/shared/app-header-nav";
 import { pageShellContainerClassName } from "@/components/shared/page-shell";
 
@@ -34,7 +34,7 @@ export function AppHeader() {
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className={cn(pageShellContainerClassName, "gap-3 py-3")}>
+        <div className={cx(pageShellContainerClassName, "gap-3 py-3")}>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/projects" className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
@@ -53,7 +53,7 @@ export function AppHeader() {
 
             <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
               <span
-                className={cn(
+                className={cx(
                   "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium",
                   streamConnected
                     ? "border-success/20 bg-success/10 text-success"
@@ -66,7 +66,7 @@ export function AppHeader() {
               </span>
 
               <span
-                className={cn(
+                className={cx(
                   "hidden rounded-full border px-3 py-1.5 text-xs font-medium sm:inline-flex",
                   isAuthenticated
                     ? "border-info/20 bg-info/10 text-info"
@@ -133,7 +133,7 @@ export function AppHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={cn(
+                  className={cx(
                     "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
                     active
                       ? "border-primary/30 bg-primary/12 text-foreground"

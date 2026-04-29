@@ -1,6 +1,6 @@
 "use client";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface TabsProps {
   className?: string;
@@ -27,7 +27,7 @@ export function TabsList({ className, children }: { className?: string; children
   const List = TabsPrimitive.List as any;
   return (
     <List
-      className={cn("tkc-tabs", className)}
+      className={cx("tkc-tabs", className)}
     >
       {children}
     </List>
@@ -40,7 +40,7 @@ export function TabsTrigger({ className, children, value }: { className?: string
   return (
     <Trigger
       value={value}
-      className={cn(
+      className={cx(
         "tkc-tab inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
         "data-[state=active]:border-b-[var(--tkc-cinnabar)] data-[state=active]:text-[var(--tkc-cinnabar)]",
         className
@@ -55,7 +55,7 @@ export function TabsContent({ className, children, value }: { className?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Content = TabsPrimitive.Content as any;
   return (
-    <Content value={value} className={cn("mt-2 focus-visible:outline-none", className)}>
+    <Content value={value} className={cx("mt-2 focus-visible:outline-none", className)}>
       {children}
     </Content>
   );

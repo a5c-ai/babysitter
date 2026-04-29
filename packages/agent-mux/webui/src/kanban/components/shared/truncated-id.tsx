@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { formatShortId } from '@/lib/utils';
-import { cn } from '@/lib/cn';
+import { cx } from '@a5c-ai/compendium';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TruncatedIdProps {
@@ -26,7 +26,7 @@ export function TruncatedId({ id, chars = 4, className }: TruncatedIdProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <span
-            className={cn(
+            className={cx(
               'inline-flex items-center justify-center rounded px-2 py-1 min-h-[44px] min-w-[44px] font-mono text-xs',
               'bg-background-secondary text-info/80',
               'hover:bg-background-tertiary hover:text-info',

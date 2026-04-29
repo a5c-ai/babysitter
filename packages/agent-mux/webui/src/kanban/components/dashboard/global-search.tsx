@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { friendlyProcessName, formatShortId } from "@/lib/utils";
 import type { Run } from "@/types";
@@ -193,7 +193,7 @@ export function GlobalSearch() {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search runs by ID, process name, or task title..."
-          className={cn(
+          className={cx(
             "w-full rounded-lg border border-border bg-card/80 backdrop-blur-sm",
             "pl-10 pr-20 py-2.5 text-sm text-foreground",
             "placeholder:text-foreground-muted/60",
@@ -228,7 +228,7 @@ export function GlobalSearch() {
       {/* Dropdown results */}
       {showDropdown && (
         <div
-          className={cn(
+          className={cx(
             "absolute z-50 top-full left-0 right-0 mt-1.5",
             "rounded-lg border border-border bg-card/95 backdrop-blur-md shadow-xl",
             "overflow-hidden"
@@ -260,7 +260,7 @@ export function GlobalSearch() {
                   role="option"
                   aria-selected={index === selectedIndex}
                   onClick={() => navigateToRun(run.runId)}
-                  className={cn(
+                  className={cx(
                     "flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors",
                     index === selectedIndex
                       ? "bg-primary/10"
@@ -269,7 +269,7 @@ export function GlobalSearch() {
                 >
                   {/* Status dot */}
                   <span
-                    className={cn(
+                    className={cx(
                       "h-2 w-2 rounded-full shrink-0",
                       run.status === "completed"
                         ? "bg-success"
@@ -305,7 +305,7 @@ export function GlobalSearch() {
                   </div>
                   {/* Navigate arrow */}
                   <ArrowRight
-                    className={cn(
+                    className={cx(
                       "h-3.5 w-3.5 shrink-0 transition-colors",
                       index === selectedIndex
                         ? "text-primary"

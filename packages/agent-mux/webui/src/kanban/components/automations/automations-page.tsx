@@ -34,7 +34,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { PageSection, PageShell } from "@/components/shared/page-shell";
 
 type AutomationRuleRecord = AutomationRuleCollectionResponse["rules"][number];
@@ -486,7 +486,7 @@ export function AutomationsPage() {
 
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={() => void loadAutomations({ preserveForm: editingRuleId !== null })} disabled={refreshing}>
-              <RefreshCw className={cn("mr-2 h-4 w-4", refreshing && "animate-spin")} />
+              <RefreshCw className={cx("mr-2 h-4 w-4", refreshing && "animate-spin")} />
               Refresh rules
             </Button>
             <Button asChild variant="ghost">
@@ -893,7 +893,7 @@ function SummaryTile(props: {
 }) {
   return (
     <div
-      className={cn(
+      className={cx(
         "rounded-2xl border px-4 py-4 shadow-sm",
         props.tone === "success" && "border-success/20 bg-success/10",
         props.tone === "warning" && "border-warning/20 bg-warning/10",

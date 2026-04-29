@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 export const pageShellContainerClassName =
   "mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-6 px-4 py-5 sm:px-6 sm:py-6";
@@ -14,8 +14,8 @@ export function PageShell(props: {
 }) {
   const background = props.background ?? "ambient";
   return (
-    <div className={cn("flex-1", background === "ambient" ? "bg-gradient-brand-subtle" : null)}>
-      <div className={cn(pageShellContainerClassName, props.className)}>{props.children}</div>
+    <div className={cx("flex-1", background === "ambient" ? "bg-gradient-brand-subtle" : null)}>
+      <div className={cx(pageShellContainerClassName, props.className)}>{props.children}</div>
     </div>
   );
 }
@@ -26,7 +26,7 @@ export function PageSection(props: {
   inset?: boolean;
 }) {
   return (
-    <section className={cn(props.inset ? pageInsetSectionClassName : pageSectionClassName, props.className)}>
+    <section className={cx(props.inset ? pageInsetSectionClassName : pageSectionClassName, props.className)}>
       {props.children}
     </section>
   );
@@ -34,7 +34,7 @@ export function PageSection(props: {
 
 export function PageHeroGrid(props: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,0.95fr)]", props.className)}>
+    <section className={cx("grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,0.95fr)]", props.className)}>
       {props.children}
     </section>
   );

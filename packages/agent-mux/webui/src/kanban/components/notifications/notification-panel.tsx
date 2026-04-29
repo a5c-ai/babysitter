@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { X, CheckCircle2, XCircle, AlertTriangle, Info, Bell, Pin } from "lucide-react";
 import type { AppNotification } from "@/hooks/use-notifications";
 import {
@@ -76,7 +76,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
               </button>
             </Dialog.Close>
           </div>
-          <div className={cn(dialogBodyClassName, "space-y-2 p-2 sm:p-3")}>
+          <div className={cx(dialogBodyClassName, "space-y-2 p-2 sm:p-3")}>
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-background/50 py-12 text-foreground-muted">
                 <Bell className="h-8 w-8 mb-2 opacity-50" />
@@ -88,7 +88,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
                   <div
                     key={notif.id}
                     data-testid={`notification-item-${notif.id}`}
-                    className={cn(
+                    className={cx(
                       "rounded-lg border border-[var(--glass-border-faint)] bg-[var(--glass-card-bg)] p-3 border-l-2",
                       "transition-colors duration-150",
                       notif.href && "cursor-pointer hover:bg-[var(--glass-border-faint)]",
@@ -109,7 +109,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); onDismiss(notif.id); }}
-                        className={cn(dialogCloseButtonClassName, "shrink-0")}
+                        className={cx(dialogCloseButtonClassName, "shrink-0")}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>

@@ -5,7 +5,7 @@ import { CheckCircle2, CornerDownRight, FileDiff, MessageSquareText, MessageSqua
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 import type {
   KanbanDiffFile,
@@ -312,7 +312,7 @@ function ReviewSubmissionBar(props: {
 
       {props.artifact.latestSubmission ? (
         <div className="mt-3 rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground-muted">
-          <span className={cn("rounded-full border px-2 py-0.5 text-xs", decisionTone(props.artifact.latestSubmission.decision))}>
+          <span className={cx("rounded-full border px-2 py-0.5 text-xs", decisionTone(props.artifact.latestSubmission.decision))}>
             {decisionLabel(props.artifact.latestSubmission.decision)}
           </span>
           <span className="ml-2">Last submitted {new Date(props.artifact.latestSubmission.submittedAt).toLocaleString()}</span>
@@ -359,7 +359,7 @@ function UnifiedDiff(props: {
                   <div key={`${hunk.id}-${lineIndex}`}>
                     <div
                       id={anchor ? lineId(anchor) : undefined}
-                      className={cn(
+                      className={cx(
                         "grid grid-cols-[96px_minmax(0,1fr)_auto] items-start gap-3 rounded-lg px-3 py-2",
                         lineTone(line.kind),
                         isFocused ? "ring-1 ring-primary/40" : undefined,
@@ -508,7 +508,7 @@ function SplitDiff(props: {
                     <div key={`${hunk.id}-${index}`}>
                       <div
                         id={anchor ? lineId(anchor) : undefined}
-                        className={cn(
+                        className={cx(
                           "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-start gap-3 rounded-lg px-2 py-2",
                           lineTone(line.kind),
                           isFocused ? "ring-1 ring-primary/40" : undefined,
@@ -768,7 +768,7 @@ export function ReviewPanel(props: {
                 setDraftBody("");
                 setFocusedAnchorKey(null);
               }}
-              className={cn(
+              className={cx(
                 "w-full rounded-2xl border p-4 text-left transition-colors",
                 selectedArtifactId === item.artifactId
                   ? "border-primary/30 bg-primary/5"
@@ -779,14 +779,14 @@ export function ReviewPanel(props: {
                 <span className="rounded-full border border-border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em] text-foreground-muted">
                   {item.targetType}
                 </span>
-                <span className={cn("rounded-full border px-2 py-0.5 text-xs", decisionTone(item.decision))}>
+                <span className={cx("rounded-full border px-2 py-0.5 text-xs", decisionTone(item.decision))}>
                   {decisionLabel(item.decision)}
                 </span>
               </div>
               <div className="mt-2 text-sm font-semibold text-foreground">{item.targetLabel}</div>
               <div className="mt-1 text-sm text-foreground-muted">{item.title}</div>
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-foreground-muted">
-                <span className={cn("rounded-full border px-2 py-0.5", queueTone(item.queueState))}>{item.queueState}</span>
+                <span className={cx("rounded-full border px-2 py-0.5", queueTone(item.queueState))}>{item.queueState}</span>
                 <span>{item.openCommentCount} open comments</span>
               </div>
             </button>
@@ -801,10 +801,10 @@ export function ReviewPanel(props: {
                   <span className="rounded-full border border-border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em] text-foreground-muted">
                     {selectedArtifact.targetLabel}
                   </span>
-                  <span className={cn("rounded-full border px-2 py-0.5 text-xs", decisionTone(selectedArtifact.decision))}>
+                  <span className={cx("rounded-full border px-2 py-0.5 text-xs", decisionTone(selectedArtifact.decision))}>
                     {decisionLabel(selectedArtifact.decision)}
                   </span>
-                  <span className={cn("rounded-full border px-2 py-0.5 text-xs", queueTone(selectedArtifact.queueState))}>
+                  <span className={cx("rounded-full border px-2 py-0.5 text-xs", queueTone(selectedArtifact.queueState))}>
                     {selectedArtifact.queueState}
                   </span>
                 </div>
@@ -849,7 +849,7 @@ export function ReviewPanel(props: {
                     </span>
                   ) : null}
                   {selectedArtifact.integration ? (
-                    <span className={cn("rounded-full border px-2 py-0.5 text-xs", integrationTone(selectedArtifact.integration.status))}>
+                    <span className={cx("rounded-full border px-2 py-0.5 text-xs", integrationTone(selectedArtifact.integration.status))}>
                       {selectedArtifact.integration.status.replace(/-/g, " ")}
                     </span>
                   ) : null}
@@ -860,17 +860,17 @@ export function ReviewPanel(props: {
                 {selectedArtifact.linkedPullRequest ? (
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
                     {selectedArtifact.linkedPullRequest.reviewStatus ? (
-                      <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.reviewStatus))}>
+                      <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.reviewStatus))}>
                         Review {selectedArtifact.linkedPullRequest.reviewStatus}
                       </span>
                     ) : null}
                     {selectedArtifact.linkedPullRequest.mergeStatus ? (
-                      <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.mergeStatus))}>
+                      <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.mergeStatus))}>
                         Merge {selectedArtifact.linkedPullRequest.mergeStatus}
                       </span>
                     ) : null}
                     {selectedArtifact.linkedPullRequest.publishStatus ? (
-                      <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.publishStatus))}>
+                      <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(selectedArtifact.linkedPullRequest.publishStatus))}>
                         Publish {selectedArtifact.linkedPullRequest.publishStatus}
                       </span>
                     ) : null}
@@ -882,7 +882,7 @@ export function ReviewPanel(props: {
                 {selectedArtifact.linkedPullRequest?.ciGates?.length ? (
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
                     {selectedArtifact.linkedPullRequest.ciGates.map((gate) => (
-                      <span key={`${selectedArtifact.id}-${gate.id}`} className={cn("rounded-full border px-2 py-0.5", lifecycleTone(gate.status))}>
+                      <span key={`${selectedArtifact.id}-${gate.id}`} className={cx("rounded-full border px-2 py-0.5", lifecycleTone(gate.status))}>
                         {gate.name}: {gate.status}
                       </span>
                     ))}
@@ -943,7 +943,7 @@ export function ReviewPanel(props: {
                         setFocusedAnchorKey(null);
                         setDraftAnchor(null);
                       }}
-                      className={cn(
+                      className={cx(
                         "w-full rounded-2xl border p-3 text-left transition-colors",
                         selectedFile?.id === file.id
                           ? "border-primary/30 bg-primary/5"

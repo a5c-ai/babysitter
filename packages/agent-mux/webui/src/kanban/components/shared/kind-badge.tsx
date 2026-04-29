@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { TaskKind } from "@/types";
 import { Bot, Terminal, Puzzle, Hand, Clock, Cog } from "lucide-react";
 
@@ -38,7 +38,7 @@ const kindConfig: Record<TaskKind, { icon: React.ReactNode; color: string; bgTin
 export function KindBadge({ kind, className }: { kind: TaskKind; className?: string }) {
   const config = kindConfig[kind] || kindConfig.agent;
   return (
-    <span className={cn(
+    <span className={cx(
       "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs leading-tight font-medium uppercase tracking-wider",
       config.bgTint,
       config.color,

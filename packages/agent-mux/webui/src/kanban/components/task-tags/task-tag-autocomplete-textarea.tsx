@@ -4,7 +4,7 @@ import type { KeyboardEvent, ReactNode, TextareaHTMLAttributes } from "react";
 import type { KanbanTaskTag } from "@a5c-ai/agent-mux-core/kanban";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface ActiveQuery {
   readonly start: number;
@@ -207,7 +207,7 @@ export function TaskTagAutocompleteTextarea({
   };
 
   return (
-    <div className={cn("relative", className)} ref={containerRef}>
+    <div className={cx("relative", className)} ref={containerRef}>
       {renderTextarea ? renderTextarea(textareaProps) : <textarea {...textareaProps} />}
       {activeQuery ? (
         <div
@@ -221,7 +221,7 @@ export function TaskTagAutocompleteTextarea({
                   id={`${listboxId}-option-${index}`}
                   role="option"
                   aria-selected={index === selectedIndex}
-                  className={cn(
+                  className={cx(
                     "cursor-pointer px-4 py-3 transition-colors",
                     index === selectedIndex ? "bg-primary/10" : "hover:bg-background/70",
                   )}

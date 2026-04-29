@@ -1,6 +1,6 @@
 "use client";
 import { Search, FolderOpen } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { RunStatus } from "@/types";
 
 const filters: { label: string; value: RunStatus | "all" }[] = [
@@ -39,7 +39,7 @@ export function SearchFilter({ search, onSearchChange, statusFilter, onStatusFil
           <button
             key={f.value}
             onClick={() => onStatusFilterChange(f.value)}
-            className={cn(
+            className={cx(
               "rounded-md px-3 py-1.5 min-h-[44px] text-xs font-medium transition-all",
               statusFilter === f.value
                 ? "bg-primary/15 text-primary shadow-neon-glow-primary-ring"
@@ -53,7 +53,7 @@ export function SearchFilter({ search, onSearchChange, statusFilter, onStatusFil
       {onGroupByProjectChange && (
         <button
           onClick={() => onGroupByProjectChange(!groupByProject)}
-          className={cn(
+          className={cx(
             "flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[44px] text-xs font-medium transition-all",
             groupByProject
               ? "bg-primary/15 text-primary shadow-neon-glow-primary-ring"

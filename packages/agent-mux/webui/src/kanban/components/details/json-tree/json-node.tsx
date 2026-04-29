@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronRight, Copy, Check } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 /* ------------------------------------------------------------------ */
 /*  CopyButton                                                         */
@@ -30,7 +30,7 @@ export function CopyButton({ value, size = "md", className: extraClass }: { valu
     <button
       type="button"
       onClick={handleCopy}
-      className={cn(
+      className={cx(
         "inline-flex items-center justify-center rounded text-foreground-muted hover:text-primary hover:bg-primary-muted transition-all",
         sizeClasses,
         size === "sm" && "opacity-0 group-hover/json-row:opacity-100 ml-1",
@@ -39,7 +39,7 @@ export function CopyButton({ value, size = "md", className: extraClass }: { valu
       )}
       title="Copy"
     >
-      {copied ? <Check className={cn(iconClasses, "text-success")} /> : <Copy className={iconClasses} />}
+      {copied ? <Check className={cx(iconClasses, "text-success")} /> : <Copy className={iconClasses} />}
     </button>
   );
 }
@@ -153,7 +153,7 @@ const JsonNode = React.memo(function JsonNode({ keyName, value, defaultExpanded,
         }}
       >
         <ChevronRight
-          className={cn(
+          className={cx(
             "h-3 w-3 shrink-0 text-primary transition-transform duration-150 mr-1 relative top-[1px]",
             expanded && "rotate-90"
           )}

@@ -2,7 +2,7 @@
 
 import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-core/kanban";
 
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 export function ExecutionContextPanel(props: {
   contexts: readonly KanbanExecutionContextEnvelope[];
@@ -16,7 +16,7 @@ export function ExecutionContextPanel(props: {
   }
 
   return (
-    <section className={cn("rounded-3xl border border-border bg-card p-5 shadow-lg", props.className)}>
+    <section className={cx("rounded-3xl border border-border bg-card p-5 shadow-lg", props.className)}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Execution context</p>
@@ -30,7 +30,7 @@ export function ExecutionContextPanel(props: {
         </span>
       </div>
 
-      <div className={cn("mt-4 grid gap-4", props.compact ? "" : "xl:grid-cols-2")}>
+      <div className={cx("mt-4 grid gap-4", props.compact ? "" : "xl:grid-cols-2")}>
         {props.contexts.map((context) => (
           <article key={context.issue.id} className="rounded-2xl border border-border bg-background/70 p-4">
             <div className="flex flex-wrap items-center gap-2">

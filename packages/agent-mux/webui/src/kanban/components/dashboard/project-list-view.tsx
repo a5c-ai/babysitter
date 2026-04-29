@@ -8,7 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { ProjectHealthCard } from "./project-health-card";
 import type { ProjectSummary, RunStatus } from "@/types";
@@ -163,7 +163,7 @@ export function ProjectListView({
               <h2 className="text-sm font-semibold text-foreground">
                 {sortMode === "activity" ? "Recent Activity" : "In Progress"}
               </h2>
-              <span className={cn(
+              <span className={cx(
                 "rounded-full px-2 py-px text-xs font-semibold tabular-nums",
                 sortMode === "activity"
                   ? "bg-primary/10 border border-primary/20 text-primary"

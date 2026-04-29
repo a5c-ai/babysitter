@@ -1,6 +1,6 @@
 "use client";
 import { RefreshCw, Inbox } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { CatchUpState } from "@/hooks/use-batched-updates";
 
 /** Lightweight snapshot of dashboard KPIs shown inside the catch-up banner. */
@@ -50,7 +50,7 @@ export function CatchUpBanner({ catchUp, summary }: CatchUpBannerProps) {
   return (
     <div
       data-testid="catch-up-banner"
-      className={cn(
+      className={cx(
         "flex items-center gap-3 px-4 py-2.5 mb-4 rounded-lg",
         "bg-info-muted border border-info/20",
         "animate-in fade-in slide-in-from-top-2 duration-300"
@@ -73,7 +73,7 @@ export function CatchUpBanner({ catchUp, summary }: CatchUpBannerProps) {
       <button
         onClick={catchUp.flush}
         data-testid="catch-up-refresh-btn"
-        className={cn(
+        className={cx(
           "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold",
           "bg-info/10 border border-info/20 text-info",
           "hover:bg-info/20 transition-colors",

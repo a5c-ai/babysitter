@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 /* ------------------------------------------------------------------ */
 /*  Input / Output toggle                                               */
@@ -19,7 +19,7 @@ export function DataToggle({ showInput, onToggle }: DataToggleProps) {
       <button
         type="button"
         onClick={() => onToggle(true)}
-        className={cn(
+        className={cx(
           "text-xs px-3 py-1 min-h-[44px] rounded transition-colors",
           showInput
             ? "bg-primary-muted text-primary"
@@ -31,7 +31,7 @@ export function DataToggle({ showInput, onToggle }: DataToggleProps) {
       <button
         type="button"
         onClick={() => onToggle(false)}
-        className={cn(
+        className={cx(
           "text-xs px-3 py-1 min-h-[44px] rounded transition-colors",
           !showInput
             ? "bg-primary-muted text-primary"

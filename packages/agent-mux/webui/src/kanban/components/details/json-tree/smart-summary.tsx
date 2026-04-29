@@ -12,7 +12,7 @@ import {
   Clock,
   Hash,
 } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { CopyButton, JsonNode, JsonTreeView } from "./json-node";
 import { formatLabel } from "./categorize";
 
@@ -23,7 +23,7 @@ import { formatLabel } from "./categorize";
 /** SmartSectionHeader -- reusable section header with consistent styling */
 export function SmartSectionHeader({ children, className: extraClass }: { children: React.ReactNode; className?: string }) {
   return (
-    <h4 className={cn("text-xs font-medium text-foreground-muted tracking-wider uppercase pl-2 border-l-2 border-primary", extraClass)}>
+    <h4 className={cx("text-xs font-medium text-foreground-muted tracking-wider uppercase pl-2 border-l-2 border-primary", extraClass)}>
       {children}
     </h4>
   );
@@ -79,14 +79,14 @@ export function StatusPill({ status }: { status: string }) {
 
   return (
     <span
-      className={cn(
+      className={cx(
         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium",
         bgColor,
         textColor
       )}
     >
       <span
-        className={cn("h-1.5 w-1.5 rounded-full animate-pulse-dot", dotColor)}
+        className={cx("h-1.5 w-1.5 rounded-full animate-pulse-dot", dotColor)}
       />
       {status}
     </span>
@@ -117,12 +117,12 @@ export function ScoreBar({ score }: { score: number }) {
 
   return (
     <div className="flex items-center gap-2 min-w-[120px]">
-      <span className={cn("text-[11px] font-mono font-bold", textColor)}>
+      <span className={cx("text-[11px] font-mono font-bold", textColor)}>
         {score}
       </span>
       <div className="flex-1 h-1.5 rounded-full bg-background-tertiary overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all duration-500", color, glowShadow)}
+          className={cx("h-full rounded-full transition-all duration-500", color, glowShadow)}
           style={{ width: `${clamped}%` }}
         />
       </div>
@@ -139,7 +139,7 @@ export function ScoreBar({ score }: { score: number }) {
 export function QualityBadge({ passes }: { passes: boolean }) {
   return (
     <span
-      className={cn(
+      className={cx(
         "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium",
         passes
           ? "bg-success-muted text-success"
@@ -218,7 +218,7 @@ export function BooleanFlagsGrid({
         {booleans.map(({ key, value }) => (
           <div
             key={key}
-            className={cn(
+            className={cx(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium border transition-colors",
               value
                 ? "bg-success-muted/50 border-success/20 text-success"
@@ -261,7 +261,7 @@ function FindingCard({
 
   return (
     <div className="group/finding flex items-start gap-2 rounded-md bg-background-secondary/50 border border-border/40 px-3 py-2 transition-colors hover:border-border-hover/60">
-      <Icon className={cn("h-3.5 w-3.5 mt-0.5 shrink-0", iconColor)} />
+      <Icon className={cx("h-3.5 w-3.5 mt-0.5 shrink-0", iconColor)} />
       <div className="flex-1 min-w-0">
         <span className="text-[11px] text-foreground-muted font-mono mr-1.5">
           {index}.
@@ -311,7 +311,7 @@ export function FindingsSection({
         return (
           <div key={key} className="space-y-1.5">
             <SmartSectionHeader className="flex items-center gap-1.5">
-              <Icon className={cn("h-3 w-3", iconColor)} />
+              <Icon className={cx("h-3 w-3", iconColor)} />
               {formatLabel(key)}
               <span className="ml-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-primary-muted text-primary text-xs font-bold">
                 {items.length}
@@ -452,7 +452,7 @@ function MetadataRow({
           {formatLabel(label)}
         </span>
         <span
-          className={cn(
+          className={cx(
             "text-xs font-mono",
             value ? "text-success" : "text-error"
           )}
@@ -554,7 +554,7 @@ export function CollapsibleRawJson({ data }: { data: unknown }) {
         className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md hover:bg-background-secondary/50 transition-colors group cursor-pointer select-none"
       >
         <ChevronDown
-          className={cn(
+          className={cx(
             "h-3 w-3 text-primary transition-transform duration-150",
             !expanded && "-rotate-90"
           )}

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Inbox } from "lucide-react";
 
 interface EmptyStateProps {
@@ -16,7 +16,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={cn(
+      className={cx(
         "flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-background/50 px-6 text-center",
         compact ? "py-10" : "py-16",
         className,

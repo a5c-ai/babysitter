@@ -17,7 +17,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ReviewPanel } from "@/components/review/review-panel";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { useBacklog } from "@/hooks/use-backlog";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { useReviews } from "@/hooks/use-reviews";
@@ -383,7 +383,7 @@ function workspaceSidebarBadges(
   if (linkedPullRequest) {
     badges.push({
       label: `PR ${linkedPullRequest.status.replace(/-/g, " ")}`,
-      className: cn("border px-2 py-0.5 text-xs", lifecycleTone(linkedPullRequest.status)),
+      className: cx("border px-2 py-0.5 text-xs", lifecycleTone(linkedPullRequest.status)),
     });
   }
 
@@ -1365,7 +1365,7 @@ function WorkspaceColumn(props: {
             <article
               key={workspace.path}
               data-workspace-path={workspace.path}
-              className={cn(
+              className={cx(
                 "rounded-2xl border bg-background/70 p-4",
                 isSelected ? "border-primary/40 ring-1 ring-primary/20" : "border-border",
               )}
@@ -1375,7 +1375,7 @@ function WorkspaceColumn(props: {
                   <div className="flex flex-wrap items-center gap-2">
                     <strong className="text-base">{workspace.name}</strong>
                     {statusBadges.map((badge) => (
-                      <span key={`${workspace.path}:${badge.label}`} className={cn("rounded-full border px-2 py-0.5 text-xs", badge.className)}>
+                      <span key={`${workspace.path}:${badge.label}`} className={cx("rounded-full border px-2 py-0.5 text-xs", badge.className)}>
                         {badge.label}
                       </span>
                     ))}
@@ -1385,7 +1385,7 @@ function WorkspaceColumn(props: {
                       </span>
                     ) : null}
                     {workspace.rebase ? (
-                      <span className={cn("rounded-full border px-2 py-0.5 text-xs", rebaseTone(workspace.rebase.status))}>
+                      <span className={cx("rounded-full border px-2 py-0.5 text-xs", rebaseTone(workspace.rebase.status))}>
                         {rebaseLabel(workspace.rebase.status)}
                       </span>
                     ) : null}
@@ -1522,7 +1522,7 @@ function WorkspaceColumn(props: {
                       </h3>
                     </div>
                     {integration ? (
-                      <span className={cn("rounded-full border px-2 py-0.5 text-xs", integrationTone(integration.status))}>
+                      <span className={cx("rounded-full border px-2 py-0.5 text-xs", integrationTone(integration.status))}>
                         {integration.status.replace(/-/g, " ")}
                       </span>
                     ) : null}
@@ -1536,7 +1536,7 @@ function WorkspaceColumn(props: {
                 </section>
               ) : null}
 
-              <div className={cn("mt-5 grid gap-4", runtimeSession?.runtime ? "xl:grid-cols-[minmax(0,1fr)_360px]" : "")}>
+              <div className={cx("mt-5 grid gap-4", runtimeSession?.runtime ? "xl:grid-cols-[minmax(0,1fr)_360px]" : "")}>
                 {runtimeSession?.runtime ? (
                   <WorkspaceRuntimePanel
                     className="border-border/70 bg-card/70"

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, useTransition } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Hand, AlertTriangle, CheckCircle2, Check, X } from "lucide-react";
 import { approveBreakpoint } from "@/app/actions/approve-breakpoint";
 import type { BreakpointRunInfo } from "@/types";
@@ -33,7 +33,7 @@ function BreakpointBannerItem({ bp, stale, onDismiss }: { bp: BreakpointRunInfo;
 
   if (result?.ok) {
     return (
-      <div className={cn(
+      <div className={cx(
         "group relative flex items-center gap-3 px-4 py-3 rounded-lg",
         "bg-success-muted border border-success/30",
       )}>
@@ -44,7 +44,7 @@ function BreakpointBannerItem({ bp, stale, onDismiss }: { bp: BreakpointRunInfo;
   }
 
   return (
-    <div className={cn(
+    <div className={cx(
       "group relative flex items-center gap-3 px-4 py-3 rounded-lg",
       "bg-warning-muted border border-warning/30",
       "shadow-breakpoint-glow animate-breakpoint-glow",
@@ -81,7 +81,7 @@ function BreakpointBannerItem({ bp, stale, onDismiss }: { bp: BreakpointRunInfo;
       <button
         onClick={handleApprove}
         disabled={isPending || !bp.effectId}
-        className={cn(
+        className={cx(
           "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold",
           "bg-success/20 text-success border border-success/30",
           "hover:bg-success/30 hover:border-success/50",
@@ -100,7 +100,7 @@ function BreakpointBannerItem({ bp, stale, onDismiss }: { bp: BreakpointRunInfo;
             e.stopPropagation();
             onDismiss();
           }}
-          className={cn(
+          className={cx(
             "shrink-0 p-1 rounded text-foreground-muted/50",
             "hover:text-foreground-muted hover:bg-foreground-muted/10",
             "transition-colors"
@@ -257,7 +257,7 @@ export function BreakpointBanner({ breakpointRuns }: BreakpointBannerProps) {
         <Link
           key={`resolved-${entry.bp.runId}`}
           href={`/runs/${entry.bp.runId}`}
-          className={cn(
+          className={cx(
             "group relative flex items-center gap-3 px-4 py-3 rounded-lg",
             "bg-success-muted border border-success/30",
             "shadow-glow-success",

@@ -1,6 +1,6 @@
 "use client";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 export function Separator({
   className,
@@ -14,7 +14,7 @@ export function Separator({
   return (
     <Root
       orientation={orientation}
-      className={cn(
+      className={cx(
         "shrink-0 bg-border",
         orientation === "horizontal" ? "h-px w-full" : "h-full w-px",
         className

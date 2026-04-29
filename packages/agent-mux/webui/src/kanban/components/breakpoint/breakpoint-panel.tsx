@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Badge } from "@/components/ui/badge";
 import { FilePreview } from "./file-preview";
 import { BreakpointApproval } from "./breakpoint-approval";
@@ -26,7 +26,7 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Hand className={cn("h-4 w-4 text-warning", isWaiting && "animate-pulse-dot")} />
+            <Hand className={cx("h-4 w-4 text-warning", isWaiting && "animate-pulse-dot")} />
             <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           </div>
           <div className="flex items-center gap-2">
@@ -40,7 +40,7 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
 
         {/* Question callout — sun yellow border with warm glow */}
         <div
-          className={cn(
+          className={cx(
             "rounded-lg border-2 p-5",
             "bg-warning-muted border-warning/40",
             isWaiting && "animate-breakpoint-glow"
@@ -50,7 +50,7 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
           <div className="flex items-start gap-3">
             <Hand className="h-6 w-6 text-warning shrink-0 mt-0.5 animate-pulse-dot" />
             <div className="min-w-0">
-              <h4 className={cn(
+              <h4 className={cx(
                 "text-xs leading-tight font-medium uppercase tracking-widest mb-2",
                 isWaiting ? "text-warning" : "text-success"
               )}>

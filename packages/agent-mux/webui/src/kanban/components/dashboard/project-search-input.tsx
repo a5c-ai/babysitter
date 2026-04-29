@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cx } from '@a5c-ai/compendium';
 
 interface ProjectSearchInputProps {
   onSearch: (value: string) => void;
@@ -27,7 +27,7 @@ export function ProjectSearchInput({
   }, [value, debounceMs, onSearch]);
 
   return (
-    <div className={cn('relative', className)}>
+    <div className={cx('relative', className)}>
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-foreground-muted" />
       <input
         type="text"

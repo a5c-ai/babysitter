@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface ProjectSectionHeaderProps {
   projectName: string;
@@ -41,7 +41,7 @@ export function ProjectSectionHeader({
   className,
 }: ProjectSectionHeaderProps) {
   return (
-    <div className={cn("flex flex-1 items-center gap-3 min-w-0", className)}>
+    <div className={cx("flex flex-1 items-center gap-3 min-w-0", className)}>
       <span className="font-semibold text-sm text-foreground truncate border-l-2 border-primary pl-2 transition-all hover:neon-text-subtle">
         {projectName}
       </span>

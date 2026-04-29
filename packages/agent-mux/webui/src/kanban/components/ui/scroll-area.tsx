@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -19,7 +19,7 @@ export const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Thumb = ScrollAreaPrimitive.Thumb as any;
     return (
-      <Root ref={ref} className={cn("relative overflow-hidden", className)} {...props}>
+      <Root ref={ref} className={cx("relative overflow-hidden", className)} {...props}>
         <Viewport className="h-full w-full rounded-[inherit]">
           {children}
         </Viewport>

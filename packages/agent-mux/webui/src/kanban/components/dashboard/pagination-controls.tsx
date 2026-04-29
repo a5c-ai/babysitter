@@ -1,6 +1,6 @@
 'use client';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { cx } from '@a5c-ai/compendium';
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -43,7 +43,7 @@ export function PaginationControls({
   }
 
   return (
-    <div className={cn('flex items-center justify-between border-t border-border pt-3', className)}>
+    <div className={cx('flex items-center justify-between border-t border-border pt-3', className)}>
       <span className="text-xs text-foreground-muted tabular-nums">
         {startItem}–{endItem} of {totalItems}
       </span>
@@ -51,7 +51,7 @@ export function PaginationControls({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!canGoPrev}
-          className={cn(
+          className={cx(
             'inline-flex h-11 w-11 items-center justify-center rounded-md text-xs transition-all',
             canGoPrev
               ? 'text-foreground hover:bg-primary-muted hover:text-primary hover:shadow-neon-glow-primary-xs cursor-pointer'
@@ -70,7 +70,7 @@ export function PaginationControls({
             <button
               key={p}
               onClick={() => onPageChange(p)}
-              className={cn(
+              className={cx(
                 'inline-flex h-11 min-w-[44px] items-center justify-center rounded-md px-1.5 text-xs font-medium tabular-nums transition-all',
                 p === currentPage
                   ? 'text-primary bg-primary/10'
@@ -84,7 +84,7 @@ export function PaginationControls({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!canGoNext}
-          className={cn(
+          className={cx(
             'inline-flex h-11 w-11 items-center justify-center rounded-md text-xs transition-all',
             canGoNext
               ? 'text-foreground hover:bg-primary-muted hover:text-primary hover:shadow-neon-glow-primary-xs cursor-pointer'

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, memo } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { KindBadge } from "@/components/shared/kind-badge";
 import { formatDuration } from "@/lib/utils";
@@ -58,7 +58,7 @@ export const StepCard = memo(function StepCard({ task, runId: _runId, onSelect, 
       data-testid={`step-card-${task.effectId}`}
       data-status={task.status}
       data-selected={String(isSelected)}
-      className={cn(
+      className={cx(
         "w-full text-left rounded-lg border border-card-border bg-card transition-all duration-150",
         "hover:bg-[var(--card-hover)] border-l-[3px]",
         borderColor,
@@ -116,13 +116,13 @@ export const StepCard = memo(function StepCard({ task, runId: _runId, onSelect, 
           className="flex items-center justify-center px-3 py-2 text-foreground-muted hover:text-primary hover:bg-primary-muted rounded-b-lg transition-colors w-full"
           aria-label={expanded ? "Collapse details" : "Expand details"}
         >
-          <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", !expanded && "-rotate-90")} />
+          <ChevronDown className={cx("h-4 w-4 transition-transform duration-200", !expanded && "-rotate-90")} />
         </button>
       </div>
 
       {/* Expanded detail */}
       <div
-        className={cn(
+        className={cx(
           "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
           expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         )}

@@ -1,7 +1,7 @@
 "use client";
 import { memo } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SessionPill } from "@/components/shared/session-pill";
@@ -92,7 +92,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
 
   return (
     <Link href={`/runs/${run.runId}`}>
-      <Card className={cn(
+      <Card className={cx(
         "cursor-pointer p-4 transition-all card-hover-lift",
         "hover:shadow-md",
         selected && "ring-1 ring-primary shadow-glow-primary",
@@ -104,7 +104,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
           <div className="flex-1 min-w-0">
             {/* Row 1: Title on its own row for readability */}
             <div className="flex items-center gap-2 mb-1.5">
-              <span className={cn(
+              <span className={cx(
                 "h-2 w-2 rounded-full shrink-0",
                 isStale
                   ? "bg-zinc-500"
@@ -166,7 +166,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
                       {breakpointQuestion}
                     </span>
                   </div>
-                  <span className={cn(
+                  <span className={cx(
                     "shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md",
                     "bg-warning/10 border border-warning/20",
                     "text-xs font-semibold text-warning",
@@ -185,7 +185,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
                 <span className="text-xs font-semibold text-warning">
                   Approval needed
                 </span>
-                <span className={cn(
+                <span className={cx(
                   "ml-auto shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md",
                   "bg-warning/10 border border-warning/20",
                   "text-xs font-semibold text-warning"

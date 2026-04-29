@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { formatShortId } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface FriendlyIdProps {
   id: string;
@@ -28,7 +28,7 @@ export function FriendlyId({ id, className }: FriendlyIdProps) {
         <TooltipTrigger asChild>
           <button
             onClick={handleCopy}
-            className={cn(
+            className={cx(
               "inline-flex items-center rounded px-1.5 py-0.5 font-mono text-xs",
               "bg-background-secondary text-info/80",
               "hover:bg-background-tertiary hover:text-info transition-colors cursor-pointer",

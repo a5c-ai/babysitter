@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Card } from "@/components/ui/card";
 import { RunCard } from "./run-card";
 import { VirtualizedRunList } from "./virtualized-run-list";
@@ -158,7 +158,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
   return (
     <Card
       data-testid={`project-card-${project.projectName}`}
-      className={cn(
+      className={cx(
         "transition-all duration-200 overflow-hidden card-hover-lift",
         config.borderClass,
         expanded && "ring-1 ring-primary/20"
@@ -176,7 +176,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
               {project.projectName}
             </h3>
             {project.pendingBreakpoints > 0 && (
-              <span className={cn(
+              <span className={cx(
                 "inline-flex items-center gap-1 rounded-full px-2 py-0.5 shrink-0",
                 "bg-warning/15 border border-warning/30",
                 "text-xs leading-tight font-bold text-warning",
@@ -193,7 +193,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
               tabIndex={0}
               onClick={handleHide}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleHide(e as unknown as React.MouseEvent); } }}
-              className={cn(
+              className={cx(
                 "rounded-md p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center transition-colors",
                 hiding
                   ? "text-foreground-muted cursor-wait"
@@ -219,7 +219,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3 text-xs text-foreground-muted">
             <span className="inline-flex items-center gap-1.5">
-              <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", config.dotClass)} />
+              <span className={cx("h-2.5 w-2.5 rounded-full shrink-0", config.dotClass)} />
               <StatusIcon className="h-3 w-3" />
               {config.label}
             </span>
@@ -274,7 +274,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
             </div>
             <div className="h-1.5 w-full rounded-full bg-background-secondary overflow-hidden">
               <div
-                className={cn("h-full rounded-full transition-all duration-500", config.barColor)}
+                className={cx("h-full rounded-full transition-all duration-500", config.barColor)}
                 style={{ width: `${taskProgress}%` }}
               />
             </div>
@@ -314,7 +314,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
               /* ── Activity mode: flat chronological list ── */
               <div className="flex flex-col gap-3">
                 {/* Mini KPI Row — clickable to filter runs within this project */}
-                <div className={cn("grid gap-2 mb-3", project.staleRuns > 0 ? "grid-cols-4" : "grid-cols-3")}>
+                <div className={cx("grid gap-2 mb-3", project.staleRuns > 0 ? "grid-cols-4" : "grid-cols-3")}>
                   <MiniKpiPill
                     icon={<Activity className="h-3.5 w-3.5" />}
                     count={project.activeRuns}
@@ -383,7 +383,7 @@ export function ProjectHealthCard({ project, statusFilter, sortMode = "status", 
               /* ── Status mode: grouped sections (original behavior) ── */
               <div className="flex flex-col gap-3">
                 {/* Mini KPI Row — clickable to filter runs within this project */}
-                <div className={cn("grid gap-2 mb-3", project.staleRuns > 0 ? "grid-cols-4" : "grid-cols-3")}>
+                <div className={cx("grid gap-2 mb-3", project.staleRuns > 0 ? "grid-cols-4" : "grid-cols-3")}>
                   <MiniKpiPill
                     icon={<Activity className="h-3.5 w-3.5" />}
                     count={project.activeRuns}
@@ -518,7 +518,7 @@ function MiniKpiPill({ icon, count, label, colorClass, bgClass, pulse, active, o
       tabIndex={isClickable ? 0 : undefined}
       onClick={onClick}
       onKeyDown={isClickable ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(e as unknown as React.MouseEvent); } } : undefined}
-      className={cn(
+      className={cx(
         "rounded-md px-2.5 py-1.5 flex items-center gap-2 transition-all",
         bgClass,
         isClickable && "cursor-pointer hover:opacity-80",
@@ -526,9 +526,9 @@ function MiniKpiPill({ icon, count, label, colorClass, bgClass, pulse, active, o
         active && colorClass.replace("text-", "ring-").replace(/\/\d+$/, "/50"),
       )}
     >
-      <span className={cn(colorClass, pulse && "animate-pulse")}>{icon}</span>
+      <span className={cx(colorClass, pulse && "animate-pulse")}>{icon}</span>
       <div>
-        <p className={cn("text-sm font-bold tabular-nums leading-none", colorClass)}>{count}</p>
+        <p className={cx("text-sm font-bold tabular-nums leading-none", colorClass)}>{count}</p>
         <p className="text-xs leading-tight text-foreground-muted uppercase tracking-wider">{label}</p>
       </div>
     </div>

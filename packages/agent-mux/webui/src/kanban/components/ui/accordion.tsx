@@ -1,7 +1,7 @@
 "use client";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 
 interface AccordionProps {
   type?: "single" | "multiple";
@@ -38,7 +38,7 @@ export function AccordionTrigger({ className, children }: { className?: string; 
   return (
     <Header className="flex">
       <Trigger
-        className={cn(
+        className={cx(
           "flex flex-1 items-center gap-2 py-3 text-sm font-medium text-[var(--tkc-ink-quiet)] transition-all duration-200 hover:bg-[var(--tkc-panel-muted)] hover:text-[var(--tkc-ink)] [&[data-state=open]>svg]:rotate-90 [&[data-state=open]]:text-[var(--tkc-cinnabar)]",
           className
         )}
@@ -55,7 +55,7 @@ export function AccordionContent({ className, children }: { className?: string; 
   const Content = AccordionPrimitive.Content as any;
   return (
     <Content className="overflow-hidden text-sm data-[state=open]:animate-[fadeIn_200ms_ease-out] data-[state=closed]:animate-[fadeIn_200ms_ease-out_reverse]">
-      <div className={cn("border-t border-[color:var(--tkc-rule-m)] pb-4 pt-3", className)}>{children}</div>
+      <div className={cx("border-t border-[color:var(--tkc-rule-m)] pb-4 pt-3", className)}>{children}</div>
     </Content>
   );
 }

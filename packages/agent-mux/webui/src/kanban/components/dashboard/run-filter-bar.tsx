@@ -1,6 +1,6 @@
 "use client";
 import { ArrowUpDown, Clock } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { DashboardSortMode, DashboardStatusFilter } from "@/hooks/use-run-dashboard";
 
 const filters: { label: string; value: DashboardStatusFilter }[] = [
@@ -41,7 +41,7 @@ export function RunFilterBar({
               data-testid={`filter-pill-${f.value}`}
               aria-pressed={statusFilter === f.value}
               onClick={() => onStatusFilterChange(f.value)}
-              className={cn(
+              className={cx(
                 "rounded-md px-3 py-1.5 min-h-[44px] text-xs font-medium transition-all inline-flex items-center gap-1.5",
                 statusFilter === f.value
                   ? f.value === "stale"
@@ -52,7 +52,7 @@ export function RunFilterBar({
             >
               {f.label}
               {count > 0 && (
-                <span className={cn(
+                <span className={cx(
                   "rounded-full px-1.5 py-px text-xs leading-tight font-semibold tabular-nums",
                   statusFilter === f.value
                     ? f.value === "stale"
@@ -71,7 +71,7 @@ export function RunFilterBar({
           <button
             data-testid="sort-toggle"
             onClick={onSortModeToggle}
-            className={cn(
+            className={cx(
               "rounded-md px-2.5 py-1.5 min-h-[44px] text-xs font-medium inline-flex items-center gap-1.5",
               "transition-all duration-200 ease-in-out",
               sortMode === "status"

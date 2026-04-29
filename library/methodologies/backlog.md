@@ -29,12 +29,13 @@ methodologies/
 
 ### 🔥 High Priority (Implement First)
 **Process-heavy methodologies similar to Spec-Kit:**
-1. **BDD/Specification by Example** - Executable specifications with Gherkin
-2. **Domain-Driven Design (DDD)** - Strategic and tactical design patterns
-3. **Feature-Driven Development (FDD)** - Feature-centric with parking lot tracking
-4. **Example Mapping** - BDD workshop technique
-5. **ATDD/TDD** - Test-driven development approaches
-6. **Hypothesis-Driven Development** - Experimentation framework
+1. **Ontology-Driven Development (ODD)** ✅ - Knowledge graph-centric development with encyclopedic domain modeling
+2. **BDD/Specification by Example** - Executable specifications with Gherkin
+3. **Domain-Driven Design (DDD)** ✅ - Strategic and tactical design patterns
+4. **Feature-Driven Development (FDD)** - Feature-centric with parking lot tracking
+5. **Example Mapping** - BDD workshop technique
+6. **ATDD/TDD** ✅ - Test-driven development approaches
+7. **Hypothesis-Driven Development** ✅ - Experimentation framework
 
 ### ⭐ Medium Priority (Modern Methodologies)
 7. **Shape Up** - Modern 6-week cycle product development

@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventItem } from "./event-item";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { formatDuration } from "@/lib/utils";
 import { ChevronUp } from "lucide-react";
 import type { JournalEvent, EventType } from "@/types";
@@ -158,7 +158,7 @@ export const EventStream = memo(function EventStream({ events, onEventClick }: E
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={cn(
+              className={cx(
                 "rounded-md px-2.5 py-1 min-h-[44px] text-xs leading-tight font-medium transition-all duration-200",
                 filter === f.value
                   ? "bg-primary/15 text-primary border border-primary/25 shadow-event-filter-active"
@@ -208,7 +208,7 @@ export const EventStream = memo(function EventStream({ events, onEventClick }: E
                   onClick={() => toggleGroup(idx)}
                   className="w-full text-left px-3 py-1.5 hover:bg-background-secondary rounded transition-colors flex items-center gap-2"
                 >
-                  <span className={cn(
+                  <span className={cx(
                     "inline-block h-1.5 w-1.5 rounded-full shrink-0",
                     config.dotColor
                   )} />
@@ -216,7 +216,7 @@ export const EventStream = memo(function EventStream({ events, onEventClick }: E
                     {entry.count}x
                   </span>
                   <span className="text-xs text-foreground-secondary">{config.label}</span>
-                  <ChevronUp className={cn(
+                  <ChevronUp className={cx(
                     "h-3 w-3 text-foreground-muted ml-auto transition-transform",
                     !isExpanded && "rotate-180"
                   )} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { formatShortId } from "@/lib/utils";
 import {
   Tooltip,
@@ -34,7 +34,7 @@ export function SessionPill({ sessionId, active = false, className }: SessionPil
       <Tooltip>
         <TooltipTrigger asChild>
           <span
-            className={cn(
+            className={cx(
               "relative inline-flex items-center gap-1.5 rounded-full bg-background-secondary px-2.5 py-0.5 text-xs font-mono text-foreground-muted cursor-pointer transition-all hover:bg-background-tertiary select-none",
               active && "shadow-neon-glow-cyan-sm",
               className
@@ -42,7 +42,7 @@ export function SessionPill({ sessionId, active = false, className }: SessionPil
             onClick={handleCopy}
           >
             <span
-              className={cn(
+              className={cx(
                 "h-1.5 w-1.5 rounded-full",
                 active ? "bg-secondary shadow-[0_0_6px_var(--secondary)] animate-pulse-dot" : "bg-foreground-muted/40"
               )}

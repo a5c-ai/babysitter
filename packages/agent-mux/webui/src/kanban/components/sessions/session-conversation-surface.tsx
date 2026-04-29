@@ -20,7 +20,7 @@ import { ProgressBar } from "@/components/shared/progress-bar";
 import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
 import { Button } from "@/components/ui/button";
 import { useTaskTags } from "@/hooks/use-task-tags";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { useGateway } from "@/lib/agent-mux-ui";
 
 type EventBuffer = {
@@ -320,7 +320,7 @@ function MetricCard(props: { label: string; value: string; detail?: string }) {
 function SegmentBadge(props: { segment: AgentFlowSegment }) {
   return (
     <span
-      className={cn(
+      className={cx(
         "rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.16em]",
         props.segment.status === "error"
           ? "border-error/25 bg-error/10 text-error"
@@ -342,10 +342,10 @@ function TranscriptCard(props: {
 }) {
   const filePaths = props.node.filePaths.slice(0, 6);
   return (
-    <article className={cn("rounded-2xl border p-4", nodeTone(props.node.kind, props.node.status))}>
+    <article className={cx("rounded-2xl border p-4", nodeTone(props.node.kind, props.node.status))}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={cn("rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em]", badgeTone(props.node.kind, props.node.status))}>
+          <span className={cx("rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em]", badgeTone(props.node.kind, props.node.status))}>
             {props.node.kind}
           </span>
           <span className="rounded-full border border-border px-2 py-0.5 text-xs text-foreground-muted">
@@ -404,7 +404,7 @@ function TimelineCard(props: {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em]", badgeTone(props.item.kind === "lifecycle" ? "system" : props.item.kind, props.item.status))}>
+            <span className={cx("rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.18em]", badgeTone(props.item.kind === "lifecycle" ? "system" : props.item.kind, props.item.status))}>
               {props.item.kind}
             </span>
             <span className="text-sm font-medium text-foreground">{props.item.title}</span>

@@ -6,7 +6,7 @@ import {
   AlertCircle,
   Pause,
 } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { useAnimatedNumber } from "@/hooks/use-animated-number";
 import type { DashboardMetrics, DashboardStatusFilter } from "@/hooks/use-run-dashboard";
 
@@ -46,7 +46,7 @@ function MetricTile({ label, value, icon, color, pulse, testId, active, onClick 
       tabIndex={isClickable ? 0 : undefined}
       onClick={onClick}
       onKeyDown={isClickable ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } } : undefined}
-      className={cn(
+      className={cx(
         "rounded-xl border border-border bg-card/90 p-3 flex items-center gap-3 transition-all shadow-sm",
         value > 0 && color !== "primary" && "border-l-2",
         value > 0 && color !== "primary" && c.borderL,
@@ -56,11 +56,11 @@ function MetricTile({ label, value, icon, color, pulse, testId, active, onClick 
         active && c.ring,
       )}
     >
-      <div className={cn("rounded-md p-2", c.bg)}>
-        <span className={cn(c.text, pulse && "animate-pulse-dot")}>{icon}</span>
+      <div className={cx("rounded-md p-2", c.bg)}>
+        <span className={cx(c.text, pulse && "animate-pulse-dot")}>{icon}</span>
       </div>
       <div>
-        <p className={cn("text-lg font-bold tabular-nums leading-none mb-0.5", c.text)}>
+        <p className={cx("text-lg font-bold tabular-nums leading-none mb-0.5", c.text)}>
           {displayValue}
         </p>
         <p className="text-[11px] leading-tight text-foreground-muted uppercase tracking-[0.12em] font-medium">
@@ -86,7 +86,7 @@ export function KpiGrid({ metrics, statusFilter, hasStaleRuns, onToggleFilter }:
   const kpiCols = hasStaleRuns ? "grid-cols-2 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4";
 
   return (
-    <div data-testid="kpi-grid" aria-live="polite" aria-label="Key metrics" className={cn("grid gap-3 mb-6", kpiCols)}>
+    <div data-testid="kpi-grid" aria-live="polite" aria-label="Key metrics" className={cx("grid gap-3 mb-6", kpiCols)}>
       <MetricTile
         label="Total Runs"
         value={metrics.totalRuns}

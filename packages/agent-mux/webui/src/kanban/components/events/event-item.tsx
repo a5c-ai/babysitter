@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime, formatDuration } from "@/lib/utils";
 import { TruncatedId } from "@/components/shared/truncated-id";
@@ -66,7 +66,7 @@ export const EventItem = memo(function EventItem({ event, onClick }: EventItemPr
           <>
             <span className="text-xs text-foreground truncate font-medium">{label || "Task"}</span>
             {kind && (
-              <span className={cn("rounded px-1.5 py-0.5 text-xs leading-tight font-medium shrink-0", kindColors[kind] || "bg-muted text-foreground-muted")}>
+              <span className={cx("rounded px-1.5 py-0.5 text-xs leading-tight font-medium shrink-0", kindColors[kind] || "bg-muted text-foreground-muted")}>
                 {kind}
               </span>
             )}
@@ -77,7 +77,7 @@ export const EventItem = memo(function EventItem({ event, onClick }: EventItemPr
           <>
             {label && <span className="text-xs text-foreground truncate font-medium">{label}</span>}
             {!label && effectId && <TruncatedId id={effectId} chars={4} className="text-foreground-secondary" />}
-            <span className={cn(
+            <span className={cx(
               "inline-block h-2 w-2 rounded-full shrink-0",
               status === "ok" ? "bg-success shadow-[0_0_4px_var(--success)]" : status === "error" ? "bg-error shadow-[0_0_4px_var(--error)]" : "bg-foreground-muted"
             )} />

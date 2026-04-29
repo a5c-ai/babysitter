@@ -7,7 +7,7 @@ import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/ag
 import { AlertCircle, ArrowUpDown, ExternalLink, FileText, GitBranch, Loader2, MessageSquareText, Terminal, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import type { WorkspaceInventoryItem } from "@/lib/workspace-lifecycle";
 
 type WorkspaceSidebarAction =
@@ -233,7 +233,7 @@ export function WorkspaceDetailsSidebar(props: {
             {selectedSession ? (
               <div className="rounded-2xl border border-border bg-card/80 px-3 py-3">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className={cn("rounded-full border px-2 py-0.5", statusTone(runtimeTone(props.sessionStatus ?? selectedSession.status)))}>
+                  <span className={cx("rounded-full border px-2 py-0.5", statusTone(runtimeTone(props.sessionStatus ?? selectedSession.status)))}>
                     {props.sessionStatus ?? selectedSession.status}
                   </span>
                   <span className="rounded-full border border-border px-2 py-0.5 text-foreground-muted">
@@ -281,7 +281,7 @@ export function WorkspaceDetailsSidebar(props: {
                   <span className="rounded-full border border-border px-2 py-0.5 text-foreground-muted">
                     Recent runs
                   </span>
-                  <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(latestRun.status))}>
+                  <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(latestRun.status))}>
                     {latestRun.status}
                   </span>
                 </div>
@@ -295,7 +295,7 @@ export function WorkspaceDetailsSidebar(props: {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-mono text-xs text-primary">{run.runId}</span>
-                        <span className={cn("rounded-full border px-2 py-0.5 text-[11px]", lifecycleTone(run.status))}>
+                        <span className={cx("rounded-full border px-2 py-0.5 text-[11px]", lifecycleTone(run.status))}>
                           {run.status}
                         </span>
                       </div>
@@ -362,7 +362,7 @@ export function WorkspaceDetailsSidebar(props: {
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={cn(
+                  className={cx(
                     "rounded-full border px-2 py-0.5 text-[11px] uppercase",
                     statusTone(lastCommand.status === "completed" ? "success" : lastCommand.status === "failed" ? "error" : "warning"),
                   )}
@@ -438,7 +438,7 @@ export function WorkspaceDetailsSidebar(props: {
                   <span className="rounded-full border border-border px-2 py-0.5 text-foreground-muted">
                     {providerLabel(linkedPullRequest.provider)} PR {linkedPullRequest.number ? `#${linkedPullRequest.number}` : ""}
                   </span>
-                  <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.status))}>
+                  <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.status))}>
                     {linkedPullRequest.status}
                   </span>
                   <span className="rounded-full border border-border px-2 py-0.5 text-foreground-muted">
@@ -448,17 +448,17 @@ export function WorkspaceDetailsSidebar(props: {
                 <h4 className="mt-2 text-sm font-semibold">{linkedPullRequest.title}</h4>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs">
                   {linkedPullRequest.reviewStatus ? (
-                    <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.reviewStatus))}>
+                    <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.reviewStatus))}>
                       Review {linkedPullRequest.reviewStatus}
                     </span>
                   ) : null}
                   {linkedPullRequest.mergeStatus ? (
-                    <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.mergeStatus))}>
+                    <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.mergeStatus))}>
                       Merge {linkedPullRequest.mergeStatus}
                     </span>
                   ) : null}
                   {linkedPullRequest.publishStatus ? (
-                    <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.publishStatus))}>
+                    <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(linkedPullRequest.publishStatus))}>
                       Publish {linkedPullRequest.publishStatus}
                     </span>
                   ) : null}
@@ -466,7 +466,7 @@ export function WorkspaceDetailsSidebar(props: {
                 {linkedPullRequest.ciGates?.length ? (
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
                     {linkedPullRequest.ciGates.map((gate) => (
-                      <span key={`${props.workspace.path}-${gate.id}`} className={cn("rounded-full border px-2 py-0.5", lifecycleTone(gate.status))}>
+                      <span key={`${props.workspace.path}-${gate.id}`} className={cx("rounded-full border px-2 py-0.5", lifecycleTone(gate.status))}>
                         {gate.name}: {gate.status}
                       </span>
                     ))}
@@ -500,7 +500,7 @@ export function WorkspaceDetailsSidebar(props: {
                   <span className="rounded-full border border-border px-2 py-0.5 text-foreground-muted">
                     {providerLabel(integration.provider)}
                   </span>
-                  <span className={cn("rounded-full border px-2 py-0.5", lifecycleTone(integration.status))}>
+                  <span className={cx("rounded-full border px-2 py-0.5", lifecycleTone(integration.status))}>
                     {integration.status.replace(/-/g, " ")}
                   </span>
                 </div>
@@ -787,14 +787,14 @@ function ValueRow(props: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="rounded-2xl border border-border bg-card/80 px-3 py-2">
       <p className="text-[11px] uppercase tracking-[0.18em] text-foreground-muted">{props.label}</p>
-      <p className={cn("mt-1 text-sm font-medium", props.mono ? "break-all font-mono text-xs" : "")}>{props.value}</p>
+      <p className={cx("mt-1 text-sm font-medium", props.mono ? "break-all font-mono text-xs" : "")}>{props.value}</p>
     </div>
   );
 }
 
 function SectionState(props: { tone: "success" | "error" | "neutral"; title: string; body: string }) {
   return (
-    <div className={cn("rounded-2xl border px-3 py-2", statusTone(props.tone === "success" ? "success" : props.tone === "error" ? "error" : "neutral"))}>
+    <div className={cx("rounded-2xl border px-3 py-2", statusTone(props.tone === "success" ? "success" : props.tone === "error" ? "error" : "neutral"))}>
       <div className="flex items-center gap-2 text-sm font-medium">
         {props.tone === "error" ? <AlertCircle className="h-4 w-4" /> : props.tone === "success" ? <ArrowUpDown className="h-4 w-4" /> : null}
         <span>{props.title}</span>

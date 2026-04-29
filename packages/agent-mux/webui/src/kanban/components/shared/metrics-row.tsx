@@ -1,5 +1,5 @@
 import { Clock, CheckCircle2, Percent, RefreshCw, Loader2, Pause } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cx } from "@a5c-ai/compendium";
 import { formatDuration } from "@/lib/utils";
 import type { Run } from "@/types";
 
@@ -21,7 +21,7 @@ function MetricCard({ icon, label, value, valueColor, testId }: MetricCardProps)
       <div className="text-foreground-muted">{icon}</div>
       <div className="flex flex-col">
         <span className="text-xs leading-tight text-foreground-muted uppercase tracking-wider font-medium">{label}</span>
-        <span className={cn("text-lg font-semibold tabular-nums", valueColor || "text-foreground")}>{value}</span>
+        <span className={cx("text-lg font-semibold tabular-nums", valueColor || "text-foreground")}>{value}</span>
       </div>
     </div>
   );
@@ -62,7 +62,7 @@ export function MetricsRow({ run }: MetricsRowProps) {
     : <Clock className="h-4 w-4" />;
 
   return (
-    <div data-testid="metrics-row" className={cn(
+    <div data-testid="metrics-row" className={cx(
       "flex items-center divide-x divide-primary/10 px-4 py-3 border-b border-border bg-background",
       (isRunning || isWaiting) && "opacity-90"
     )}>
