@@ -508,16 +508,17 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
   const [pendingHookId, setPendingHookId] = useState<string | null>(null);
 
   const agentRecords = useStore(store, (state) => state.agents.byId);
+  const hooksByRunId = useStore(store, (state) => state.hooks.byRunId);
   const runIds = useMemo(
     () => props.runs.map((run) => String(run.runId ?? "")).filter((runId) => runId.length > 0),
     [props.runs],
   );
-  const hookRequests = useStore(
-    store,
-    (state) =>
+  const hookRequests = useMemo(
+    () =>
       runIds
-        .flatMap((runId) => state.hooks.byRunId[runId] ?? [])
+        .flatMap((runId) => hooksByRunId[runId] ?? [])
         .sort((left, right) => left.deadlineTs - right.deadlineTs),
+    [hooksByRunId, runIds],
   ) as HookRequestRecord[];
 
   const flowModel = useMemo(

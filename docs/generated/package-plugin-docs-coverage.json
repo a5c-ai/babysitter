@@ -449,16 +449,6 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/kanban",
-      "packageName": "@a5c-ai/kanban",
-      "description": "Board-, issue-, and workspace-first kanban surface with reconstructed session and run execution views",
-      "hasReadme": true,
-      "status": "Public package",
-      "canonicalHome": "../packages/kanban/README.md",
-      "supporting": [],
-      "note": "README is the canonical package-level contract."
-    },
-    {
       "surface": "packages/observer-dashboard",
       "packageName": "@a5c-ai/babysitter-observer-dashboard",
       "description": "Real-time observability dashboard for babysitter orchestration runs",

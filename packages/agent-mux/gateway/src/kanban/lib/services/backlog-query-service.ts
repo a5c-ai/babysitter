@@ -49,7 +49,7 @@ import {
   type StoredKanbanProject,
 } from './kanban-storage.js';
 
-const SOURCE_PATH = 'packages/kanban/gaps-and-debt.md';
+const SOURCE_PATH = 'packages/agent-mux/webui/src/kanban/gaps-and-debt.md';
 const PROJECT_ID = 'kanban-app';
 
 function normalizeDispatchContextLabelKey(value: string): string {
@@ -870,7 +870,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     summary:
       'Define the target product model explicitly and track the remaining work as board-product capabilities instead of treating the package as observability-first.',
     description:
-      'The package name should match the real product contract. `packages/kanban` is the shell for board planning, issue orchestration, and workspace execution, with Babysitter observability layered on top. The unresolved work is deeper product capability, not cosmetic renaming.',
+      'The browser product shell now lives in `packages/agent-mux/webui`, with shared runtime and API ownership in the surrounding agent-mux packages. The unresolved work is deeper product capability, not cosmetic renaming.',
     status: 'review',
     priority: 'high',
     labels: [debtLabel],
@@ -879,7 +879,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     acceptanceCriteria: [
       {
         id: 'KANBAN-DEBT-003-ac-1',
-        title: 'Document the target product model for packages/kanban.',
+        title: 'Document the target product model for packages/agent-mux/webui.',
         satisfied: true,
       },
       {
@@ -1182,7 +1182,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
       },
       {
         id: 'KANBAN-GAP-004-ac-4',
-        title: 'Expose review artifacts and actions through shared APIs, then compose the UX in packages/kanban.',
+        title: 'Expose review artifacts and actions through shared APIs, then compose the UX in packages/agent-mux/webui.',
         satisfied: false,
       },
     ],
@@ -1271,7 +1271,7 @@ const defaultIssues: readonly BacklogSeedIssue[] = [
     decomposition: [
       {
         id: 'KANBAN-GAP-006-decomp-1',
-        title: 'Add shared repo and PR state below packages/kanban.',
+        title: 'Add shared repo and PR state below packages/agent-mux/webui.',
         kind: 'implementation',
         status: 'done',
       },

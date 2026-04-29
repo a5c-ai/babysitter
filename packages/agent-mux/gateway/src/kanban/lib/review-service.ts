@@ -209,7 +209,7 @@ function buildDefaultArtifacts(workspacePath: string): KanbanReviewArtifact[] {
         },
         {
           id: "issue-diff-api",
-          path: "packages/kanban/src/app/api/reviews/route.ts",
+          path: "packages/agent-mux/gateway/src/kanban/routes.ts",
           additions: 22,
           deletions: 0,
           hunks: [
@@ -322,7 +322,7 @@ function buildDefaultArtifacts(workspacePath: string): KanbanReviewArtifact[] {
       diff: [
         {
           id: "workspace-diff-page",
-          path: "packages/kanban/src/components/workspaces/workspaces-page.tsx",
+          path: "packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx",
           additions: 16,
           deletions: 2,
           hunks: [
@@ -350,7 +350,7 @@ function buildDefaultArtifacts(workspacePath: string): KanbanReviewArtifact[] {
           status: "open",
           anchor: {
             fileId: "workspace-diff-page",
-            filePath: "packages/kanban/src/components/workspaces/workspaces-page.tsx",
+            filePath: "packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx",
             hunkId: "workspace-diff-page-h1",
             side: "head",
             line: 211,

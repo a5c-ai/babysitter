@@ -1020,8 +1020,8 @@ export function WorkspacesPageContent(props: {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Workspace lifecycle</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">Provisioning and worktree control</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-foreground-muted">
-              This surface keeps `packages/kanban` as the shell while inventory and lifecycle actions are derived from
-              agent-mux session `cwd` values, Babysitter run discovery, and git worktree state.
+              This surface keeps `packages/agent-mux/webui` as the browser shell while inventory and lifecycle actions
+              are derived from agent-mux session `cwd` values, Babysitter run discovery, and git worktree state.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

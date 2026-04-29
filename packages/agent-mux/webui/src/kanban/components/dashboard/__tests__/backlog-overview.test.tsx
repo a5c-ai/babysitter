@@ -1156,7 +1156,7 @@ describe("BacklogOverview", () => {
             status: "open",
             anchor: {
               fileId: "file-1",
-              filePath: "packages/kanban/src/components/dashboard/backlog-overview.tsx",
+              filePath: "packages/agent-mux/webui/src/kanban/components/dashboard/backlog-overview.tsx",
               hunkId: "hunk-1",
               side: "head",
               line: 1500,

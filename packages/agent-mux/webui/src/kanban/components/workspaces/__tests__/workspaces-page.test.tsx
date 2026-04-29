@@ -690,7 +690,7 @@ describe("workspaces-page helpers", () => {
     expect(screen.getAllByText("Pinned").length).toBeGreaterThan(0);
     expect(screen.getByText("Dev server running")).toBeInTheDocument();
     expect(screen.getByText("PR in review")).toBeInTheDocument();
-    expect(screen.getByText("Needs attention")).toBeInTheDocument();
+    expect(screen.getAllByText("Needs attention").length).toBeGreaterThan(0);
   });
 
   it("filters workspace sidebar content and reports hidden items", async () => {
@@ -892,7 +892,7 @@ describe("workspaces-page helpers", () => {
       expect(screen.getByRole("button", { name: "Flat" })).toHaveAttribute("aria-pressed", "true");
     });
 
-    expect(screen.getByDisplayValue("beta")).toBeInTheDocument();
+    expect(screen.getByLabelText("Workspace search")).toHaveValue("beta");
     expect(screen.queryByText("alpha")).not.toBeInTheDocument();
     expect(screen.getByText("Workspace list")).toBeInTheDocument();
   });
@@ -964,7 +964,7 @@ describe("workspaces-page helpers", () => {
     await user.click(screen.getByRole("button", { name: "Pin" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Pin failed.")).toBeInTheDocument();
+      expect(screen.getAllByText("Pin failed.").length).toBeGreaterThan(0);
     });
 
     expect(fetch).toHaveBeenNthCalledWith(
@@ -1051,10 +1051,10 @@ describe("workspaces-page helpers", () => {
             rebase: {
               status: "rebase-conflicts",
               attemptCount: 1,
-              unresolvedFiles: ["packages/kanban/src/lib/workspace-lifecycle.ts"],
-              resolvedFiles: ["packages/kanban/src/components/workspaces/workspaces-page.tsx"],
+              unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
+              resolvedFiles: ["packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx"],
               followUpInstructions: [
-                "Unresolved files: packages/kanban/src/lib/workspace-lifecycle.ts.",
+                "Unresolved files: packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts.",
                 "Open in editor for manual fixes, then use Mark resolved to return the workspace to review or merge readiness.",
               ],
               manualResolutionSuggested: true,
@@ -1141,7 +1141,7 @@ describe("workspaces-page helpers", () => {
               status: "ready-for-merge",
               attemptCount: 2,
               unresolvedFiles: [],
-              resolvedFiles: ["packages/kanban/src/lib/workspace-lifecycle.ts"],
+              resolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
               followUpInstructions: ["Rebase workflow completed. Continue the workspace through merge readiness."],
               manualResolutionSuggested: false,
               readyFor: "merge",
@@ -1295,7 +1295,7 @@ describe("workspaces-page helpers", () => {
             status: "open",
             anchor: {
               fileId: "file-1",
-              filePath: "packages/kanban/src/components/workspaces/workspace-details-sidebar.tsx",
+              filePath: "packages/agent-mux/webui/src/kanban/components/workspaces/workspace-details-sidebar.tsx",
               hunkId: "hunk-1",
               side: "head",
               line: 120,

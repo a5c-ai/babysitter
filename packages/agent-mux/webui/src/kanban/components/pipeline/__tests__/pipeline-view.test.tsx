@@ -89,7 +89,7 @@ describe('PipelineView', () => {
     const run = createMockRun();
     render(<PipelineView {...defaultProps} run={run} />);
     const link = screen.getByText('Projects');
-    expect(link.closest('a')).toHaveAttribute('href', '/');
+    expect(link.closest('a')).toHaveAttribute('href', '/projects');
   });
 
   // -----------------------------------------------------------------------

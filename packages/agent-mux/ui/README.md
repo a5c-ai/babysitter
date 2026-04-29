@@ -73,7 +73,7 @@ It also exposes transcript-derived fallback helpers so consumers can keep native
 Intended audience and boundary:
 
 - use `@a5c-ai/agent-mux-ui/session-flow` when a surface needs a reusable realtime execution model
-- keep product-specific routing, layout, page composition, and browser-only deep links in consuming apps such as `@a5c-ai/agent-mux-webui` and `@a5c-ai/kanban`
+- keep product-specific routing, layout, page composition, and browser-only deep links in consuming apps such as `@a5c-ai/agent-mux-webui`
 - do not treat this package as the owner of app-specific session pages or kanban workflow policy
 
 ## Validation

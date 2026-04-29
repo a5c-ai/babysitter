@@ -101,7 +101,7 @@ describe("SessionConversationSurface", () => {
     expect(screen.getByText("Live operator surface")).toBeInTheDocument();
     expect(screen.getAllByText("user").length).toBeGreaterThan(0);
     expect(screen.getByText("read_file")).toBeInTheDocument();
-    expect(screen.getByText("write src/app.ts")).toBeInTheDocument();
+    expect(screen.getAllByText("write src/app.ts").length).toBeGreaterThan(0);
     expect(screen.getByText("Tool timeout")).toBeInTheDocument();
     expect(screen.getByText("Approval feedback loop")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Attach" })).toBeEnabled();

@@ -51,7 +51,7 @@ export function AppFooter() {
         </div>
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/a5c-ai/babysitter/tree/main/packages/kanban#readme"
+            href="https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/webui#readme"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 hover:text-foreground-secondary transition-colors"

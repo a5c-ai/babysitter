@@ -1,3 +1,4 @@
+import React from "react";
 type Theme = "dark" | "light";
 export declare function useTheme(): {
     theme: Theme;

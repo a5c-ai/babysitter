@@ -4628,7 +4628,7 @@ export function BacklogOverview({
                 Repository context
               </p>
               <h3 className="mt-1 text-lg font-semibold text-foreground">
-                Shared repository settings stay below `packages/kanban`
+                Shared repository settings stay below `packages/agent-mux/webui`
               </h3>
             </div>
             <span className="rounded-full border border-border px-3 py-1 text-xs text-foreground-muted">

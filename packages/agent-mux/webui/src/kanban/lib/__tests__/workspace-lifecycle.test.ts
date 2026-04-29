@@ -58,7 +58,7 @@ function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceL
         stderr: "",
       },
       [`${mainPath}::status --porcelain`]: { stdout: "", stderr: "" },
-      [`${taskPath}::status --porcelain`]: { stdout: " M packages/kanban/src/app/page.tsx\n", stderr: "" },
+      [`${taskPath}::status --porcelain`]: { stdout: " M packages/agent-mux/webui/src/pages/KanbanLayout.tsx\n", stderr: "" },
       [`${mainPath}::branch --show-current`]: { stdout: "main\n", stderr: "" },
       [`${taskPath}::branch --show-current`]: { stdout: "vk/task\n", stderr: "" },
       [`${mainPath}::rev-parse HEAD`]: { stdout: "abc123\n", stderr: "" },
@@ -130,7 +130,7 @@ describe("WorkspaceLifecycleService", () => {
           rebase: {
             status: "rebase-needed",
             attemptCount: 0,
-            unresolvedFiles: ["packages/kanban/src/lib/workspace-lifecycle.ts"],
+            unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
             resolvedFiles: [],
             followUpInstructions: ["Retry the rebase before merge readiness."],
             manualResolutionSuggested: false,
@@ -311,8 +311,8 @@ describe("WorkspaceLifecycleService", () => {
             status: "rebase-needed",
             attemptCount: 0,
             unresolvedFiles: [
-              "packages/kanban/src/components/workspaces/workspaces-page.tsx",
-              "packages/kanban/src/lib/workspace-lifecycle.ts",
+              "packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx",
+              "packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts",
             ],
             resolvedFiles: [],
             followUpInstructions: [],
@@ -388,7 +388,7 @@ describe("WorkspaceLifecycleService", () => {
           rebase: {
             status: "rebase-conflicts",
             attemptCount: 1,
-            unresolvedFiles: ["packages/kanban/src/lib/workspace-lifecycle.ts"],
+            unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
             resolvedFiles: [],
             followUpInstructions: [],
             manualResolutionSuggested: true,

@@ -70,7 +70,7 @@ function makeInventory() {
           targetBranch: 'main',
           attemptCount: 2,
           unresolvedFiles: ['packages/agent-mux/tui/src/plugins/workspaces-view.tsx'],
-          resolvedFiles: ['packages/kanban/src/lib/workspace-lifecycle.ts'],
+          resolvedFiles: ['packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts'],
           followUpInstructions: ['Resolve the remaining workspace-view conflicts.'],
           manualResolutionSuggested: true,
           readyFor: 'merge',

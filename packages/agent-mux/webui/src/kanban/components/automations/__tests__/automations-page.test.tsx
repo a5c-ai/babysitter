@@ -186,7 +186,7 @@ describe("AutomationsPage", () => {
     expect(screen.getByText("failing")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /KANBAN-AUTO-201/i })).toHaveAttribute(
       "href",
-      "/issues/KANBAN-AUTO-201",
+      "/projects/kanban-app/board?issueId=KANBAN-AUTO-201&issueKey=KANBAN-AUTO-201",
     );
   });
 
