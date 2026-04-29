@@ -1,13 +1,12 @@
 /**
  * @process product-management/task-to-prd
- * @description Orchestrate conversion of a raw task (tracker ticket / file / inline text) into a fully characterized PRD via interactive clarification, automated verification, and user-gated refinement. Stack-agnostic. Wraps the task-to-prd skill.
- * @skill task-to-prd library/specializations/product-management/skills/task-to-prd/SKILL.md
+ * @description Orchestrate conversion of a raw task (tracker ticket / file / inline text) into a fully characterized PRD via interactive clarification, automated verification, and user-gated refinement. Stack-agnostic. Self-contained — the task-to-prd skill dispatches here via /babysitter:call or /babysitter:yolo.
  * @inputs { input: string, featureBranch: string, contextDoc?: string, archiveDir?: string, trackerHint?: string, secondaryReviewer?: string, requireFinalApproval?: boolean }
  * @outputs { success: boolean, prdPath: string, decisionLog: array, followupPrompt: string, summary: string }
  *
  * Phases:
  * 1. Clarification (interactive) - load source, Five Whys, interactive Q&A, scope-lock breakpoint
- * 2. Draft (automatic) - parallel codebase scan + draft PRD via the task-to-prd skill
+ * 2. Draft (automatic) - parallel codebase scan + draft PRD inline (full instructions embedded in agent prompt)
  * 3. Verification (with user gates) - what-could-go-wrong, consistency, conventions, adversarial, quality checklist, optional secondary reviewer; every proposed change goes through a per-finding breakpoint
  * 4. Finalize - final review breakpoint, optional tracker update, emit follow-up prompt
  */
@@ -53,7 +52,7 @@ export async function process(inputs, ctx) {
     rawTask: sourceLoad.rawTask
   });
 
-  // Interactive clarification — handed to the user; the task-to-prd skill drives the Q&A loop
+  // Interactive clarification — handed to the user via the harness Q&A mechanism
   const clarification = await ctx.breakpoint({
     question: [
       'Interactive Clarification phase begins now.',
@@ -61,7 +60,7 @@ export async function process(inputs, ctx) {
       `**Task summary:** ${sourceLoad.summary || sourceLoad.rawTask?.slice(0, 200)}`,
       `**Five Whys gaps:** ${(fiveWhys.openQuestions || []).length} open question(s)`,
       '',
-      'The task-to-prd skill will ask one question at a time (explanation + recommendation + 2-4 options). You may answer directly or say "I will ask <stakeholder>" — paste their answer back when ready.',
+      'The clarification loop will ask one question at a time (explanation + recommendation + 2-4 options). You may answer directly or say "I will ask <stakeholder>" — paste their answer back when ready.',
       '',
       'Approve to start the clarification loop, or reject to cancel.'
     ].join('\n'),
@@ -101,7 +100,7 @@ export async function process(inputs, ctx) {
   // PHASE 2: DRAFT (AUTOMATIC)
   // ============================================================================
 
-  ctx.log('info', 'Phase 2: Drafting PRD via task-to-prd skill');
+  ctx.log('info', 'Phase 2: Drafting PRD');
 
   const [scanResult, draftResult] = await ctx.parallel.all([
     () => ctx.task(codebaseScanTask, { scope: decisionLog.scope, contextDoc }),
@@ -307,20 +306,21 @@ export const fiveWhysTask = defineTask('five-whys', (args, taskCtx) => ({
 
 export const clarificationLoopTask = defineTask('clarification-loop', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Interactive clarification loop (driven by task-to-prd skill)',
+  title: 'Interactive clarification loop',
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'Clarification-loop driver invoking the task-to-prd skill',
+      role: 'Clarification-loop driver running an interactive Q&A pass',
       task: 'Run the interactive clarification loop. Ask one question at a time, in English, with explanation + recommendation + 2-4 options. Track every Q&A in a Decision Log with attribution.',
       context: { rawTask: args.rawTask, fiveWhys: args.fiveWhys, contextDoc: args.contextDoc },
       instructions: [
-        'Invoke the task-to-prd skill (via the Skill tool) to drive the clarification loop — Phase 1 of the skill',
-        'Use the harness Q&A mechanism (e.g., AskUserQuestion) for each question',
-        'User may answer directly OR say "I will ask <stakeholder>" — wait for them to paste back the answer',
-        'Continue until all open questions from the Five Whys are resolved (or the user explicitly closes them as out-of-scope)',
-        'Detect scope: which layers are affected (data-pipeline, backend, frontend, infra, docs)',
-        'Maintain a running Decision Log: each entry has question, answer, attribution (user / <stakeholder name>)'
+        'Use the harness interactive Q&A mechanism (e.g., AskUserQuestion). Ask one question at a time.',
+        'Each question MUST include: short explanation of what is unclear + why it matters + recommendation + 2-4 options. Language: English.',
+        'Iterate over the open questions from the Five Whys analysis until all are resolved or explicitly marked out-of-scope by the user',
+        'User may answer directly OR say "I will ask <stakeholder>" — wait for them to paste back the answer; tag the entry with that stakeholder in the Decision Log',
+        'Detect scope as a side-effect: which layers are affected (data-pipeline, backend, frontend, infra, docs)',
+        'Maintain a running Decision Log: each entry has question, answer, attribution (user / <stakeholder name>)',
+        'When all questions are resolved, summarize: problem summary, scope, constraints, decision-log entries, any remaining open questions'
       ],
       outputFormat: 'JSON with keys: problemSummary (string), scope (array of strings), constraints (array of strings), entries (array of {question, answer, attribution}), openQuestions (array of strings)'
     },
@@ -337,7 +337,7 @@ export const clarificationLoopTask = defineTask('clarification-loop', (args, tas
     }
   },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
-  labels: ['agent', 'phase-1', 'clarification', 'invokes-skill']
+  labels: ['agent', 'phase-1', 'clarification']
 }));
 
 export const codebaseScanTask = defineTask('codebase-scan', (args, taskCtx) => ({
@@ -372,12 +372,12 @@ export const codebaseScanTask = defineTask('codebase-scan', (args, taskCtx) => (
 
 export const draftPrdTask = defineTask('draft-prd', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Draft PRD via task-to-prd skill',
+  title: 'Draft PRD file',
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'PRD drafter wrapping the task-to-prd Claude Code skill',
-      task: 'Invoke the task-to-prd skill (via the Skill tool) to draft the PRD file using clarification + scope-lock results. Return the absolute PRD file path.',
+      role: 'PRD author writing a production-ready PRD from clarification and scope-lock results',
+      task: `Generate a PRD file at <tasks-dir>/${args.featureBranch}-PRD.md using the Decision Log, Five Whys analysis, and codebase context. Return the absolute PRD path.`,
       context: {
         input: args.input,
         featureBranch: args.featureBranch,
@@ -387,11 +387,24 @@ export const draftPrdTask = defineTask('draft-prd', (args, taskCtx) => ({
         fiveWhys: args.fiveWhys
       },
       instructions: [
-        'Invoke the task-to-prd skill — Phase 2 (PRD Draft)',
-        `Output path: <tasks-dir>/${args.featureBranch}-PRD.md (the skill resolves the tasks-dir from project conventions)`,
-        'PRD sections must include: Background (with Five Whys), Root Cause, Agreed Solution, Scope (exhaustive file list), Edge Cases, Technical Constraints, Data Flow (if applicable), Decision Log (with attribution), Definition of Done, Open Questions',
-        'PRD must be proportional to the task size',
-        'Do NOT create a SPEC — only a PRD'
+        'The PRD must contain these top-level sections in order:',
+        '  1. **Background** — include the Five Whys findings verbatim',
+        '  2. **Root Cause** — distilled from the Five Whys',
+        '  3. **Agreed Solution** — the locked scope from the Decision Log',
+        '  4. **Scope** — exhaustive file list by layer (data-pipeline / backend / frontend / infra / docs as applicable)',
+        '  5. **Edge Cases** — every edge case raised during clarification or risk analysis',
+        '  6. **Technical Constraints** — performance, security, compatibility, integration',
+        '  7. **Data Flow** (if applicable) — diagram or step-by-step description',
+        '  8. **Decision Log** — every Q&A from the clarification loop with attribution (user / <stakeholder name>)',
+        '  9. **Definition of Done** — testable, exhaustive checklist',
+        '  10. **Open Questions** — any clarifications that remain unresolved',
+        'The PRD must be proportional to the task size — concise for a 1-line fix, detailed for a multi-layer feature',
+        `Resolve the tasks-dir from project conventions (read ${args.contextDoc}); fall back to docs/active/ if unspecified`,
+        args.archiveDir
+          ? `Reference style from previous PRDs in ${args.archiveDir} for inspiration only — never as a rigid template`
+          : 'No PRD archive configured — write fresh',
+        'Do NOT create a SPEC — only a PRD. The /prd-to-spec skill is the next step.',
+        'Return the absolute PRD file path; if there is a hard error, report it without silent continuation'
       ],
       outputFormat: 'JSON with keys: prdPath (string), generatedSections (array of strings)'
     },
@@ -405,7 +418,7 @@ export const draftPrdTask = defineTask('draft-prd', (args, taskCtx) => ({
     }
   },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
-  labels: ['agent', 'phase-2', 'draft-prd', 'invokes-skill']
+  labels: ['agent', 'phase-2', 'draft-prd']
 }));
 
 export const whatCouldGoWrongTask = defineTask('what-could-go-wrong', (args, taskCtx) => ({

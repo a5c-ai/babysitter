@@ -1,13 +1,12 @@
 /**
  * @process product-management/prd-to-spec
- * @description Orchestrate conversion of an approved PRD into a phase-gated implementation SPEC. Stack-agnostic. Wraps the prd-to-spec skill with verification, self-review, and an execution-prompt output.
- * @skill prd-to-spec library/specializations/product-management/skills/prd-to-spec/SKILL.md
+ * @description Orchestrate conversion of an approved PRD into a phase-gated implementation SPEC. Stack-agnostic. Self-contained — the prd-to-spec skill dispatches here via /babysitter:call or /babysitter:yolo.
  * @inputs { prdPath: string, featureBranch: string, baseBranch?: string, contextDoc?: string, archiveDir?: string, failureLogPath?: string, secondaryReviewer?: string, requireApproval?: boolean }
  * @outputs { success: boolean, specPath: string, executionPrompt: string, summary: string }
  *
  * Phases:
  * 1. Discovery & Verification Ledger - read PRD + project context, scan affected layers, build ledger
- * 2. SPEC Generation - invoke the prd-to-spec skill to produce the SPEC file
+ * 2. SPEC Generation - generate the phase-gated SPEC file inline (full structure embedded in agent prompt)
  * 3. Self-Verification - internal review + optional secondary reviewer + user approval breakpoint
  * 4. Execution Prompt - emit the short prompt that drives downstream execution
  */
@@ -194,12 +193,12 @@ export const discoveryTask = defineTask('discovery', (args, taskCtx) => ({
 
 export const generateSpecTask = defineTask('generate-spec', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Generate SPEC by invoking the prd-to-spec skill',
+  title: 'Generate phase-gated SPEC file',
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'SPEC generator wrapping the prd-to-spec Claude Code skill',
-      task: 'Invoke the prd-to-spec skill (via the Skill tool) to produce a phase-gated SPEC file from the PRD and discovery results. Return the SPEC file path.',
+      role: 'SPEC author writing a production-ready, phase-gated implementation SPEC',
+      task: `Generate a phase-gated SPEC file at <tasks-dir>/${args.featureBranch}-SPEC.md based on the PRD at "${args.prdPath}" and the discovery results from Phase 1. Return the absolute SPEC path.`,
       context: {
         prdPath: args.prdPath,
         featureBranch: args.featureBranch,
@@ -208,12 +207,25 @@ export const generateSpecTask = defineTask('generate-spec', (args, taskCtx) => (
         discovery: args.discovery
       },
       instructions: [
-        `Invoke the prd-to-spec skill with input: ${args.prdPath}`,
-        'The skill follows its own internal phases: Pre-Check, Execute (TDD), Pipeline/UI Verification, Conventions Fix, Completeness, Code Review, Deliver',
-        `Pass through: featureBranch=${args.featureBranch}, baseBranch=${args.baseBranch}, contextDoc=${args.contextDoc}`,
-        'Pass through the discovery results (Verification Ledger, scope, blocking PRs, prior failures) as Phase 1 inputs',
-        'After the skill produces the SPEC, return the absolute path to the SPEC file',
-        'If the skill encounters a hard error, report it back; do not silently continue'
+        'The SPEC must contain these top-level sections in order:',
+        '  1. **Header** — Title, Source PRD path, Tracker Task link (if applicable), Branch, Quality Gate (each phase >= 0.85)',
+        '  2. **Prerequisites** — files to read before execution; MUST include the project-local failure-log.md if configured',
+        '  3. **Known Divergences** (if applicable) — intentional differences between related files',
+        '  4. **Verification Ledger** — table of PRD claims vs. actual code findings (use the table from discovery verbatim)',
+        '  5. **Phase 1: Pre-Check** — first numbered step is to read failure-log.md and internalize patterns; branch from base-branch; verify dependencies merged; read project conventions',
+        '  6. **Phase 2: Execute (TDD)** — for every sub-task: failing test FIRST (RED) → minimal implementation (GREEN) → refactor (IMPROVE); list sub-tasks with exact file paths, line numbers, current code, target code; include edge case matrix',
+        '  7. **Phase 3: Local Pipeline Verification & Data Quality** — run project test suite; if data-pipeline/backend changed → Pipeline Verification BREAKPOINT (materialize/run, data-quality spot-check, downstream consumers); if UI changed → UI Verification BREAKPOINT (start dev server, seed test data, present URL+credentials, wait); if neither applies → skip',
+        '  8. **Phase 4: Conventions Fix** — project conventions check; project linter+formatter+type-checker on changed files only',
+        '  9. **Phase 5: Completeness (Hard Gate)** — verify every Definition-of-Done item with file:line evidence; YES/NO gate questions',
+        '  10. **Phase 6: Code Review** — primary review (mandatory); 1-2 independent secondary reviews (optional); re-run tests after fixes',
+        '  11. **Phase 7: Deliver** — BREAKPOINT for user approval; Pre-Push Personal Docs Check (mandatory gate); commit, push, open PR; tracker update (optional); rollback plan; post-deploy monitoring',
+        '  12. **Execution Constraints** — scope boundary, exhaustive file list, what does NOT change',
+        'Apply Smart Scope Detection from discovery: skip Phase 3 sub-sections that target irrelevant layers',
+        'Every phase MUST have a Quality Gate checklist (target score >= 0.85)',
+        'The SPEC must be proportional to the task — concise for small changes, detailed for multi-layer refactors',
+        'Use the Verification Ledger from discovery verbatim; do NOT regenerate it',
+        `Resolve the tasks-dir from project conventions (read ${args.contextDoc}); fall back to docs/active/ if unspecified`,
+        'Return the absolute SPEC file path; if there is a hard error, report it without silent continuation'
       ],
       outputFormat: 'JSON with keys: specPath (string), generatedSections (array of strings)'
     },
@@ -227,7 +239,7 @@ export const generateSpecTask = defineTask('generate-spec', (args, taskCtx) => (
     }
   },
   io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` },
-  labels: ['agent', 'phase-2', 'spec-generation', 'invokes-skill']
+  labels: ['agent', 'phase-2', 'spec-generation']
 }));
 
 export const selfReviewTask = defineTask('self-review', (args, taskCtx) => ({
