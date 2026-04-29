@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom-v6';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { useParams, useSearchParams } from 'react-router-dom-v6';
@@ -151,16 +151,16 @@ export function KanbanRunsPage(): JSX.Element {
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button variant="primary">
-              <Link href="/projects">Open projects</Link>
+              <Link to="/projects">Open projects</Link>
             </Button>
             <Button variant="ghost">
-              <Link href="/sessions/new">Start session</Link>
+              <Link to="/sessions/new">Start session</Link>
             </Button>
             <Button variant="ghost">
-              <Link href="/workspaces">Open workspaces</Link>
+              <Link to="/workspaces">Open workspaces</Link>
             </Button>
             <Button variant="ghost">
-              <Link href="/inbox">Open inbox</Link>
+              <Link to="/inbox">Open inbox</Link>
             </Button>
           </div>
         </PageSection>
@@ -177,7 +177,7 @@ export function KanbanRunsPage(): JSX.Element {
           </p>
           <div className="mt-5">
             <Button variant="ghost">
-              <Link href={isAuthenticated ? '/sessions' : '/login'}>
+              <Link to={isAuthenticated ? '/sessions' : '/login'}>
                 {isAuthenticated ? 'Open sessions' : 'Connect gateway'}
               </Link>
             </Button>

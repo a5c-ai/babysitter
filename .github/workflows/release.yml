@@ -560,18 +560,25 @@ jobs:
       matrix:
         include:
           - name: babysitter-sdk
+            build: npm run build:sdk
             publish: npm publish --workspace=@a5c-ai/babysitter-sdk --access public
           - name: agent-plugins-mux
+            build: npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-plugins-mux
             publish: npm publish --workspace=@a5c-ai/agent-plugins-mux --access public
           - name: observer-dashboard
+            build: npm run build:observer
             publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public
           - name: cloud
+            build: npm run build:cloud
             publish: npm publish --workspace=@a5c-ai/cloud --access public
           - name: breakpoints-mux
+            build: npm run build --workspace=@a5c-ai/breakpoints-mux
             publish: npm publish --workspace=@a5c-ai/breakpoints-mux --access public
           - name: hooks-mux-core
+            build: npm run build:hooks-mux
             publish: npm publish --workspace=@a5c-ai/hooks-mux-core --access public
           - name: agent-mux-observability
+            build: npm run build:agent-mux
             publish: npm publish --workspace=@a5c-ai/agent-mux-observability --access public
     steps:
       - name: Download release publish workspace
@@ -597,6 +604,9 @@ jobs:
         run: |
           npm ci
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build package workspace
+        run: ${{ matrix.build }}
 
       - name: Publish package
         env:

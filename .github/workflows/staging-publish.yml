@@ -871,7 +871,7 @@ jobs:
             build: npm run build:sdk
             publish: npm publish --workspace=@a5c-ai/babysitter-sdk --access public --tag staging
           - name: agent-plugins-mux
-            build: npm run build --workspace=@a5c-ai/agent-plugins-mux
+            build: npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-plugins-mux
             publish: npm publish --workspace=@a5c-ai/agent-plugins-mux --access public --tag staging
           - name: observer-dashboard
             build: npm run build:observer
