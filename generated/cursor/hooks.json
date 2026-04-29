@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/babysitter-proxied-session-start.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-session-start.ps1\"",
+        "timeoutSec": 30
+      }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "bash": "bash \"./hooks/babysitter-proxied-stop.sh\"",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"./hooks/babysitter-proxied-stop.ps1\"",
+        "loop_limit": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "description": "babysitter plugin hooks for Gemini CLI",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "babysitter-session-start",
+            "type": "command",
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter gemini --handler 'bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-session-start.sh' --json\"",
+            "timeout": 30000,
+            "description": "babysitter SessionStart hook"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "name": "babysitter-after-agent",
+            "type": "command",
+            "command": "npx -y -p @a5c-ai/hooks-mux-cli -c \"a5c-hooks-mux invoke --adapter gemini --handler 'bash ${GEMINI_EXTENSION_PATH}/hooks/babysitter-proxied-after-agent.sh' --json\"",
+            "timeout": 30000,
+            "description": "babysitter AfterAgent hook"
+          }
+        ]
+      }
+    ]
+  }
+}

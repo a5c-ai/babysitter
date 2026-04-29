@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -46,29 +46,27 @@ jobs:
           npm ci
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build agent-plugins-mux compiler
-        run: |
-          set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-plugins-mux
-
       - name: Generate all target plugins
         run: |
           set -euo pipefail
-          node scripts/generate-plugins.mjs \
-            --output generated-plugins
+          npm run generate:plugins
 
       - name: Compare with existing plugins
+        id: compare_plugins
+        continue-on-error: true
         run: |
           set -euo pipefail
-          node scripts/generate-plugins.mjs \
-            --output generated-plugins \
-            --compare . || true
+          node scripts/generate-plugins.mjs --output generated --compare . --compare-only
+
+      - name: Warn on manual plugin drift
+        if: steps.compare_plugins.outcome == 'failure'
+        run: echo "::warning::Generated plugins differ from the manually maintained plugins. Review the compare output before syncing them."
 
       - name: Upload generated plugins
         uses: actions/upload-artifact@v4
         with:
-          name: generated-plugins
-          path: generated-plugins/
+          name: generated
+          path: generated/
           if-no-files-found: error
 
       - name: Commit generated plugins
@@ -80,31 +78,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Copy generated output over existing plugin dirs
-          for target_dir in generated-plugins/*/; do
-            target=$(basename "$target_dir")
-            case "$target" in
-              claude-code) dest="plugins/babysitter" ;;
-              codex) dest="plugins/babysitter-codex" ;;
-              cursor) dest="plugins/babysitter-cursor" ;;
-              gemini) dest="plugins/babysitter-gemini" ;;
-              github-copilot) dest="plugins/babysitter-github" ;;
-              pi) dest="plugins/babysitter-pi" ;;
-              oh-my-pi) dest="plugins/babysitter-omp" ;;
-              opencode) dest="plugins/babysitter-opencode" ;;
-              openclaw) dest="plugins/babysitter-openclaw" ;;
-              *) continue ;;
-            esac
-
-            echo "Syncing $target -> $dest"
-            # Only copy files that the compiler generates (don't delete hand-maintained extras)
-            cp -r "$target_dir"* "$dest/" 2>/dev/null || true
-          done
-
-          git add plugins/
+          git add generated/
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: regenerate target plugins from unified source [skip staging]"
-            git push origin HEAD:$BRANCH_NAME
+            git commit -m "chore: refresh generated plugins snapshot [skip staging]"
+            if git push origin HEAD:$BRANCH_NAME 2>/dev/null; then
+              echo "Generated plugins committed and pushed."
+            elif git pull --rebase --autostash origin "$BRANCH_NAME" 2>/dev/null && git push origin HEAD:$BRANCH_NAME 2>/dev/null; then
+              echo "Generated plugins committed after rebase."
+            else
+              echo "::warning::Could not push generated snapshot commit due to a concurrent branch update."
+              git rebase --abort 2>/dev/null || true
+            fi
           fi

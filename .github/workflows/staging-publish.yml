@@ -14,8 +14,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate:
+  validate_core:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Validate Core Runtime
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -40,173 +41,380 @@ jobs:
       - name: Prepare artifacts directory
         run: |
           set -euo pipefail
-          mkdir -p artifacts/logs
+          mkdir -p artifacts/core-logs
 
       - name: Check command surface sync
         run: |
           set -euo pipefail
-          npm run check:plugin-commands 2>&1 | tee artifacts/logs/plugin-command-sync.log
+          npm run check:plugin-commands 2>&1 | tee artifacts/core-logs/plugin-command-sync.log
 
       - name: Verify metadata
         run: |
           set -euo pipefail
-          npm run verify:metadata 2>&1 | tee artifacts/logs/metadata.log
+          npm run verify:metadata 2>&1 | tee artifacts/core-logs/metadata.log
 
       - name: Architecture boundary gate
         run: |
           set -euo pipefail
-          npm run test:architecture 2>&1 | tee artifacts/logs/architecture.log
-
-      - name: Build runtime graph
-        run: |
-          set -euo pipefail
-          npm run build:runtime 2>&1 | tee artifacts/logs/build.log
+          npm run test:architecture 2>&1 | tee artifacts/core-logs/architecture.log
 
       - name: Lint SDK
         run: |
           set -euo pipefail
-          npm run lint --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee artifacts/logs/lint.log
+          npm run lint --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee artifacts/core-logs/lint.log
+
+      - name: Build runtime graph
+        run: |
+          set -euo pipefail
+          npm run build:runtime 2>&1 | tee artifacts/core-logs/runtime-build.log
 
       - name: SDK tests
         run: |
           set -euo pipefail
-          npm run test:sdk 2>&1 | tee artifacts/logs/sdk-tests.log
+          npm run test:sdk 2>&1 | tee artifacts/core-logs/sdk-tests.log
 
-      - name: Build hooks-mux
+      - name: agent-core tests
         run: |
           set -euo pipefail
-          npm run build:hooks-mux 2>&1 | tee artifacts/logs/hooks-mux-build.log
+          npm run test --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/core-logs/agent-core-tests.log
+
+      - name: babysitter-harness tests
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/babysitter-agent 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
+
+      - name: Upload core validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-core-logs
+          path: artifacts/core-logs
+          if-no-files-found: warn
+
+  validate_mux:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Validate Mux Surfaces
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/mux-logs
 
       - name: Hooks-proxy unit tests
         run: |
           set -euo pipefail
-          npm run test:hooks-mux 2>&1 | tee artifacts/logs/hooks-mux-tests.log
-
-      - name: Build agent-mux packages
-        run: |
-          set -euo pipefail
-          npm run build:agent-mux 2>&1 | tee artifacts/logs/agent-mux-build.log
+          npm run test:hooks-mux 2>&1 | tee artifacts/mux-logs/hooks-mux-tests.log
 
       - name: agent-mux tests
         run: |
           set -euo pipefail
-          npm run test:agent-mux 2>&1 | tee artifacts/logs/agent-mux-tests.log
+          npm run test:agent-mux 2>&1 | tee artifacts/mux-logs/agent-mux-tests.log
 
       - name: agent-mux-tui release verification
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/logs/agent-mux-tui-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/mux-logs/agent-mux-tui-release.log
 
       - name: agent-mux-core release verification
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-core 2>&1 | tee artifacts/logs/agent-mux-core-release.log
-
-      - name: Build realtime flow surfaces
-        run: |
-          set -euo pipefail
-          npm run build:realtime-flow 2>&1 | tee artifacts/logs/realtime-flow-build.log
-
-      - name: Realtime flow tests
-        run: |
-          set -euo pipefail
-          npm run test:realtime-flow 2>&1 | tee artifacts/logs/realtime-flow-tests.log
-
-      - name: Realtime flow release verification
-        run: |
-          set -euo pipefail
-          npm run verify:realtime-flow-release 2>&1 | tee artifacts/logs/realtime-flow-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-mux-core 2>&1 | tee artifacts/mux-logs/agent-mux-core-release.log
 
       - name: Validate transport-mux runtime owner
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/logs/transport-mux-build.log
-          npm run test --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/logs/transport-mux-tests.log
-          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/logs/transport-mux-scorecard.log
+          npm run build --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/mux-logs/transport-mux-build.log
+          npm run test --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/mux-logs/transport-mux-tests.log
+          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/mux-logs/transport-mux-scorecard.log
+
+      - name: Upload mux validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-mux-logs
+          path: artifacts/mux-logs
+          if-no-files-found: warn
+
+  validate_cloud:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Validate Cloud Workspace
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/cloud-logs
 
       - name: Validate cloud deployment workspace
         run: |
           set -euo pipefail
-          npm run build:cloud 2>&1 | tee artifacts/logs/cloud-build.log
-          npm run test:cloud 2>&1 | tee artifacts/logs/cloud-tests.log
-          npm run coverage:cloud 2>&1 | tee artifacts/logs/cloud-coverage.log
-          npm run verify:cloud-release 2>&1 | tee artifacts/logs/cloud-release.log
+          npm run build:cloud 2>&1 | tee artifacts/cloud-logs/cloud-build.log
+          npm run test:cloud 2>&1 | tee artifacts/cloud-logs/cloud-tests.log
+          npm run coverage:cloud 2>&1 | tee artifacts/cloud-logs/cloud-coverage.log
+          npm run verify:cloud-release 2>&1 | tee artifacts/cloud-logs/cloud-release.log
+
+      - name: Upload cloud validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-cloud-logs
+          path: artifacts/cloud-logs
+          if-no-files-found: warn
+
+  validate_observer_and_compiler:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Validate Observer And Compiler
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/observer-compiler-logs
 
       - name: Build and test agent-plugins-mux
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/logs/agent-plugins-mux-build.log
-          npm run test --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/logs/agent-plugins-mux-tests.log
+          npm run build --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/observer-compiler-logs/agent-plugins-mux-build.log
+          npm run test --workspace=@a5c-ai/agent-plugins-mux 2>&1 | tee artifacts/observer-compiler-logs/agent-plugins-mux-tests.log
 
       - name: Build and test observer-dashboard
         run: |
           set -euo pipefail
-          npm run build:observer 2>&1 | tee artifacts/logs/observer-dashboard-build.log
-          npm run test:observer 2>&1 | tee artifacts/logs/observer-dashboard-tests.log
+          npm run build:observer 2>&1 | tee artifacts/observer-compiler-logs/observer-dashboard-build.log
+          npm run test:observer 2>&1 | tee artifacts/observer-compiler-logs/observer-dashboard-tests.log
 
-      - name: Build and test babysitter-harness
-        run: |
-          set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/logs/agent-core-build.log
-          npm run build --workspace=@a5c-ai/babysitter-agent 2>&1 | tee artifacts/logs/babysitter-harness-build.log
-          npm run test --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/logs/agent-core-tests.log
-          npm run test --workspace=@a5c-ai/babysitter-agent 2>&1 | tee artifacts/logs/babysitter-harness-tests.log
-
-      - name: babysitter-codex package tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-codex 2>&1 | tee artifacts/logs/babysitter-codex-tests.log
-
-      - name: babysitter-github plugin validation
-        run: |
-          set -euo pipefail
-          bash plugins/babysitter-github/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-github-validate.log
-
-      - name: babysitter-cursor plugin validation
-        run: |
-          set -euo pipefail
-          bash plugins/babysitter-cursor/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-cursor-validate.log
-
-      - name: babysitter-gemini plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-gemini 2>&1 | tee artifacts/logs/babysitter-gemini-tests.log
-
-      - name: babysitter-pi plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-pi 2>&1 | tee artifacts/logs/babysitter-pi-tests.log
-
-      - name: babysitter-omp plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-omp 2>&1 | tee artifacts/logs/babysitter-omp-tests.log
-
-      - name: babysitter-opencode plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-opencode 2>&1 | tee artifacts/logs/babysitter-opencode-tests.log
-
-      - name: babysitter-openclaw plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-openclaw 2>&1 | tee artifacts/logs/babysitter-openclaw-tests.log
-
-      - name: babysitter-paperclip plugin tests
-        run: |
-          set -euo pipefail
-          npm test --prefix plugins/babysitter-paperclip 2>&1 | tee artifacts/logs/babysitter-paperclip-tests.log
-
-      - name: Upload build logs
+      - name: Upload observer and compiler logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs
-          path: artifacts/logs
+          name: staging-observer-compiler-logs
+          path: artifacts/observer-compiler-logs
           if-no-files-found: warn
+
+  validate_plugins:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Validate Plugin ${{ matrix.slug }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: babysitter-codex
+            command: npm test --prefix plugins/babysitter-codex
+            log: babysitter-codex-tests.log
+          - slug: babysitter-github
+            command: bash plugins/babysitter-github/test/plugin-validate.sh
+            log: babysitter-github-validate.log
+          - slug: babysitter-cursor
+            command: bash plugins/babysitter-cursor/test/plugin-validate.sh
+            log: babysitter-cursor-validate.log
+          - slug: babysitter-gemini
+            command: npm test --prefix plugins/babysitter-gemini
+            log: babysitter-gemini-tests.log
+          - slug: babysitter-pi
+            command: npm test --prefix plugins/babysitter-pi
+            log: babysitter-pi-tests.log
+          - slug: babysitter-omp
+            command: npm test --prefix plugins/babysitter-omp
+            log: babysitter-omp-tests.log
+          - slug: babysitter-opencode
+            command: npm test --prefix plugins/babysitter-opencode
+            log: babysitter-opencode-tests.log
+          - slug: babysitter-openclaw
+            command: npm test --prefix plugins/babysitter-openclaw
+            log: babysitter-openclaw-tests.log
+          - slug: babysitter-paperclip
+            command: npm test --prefix plugins/babysitter-paperclip
+            log: babysitter-paperclip-tests.log
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/plugin-logs
+
+      - name: Run plugin validation
+        run: |
+          set -euo pipefail
+          ${{ matrix.command }} 2>&1 | tee "artifacts/plugin-logs/${{ matrix.log }}"
+
+      - name: Upload plugin validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-${{ matrix.slug }}-logs
+          path: artifacts/plugin-logs
+          if-no-files-found: warn
+
+  generated_plugins:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Generate Plugin Snapshots
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/generated-plugin-logs
+
+      - name: Generate plugin snapshots
+        run: |
+          set -euo pipefail
+          npm run generate:plugins 2>&1 | tee artifacts/generated-plugin-logs/generated-plugins.log
+
+      - name: Compare generated plugins with manual plugins
+        id: compare_plugins
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          node scripts/generate-plugins.mjs --output generated --compare . --compare-only 2>&1 | tee artifacts/generated-plugin-logs/generated-plugins-compare.log
+
+      - name: Warn on manual plugin drift
+        if: steps.compare_plugins.outcome == 'failure'
+        run: echo "::warning::Generated plugins differ from the manually maintained plugin directories. Review staging-generated-plugin-logs for the drift report."
+
+      - name: Upload generated plugin artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-generated-plugins
+          path: generated
+          if-no-files-found: warn
+
+      - name: Upload generated plugin logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-generated-plugin-logs
+          path: artifacts/generated-plugin-logs
+          if-no-files-found: warn
+
+      - name: Commit generated plugin snapshots
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add generated/
+          if git diff --cached --quiet; then
+            echo "No generated plugin snapshot changes to commit."
+          else
+            git commit -m "chore: refresh generated plugin snapshots [skip staging]"
+            if git push origin HEAD:$BRANCH_NAME 2>/dev/null; then
+              echo "Generated plugin snapshots committed and pushed."
+            elif git pull --rebase --autostash origin "$BRANCH_NAME" 2>/dev/null && git push origin HEAD:$BRANCH_NAME 2>/dev/null; then
+              echo "Generated plugin snapshots committed after rebase."
+            else
+              echo "::warning::Could not push generated plugin snapshots due to a concurrent branch update."
+              git rebase --abort 2>/dev/null || true
+            fi
+          fi
 
   publish_staging:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
-    needs: validate
+    name: Publish Staging Packages
+    needs:
+      - validate_core
+      - validate_mux
+      - validate_cloud
+      - validate_observer_and_compiler
+      - validate_plugins
+      - generated_plugins
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -229,11 +437,6 @@ jobs:
           npm ci
           # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
-
-      - name: Prepare artifacts directory
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/logs
 
       - name: Set staging prerelease version
         id: version
@@ -486,73 +689,16 @@ jobs:
             fi
           fi
 
-      - name: Build SDK
+      - name: Build publishable workspaces
         run: |
           set -euo pipefail
           npm run build:sdk
-
-      - name: Build hooks-mux
-        run: |
-          set -euo pipefail
           npm run build:hooks-mux
-
-      - name: Hooks-proxy unit tests
-        run: |
-          set -euo pipefail
-          npm run test:hooks-mux
-
-      - name: Build agent-mux packages
-        run: |
-          set -euo pipefail
           npm run build:agent-mux
-
-      - name: agent-mux tests
-        run: |
-          set -euo pipefail
-          npm run test:agent-mux
-
-      - name: Verify agent-mux-tui release contract
-        run: |
-          set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-tui
-
-      - name: Verify agent-mux-core release contract
-        run: |
-          set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-mux-core
-
-      - name: Build realtime flow surfaces
-        run: |
-          set -euo pipefail
-          npm run build:realtime-flow
-
-      - name: Realtime flow tests
-        run: |
-          set -euo pipefail
-          npm run test:realtime-flow
-
-      - name: Realtime flow release verification
-        run: |
-          set -euo pipefail
-          npm run verify:realtime-flow-release
-
-      - name: Build transport-mux runtime
-        run: |
-          set -euo pipefail
-          npm run build --workspace=@a5c-ai/transport-mux
-
-      - name: Build and verify cloud package
-        run: |
-          set -euo pipefail
           npm run build:cloud
-          npm run test:cloud
-          npm run verify:cloud-release
-
-      - name: Build and test observer-dashboard
-        run: |
-          set -euo pipefail
           npm run build:observer
-          npm run test:observer
+          npm run build --workspace=@a5c-ai/transport-mux
+          npm run build --workspace=@a5c-ai/agent-plugins-mux
 
       - name: Publish SDK to npm (staging tag)
         env:

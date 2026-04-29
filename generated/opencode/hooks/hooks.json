@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "description": "babysitter hook registration for OpenCode.",
+  "hooks": {
+    "session.created": [
+      {
+        "type": "command",
+        "script": "./hooks/babysitter-proxied-session-created.js",
+        "description": "babysitter SessionStart hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "tool.execute.before": [
+      {
+        "type": "command",
+        "script": "./hooks/babysitter-proxied-tool-execute-before.js",
+        "description": "babysitter PreToolUse hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "tool.execute.after": [
+      {
+        "type": "command",
+        "script": "./hooks/babysitter-proxied-tool-execute-after.js",
+        "description": "babysitter PostToolUse hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "session.idle": [
+      {
+        "type": "command",
+        "script": "./hooks/babysitter-proxied-session-idle.js",
+        "description": "babysitter SessionIdle hook",
+        "timeoutMs": 30000
+      }
+    ],
+    "shell.env": [
+      {
+        "type": "command",
+        "script": "./hooks/babysitter-proxied-shell-env.js",
+        "description": "babysitter ShellEnv hook",
+        "timeoutMs": 5000
+      }
+    ]
+  }
+}

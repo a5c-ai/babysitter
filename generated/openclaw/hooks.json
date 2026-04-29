@@ -1,0 +1,27 @@
+{
+  "description": "babysitter plugin hooks for OpenClaw",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/babysitter-proxied-session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/babysitter-proxied-stop-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

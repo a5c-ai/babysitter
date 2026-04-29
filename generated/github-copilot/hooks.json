@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "./hooks/babysitter-proxied-session-start.sh",
+        "powershell": "./hooks/babysitter-proxied-session-start.ps1",
+        "timeoutSec": 30
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "./hooks/babysitter-proxied-user-prompt-submitted.sh",
+        "powershell": "./hooks/babysitter-proxied-user-prompt-submitted.ps1",
+        "timeoutSec": 15
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "./hooks/babysitter-proxied-session-end.sh",
+        "powershell": "./hooks/babysitter-proxied-session-end.ps1",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

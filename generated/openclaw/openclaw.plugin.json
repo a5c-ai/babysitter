@@ -1,0 +1,17 @@
+{
+  "name": "babysitter",
+  "version": "5.0.0",
+  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
+  "entrypoint": "extensions/index.ts",
+  "hooks": {
+    "session_start": "extensions/hooks/session-start.ts",
+    "agent_end": "extensions/hooks/agent-end.ts",
+    "session_end": "extensions/hooks/session-end.ts",
+    "before_prompt_build": "extensions/hooks/before-prompt-build.ts"
+  },
+  "capabilities": [
+    "orchestration",
+    "process-management",
+    "human-in-the-loop"
+  ]
+}

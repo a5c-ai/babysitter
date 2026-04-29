@@ -3,18 +3,19 @@
 // Usage: node scripts/generate-plugins.mjs [--output <dir>] [--marketplace <path>] [--compare <dir>]
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, resolve, relative } from 'node:path';
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { join, relative, resolve, sep } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const UNIFIED_SOURCE = join(ROOT, 'plugins/babysitter-unified');
-const DEFAULT_OUTPUT = join(ROOT, 'generated-plugins');
+const DEFAULT_OUTPUT = join(ROOT, 'generated');
 const COMPILER_PKG = join(ROOT, 'packages/agent-plugins-mux');
 
 const args = process.argv.slice(2);
-const outputDir = getArg('--output') || DEFAULT_OUTPUT;
-const compareDir = getArg('--compare');
-const marketplacePath = getArg('--marketplace');
+const outputDir = resolve(ROOT, getArg('--output') || DEFAULT_OUTPUT);
+const compareDir = getArg('--compare') ? resolve(ROOT, getArg('--compare')) : null;
+const marketplacePath = getArg('--marketplace') ? resolve(ROOT, getArg('--marketplace')) : null;
+const compareOnly = args.includes('--compare-only');
 
 function getArg(flag) {
   const idx = args.indexOf(flag);
@@ -33,35 +34,42 @@ if (!existsSync(distCli)) {
 
 // Compile all targets
 console.log(`[generate] Source: ${relative(ROOT, UNIFIED_SOURCE)}`);
-console.log(`[generate] Output: ${relative(ROOT, outputDir)}`);
+console.log(`[generate] Output: ${relative(ROOT, outputDir) || '.'}`);
 
-const cliArgs = [
-  'compile',
-  '--target', 'all',
-  '--source', UNIFIED_SOURCE,
-  '--output', outputDir,
-  '--verbose',
-];
+if (!compareOnly) {
+  resetOutputDir(outputDir);
 
-if (marketplacePath) {
-  cliArgs.push('--marketplace', marketplacePath);
-}
+  const cliArgs = [
+    'compile',
+    '--target', 'all',
+    '--source', UNIFIED_SOURCE,
+    '--output', outputDir,
+    '--verbose',
+  ];
 
-try {
-  execSync(`node ${distCli} ${cliArgs.join(' ')}`, {
-    cwd: ROOT,
-    stdio: 'inherit',
-  });
-} catch {
-  console.error('[generate] Compilation failed');
+  if (marketplacePath) {
+    cliArgs.push('--marketplace', marketplacePath);
+  }
+
+  try {
+    execSync(`node ${distCli} ${cliArgs.join(' ')}`, {
+      cwd: ROOT,
+      stdio: 'inherit',
+    });
+  } catch {
+    console.error('[generate] Compilation failed');
+    process.exit(1);
+  }
+
+  console.log('[generate] Compilation complete.');
+} else if (!existsSync(outputDir)) {
+  console.error('[compare] Output directory does not exist. Run generation first.');
   process.exit(1);
 }
 
-console.log('[generate] Compilation complete.');
-
 // Compare if requested
 if (compareDir) {
-  console.log(`\n[compare] Comparing generated output to ${relative(ROOT, compareDir)}`);
+  console.log(`\n[compare] Comparing generated output to ${relative(ROOT, compareDir) || '.'}`);
   const targets = readdirSync(outputDir).filter(
     (d) => statSync(join(outputDir, d)).isDirectory()
   );
@@ -99,7 +107,9 @@ if (compareDir) {
       (f) => !generatedFiles.includes(f) && !isIgnoredFile(f)
     );
 
-    const matching = generatedFiles.filter((f) => originalFiles.includes(f));
+    const matching = generatedFiles.filter(
+      (f) => originalFiles.includes(f) && !isIgnoredFile(f)
+    );
     let contentDiffs = 0;
     for (const f of matching) {
       const genContent = readFileSync(join(generatedDir, f), 'utf-8');
@@ -172,6 +182,7 @@ function collectFiles(dir, prefix) {
 
 function isIgnoredFile(f) {
   return (
+    f.startsWith('.a5c/') ||
     f.startsWith('node_modules/') ||
     f.startsWith('dist/') ||
     f.startsWith('test/') ||
@@ -184,10 +195,20 @@ function isIgnoredFile(f) {
     f === 'hooks/hooks.json' ||
     f === 'proxied-hooks.json' ||
     f === 'versions.json' ||
+    f === '.babysitter-install-attempted' ||
     f.endsWith('.legacy') ||
     f.endsWith('.legacy.ts') ||
     f.includes('sync-command') ||
     f.endsWith('.png') ||
     f.endsWith('.svg')
   );
+}
+
+function resetOutputDir(targetDir) {
+  const safeRoot = `${ROOT}${sep}`;
+  if (targetDir === ROOT || !targetDir.startsWith(safeRoot)) {
+    throw new Error(`Refusing to clear unsafe output directory: ${targetDir}`);
+  }
+
+  rmSync(targetDir, { recursive: true, force: true });
 }
