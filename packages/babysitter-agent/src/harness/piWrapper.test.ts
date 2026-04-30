@@ -2,7 +2,11 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockCreateSecureBashBackend = vi.fn(async () => null);
+const mockCreateSecureBashBackend = vi.fn(async (): Promise<{
+  operations: unknown;
+  promptNote: string;
+  dispose: () => void;
+} | null> => null);
 const mockLoadCompressionConfigSafe = vi.fn(() => null);
 const mockBuildCompactionSettings = vi.fn(() => ({
   compaction: {},
@@ -15,6 +19,11 @@ const mockLoadPiModule = vi.fn();
 
 let defaultResourceLoaderOptions: Record<string, unknown> | undefined;
 let createAgentSessionOptions: Record<string, unknown> | undefined;
+const mockCreateBashToolDefinition = vi.fn((cwd: string, options?: Record<string, unknown>) => ({
+  name: "bash",
+  cwd,
+  options,
+}));
 
 vi.mock("./piSecureSandbox", () => ({
   createSecureBashBackend: mockCreateSecureBashBackend,
@@ -98,6 +107,7 @@ describe("AgentCoreSessionHandle", () => {
       SettingsManager: {
         inMemory: vi.fn(() => ({ kind: "memory-settings-manager" })),
       },
+      createBashToolDefinition: mockCreateBashToolDefinition,
       createCodingTools: vi.fn(() => []),
       createReadOnlyTools: vi.fn(() => []),
       codingTools: [],
@@ -126,5 +136,35 @@ describe("AgentCoreSessionHandle", () => {
       agentDir: expectedAgentDir,
       cwd: process.cwd(),
     });
+  });
+
+  it("passes tool names instead of tool objects and injects the secure bash override through customTools", async () => {
+    mockCreateSecureBashBackend.mockResolvedValueOnce({
+      operations: { kind: "secure-bash-ops" },
+      promptNote: "secure bash",
+      dispose: vi.fn(),
+    });
+
+    const { AgentCoreSessionHandle } = await import("./piWrapper");
+
+    const session = new AgentCoreSessionHandle({
+      workspace: process.cwd(),
+      toolsMode: "coding",
+      customTools: [{ name: "babysitter_run_iterate" }],
+    });
+
+    await session.initialize();
+
+    expect(createAgentSessionOptions?.tools).toEqual(["read", "bash", "edit", "write"]);
+    expect(mockCreateBashToolDefinition).toHaveBeenCalledWith(
+      process.cwd(),
+      expect.objectContaining({
+        operations: { kind: "secure-bash-ops" },
+      }),
+    );
+    expect(createAgentSessionOptions?.customTools).toEqual([
+      expect.objectContaining({ name: "bash" }),
+      { name: "babysitter_run_iterate" },
+    ]);
   });
 });

@@ -34,6 +34,8 @@ const DEFAULT_BASH_SANDBOX_MODE: NonNullable<AgentCoreSessionOptions["bashSandbo
 const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
 const PI_AGENT_DIR_ENV = "PI_CODING_AGENT_DIR";
 const DEFAULT_PI_AGENT_DIR = join(homedir(), ".pi", "agent");
+const CODING_TOOL_NAMES = ["read", "bash", "edit", "write"] as const;
+const READONLY_TOOL_NAMES = ["read", "grep", "find", "ls"] as const;
 
 /** Listener for Pi session events. */
 export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
@@ -285,7 +287,7 @@ export class AgentCoreSessionHandle {
     createOpts.cwd = cwd;
     createOpts.agentDir = agentDir;
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
-    if (this.options.customTools) createOpts.customTools = this.options.customTools;
+    const customTools = [...(this.options.customTools ?? [])];
     if (this.options.ephemeral) {
       createOpts.sessionManager = mod.SessionManager.inMemory();
     }
@@ -298,21 +300,18 @@ export class AgentCoreSessionHandle {
     if (secureBashBackend) {
       this.cleanupTasks.push(() => secureBashBackend.dispose());
     }
-    const toolOptions = secureBashBackend
-      ? {
-        bash: {
-          operations: secureBashBackend.operations,
-        },
-      }
-      : undefined;
     if (this.options.toolsMode === "coding") {
-      createOpts.tools = mod.createCodingTools
-        ? mod.createCodingTools(cwd, toolOptions)
-        : mod.codingTools;
+      createOpts.tools = [...CODING_TOOL_NAMES];
     } else if (this.options.toolsMode === "readonly") {
-      createOpts.tools = mod.createReadOnlyTools
-        ? mod.createReadOnlyTools(cwd, toolOptions)
-        : mod.readOnlyTools;
+      createOpts.tools = [...READONLY_TOOL_NAMES];
+    }
+    if (secureBashBackend && typeof mod.createBashToolDefinition === "function") {
+      customTools.unshift(mod.createBashToolDefinition(cwd, {
+        operations: secureBashBackend.operations,
+      }));
+    }
+    if (customTools.length > 0) {
+      createOpts.customTools = customTools;
     }
     const appendedSystemPrompt = [
       ...discoverRepoInstructionPrompts(cwd),

@@ -47,6 +47,7 @@ export interface PiCodingAgentModule {
   SettingsManager: {
     inMemory(settings?: Record<string, unknown>): unknown;
   };
+  createBashToolDefinition?: (cwd: string, options?: Record<string, unknown>) => unknown;
   codingTools?: unknown[];
   readOnlyTools?: unknown[];
   createCodingTools?: (cwd: string, options?: Record<string, unknown>) => unknown[];
