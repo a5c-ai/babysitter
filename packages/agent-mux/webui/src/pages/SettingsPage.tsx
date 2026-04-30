@@ -25,7 +25,7 @@ export function SettingsPage(): JSX.Element {
         </div>
         <div>
           <strong>Token</strong>
-          <Button type="button" variant="ghost" onClick={logout}>
+          <Button type="button" variant="ghost" onClick={() => logout()}>
             Forget saved token
           </Button>
         </div>

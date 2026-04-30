@@ -3935,36 +3935,6 @@ export function BacklogOverview({
     };
   }, [focusedIssue?.id]);
 
-  if (loading && !snapshot) {
-    return (
-      <section
-        className="mb-6 rounded-3xl border border-border bg-card p-6 shadow-lg"
-        data-testid="backlog-overview-loading"
-      >
-        <div className="animate-pulse space-y-3">
-          <div className="h-4 w-36 rounded bg-background-secondary" />
-          <div className="h-8 w-80 rounded bg-background-secondary" />
-          <div className="grid gap-3 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-20 rounded-2xl bg-background-secondary" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error || !snapshot || !summary || !board) {
-    return (
-      <section
-        className="mb-6 rounded-3xl border border-error/25 bg-error-muted p-6 text-sm text-error shadow-lg"
-        data-testid="backlog-overview-error"
-      >
-        Failed to load issue backlog model.
-      </section>
-    );
-  }
-
   const boardCards = primaryBoard
     ? primaryBoard.swimlanes.flatMap((swimlane) =>
         workflowOrder.flatMap((state) => findCardsForCell(primaryBoard, swimlane.id, state)),
@@ -4031,6 +4001,36 @@ export function BacklogOverview({
       return next.length === current.length ? current : next;
     });
   }, [visibleIssueIdsKey]);
+
+  if (loading && !snapshot) {
+    return (
+      <section
+        className="mb-6 rounded-3xl border border-border bg-card p-6 shadow-lg"
+        data-testid="backlog-overview-loading"
+      >
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 w-36 rounded bg-background-secondary" />
+          <div className="h-8 w-80 rounded bg-background-secondary" />
+          <div className="grid gap-3 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-20 rounded-2xl bg-background-secondary" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !snapshot || !summary || !board) {
+    return (
+      <section
+        className="mb-6 rounded-3xl border border-error/25 bg-error-muted p-6 text-sm text-error shadow-lg"
+        data-testid="backlog-overview-error"
+      >
+        Failed to load issue backlog model.
+      </section>
+    );
+  }
 
   if (!primaryProject || !primaryBoard) {
     return null;

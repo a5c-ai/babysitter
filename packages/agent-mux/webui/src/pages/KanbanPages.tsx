@@ -138,18 +138,16 @@ export function KanbanRunsPage(): JSX.Element {
     <PageShell>
       <PageHeroGrid>
         <PageSection>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Execution overlays</p>
-          <div className="mt-2">
+          <p className="page-kicker">Execution overlays</p>
+          <div className="page-logo">
             <LogoWordmark className="h-6 w-auto" />
           </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            Runs stay visible without replacing the planning workspace
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-foreground-muted">
+          <h1 className="page-title">Runs stay visible without replacing the planning workspace</h1>
+          <p className="page-copy">
             The project board now owns the main journey. This route keeps Babysitter runs,
             approvals, search, and status triage available as an execution dashboard.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="page-actions">
             <Button variant="primary">
               <Link to="/projects">Open projects</Link>
             </Button>
@@ -166,16 +164,16 @@ export function KanbanRunsPage(): JSX.Element {
         </PageSection>
 
         <PageSection>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">Gateway</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">
+          <p className="page-kicker">Gateway</p>
+          <h2 className="page-title page-title--secondary">
             {isAuthenticated ? 'agent-mux connected' : 'agent-mux disconnected'}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-foreground-muted">
+          <p className="page-copy">
             {isAuthenticated
               ? 'Live sessions and workspace attention are available now.'
               : 'Connect the gateway to enable session creation, chat continuation, and live workspace context from the same app.'}
           </p>
-          <div className="mt-5">
+          <div className="page-actions">
             <Button variant="ghost">
               <Link to={isAuthenticated ? '/sessions' : '/login'}>
                 {isAuthenticated ? 'Open sessions' : 'Connect gateway'}

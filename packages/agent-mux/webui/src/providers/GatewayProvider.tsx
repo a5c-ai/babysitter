@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { GatewayClient, GatewayProvider as UiGatewayProvider, useGateway } from '@a5c-ai/agent-mux-ui';
 import type { AgentRecord } from '@a5c-ai/agent-mux-ui';
 
@@ -10,13 +10,25 @@ type SavedGatewayAuth = {
 type GatewayAuthContextValue = {
   auth: SavedGatewayAuth | null;
   isAuthenticated: boolean;
+  isReady: boolean;
   login(input: SavedGatewayAuth): Promise<void>;
-  logout(): void;
+  logout(message?: string): void;
 };
 
 const STORAGE_KEY = 'amux.webui.auth';
+const AUTH_ERROR_STORAGE_KEY = 'amux.webui.auth-error';
 const SNAPSHOT_POLL_INTERVAL_MS = 15_000;
 const GatewayAuthContext = createContext<GatewayAuthContextValue | null>(null);
+
+class GatewayHttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`Gateway request failed: ${status}`);
+    this.name = 'GatewayHttpError';
+    this.status = status;
+  }
+}
 
 function sanitizeGatewayUrl(url: string): string {
   return url.replace(/\/+$/, '');
@@ -57,6 +69,36 @@ function readStoredAuth(): SavedGatewayAuth | null {
   }
 }
 
+function authFingerprint(auth: SavedGatewayAuth): string {
+  return `${sanitizeGatewayUrl(auth.gatewayUrl)}\n${auth.token}`;
+}
+
+function persistAuthError(message?: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  if (message && message.length > 0) {
+    window.sessionStorage.setItem(AUTH_ERROR_STORAGE_KEY, message);
+  } else {
+    window.sessionStorage.removeItem(AUTH_ERROR_STORAGE_KEY);
+  }
+}
+
+export function readPersistedAuthError(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  const value = window.sessionStorage.getItem(AUTH_ERROR_STORAGE_KEY);
+  return value && value.length > 0 ? value : null;
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+  if (error instanceof GatewayHttpError) {
+    return error.status === 401;
+  }
+  return error instanceof Error && /\b401\b/.test(error.message);
+}
+
 async function validateAuth(input: SavedGatewayAuth): Promise<void> {
   const client = new GatewayClient({
     url: toSocketUrl(input.gatewayUrl),
@@ -81,13 +123,18 @@ async function fetchAuthorized<T>(gatewayUrl: string, token: string, pathname: s
   });
 
   if (!response.ok) {
-    throw new Error(`Gateway request failed: ${response.status}`);
+    throw new GatewayHttpError(response.status);
   }
 
   return (await response.json()) as T;
 }
 
-function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: React.ReactNode }): JSX.Element {
+function GatewayBootstrap(props: {
+  gatewayUrl: string;
+  token: string;
+  onAuthFailure(message?: string): void;
+  children: React.ReactNode;
+}): JSX.Element {
   const { client, store } = useGateway();
   const subscriptionsRef = useRef(new Map<string, () => void>());
   const syncInFlightRef = useRef<Promise<void> | null>(null);
@@ -143,6 +190,14 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
         ]);
 
         if (cancelled) {
+          return;
+        }
+
+        const rejectedResponses = [agentsResponse, runsResponse, sessionsResponse].filter(
+          (response): response is PromiseRejectedResult => response.status === 'rejected',
+        );
+        if (rejectedResponses.some((response) => isUnauthorizedError(response.reason))) {
+          props.onAuthFailure('Stored gateway access expired or was rejected. Connect again.');
           return;
         }
 
@@ -230,43 +285,97 @@ function GatewayBootstrap(props: { gatewayUrl: string; token: string; children: 
 
 export function GatewayProvider(props: { children: React.ReactNode }): JSX.Element {
   const [auth, setAuth] = useState<SavedGatewayAuth | null>(() => readStoredAuth());
+  const [isReady, setIsReady] = useState(() => auth === null);
+  const [validatedFingerprint, setValidatedFingerprint] = useState<string | null>(null);
+
+  const clearAuth = useCallback((message?: string) => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+    persistAuthError(message);
+    setValidatedFingerprint(null);
+    setAuth(null);
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!auth) {
+      setIsReady(true);
+      return;
+    }
+
+    const nextFingerprint = authFingerprint(auth);
+    if (validatedFingerprint === nextFingerprint) {
+      setIsReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    setIsReady(false);
+    void validateAuth(auth)
+      .then(() => {
+        if (cancelled) {
+          return;
+        }
+        persistAuthError();
+        setValidatedFingerprint(nextFingerprint);
+        setIsReady(true);
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        clearAuth('Stored gateway access expired or was rejected. Connect again.');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [auth, clearAuth, validatedFingerprint]);
 
   const value = useMemo<GatewayAuthContextValue>(
     () => ({
       auth,
-      isAuthenticated: auth !== null,
+      isAuthenticated: auth !== null && isReady,
+      isReady,
       async login(input) {
         const nextAuth = {
           gatewayUrl: sanitizeGatewayUrl(input.gatewayUrl || defaultGatewayUrl()),
           token: input.token.trim(),
         };
         await validateAuth(nextAuth);
+        persistAuthError();
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextAuth));
+        setValidatedFingerprint(authFingerprint(nextAuth));
+        setIsReady(true);
         setAuth(nextAuth);
       },
-      logout() {
-        window.localStorage.removeItem(STORAGE_KEY);
-        setAuth(null);
+      logout(message?: string) {
+        clearAuth(message);
       },
     }),
-    [auth],
+    [auth, clearAuth, isReady],
   );
 
   const client = useMemo(() => {
-    if (!auth) {
+    if (!auth || !isReady) {
       return null;
     }
     return new GatewayClient({
       url: toSocketUrl(auth.gatewayUrl),
       token: auth.token,
     });
-  }, [auth]);
+  }, [auth, isReady]);
 
   return (
     <GatewayAuthContext.Provider value={value}>
-      {client && auth ? (
+      {client && auth && isReady ? (
         <UiGatewayProvider client={client}>
-          <GatewayBootstrap gatewayUrl={auth.gatewayUrl} token={auth.token}>
+          <GatewayBootstrap
+            gatewayUrl={auth.gatewayUrl}
+            token={auth.token}
+            onAuthFailure={clearAuth}
+          >
             {props.children}
           </GatewayBootstrap>
         </UiGatewayProvider>
@@ -286,20 +395,24 @@ export function useGatewayAuth(): GatewayAuthContextValue {
 }
 
 export function useGatewayFetch(): (pathname: string, init?: RequestInit) => Promise<Response> {
-  const { auth } = useGatewayAuth();
+  const { auth, logout } = useGatewayAuth();
   return useMemo(
     () => async (pathname: string, init?: RequestInit) => {
       if (!auth) {
         throw new Error('Gateway auth is required');
       }
-      return await fetch(`${sanitizeGatewayUrl(auth.gatewayUrl)}${pathname}`, {
+      const response = await fetch(`${sanitizeGatewayUrl(auth.gatewayUrl)}${pathname}`, {
         ...init,
         headers: {
           authorization: `Bearer ${auth.token}`,
           ...(init?.headers ?? {}),
         },
       });
+      if (response.status === 401) {
+        logout('Stored gateway access expired or was rejected. Connect again.');
+      }
+      return response;
     },
-    [auth],
+    [auth, logout],
   );
 }

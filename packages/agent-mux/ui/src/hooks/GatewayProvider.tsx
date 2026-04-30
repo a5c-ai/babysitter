@@ -86,7 +86,12 @@ export function GatewayProvider({ client, children }: GatewayProviderProps): JSX
   useEffect(() => {
     store.getState().actions.setConnection('connecting');
     const unbind = bindClientToStore(client, store);
-    void client.connect();
+    void client.connect().catch((error) => {
+      store.getState().actions.setConnection(
+        'disconnected',
+        error instanceof Error ? error.message : String(error),
+      );
+    });
     return () => {
       unbind();
       void client.close();

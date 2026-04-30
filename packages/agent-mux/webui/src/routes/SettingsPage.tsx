@@ -764,14 +764,12 @@ export default function SettingsPage() {
   return (
     <PageShell>
       <PageSection>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
-          Settings
-        </p>
-        <div className="mt-2">
+        <p className="page-kicker">Settings</p>
+        <div className="page-logo">
           <LogoWordmark className="h-6 w-auto" />
         </div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Settings breadth parity</h1>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-foreground-muted">
+        <h1 className="page-title">Settings breadth parity</h1>
+        <p className="page-copy page-copy--wide">
           The local kanban settings surface keeps its Babysitter-specific framing while expanding
           to the broader upstream settings breadth: general preferences, repositories/projects,
           organization, remote-project bindings, agents, MCP, editor integration, git,
@@ -779,12 +777,10 @@ export default function SettingsPage() {
         </p>
       </PageSection>
 
-      <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-3xl border border-border bg-card p-4 shadow-lg">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-foreground-muted">
-            Settings sections
-          </div>
-          <div className="mt-4 space-y-2">
+      <div className="settings-layout">
+        <aside className="settings-nav">
+          <div className="settings-nav__label">Settings sections</div>
+          <div className="settings-nav__list">
             {SETTINGS_SECTIONS.map((section) => {
               const Icon = section.icon;
               const active = section.id === selectedSection;
@@ -795,26 +791,24 @@ export default function SettingsPage() {
                   data-testid={`settings-nav-${section.id}`}
                   onClick={() => requestSectionChange(section.id)}
                   className={[
-                    "w-full rounded-2xl border px-4 py-3 text-left transition",
-                    active
-                      ? "border-primary/30 bg-primary/10"
-                      : "border-border bg-background/60 hover:bg-background",
-                  ].join(" ")}
+                    "settings-nav__button",
+                    active ? "settings-nav__button--active" : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
-                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <div className="settings-nav__title">
                     <Icon className="h-4 w-4" />
                     {section.title}
                   </div>
-                  <div className="mt-1 text-xs leading-5 text-foreground-muted">
-                    {section.summary}
-                  </div>
+                  <div className="settings-nav__summary">{section.summary}</div>
                 </button>
               );
             })}
           </div>
         </aside>
 
-        <div className="space-y-6">
+        <div className="settings-stack">
           {pendingSection ? (
             <section
               className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm"
@@ -883,7 +877,7 @@ export default function SettingsPage() {
                         </Link>
                       </Button>
                       {isAuthenticated ? (
-                        <Button onClick={logout} variant="ghost" type="button">
+                        <Button onClick={() => logout()} variant="ghost" type="button">
                           Forget access
                         </Button>
                       ) : null}

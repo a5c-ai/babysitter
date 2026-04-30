@@ -929,6 +929,25 @@ describe("BacklogOverview", () => {
     expect(screen.getByTestId("issue-detail-panel")).toBeInTheDocument();
   });
 
+  it("does not hit a hook-order crash when board data loads after the initial loading state", () => {
+    backlogState = {
+      ...buildBacklogState(),
+      snapshot: null,
+      board: null,
+      summary: null,
+      loading: true,
+      error: null,
+    };
+
+    const view = render(<BacklogOverview projectId="kanban-app" forcedPresentation="board" />);
+    expect(screen.getByTestId("backlog-overview-loading")).toBeInTheDocument();
+
+    backlogState = buildBacklogState();
+    view.rerender(<BacklogOverview projectId="kanban-app" forcedPresentation="board" />);
+
+    expect(screen.getByTestId("kanban-board")).toBeInTheDocument();
+  });
+
   it("preserves unsaved description edits across close and reopen", async () => {
     const user = setupUser();
     searchParams = new URLSearchParams("issueId=KANBAN-GAP-007&issueKey=KANBAN-GAP-007");

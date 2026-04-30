@@ -183,9 +183,24 @@ function renderOutput(
  * Parse --handler values into HandlerRef objects.
  * Format: "source:handler" or just "source" (handler defaults to "handler").
  */
+function findWindowsPathPrefixLength(value: string): number {
+  if (/^[A-Za-z]:[\\/]/.test(value)) {
+    return 2;
+  }
+
+  if (/^[\\/]{2}\?[\\/][A-Za-z]:[\\/]/.test(value)) {
+    return 6;
+  }
+
+  return 0;
+}
+
 function parseHandlerArgs(handlers: string[]): Array<{ source: string; handler: string }> {
   return handlers.map((h) => {
-    const colonIdx = h.indexOf(':');
+    const windowsPrefixLength = findWindowsPathPrefixLength(h);
+    const colonIdx = windowsPrefixLength > 0
+      ? h.indexOf(':', windowsPrefixLength)
+      : h.indexOf(':');
     if (colonIdx >= 0) {
       return { source: h.slice(0, colonIdx), handler: h.slice(colonIdx + 1) };
     }

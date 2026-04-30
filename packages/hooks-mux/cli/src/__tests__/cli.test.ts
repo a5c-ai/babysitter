@@ -317,6 +317,62 @@ describe('CLI Commands', () => {
         stdout.restore();
       }
     });
+
+    it('preserves Windows drive-letter handler paths without splitting on the drive separator', async () => {
+      const { invokeCommand } = await import('../cli/commands/invoke');
+      const stdout = captureStdout();
+
+      try {
+        await (invokeCommand.handler as Function)({
+          adapter: 'claude',
+          handler: ['C:\\Users\\tmusk\\.claude\\plugins\\handler.js'],
+          'bootstrap-only': false,
+          json: false,
+          _: [],
+          $0: 'a5c-hooks-mux',
+        });
+
+        expect(mockResolveHookPlan).toHaveBeenCalledWith({
+          phase: 'session.start',
+          handlers: [
+            {
+              source: 'C:\\Users\\tmusk\\.claude\\plugins\\handler.js',
+              handler: 'handler',
+            },
+          ],
+        });
+      } finally {
+        stdout.restore();
+      }
+    });
+
+    it('supports explicit export names on Windows handler paths', async () => {
+      const { invokeCommand } = await import('../cli/commands/invoke');
+      const stdout = captureStdout();
+
+      try {
+        await (invokeCommand.handler as Function)(({
+          adapter: 'claude',
+          handler: ['\\\\?\\C:\\Users\\tmusk\\.claude\\plugins\\handler.js:runHook'],
+          'bootstrap-only': false,
+          json: false,
+          _: [],
+          $0: 'a5c-hooks-mux',
+        }));
+
+        expect(mockResolveHookPlan).toHaveBeenCalledWith({
+          phase: 'session.start',
+          handlers: [
+            {
+              source: '\\\\?\\C:\\Users\\tmusk\\.claude\\plugins\\handler.js',
+              handler: 'runHook',
+            },
+          ],
+        });
+      } finally {
+        stdout.restore();
+      }
+    });
   });
 
   describe('bootstrap', () => {

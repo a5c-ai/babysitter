@@ -6,9 +6,11 @@ type SavedGatewayAuth = {
 type GatewayAuthContextValue = {
     auth: SavedGatewayAuth | null;
     isAuthenticated: boolean;
+    isReady: boolean;
     login(input: SavedGatewayAuth): Promise<void>;
-    logout(): void;
+    logout(message?: string): void;
 };
+export declare function readPersistedAuthError(): string | null;
 export declare function GatewayProvider(props: {
     children: React.ReactNode;
 }): JSX.Element;

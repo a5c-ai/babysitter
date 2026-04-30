@@ -48,8 +48,21 @@ function LegacySessionRouteRedirect(): JSX.Element {
 }
 
 function RequireAuth(props: { children: React.ReactNode }): JSX.Element {
-  const { isAuthenticated } = useGatewayAuth();
+  const { auth, isAuthenticated, isReady } = useGatewayAuth();
   const location = useLocation();
+  if (auth && !isReady) {
+    return (
+      <main className="login-page">
+        <section className="login-card auth-card">
+          <p className="eyebrow">agent-mux webui</p>
+          <h1>Checking saved gateway access</h1>
+          <p className="lede auth-note">
+            Revalidating the stored gateway token before the app reconnects live sessions and run feeds.
+          </p>
+        </section>
+      </main>
+    );
+  }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }

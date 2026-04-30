@@ -88,9 +88,37 @@ export function SessionsPage(): JSX.Element {
 
   const activeSessions = rows.filter((session) => session.status === 'active');
   const inactiveSessions = rows.filter((session) => session.status !== 'active');
+  const totalCost = rows.reduce((sum, session) => sum + (session.costTotalUsd ?? 0), 0);
 
   return (
     <section className="flow-grid">
+      <article className="panel hero-panel">
+        <p className="eyebrow">Sessions</p>
+        <h2>Resume conversations, not just runs</h2>
+        <p className="lede">
+          The browser keeps active and inactive sessions on the same surface so you can continue
+          work, inspect cost, and jump back into the live chat without hunting through run ids.
+        </p>
+        <div className="summary-grid sessions-summary-grid">
+          <div className="summary-card">
+            <span className="summary-label">Active</span>
+            <strong>{activeSessions.length}</strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Inactive</span>
+            <strong>{inactiveSessions.length}</strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Tracked sessions</span>
+            <strong>{rows.length}</strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Observed cost</span>
+            <strong>{rows.length > 0 ? formatUsd(totalCost) ?? 'unavailable' : 'No usage yet'}</strong>
+          </div>
+        </div>
+      </article>
+
       <article className="panel">
         <header>
           <div>
@@ -120,7 +148,20 @@ export function SessionsPage(): JSX.Element {
               </div>
             </article>
           ))}
-          {activeSessions.length === 0 ? <p className="muted-copy">No active sessions right now.</p> : null}
+          {activeSessions.length === 0 ? (
+            <div className="empty-card">
+              <strong>No active sessions right now.</strong>
+              <p className="muted-copy">
+                Start a session from here or reopen an inactive conversation when you want to keep
+                the same context.
+              </p>
+              <div className="actions">
+                <Link className="ghost-link" to="/sessions/new">
+                  Start session
+                </Link>
+              </div>
+            </div>
+          ) : null}
         </div>
       </article>
 
@@ -155,7 +196,15 @@ export function SessionsPage(): JSX.Element {
               </div>
             </article>
           ))}
-          {inactiveSessions.length === 0 ? <p className="muted-copy">No inactive sessions yet.</p> : null}
+          {inactiveSessions.length === 0 ? (
+            <div className="empty-card">
+              <strong>No inactive sessions yet.</strong>
+              <p className="muted-copy">
+                Completed or paused session threads will stay here so they can be resumed without
+                losing their conversation history.
+              </p>
+            </div>
+          ) : null}
         </div>
       </article>
     </section>
