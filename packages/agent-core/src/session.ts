@@ -7,6 +7,7 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 900_000;
 const DEFAULT_BACKEND = "codex-sdk";
+const SDK_BACKEND_SUFFIX = "-sdk";
 
 type AgentMuxModule = typeof import("@a5c-ai/agent-mux");
 type RunHandle = import("@a5c-ai/agent-mux").RunHandle;
@@ -85,6 +86,34 @@ function mapEventPayload(event: unknown): AgentCoreSessionEvent {
   };
 }
 
+function resolveRunBackend(
+  client: import("@a5c-ai/agent-mux").AgentMuxClient,
+  options: AgentCoreSessionOptions,
+): string {
+  const configuredBackend = options.backend ?? process.env.AGENT_CORE_BACKEND;
+  if (configuredBackend) {
+    return configuredBackend;
+  }
+
+  if (!options.model) {
+    return DEFAULT_BACKEND;
+  }
+
+  const defaultBackendSupportsModel = client.models.model(DEFAULT_BACKEND, options.model);
+  if (defaultBackendSupportsModel) {
+    return DEFAULT_BACKEND;
+  }
+
+  if (DEFAULT_BACKEND.endsWith(SDK_BACKEND_SUFFIX)) {
+    const fallbackBackend = DEFAULT_BACKEND.slice(0, -SDK_BACKEND_SUFFIX.length);
+    if (client.adapters.get(fallbackBackend as import("@a5c-ai/agent-mux").AgentName)) {
+      return fallbackBackend;
+    }
+  }
+
+  return DEFAULT_BACKEND;
+}
+
 export class AgentCoreSessionHandle {
   private readonly options: AgentCoreSessionOptions;
   private readonly listeners = new Set<AgentCoreEventListener>();
@@ -108,7 +137,7 @@ export class AgentCoreSessionHandle {
     const agentMux = await loadAgentMux();
     const client = await getAgentMuxClient();
     const effectiveTimeout = timeout ?? this.options.timeout ?? DEFAULT_TIMEOUT_MS;
-    const backend = this.options.backend ?? process.env.AGENT_CORE_BACKEND ?? DEFAULT_BACKEND;
+    const backend = resolveRunBackend(client, this.options);
     const thinkingEffort = mapThinkingLevel(this.options.thinkingLevel);
     const start = Date.now();
 

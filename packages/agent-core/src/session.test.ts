@@ -52,6 +52,8 @@ async function loadSessionModule(args: {
   handleResult?: MockRunResult;
   events?: unknown[];
   runImplementation?: (options: Record<string, unknown>) => ReturnType<typeof createHandle>;
+  modelImplementation?: (agent: string, modelId: string) => Record<string, unknown> | null;
+  adapterImplementation?: (agent: string) => Record<string, unknown> | undefined;
 }) {
   vi.resetModules();
 
@@ -59,7 +61,13 @@ async function loadSessionModule(args: {
     args.handleResult ?? { text: "ok", exitReason: "completed", exitCode: 0, sessionId: "session-1" },
     args.events,
   ));
-  const createClient = vi.fn(() => ({ run }));
+  const models = {
+    model: vi.fn((agent: string, modelId: string) => args.modelImplementation?.(agent, modelId) ?? null),
+  };
+  const adapters = {
+    get: vi.fn((agent: string) => args.adapterImplementation?.(agent)),
+  };
+  const createClient = vi.fn(() => ({ run, models, adapters }));
   const registerBuiltInAdapters = vi.fn();
 
   vi.doMock("@a5c-ai/agent-mux", () => ({
@@ -68,7 +76,7 @@ async function loadSessionModule(args: {
   }));
 
   const sessionModule = await import("./session");
-  return { ...sessionModule, createClient, registerBuiltInAdapters, run };
+  return { ...sessionModule, createClient, registerBuiltInAdapters, run, models, adapters };
 }
 
 describe("AgentCoreSessionHandle", () => {
@@ -149,6 +157,33 @@ describe("AgentCoreSessionHandle", () => {
       timeout: 900_000,
       sessionId: undefined,
       systemPrompt: "Line one\n\nLine two",
+      systemPromptMode: "append",
+      approvalMode: "yolo",
+      collectEvents: true,
+    });
+  });
+
+  it("falls back from the implicit sdk backend to the paired subprocess backend for unsupported models", async () => {
+    const sessionModule = await loadSessionModule({
+      modelImplementation: () => null,
+      adapterImplementation: (agent) => (agent === "codex" ? { agent } : undefined),
+    });
+    const session = sessionModule.createAgentCoreSession({
+      model: "gpt-5.4",
+    });
+
+    await session.prompt("Plan the run");
+
+    expect(sessionModule.models.model).toHaveBeenCalledWith("codex-sdk", "gpt-5.4");
+    expect(sessionModule.adapters.get).toHaveBeenCalledWith("codex");
+    expect(sessionModule.run).toHaveBeenCalledWith({
+      agent: "codex",
+      prompt: "Plan the run",
+      cwd: undefined,
+      model: "gpt-5.4",
+      timeout: 900_000,
+      sessionId: undefined,
+      systemPrompt: undefined,
       systemPromptMode: "append",
       approvalMode: "yolo",
       collectEvents: true,
