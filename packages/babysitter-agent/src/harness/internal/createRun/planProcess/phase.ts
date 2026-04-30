@@ -22,6 +22,7 @@ import {
   buildInternalProcessConformancePrompt,
 } from "./prompts";
 import {
+  applyRecoveredProcessDefinitionFromOutput,
   buildPhaseConversationSummary,
   recoverReportedProcessDefinition,
   writeVerboseProcessDefinitionRecovery,
@@ -328,6 +329,14 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
           writeVerboseData("phasePlanProcess conformance repair failure output", repair.output);
         } else {
           writeVerboseData("phasePlanProcess conformance repair output", repair.output);
+        }
+        if (await applyRecoveredProcessDefinitionFromOutput({
+          processPath: state.report.processPath,
+          output: repair.output,
+        })) {
+          writeVerbose(
+            `[phasePlanProcess conformance repair] recovered rewritten process source from agent output into ${path.resolve(state.report.processPath)}`,
+          );
         }
         await waitForProcessFile(state.report.processPath);
       }

@@ -1564,6 +1564,120 @@ describe("handleHarnessCreateRun", () => {
       expect(source).toContain("export async function process");
     });
 
+    it("applies a fenced repaired process module onto the reported file when the agent does not actually rewrite it", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-planProcess-conformance-code-block-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, ".a5c", "processes");
+      const generatedFile = path.join(generatedPath, "test-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-conformance-code-block-fix",
+        runDir: "/tmp/runs/run-conformance-code-block-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createAgentCoreSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = getProcessWriteTool(tools) as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = getCompatTool(tools, "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-planProcess-conformance-code-block";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async () => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              return { success: true, output: "planProcess-intent", exitCode: 0, duration: 1 };
+            }
+
+            if (promptCount === 2) {
+              await writeProcess?.execute?.("tool-write-invalid", {
+                filename: "test-process.mjs",
+                source: [
+                  'import { defineTask } from "@babysitter/sdk";',
+                  "",
+                  'const buildGameTask = defineTask("build-game", () => ({',
+                  '  kind: "agent",',
+                  "  agent: {",
+                  '    name: "general-purpose",',
+                  '    prompt: { task: "Create the requested game.", instructions: [] },',
+                  '    outputSchema: { type: "object" },',
+                  "  },",
+                  "}));",
+                  "",
+                  "export async function process(inputs, ctx) {",
+                  "  return ctx.task(buildGameTask, {});",
+                  "}",
+                  "",
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-invalid", {
+                processPath: generatedFile,
+                summary: "Generated process",
+              });
+              return { success: true, output: "planProcess-invalid-import", exitCode: 0, duration: 1 };
+            }
+
+            return {
+              success: true,
+              output: [
+                "I repaired the module and the corrected source is below.",
+                "```javascript",
+                buildMinimalAgentProcessSource(),
+                "```",
+              ].join("\n"),
+              exitCode: 0,
+              duration: 1,
+            };
+          }),
+        };
+      });
+
+      const code = await handleHarnessCreateRun({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(3);
+      const source = await fs.readFile(generatedFile, "utf8");
+      expect(source).toContain("export async function process");
+      expect(source).toContain('defineTask("main-task"');
+      expect(source).not.toContain('@babysitter/sdk');
+    });
+
     it("recovers a valid process module from a heredoc-heavy agent transcript instead of writing the raw transcript", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-planProcess-heredoc-transcript-"));
       tempDirs.push(workspace);

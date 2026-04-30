@@ -85,6 +85,20 @@ function looksLikeStandaloneProcessDefinitionSource(source: string): boolean {
   return /^(?:#!.*\r?\n)?(?:\s*\/\*\*[\s\S]*?\*\/\s*)?(?:import\s|const\s+\w+\s*=\s*defineTask\(|export\s+async\s+function\s+process\b|async\s+function\s+process\b)/.test(normalized);
 }
 
+function extractRecoverableProcessDefinitionSource(output: string): string | null {
+  const codeBlock = extractProcessDefinitionCodeBlock(output);
+  if (codeBlock && looksLikeProcessDefinitionSource(codeBlock)) {
+    return codeBlock;
+  }
+
+  const heredoc = extractProcessDefinitionHeredoc(output);
+  if (heredoc && looksLikeProcessDefinitionSource(heredoc)) {
+    return heredoc;
+  }
+
+  return looksLikeStandaloneProcessDefinitionSource(output) ? output.trim() : null;
+}
+
 export function buildPhaseConversationSummary(outputs: string[]): string {
   const trimmedOutputs = outputs
     .map((output) => output.replace(/\s+/g, " ").trim())
@@ -132,8 +146,8 @@ async function recoverProcessDefinitionFromOutputs(args: {
   }
 
   for (const output of args.outputs) {
-    const extracted = extractProcessDefinitionCodeBlock(output);
-    if (!extracted || !looksLikeProcessDefinitionSource(extracted)) {
+    const extracted = extractRecoverableProcessDefinitionSource(output);
+    if (!extracted) {
       continue;
     }
     const recoveredName = `recovered-process-${Date.now()}.mjs`;
@@ -142,40 +156,26 @@ async function recoverProcessDefinitionFromOutputs(args: {
     await fs.writeFile(recoveredPath, extracted, "utf8");
     return {
       processPath: recoveredPath,
-      summary: "Recovered process-definition output by writing a JavaScript code block returned by the agent.",
-    };
-  }
-
-  for (const output of args.outputs) {
-    const extracted = extractProcessDefinitionHeredoc(output);
-    if (!extracted || !looksLikeProcessDefinitionSource(extracted)) {
-      continue;
-    }
-    const recoveredName = `recovered-process-${Date.now()}.mjs`;
-    const recoveredPath = path.join(resolvedDir, recoveredName);
-    await fs.mkdir(resolvedDir, { recursive: true });
-    await fs.writeFile(recoveredPath, extracted, "utf8");
-    return {
-      processPath: recoveredPath,
-      summary: "Recovered process-definition output by extracting a heredoc-written JavaScript module from the agent transcript.",
-    };
-  }
-
-  for (const output of args.outputs) {
-    if (!looksLikeStandaloneProcessDefinitionSource(output)) {
-      continue;
-    }
-    const recoveredName = `recovered-process-${Date.now()}.mjs`;
-    const recoveredPath = path.join(resolvedDir, recoveredName);
-    await fs.mkdir(resolvedDir, { recursive: true });
-    await fs.writeFile(recoveredPath, output.trim(), "utf8");
-    return {
-      processPath: recoveredPath,
-      summary: "Recovered process-definition output by writing the agent's direct JavaScript response.",
+      summary: "Recovered process-definition output by writing recoverable JavaScript source returned by the agent.",
     };
   }
 
   return null;
+}
+
+export async function applyRecoveredProcessDefinitionFromOutput(args: {
+  output: string;
+  processPath: string;
+}): Promise<boolean> {
+  const extracted = extractRecoverableProcessDefinitionSource(args.output);
+  if (!extracted) {
+    return false;
+  }
+
+  const resolvedPath = path.resolve(args.processPath);
+  await fs.mkdir(path.dirname(resolvedPath), { recursive: true });
+  await fs.writeFile(resolvedPath, extracted, "utf8");
+  return true;
 }
 
 export async function recoverReportedProcessDefinition(args: {
