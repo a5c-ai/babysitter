@@ -8,6 +8,8 @@
  * Events are forwarded through the `subscribe()` method.
  */
 
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { AgentCoreSessionOptions, AgentCorePromptResult, AgentCoreSessionEvent } from "./types";
 import {
   BabysitterRuntimeError,
@@ -30,9 +32,25 @@ import type { PiAgentSession } from "./piWrapper/moduleSupport";
 const DEFAULT_TIMEOUT_MS = 900_000;
 const DEFAULT_BASH_SANDBOX_MODE: NonNullable<AgentCoreSessionOptions["bashSandbox"]> = "local";
 const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
+const PI_AGENT_DIR_ENV = "PI_CODING_AGENT_DIR";
+const DEFAULT_PI_AGENT_DIR = join(homedir(), ".pi", "agent");
 
 /** Listener for Pi session events. */
 export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
+
+function resolvePiAgentDir(agentDir?: string): string {
+  const configured = agentDir?.trim() || process.env[PI_AGENT_DIR_ENV]?.trim();
+  if (!configured) {
+    return DEFAULT_PI_AGENT_DIR;
+  }
+  if (configured === "~") {
+    return homedir();
+  }
+  if (configured.startsWith("~/")) {
+    return join(homedir(), configured.slice(2));
+  }
+  return configured;
+}
 
 // ---------------------------------------------------------------------------
 // AgentCoreSessionHandle
@@ -259,12 +277,13 @@ export class AgentCoreSessionHandle {
     );
     const createOpts: Record<string, unknown> = {};
     const cwd = this.options.workspace ?? process.cwd();
+    const agentDir = resolvePiAgentDir(this.options.agentDir);
     const compressionConfig = loadCompressionConfigSafe(cwd);
     const compactionEnabled = this.options.enableCompaction ??
       Boolean(compressionConfig?.enabled && compressionConfig.layers.sdkContextHook.enabled);
     const compactionSettings = buildCompactionSettings(compactionEnabled);
     createOpts.cwd = cwd;
-    if (this.options.agentDir) createOpts.agentDir = this.options.agentDir;
+    createOpts.agentDir = agentDir;
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
     if (this.options.customTools) createOpts.customTools = this.options.customTools;
     if (this.options.ephemeral) {
@@ -319,7 +338,7 @@ export class AgentCoreSessionHandle {
       ) {
         const resourceLoader = new mod.DefaultResourceLoader({
           cwd,
-          agentDir: this.options.agentDir,
+          agentDir,
           settingsManager,
           noExtensions: this.options.isolated === true,
           noSkills: this.options.isolated === true,
