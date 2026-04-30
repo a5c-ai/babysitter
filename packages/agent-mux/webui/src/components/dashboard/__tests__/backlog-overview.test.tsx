@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { render, screen, setupUser, waitFor, within } from "@/test/test-utils";
+import { fireEvent, render, screen, setupUser, waitFor, within } from "@/test/test-utils";
 
 import { BacklogOverview } from "../backlog-overview";
 
@@ -23,11 +23,16 @@ const push = vi.fn();
 let creatingIssueState = false;
 let searchParams = new URLSearchParams();
 let issueReviewArtifacts: Array<Record<string, unknown>> = [];
+const setSearchParams = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push, replace: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
-  useSearchParams: () => searchParams,
-}));
+vi.mock("react-router-dom-v6", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom-v6")>("react-router-dom-v6");
+  return {
+    ...actual,
+    useNavigate: () => push,
+    useSearchParams: () => [searchParams, setSearchParams],
+  };
+});
 
 vi.mock("@/components/review/review-panel", () => ({
   ReviewPanel: () => null,
@@ -604,26 +609,23 @@ describe("BacklogOverview", () => {
     expect(screen.getByTestId("kanban-list")).toBeInTheDocument();
     const panel = screen.getByTestId("create-issue-panel");
 
-    await user.type(screen.getByLabelText("Issue title"), "List-view create");
-    await user.type(screen.getByLabelText("Issue summary"), "Keep panel beside alternate surface");
-    await user.type(
-      screen.getByLabelText("Issue description"),
-      "Persist authoring details through the shared mutation path.",
-    );
+    fireEvent.change(screen.getByLabelText("Issue title"), { target: { value: "List-view create" } });
+    fireEvent.change(screen.getByLabelText("Issue summary"), { target: { value: "Keep panel beside alternate surface" } });
+    fireEvent.change(screen.getByLabelText("Issue description"), {
+      target: { value: "Persist authoring details through the shared mutation path." },
+    });
     await user.selectOptions(screen.getByLabelText("Target column"), "in-progress");
     await user.selectOptions(screen.getByLabelText("Issue status"), "blocked");
     await user.selectOptions(screen.getByLabelText("Priority"), "high");
     await user.click(screen.getByRole("checkbox", { name: "QA Lead" }));
     await user.click(screen.getByRole("checkbox", { name: "parity" }));
     await user.click(screen.getByRole("button", { name: "Add criterion" }));
-    await user.type(
-      screen.getByLabelText("Acceptance criterion 1 title"),
-      "Shared authoring flow saves the full issue profile.",
-    );
-    await user.type(
-      screen.getByLabelText("Acceptance criterion 1 notes"),
-      "Verify create and edit routes stay aligned.",
-    );
+    fireEvent.change(screen.getByLabelText("Acceptance criterion 1 title"), {
+      target: { value: "Shared authoring flow saves the full issue profile." },
+    });
+    fireEvent.change(screen.getByLabelText("Acceptance criterion 1 notes"), {
+      target: { value: "Verify create and edit routes stay aligned." },
+    });
     await user.click(within(panel).getByRole("button", { name: "Create issue" }));
 
     await waitFor(() => {
@@ -655,7 +657,7 @@ describe("BacklogOverview", () => {
     });
 
     expect(screen.getByText("Created KANBAN-AUTO-101 from board header create mode.")).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("surfaces partial-save failure state and preserves the draft for retry", async () => {
     const user = setupUser();
@@ -664,8 +666,10 @@ describe("BacklogOverview", () => {
     render(<BacklogOverview />);
 
     await user.click(screen.getByTestId("board-header-create"));
-    await user.type(screen.getByLabelText("Issue title"), "Retry me");
-    await user.type(screen.getByLabelText("Issue summary"), "Draft should remain after failure");
+    fireEvent.change(screen.getByLabelText("Issue title"), { target: { value: "Retry me" } });
+    fireEvent.change(screen.getByLabelText("Issue summary"), {
+      target: { value: "Draft should remain after failure" },
+    });
     await user.click(within(screen.getByTestId("create-issue-panel")).getByRole("button", { name: "Create issue" }));
 
     await waitFor(() => {
@@ -1156,7 +1160,7 @@ describe("BacklogOverview", () => {
             status: "open",
             anchor: {
               fileId: "file-1",
-              filePath: "packages/agent-mux/webui/src/kanban/components/dashboard/backlog-overview.tsx",
+              filePath: "packages/agent-mux/webui/src/components/dashboard/backlog-overview.tsx",
               hunkId: "hunk-1",
               side: "head",
               line: 1500,

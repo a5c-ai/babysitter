@@ -144,7 +144,7 @@ describe('SettingsModal', () => {
     });
 
     // Click the close button rendered by the compendium Modal
-    const closeButton = screen.getByLabelText('Close');
+    const closeButton = screen.getByRole('button', { name: /close/i });
     await user.click(closeButton);
     expect(onClose).toHaveBeenCalled();
   });

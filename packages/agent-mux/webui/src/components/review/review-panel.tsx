@@ -822,7 +822,7 @@ export function ReviewPanel(props: {
                     {feedbackContext.map((item) => (
                       <Link
                         key={item.id}
-                        href={item.href}
+                        to={item.href}
                         className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-foreground-muted hover:border-primary/30 hover:text-primary"
                       >
                         {item.label}
@@ -1052,7 +1052,7 @@ export function ReviewPanel(props: {
                     {selectedArtifact.executionTargets?.map((target) => (
                       <Link
                         key={target.id}
-                        href={target.href}
+                        to={target.href}
                         className="rounded-2xl border border-border bg-card px-4 py-3 transition-colors hover:border-primary/30 hover:bg-background"
                       >
                         <div className="text-sm font-medium text-foreground">{target.actionLabel ?? target.label}</div>

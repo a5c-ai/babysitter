@@ -41,7 +41,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom-v6";
 
 import { useBacklog } from "@/hooks/use-backlog";
 import { usePersistedState } from "@/hooks/use-persisted-state";
@@ -3660,8 +3660,8 @@ export function BacklogOverview({
   initialIssueKey,
   initialProjectId,
 }: BacklogOverviewProps = {}) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { taskTags } = useTaskTags();
   const {
     snapshot,
@@ -4113,7 +4113,7 @@ export function BacklogOverview({
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => router.push(projectIssueCreateHref(focusedIssue.projectId))}
+                onClick={() => navigate(projectIssueCreateHref(focusedIssue.projectId))}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary"
               >
                 <Plus className="h-4 w-4" />
@@ -4146,7 +4146,7 @@ export function BacklogOverview({
           assigneeEditing={assigneeEditing}
           labelEditing={labelEditing}
           onFocusIssue={setFocusedIssue}
-          onOpenDedicatedPage={(issue) => router.push(projectIssueHref(issue.projectId, issue.id))}
+          onOpenDedicatedPage={(issue) => navigate(projectIssueHref(issue.projectId, issue.id))}
           onClose={clearFocusedIssue}
           onChangeDraft={updateFocusedIssueDraft}
           onResetDraft={resetFocusedIssueDraft}
@@ -4359,7 +4359,7 @@ export function BacklogOverview({
       });
 
       if (routeMode === "create") {
-        router.push(projectIssueHref(created.issue.projectId, created.issue.id));
+        navigate(projectIssueHref(created.issue.projectId, created.issue.id));
         return;
       }
 
@@ -4375,7 +4375,7 @@ export function BacklogOverview({
     if (routeBasePath) {
       const params = new URLSearchParams(searchParams.toString());
       const query = params.toString();
-      router.push(query ? `${routeBasePath}/${nextPresentation}?${query}` : `${routeBasePath}/${nextPresentation}`);
+      navigate(query ? `${routeBasePath}/${nextPresentation}?${query}` : `${routeBasePath}/${nextPresentation}`);
       return;
     }
     setPersistedPresentation(nextPresentation);
@@ -4465,26 +4465,26 @@ export function BacklogOverview({
 
   function setFocusedIssue(issue: KanbanIssue) {
     if (routeMode === "issue") {
-      router.push(projectIssueHref(issue.projectId, issue.id));
+      navigate(projectIssueHref(issue.projectId, issue.id));
       return;
     }
     closeCreateMode();
     const params = new URLSearchParams(searchParams.toString());
     params.set("issueId", issue.id);
     params.set("issueKey", issue.key);
-    router.push(`${currentSurfacePath}?${params.toString()}`);
+    navigate(`${currentSurfacePath}?${params.toString()}`);
   }
 
   function clearFocusedIssue() {
     if (routeMode === "issue" || routeMode === "create") {
-      router.push(currentSurfacePath);
+      navigate(currentSurfacePath);
       return;
     }
     const params = new URLSearchParams(searchParams.toString());
     params.delete("issueId");
     params.delete("issueKey");
     const query = params.toString();
-    router.push(query ? `${currentSurfacePath}?${query}` : currentSurfacePath);
+    navigate(query ? `${currentSurfacePath}?${query}` : currentSurfacePath);
   }
 
   function refreshWorkspaceInventory() {
@@ -4510,11 +4510,11 @@ export function BacklogOverview({
   }
 
   function openWorkspacePath(workspacePath?: string) {
-    router.push(workspacePath ? workspaceShellHref(workspacePath) : "/workspaces");
+    navigate(workspacePath ? workspaceShellHref(workspacePath) : "/workspaces");
   }
 
   function openIssueWorkspaceCreate(issue: KanbanIssue) {
-    router.push(projectIssueWorkspaceCreateHref(issue.projectId, issue.id));
+    navigate(projectIssueWorkspaceCreateHref(issue.projectId, issue.id));
   }
 
   const activeSidePanel = focusedIssue ? "issue" : createMode ? "create" : null;
@@ -4735,7 +4735,7 @@ export function BacklogOverview({
           </button>
           <button
             type="button"
-            onClick={() => router.push(projectWorkspaceCreateHref(primaryProject.id))}
+            onClick={() => navigate(projectWorkspaceCreateHref(primaryProject.id))}
             className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground"
             data-testid="board-header-create-workspace"
           >
@@ -5238,7 +5238,7 @@ export function BacklogOverview({
             assigneeEditing={assigneeEditing}
             labelEditing={labelEditing}
             onFocusIssue={setFocusedIssue}
-            onOpenDedicatedPage={(issue) => router.push(projectIssueHref(issue.projectId, issue.id))}
+            onOpenDedicatedPage={(issue) => navigate(projectIssueHref(issue.projectId, issue.id))}
             onClose={clearFocusedIssue}
             onChangeDraft={updateFocusedIssueDraft}
             onResetDraft={resetFocusedIssueDraft}

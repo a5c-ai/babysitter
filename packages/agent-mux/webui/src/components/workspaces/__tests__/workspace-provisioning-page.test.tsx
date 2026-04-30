@@ -33,23 +33,24 @@ const backlogState = {
   ],
 };
 
-vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: ReactNode }) => <a href={href}>{children}</a>,
-}));
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push, replace: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
-}));
+vi.mock("react-router-dom-v6", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom-v6")>("react-router-dom-v6");
+  return {
+    ...actual,
+    useNavigate: () => push,
+  };
+});
 
 vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
-   ,
+    asChild,
     children,
     ...props
   }: {
-   ?: boolean;
+    asChild?: boolean;
     children: ReactNode;
   } & Record<string, unknown>) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
+  cx: (...args: unknown[]) => args.filter(Boolean).join(" "),
 }));
 
 vi.mock("@/hooks/use-backlog", () => ({

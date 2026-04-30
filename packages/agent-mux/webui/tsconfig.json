@@ -19,10 +19,7 @@
       "@a5c-ai/agent-mux-ui": ["../ui/src/index.ts"],
       "@a5c-ai/agent-mux-ui/gateway": ["../ui/src/gateway.ts"],
       "@a5c-ai/agent-mux-ui/session-flow": ["../ui/src/session-flow.ts"],
-      "@/*": ["src/kanban/*"],
-      "next/dynamic": ["src/kanban-shims/next-dynamic.tsx"],
-      "next/link": ["src/kanban-shims/next-link.tsx"],
-      "next/navigation": ["src/kanban-shims/next-navigation.ts"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src", "vite.config.ts"],

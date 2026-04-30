@@ -51,7 +51,7 @@ export function WorkspaceProvisioningPage(props: {
   projectId?: string;
   issueId?: string;
 }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { snapshot, loading, error } = useBacklog();
   const [selectedProjectId, setSelectedProjectId] = useState(props.projectId ?? "");
   const [selectedHostProvider, setSelectedHostProvider] = useState<KanbanIntegrationProvider | "">("");
@@ -174,7 +174,7 @@ export function WorkspaceProvisioningPage(props: {
       }
 
       const payload = (await response.json()) as WorkspaceProvisionResponse;
-      router.push(`/workspaces?workspace=${encodeURIComponent(payload.workspace.workspacePath)}`);
+      navigate(`/workspaces?workspace=${encodeURIComponent(payload.workspace.workspacePath)}`);
     } catch (cause) {
       setSubmitError(cause instanceof Error ? cause.message : String(cause));
     } finally {

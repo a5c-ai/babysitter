@@ -46,7 +46,12 @@ function createBacklogService(options: {
 
 describe("BacklogQueryService", () => {
   it("returns a seeded backlog summary and links matching run summaries", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-backlog-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
     const service = new BacklogQueryService({
+      backlogFilePath,
       reviewService: {
         listReviews: vi.fn().mockResolvedValue({
           generatedAt: "2026-04-24T00:00:00.000Z",
@@ -558,7 +563,12 @@ describe("BacklogQueryService", () => {
   });
 
   it("rejects PR creation when integration prerequisites disable the action", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kanban-backlog-"));
+    tempDirs.push(tempDir);
+    const backlogFilePath = path.join(tempDir, "kanban-backlog.json");
+
     const service = new BacklogQueryService({
+      backlogFilePath,
       runQueryService: {
         listProjects: vi.fn().mockResolvedValue({
           recentCompletionWindowMs: 14400000,
@@ -1042,8 +1052,8 @@ describe("BacklogQueryService", () => {
     const issue = overview.snapshot.issues.find((candidate) => candidate.id === "KANBAN-GAP-007");
     expect(issue?.workspaceLinks).toHaveLength(2);
     expect(issue?.workspaceLinks.map((link) => link.workspacePath)).toEqual([
-      "/repo/worktrees/kanban-gap-007",
-      "/repo/worktrees/shared",
+      path.resolve(path.sep, "repo", "worktrees", "kanban-gap-007"),
+      path.resolve(path.sep, "repo", "worktrees", "shared"),
     ]);
 
     const persisted = JSON.parse(await fs.readFile(backlogFilePath, "utf8")) as {
@@ -1056,11 +1066,11 @@ describe("BacklogQueryService", () => {
       persisted.issues.find((candidate) => candidate.id === "KANBAN-GAP-007")?.workspaceLinks,
     ).toEqual([
       expect.objectContaining({
-        workspacePath: "/repo/worktrees/kanban-gap-007",
+        workspacePath: path.resolve(path.sep, "repo", "worktrees", "kanban-gap-007"),
         source: "created-from-issue",
       }),
       expect.objectContaining({
-        workspacePath: "/repo/worktrees/shared",
+        workspacePath: path.resolve(path.sep, "repo", "worktrees", "shared"),
         source: "linked-existing-workspace",
       }),
     ]);
@@ -1069,7 +1079,10 @@ describe("BacklogQueryService", () => {
     expect(
       refreshed.snapshot.issues.find((candidate) => candidate.id === "KANBAN-GAP-007")?.workspaceLinks
         ?.map((link) => link.workspacePath),
-    ).toEqual(["/repo/worktrees/kanban-gap-007", "/repo/worktrees/shared"]);
+    ).toEqual([
+      path.resolve(path.sep, "repo", "worktrees", "kanban-gap-007"),
+      path.resolve(path.sep, "repo", "worktrees", "shared"),
+    ]);
   });
 
   it("rejects duplicate workspace linking on the same issue", async () => {

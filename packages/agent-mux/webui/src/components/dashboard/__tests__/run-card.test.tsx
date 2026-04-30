@@ -7,16 +7,6 @@ import {
   resetIdCounter,
 } from '@/test/fixtures';
 
-// Mock next/link to render a plain anchor
-vi.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href} data-testid="next-link">
-      {children}
-    </a>
-  ),
-}));
-
 beforeEach(() => {
   resetIdCounter();
 });
@@ -49,7 +39,7 @@ describe('RunCard', () => {
   it('links to the run detail page', () => {
     const run = createMockRun({ runId: 'run-abc-123' });
     render(<RunCard run={run} />);
-    const link = screen.getByTestId('next-link');
+    const link = screen.getByRole('link', { name: /data pipeline ingest/i });
     expect(link).toHaveAttribute('href', '/runs/run-abc-123');
   });
 

@@ -3,53 +3,6 @@ import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import React from 'react';
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-  useParams: () => ({}),
-}));
-
-vi.mock('next/dynamic', () => {
-  const dynamic = (loader: () => Promise<any>, opts?: any) => {
-    let Resolved: React.ComponentType<any> | null = null;
-    const loadPromise = loader().then((mod: any) => {
-      Resolved = mod.default || mod;
-    });
-
-    const DynamicComponent = (props: any) => {
-      const [Comp, setComp] = React.useState<React.ComponentType<any> | null>(() => Resolved);
-
-      React.useEffect(() => {
-        if (!Comp && !Resolved) {
-          loadPromise.then(() => {
-            if (Resolved) {
-              setComp(() => Resolved);
-            }
-          });
-        } else if (!Comp && Resolved) {
-          setComp(() => Resolved);
-        }
-      }, [Comp]);
-
-      const Active = Comp || Resolved;
-      if (Active) {
-        return React.createElement(Active, props);
-      }
-      if (opts?.loading) {
-        return React.createElement(opts.loading, {});
-      }
-      return null;
-    };
-
-    DynamicComponent.displayName = 'DynamicComponent';
-    (DynamicComponent as any).preload = () => loadPromise;
-    return DynamicComponent;
-  };
-
-  return { __esModule: true, default: dynamic };
-});
-
 vi.mock('lucide-react', () => {
   const createIconMock = (name: string) => {
     const Icon = React.forwardRef<SVGSVGElement, any>(function IconMock(props: any, ref: any) {

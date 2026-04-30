@@ -162,7 +162,12 @@ export function FilePreview({ files, runId, effectId }: FilePreviewProps) {
       <Accordion
         items={files.map((file) => ({
           title: (
-            <div className="flex items-center gap-2 min-w-0">
+            <div
+              className="flex items-center gap-2 min-w-0"
+              onClickCapture={() => {
+                void loadFileContent(file.path);
+              }}
+            >
               {getIcon(file.format)}
               <span className="font-mono text-foreground-secondary truncate">
                 {file.path}

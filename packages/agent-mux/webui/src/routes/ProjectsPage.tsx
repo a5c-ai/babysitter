@@ -98,21 +98,21 @@ export default function ProjectsPage() {
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
-                href={`/projects/${project.id}/board`}
+                to={`/projects/${project.id}/board`}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-semibold text-primary"
               >
                 <Layers className="h-4 w-4" />
                 Open board
               </Link>
               <Link
-                href={`/projects/${project.id}/list`}
+                to={`/projects/${project.id}/list`}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground"
               >
                 <ListTodo className="h-4 w-4" />
                 Open list
               </Link>
               <Link
-                href={`/projects/${project.id}/workspaces/new`}
+                to={`/projects/${project.id}/workspaces/new`}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground"
               >
                 <FolderGit2 className="h-4 w-4" />

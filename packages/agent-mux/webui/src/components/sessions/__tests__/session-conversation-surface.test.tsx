@@ -6,10 +6,6 @@ import { render, screen, setupUser } from "@/test/test-utils";
 
 import { SessionConversationSurface } from "../session-conversation-surface";
 
-vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) => <a href={href}>{children}</a>,
-}));
-
 vi.mock("@/hooks/use-task-tags", () => ({
   useTaskTags: () => ({
     taskTags: [],
@@ -21,13 +17,12 @@ vi.mock("@/hooks/use-task-tags", () => ({
 vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,
-   ,
     ...props
   }: {
     children?: ReactNode;
-   ?: boolean;
     [key: string]: unknown;
-  }) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
+  }) => <button {...props}>{children}</button>,
+  cx: (...args: unknown[]) => args.filter(Boolean).join(" "),
 }));
 
 const requestMock = vi.fn();

@@ -24,14 +24,6 @@ const gatewayStore = createStore(() => ({
   },
 }));
 
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: { href?: string; children?: unknown; [key: string]: unknown }) => (
-    <a href={typeof href === "string" ? href : "#"} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
 vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,
@@ -40,6 +32,20 @@ vi.mock("@a5c-ai/compendium", () => ({
     children?: unknown;
     [key: string]: unknown;
   }) => (<button {...props}>{children}</button>),
+  Accordion: ({
+    items,
+  }: {
+    items: Array<{ title: string; body: unknown }>;
+  }) => (
+    <div data-testid="workspace-accordion">
+      {items.map((item) => (
+        <section key={item.title}>
+          <div>{item.title}</div>
+          <div>{item.body as any}</div>
+        </section>
+      ))}
+    </div>
+  ),
   CommandPalette: ({
     open,
     items,
@@ -1050,10 +1056,10 @@ describe("workspaces-page helpers", () => {
             rebase: {
               status: "rebase-conflicts",
               attemptCount: 1,
-              unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
-              resolvedFiles: ["packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx"],
+              unresolvedFiles: ["packages/agent-mux/webui/src/lib/workspace-lifecycle.ts"],
+              resolvedFiles: ["packages/agent-mux/webui/src/components/workspaces/workspaces-page.tsx"],
               followUpInstructions: [
-                "Unresolved files: packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts.",
+                "Unresolved files: packages/agent-mux/webui/src/lib/workspace-lifecycle.ts.",
                 "Open in editor for manual fixes, then use Mark resolved to return the workspace to review or merge readiness.",
               ],
               manualResolutionSuggested: true,
@@ -1140,7 +1146,7 @@ describe("workspaces-page helpers", () => {
               status: "ready-for-merge",
               attemptCount: 2,
               unresolvedFiles: [],
-              resolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
+              resolvedFiles: ["packages/agent-mux/webui/src/lib/workspace-lifecycle.ts"],
               followUpInstructions: ["Rebase workflow completed. Continue the workspace through merge readiness."],
               manualResolutionSuggested: false,
               readyFor: "merge",
@@ -1294,7 +1300,7 @@ describe("workspaces-page helpers", () => {
             status: "open",
             anchor: {
               fileId: "file-1",
-              filePath: "packages/agent-mux/webui/src/kanban/components/workspaces/workspace-details-sidebar.tsx",
+              filePath: "packages/agent-mux/webui/src/components/workspaces/workspace-details-sidebar.tsx",
               hunkId: "hunk-1",
               side: "head",
               line: 120,

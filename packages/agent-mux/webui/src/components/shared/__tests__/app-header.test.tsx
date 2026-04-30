@@ -7,13 +7,18 @@ import { APP_HEADER_NAV_ITEMS } from "../app-header-nav";
 const mockUsePathname = vi.fn(() => "/");
 const toggleThemeMock = vi.fn();
 
-vi.mock("next/navigation", async () => {
-  const actual = await vi.importActual("next/navigation");
-  return { ...actual, usePathname: () => mockUsePathname() };
+vi.mock("react-router-dom-v6", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom-v6")>("react-router-dom-v6");
+  return {
+    ...actual,
+    useLocation: () => ({ pathname: mockUsePathname(), search: "", hash: "", state: null, key: "test" }),
+  };
 });
 
 vi.mock("@a5c-ai/compendium", () => ({
+  Button: ({ children, ...props }: Record<string, unknown>) => <button {...props}>{children}</button>,
   LogoWordmark: (props: Record<string, unknown>) => <div {...props}>Babysitter</div>,
+  cx: (...args: unknown[]) => args.filter(Boolean).join(" "),
 }));
 
 vi.mock("@/components/agent-mux/gateway-provider", () => ({

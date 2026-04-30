@@ -4,16 +4,13 @@ import type { AppNotification } from '@/hooks/use-notifications';
 
 // Mock next/navigation
 const mockPush = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
-  }),
-}));
+vi.mock('react-router-dom-v6', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom-v6')>('react-router-dom-v6');
+  return {
+    ...actual,
+    useNavigate: () => mockPush,
+  };
+});
 
 function makeNotification(overrides: Partial<AppNotification> = {}): AppNotification {
   return {
@@ -136,7 +133,7 @@ describe('NotificationPanel', () => {
     );
 
     // The Drawer close button
-    const closeButton = screen.getByLabelText('Close');
+    const closeButton = screen.getByLabelText(/close/i);
     await user.click(closeButton);
 
     expect(onClose).toHaveBeenCalledTimes(1);

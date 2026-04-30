@@ -288,7 +288,7 @@ export function WorkspaceDetailsSidebar(props: {
                   {recentRuns.map((run) => (
                     <Link
                       key={`${props.workspace.path}:${run.runId}`}
-                      href={`/runs/${encodeURIComponent(run.runId)}`}
+                      to={`/runs/${encodeURIComponent(run.runId)}`}
                       data-testid={`workspace-status-run-${run.runId}`}
                       className="rounded-xl border border-border bg-background/70 px-3 py-2 transition-colors hover:border-primary/30"
                     >

@@ -181,8 +181,8 @@ function buildEditorHref(workspacePath: string): string {
 
 function defaultConflictFiles(): string[] {
   return [
-    "packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx",
-    "packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts",
+    "packages/agent-mux/webui/src/components/workspaces/workspaces-page.tsx",
+    "packages/agent-mux/webui/src/lib/workspace-lifecycle.ts",
   ];
 }
 

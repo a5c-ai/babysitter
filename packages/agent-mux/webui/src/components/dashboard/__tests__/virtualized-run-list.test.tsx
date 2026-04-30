@@ -5,16 +5,6 @@ import { RunCard } from '../run-card';
 import { createMockRun, resetIdCounter } from '@/test/fixtures';
 import type { Run } from '@/types';
 
-// Mock next/link to render a plain anchor
-vi.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href} data-testid="next-link">
-      {children}
-    </a>
-  ),
-}));
-
 beforeEach(() => {
   resetIdCounter();
 });
@@ -27,7 +17,7 @@ describe('VirtualizedRunList', () => {
       );
       render(<VirtualizedRunList runs={runs} />);
       expect(screen.getByTestId('run-list-flat')).toBeInTheDocument();
-      const links = screen.getAllByTestId('next-link');
+      const links = screen.getAllByRole('link');
       expect(links).toHaveLength(5);
     });
 
@@ -43,7 +33,7 @@ describe('VirtualizedRunList', () => {
       ];
       render(<VirtualizedRunList runs={runs} />);
       // Both should render in the given order (not re-sorted)
-      const links = screen.getAllByTestId('next-link');
+      const links = screen.getAllByRole('link');
       expect(links[0]).toHaveAttribute('href', '/runs/run-b');
       expect(links[1]).toHaveAttribute('href', '/runs/run-a');
     });
@@ -119,7 +109,7 @@ describe('VirtualizedRunList', () => {
       ];
       rerender(<VirtualizedRunList runs={runsV2} />);
 
-      const links = screen.getAllByTestId('next-link');
+      const links = screen.getAllByRole('link');
       expect(links[0]).toHaveAttribute('href', '/runs/run-1');
       expect(links[1]).toHaveAttribute('href', '/runs/run-2');
       expect(links[2]).toHaveAttribute('href', '/runs/run-3');
@@ -140,7 +130,7 @@ describe('VirtualizedRunList', () => {
       ];
       rerender(<VirtualizedRunList runs={updatedRuns} />);
 
-      const links = screen.getAllByTestId('next-link');
+      const links = screen.getAllByRole('link');
       expect(links).toHaveLength(3);
       expect(links[0]).toHaveAttribute('href', '/runs/run-1');
     });
@@ -173,7 +163,7 @@ describe('RunCard React.memo', () => {
     rerender(<RunCard run={run} />);
 
     // The component should still be in the DOM
-    const links = screen.getAllByTestId('next-link');
+    const links = screen.getAllByRole('link');
     expect(links.length).toBeGreaterThan(0);
   });
 });

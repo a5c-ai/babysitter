@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "react-router-dom-v6";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom-v6";
 import { useState } from "react";
 import { LogoWordmark } from "@a5c-ai/compendium";
 import { Bell, Columns3, Github, Menu, Moon, Settings2, Sun, Wifi, WifiOff } from "lucide-react";
@@ -20,7 +20,7 @@ import { pageShellContainerClassName } from "@/components/shared/page-shell";
 export const WORKSPACES_HREF = "/workspaces";
 
 export function AppHeader() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const { theme, toggle: toggleTheme } = useTheme();
   const { connected: streamConnected } = useEventStream();
   const { isAuthenticated } = useGatewayAuth();
@@ -132,7 +132,7 @@ export function AppHeader() {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  to={item.href}
                   className={cx(
                     "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
                     active

@@ -630,7 +630,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                 (props.workspace.issues ?? []).map((issue) => (
                   <Link
                     key={`${props.workspace.path}-${issue.issueId}`}
-                    href={workspaceIssueHref(props.workspace, issue.issueId)}
+                    to={workspaceIssueHref(props.workspace, issue.issueId)}
                     className="rounded-full border border-border px-3 py-1.5 text-xs text-primary"
                     data-testid={`workspace-issue-link-${issue.issueKey}`}
                   >

@@ -3,24 +3,15 @@ import { render, screen } from "@/test/test-utils";
 
 import { WorkspaceDetailsSidebar } from "../workspace-details-sidebar";
 
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: { href?: string; children?: unknown; [key: string]: unknown }) => (
-    <a href={typeof href === "string" ? href : "#"} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
 vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,
-   ,
     ...props
   }: {
     children?: unknown;
-   ?: boolean;
     [key: string]: unknown;
-  }) => (asChild ? <>{children}</> : <button {...props}>{children}</button>),
+  }) => <button {...props}>{children}</button>,
+  cx: (...args: unknown[]) => args.filter(Boolean).join(" "),
 }));
 
 function buildWorkspace(overrides: Partial<Parameters<typeof WorkspaceDetailsSidebar>[0]["workspace"]> = {}) {

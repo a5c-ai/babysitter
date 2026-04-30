@@ -73,7 +73,7 @@ describe("WorkspaceRuntimePanel", () => {
     );
 
     await user.click(screen.getByRole("tab", { name: "Logs" }));
-    await user.click(screen.getByRole("tab", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" }));
+    await user.click(screen.getByRole("button", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" }));
 
     const search = screen.getByPlaceholderText("Search logs");
     await user.type(search, "Expected logs");
@@ -94,7 +94,7 @@ describe("WorkspaceRuntimePanel", () => {
     );
 
     await user.click(screen.getByRole("tab", { name: "Logs" }));
-    const processTab = screen.getByRole("tab", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" });
+    const processTab = screen.getByRole("button", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" });
     await user.click(processTab);
 
     const search = screen.getByPlaceholderText("Search logs");
@@ -122,7 +122,10 @@ describe("WorkspaceRuntimePanel", () => {
     );
 
     expect(screen.getByDisplayValue("Expected logs")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("button", { name: "pnpm vitest run workspace-runtime-panel.test.tsx" })).toHaveClass(
+      "border-primary/30",
+      "bg-primary/8",
+    );
     expect(screen.getByText("Expected logs tab to exist again")).toBeInTheDocument();
   });
 
@@ -232,7 +235,7 @@ describe("WorkspaceRuntimePanel", () => {
     );
 
     await user.click(screen.getByRole("tab", { name: "Logs" }));
-    await user.click(screen.getByRole("tab", { name: "Process 1" }));
+    await user.click(screen.getByRole("button", { name: "Process 1" }));
 
     expect(screen.getByText("Process exited with code 1 before emitting logs.")).toBeInTheDocument();
   });

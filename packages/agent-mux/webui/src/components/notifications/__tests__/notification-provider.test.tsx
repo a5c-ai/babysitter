@@ -109,7 +109,7 @@ describe('NotificationProvider', () => {
 
     screen.getByText('Notify').click();
 
-    expect(mockNotify).toHaveBeenCalledWith('Test', 'Body', 'info');
+    expect(mockNotify).toHaveBeenCalledWith('Test', 'Body', 'info', undefined);
   });
 
   // -----------------------------------------------------------------------

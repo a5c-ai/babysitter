@@ -31,7 +31,7 @@ export default defineConfig({
       },
     },
     globals: true,
-    setupFiles: ['./src/kanban/test/setup.ts'],
+    setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
     server: {
       deps: {
@@ -56,9 +56,7 @@ export default defineConfig({
       '@a5c-ai/agent-mux-ui': path.resolve(rootDir, '..', 'ui', 'src', 'index.ts'),
       '@testing-library/react': testingLibraryReact,
       '@testing-library/dom': testingLibraryDom,
-      '@': path.resolve(rootDir, 'src', 'kanban'),
-      'next/link': path.resolve(rootDir, 'src', 'kanban-shims', 'next-link.tsx'),
-      'next/navigation': path.resolve(rootDir, 'src', 'kanban-shims', 'next-navigation.ts'),
+      '@': path.resolve(rootDir, 'src'),
       'react': localReact,
       'react/jsx-runtime': path.join(localReact, 'jsx-runtime'),
       'react/jsx-dev-runtime': path.join(localReact, 'jsx-dev-runtime'),

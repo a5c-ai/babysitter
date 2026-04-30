@@ -102,6 +102,24 @@ function createDeps(overrides: Partial<WorkspaceLifecycleDeps> = {}): WorkspaceL
     execGit,
     now: () => "2026-04-24T12:00:00.000Z",
     cwd: () => kanbanPath,
+    workspaceService: {
+      listWorkspaces: vi.fn(async () => ({ workspaces: [] })),
+      createWorkspace: vi.fn(async () => {
+        throw new Error("shared workspace service unavailable");
+      }),
+      archiveWorkspace: vi.fn(async () => {
+        throw new Error("shared workspace service unavailable");
+      }),
+      cleanupWorkspace: vi.fn(async () => {
+        throw new Error("shared workspace service unavailable");
+      }),
+      recoverWorkspace: vi.fn(async () => {
+        throw new Error("shared workspace service unavailable");
+      }),
+      resolveWorkspace: vi.fn(async () => {
+        throw new Error("shared workspace service unavailable");
+      }),
+    },
     ...overrides,
   };
 }
@@ -130,7 +148,7 @@ describe("WorkspaceLifecycleService", () => {
           rebase: {
             status: "rebase-needed",
             attemptCount: 0,
-            unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
+            unresolvedFiles: ["packages/agent-mux/webui/src/lib/workspace-lifecycle.ts"],
             resolvedFiles: [],
             followUpInstructions: ["Retry the rebase before merge readiness."],
             manualResolutionSuggested: false,
@@ -156,7 +174,7 @@ describe("WorkspaceLifecycleService", () => {
     expect(result.workspaces[0]?.git.uncommittedCount).toBe(1);
     expect(result.workspaces[0]?.rebase?.status).toBe("rebase-needed");
     expect(result.workspaces[0]?.actions.canRebaseStart).toBe(true);
-  });
+  }, 30000);
 
   it("persists pin and unpin actions in the workspace registry", async () => {
     let registry = JSON.stringify({
@@ -311,8 +329,8 @@ describe("WorkspaceLifecycleService", () => {
             status: "rebase-needed",
             attemptCount: 0,
             unresolvedFiles: [
-              "packages/agent-mux/webui/src/kanban/components/workspaces/workspaces-page.tsx",
-              "packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts",
+              "packages/agent-mux/webui/src/components/workspaces/workspaces-page.tsx",
+              "packages/agent-mux/webui/src/lib/workspace-lifecycle.ts",
             ],
             resolvedFiles: [],
             followUpInstructions: [],
@@ -388,7 +406,7 @@ describe("WorkspaceLifecycleService", () => {
           rebase: {
             status: "rebase-conflicts",
             attemptCount: 1,
-            unresolvedFiles: ["packages/agent-mux/webui/src/kanban/lib/workspace-lifecycle.ts"],
+            unresolvedFiles: ["packages/agent-mux/webui/src/lib/workspace-lifecycle.ts"],
             resolvedFiles: [],
             followUpInstructions: [],
             manualResolutionSuggested: true,

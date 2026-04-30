@@ -30,7 +30,7 @@ export function NotificationPanel({ open, notifications, onDismiss, onClose }: N
 
   const handleClick = (notif: AppNotification) => {
     if (notif.href) {
-      router.push(notif.href);
+      navigate(notif.href);
       onDismiss(notif.id);
       onClose();
     }

@@ -49,7 +49,7 @@ import {
   type StoredKanbanProject,
 } from './kanban-storage';
 
-const SOURCE_PATH = 'packages/agent-mux/webui/src/kanban/gaps-and-debt.md';
+const SOURCE_PATH = 'packages/agent-mux/webui/src/gaps-and-debt.md';
 const PROJECT_ID = 'kanban-app';
 
 function normalizeDispatchContextLabelKey(value: string): string {

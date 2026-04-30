@@ -94,6 +94,59 @@ img { display: block; max-width: 100%; }
 .list-grid { display: grid; gap: 16px; }
 .summary-grid { display: grid; gap: 16px; }
 
+.tkc-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgb(12 8 5 / 0.68);
+  backdrop-filter: blur(2px);
+}
+
+.tkc-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  background: linear-gradient(180deg, #f2e7ce, #e8d9b8);
+  border: 2px solid var(--tkc-rule);
+  border-radius: 6px;
+  width: min(520px, 92vw);
+  max-height: 84vh;
+  overflow: auto;
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 0.65),
+    0 0 0 4px var(--tkc-brass-deep),
+    0 0 0 6px #000,
+    inset 0 1px rgb(255 255 255 / 0.4);
+}
+
+.tkc-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1.5px solid var(--tkc-rule-m);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--tkc-ink);
+}
+
+.tkc-modal__body {
+  padding: 16px 18px;
+  font-family: var(--font-body);
+  color: var(--tkc-ink);
+}
+
+.tkc-modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1.5px solid var(--tkc-rule-m);
+}
+
 @media (max-width: 768px) {
   .app-shell { flex-direction: column; }
   .app-content { padding: var(--tk-space-md, 16px); }

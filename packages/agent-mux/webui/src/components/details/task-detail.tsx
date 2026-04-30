@@ -1,5 +1,5 @@
 "use client";
-import dynamic from "next/dynamic";
+import React, { Suspense, lazy } from "react";
 import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-core/kanban";
 
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
@@ -27,30 +27,21 @@ function PanelSkeleton() {
 /*  Lazy-loaded heavy components (code-split per tab)                         */
 /* -------------------------------------------------------------------------- */
 
-const AgentPanel = dynamic(
-  () => import("./agent-panel").then((mod) => ({ default: mod.AgentPanel })),
-  { ssr: false, loading: PanelSkeleton }
+const AgentPanel = lazy(() => import("./agent-panel").then((mod) => ({ default: mod.AgentPanel })));
+
+const TimingPanel = lazy(() => import("./timing-panel").then((mod) => ({ default: mod.TimingPanel })));
+
+const LogViewer = lazy(() => import("./log-viewer").then((mod) => ({ default: mod.LogViewer })));
+
+const JsonTree = lazy(() => import("./json-tree").then((mod) => ({ default: mod.JsonTree })));
+
+const BreakpointPanel = lazy(() =>
+  import("@/components/breakpoint/breakpoint-panel").then((mod) => ({ default: mod.BreakpointPanel })),
 );
 
-const TimingPanel = dynamic(
-  () => import("./timing-panel").then((mod) => ({ default: mod.TimingPanel })),
-  { ssr: false, loading: PanelSkeleton }
-);
-
-const LogViewer = dynamic(
-  () => import("./log-viewer").then((mod) => ({ default: mod.LogViewer })),
-  { ssr: false, loading: PanelSkeleton }
-);
-
-const JsonTree = dynamic(
-  () => import("./json-tree").then((mod) => ({ default: mod.JsonTree })),
-  { ssr: false, loading: PanelSkeleton }
-);
-
-const BreakpointPanel = dynamic(
-  () => import("@/components/breakpoint/breakpoint-panel").then((mod) => ({ default: mod.BreakpointPanel })),
-  { ssr: false, loading: PanelSkeleton }
-);
+function renderLazyPanel(node: React.ReactNode) {
+  return <Suspense fallback={<PanelSkeleton />}>{node}</Suspense>;
+}
 
 interface TaskDetailPanelProps {
   runId: string;
@@ -97,11 +88,39 @@ export function TaskDetailPanel({
   return (
     <Tabs value={activeTab} onChange={onTabChange} defaultValue={defaultTab}
       items={[
-        ...(isBreakpoint && task ? [{ value: "breakpoint", label: "Approval", body: (<div><BreakpointPanel task={task} runId={runId} /></div>) }] : []),
-        { value: "agent", label: "Agent", body: (<div><AgentPanel task={task} executionContexts={executionContexts} executionAudits={executionAudits} /></div>) },
-        { value: "timing", label: "Timing", body: (<div><TimingPanel task={task} runDuration={runDuration} allTasks={allTasks} /></div>) },
-        { value: "logs", label: "Logs", body: (<div><LogViewer task={task} /></div>) },
-        { value: "data", label: "Data", body: (<div><JsonTree task={task} /></div>) },
+        ...(isBreakpoint && task
+          ? [
+              {
+                value: "breakpoint",
+                label: "Approval",
+                body: renderLazyPanel(
+                  <div>
+                    <BreakpointPanel task={task} runId={runId} />
+                  </div>,
+                ),
+              },
+            ]
+          : []),
+        {
+          value: "agent",
+          label: "Agent",
+          body: renderLazyPanel(
+            <div>
+              <AgentPanel task={task} executionContexts={executionContexts} executionAudits={executionAudits} />
+            </div>,
+          ),
+        },
+        {
+          value: "timing",
+          label: "Timing",
+          body: renderLazyPanel(
+            <div>
+              <TimingPanel task={task} runDuration={runDuration} allTasks={allTasks} />
+            </div>,
+          ),
+        },
+        { value: "logs", label: "Logs", body: renderLazyPanel(<div><LogViewer task={task} /></div>) },
+        { value: "data", label: "Data", body: renderLazyPanel(<div><JsonTree task={task} /></div>) },
       ]}
     />
   );

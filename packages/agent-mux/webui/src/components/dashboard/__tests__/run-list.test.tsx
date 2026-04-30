@@ -4,16 +4,6 @@ import { RunList } from '../run-list';
 import { createMockRun, resetIdCounter } from '@/test/fixtures';
 import userEvent from '@testing-library/user-event';
 
-// Mock next/link
-vi.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href} data-testid="next-link">
-      {children}
-    </a>
-  ),
-}));
-
 // Mock ProjectSection to avoid hook side effects
 vi.mock('../project-section', () => ({
   ProjectSection: ({ projectName }: { projectName: string }) => (
@@ -59,7 +49,7 @@ describe('RunList', () => {
     );
     render(<RunList runs={runs} />);
     // First page shows 10 items
-    const links = screen.getAllByTestId('next-link');
+    const links = screen.getAllByRole('link');
     expect(links).toHaveLength(10);
     // "Show more" button exists with remaining count
     expect(screen.getByText(/Show more \(2 remaining\)/)).toBeInTheDocument();
@@ -76,7 +66,7 @@ describe('RunList', () => {
     await user.click(showMoreBtn);
 
     // After clicking, all 12 runs should be visible
-    const links = screen.getAllByTestId('next-link');
+    const links = screen.getAllByRole('link');
     expect(links).toHaveLength(12);
   });
 

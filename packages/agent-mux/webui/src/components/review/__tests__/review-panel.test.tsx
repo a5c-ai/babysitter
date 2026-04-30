@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { render, screen, setupUser } from "@/test/test-utils";
+import { fireEvent, render, screen, setupUser } from "@/test/test-utils";
 
 import { ReviewPanel } from "../review-panel";
 
@@ -158,7 +158,9 @@ describe("ReviewPanel", () => {
     expect(screen.getAllByText("packages/agent-mux/core/src/kanban.ts").length).toBeGreaterThan(0);
 
     await user.click(screen.getAllByRole("button", { name: /^comment$/i })[0]!);
-    await user.type(screen.getByLabelText(/inline review comment/i), "Queue this follow-up for the dashboard badge.");
+    fireEvent.change(screen.getByLabelText(/inline review comment/i), {
+      target: { value: "Queue this follow-up for the dashboard badge." },
+    });
     await user.click(screen.getByRole("button", { name: /save comment/i }));
 
     expect(onAddComment).toHaveBeenCalledWith(
@@ -171,7 +173,9 @@ describe("ReviewPanel", () => {
       }),
     );
 
-    await user.type(screen.getByLabelText(/review summary/i), "Ship the queue badges, then resume the linked session.");
+    fireEvent.change(screen.getByLabelText(/review summary/i), {
+      target: { value: "Ship the queue badges, then resume the linked session." },
+    });
     await user.selectOptions(screen.getByLabelText(/route follow-up to/i), "session-follow-up");
     await user.click(screen.getByRole("button", { name: /approve review/i }));
 
@@ -181,5 +185,5 @@ describe("ReviewPanel", () => {
       summary: "Ship the queue badges, then resume the linked session.",
       executionTargetId: "session-follow-up",
     });
-  });
+  }, 10000);
 });

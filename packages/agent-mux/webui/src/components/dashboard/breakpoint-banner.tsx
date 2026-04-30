@@ -256,7 +256,7 @@ export function BreakpointBanner({ breakpointRuns }: BreakpointBannerProps) {
       {resolvedEntries.map((entry) => (
         <Link
           key={`resolved-${entry.bp.runId}`}
-          href={`/runs/${entry.bp.runId}`}
+          to={`/runs/${entry.bp.runId}`}
           className={cx(
             "group relative flex items-center gap-3 px-4 py-3 rounded-lg",
             "bg-success-muted border border-success/30",

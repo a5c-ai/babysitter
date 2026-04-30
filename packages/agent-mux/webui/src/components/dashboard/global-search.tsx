@@ -86,9 +86,9 @@ export function GlobalSearch() {
       setQuery("");
       setResults([]);
       setHasSearched(false);
-      router.push(`/runs/${runId}`);
+      navigate(`/runs/${runId}`);
     },
-    [router]
+    [navigate]
   );
 
   // Keyboard navigation

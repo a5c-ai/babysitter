@@ -5,9 +5,12 @@ import { ShortcutsHelp } from '../shortcuts-help';
 
 // Default mock returns '/' (dashboard). Override per-test for run detail.
 const mockUsePathname = vi.fn(() => '/');
-vi.mock('next/navigation', async () => {
-  const actual = await vi.importActual('next/navigation');
-  return { ...actual, usePathname: () => mockUsePathname() };
+vi.mock('react-router-dom-v6', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom-v6')>('react-router-dom-v6');
+  return {
+    ...actual,
+    useLocation: () => ({ pathname: mockUsePathname(), search: '', hash: '', state: null, key: 'test' }),
+  };
 });
 
 describe('ShortcutsHelp', () => {
@@ -110,7 +113,7 @@ describe('ShortcutsHelp', () => {
     expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
 
     // Click the close button rendered by the compendium Modal
-    const closeButton = screen.getByLabelText('Close');
+    const closeButton = screen.getByLabelText(/close/i);
     fireEvent.click(closeButton);
     expect(screen.queryByText('Keyboard Shortcuts')).not.toBeInTheDocument();
   });

@@ -34,9 +34,8 @@ function createEventSource() {
   const source = new EventSource("/api/stream");
 
   source.onopen = () => {
-    // eslint-disable-next-line no-console
-    console.log("SSE connected");
     reconnectAttempts = 0;
+    subscribers.forEach((callback) => callback({ type: "connected" }));
   };
 
   source.onmessage = (event) => {
@@ -49,7 +48,6 @@ function createEventSource() {
   };
 
   source.onerror = () => {
-    console.error("SSE connection error");
     source.close();
     sharedEventSource = null;
 
@@ -60,8 +58,6 @@ function createEventSource() {
     if (subscriberCount > 0) {
       reconnectAttempts++;
       const delay = getReconnectDelay();
-      // eslint-disable-next-line no-console
-      console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
       reconnectTimeout = setTimeout(() => {
         if (subscriberCount > 0) {
           sharedEventSource = createEventSource();

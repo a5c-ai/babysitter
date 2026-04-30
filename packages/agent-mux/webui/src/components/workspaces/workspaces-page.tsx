@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "react-router-dom-v6";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom-v6";
 import type { Attachment } from "@a5c-ai/agent-mux-core";
 import type {
   KanbanLinkedPullRequestSummary,
@@ -443,7 +443,7 @@ export function WorkspacesPageContent(props: {
   }) => Promise<void>;
   mode?: WorkspaceSurfaceMode;
 }) {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [inventory, setInventory] = useState<WorkspaceInventoryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1474,7 +1474,7 @@ function WorkspaceColumn(props: {
                   {(workspace.issues ?? []).map((issue) => (
                     <Link
                       key={`${workspace.path}-${issue.issueId}`}
-                      href={issueHref(workspace, issue.issueId)}
+                      to={issueHref(workspace, issue.issueId)}
                       className="rounded-full border border-border px-2.5 py-1 text-xs text-primary"
                     >
                       {issue.issueKey}
@@ -1485,7 +1485,7 @@ function WorkspaceColumn(props: {
 
               <div className="mt-4 flex flex-wrap gap-3 text-sm text-foreground-muted">
                 {workspace.sessions.items.slice(0, 2).map((session) => (
-                  <Link key={session.sessionId} href={`/sessions/${session.sessionId}`} className="text-primary">
+                  <Link key={session.sessionId} to={`/sessions/${session.sessionId}`} className="text-primary">
                     Session {session.sessionId}
                   </Link>
                 ))}

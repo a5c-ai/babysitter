@@ -111,7 +111,7 @@ function ActionLinks(props: { actions: ActionLink[] }): JSX.Element | null {
             {action.label}
           </a>
         ) : (
-          <Link key={action.key} href={action.href} className={actionLinkClassName(action)}>
+          <Link key={action.key} to={action.href} className={actionLinkClassName(action)}>
             {action.label}
           </Link>
         ),
@@ -419,7 +419,7 @@ export function SessionObservabilityPanel(props: {
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
                     {item.breakpointEffectId ? (
                       <Link
-                        href={`/runs/${item.runId}?effectId=${encodeURIComponent(item.breakpointEffectId)}`}
+                        to={`/runs/${item.runId}?effectId=${encodeURIComponent(item.breakpointEffectId)}`}
                         className="inline-flex items-center gap-1 text-primary"
                       >
                         <Hand className="h-3 w-3" />
@@ -428,7 +428,7 @@ export function SessionObservabilityPanel(props: {
                     ) : null}
                     {item.errorEffectId ? (
                       <Link
-                        href={`/runs/${item.runId}?effectId=${encodeURIComponent(item.errorEffectId)}`}
+                        to={`/runs/${item.runId}?effectId=${encodeURIComponent(item.errorEffectId)}`}
                         className="inline-flex items-center gap-1 text-primary"
                       >
                         <AlertTriangle className="h-3 w-3" />

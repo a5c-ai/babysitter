@@ -3,14 +3,6 @@ import { render, screen, setupUser, waitFor } from "@/test/test-utils";
 
 import { WorkspaceDetailShell } from "../workspace-detail-shell";
 
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: { href?: string; children?: unknown; [key: string]: unknown }) => (
-    <a href={typeof href === "string" ? href : "#"} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
 vi.mock("@a5c-ai/compendium", () => ({
   Button: ({
     children,

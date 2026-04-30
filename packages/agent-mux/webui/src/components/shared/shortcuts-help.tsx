@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom-v6";
 import { Modal } from "@a5c-ai/compendium";
 import { Kbd } from "./kbd";
 import { useKeyboard } from "@/hooks/use-keyboard";
@@ -44,7 +44,7 @@ export const SHORTCUT_SECTION_LABELS: Record<string, string> = {
 
 export function ShortcutsHelp() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const isRunDetail = pathname?.startsWith("/runs/") ?? false;
   const isSessionWorkspace = pathname?.startsWith("/sessions/") ?? false;
 

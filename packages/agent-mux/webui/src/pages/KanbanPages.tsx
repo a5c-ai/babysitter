@@ -8,26 +8,26 @@ import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/agent-mux-core
 import type { KanbanWorkspaceSessionSummary } from '@a5c-ai/agent-mux-core/kanban';
 import { useGateway } from '@a5c-ai/agent-mux-ui';
 
-import ProjectsRoutePage from '../kanban/routes/ProjectsPage.js';
-import AutomationsRoutePage from '../kanban/routes/AutomationsPage.js';
-import SettingsRoutePage from '../kanban/routes/SettingsPage.js';
-import { RequireGatewayAuth } from '../kanban/components/agent-mux/require-gateway-auth.js';
-import { useGatewayAuth, useGatewayFetch } from '../kanban/components/agent-mux/gateway-provider.js';
-import { BabysitterOverlayPanel } from '../kanban/components/dashboard/babysitter-overlay-panel.js';
-import { BacklogOverview } from '../kanban/components/dashboard/backlog-overview.js';
-import { BreakpointBanner } from '../kanban/components/dashboard/breakpoint-banner.js';
-import { CatchUpBanner } from '../kanban/components/dashboard/catch-up-banner.js';
-import { ExecutiveSummaryBanner } from '../kanban/components/dashboard/executive-summary-banner.js';
-import { GlobalSearch } from '../kanban/components/dashboard/global-search.js';
-import { KpiGrid } from '../kanban/components/dashboard/kpi-grid.js';
-import { ProjectListView } from '../kanban/components/dashboard/project-list-view.js';
-import { RunFilterBar } from '../kanban/components/dashboard/run-filter-bar.js';
-import { ErrorBoundary } from '../kanban/components/shared/error-boundary.js';
-import { PageHeroGrid, PageSection, PageShell } from '../kanban/components/shared/page-shell.js';
+import ProjectsRoutePage from '../routes/ProjectsPage.js';
+import AutomationsRoutePage from '../routes/AutomationsPage.js';
+import SettingsRoutePage from '../routes/SettingsPage.js';
+import { RequireGatewayAuth } from '../components/agent-mux/require-gateway-auth.js';
+import { useGatewayAuth, useGatewayFetch } from '../components/agent-mux/gateway-provider.js';
+import { BabysitterOverlayPanel } from '../components/dashboard/babysitter-overlay-panel.js';
+import { BacklogOverview } from '../components/dashboard/backlog-overview.js';
+import { BreakpointBanner } from '../components/dashboard/breakpoint-banner.js';
+import { CatchUpBanner } from '../components/dashboard/catch-up-banner.js';
+import { ExecutiveSummaryBanner } from '../components/dashboard/executive-summary-banner.js';
+import { GlobalSearch } from '../components/dashboard/global-search.js';
+import { KpiGrid } from '../components/dashboard/kpi-grid.js';
+import { ProjectListView } from '../components/dashboard/project-list-view.js';
+import { RunFilterBar } from '../components/dashboard/run-filter-bar.js';
+import { ErrorBoundary } from '../components/shared/error-boundary.js';
+import { PageHeroGrid, PageSection, PageShell } from '../components/shared/page-shell.js';
 import { Button } from '@a5c-ai/compendium';
-import { WorkspaceProvisioningPage } from '../kanban/components/workspaces/workspace-provisioning-page.js';
-import { WorkspacesPageContent } from '../kanban/components/workspaces/workspaces-page.js';
-import { useRunDashboard } from '../kanban/hooks/use-run-dashboard.js';
+import { WorkspaceProvisioningPage } from '../components/workspaces/workspace-provisioning-page.js';
+import { WorkspacesPageContent } from '../components/workspaces/workspaces-page.js';
+import { useRunDashboard } from '../hooks/use-run-dashboard.js';
 
 function readRuntime(value: unknown): WorkspaceRuntimeSurface | undefined {
   if (!value || typeof value !== 'object') {
