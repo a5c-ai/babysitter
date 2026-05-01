@@ -1,4 +1,5 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { initI18n, t } from "./i18n.js";
 
 const COMMANDS = [
   "assimilate",
@@ -23,6 +24,8 @@ function toSkillPrompt(name: string, args: string): string {
 }
 
 export default function activate(pi: ExtensionAPI): void {
+  initI18n(pi);
+
   const forwardBabysit = async (args: unknown) => {
     pi.sendUserMessage(toSkillPrompt("babysit", String(args ?? "").trim()));
   };
@@ -43,12 +46,16 @@ export default function activate(pi: ExtensionAPI): void {
     };
 
     pi.registerCommand(name, {
-      description: `Open the Babysitter ${name} skill`,
+      description: name === "doctor"
+        ? t("command.doctor.description", "Open the Babysitter doctor skill")
+        : `Open the Babysitter ${name} skill`,
       handler: forward,
     });
 
     pi.registerCommand(`babysitter:${name}`, {
-      description: `Alias for /${name}`,
+      description: name === "doctor"
+        ? t("command.doctor.aliasDescription", "Alias for /doctor")
+        : `Alias for /${name}`,
       handler: forward,
     });
   }
