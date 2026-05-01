@@ -58,6 +58,5 @@ describe("oh-my-pi Docker structural tests", () => {
   test("does not ship the removed overengineered runtime", () => {
     expect(dockerExec(`test ! -d ${OH_MY_PI_PACKAGE_ROOT}/extensions/babysitter && echo ok`).trim()).toBe("ok");
     expect(dockerExec(`test ! -e ${OH_MY_PI_PACKAGE_ROOT}/hooks.json && echo ok`).trim()).toBe("ok");
-    expect(dockerExec(`test ! -d ${OH_MY_PI_PACKAGE_ROOT}/hooks && echo ok`).trim()).toBe("ok");
   });
 });

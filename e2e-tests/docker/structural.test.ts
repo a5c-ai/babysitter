@@ -69,29 +69,29 @@ describe("Plugin installation", () => {
     const skills = dockerExec(
       `cat ${PLUGIN_DIR}/plugin.json | jq -r '.skills[].name'`,
     ).trim();
-    expect(skills).toContain("babysitter");
+    expect(skills).toContain("babysit");
   });
 
   test("hooks.json registers Stop hook", () => {
     const cmd = dockerExec(
       `cat ${PLUGIN_DIR}/hooks/hooks.json | jq -r '.hooks.Stop[0].hooks[0].command'`,
     ).trim();
-    expect(cmd).toContain("babysitter-stop-hook.sh");
+    expect(cmd).toContain("babysitter-proxied-stop.sh");
   });
 
   test("hooks.json registers SessionStart hook", () => {
     const cmd = dockerExec(
       `cat ${PLUGIN_DIR}/hooks/hooks.json | jq -r '.hooks.SessionStart[0].hooks[0].command'`,
     ).trim();
-    expect(cmd).toContain("babysitter-session-start-hook.sh");
+    expect(cmd).toContain("babysitter-proxied-session-start.sh");
   });
 
   test("stop hook script is executable", () => {
-    dockerExec(`test -x ${PLUGIN_DIR}/hooks/babysitter-stop-hook.sh`);
+    dockerExec(`test -x ${PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`);
   });
 
   test("session start hook script is executable", () => {
-    dockerExec(`test -x ${PLUGIN_DIR}/hooks/babysitter-session-start-hook.sh`);
+    dockerExec(`test -x ${PLUGIN_DIR}/hooks/babysitter-proxied-session-start.sh`);
   });
 
   test("installed_plugins.json has correct install path", () => {

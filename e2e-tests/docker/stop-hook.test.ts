@@ -10,7 +10,7 @@ import {
 import path from "path";
 
 const ROOT = path.resolve(__dirname, "../..");
-const HOOK = `${PLUGIN_DIR}/hooks/babysitter-stop-hook.sh`;
+const HOOK = `${PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`;
 // Claude session state now lives in the global Babysitter state dir so all
 // harness entrypoints (hooks, CLI, Bash tool calls) resolve the same files.
 const STATE_DIR = "/home/claude/.a5c/state";
@@ -631,6 +631,6 @@ describe("run:create --harness session binding triggers stop hook", () => {
     // But session binding should report an error
     expect(createResult.session).toBeDefined();
     expect(createResult.session.error).toBeTruthy();
-    expect(createResult.session.error).toContain("session ID");
+    expect(createResult.session.error).toContain("--session-id");
   });
 });

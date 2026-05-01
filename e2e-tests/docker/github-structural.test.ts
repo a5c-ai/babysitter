@@ -91,7 +91,7 @@ describe("Plugin installation (GitHub)", () => {
     expect(hooksJson.hooks.sessionStart).toBeDefined();
     expect(hooksJson.hooks.sessionStart.length).toBeGreaterThan(0);
     const entry = hooksJson.hooks.sessionStart[0];
-    expect(entry.bash).toContain("session-start.sh");
+    expect(entry.bash).toContain("babysitter-proxied-session-start.sh");
   });
 
   test("hooks.json registers sessionEnd hook", () => {
@@ -100,7 +100,7 @@ describe("Plugin installation (GitHub)", () => {
     expect(hooksJson.hooks.sessionEnd).toBeDefined();
     expect(hooksJson.hooks.sessionEnd.length).toBeGreaterThan(0);
     const entry = hooksJson.hooks.sessionEnd[0];
-    expect(entry.bash).toContain("session-end.sh");
+    expect(entry.bash).toContain("babysitter-proxied-session-end.sh");
   });
 
   test("hooks.json registers userPromptSubmitted hook", () => {
@@ -109,15 +109,15 @@ describe("Plugin installation (GitHub)", () => {
     expect(hooksJson.hooks.userPromptSubmitted).toBeDefined();
     expect(hooksJson.hooks.userPromptSubmitted.length).toBeGreaterThan(0);
     const entry = hooksJson.hooks.userPromptSubmitted[0];
-    expect(entry.bash).toContain("user-prompt-submitted.sh");
+    expect(entry.bash).toContain("babysitter-proxied-user-prompt-submitted.sh");
   });
 });
 
 describe("Hook scripts (GitHub)", () => {
   const HOOK_SCRIPTS = [
-    "session-start.sh",
-    "session-end.sh",
-    "user-prompt-submitted.sh",
+    "babysitter-proxied-session-start.sh",
+    "babysitter-proxied-session-end.sh",
+    "babysitter-proxied-user-prompt-submitted.sh",
   ];
 
   for (const script of HOOK_SCRIPTS) {

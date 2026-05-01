@@ -10,7 +10,7 @@ import {
 import path from "path";
 
 const ROOT = path.resolve(__dirname, "../..");
-const HOOK = `${CURSOR_PLUGIN_DIR}/hooks/stop-hook.sh`;
+const HOOK = `${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`;
 // The stop hook resolves STATE_DIR from BABYSITTER_STATE_DIR or PWD/.a5c
 const STATE_DIR = "/tmp/cursor-hook-test-state";
 const TEST_RUNS_DIR = "/tmp/cursor-hook-test-runs";

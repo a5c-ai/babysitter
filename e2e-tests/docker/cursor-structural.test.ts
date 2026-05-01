@@ -72,18 +72,18 @@ describe("Plugin installation (cursor)", () => {
   });
 
   test("stop hook script exists and is executable", () => {
-    dockerExec(`test -f ${CURSOR_PLUGIN_DIR}/hooks/stop-hook.sh`);
-    dockerExec(`test -x ${CURSOR_PLUGIN_DIR}/hooks/stop-hook.sh`);
+    dockerExec(`test -f ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`);
+    dockerExec(`test -x ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`);
   });
 
   test("session-start hook script exists and is executable", () => {
-    dockerExec(`test -f ${CURSOR_PLUGIN_DIR}/hooks/session-start.sh`);
-    dockerExec(`test -x ${CURSOR_PLUGIN_DIR}/hooks/session-start.sh`);
+    dockerExec(`test -f ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-session-start.sh`);
+    dockerExec(`test -x ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-session-start.sh`);
   });
 
   test("hook scripts have valid bash syntax", () => {
-    dockerExec(`bash -n ${CURSOR_PLUGIN_DIR}/hooks/stop-hook.sh`);
-    dockerExec(`bash -n ${CURSOR_PLUGIN_DIR}/hooks/session-start.sh`);
+    dockerExec(`bash -n ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-stop.sh`);
+    dockerExec(`bash -n ${CURSOR_PLUGIN_DIR}/hooks/babysitter-proxied-session-start.sh`);
   });
 
   test("versions.json has sdkVersion", () => {

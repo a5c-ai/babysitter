@@ -138,7 +138,7 @@ describe("Hook scripts (gemini-cli)", () => {
     ).trim();
     const hooksJson = JSON.parse(raw);
     const cmd = hooksJson.hooks.SessionStart[0].hooks[0].command;
-    expect(cmd).toContain("session-start.sh");
+    expect(cmd).toContain("babysitter-proxied-session-start.sh");
   });
 
   test("AfterAgent hook command references after-agent.sh", () => {
@@ -147,10 +147,13 @@ describe("Hook scripts (gemini-cli)", () => {
     ).trim();
     const hooksJson = JSON.parse(raw);
     const cmd = hooksJson.hooks.AfterAgent[0].hooks[0].command;
-    expect(cmd).toContain("after-agent.sh");
+    expect(cmd).toContain("babysitter-proxied-after-agent.sh");
   });
 
-  const HOOK_SCRIPTS = ["session-start.sh", "after-agent.sh"];
+  const HOOK_SCRIPTS = [
+    "babysitter-proxied-session-start.sh",
+    "babysitter-proxied-after-agent.sh",
+  ];
 
   for (const script of HOOK_SCRIPTS) {
     test(`${script} exists and is executable`, () => {
