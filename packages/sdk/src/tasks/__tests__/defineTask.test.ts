@@ -108,3 +108,75 @@ describe("defineTask label metadata", () => {
     expect(record?.labels).toEqual(["opt", "impl"]);
   });
 });
+
+describe("defineTask object-form (backward-compat for legacy library processes)", () => {
+  beforeEach(() => {
+    resetGlobalTaskRegistry();
+  });
+
+  it("accepts { id, kind, ... } static-TaskDef form (used by quality-gated-six-phase)", async () => {
+    const defined = defineTask({
+      id: "qg6.design",
+      kind: "agent",
+      title: "Phase 1: Design",
+      labels: ["qg6", "design"],
+      description: "Static TaskDef shape",
+    });
+    expect(defined.id).toBe("qg6.design");
+    const built = await defined.build({}, fakeCtx());
+    expect(built.kind).toBe("agent");
+    expect(built.title).toBe("Phase 1: Design");
+  });
+
+  it("accepts { name, ... } as alias for id (used by canonical ontology-driven-development)", async () => {
+    const defined = defineTask({
+      name: "world-ontology-research",
+      kind: "agent",
+      title: "World Ontology Research",
+    });
+    expect(defined.id).toBe("world-ontology-research");
+    const built = await defined.build({}, fakeCtx());
+    expect(built.kind).toBe("agent");
+  });
+
+  it("accepts { name, run } form where run produces TaskDef from inputs", async () => {
+    const defined = defineTask<{ projectName: string }, unknown>({
+      name: "with-run",
+      description: "object-form with run impl",
+      run: async (inputs) => ({
+        kind: "agent",
+        title: `Research: ${inputs.projectName}`,
+      }),
+    });
+    expect(defined.id).toBe("with-run");
+    const built = await defined.build({ projectName: "v6" }, fakeCtx());
+    expect(built.kind).toBe("agent");
+    expect(built.title).toBe("Research: v6");
+  });
+
+  it("strips inputs/outputs/source/run/id/name from static-form TaskDef envelope", async () => {
+    const defined = defineTask({
+      name: "envelope",
+      kind: "agent",
+      title: "envelope-test",
+      inputs: { foo: { type: "string" } },
+      outputs: { bar: { type: "object" } },
+      source: "library/methodologies/example",
+    });
+    const built = await defined.build({}, fakeCtx());
+    expect(built.kind).toBe("agent");
+    expect(built).not.toHaveProperty("name");
+    expect(built).not.toHaveProperty("inputs");
+    expect(built).not.toHaveProperty("outputs");
+    expect(built).not.toHaveProperty("source");
+  });
+
+  it("rejects object-form without id or name", () => {
+    expect(() =>
+      defineTask({
+        kind: "agent",
+        title: "missing id and name",
+      } as unknown as Parameters<typeof defineTask>[0])
+    ).toThrow(/id.*name/);
+  });
+});
