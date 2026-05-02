@@ -77,6 +77,10 @@ function evaluateTransportMuxCutover(): boolean {
   const architectureDoc = readRepoFile("packages/transport-mux/architecture.md");
   const packageJson = JSON.parse(readRepoFile("packages/transport-mux/package.json")) as {
     private?: boolean;
+    files?: unknown;
+    publishConfig?: {
+      access?: string;
+    };
     scripts?: Record<string, string>;
   };
   const packageEntrypoint = readRepoFile("packages/transport-mux/src/index.ts");
@@ -89,15 +93,15 @@ function evaluateTransportMuxCutover(): boolean {
     countFiles("packages/transport-mux/tests/e2e", ".ts");
 
   const docsHonestyChecks = [
-    containsAll(readmeDoc, ["internal-only placeholder seam", "not the active runtime or release owner yet"]),
-    containsAll(readmeDoc, ["workspace-local development", "not a published npm deliverable"]),
+    containsAll(readmeDoc, ["published transport/proxy runtime seam", "used by the agent-mux launcher"]),
+    containsAll(readmeDoc, ["published npm deliverable", "public runtime surface"]),
     containsAll(migrationDoc, [
-      "private workspace package and placeholder seam",
-      "does not yet own publish, release, or externally installable runtime truth",
+      "published transport/proxy runtime seam",
+      "public install chain",
     ]),
     containsAll(migrationDoc, [
-      "`files`, `publishConfig`, and `prepack` must stay absent",
-      "Referenced packaged artifacts must exist locally or be removed from package metadata.",
+      "publishable and aligned with the package docs map",
+      "package metadata does not advertise packable artifacts that are not present locally.",
     ]),
     containsAll(architectureDoc, [
       "`launch.ts` starts the `transport-mux` runtime",
@@ -110,10 +114,9 @@ function evaluateTransportMuxCutover(): boolean {
       migrationDoc.includes(
         "Historical archive: legacy Python tests under `packages/agent-mux/amux-proxy/tests` remain available as reference material for the still-active historical runtime path.",
       ),
-    packageJson.private === true &&
-      !("files" in packageJson) &&
-      !("publishConfig" in packageJson) &&
-      !("prepack" in (packageJson.scripts ?? {})),
+    packageJson.private !== true &&
+      Array.isArray(packageJson.files) &&
+      packageJson.publishConfig?.access === "public",
     Boolean(packageJson.scripts?.["scorecard:migration"]) && jsContractTests > 0,
     launchCommand.includes("@a5c-ai/transport-mux") && packageEntrypoint.includes("export * from './runtime.js';"),
     docsHonestyChecks.every(Boolean),
