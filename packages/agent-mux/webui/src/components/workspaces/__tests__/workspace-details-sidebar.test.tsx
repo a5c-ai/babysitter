@@ -125,7 +125,7 @@ describe("WorkspaceDetailsSidebar", () => {
     expect(screen.getByText("Runtime updated")).toBeInTheDocument();
     expect(screen.getByText("Dev server")).toBeInTheDocument();
     expect(screen.getByTestId("workspace-status-run-run-2")).toHaveAttribute("href", "/runs/run-2");
-    expect(screen.getByText("Git summary")).toBeInTheDocument();
+    expect(screen.getByText("Git")).toBeInTheDocument();
     expect(screen.getByText("Notes")).toBeInTheDocument();
   });
 

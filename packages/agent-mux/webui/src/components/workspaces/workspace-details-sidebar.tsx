@@ -221,8 +221,8 @@ export function WorkspaceDetailsSidebar(props: {
     <aside className="rounded-[28px] border border-border bg-card p-4 shadow-lg" aria-label={`Workspace details for ${props.workspace.name}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Workspace details</p>
-          <h2 className="mt-2 text-lg font-semibold tracking-tight">Status, notes, and handoff</h2>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Workspace</p>
+          <h2 className="mt-2 text-lg font-semibold tracking-tight">Context and handoff</h2>
         </div>
         <span className="rounded-full border border-border px-2.5 py-1 text-[11px] text-foreground-muted">
           {props.workspace.status}
@@ -230,7 +230,7 @@ export function WorkspaceDetailsSidebar(props: {
       </div>
 
       <div className="mt-4 space-y-4">
-        <SidebarSection title="Workspace status" icon={AlertCircle}>
+        <SidebarSection title="Status" icon={AlertCircle}>
           <div className="space-y-3" data-testid="workspace-status-panel">
             {selectedSession ? (
               <div className="rounded-2xl border border-border bg-card/80 px-3 py-3">
@@ -320,7 +320,7 @@ export function WorkspaceDetailsSidebar(props: {
           </div>
         </SidebarSection>
 
-        <SidebarSection title="Git summary" icon={GitBranch}>
+        <SidebarSection title="Git" icon={GitBranch}>
           {gitMetadataMissing ? (
             <SectionState
               tone="error"
@@ -679,7 +679,7 @@ export function WorkspaceDetailsSidebar(props: {
           </div>
         </CollapsibleSidebarSection>
 
-        <SidebarSection title="Quick actions" icon={Wrench}>
+        <SidebarSection title="Actions" icon={Wrench}>
           <div className="space-y-3">
             {props.workspace.rebase ? (
               <div className="rounded-2xl border border-border bg-card/80 px-3 py-3">
@@ -799,7 +799,7 @@ function SidebarSection(props: { title: string; icon: typeof GitBranch; children
     <section className="rounded-2xl border border-border bg-background/60 p-3">
       <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-foreground-muted">
         <Icon className="h-4 w-4" />
-        <h3>{props.title}</h3>
+        <span>{props.title}</span>
       </div>
       {props.children as any}
     </section>

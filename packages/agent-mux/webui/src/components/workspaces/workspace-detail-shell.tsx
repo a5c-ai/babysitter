@@ -101,8 +101,8 @@ const PANEL_DEFINITIONS: PanelDefinition[] = [
 ];
 
 const DEFAULT_WORKSPACE_DETAIL_SIZES: WorkspacePanelSizes = {
-  sidebar: 18,
-  conversation: 62,
+  sidebar: 22,
+  conversation: 58,
   context: 12,
   details: 8,
 };
@@ -140,13 +140,14 @@ function statusTone(status: string): string {
 
 function WorkspaceCommandBar(props: {
   open: boolean;
+  panels: PanelDefinition[];
   visibility: WorkspacePanelVisibility;
   onOpenChange: (open: boolean) => void;
   onTogglePanel: (panel: WorkspacePanelKey) => void;
 }) {
   const items = useMemo<CommandItem[]>(
     () =>
-      PANEL_DEFINITIONS.map((panel) => ({
+      props.panels.map((panel) => ({
         id: panel.key,
         label: panel.label,
         shortcut: panel.shortcut,
@@ -236,6 +237,10 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
   const [minimalLayoutAppliedForWorkspace, setMinimalLayoutAppliedForWorkspace] = useState<string | null>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const linkedIssue = props.workspace.issues?.[0] ?? null;
+  const hasSessions = props.sessions.length > 0;
+  const availablePanels = hasSessions
+    ? PANEL_DEFINITIONS
+    : PANEL_DEFINITIONS.filter((panel) => panel.key === "sidebar");
 
   const visibility = useMemo<WorkspacePanelVisibility>(
     () =>
@@ -296,6 +301,9 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
   };
 
   const togglePanel = (panel: WorkspacePanelKey) => {
+    if (!hasSessions && panel !== "sidebar") {
+      return;
+    }
     applyVisibility(toggleWorkspacePanel(visibility, panel));
   };
 
@@ -392,46 +400,49 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
         <WorkspacePanelFrame
           panelKey="sidebar"
           title="Workspace"
-          subtitle="Issue link, session roster, and quick actions"
+          subtitle={hasSessions ? "Issue link, session roster, and quick actions" : "Issue link, workspace status, and next steps"}
         >
           <div className="grid gap-4">
-            <div className="rounded-2xl border border-border bg-background/65 p-4">
-              <div className="flex items-center gap-2">
-                <LayoutDashboard className="h-4 w-4 text-primary" />
-                <div className="text-sm font-medium text-foreground">Workspace sessions</div>
+            {hasSessions ? (
+              <div className="rounded-2xl border border-border bg-background/65 p-4">
+                <div className="flex items-center gap-2">
+                  <LayoutDashboard className="h-4 w-4 text-primary" />
+                  <div className="text-sm font-medium text-foreground">Workspace sessions</div>
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {props.sessions.map((session) => (
+                    <button
+                      key={session.sessionId}
+                      type="button"
+                      onClick={() => props.onSelectSession(session.sessionId)}
+                      className={`rounded-2xl border bg-card/80 p-3 text-left transition-colors hover:border-primary/30 ${
+                        session.sessionId === props.selectedSessionId ? "border-primary/40" : "border-border"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-medium text-foreground">
+                          {session.title ?? session.sessionId}
+                        </span>
+                        <span className={`rounded-full border px-2 py-0.5 text-xs ${statusTone(session.status)}`}>
+                          {session.status}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-foreground-muted">
+                        <span>{session.agent}</span>
+                        {session.latestRunId ? <span>{session.latestRunId}</span> : null}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="mt-4 grid gap-3">
-                {props.sessions.map((session) => (
-                  <button
-                    key={session.sessionId}
-                    type="button"
-                    onClick={() => props.onSelectSession(session.sessionId)}
-                    className={`rounded-2xl border bg-card/80 p-3 text-left transition-colors hover:border-primary/30 ${
-                      session.sessionId === props.selectedSessionId ? "border-primary/40" : "border-border"
-                    }`}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-medium text-foreground">
-                        {session.title ?? session.sessionId}
-                      </span>
-                      <span className={`rounded-full border px-2 py-0.5 text-xs ${statusTone(session.status)}`}>
-                        {session.status}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-foreground-muted">
-                      <span>{session.agent}</span>
-                      {session.latestRunId ? <span>{session.latestRunId}</span> : null}
-                    </div>
-                  </button>
-                ))}
-                {props.sessions.length === 0 ? (
-                  <EmptyWorkspaceState
-                    title="No attached sessions"
-                    body="This workspace is tracked, but no session is currently publishing chat or runtime activity into it."
-                  />
-                ) : null}
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-background/65 p-4">
+                <div className="text-sm font-medium text-foreground">No linked session yet</div>
+                <p className="mt-2 text-sm leading-6 text-foreground-muted">
+                  This workspace still keeps its issue and repo context here. Link or start a session from the board when you want the chat and runtime to appear beside it.
+                </p>
               </div>
-            </div>
+            )}
 
             <WorkspaceDetailsSidebar
               workspace={props.workspace}
@@ -571,7 +582,9 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
               <span>/</span>
               <span className="font-mono text-xs text-foreground-secondary">{props.workspace.path}</span>
             </div>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">{props.workspace.name}</h1>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight" style={{ fontSize: "1.5rem", lineHeight: 1.1 }}>
+              {props.workspace.name}
+            </h1>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-foreground-muted">
               {linkedIssue
                 ? `${linkedIssue.issueKey} stays pinned here while the linked session chat and runtime stay beside it.`
@@ -605,7 +618,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                 View session
               </Button>
             ) : null}
-            {PANEL_DEFINITIONS.map((panel) => {
+            {availablePanels.map((panel) => {
               const Icon = panel.icon;
               return (
                 <Button
@@ -648,11 +661,19 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
           <div className="rounded-2xl border border-border bg-background/65 p-4" data-testid="workspace-context-bar">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-foreground-muted">Session</p>
-                <p className="mt-1 text-sm font-medium text-foreground">{activeSessionLabel}</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-foreground-muted">
+                  {hasSessions ? "Session" : "Workspace focus"}
+                </p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {hasSessions ? activeSessionLabel : "Issue and repo stay visible here until a session attaches"}
+                </p>
                 {props.activeSession ? (
                   <p className="mt-1 text-xs text-foreground-muted">
                     Updated {formatSessionUpdatedAt(props.activeSession.updatedAt)}
+                  </p>
+                ) : !hasSessions ? (
+                  <p className="mt-1 text-xs text-foreground-muted">
+                    Open the linked issue or board when you want to create a session against this workspace.
                   </p>
                 ) : null}
                 {props.workspace.ownership ? (
@@ -664,24 +685,27 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
                   </div>
                 ) : null}
               </div>
-              <label className="w-full xl:max-w-sm">
-                <span className="sr-only">Select workspace session</span>
-                <select
-                  data-testid="workspace-session-select"
-                  value={props.selectedSessionId ?? ""}
-                  onChange={(event) => props.onSelectSession(event.target.value)}
-                  className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary/40"
-                >
-                  {props.sessions.length === 0 ? (
-                    <option value="">No sessions available</option>
-                  ) : null}
-                  {props.sessions.map((session) => (
-                    <option key={session.sessionId} value={session.sessionId}>
-                      {(session.title ?? session.sessionId)} · {session.status} · {session.agent}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {hasSessions ? (
+                <label className="w-full xl:max-w-sm">
+                  <span className="sr-only">Select workspace session</span>
+                  <select
+                    data-testid="workspace-session-select"
+                    value={props.selectedSessionId ?? ""}
+                    onChange={(event) => props.onSelectSession(event.target.value)}
+                    className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary/40"
+                  >
+                    {props.sessions.map((session) => (
+                      <option key={session.sessionId} value={session.sessionId}>
+                        {(session.title ?? session.sessionId)} · {session.status} · {session.agent}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border px-4 py-3 text-sm text-foreground-muted">
+                  No sessions attached
+                </div>
+              )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {(props.workspace.issues ?? []).length > 0 ? (
@@ -753,6 +777,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
 
       <WorkspaceCommandBar
         open={commandBarOpen}
+        panels={availablePanels}
         visibility={visibility}
         onOpenChange={setCommandBarOpen}
         onTogglePanel={togglePanel}

@@ -474,7 +474,9 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
             <div className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
               {props.heroEyebrow ?? "Session workspace"}
             </div>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">{props.sessionTitle}</h1>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight" style={{ fontSize: "1.5rem", lineHeight: 1.1 }}>
+              {props.sessionTitle}
+            </h1>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-foreground-muted">
               {props.heroBody ??
                 "Keep the chat primary while trace, approvals, and runtime stay close enough to open only when needed."}

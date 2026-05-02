@@ -1271,12 +1271,10 @@ describe("workspaces-page helpers", () => {
     });
 
     const sidebar = screen.getByLabelText("Workspace details for task");
-    expect(within(sidebar).getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent)).toEqual([
-      "Workspace status",
-      "Git summary",
-      "Notes",
-      "Quick actions",
-    ]);
+    expect(within(sidebar).getByText("Status")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Git")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Notes")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Actions")).toBeInTheDocument();
     expect(screen.getByText("Resolve conflicts before returning to review or merge")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Auto-resolve" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Open in editor" })).toBeEnabled();

@@ -210,4 +210,37 @@ describe("WorkspaceDetailShell", () => {
     expect(screen.getByText("runtime session-1")).toBeInTheDocument();
     expect(screen.getByTestId("workspace-session-select")).toHaveValue("session-1");
   });
+
+  it("keeps the workspace shell compact when no session is linked yet", () => {
+    window.innerWidth = 1440;
+    window.dispatchEvent(new Event("resize"));
+
+    render(
+      <WorkspaceDetailShell
+        workspace={buildWorkspace()}
+        sessions={[]}
+        activeSession={null}
+        runs={[]}
+        eventBuffers={{}}
+        totalCostLabel="$0.00"
+        selectedSessionId={null}
+        onSelectSession={vi.fn()}
+        pendingAction={null}
+        notesSaving={false}
+        reviewPending={false}
+        onSubmit={vi.fn()}
+        onAction={vi.fn()}
+        onOpenInEditor={vi.fn()}
+        onSaveNote={vi.fn()}
+        onCreatePullRequest={vi.fn()}
+        onLinkPullRequest={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("No linked session yet")).toBeInTheDocument();
+    expect(screen.getByText("No sessions attached")).toBeInTheDocument();
+    expect(screen.getByTestId("panel-toggle-sidebar")).toBeInTheDocument();
+    expect(screen.queryByTestId("panel-toggle-conversation")).toBeNull();
+    expect(screen.queryByTestId("workspace-session-select")).toBeNull();
+  });
 });

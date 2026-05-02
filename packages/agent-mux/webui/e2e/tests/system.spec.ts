@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page, type TestInfo } from "@playwright/test";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,13 +45,13 @@ async function readFixtureState(): Promise<FixtureState> {
   throw new Error(`Timed out waiting for fixture state at ${stateFile}.`);
 }
 
-async function authenticatePage(page: Page, request: APIRequestContext) {
+async function authenticatePage(page: Page, request: APIRequestContext, testInfo: TestInfo) {
   const state = await readFixtureState();
   const response = await request.post(`${state.baseUrl}/api/v1/bootstrap/login`, {
     data: {
       username: state.adminUsername,
       password: state.adminPassword,
-      clientName: "playwright-webui-e2e",
+      clientName: `playwright-webui-e2e-${testInfo.workerIndex}-${testInfo.retry}-${testInfo.testId}`,
     },
   });
   expect(response.ok()).toBeTruthy();
@@ -82,9 +82,25 @@ test.describe("agent-mux webui e2e", () => {
     await expect(page.getByTestId("workspace-review-queue-details")).not.toHaveAttribute("open", "");
   });
 
+  test("focused workspace stays compact before any linked session is available", async ({ page }) => {
+    const state = await readFixtureState();
+    await page.goto(`/workspaces?workspace=${encodeURIComponent(state.workspacePath)}`, { waitUntil: "domcontentloaded" });
+
+    await expect(page).toHaveURL(new RegExp(`/workspaces\\?workspace=${encodeURIComponent(state.workspacePath)}`));
+    await expect(page.getByTestId("workspace-shell")).toBeVisible();
+    await expect(page.getByText("No linked session yet")).toBeVisible();
+    await expect(page.getByText("No sessions attached")).toBeVisible();
+    await expect(page.getByTestId("panel-toggle-sidebar")).toBeVisible();
+    await expect(page.getByTestId("panel-toggle-conversation")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-context-bar")).toContainText("Issue and repo stay visible here until a session attaches");
+
+    const titleFontSize = await page.locator("h1").evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+    expect(titleFontSize).toBeLessThan(40);
+  });
+
   test.describe("authenticated surfaces", () => {
-    test.beforeEach(async ({ page, request }) => {
-      await authenticatePage(page, request);
+    test.beforeEach(async ({ page, request }, testInfo) => {
+      await authenticatePage(page, request, testInfo);
     });
 
     test("board uses the available width and keeps heavy details collapsed until requested", async ({ page }) => {
@@ -130,10 +146,11 @@ test.describe("agent-mux webui e2e", () => {
       const linkedCard = page.getByTestId(`kanban-card-${state.issueKey}`);
       await expect(linkedCard).toBeVisible();
       await expect(linkedCard.getByText("Repository lifecycle")).not.toBeVisible();
-      await expect(linkedCard.locator(`[data-testid^="card-workspace-${state.issueKey}-"]`)).not.toBeVisible();
+      await expect(linkedCard.getByText("Workspace options")).not.toBeVisible();
       await linkedCard.locator("details summary").click();
+      await expect(linkedCard.getByText("Workspace options")).toBeVisible();
       await expect(linkedCard.getByText("Repository lifecycle")).toBeVisible();
-      await expect(linkedCard.locator(`[data-testid^="card-workspace-${state.issueKey}-"]`)).toBeVisible();
+      await expect(linkedCard.getByRole("button", { name: /linked workspace/i })).toBeVisible();
     });
 
     test("board workspace links keep issue association visible and hand off cleanly into the linked session chat", async ({ page }) => {

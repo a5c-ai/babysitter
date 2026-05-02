@@ -8,10 +8,10 @@ const testPort = Number.parseInt(process.env.AMUX_WEBUI_E2E_PORT ?? "4175", 10);
 
 export default defineConfig({
   testDir: path.join(packageRoot, "e2e", "tests"),
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   timeout: 90_000,
   expect: {
     timeout: 15_000,

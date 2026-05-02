@@ -1711,6 +1711,77 @@ img {
 :where([class~="leading-6"]) { line-height: 1.5rem; }
 :where([class~="text-foreground"]) { color: var(--tkc-ink); }
 :where([class~="text-foreground-muted"]) { color: var(--ui-ink-muted); }
+
+.app-shell :is(h1, h2, h3, h4, h5, h6, p),
+.page-shell :is(h1, h2, h3, h4, h5, h6, p),
+.login-page :is(h1, h2, h3, h4, h5, h6, p) {
+  margin: 0;
+  max-width: none;
+}
+
+.app-shell [class~="text-xs"],
+.page-shell [class~="text-xs"],
+.login-page [class~="text-xs"] { font-size: 0.75rem; }
+
+.app-shell [class~="text-sm"],
+.page-shell [class~="text-sm"],
+.login-page [class~="text-sm"] { font-size: 0.875rem; }
+
+.app-shell [class~="text-base"],
+.page-shell [class~="text-base"],
+.login-page [class~="text-base"] { font-size: 1rem; }
+
+.app-shell [class~="text-lg"],
+.page-shell [class~="text-lg"],
+.login-page [class~="text-lg"] { font-size: 1.125rem; }
+
+.app-shell [class~="text-xl"],
+.page-shell [class~="text-xl"],
+.login-page [class~="text-xl"] { font-size: 1.25rem; }
+
+.app-shell [class~="text-2xl"],
+.page-shell [class~="text-2xl"],
+.login-page [class~="text-2xl"] { font-size: 1.5rem; }
+
+.app-shell [class~="text-3xl"],
+.page-shell [class~="text-3xl"],
+.login-page [class~="text-3xl"] { font-size: 2rem; }
+
+.app-shell [class~="text-[11px]"],
+.page-shell [class~="text-[11px]"],
+.login-page [class~="text-[11px]"] { font-size: 11px; }
+
+.app-shell [class~="font-medium"],
+.page-shell [class~="font-medium"],
+.login-page [class~="font-medium"] { font-weight: 500; }
+
+.app-shell [class~="font-semibold"],
+.page-shell [class~="font-semibold"],
+.login-page [class~="font-semibold"] { font-weight: 700; }
+
+.app-shell [class~="font-bold"],
+.page-shell [class~="font-bold"],
+.login-page [class~="font-bold"] { font-weight: 700; }
+
+.app-shell [class~="tracking-tight"],
+.page-shell [class~="tracking-tight"],
+.login-page [class~="tracking-tight"] { letter-spacing: -0.03em; }
+
+.app-shell [class~="leading-none"],
+.page-shell [class~="leading-none"],
+.login-page [class~="leading-none"] { line-height: 1; }
+
+.app-shell [class~="leading-tight"],
+.page-shell [class~="leading-tight"],
+.login-page [class~="leading-tight"] { line-height: 1.25; }
+
+.app-shell [class~="leading-5"],
+.page-shell [class~="leading-5"],
+.login-page [class~="leading-5"] { line-height: 1.25rem; }
+
+.app-shell [class~="leading-6"],
+.page-shell [class~="leading-6"],
+.login-page [class~="leading-6"] { line-height: 1.5rem; }
 :where([class~="text-foreground-secondary"]) { color: var(--ui-ink-soft); }
 :where([class~="text-foreground-muted/30"]) { color: color-mix(in srgb, var(--ui-ink-muted) 30%, transparent); }
 :where([class~="text-foreground-muted/40"]) { color: color-mix(in srgb, var(--ui-ink-muted) 40%, transparent); }
