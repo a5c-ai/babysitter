@@ -464,10 +464,83 @@ describe('SessionDetailPage route shell wiring', () => {
       'run-2',
       expect.objectContaining({ runId: 'run-2' }),
     );
-    expect(client.subscribeRun).toHaveBeenCalledWith('run-2');
+    expect(client.subscribeRun).toHaveBeenCalledWith('run-2', expect.any(Function));
     expect((state.actions.mergeSession as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
       'session-1',
       expect.objectContaining({ sessionId: 'session-1' }),
     );
+  });
+
+  it('refreshes native transcript after a follow-up run finalizes', async () => {
+    const subscribeRun = vi.fn((_runId: string, callback?: (frame: { event?: Record<string, unknown> }) => void) => {
+      if (callback) {
+        setTimeout(() => callback({ event: { type: 'run.finalized', exitReason: 'completed' } }), 0);
+      }
+      return () => {};
+    });
+    const client = { subscribeSession: vi.fn(() => () => {}), subscribeRun };
+    const state = createSessionState({
+      session: {
+        status: 'inactive',
+      },
+      runs: [
+        {
+          runId: 'run-1',
+          sessionId: 'session-1',
+          agent: 'claude',
+          status: 'completed',
+          startedAt: 1_000,
+        },
+      ],
+    });
+    const store = createMockStore(state);
+    mockUseGateway.mockReturnValue({ client, store });
+    let messageFetchCount = 0;
+    mockFetchGateway.mockImplementation(async (path: string, init?: RequestInit) => {
+      if (path.includes('/messages?')) {
+        messageFetchCount += 1;
+        return okJson({
+          messages:
+            messageFetchCount === 1
+              ? [{ role: 'assistant', content: 'Existing native transcript' }]
+              : [{ role: 'assistant', content: 'Native transcript includes the resumed reply' }],
+          pagination: {
+            total: 1,
+            offset: 0,
+            limit: 60,
+            hasMore: false,
+          },
+        });
+      }
+      if (path.endsWith('/messages')) {
+        expect(init?.method).toBe('POST');
+        return okJson({
+          run: { runId: 'run-2', sessionId: 'session-1', status: 'queued' },
+          session: { sessionId: 'session-1', status: 'active' },
+        });
+      }
+      return okJson({});
+    });
+    mockBuildNativeTranscript.mockImplementation((_sessionId: string, messages: Array<{ content?: string }>) =>
+      messages.map((message, index) => ({
+        id: `native-${index}`,
+        kind: 'assistant',
+        label: 'Assistant',
+        text: String(message.content ?? ''),
+        runId: `session-1:native:${index}`,
+        timestamp: index + 1,
+        filePaths: [],
+      })),
+    );
+
+    render(<SessionDetailPage />);
+
+    expect(await screen.findByText('Existing native transcript')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'submit' }));
+
+    expect(await screen.findByText('Native transcript includes the resumed reply')).toBeInTheDocument();
+    expect(subscribeRun).toHaveBeenCalledWith('run-2', expect.any(Function));
+    expect(messageFetchCount).toBeGreaterThanOrEqual(2);
   });
 });

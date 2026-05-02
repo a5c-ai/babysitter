@@ -266,6 +266,38 @@ class FakeGatewayRunClient {
     });
   }
 
+  appendNativeSessionMessages(agent, targetSessionId, messages) {
+    const key = `${agent}:${targetSessionId}`;
+    const detail = this.nativeSessionDetails.get(key);
+    if (!detail || !Array.isArray(detail.messages)) {
+      return;
+    }
+    const updatedAt = new Date().toISOString();
+    const nextMessages = [...detail.messages, ...messages];
+    const nextTurnCount = Number(detail.turnCount ?? 0) + 1;
+    const nextMessageCount = nextMessages.length;
+    const nextDetail = {
+      ...detail,
+      updatedAt,
+      turnCount: nextTurnCount,
+      messageCount: nextMessageCount,
+      messages: nextMessages,
+    };
+    this.nativeSessionDetails.set(key, nextDetail);
+
+    const sessions = [...(this.nativeSessions.get(agent) ?? [])];
+    const sessionIndex = sessions.findIndex((session) => String(session.sessionId) === targetSessionId);
+    if (sessionIndex >= 0) {
+      sessions[sessionIndex] = {
+        ...sessions[sessionIndex],
+        updatedAt,
+        turnCount: nextTurnCount,
+        messageCount: nextMessageCount,
+      };
+      this.nativeSessions.set(agent, sessions);
+    }
+  }
+
   emitAssistantReply(runId, text, agent = sessionAgent, cost = sessionCost) {
     const active = this.runs.get(runId);
     if (!active) {
@@ -350,6 +382,10 @@ class FakeGatewayRunClient {
         });
         const text = `Codex resumed the existing session: ${String(options.prompt ?? "")}`;
         this.emitAssistantReply(runId, text, codexSessionAgent, codexSessionCost);
+        this.appendNativeSessionMessages(codexSessionAgent, codexSessionId, [
+          { role: "user", content: String(options.prompt ?? "") },
+          { role: "assistant", content: text },
+        ]);
         active.handle.complete("completed", 0, null);
       }, 0);
     }

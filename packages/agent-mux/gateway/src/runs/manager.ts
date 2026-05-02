@@ -179,6 +179,7 @@ export class RunManager {
     };
     this.activeRuns.set(handle.runId, active);
     if (input.sessionId) {
+      this.invalidateNativeSessionCaches(input.sessionId);
       if (entry.workspaceId) {
         await this.workspaceService.bindSession({
           workspaceId: entry.workspaceId,
@@ -543,6 +544,7 @@ export class RunManager {
             event.resumed === true && typeof active.entry.sessionId === 'string' && active.entry.sessionId.length > 0
               ? active.entry.sessionId
               : event.sessionId;
+          this.invalidateNativeSessionCaches(resumedSessionId);
           if (resumedSessionId !== event.sessionId) {
             eventToRecord = {
               ...event,
@@ -581,6 +583,9 @@ export class RunManager {
           }
         : null;
       this.eventLog.index.upsertRun(active.entry);
+      if (active.entry.sessionId) {
+        this.invalidateNativeSessionCaches(active.entry.sessionId);
+      }
       if (active.entry.workspaceId && active.entry.sessionId) {
         await this.workspaceService.bindSession({
           workspaceId: active.entry.workspaceId,
@@ -670,6 +675,15 @@ export class RunManager {
         await this.subscribe(conn, runId, 0);
       }),
     );
+  }
+
+  private invalidateNativeSessionCaches(sessionId?: string): void {
+    this.nativeSessionsCache = null;
+    if (sessionId) {
+      this.nativeSessionContentCache.delete(sessionId);
+    } else {
+      this.nativeSessionContentCache.clear();
+    }
   }
 
   private async listNativeSessions(): Promise<SessionEntry[]> {

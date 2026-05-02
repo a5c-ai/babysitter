@@ -98,6 +98,62 @@ describe('GatewayClient', () => {
     expect(replay.some((frame) => frame.type === 'subscribe' && frame.runId === 'run-1' && frame.sinceSeq === 5)).toBe(true);
   });
 
+  it('keeps multiple run subscribers attached to the same dispatch', async () => {
+    const factory = createFakeSocketFactory();
+    const client = new GatewayClient({
+      url: 'ws://example.test',
+      token: 'secret',
+      createSocket: factory.createSocket,
+    });
+
+    const connectPromise = client.connect();
+    factory.sockets[0]!.open?.();
+    factory.sockets[0]!.message?.(
+      JSON.stringify({ type: 'hello', protocolVersions: ['1'], serverVersion: 'test', serverTime: new Date().toISOString() }),
+    );
+    await connectPromise;
+
+    const first = vi.fn();
+    const second = vi.fn();
+    const unsubscribeFirst = client.subscribeRun('run-1', first);
+    client.subscribeRun('run-1', second);
+
+    const subscribeFrames = factory.sockets[0]!.sent
+      .map((entry) => JSON.parse(entry) as Record<string, unknown>)
+      .filter((frame) => frame.type === 'subscribe' && frame.runId === 'run-1');
+    expect(subscribeFrames).toHaveLength(1);
+
+    factory.sockets[0]!.message?.(
+      JSON.stringify({
+        type: 'run.event',
+        runId: 'run-1',
+        seq: 3,
+        source: 'agent',
+        event: { type: 'text_delta', delta: 'shared' },
+      }),
+    );
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
+
+    unsubscribeFirst();
+    factory.sockets[0]!.message?.(
+      JSON.stringify({
+        type: 'run.event',
+        runId: 'run-1',
+        seq: 4,
+        source: 'agent',
+        event: { type: 'text_delta', delta: 'remaining' },
+      }),
+    );
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(2);
+
+    const unsubscribeFrames = factory.sockets[0]!.sent
+      .map((entry) => JSON.parse(entry) as Record<string, unknown>)
+      .filter((frame) => frame.type === 'unsubscribe' && frame.runId === 'run-1');
+    expect(unsubscribeFrames).toHaveLength(0);
+  });
+
   it('waits for hello before resolving connect', async () => {
     const factory = createFakeSocketFactory();
     const client = new GatewayClient({

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom-v6';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
@@ -166,6 +166,8 @@ export function SessionDetailPage(): JSX.Element {
   const [messagePageOffset, setMessagePageOffset] = useState<number | null>(null);
   const [messagePage, setMessagePage] = useState({ total: 0, offset: 0, limit: MESSAGE_PAGE_SIZE, hasMore: false });
   const linkedIssueKeyRef = useRef<string | null>(null);
+  const nativeRefreshTimersRef = useRef<number[]>([]);
+  const nativeMessageRequestIdRef = useRef(0);
 
   const transportCandidates = useMemo(
     () => [
@@ -234,6 +236,13 @@ export function SessionDetailPage(): JSX.Element {
     return client.subscribeSession(sessionId);
   }, [client, sessionId]);
 
+  useEffect(() => () => {
+    for (const timer of nativeRefreshTimersRef.current) {
+      window.clearTimeout(timer);
+    }
+    nativeRefreshTimersRef.current = [];
+  }, []);
+
   useEffect(() => {
     if (!sessionId) {
       setError(null);
@@ -270,70 +279,67 @@ export function SessionDetailPage(): JSX.Element {
     setMessagePageOffset(null);
   }, [sessionId]);
 
-  useEffect(() => {
+  const loadNativeMessages = useCallback(async (force = false) => {
     if (!sessionId) {
       setNativeMessages([]);
       setMessagePage({ total: 0, offset: 0, limit: MESSAGE_PAGE_SIZE, hasMore: false });
       return;
     }
-    if (status === 'active' && eventFlowModel.transcript.length > 0) {
+    if (!force && status === 'active' && eventFlowModel.transcript.length > 0) {
       return;
     }
-
-    let cancelled = false;
+    const requestId = ++nativeMessageRequestIdRef.current;
     setError(null);
-    void (async () => {
-      try {
-        const params = new URLSearchParams();
-        params.set('limit', String(MESSAGE_PAGE_SIZE));
-        if (messagePageOffset == null) {
-          params.set('tail', 'true');
-        } else {
-          params.set('offset', String(messagePageOffset));
-        }
-        const response = await fetchGateway(`/api/v1/sessions/${encodeURIComponent(sessionId)}/messages?${params.toString()}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            if (!cancelled) {
-              setNativeMessages([]);
-              setMessagePage({ total: 0, offset: 0, limit: MESSAGE_PAGE_SIZE, hasMore: false });
-            }
-            return;
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', String(MESSAGE_PAGE_SIZE));
+      if (messagePageOffset == null) {
+        params.set('tail', 'true');
+      } else {
+        params.set('offset', String(messagePageOffset));
+      }
+      const response = await fetchGateway(`/api/v1/sessions/${encodeURIComponent(sessionId)}/messages?${params.toString()}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          if (requestId === nativeMessageRequestIdRef.current) {
+            setNativeMessages([]);
+            setMessagePage({ total: 0, offset: 0, limit: MESSAGE_PAGE_SIZE, hasMore: false });
           }
-          throw new Error(`Gateway request failed: ${response.status}`);
-        }
-        const body = await response.json() as {
-          messages?: NativeSessionMessage[];
-          pagination?: {
-            total?: number;
-            offset?: number;
-            limit?: number;
-            hasMore?: boolean;
-          };
-        };
-        if (cancelled) {
           return;
         }
-        if (Array.isArray(body.messages)) {
-          setNativeMessages(body.messages);
-        }
-        setMessagePage({
-          total: Number(body.pagination?.total ?? body.messages?.length ?? 0),
-          offset: Number(body.pagination?.offset ?? 0),
-          limit: Number(body.pagination?.limit ?? MESSAGE_PAGE_SIZE),
-          hasMore: body.pagination?.hasMore === true,
-        });
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : String(cause));
-        }
+        throw new Error(`Gateway request failed: ${response.status}`);
       }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+      const body = await response.json() as {
+        messages?: NativeSessionMessage[];
+        pagination?: {
+          total?: number;
+          offset?: number;
+          limit?: number;
+          hasMore?: boolean;
+        };
+      };
+      if (requestId !== nativeMessageRequestIdRef.current) {
+        return;
+      }
+      if (Array.isArray(body.messages)) {
+        setNativeMessages(body.messages);
+      }
+      setMessagePage({
+        total: Number(body.pagination?.total ?? body.messages?.length ?? 0),
+        offset: Number(body.pagination?.offset ?? 0),
+        limit: Number(body.pagination?.limit ?? MESSAGE_PAGE_SIZE),
+        hasMore: body.pagination?.hasMore === true,
+      });
+    } catch (cause) {
+      if (requestId === nativeMessageRequestIdRef.current) {
+        setError(cause instanceof Error ? cause.message : String(cause));
+      }
+    }
   }, [eventFlowModel.transcript.length, fetchGateway, messagePageOffset, sessionId, status]);
+
+  useEffect(() => {
+    void loadNativeMessages(false);
+  }, [loadNativeMessages]);
 
   useEffect(() => {
     if (!linkedIssueId || !sessionId) {
@@ -428,13 +434,30 @@ export function SessionDetailPage(): JSX.Element {
       throw new Error(`Gateway request failed: ${response.status}`);
     }
 
+    setMessagePageOffset(null);
     const body = (await response.json()) as {
       run?: Record<string, unknown>;
       session?: Record<string, unknown>;
     };
     if (body.run && typeof body.run.runId === 'string') {
       store.getState().actions.mergeRun(body.run.runId, body.run);
-      client.subscribeRun(body.run.runId);
+      const scheduleNativeRefresh = () => {
+        for (const timer of nativeRefreshTimersRef.current) {
+          window.clearTimeout(timer);
+        }
+        nativeRefreshTimersRef.current = [0, 600, 1_800, 3_200].map((delay) =>
+          window.setTimeout(() => {
+            void loadNativeMessages(true);
+          }, delay),
+        );
+      };
+      scheduleNativeRefresh();
+      client.subscribeRun(body.run.runId, (frame) => {
+        const event = frame.event as Record<string, unknown> | undefined;
+        if (event?.type === 'run.finalized') {
+          scheduleNativeRefresh();
+        }
+      });
     }
     if (body.session && typeof body.session.sessionId === 'string') {
       store.getState().actions.mergeSession(body.session.sessionId, body.session);

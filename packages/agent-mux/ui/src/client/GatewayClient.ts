@@ -27,7 +27,8 @@ type SessionSubscription = {
 type RunSubscription = {
   runId: string;
   sinceSeq: number;
-  callback?: (frame: RunEventFrame) => void;
+  callbacks: Set<(frame: RunEventFrame) => void>;
+  subscriberCount: number;
 };
 
 export interface GatewayClientOptions {
@@ -135,13 +136,33 @@ export class GatewayClient {
   }
 
   subscribeRun(runId: string, callback?: (frame: RunEventFrame) => void): () => void {
-    this.runSubscriptions.set(runId, {
+    const existing = this.runSubscriptions.get(runId);
+    const subscription: RunSubscription = existing ?? {
       runId,
-      sinceSeq: this.runSubscriptions.get(runId)?.sinceSeq ?? 0,
-      callback,
-    });
-    this.sendFrame({ type: 'subscribe', runId, sinceSeq: this.runSubscriptions.get(runId)?.sinceSeq } satisfies SubscribeFrame);
+      sinceSeq: 0,
+      callbacks: new Set(),
+      subscriberCount: 0,
+    };
+    subscription.subscriberCount += 1;
+    if (callback) {
+      subscription.callbacks.add(callback);
+    }
+    this.runSubscriptions.set(runId, subscription);
+    if (!existing) {
+      this.sendFrame({ type: 'subscribe', runId, sinceSeq: subscription.sinceSeq } satisfies SubscribeFrame);
+    }
     return () => {
+      const current = this.runSubscriptions.get(runId);
+      if (!current) {
+        return;
+      }
+      current.subscriberCount = Math.max(0, current.subscriberCount - 1);
+      if (callback) {
+        current.callbacks.delete(callback);
+      }
+      if (current.subscriberCount > 0) {
+        return;
+      }
       this.runSubscriptions.delete(runId);
       this.sendFrame({ type: 'unsubscribe', runId });
     };
@@ -234,20 +255,27 @@ export class GatewayClient {
       const subscription = this.runSubscriptions.get(frame['runId']);
       if (subscription) {
         subscription.sinceSeq = Math.max(subscription.sinceSeq, Number(frame['seq']));
-        subscription.callback?.(frame as unknown as RunEventFrame);
+        for (const callback of subscription.callbacks) {
+          callback(frame as unknown as RunEventFrame);
+        }
       }
     }
 
     if (frame['type'] === 'hook.request') {
       const hookFrame = frame as unknown as HookRequestFrame;
       const subscription = this.runSubscriptions.get(hookFrame.runId);
-      subscription?.callback?.({
-        type: 'run.event',
-        runId: hookFrame.runId,
-        seq: hookFrame.deadlineTs,
-        source: 'gateway',
-        event: hookFrame as unknown as Record<string, unknown>,
-      });
+      if (subscription) {
+        const eventFrame = {
+          type: 'run.event',
+          runId: hookFrame.runId,
+          seq: hookFrame.deadlineTs,
+          source: 'gateway',
+          event: hookFrame as unknown as Record<string, unknown>,
+        } satisfies RunEventFrame;
+        for (const callback of subscription.callbacks) {
+          callback(eventFrame);
+        }
+      }
     }
 
     this.emit('frame', frame);

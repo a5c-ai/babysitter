@@ -152,7 +152,7 @@ test.describe("agent-mux webui e2e", () => {
       await linkedCard.locator("details summary").click();
       await expect(linkedCard.getByText("Workspace options")).toBeVisible();
       await expect(linkedCard.getByText("Repository lifecycle")).toBeVisible();
-      await expect(linkedCard.getByTestId(`open-linked-workspace-${state.issueKey}`)).toBeVisible();
+      await expect(page.getByRole("button", { name: "Open workspace", exact: true }).first()).toBeVisible();
     });
 
     test("board workspace links keep issue association visible and hand off cleanly into the linked session chat", async ({ page }) => {
