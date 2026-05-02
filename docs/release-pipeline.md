@@ -11,6 +11,7 @@ last_updated: 2026-05-01
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.
 - `@a5c-ai/babysitter-observer-dashboard` is part of those central workflows. The former standalone `.github/workflows/observer-dashboard-publish.yml` path is retired, so observer-dashboard no longer has a separate `main` release workflow.
 - `@a5c-ai/agent-catalog` is part of those central publish workflows. It ships as a public dependency surface for SDK, hooks-mux, agent-mux, and agent-plugins-mux consumers.
+- `@a5c-ai/agent-core` and `@a5c-ai/babysitter-agent` are part of those central publish workflows. `agent-core` publishes before `babysitter-agent` so the runtime CLI can be installed from npm without workspace-only dependencies.
 - `process-library-catalog` (`packages/catalog`) is intentionally excluded from those central publish workflows. It remains an internal-only workspace UI/API surface whose support contract is enforced through workspace CI rather than npm release automation.
 - Both central workflows validate, build, and publish observer-dashboard alongside the other public workspaces they own.
 

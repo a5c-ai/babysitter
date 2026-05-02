@@ -1,11 +1,11 @@
 # @a5c-ai/agent-core
 
-Built-in programmatic session wrapper and agentic tool surface for Babysitter runtime consumers inside this monorepo.
+Built-in programmatic session wrapper and agentic tool surface for Babysitter runtime consumers.
 
 <!-- docs-status:start -->
-> Status: Internal-only workspace package.
+> Status: Public advanced/runtime package.
 > Canonical docs home: [Package and Plugin Docs Map](../../docs/package-and-plugin-map.md).
-> This README defines the current package contract for repo-internal runtime consumers.
+> This README defines the package contract for runtime consumers and published dependents such as `@a5c-ai/babysitter-agent`.
 <!-- docs-status:end -->
 
 ## Package role
@@ -17,7 +17,7 @@ Built-in programmatic session wrapper and agentic tool surface for Babysitter ru
 - `@a5c-ai/babysitter-agent` re-exports these APIs from `src/harness/index.ts`, uses `createAgentCoreSession()` for direct `agent-core` harness invocation in `src/harness/invoker.ts`, and injects tool definitions into plan-process and resume-run flows.
 - `@a5c-ai/babysitter-sdk` still owns run directories, journals, task/effect lifecycle, and config defaults. `agent-core` does not replace the SDK orchestration layer.
 
-This package is repo-internal. Do not describe it as a standalone public product surface.
+This package is published as a runtime dependency surface for higher-level Babysitter runtimes. It is still an advanced/operator-facing building block rather than the primary entrypoint for new users.
 
 ## Root exports
 
@@ -214,4 +214,4 @@ For the shared runtime chain used by release-oriented workflows, run:
 npm run build:runtime
 ```
 
-Per [Workspace Validation Map](../../docs/workspace-validation.md), `packages/agent-core` is an internal-only active workspace validated by `.github/workflows/ci.yml` job `test` and by the release/staging workflows. Keep README claims aligned with those validation paths rather than inventing package-specific CI jobs that do not exist.
+Per [Workspace Validation Map](../../docs/workspace-validation.md), `packages/agent-core` is a public advanced/runtime package validated by `.github/workflows/ci.yml` job `test` and by the release/staging workflows. Keep README claims aligned with those validation paths rather than inventing package-specific CI jobs that do not exist.

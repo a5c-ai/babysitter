@@ -417,6 +417,8 @@ jobs:
 
           const dependencyVersions = new Map([
             ['@a5c-ai/agent-catalog', '${{ steps.bump.outputs.version }}'],
+            ['@a5c-ai/agent-core', '${{ steps.bump.outputs.version }}'],
+            ['@a5c-ai/babysitter-agent', '${{ steps.bump.outputs.version }}'],
             ['@a5c-ai/babysitter-sdk', '${{ steps.bump.outputs.version }}'],
             ['@a5c-ai/hooks-mux-core', '${{ steps.bump.outputs.version }}'],
             ['@a5c-ai/agent-mux', agentMuxVersion],
@@ -490,6 +492,8 @@ jobs:
         run: |
           set -euo pipefail
           npm pack --workspace=@a5c-ai/agent-catalog --pack-destination artifacts/release
+          npm pack --workspace=@a5c-ai/agent-core --pack-destination artifacts/release
+          npm pack --workspace=@a5c-ai/babysitter-agent --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/babysitter-sdk --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/agent-plugins-mux --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/babysitter-observer-dashboard --pack-destination artifacts/release
@@ -564,6 +568,12 @@ jobs:
           - name: agent-catalog
             build: npm run build --workspace=@a5c-ai/agent-catalog
             publish: npm publish --workspace=@a5c-ai/agent-catalog --access public
+          - name: agent-core
+            build: npm run build --workspace=@a5c-ai/agent-core
+            publish: npm publish --workspace=@a5c-ai/agent-core --access public
+          - name: babysitter-agent
+            build: npm run build --workspace=@a5c-ai/babysitter-agent
+            publish: npm publish --workspace=@a5c-ai/babysitter-agent --access public
           - name: babysitter-sdk
             build: npm run build:sdk
             publish: npm publish --workspace=@a5c-ai/babysitter-sdk --access public

@@ -40,6 +40,7 @@ These packages are publicly installable, but their canonical docs live primarily
 | Workspace | Role | Validation path |
 | --- | --- | --- |
 | `packages/babysitter-agent` | Public runtime CLI for headless/orchestrated/operator workflows; not the default first-stop end-user entrypoint | `.github/workflows/ci.yml` job `test`, plus `release.yml` and `staging-publish.yml` runtime build/test validation |
+| `packages/agent-core` | Public advanced/runtime dependency package consumed by `@a5c-ai/babysitter-agent` and runtime orchestration flows | `.github/workflows/ci.yml` job `test`, plus `release.yml` and `staging-publish.yml` |
 | `packages/agent-catalog` | Public graph/evidence catalog package consumed by SDK, agent-mux, hooks-mux, plugin compiler, and catalog-adjacent tooling | `.github/workflows/ci.yml` job `workspace-coverage` (`npm run ci:test --workspace=@a5c-ai/agent-catalog`), plus `release.yml` and `staging-publish.yml` |
 
 ## Internal-only active workspaces
@@ -48,7 +49,6 @@ These workspaces are part of the active monorepo and ship code or operational be
 
 | Workspace | Role | Validation path |
 | --- | --- | --- |
-| `packages/agent-core` | Internal harness support package | `.github/workflows/ci.yml` job `test`, plus `release.yml` and `staging-publish.yml` |
 | `packages/catalog` | internal-only Next.js catalog UI and API surface for browsing process-library and graph-backed discovery data inside the monorepo | `.github/workflows/ci.yml` job `workspace-coverage` (`npm run ci:test --workspace=process-library-catalog`) |
 | `packages/babysitter-tui-plugins` | Internal TUI plugin package for babysitter observability | `.github/workflows/ci.yml` job `workspace-coverage` |
 | `packages/transport-mux` | Internal transport/proxy runtime workspace with package-local QA commands | `.github/workflows/ci.yml` job `workspace-coverage` (`build` + `lint` + `typecheck` + `test` + `scorecard:migration`) |

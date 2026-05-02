@@ -343,6 +343,7 @@ for (const path of [
 
 for (const path of [
   "package.json",
+  "packages/agent-core/package.json",
   "packages/sdk/package.json",
   "packages/babysitter-agent/package.json",
   "packages/agent-mux/adapters/package.json",
@@ -358,6 +359,8 @@ for (const path of [
   "packages/agent-mux/webui/package.json",
   "packages/transport-mux/package.json",
 ]) {
+  syncDependencyVersion(path, "@a5c-ai/agent-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/babysitter-agent", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-cli", newAgentMuxVersion);

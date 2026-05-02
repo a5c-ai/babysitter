@@ -47,10 +47,10 @@
       "packageName": "@a5c-ai/agent-core",
       "description": "Built-in agent-core runtime and tool surface for Babysitter.",
       "hasReadme": true,
-      "status": "Internal-only workspace",
+      "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/agent-core/README.md",
       "supporting": [],
-      "note": "Repo-internal runtime/tool surface consumed by advanced runtime flows; do not present it as a standalone public product offering."
+      "note": "Public runtime dependency package for advanced orchestration surfaces."
     },
     {
       "surface": "packages/agent-mux/adapters",

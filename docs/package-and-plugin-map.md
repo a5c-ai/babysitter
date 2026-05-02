@@ -38,6 +38,7 @@ Use it to answer three questions quickly:
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
 | `packages/agent-plugins-mux` | Public package | [packages/agent-plugins-mux/README.md](../packages/agent-plugins-mux/README.md) | — | README is the canonical package-level contract. |
+| `packages/agent-core` | Public advanced/runtime package | [packages/agent-core/README.md](../packages/agent-core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
 | `packages/babysitter` | Public package | [packages/babysitter/README.md](../packages/babysitter/README.md) | — | README is the canonical package-level contract. |
 | `packages/babysitter-agent` | Public advanced/runtime package | [packages/babysitter-agent/README.md](../packages/babysitter-agent/README.md) | [README.md](../README.md) | Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users. |
 | `packages/agent-catalog` | Public advanced/runtime package | [packages/agent-catalog/README.md](../packages/agent-catalog/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public npm package for shared ontology/discovery/evidence assets used by other published runtimes; README is the canonical package contract. |
@@ -96,7 +97,6 @@ Use it to answer three questions quickly:
 
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
-| `packages/agent-core` | Internal-only workspace | [packages/agent-core/README.md](../packages/agent-core/README.md) | — | Repo-internal runtime/tool surface consumed by advanced runtime flows; do not present it as a standalone public product offering. |
 | `packages/agent-mux/mobile-android-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/agent-mux/mobile-ios-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/agent-mux/tv-androidtv-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |

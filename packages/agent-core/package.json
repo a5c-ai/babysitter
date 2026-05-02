@@ -2,8 +2,7 @@
   "name": "@a5c-ai/agent-core",
   "version": "0.1.0",
   "description": "Built-in agent-core runtime and tool surface for Babysitter.",
-  "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,6 +18,9 @@
     "dist/",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run build:runtime:agent-core-deps --prefix ../.. && tsc --build --force tsconfig.json",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
@@ -34,5 +36,14 @@
     "rimraf": "^5.0.5",
     "typescript": "^5.4.2",
     "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-core"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-core#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
   }
 }
