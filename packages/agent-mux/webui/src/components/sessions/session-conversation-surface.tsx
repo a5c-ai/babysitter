@@ -757,7 +757,10 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
         </details>
       </div>
 
-      <div className="mt-4 shrink-0 rounded-3xl border border-border bg-card/95 px-4 py-4 shadow-lg" data-testid="conversation-composer">
+      <div
+        className="sticky bottom-0 z-10 mt-4 shrink-0 rounded-3xl border border-border bg-card/95 px-4 py-4 shadow-lg supports-[backdrop-filter]:bg-card/92"
+        data-testid="conversation-composer"
+      >
       <form onSubmit={handleSubmit} className="grid gap-3">
         <label className="grid gap-2">
           <span className="text-sm font-medium text-foreground">Send another turn</span>

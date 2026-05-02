@@ -227,6 +227,8 @@ describe("SessionConversationSurface", () => {
     expect(screen.queryByRole("button", { name: "Deny" })).not.toBeInTheDocument();
     expect(screen.getByTestId("conversation-scroll-region")).toBeInTheDocument();
     expect(screen.getByTestId("conversation-composer")).toBeInTheDocument();
+    expect(screen.getByTestId("conversation-composer").className).toContain("sticky");
+    expect(screen.getByTestId("conversation-composer").className).toContain("bottom-0");
     expect(screen.getByTestId("conversation-stats-details")).not.toHaveAttribute("open");
     expect(screen.getByTestId("composer-options-details")).not.toHaveAttribute("open");
     expect(screen.getByPlaceholderText("Continue the session...")).toBeInTheDocument();

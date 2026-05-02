@@ -378,7 +378,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
           panelKey="conversation"
           title="Chat"
           subtitle="Transcript and the next turn"
-          bodyClassName="min-h-0 flex-1 p-4"
+          bodyClassName="min-h-0 flex-1 overflow-hidden p-4"
         >
           {props.conversationSupplement ? (
             <div className="mb-4">{props.conversationSupplement}</div>
