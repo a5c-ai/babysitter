@@ -14,6 +14,7 @@ interface HookBrokerDeps {
 
 interface PendingHookDecision {
   runId: string;
+  hookKind: string;
   recipients: ClientConn[];
   settled: boolean;
   timer: NodeJS.Timeout;
@@ -32,7 +33,17 @@ export class HookBroker {
     timeoutMs: number,
   ): Promise<HookDecision> {
     const hookRequestId = randomUUID();
+    const timestamp = Date.now();
+    const deadlineTs = Date.now() + timeoutMs;
     const recipients = this.deps.getSubscribers(runId);
+    await this.deps.persist(runId, {
+      type: 'hook_requested',
+      hookRequestId,
+      hookKind,
+      payload,
+      deadlineTs,
+      timestamp,
+    });
     if (recipients.length === 0) {
       await this.deps.persist(runId, {
         type: 'gateway.notification',
@@ -57,6 +68,7 @@ export class HookBroker {
 
       this.pending.set(hookRequestId, {
         runId,
+        hookKind,
         recipients,
         settled: false,
         timer,
@@ -70,7 +82,7 @@ export class HookBroker {
           runId,
           hookKind,
           payload,
-          deadlineTs: Date.now() + timeoutMs,
+          deadlineTs,
         },
         recipients,
       );
@@ -80,7 +92,7 @@ export class HookBroker {
         runId,
         hookKind,
         payload,
-        deadlineTs: Date.now() + timeoutMs,
+        deadlineTs,
       });
     });
   }
@@ -133,9 +145,11 @@ export class HookBroker {
     await this.deps.persist(pending.runId, {
       type: 'hook_decision',
       hookRequestId,
+      hookKind: pending.hookKind,
       decision: decision.decision,
       reason: decision.decision === 'deny' ? decision.reason : undefined,
       resolvedBy,
+      timestamp: Date.now(),
     });
     pending.resolveDecision(decision);
   }

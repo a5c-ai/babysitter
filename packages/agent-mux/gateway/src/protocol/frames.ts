@@ -53,6 +53,9 @@ const sessionStartFrameSchema = z.object({
   approvalMode: z.enum(['yolo', 'prompt', 'deny']).optional(),
   sessionId: z.string().optional(),
   runId: z.string().optional(),
+  cwd: z.string().optional(),
+  workspaceId: z.string().optional(),
+  forkSessionId: z.string().optional(),
 });
 
 const sessionMessageFrameSchema = z.object({

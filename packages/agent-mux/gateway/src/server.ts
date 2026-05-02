@@ -760,6 +760,9 @@ export function createGatewayServer(
             attachments: sanitizeAttachments(rawFrame['attachments']),
             approvalMode: readApprovalMode(rawFrame['approvalMode']),
             sessionId: typeof rawFrame['sessionId'] === 'string' ? rawFrame['sessionId'] : undefined,
+            cwd: typeof rawFrame['cwd'] === 'string' ? rawFrame['cwd'] : undefined,
+            workspaceId: typeof rawFrame['workspaceId'] === 'string' ? rawFrame['workspaceId'] : undefined,
+            forkSessionId: typeof rawFrame['forkSessionId'] === 'string' ? rawFrame['forkSessionId'] : undefined,
           },
           {
             tokenId: tokenRecord.id,

@@ -1,4 +1,7 @@
 import type {
+  ApprovalDeniedEvent,
+  ApprovalGrantedEvent,
+  ApprovalRequestEvent,
   AgentdocReadEvent,
   ErrorEvent,
   FileCreateEvent,
@@ -50,8 +53,39 @@ export type UserMessageEvent = EventTimestamp & {
   sessionId?: string;
 };
 
+export type HookRequestedEvent = EventTimestamp & {
+  type: 'hook_requested';
+  hookRequestId: string;
+  hookKind: string;
+  payload?: unknown;
+  deadlineTs?: number;
+};
+
+export type HookDecisionEvent = EventTimestamp & {
+  type: 'hook_decision';
+  hookRequestId: string;
+  hookKind?: string;
+  decision: 'allow' | 'deny';
+  reason?: string;
+  resolvedBy?: string;
+};
+
+export type ApprovalRequestFlowEvent = Pick<
+  ApprovalRequestEvent,
+  'type' | 'interactionId' | 'action' | 'detail' | 'toolName' | 'riskLevel'
+> & EventTimestamp;
+
+export type ApprovalGrantedFlowEvent = Pick<ApprovalGrantedEvent, 'type' | 'interactionId'> & EventTimestamp;
+
+export type ApprovalDeniedFlowEvent = Pick<ApprovalDeniedEvent, 'type' | 'interactionId' | 'reason'> & EventTimestamp;
+
 export type SessionFlowEvent =
   | UserMessageEvent
+  | HookRequestedEvent
+  | HookDecisionEvent
+  | ApprovalRequestFlowEvent
+  | ApprovalGrantedFlowEvent
+  | ApprovalDeniedFlowEvent
   | (Pick<ThinkingDeltaEvent, 'type' | 'delta'> & EventTimestamp)
   | (Pick<ThinkingStopEvent, 'type' | 'thinking'> & EventTimestamp)
   | (Pick<TextDeltaEvent, 'type' | 'delta'> & EventTimestamp)
@@ -259,6 +293,65 @@ function parseFileEvent(event: RawEvent): SessionFlowEvent | null {
 function parseSystemEvent(event: RawEvent): SessionFlowEvent | null {
   const timestamp = readTimestamp(event);
   switch (event.type) {
+    case 'approval_request': {
+      const interactionId = readString(event.interactionId);
+      const action = readString(event.action);
+      const detail = readString(event.detail);
+      const riskLevel = readString(event.riskLevel);
+      if (!interactionId || !action || detail == null || (riskLevel !== 'low' && riskLevel !== 'medium' && riskLevel !== 'high')) {
+        return null;
+      }
+      return {
+        type: 'approval_request',
+        interactionId,
+        action,
+        detail,
+        toolName: readString(event.toolName) ?? undefined,
+        riskLevel,
+        timestamp,
+      };
+    }
+    case 'approval_granted': {
+      const interactionId = readString(event.interactionId);
+      return interactionId ? { type: 'approval_granted', interactionId, timestamp } : null;
+    }
+    case 'approval_denied': {
+      const interactionId = readString(event.interactionId);
+      return interactionId
+        ? { type: 'approval_denied', interactionId, reason: readString(event.reason) ?? undefined, timestamp }
+        : null;
+    }
+    case 'hook_requested': {
+      const hookRequestId = readString(event.hookRequestId);
+      const hookKind = readString(event.hookKind);
+      if (!hookRequestId || !hookKind) {
+        return null;
+      }
+      return {
+        type: 'hook_requested',
+        hookRequestId,
+        hookKind,
+        payload: event.payload,
+        deadlineTs: readNumber(event.deadlineTs) ?? undefined,
+        timestamp,
+      };
+    }
+    case 'hook_decision': {
+      const hookRequestId = readString(event.hookRequestId);
+      const decision = event.decision === 'deny' ? 'deny' : event.decision === 'allow' ? 'allow' : null;
+      if (!hookRequestId || !decision) {
+        return null;
+      }
+      return {
+        type: 'hook_decision',
+        hookRequestId,
+        hookKind: readString(event.hookKind) ?? undefined,
+        decision,
+        reason: readString(event.reason) ?? undefined,
+        resolvedBy: readString(event.resolvedBy) ?? undefined,
+        timestamp,
+      };
+    }
     case 'shell_start': {
       const command = readString(event.command);
       return command != null ? { type: 'shell_start', command, timestamp } : null;
@@ -357,6 +450,11 @@ export function adaptSessionFlowEvent(value: unknown): SessionFlowEvent | null {
       return parseFileEvent(event);
     case 'shell_start':
     case 'shell_exit':
+    case 'approval_request':
+    case 'approval_granted':
+    case 'approval_denied':
+    case 'hook_requested':
+    case 'hook_decision':
     case 'plugin_loaded':
     case 'plugin_invoked':
     case 'plugin_error':

@@ -46,6 +46,9 @@ export interface StartSessionInput extends Record<string, unknown> {
   approvalMode?: 'yolo' | 'prompt' | 'deny';
   sessionId?: string;
   runId?: string;
+  cwd?: string;
+  workspaceId?: string;
+  forkSessionId?: string;
 }
 
 export interface SendSessionMessageInput extends Record<string, unknown> {

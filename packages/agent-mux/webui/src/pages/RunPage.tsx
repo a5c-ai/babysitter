@@ -37,7 +37,11 @@ function formatMoment(value: unknown): string {
 
 function isActiveDispatch(run: DispatchRecord): boolean {
   const status = String(run?.status ?? '');
-  return status === 'pending' || status === 'waiting';
+  return status === 'queued' || status === 'starting' || status === 'pending' || status === 'waiting' || status === 'running';
+}
+
+function shouldKeepResolvingSessionId(status: string): boolean {
+  return status === 'queued' || status === 'starting' || status === 'pending' || status === 'waiting' || status === 'running';
 }
 
 function DispatchSummaryCard(props: {
@@ -57,13 +61,95 @@ function DispatchSummaryCard(props: {
 export function SessionPendingPage(): JSX.Element {
   const params = useParams<{ runId: string }>();
   const location = useLocation();
+  const fetchGateway = useGatewayFetch();
+  const { client, store } = useGateway();
   const runId = params.runId ?? '';
   const run = useRun(runId);
+  const [resolvedSessionId, setResolvedSessionId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const agent = String(run?.agent ?? 'unknown');
   const status = String(run?.status ?? 'starting');
+  const sessionId = readOptionalText(run?.sessionId) ?? resolvedSessionId;
 
-  if (typeof run?.sessionId === 'string' && run.sessionId.length > 0) {
-    return <Navigate to={`/sessions/${run.sessionId}${location.search}`} replace />;
+  useEffect(() => {
+    if (!runId) {
+      return;
+    }
+    return client.subscribeRun(runId);
+  }, [client, runId]);
+
+  useEffect(() => {
+    if (!runId || sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleRefresh = (delayMs: number) => {
+      if (cancelled || timer != null) {
+        return;
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        void hydrateFromDispatch();
+      }, delayMs);
+    };
+
+    const hydrateFromDispatch = async () => {
+      try {
+        const response = await fetchGateway(`/api/v1/dispatches/${encodeURIComponent(runId)}`);
+        if (!response.ok) {
+          if (response.status === 404 || cancelled) {
+            return;
+          }
+          throw new Error(`Gateway request failed: ${response.status}`);
+        }
+        const body = await response.json() as Record<string, unknown>;
+        if (cancelled) {
+          return;
+        }
+        store.getState().actions.mergeRun(runId, body);
+        const fetchedSessionId = readOptionalText(body.sessionId);
+        if (fetchedSessionId) {
+          store.getState().actions.mergeSession(fetchedSessionId, {
+            sessionId: fetchedSessionId,
+            agent: body.agent,
+            latestRunId: runId,
+            activeRunId: shouldKeepResolvingSessionId(String(body.status ?? '')) ? runId : null,
+          });
+          setResolvedSessionId(fetchedSessionId);
+          setLoadError(null);
+          return;
+        }
+
+        const nextStatus = String(body.status ?? '');
+        if (shouldKeepResolvingSessionId(nextStatus)) {
+          scheduleRefresh(1_000);
+          return;
+        }
+
+        setLoadError('This dispatch finished before the gateway exposed a durable session id.');
+      } catch (cause) {
+        if (!cancelled) {
+          setLoadError(cause instanceof Error ? cause.message : String(cause));
+          scheduleRefresh(1_500);
+        }
+      }
+    };
+
+    void hydrateFromDispatch();
+
+    return () => {
+      cancelled = true;
+      if (timer != null) {
+        clearTimeout(timer);
+      }
+    };
+  }, [client, fetchGateway, runId, sessionId, store]);
+
+  if (sessionId) {
+    return <Navigate to={`/sessions/${sessionId}${location.search}`} replace />;
   }
 
   return (
@@ -80,6 +166,11 @@ export function SessionPendingPage(): JSX.Element {
               the dispatch to a durable session id. As soon as that happens, this page redirects into the
               live session chat automatically.
             </p>
+            {loadError ? (
+              <p className="mt-4 rounded-2xl border border-warning/20 bg-warning/8 px-4 py-3 text-sm text-warning">
+                {loadError}
+              </p>
+            ) : null}
             <div className="page-actions">
               <Link to="/sessions" className="session-browser__action session-browser__action--primary">
                 Open sessions

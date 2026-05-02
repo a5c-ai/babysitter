@@ -48,7 +48,6 @@ vi.mock("@a5c-ai/compendium", () => ({
   cx: (...args: unknown[]) => args.filter(Boolean).join(" "),
 }));
 
-const requestMock = vi.fn();
 const gatewayStore = createStore(() => ({
   agents: {
     items: ["claude"],
@@ -79,7 +78,6 @@ const gatewayStore = createStore(() => ({
 
 vi.mock("@/lib/agent-mux-ui", () => ({
   useGateway: () => ({
-    client: { request: requestMock },
     store: gatewayStore,
   }),
 }));
@@ -165,7 +163,7 @@ describe("SessionConversationSurface", () => {
     expect(screen.queryByText("workspace file")).not.toBeInTheDocument();
   });
 
-  it("renders parity message kinds and approval controls in one surface", async () => {
+  it("renders runtime hooks as passive chat history instead of approval controls", () => {
     gatewayStore.setState({
       ...gatewayStore.getState(),
       agents: {
@@ -181,7 +179,6 @@ describe("SessionConversationSurface", () => {
         },
       },
     });
-    const user = setupUser();
     render(
       <SessionConversationSurface
         sessionId="session-1"
@@ -198,6 +195,10 @@ describe("SessionConversationSurface", () => {
               { type: "user_message", text: "Please update src/app.ts", timestamp: 1_100 },
               { type: "tool_call_start", toolCallId: "tool-1", toolName: "read_file", inputAccumulated: "src/app.ts", timestamp: 1_200 },
               { type: "tool_result", toolCallId: "tool-1", toolName: "read_file", output: { path: "src/app.ts" }, timestamp: 1_300 },
+              { type: "approval_request", interactionId: "approval-1", action: "Write src/app.ts", detail: "The agent wants to update the file.", toolName: "write_file", riskLevel: "medium", timestamp: 1_310 },
+              { type: "approval_granted", interactionId: "approval-1", timestamp: 1_315 },
+              { type: "hook_requested", hookRequestId: "hook-1", hookKind: "userPromptSubmit", payload: { prompt: "Please update src/app.ts" }, deadlineTs: 1_360, timestamp: 1_320 },
+              { type: "hook_decision", hookRequestId: "hook-1", hookKind: "userPromptSubmit", decision: "allow", resolvedBy: "timeout", timestamp: 1_330 },
               { type: "file_write", path: "src/app.ts", timestamp: 1_350 },
               { type: "error", message: "Tool timeout", timestamp: 1_400 },
             ],
@@ -214,22 +215,21 @@ describe("SessionConversationSurface", () => {
     expect(screen.getByText("Conversation")).toBeInTheDocument();
     expect(screen.getAllByText("user").length).toBeGreaterThan(0);
     expect(screen.getByText("read_file")).toBeInTheDocument();
+    expect(screen.getByText("approval requested")).toBeInTheDocument();
+    expect(screen.getByText(/Approval requested: Write src\/app.ts/)).toBeInTheDocument();
+    expect(screen.getByText("approval granted")).toBeInTheDocument();
     expect(screen.getAllByText("write src/app.ts").length).toBeGreaterThan(0);
     expect(screen.getByText("Tool timeout")).toBeInTheDocument();
-    expect(screen.getByText("Approval feedback loop")).toBeInTheDocument();
+    expect(screen.getByText("runtime hook userPromptSubmit")).toBeInTheDocument();
+    expect(screen.getByText(/Runtime hook userPromptSubmit opened/)).toBeInTheDocument();
+    expect(screen.getByText(/Runtime hook userPromptSubmit resolved: allow/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Allow" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Deny" })).not.toBeInTheDocument();
     expect(screen.getByTestId("conversation-scroll-region")).toBeInTheDocument();
     expect(screen.getByTestId("conversation-composer")).toBeInTheDocument();
     expect(screen.getByTestId("conversation-stats-details")).not.toHaveAttribute("open");
     expect(screen.getByTestId("composer-options-details")).not.toHaveAttribute("open");
     expect(screen.getByPlaceholderText("Continue the session...")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Attach" })).toBeEnabled();
-
-    await user.click(screen.getByRole("button", { name: "Allow" }));
-
-    expect(requestMock).toHaveBeenCalledWith({
-      type: "hook.decision",
-      hookRequestId: "hook-1",
-      decision: "allow",
-    });
   });
 });

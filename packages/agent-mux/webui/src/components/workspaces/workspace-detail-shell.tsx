@@ -479,7 +479,7 @@ export function WorkspaceDetailShell(props: WorkspaceDetailShellProps) {
           <WorkspacePanelFrame
             panelKey="conversation"
             title="Session chat"
-            subtitle="Selected session transcript, approvals, and next-turn input"
+            subtitle="Selected session transcript, runtime notes, and next-turn input"
           >
             <EmptyWorkspaceState
               title="Connect the gateway to open live chat"

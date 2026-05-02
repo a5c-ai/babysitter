@@ -122,6 +122,9 @@ public struct SessionStartFrame: Codable {
   public let approvalMode: SessionStartFrameApprovalMode?
   public let sessionId: String?
   public let runId: String?
+  public let cwd: String?
+  public let workspaceId: String?
+  public let forkSessionId: String?
 }
 
 public struct SessionMessageFrame: Codable {

@@ -8,6 +8,9 @@ export function useStartSession() {
     model?: string;
     sessionId?: string;
     runId?: string;
+    cwd?: string;
+    workspaceId?: string;
+    forkSessionId?: string;
   }) => {
     const response = await client.startSession<Record<string, unknown>>(input);
     const run = response['run'] as Record<string, unknown> | undefined;

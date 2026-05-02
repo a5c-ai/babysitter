@@ -48,7 +48,6 @@ beforeEach(() => {
       status: 'waiting',
       agent: 'codex',
       processId: 'dispatch/process',
-      sessionId: 'session-9',
       cwd: 'C:\\work\\repo',
       createdAt: '2026-05-02T10:00:00.000Z',
       updatedAt: '2026-05-02T10:01:00.000Z',
@@ -60,7 +59,7 @@ beforeEach(() => {
 });
 
 describe('SessionPendingPage', () => {
-  it('renders the dispatch handoff surface while waiting for a session id', () => {
+  it('renders the dispatch handoff surface while waiting for a session id', async () => {
     mockUseRun.mockReturnValue({
       runId: 'run-123',
       agent: 'codex',
@@ -72,6 +71,10 @@ describe('SessionPendingPage', () => {
     expect(screen.getByText('Waiting for this dispatch to bind to its session.')).toBeInTheDocument();
     expect(screen.getByText('run-123')).toBeInTheDocument();
     expect(screen.getByText('queued')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockSubscribeRun).toHaveBeenCalledWith('run-123');
+      expect(mockFetchGateway).toHaveBeenCalledWith('/api/v1/dispatches/run-123');
+    });
     expect(screen.getByRole('link', { name: 'Open sessions' })).toHaveAttribute('href', '/sessions');
     expect(screen.getByRole('link', { name: 'Open workspaces' })).toHaveAttribute('href', '/workspaces');
   });

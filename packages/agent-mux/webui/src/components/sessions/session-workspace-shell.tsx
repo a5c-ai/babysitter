@@ -485,7 +485,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
             </h1>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-foreground-muted">
               {props.heroBody ??
-                "Keep the chat primary while dispatch trace, approvals, and runtime stay close enough to open only when needed."}
+                "Keep the chat primary while dispatch trace, runtime hook history, and runtime stay close enough to open only when needed."}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

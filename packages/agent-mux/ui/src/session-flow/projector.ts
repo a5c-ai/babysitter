@@ -36,6 +36,16 @@ function getLifecycleLabel(event: SessionFlowEvent): string {
 
 function getSystemLabel(event: SessionFlowEvent): string {
   switch (event.type) {
+    case 'approval_request':
+      return `approval requested`;
+    case 'approval_granted':
+      return 'approval granted';
+    case 'approval_denied':
+      return 'approval denied';
+    case 'hook_requested':
+      return `runtime hook ${event.hookKind}`;
+    case 'hook_decision':
+      return `hook ${event.decision}`;
     case 'shell_start':
       return `shell ${previewText(event.command, 48)}`;
     case 'shell_exit':
@@ -66,6 +76,47 @@ function getSystemLabel(event: SessionFlowEvent): string {
 
 function buildToolLabel(toolName: string, secondaryLabel?: string): string {
   return secondaryLabel ? `${toolName} · ${secondaryLabel}` : toolName;
+}
+
+function buildHookRequestDetail(event: Extract<SessionFlowEvent, { type: 'hook_requested' }>): string {
+  const payload = renderPayload(event.payload);
+  const deadline = event.deadlineTs ? `deadline ${new Date(event.deadlineTs).toLocaleTimeString()}` : 'pending';
+  return payload.length > 0
+    ? `Runtime hook ${event.hookKind} opened (${deadline}).\n${payload}`
+    : `Runtime hook ${event.hookKind} opened (${deadline}).`;
+}
+
+function buildHookDecisionDetail(event: Extract<SessionFlowEvent, { type: 'hook_decision' }>): string {
+  const parts = [
+    `Runtime hook ${event.hookKind ?? event.hookRequestId} resolved: ${event.decision}.`,
+  ];
+  if (event.reason) {
+    parts.push(`Reason: ${event.reason}`);
+  }
+  if (event.resolvedBy) {
+    parts.push(`Resolved by: ${event.resolvedBy}`);
+  }
+  return parts.join('\n');
+}
+
+function buildApprovalDetail(
+  event: Extract<SessionFlowEvent, { type: 'approval_request' | 'approval_granted' | 'approval_denied' }>,
+): string {
+  if (event.type === 'approval_request') {
+    const parts = [
+      `Approval requested: ${event.action}.`,
+      event.detail,
+    ];
+    if (event.toolName) {
+      parts.push(`Tool: ${event.toolName}`);
+    }
+    parts.push(`Risk: ${event.riskLevel}`);
+    return parts.join('\n');
+  }
+  if (event.type === 'approval_denied' && event.reason) {
+    return `Approval denied.\nReason: ${event.reason}`;
+  }
+  return event.type === 'approval_granted' ? 'Approval granted.' : 'Approval denied.';
 }
 
 export function projectRunFlow(
@@ -223,6 +274,29 @@ export function projectRunFlow(
 
     flushThinking(timestamp);
     flushAssistant(timestamp);
+
+    if (event.type === 'hook_requested') {
+      const filePaths = [...collectPaths(event.payload)];
+      pushSegment('system', getSystemLabel(event), buildHookRequestDetail(event), timestamp, timestamp, 'complete', {
+        includeTranscript: true,
+        filePaths,
+      });
+      continue;
+    }
+
+    if (event.type === 'hook_decision') {
+      pushSegment('system', getSystemLabel(event), buildHookDecisionDetail(event), timestamp, timestamp, 'complete', {
+        includeTranscript: true,
+      });
+      continue;
+    }
+
+    if (event.type === 'approval_request' || event.type === 'approval_granted' || event.type === 'approval_denied') {
+      pushSegment(event.type === 'approval_denied' ? 'error' : 'system', getSystemLabel(event), buildApprovalDetail(event), timestamp, timestamp, event.type === 'approval_denied' ? 'error' : 'complete', {
+        includeTranscript: true,
+      });
+      continue;
+    }
 
     if (event.type === 'tool_call_start' || event.type === 'tool_call_ready' || event.type === 'tool_input_delta') {
       const toolCallId = event.toolCallId;

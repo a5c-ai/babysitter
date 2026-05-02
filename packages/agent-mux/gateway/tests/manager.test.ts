@@ -212,6 +212,13 @@ describe('gateway run manager', () => {
     ) as Promise<unknown>;
     await new Promise((resolve) => setTimeout(resolve, 25));
     const request = left.frames.find((frame) => frame['type'] === 'hook.request')!;
+    await waitUntil(() =>
+      left.frames.some(
+        (frame) =>
+          frame['type'] === 'run.event' &&
+          (frame['event'] as Record<string, unknown> | undefined)?.['type'] === 'hook_requested',
+      ),
+    );
     manager.submitHookDecision(left as unknown as ClientConn, {
       type: 'hook.decision',
       hookRequestId: String(request['hookRequestId']),

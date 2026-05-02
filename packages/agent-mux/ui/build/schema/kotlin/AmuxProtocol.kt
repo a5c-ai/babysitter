@@ -103,7 +103,10 @@ data class SessionStartFrame(
   val attachments: List<Attachment>? = null,
   val approvalMode: SessionStartFrameApprovalMode? = null,
   val sessionId: String? = null,
-  val runId: String? = null
+  val runId: String? = null,
+  val cwd: String? = null,
+  val workspaceId: String? = null,
+  val forkSessionId: String? = null
 ) : ClientFrame
 
 @Serializable

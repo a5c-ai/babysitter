@@ -52,6 +52,9 @@ export interface SessionStartFrame {
   approvalMode?: 'yolo' | 'prompt' | 'deny';
   sessionId?: string;
   runId?: string;
+  cwd?: string;
+  workspaceId?: string;
+  forkSessionId?: string;
 }
 
 export interface SessionMessageFrame {

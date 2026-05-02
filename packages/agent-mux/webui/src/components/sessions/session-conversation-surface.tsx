@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "zustand";
 import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-core";
-import type { HookRequestRecord } from "@a5c-ai/agent-mux-ui";
 import type {
   AgentFlowLane,
   AgentFlowSegment,
@@ -15,7 +14,7 @@ import type {
 } from "@a5c-ai/agent-mux-ui/session-flow";
 import { accumulateEventCost, buildSessionFlowModel } from "@a5c-ai/agent-mux-ui/session-flow";
 import type { AgentRecord } from "@a5c-ai/agent-mux-ui/gateway";
-import { AlertTriangle, Bot, FileImage, FileStack, Files, LoaderCircle, MessagesSquare, PlayCircle, RefreshCw, ShieldCheck, Sparkles, WandSparkles } from "lucide-react";
+import { AlertTriangle, FileImage, FileStack, Files, LoaderCircle, MessagesSquare, PlayCircle, RefreshCw, Sparkles, WandSparkles } from "lucide-react";
 
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { TaskTagAutocompleteTextarea } from "@/components/task-tags/task-tag-autocomplete-textarea";
@@ -427,7 +426,7 @@ function FilesCard(props: {
 export type { ComposerSubmitInput };
 
 export function SessionConversationSurface(props: SessionConversationSurfaceProps) {
-  const { client, store } = useGateway();
+  const { store } = useGateway();
   const navigate = useNavigate();
   const { taskTags } = useTaskTags();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -439,21 +438,12 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingHookId, setPendingHookId] = useState<string | null>(null);
 
   const agentRecords = useStore(store, (state) => state.agents.byId);
-  const hooksByRunId = useStore(store, (state) => state.hooks.byRunId);
   const runIds = useMemo(
     () => props.runs.map((run) => String(run.runId ?? "")).filter((runId) => runId.length > 0),
     [props.runs],
   );
-  const hookRequests = useMemo(
-    () =>
-      runIds
-        .flatMap((runId) => hooksByRunId[runId] ?? [])
-        .sort((left, right) => left.deadlineTs - right.deadlineTs),
-    [hooksByRunId, runIds],
-  ) as HookRequestRecord[];
 
   const flowModel = useMemo(
     () => props.flowModelOverride ?? buildSessionFlowModel(props.runs, props.eventBuffers),
@@ -578,21 +568,6 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       setSubmitting(false);
-    }
-  }
-
-  async function handleHookDecision(hookRequestId: string, decision: "allow" | "deny") {
-    setPendingHookId(hookRequestId);
-    try {
-      await client.request({
-        type: "hook.decision",
-        hookRequestId,
-        decision,
-      });
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setPendingHookId(null);
     }
   }
 
@@ -754,51 +729,6 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
           </div>
         ) : null}
 
-        {hookRequests.length > 0 ? (
-          <section className="mt-4 rounded-2xl border border-warning/25 bg-warning/8 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <ShieldCheck className="h-4 w-4 text-warning" />
-              Approval feedback loop
-            </div>
-            <div className="mt-3 grid gap-3">
-              {hookRequests.map((request) => (
-                <article key={request.hookRequestId} className="rounded-2xl border border-warning/25 bg-background/80 p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-medium text-foreground">{request.hookKind}</div>
-                        <div className="mt-1 text-xs text-foreground-muted">
-                          Deadline {formatTimestamp(request.deadlineTs)} · dispatch {request.runId}
-                        </div>
-                      </div>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        disabled={pendingHookId === request.hookRequestId}
-                        onClick={() => void handleHookDecision(request.hookRequestId, "deny")}
-                      >
-                        Deny
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={pendingHookId === request.hookRequestId}
-                        onClick={() => void handleHookDecision(request.hookRequestId, "allow")}
-                      >
-                        {pendingHookId === request.hookRequestId ? "Sending..." : "Allow"}
-                      </Button>
-                    </div>
-                  </div>
-                  <pre className="mt-3 whitespace-pre-wrap break-words text-xs leading-6 text-foreground-secondary">
-                    {JSON.stringify(request.payload, null, 2)}
-                  </pre>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
         <details className="mt-4 rounded-2xl border border-border bg-card/60" data-testid="conversation-stats-details">
           <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
             Session stats
@@ -811,9 +741,6 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
               {formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} files changed
             </span>
             <span className="rounded-full border border-border px-3 py-1.5">
-              {hookRequests.length} approvals waiting
-            </span>
-            <span className="rounded-full border border-border px-3 py-1.5">
               {formatUsd(sessionCost?.totalUsd)} total cost
             </span>
           </div>
@@ -822,10 +749,10 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
             <MetricCard label="Cost" value={formatUsd(sessionCost?.totalUsd)} detail={`${formatNumber(sessionCost?.thinkingTokens)} thinking tokens`} />
             <MetricCard label="Task progress" value={`${progressValue}%`} detail={`${flowModel.summary.pendingTools} pending tools`} />
             <MetricCard label="File changes" value={formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} detail={`${formatNumber(flowModel.summary.fileCount)} files touched`} />
-            <MetricCard label="Approvals" value={formatNumber(hookRequests.length)} detail={`${formatNumber(flowModel.summary.totalTools)} tool calls seen`} />
+            <MetricCard label="Tools" value={formatNumber(flowModel.summary.totalTools)} detail={`${formatNumber(flowModel.summary.pendingTools)} still running`} />
           </div>
           <div className="border-t border-border px-4 py-4">
-            <ProgressBar value={progressValue} variant={hookRequests.length > 0 ? "warning" : "default"} glow />
+            <ProgressBar value={progressValue} variant="default" glow />
           </div>
         </details>
       </div>
@@ -1006,12 +933,6 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
             <div className="inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/8 px-3 py-2 text-xs text-warning">
               <RefreshCw className="h-3.5 w-3.5" />
               {flowModel.summary.pendingTools} tool calls still running
-            </div>
-          ) : null}
-          {!submitting && hookRequests.length > 0 ? (
-            <div className="inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/8 px-3 py-2 text-xs text-warning">
-              <Bot className="h-3.5 w-3.5" />
-              {hookRequests.length} approvals waiting
             </div>
           ) : null}
         </div>
