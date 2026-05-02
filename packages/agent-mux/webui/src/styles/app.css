@@ -857,6 +857,10 @@ img {
   box-shadow: var(--ui-shadow-sm);
 }
 
+.session-browser__item--fresh-update {
+  animation: session-browser-update-flash 1.35s ease-out 1;
+}
+
 .session-browser__spotlight-header,
 .session-browser__row-main {
   display: flex;
@@ -2031,6 +2035,25 @@ img {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes session-browser-update-flash {
+  0% {
+    border-color: color-mix(in srgb, var(--ui-primary) 58%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-primary) 12%, white 88%), rgb(255 255 255 / 0.2)),
+      color-mix(in srgb, var(--ui-surface-1) 94%, black 6%);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--ui-primary) 24%, transparent),
+      0 12px 36px color-mix(in srgb, var(--ui-primary) 18%, transparent);
+  }
+  100% {
+    border-color: var(--ui-border);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.08)),
+      color-mix(in srgb, var(--ui-surface-1) 92%, black 8%);
+    box-shadow: var(--ui-shadow-sm);
+  }
 }
 
 .backlog-overview-surface {

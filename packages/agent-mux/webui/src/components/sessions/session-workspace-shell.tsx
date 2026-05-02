@@ -140,6 +140,7 @@ function WorkspacePanelFrame(props: {
   subtitle?: string;
   panelKey: WorkspacePanelKey;
   children: React.ReactNode;
+  bodyClassName?: string;
 }) {
   return (
     <section
@@ -152,7 +153,7 @@ function WorkspacePanelFrame(props: {
           <div className="mt-1 text-sm text-foreground-muted">{props.subtitle}</div>
         ) : null}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-4">{props.children}</div>
+      <div className={props.bodyClassName ?? "min-h-0 flex-1 overflow-auto p-4"}>{props.children}</div>
     </section>
   );
 }
@@ -377,6 +378,7 @@ export function SessionWorkspaceShell(props: SessionWorkspaceShellProps) {
           panelKey="conversation"
           title="Chat"
           subtitle="Transcript and the next turn"
+          bodyClassName="min-h-0 flex-1 p-4"
         >
           {props.conversationSupplement ? (
             <div className="mb-4">{props.conversationSupplement}</div>

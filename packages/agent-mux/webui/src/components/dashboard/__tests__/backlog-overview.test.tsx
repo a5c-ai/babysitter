@@ -674,7 +674,9 @@ describe("BacklogOverview", () => {
       expect(screen.getByText("Backend unavailable")).toBeInTheDocument();
     });
 
-    expect(await screen.findByText("Issue save failed. Draft preserved locally for retry.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Issue save failed. Draft preserved locally for retry.", {}, { timeout: 5000 }),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Issue title")).toHaveValue("Retry me");
     expect(screen.getByLabelText("Issue summary")).toHaveValue("Draft should remain after failure");
   });

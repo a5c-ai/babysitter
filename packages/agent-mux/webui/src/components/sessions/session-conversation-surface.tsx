@@ -668,7 +668,7 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
         </div>
       </div>
 
-      <div className="mt-4 min-h-0 flex-1 overflow-auto">
+      <div className="mt-4 min-h-0 flex-1 overflow-auto" data-testid="conversation-scroll-region">
         {viewMode === "transcript" ? (
           <div className="grid gap-3">
             {flowModel.transcript.map((node) => (
@@ -753,84 +753,85 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
             ) : null}
           </div>
         ) : null}
+
+        {hookRequests.length > 0 ? (
+          <section className="mt-4 rounded-2xl border border-warning/25 bg-warning/8 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <ShieldCheck className="h-4 w-4 text-warning" />
+              Approval feedback loop
+            </div>
+            <div className="mt-3 grid gap-3">
+              {hookRequests.map((request) => (
+                <article key={request.hookRequestId} className="rounded-2xl border border-warning/25 bg-background/80 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{request.hookKind}</div>
+                        <div className="mt-1 text-xs text-foreground-muted">
+                          Deadline {formatTimestamp(request.deadlineTs)} · dispatch {request.runId}
+                        </div>
+                      </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={pendingHookId === request.hookRequestId}
+                        onClick={() => void handleHookDecision(request.hookRequestId, "deny")}
+                      >
+                        Deny
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={pendingHookId === request.hookRequestId}
+                        onClick={() => void handleHookDecision(request.hookRequestId, "allow")}
+                      >
+                        {pendingHookId === request.hookRequestId ? "Sending..." : "Allow"}
+                      </Button>
+                    </div>
+                  </div>
+                  <pre className="mt-3 whitespace-pre-wrap break-words text-xs leading-6 text-foreground-secondary">
+                    {JSON.stringify(request.payload, null, 2)}
+                  </pre>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <details className="mt-4 rounded-2xl border border-border bg-card/60" data-testid="conversation-stats-details">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
+            Session stats
+          </summary>
+          <div className="flex flex-wrap gap-2 border-t border-border px-4 py-4 text-xs text-foreground-muted">
+            <span className="rounded-full border border-border px-3 py-1.5">
+              {formatNumber(flowModel.transcript.length)} messages
+            </span>
+            <span className="rounded-full border border-border px-3 py-1.5">
+              {formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} files changed
+            </span>
+            <span className="rounded-full border border-border px-3 py-1.5">
+              {hookRequests.length} approvals waiting
+            </span>
+            <span className="rounded-full border border-border px-3 py-1.5">
+              {formatUsd(sessionCost?.totalUsd)} total cost
+            </span>
+          </div>
+          <div className="grid gap-3 border-t border-border px-4 py-4 sm:grid-cols-2 xl:grid-cols-5">
+            <MetricCard label="Token usage" value={formatNumber((sessionCost?.inputTokens ?? 0) + (sessionCost?.outputTokens ?? 0) + (sessionCost?.thinkingTokens ?? 0))} detail={`${formatNumber(sessionCost?.inputTokens)} in · ${formatNumber(sessionCost?.outputTokens)} out`} />
+            <MetricCard label="Cost" value={formatUsd(sessionCost?.totalUsd)} detail={`${formatNumber(sessionCost?.thinkingTokens)} thinking tokens`} />
+            <MetricCard label="Task progress" value={`${progressValue}%`} detail={`${flowModel.summary.pendingTools} pending tools`} />
+            <MetricCard label="File changes" value={formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} detail={`${formatNumber(flowModel.summary.fileCount)} files touched`} />
+            <MetricCard label="Approvals" value={formatNumber(hookRequests.length)} detail={`${formatNumber(flowModel.summary.totalTools)} tool calls seen`} />
+          </div>
+          <div className="border-t border-border px-4 py-4">
+            <ProgressBar value={progressValue} variant={hookRequests.length > 0 ? "warning" : "default"} glow />
+          </div>
+        </details>
       </div>
 
-      {hookRequests.length > 0 ? (
-        <section className="mt-4 rounded-2xl border border-warning/25 bg-warning/8 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <ShieldCheck className="h-4 w-4 text-warning" />
-            Approval feedback loop
-          </div>
-          <div className="mt-3 grid gap-3">
-            {hookRequests.map((request) => (
-              <article key={request.hookRequestId} className="rounded-2xl border border-warning/25 bg-background/80 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">{request.hookKind}</div>
-                      <div className="mt-1 text-xs text-foreground-muted">
-                        Deadline {formatTimestamp(request.deadlineTs)} · dispatch {request.runId}
-                      </div>
-                    </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      disabled={pendingHookId === request.hookRequestId}
-                      onClick={() => void handleHookDecision(request.hookRequestId, "deny")}
-                    >
-                      Deny
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={pendingHookId === request.hookRequestId}
-                      onClick={() => void handleHookDecision(request.hookRequestId, "allow")}
-                    >
-                      {pendingHookId === request.hookRequestId ? "Sending..." : "Allow"}
-                    </Button>
-                  </div>
-                </div>
-                <pre className="mt-3 whitespace-pre-wrap break-words text-xs leading-6 text-foreground-secondary">
-                  {JSON.stringify(request.payload, null, 2)}
-                </pre>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <details className="mt-4 rounded-2xl border border-border bg-card/60" data-testid="conversation-stats-details">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
-          Session stats
-        </summary>
-        <div className="flex flex-wrap gap-2 border-t border-border px-4 py-4 text-xs text-foreground-muted">
-          <span className="rounded-full border border-border px-3 py-1.5">
-            {formatNumber(flowModel.transcript.length)} messages
-          </span>
-          <span className="rounded-full border border-border px-3 py-1.5">
-            {formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} files changed
-          </span>
-          <span className="rounded-full border border-border px-3 py-1.5">
-            {hookRequests.length} approvals waiting
-          </span>
-          <span className="rounded-full border border-border px-3 py-1.5">
-            {formatUsd(sessionCost?.totalUsd)} total cost
-          </span>
-        </div>
-        <div className="grid gap-3 border-t border-border px-4 py-4 sm:grid-cols-2 xl:grid-cols-5">
-          <MetricCard label="Token usage" value={formatNumber((sessionCost?.inputTokens ?? 0) + (sessionCost?.outputTokens ?? 0) + (sessionCost?.thinkingTokens ?? 0))} detail={`${formatNumber(sessionCost?.inputTokens)} in · ${formatNumber(sessionCost?.outputTokens)} out`} />
-          <MetricCard label="Cost" value={formatUsd(sessionCost?.totalUsd)} detail={`${formatNumber(sessionCost?.thinkingTokens)} thinking tokens`} />
-          <MetricCard label="Task progress" value={`${progressValue}%`} detail={`${flowModel.summary.pendingTools} pending tools`} />
-          <MetricCard label="File changes" value={formatNumber(flowModel.files.filter((file) => file.writes > 0).length)} detail={`${formatNumber(flowModel.summary.fileCount)} files touched`} />
-          <MetricCard label="Approvals" value={formatNumber(hookRequests.length)} detail={`${formatNumber(flowModel.summary.totalTools)} tool calls seen`} />
-        </div>
-        <div className="border-t border-border px-4 py-4">
-          <ProgressBar value={progressValue} variant={hookRequests.length > 0 ? "warning" : "default"} glow />
-        </div>
-      </details>
-
-      <form onSubmit={handleSubmit} className="mt-4 grid gap-3 border-t border-border pt-4">
+      <div className="mt-4 shrink-0 rounded-3xl border border-border bg-card/95 px-4 py-4 shadow-lg" data-testid="conversation-composer">
+      <form onSubmit={handleSubmit} className="grid gap-3">
         <label className="grid gap-2">
           <span className="text-sm font-medium text-foreground">Send another turn</span>
           <TaskTagAutocompleteTextarea
@@ -1015,6 +1016,7 @@ export function SessionConversationSurface(props: SessionConversationSurfaceProp
           ) : null}
         </div>
       </form>
+      </div>
     </div>
   );
 }

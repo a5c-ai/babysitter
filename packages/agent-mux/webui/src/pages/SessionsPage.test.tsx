@@ -1,7 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import { describe, expect, it, vi } from 'vitest';
 
-import { render, screen, setupUser } from '@/test/test-utils';
+import { render, screen, setupUser, waitFor } from '@/test/test-utils';
 
 import { SessionsPage } from './SessionsPage.js';
 
@@ -112,5 +112,32 @@ describe('SessionsPage', () => {
     await user.clear(screen.getByPlaceholderText('Search session id, title, agent, workspace, or dispatch id'));
     await user.type(screen.getByPlaceholderText('Search session id, title, agent, workspace, or dispatch id'), 'missing');
     expect(screen.getByText('No sessions match the current filter.')).toBeInTheDocument();
+  });
+
+  it('briefly highlights a session row when live values change', async () => {
+    const store = createGatewayStore();
+    mockUseGateway.mockReturnValue({ store });
+
+    render(<SessionsPage />);
+
+    expect(screen.getByTestId('session-row-session-active')).not.toHaveClass('session-browser__item--fresh-update');
+
+    store.setState({
+      ...store.getState(),
+      sessions: {
+        byId: {
+          ...store.getState().sessions.byId,
+          'session-active': {
+            ...store.getState().sessions.byId['session-active'],
+            messageCount: 9,
+            updatedAt: 1_700_000_001_000,
+          },
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('session-row-session-active')).toHaveClass('session-browser__item--fresh-update');
+    });
   });
 });

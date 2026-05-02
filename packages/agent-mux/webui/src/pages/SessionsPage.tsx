@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom-v6';
 import { Search } from 'lucide-react';
 import { useGateway } from '@a5c-ai/agent-mux-ui';
 
+import { cx } from '@a5c-ai/compendium';
+import { useUpdateFlash } from '../hooks/use-update-flash.js';
 import { PageHeroGrid, PageSection, PageShell } from '../components/shared/page-shell.js';
 import { useGatewayFetch } from '../providers/GatewayProvider.js';
 
@@ -84,11 +86,31 @@ function workspaceHref(path: string): string {
   return `/workspaces?workspace=${encodeURIComponent(path)}`;
 }
 
+function sessionUpdateSignature(session: SessionRow): string {
+  return [
+    session.status,
+    session.updatedAt,
+    session.messageCount ?? '',
+    session.turnCount ?? '',
+    session.costTotalUsd ?? '',
+    session.activeRunId ?? '',
+    session.latestRunId ?? '',
+    session.workspacePath ?? '',
+  ].join('|');
+}
+
 function SessionSpotlightCard(props: { session: SessionRow }) {
   const runId = props.session.activeRunId ?? props.session.latestRunId;
+  const updateFlash = useUpdateFlash(sessionUpdateSignature(props.session));
 
   return (
-    <article className="session-browser__spotlight-card" data-testid={`session-card-${props.session.sessionId}`}>
+    <article
+      className={cx(
+        "session-browser__spotlight-card",
+        updateFlash && "session-browser__item--fresh-update",
+      )}
+      data-testid={`session-card-${props.session.sessionId}`}
+    >
       <div className="session-browser__spotlight-header">
         <div>
           <p className="session-browser__eyebrow">{props.session.status === 'active' ? 'Live session' : 'Recent session'}</p>
@@ -130,9 +152,16 @@ function SessionSpotlightCard(props: { session: SessionRow }) {
 
 function SessionRowCard(props: { session: SessionRow }) {
   const runId = props.session.activeRunId ?? props.session.latestRunId;
+  const updateFlash = useUpdateFlash(sessionUpdateSignature(props.session));
 
   return (
-    <article className="session-browser__row" data-testid={`session-row-${props.session.sessionId}`}>
+    <article
+      className={cx(
+        "session-browser__row",
+        updateFlash && "session-browser__item--fresh-update",
+      )}
+      data-testid={`session-row-${props.session.sessionId}`}
+    >
       <div className="session-browser__row-main">
         <div className="session-browser__row-copy">
           <div className="session-browser__row-topline">

@@ -217,6 +217,8 @@ describe("SessionConversationSurface", () => {
     expect(screen.getAllByText("write src/app.ts").length).toBeGreaterThan(0);
     expect(screen.getByText("Tool timeout")).toBeInTheDocument();
     expect(screen.getByText("Approval feedback loop")).toBeInTheDocument();
+    expect(screen.getByTestId("conversation-scroll-region")).toBeInTheDocument();
+    expect(screen.getByTestId("conversation-composer")).toBeInTheDocument();
     expect(screen.getByTestId("conversation-stats-details")).not.toHaveAttribute("open");
     expect(screen.getByTestId("composer-options-details")).not.toHaveAttribute("open");
     expect(screen.getByPlaceholderText("Continue the session...")).toBeInTheDocument();
