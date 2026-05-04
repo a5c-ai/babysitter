@@ -16,7 +16,7 @@ concurrency:
 jobs:
   validate:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     steps:
@@ -227,7 +227,7 @@ jobs:
   prepare_release:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: write
     outputs:
@@ -284,7 +284,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/agent-catalog/package.json packages/sdk/package.json packages/babysitter/package.json packages/babysitter-agent/package.json packages/agent-plugins-mux/package.json packages/observer-dashboard/package.json packages/cloud/package.json packages/breakpoints-mux/package.json packages/hooks-mux/core/package.json packages/hooks-mux/cli/package.json packages/hooks-mux/adapter-claude/package.json packages/hooks-mux/adapter-codex/package.json packages/hooks-mux/adapter-gemini/package.json packages/hooks-mux/adapter-copilot/package.json packages/hooks-mux/adapter-cursor/package.json packages/hooks-mux/adapter-pi/package.json packages/hooks-mux/adapter-oh-my-pi/package.json packages/hooks-mux/adapter-opencode/package.json packages/hooks-mux/adapter-openclaw/package.json packages/agent-mux/adapters/package.json packages/agent-mux/cli/package.json packages/agent-mux/core/package.json packages/agent-mux/gateway/package.json packages/agent-mux/harness-mock/package.json packages/agent-mux/mobile-android-app/package.json packages/agent-mux/mobile-ios-app/package.json packages/agent-mux/observability/package.json packages/agent-mux/sdk/package.json packages/agent-mux/tui/package.json packages/agent-mux/tv-androidtv-app/package.json packages/agent-mux/tv-appletv-app/package.json packages/agent-mux/ui/package.json packages/agent-mux/watch-watchos-app/package.json packages/agent-mux/watch-wearos-app/package.json packages/agent-mux/webui/package.json packages/transport-mux/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/plugin.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/plugin.json plugins/babysitter-openclaw/openclaw.plugin.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/plugin.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/plugin.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json plugins/babysitter-paperclip/package.json plugins/babysitter-paperclip/versions.json .claude-plugin/marketplace.json
+          git add package.json packages/agent-catalog/package.json packages/sdk/package.json packages/babysitter/package.json packages/babysitter-agent/package.json packages/agent-plugins-mux/package.json packages/observer-dashboard/package.json packages/cloud/package.json packages/breakpoints-mux/package.json packages/hooks-mux/core/package.json packages/hooks-mux/cli/package.json packages/hooks-mux/adapter-claude/package.json packages/hooks-mux/adapter-codex/package.json packages/hooks-mux/adapter-gemini/package.json packages/hooks-mux/adapter-copilot/package.json packages/hooks-mux/adapter-cursor/package.json packages/hooks-mux/adapter-pi/package.json packages/hooks-mux/adapter-oh-my-pi/package.json packages/hooks-mux/adapter-opencode/package.json packages/hooks-mux/adapter-openclaw/package.json packages/agent-mux/adapters/package.json packages/agent-mux/cli/package.json packages/agent-mux/core/package.json packages/agent-mux/gateway/package.json packages/agent-mux/harness-mock/package.json packages/agent-mux/mobile-android-app/package.json packages/agent-mux/mobile-ios-app/package.json packages/agent-mux/observability/package.json packages/agent-mux/sdk/package.json packages/agent-mux/tui/package.json packages/agent-mux/tv-androidtv-app/package.json packages/agent-mux/tv-appletv-app/package.json packages/agent-mux/ui/package.json packages/agent-mux/watch-watchos-app/package.json packages/agent-mux/watch-wearos-app/package.json packages/agent-mux/webui/package.json packages/transport-mux/package.json packages/triggers/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/package.json plugins/babysitter-gemini/plugin.json plugins/babysitter-gemini/gemini-extension.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/package.json plugins/babysitter-pi/versions.json plugins/babysitter-omp/package.json plugins/babysitter-omp/versions.json plugins/babysitter-opencode/package.json plugins/babysitter-opencode/plugin.json plugins/babysitter-opencode/versions.json plugins/babysitter-openclaw/package.json plugins/babysitter-openclaw/plugin.json plugins/babysitter-openclaw/openclaw.plugin.json plugins/babysitter-openclaw/versions.json plugins/babysitter-github/plugin.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/plugin.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json plugins/babysitter-paperclip/package.json plugins/babysitter-paperclip/versions.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -345,7 +345,7 @@ jobs:
           set -euo pipefail
           npm run test:agent-mux
 
-      - name: Verify agent-mux-tui release contract
+      - name: Verify agent-mux-tui release contrac
         run: |
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/agent-mux-tui
@@ -369,6 +369,14 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/transport-mux
+
+      - name: Build and test triggers package
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/triggers
+          npm run test:unit --workspace=@a5c-ai/triggers
+          npm run test:e2e --workspace=@a5c-ai/triggers
+          npm run test:coverage --workspace=@a5c-ai/triggers
 
       - name: Build and verify cloud package
         run: |
@@ -411,6 +419,7 @@ jobs:
             ['@a5c-ai/agent-mux-observability', agentMuxVersion],
             ['@a5c-ai/agent-mux-ui', agentMuxVersion],
             ['@a5c-ai/transport-mux', agentMuxVersion],
+            ['@a5c-ai/triggers', agentMuxVersion],
           ]);
           const manifestPaths = ['package.json'];
           const depFields = ['dependencies', 'peerDependencies', 'optionalDependencies', 'devDependencies'];
@@ -489,6 +498,7 @@ jobs:
           npm pack --workspace=@a5c-ai/agent-mux --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/agent-mux-tui --pack-destination artifacts/release
           npm pack --workspace=@a5c-ai/transport-mux --pack-destination artifacts/release
+          npm pack --workspace=@a5c-ai/triggers --pack-destination artifacts/release
           (cd packages/babysitter && npm pack --pack-destination ../../artifacts/release)
 
       - name: Generate artifact checksums
@@ -528,7 +538,7 @@ jobs:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Foundation - ${{ matrix.name }}
     needs: prepare_release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     strategy:
@@ -541,8 +551,8 @@ jobs:
           - name: agent-core
             build: npm run build --workspace=@a5c-ai/agent-core
             publish: npm publish --workspace=@a5c-ai/agent-core --access public
-          - name: babysitter-agent
-            build: npm run build --workspace=@a5c-ai/babysitter-agent
+          - name: babysitter-agen
+            build: npm run build --workspace=@a5c-ai/babysitter-agen
             publish: npm publish --workspace=@a5c-ai/babysitter-agent --access public
           - name: babysitter-sdk
             build: npm run build:sdk
@@ -602,7 +612,7 @@ jobs:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Hooks And Core - ${{ matrix.name }}
     needs: publish_release_foundation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     strategy:
@@ -619,7 +629,7 @@ jobs:
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-codex --access public
           - name: hooks-mux-adapter-gemini
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-gemini --access public
-          - name: hooks-mux-adapter-copilot
+          - name: hooks-mux-adapter-copilo
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-copilot --access public
           - name: hooks-mux-adapter-cursor
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-cursor --access public
@@ -665,7 +675,7 @@ jobs:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Agent Mux Leaf - ${{ matrix.name }}
     needs: publish_release_hooks_and_core
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     strategy:
@@ -680,6 +690,8 @@ jobs:
             publish: npm publish --workspace=@a5c-ai/agent-mux-ui --access public
           - name: transport-mux
             publish: npm publish --workspace=@a5c-ai/transport-mux --access public
+          - name: triggers
+            publish: npm publish --workspace=@a5c-ai/triggers --access public
     steps:
       - name: Download release publish workspace
         uses: actions/download-artifact@v4
@@ -714,7 +726,7 @@ jobs:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Agent Mux Gateway - ${{ matrix.name }}
     needs: publish_release_agent_mux_leaf
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     strategy:
@@ -759,7 +771,7 @@ jobs:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Agent Mux CLI
     needs: publish_release_agent_mux_gateway
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     steps:
@@ -794,9 +806,9 @@ jobs:
 
   publish_release_agent_mux_root:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
-    name: Publish Release Agent Mux Root
+    name: Publish Release Agent Mux Roo
     needs: publish_release_agent_mux_cli
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     steps:
@@ -824,7 +836,7 @@ jobs:
           npm ci
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
-      - name: Publish agent-mux root
+      - name: Publish agent-mux roo
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace=@a5c-ai/agent-mux --access public
@@ -832,8 +844,8 @@ jobs:
   publish_release_agent_mux_tui:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
     name: Publish Release Agent Mux TUI
-    needs: publish_release_agent_mux_root
-    runs-on: ubuntu-latest
+    needs: publish_release_agent_mux_roo
+    runs-on: ubuntu-lates
     permissions:
       contents: read
     steps:
@@ -872,7 +884,7 @@ jobs:
     needs:
       - prepare_release
       - publish_release_foundation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     steps:
       - name: Download release publish workspace
         uses: actions/download-artifact@v4
@@ -925,10 +937,10 @@ jobs:
       - publish_release_agent_mux_leaf
       - publish_release_agent_mux_gateway
       - publish_release_agent_mux_cli
-      - publish_release_agent_mux_root
+      - publish_release_agent_mux_roo
       - publish_release_agent_mux_tui
       - deploy_release_cloud
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lates
     permissions:
       contents: write
     steps:
@@ -1000,6 +1012,6 @@ jobs:
             echo "Release artifacts missing" >&2
             exit 1
           fi
-          gh release create "$TAG" "${ASSETS[@]}" \
-            --title "Babysitter $TAG" \
+          gh release create "$TAG" "${ASSETS[@]}"
+            --title "Babysitter $TAG"
             --notes-file release-notes.md

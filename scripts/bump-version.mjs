@@ -179,6 +179,9 @@ const updateLockVersion = (path, version, agentMuxVersion) => {
       version: agentMuxVersion,
       dependencies: { "@a5c-ai/agent-mux-core": agentMuxVersion }
     },
+    "packages/triggers": {
+      version: agentMuxVersion
+    },
     "packages/cloud": {
       version
     },
@@ -243,6 +246,7 @@ const agentMuxManifestPaths = [
   "packages/agent-mux/watch-wearos-app/package.json",
   "packages/agent-mux/webui/package.json",
   "packages/transport-mux/package.json",
+  "packages/triggers/package.json",
 ];
 
 const pluginPackageManifestPaths = [

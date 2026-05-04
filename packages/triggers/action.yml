@@ -1,0 +1,232 @@
+name: Agent Mux
+description: Run the agent-mux CLI from GitHub Actions with event triggers, harness setup, plugin install, and optional a5c token exchange.
+author: a5c-ai
+
+branding:
+  icon: terminal
+  color: purple
+
+inputs:
+  command:
+    description: agent-mux command to execute after trigger evaluation.
+    required: false
+    default: run
+  args:
+    description: Space-delimited fallback arguments passed to amux after the command.
+    required: false
+  args-json:
+    description: JSON string array of additional arguments passed to amux after the command. Prefer this for values containing spaces or shell-sensitive characters.
+    required: false
+  adapter:
+    description: Agent adapter/agent name passed to amux via --agent when set.
+    required: false
+  prompt:
+    description: Prompt passed to amux run via --prompt when set.
+    required: false
+  harness:
+    description: Harness to install before plugin installation.
+    required: false
+  plugins:
+    description: Newline-delimited plugin specs installed after harness setup. Each line is passed to amux plugin install <adapter> <plugin>.
+    required: false
+  trigger-backend:
+    description: Trigger backend to normalize. Supports github, gitlab, bitbucket, generic-webhook.
+    required: false
+    default: github
+  trigger-query:
+    description: Query used to decide whether agent-mux should run.
+    required: false
+  include-diff:
+    description: Include local git diff patches in trigger enrichment.
+    required: false
+    default: 'true'
+  use-a5c-token-exchange:
+    description: Use a5c-ai/generate-token-action@main before running trigger enrichment and agent-mux.
+    required: false
+    default: 'false'
+  github-token:
+    description: GitHub token fallback for API enrichment.
+    required: false
+    default: ${{ github.token }}
+  node-version:
+    description: Node.js version.
+    required: false
+    default: '22'
+  working-directory:
+    description: Working directory for amux execution.
+    required: false
+    default: ${{ github.workspace }}
+  pre-run:
+    description: Optional shell commands to run after trigger match and before amux.
+    required: false
+  post-run:
+    description: Optional shell commands to run after amux when trigger matched.
+    required: false
+
+outputs:
+  matched:
+    description: Whether trigger-query matched the enriched event.
+    value: ${{ steps.trigger.outputs.matched }}
+  event:
+    description: Path to enriched event JSON.
+    value: ${{ steps.trigger.outputs.event }}
+  exit-code:
+    description: agent-mux exit code. Empty when trigger did not match.
+    value: ${{ steps.amux.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Generate a5c GitHub App token
+      id: a5c-token
+      if: ${{ inputs.use-a5c-token-exchange == 'true' }}
+      continue-on-error: true
+      uses: a5c-ai/generate-token-action@main
+
+    - name: Build agent-mux action runtime
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        cd "$REPO_ROOT"
+        npm ci
+        npm run build:agent-mux
+        npm run build --workspace=@a5c-ai/triggers
+
+    - name: Install harness
+      if: ${{ inputs.harness != '' }}
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_HARNESS: ${{ inputs.harness }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+      run: |
+        set -euo pipefail
+        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        cd "$INPUT_WORKING_DIRECTORY"
+        node "$REPO_ROOT/packages/agent-mux/sdk/dist/bin/amux.js" install "$INPUT_HARNESS"
+
+    - name: Install plugins
+      if: ${{ inputs.plugins != '' }}
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_ADAPTER: ${{ inputs.adapter || inputs.harness }}
+        INPUT_PLUGINS: ${{ inputs.plugins }}
+      run: |
+        set -euo pipefail
+        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        while IFS= read -r plugin; do
+          [ -z "$plugin" ] && continue
+          node "$REPO_ROOT/packages/agent-mux/sdk/dist/bin/amux.js" plugin install "$INPUT_ADAPTER" "$plugin"
+        done <<< "$INPUT_PLUGINS"
+
+    - name: Evaluate trigger
+      id: trigger
+      shell: bash
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_TRIGGER_BACKEND: ${{ inputs.trigger-backend }}
+        INPUT_TRIGGER_QUERY: ${{ inputs.trigger-query }}
+        INPUT_INCLUDE_DIFF: ${{ inputs.include-diff }}
+        EFFECTIVE_GITHUB_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || inputs.github-token }}
+      run: |
+        set -euo pipefail
+        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        EVENT_FILE="$RUNNER_TEMP/agent-mux-event.json"
+        RESULT_FILE="$RUNNER_TEMP/agent-mux-trigger.json"
+        INCLUDE_DIFF_ARGS=()
+        if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
+          INCLUDE_DIFF_ARGS+=(--include-diff)
+        fi
+        node "$REPO_ROOT/packages/triggers/dist/cli.js" enrich \
+          --backend "$INPUT_TRIGGER_BACKEND" \
+          --token "$EFFECTIVE_GITHUB_TOKEN" \
+          "${INCLUDE_DIFF_ARGS[@]}" \
+          --output "$EVENT_FILE"
+        if [ -z "$INPUT_TRIGGER_QUERY" ]; then
+          echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
+        elif node "$REPO_ROOT/packages/triggers/dist/cli.js" evaluate \
+          --backend "$INPUT_TRIGGER_BACKEND" \
+          --query "$INPUT_TRIGGER_QUERY" \
+          --token "$EFFECTIVE_GITHUB_TOKEN" \
+          "${INCLUDE_DIFF_ARGS[@]}" \
+          --output "$RESULT_FILE"; then
+          true
+        else
+          status=$?
+          if [ "$status" -ne 78 ]; then
+            exit "$status"
+          fi
+        fi
+        MATCHED=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).matched ? 'true' : 'false')" "$RESULT_FILE")
+        echo "matched=$MATCHED" >> "$GITHUB_OUTPUT"
+        echo "event=$EVENT_FILE" >> "$GITHUB_OUTPUT"
+        cat "$RESULT_FILE"
+
+    - name: Pre-run pipeline commands
+      if: ${{ steps.trigger.outputs.matched == 'true' && inputs.pre-run != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        INPUT_PRE_RUN: ${{ inputs.pre-run }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        bash -euo pipefail -c "$INPUT_PRE_RUN"
+
+    - name: Run agent-mux
+      id: amux
+      if: ${{ steps.trigger.outputs.matched == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ACTION_ROOT: ${{ github.action_path }}
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_ARGS: ${{ inputs.args }}
+        INPUT_ARGS_JSON: ${{ inputs.args-json }}
+        INPUT_ADAPTER: ${{ inputs.adapter }}
+        INPUT_PROMPT: ${{ inputs.prompt }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
+        ARGS=("$INPUT_COMMAND")
+        if [ -n "$INPUT_ADAPTER" ]; then
+          ARGS+=(--agent "$INPUT_ADAPTER")
+        fi
+        if [ -n "$INPUT_PROMPT" ]; then
+          ARGS+=(--prompt "$INPUT_PROMPT")
+        fi
+        if [ -n "$INPUT_ARGS_JSON" ]; then
+          mapfile -t EXTRA_ARGS < <(node -e "const value = JSON.parse(process.env.INPUT_ARGS_JSON || '[]'); if (!Array.isArray(value)) throw new Error('args-json must be a JSON array'); for (const item of value) console.log(String(item));")
+          ARGS+=("${EXTRA_ARGS[@]}")
+        elif [ -n "$INPUT_ARGS" ]; then
+          read -r -a EXTRA_ARGS <<< "$INPUT_ARGS"
+          ARGS+=("${EXTRA_ARGS[@]}")
+        fi
+        if node "$REPO_ROOT/packages/agent-mux/sdk/dist/bin/amux.js" "${ARGS[@]}"; then
+          echo "exit-code=0" >> "$GITHUB_OUTPUT"
+        else
+          status=$?
+          echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+        fi
+
+    - name: Post-run pipeline commands
+      if: ${{ steps.trigger.outputs.matched == 'true' && inputs.post-run != '' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        INPUT_POST_RUN: ${{ inputs.post-run }}
+        AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
+      run: |
+        set -euo pipefail
+        bash -euo pipefail -c "$INPUT_POST_RUN"

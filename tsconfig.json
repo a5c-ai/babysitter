@@ -25,6 +25,7 @@
     { "path": "packages/agent-mux/mobile-android-app" },
     { "path": "packages/agent-mux/webui" },
     { "path": "packages/agent-mux/harness-mock" },
+    { "path": "packages/triggers" },
     { "path": "packages/agent-mux/tui" }
   ],
   "files": []

@@ -134,6 +134,26 @@ jobs:
           set -euo pipefail
           npm run build:agent-mux 2>&1 | tee artifacts/test-logs/agent-mux-build.log
 
+      - name: Build triggers package
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-build.log
+
+      - name: Triggers unit tests
+        run: |
+          set -euo pipefail
+          npm run test:unit --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-unit-tests.log
+
+      - name: Triggers e2e tests
+        run: |
+          set -euo pipefail
+          npm run test:e2e --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-e2e-tests.log
+
+      - name: Triggers coverage tests
+        run: |
+          set -euo pipefail
+          npm run test:coverage --workspace=@a5c-ai/triggers 2>&1 | tee artifacts/test-logs/triggers-coverage.log
+
       - name: agent-mux-tui release verification
         run: |
           set -euo pipefail

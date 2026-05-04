@@ -481,6 +481,18 @@
       "note": "README is the canonical package-level contract for the published transport/proxy runtime seam."
     },
     {
+      "surface": "packages/triggers",
+      "packageName": "@a5c-ai/triggers",
+      "description": "Trigger normalization, enrichment, filtering, and GitHub Action glue for agent-mux automation pipelines.",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/triggers/README.md",
+      "supporting": [
+        "./agent-mux/README.md"
+      ],
+      "note": "README is the canonical package-level contract for reusable trigger/action glue used with agent-mux pipelines."
+    },
+    {
       "surface": "plugins/babysitter",
       "packageName": "Babysitter Claude Code plugin",
       "description": "Claude Code harness plugin surface shipped from the repo plugin directory.",
