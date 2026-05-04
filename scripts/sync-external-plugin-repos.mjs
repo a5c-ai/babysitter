@@ -46,12 +46,36 @@ function currentBranch() {
   return result.status === 0 ? result.stdout.trim() : null;
 }
 
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function isTransientGitHubFailure(command, result) {
+  if (command !== 'gh') return false;
+  const output = `${result.stdout || ''}\n${result.stderr || ''}`;
+  return /(HTTP (500|502|503|504)|connection reset|tls handshake timeout|timed out|unexpected EOF|stream error)/i.test(output);
+}
+
 function run(command, commandArgs, options = {}) {
-  const result = spawnSync(command, commandArgs, { cwd: options.cwd || ROOT, encoding: 'utf8', stdio: options.stdio || 'pipe' });
-  if (result.status !== 0) {
+  const retries = options.retries ?? 0;
+  const retryDelayMs = options.retryDelayMs ?? 5000;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const result = spawnSync(command, commandArgs, {
+      cwd: options.cwd || ROOT,
+      encoding: 'utf8',
+      stdio: options.stdio || 'pipe',
+    });
+    if (result.status === 0) {
+      return result.stdout.trim();
+    }
+    if (attempt < retries && isTransientGitHubFailure(command, result)) {
+      console.warn(`[retry ${attempt + 1}/${retries}] ${command} ${commandArgs.join(' ')} failed with a transient GitHub error. Retrying in ${retryDelayMs}ms.`);
+      sleep(retryDelayMs);
+      continue;
+    }
     throw new Error(`${command} ${commandArgs.join(' ')} failed\n${result.stdout || ''}${result.stderr || ''}`);
   }
-  return result.stdout.trim();
 }
 
 function copyTree(source, target) {
@@ -205,7 +229,10 @@ function prepareTarget(target) {
       run('git', ['checkout', '-B', targetBranch, 'HEAD'], { cwd: repoDir });
       run('git', ['push', '-u', 'origin', targetBranch], { cwd: repoDir });
     }
-    run('gh', ['repo', 'edit', target.repo, '--default-branch', branch === 'main' ? 'main' : 'develop']);
+    run('gh', ['repo', 'edit', target.repo, '--default-branch', branch === 'main' ? 'main' : 'develop'], {
+      retries: 3,
+      retryDelayMs: 5000,
+    });
   }
   return { repo: target.repo, changed: hasChanges, path: repoDir, source: target.sourceDir };
 }

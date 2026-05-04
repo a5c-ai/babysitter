@@ -78,6 +78,9 @@ ENV NODE_ENV=production
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g ./packages/sdk ./packages/agent-core ./packages/babysitter-agent --cache=/root/.npm
 
+RUN --mount=type=cache,target=/root/.npm \
+    npm install -g @mariozechner/pi-coding-agent --cache=/root/.npm
+
 # Read plugin version from plugin.json (single source of truth)
 RUN PLUGIN_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('plugins/babysitter/plugin.json','utf8')).version)") && \
     PLUGIN_CACHE="/home/claude/.claude/plugins/cache/a5c-ai/babysitter/${PLUGIN_VERSION}" && \

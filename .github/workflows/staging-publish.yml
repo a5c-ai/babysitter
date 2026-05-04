@@ -17,7 +17,7 @@ jobs:
   validate_core:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Validate Core Runtime
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -94,7 +94,7 @@ jobs:
   validate_mux:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Validate Mux Surfaces
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -200,7 +200,7 @@ jobs:
         with:
           name: staging-mux-playwright-artifacts
           path: |
-            packages/agent-mux/webui/.tmp/playwright-repor
+            packages/agent-mux/webui/.tmp/playwright-report
             packages/agent-mux/webui/.tmp/playwright-test-results
           if-no-files-found: warn
 
@@ -215,7 +215,7 @@ jobs:
   validate_cloud:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Validate Cloud Workspace
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -260,7 +260,7 @@ jobs:
   validate_observer_and_compiler:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Validate Observer And Compiler
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -314,7 +314,7 @@ jobs:
   validate_plugins:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Validate Plugin ${{ matrix.slug }}
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -414,7 +414,7 @@ jobs:
   generated_plugins:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Generate Plugin Snapshots
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -452,7 +452,7 @@ jobs:
           set -euo pipefail
           node scripts/generate-plugins.mjs --output generated --compare . --compare-only 2>&1 | tee artifacts/generated-plugin-logs/generated-plugins-compare.log
 
-      - name: Warn on manual plugin drif
+      - name: Warn on manual plugin drift
         if: steps.compare_plugins.outcome == 'failure'
         run: echo "::warning::Generated plugins differ from the manually maintained plugin directories. Review staging-generated-plugin-logs for the drift report."
 
@@ -504,7 +504,7 @@ jobs:
       - validate_observer_and_compiler
       - validate_plugins
       - generated_plugins
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     outputs:
@@ -865,7 +865,7 @@ jobs:
       - name: Refresh staging publish lockfile
         run: |
           set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --workspaces --include-workspace-roo
+          npm install --package-lock-only --ignore-scripts --workspaces --include-workspace-root
 
       - name: Bundle staging publish workspace
         run: |
@@ -884,7 +884,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Foundation - ${{ matrix.name }}
     needs: prepare_staging_publish
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -897,8 +897,8 @@ jobs:
           - name: agent-core
             build: npm run build --workspace=@a5c-ai/agent-core
             publish: npm publish --workspace=@a5c-ai/agent-core --access public --tag staging
-          - name: babysitter-agen
-            build: npm run build --workspace=@a5c-ai/babysitter-agen
+          - name: babysitter-agent
+            build: npm run build --workspace=@a5c-ai/babysitter-agent
             publish: npm publish --workspace=@a5c-ai/babysitter-agent --access public --tag staging
           - name: babysitter-sdk
             build: npm run build:sdk
@@ -955,7 +955,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Hooks And Core - ${{ matrix.name }}
     needs: publish_staging_foundation
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -972,7 +972,7 @@ jobs:
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-codex --access public --tag staging
           - name: hooks-mux-adapter-gemini
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-gemini --access public --tag staging
-          - name: hooks-mux-adapter-copilo
+          - name: hooks-mux-adapter-copilot
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-copilot --access public --tag staging
           - name: hooks-mux-adapter-cursor
             publish: npm publish --workspace=@a5c-ai/hooks-mux-adapter-cursor --access public --tag staging
@@ -1026,7 +1026,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Agent Mux Leaf - ${{ matrix.name }}
     needs: publish_staging_hooks_and_core
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -1102,7 +1102,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Agent Mux Gateway - ${{ matrix.name }}
     needs: publish_staging_agent_mux_leaf
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -1155,7 +1155,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Agent Mux CLI
     needs: publish_staging_agent_mux_gateway
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1186,13 +1186,13 @@ jobs:
       - name: Build agent-mux CLI workspace
         run: |
           set -euo pipefail
-          for workspace in
-            @a5c-ai/agent-catalog
-            @a5c-ai/agent-mux-observability
-            @a5c-ai/agent-mux-core
-            @a5c-ai/agent-mux-adapters
-            @a5c-ai/agent-mux-gateway
-            @a5c-ai/transport-mux
+          for workspace in \
+            @a5c-ai/agent-catalog \
+            @a5c-ai/agent-mux-observability \
+            @a5c-ai/agent-mux-core \
+            @a5c-ai/agent-mux-adapters \
+            @a5c-ai/agent-mux-gateway \
+            @a5c-ai/transport-mux \
             @a5c-ai/agent-mux-cli
           do
             npm run build --workspace="$workspace"
@@ -1205,9 +1205,9 @@ jobs:
 
   publish_staging_agent_mux_root:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
-    name: Publish Staging Agent Mux Roo
+    name: Publish Staging Agent Mux Root
     needs: publish_staging_agent_mux_cli
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1238,20 +1238,20 @@ jobs:
       - name: Build agent-mux root workspace
         run: |
           set -euo pipefail
-          for workspace in
-            @a5c-ai/agent-catalog
-            @a5c-ai/agent-mux-observability
-            @a5c-ai/agent-mux-core
-            @a5c-ai/agent-mux-adapters
-            @a5c-ai/agent-mux-gateway
-            @a5c-ai/transport-mux
-            @a5c-ai/agent-mux-cli
+          for workspace in \
+            @a5c-ai/agent-catalog \
+            @a5c-ai/agent-mux-observability \
+            @a5c-ai/agent-mux-core \
+            @a5c-ai/agent-mux-adapters \
+            @a5c-ai/agent-mux-gateway \
+            @a5c-ai/transport-mux \
+            @a5c-ai/agent-mux-cli \
             @a5c-ai/agent-mux
           do
             npm run build --workspace="$workspace"
           done
 
-      - name: Publish agent-mux roo
+      - name: Publish agent-mux root
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace=@a5c-ai/agent-mux --access public --tag staging
@@ -1259,8 +1259,8 @@ jobs:
   publish_staging_agent_mux_tui:
     if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
     name: Publish Staging Agent Mux TUI
-    needs: publish_staging_agent_mux_roo
-    runs-on: ubuntu-lates
+    needs: publish_staging_agent_mux_root
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -1291,15 +1291,15 @@ jobs:
       - name: Build agent-mux TUI workspace
         run: |
           set -euo pipefail
-          for workspace in
-            @a5c-ai/agent-catalog
-            @a5c-ai/agent-mux-observability
-            @a5c-ai/agent-mux-core
-            @a5c-ai/agent-mux-adapters
-            @a5c-ai/agent-mux-gateway
-            @a5c-ai/transport-mux
-            @a5c-ai/agent-mux-cli
-            @a5c-ai/agent-mux
+          for workspace in \
+            @a5c-ai/agent-catalog \
+            @a5c-ai/agent-mux-observability \
+            @a5c-ai/agent-mux-core \
+            @a5c-ai/agent-mux-adapters \
+            @a5c-ai/agent-mux-gateway \
+            @a5c-ai/transport-mux \
+            @a5c-ai/agent-mux-cli \
+            @a5c-ai/agent-mux \
             @a5c-ai/agent-mux-tui
           do
             npm run build --workspace="$workspace"
@@ -1316,7 +1316,7 @@ jobs:
     needs:
       - prepare_staging_publish
       - publish_staging_foundation
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     steps:
       - name: Download staging publish workspace
         uses: actions/download-artifact@v4
@@ -1373,9 +1373,9 @@ jobs:
       - publish_staging_agent_mux_leaf
       - publish_staging_agent_mux_gateway
       - publish_staging_agent_mux_cli
-      - publish_staging_agent_mux_roo
+      - publish_staging_agent_mux_root
       - deploy_staging_cloud
-    runs-on: ubuntu-lates
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

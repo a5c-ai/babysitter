@@ -30,8 +30,8 @@ RUN npm run build:sdk && chown -R paperclip:paperclip /app /home/paperclip
 
 USER paperclip
 
-# Install SDK globally and set up the paperclip plugin from local source
-RUN npm install -g @a5c-ai/babysitter-sdk
+# Install SDK globally from the local workspace so the CLI matches this checkout
+RUN npm install -g /app/packages/sdk
 
 # Verify the babysitter CLI is available
 RUN babysitter --version

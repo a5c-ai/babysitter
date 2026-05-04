@@ -30,7 +30,7 @@ RUN npm run build:sdk && chown -R pi:pi /app /home/pi
 
 USER pi
 
-RUN npm install -g @mariozechner/pi-coding-agent @a5c-ai/babysitter-sdk /app/plugins/babysitter-pi
+RUN npm install -g @mariozechner/pi-coding-agent /app/packages/sdk /app/plugins/babysitter-pi
 
 WORKDIR /workspace
 
