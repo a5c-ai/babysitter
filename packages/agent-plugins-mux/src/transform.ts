@@ -11,18 +11,11 @@ import type {
 } from './types.js';
 import {
   buildSkillFromCommand,
+  getCommandPaths,
   markdownToToml,
 } from './utils.js';
 
-import {
-  generateClaudeCodeHooksJson,
-  generateCodexHooksJson,
-  generateCursorHooksJson,
-  generateGeminiHooksJson,
-  generateGithubCopilotHooksJson,
-  generateOpenCodeHooksJson,
-  generateOpenClawHooksJson,
-} from './hookRegistration.js';
+import { getAdapter } from './targets/adapters/index.js';
 
 import {
   generatePs1Wrapper,
@@ -205,29 +198,8 @@ function transformSkills(
   return files;
 }
 
-export function getCommandPaths(
-  sourceDir: string,
-  manifest: A5cPluginManifest
-): string[] {
-  if (!manifest.commands) return [];
-
-  const commandPaths: string[] = [];
-  if (typeof manifest.commands === 'string') {
-    const commandDir = path.join(sourceDir, manifest.commands);
-    if (fs.existsSync(commandDir)) {
-      const entries = fs.readdirSync(commandDir);
-      for (const entry of entries) {
-        if (entry.endsWith('.md')) {
-          commandPaths.push(toOutputPath(path.join(manifest.commands, entry)));
-        }
-      }
-    }
-  } else {
-    commandPaths.push(...manifest.commands.map(toOutputPath));
-  }
-
-  return commandPaths;
-}
+// Re-export for backward compatibility
+export { getCommandPaths } from './utils.js';
 
 function transformHooks(
   sourceDir: string,
@@ -357,43 +329,9 @@ function transformHooks(
 function generateHookRegistrationFile(
   manifest: A5cPluginManifest,
   targetProfile: TargetProfile,
-  _diagnostics: Diagnostic[]
+  diagnostics: Diagnostic[]
 ): TransformedFile | null {
-  let content = '';
-  let filePath = '';
-
-  switch (targetProfile.hookRegistrationFormat) {
-    case 'claude-code':
-      content = generateClaudeCodeHooksJson(manifest, targetProfile);
-      filePath = 'hooks/hooks.json';
-      break;
-    case 'codex':
-      content = generateCodexHooksJson(manifest, targetProfile);
-      filePath = 'hooks.json';
-      break;
-    case 'cursor':
-      content = generateCursorHooksJson(manifest, targetProfile);
-      filePath = 'hooks.json';
-      break;
-    case 'gemini':
-      content = generateGeminiHooksJson(manifest, targetProfile);
-      filePath = 'hooks/hooks.json';
-      break;
-    case 'github-copilot':
-      content = generateGithubCopilotHooksJson(manifest, targetProfile);
-      filePath = 'hooks.json';
-      break;
-    case 'opencode':
-      content = generateOpenCodeHooksJson(manifest, targetProfile);
-      filePath = 'hooks/hooks.json';
-      break;
-    case 'openclaw':
-      content = generateOpenClawHooksJson(manifest, targetProfile);
-      filePath = 'hooks.json';
-      break;
-    default:
-      return null;
-  }
-
-  return { path: filePath, content };
+  const adapter = getAdapter(targetProfile.name);
+  if (!adapter) return null;
+  return adapter.generateHookRegistration(manifest, targetProfile, diagnostics);
 }

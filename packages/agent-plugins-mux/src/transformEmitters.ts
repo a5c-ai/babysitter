@@ -3,26 +3,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { A5cPluginManifest, TargetProfile, TransformedFile, Diagnostic } from './types.js';
-import {
-  generateClaudeCodeManifest,
-  generateCodexManifest,
-  generateCursorManifest,
-  generateGeminiManifest,
-  generateGithubCopilotManifest,
-  generatePiManifest,
-  generateOhMyPiManifest,
-  generateOpenCodeManifest,
-  generateOpenClawPackageManifest,
-  generateOpenClawManifest,
-} from './manifestGenerators.js';
+import { getAdapter } from './targets/adapters/index.js';
 import { generateProgrammaticExtension } from './proxiedHookTemplates.js';
 import { generateCliBinScript, generateInstallScript, generateUninstallScript } from './binTemplates.js';
 import { generateInstallInstructions } from './installInstructions.js';
 import {
-  generateHarnessManifest,
   generateTeamInstall,
-  generateOpenClawNativeHooksSection,
-  generateOpenCodeAccomplishSkill,
   resolveExtraFiles,
 } from './transformHelpers.js';
 import { generateInstallShared } from './installSharedGenerator.js';
@@ -31,7 +17,7 @@ import {
   resolveTargetCliName,
   resolveTargetNpmPackageName,
 } from './sdkConfig.js';
-import { getCommandPaths } from './transform.js';
+import { getCommandPaths } from './utils.js';
 
 function toOutputPath(value: string): string {
   return value.replace(/\\/g, '/');
@@ -149,112 +135,10 @@ export function generateManifests(
     filteredManifest.keywords = kw;
   }
 
-  switch (targetProfile.name) {
-    case 'claude-code': {
-      const ccManifest = generateClaudeCodeManifest(filteredManifest);
-      files.push({ path: 'plugin.json', content: ccManifest });
-      const author = typeof manifest.author === 'string'
-        ? { name: manifest.author }
-        : manifest.author;
-      files.push({ path: '.claude-plugin/plugin.json', content: JSON.stringify({
-        name: manifest.name,
-        version: manifest.version,
-        description: manifest.description,
-        author,
-      }, null, 2) + '\n' });
-      break;
-    }
-    case 'codex': {
-      const codexPkg = generateCodexManifest(filteredManifest);
-      files.push({ path: 'package.json', content: codexPkg });
-      files.push({ path: '.codex-plugin/plugin.json', content: generateHarnessManifest(manifest, targetProfile) });
-      files.push({ path: '.app.json', content: JSON.stringify({ apps: {} }, null, 2) + '\n' });
-      break;
-    }
-    case 'cursor': {
-      const cursorManifest = generateCursorManifest(filteredManifest);
-      files.push({ path: 'plugin.json', content: cursorManifest });
-      files.push({ path: '.cursor-plugin/plugin.json', content: generateHarnessManifest(manifest, targetProfile) });
-      break;
-    }
-    case 'gemini':
-      {
-        const commandPaths = getCommandPaths(sourceDir, manifest);
-      files.push({
-        path: 'plugin.json',
-        content: generateGeminiManifest(filteredManifest, commandPaths),
-      });
-      files.push({
-        path: 'gemini-extension.json',
-        content: JSON.stringify(
-          {
-            name: manifest.name,
-            version: manifest.version,
-            description: manifest.description,
-            contextFileName: 'GEMINI.md',
-            settings: [],
-          },
-          null,
-          2
-        ) + '\n',
-      });
-      }
-      break;
-    case 'github-copilot': {
-      const copilotManifest = generateGithubCopilotManifest(filteredManifest);
-      files.push({
-        path: 'plugin.json',
-        content: copilotManifest,
-      });
-      files.push({
-        path: '.github/plugin.json',
-        content: copilotManifest,
-      });
-      break;
-    }
-    case 'pi':
-      files.push({
-        path: 'package.json',
-        content: generatePiManifest(filteredManifest),
-      });
-      break;
-    case 'oh-my-pi':
-      files.push({
-        path: 'package.json',
-        content: generateOhMyPiManifest(filteredManifest),
-      });
-      break;
-    case 'opencode':
-      files.push({
-        path: 'plugin.json',
-        content: generateOpenCodeManifest(filteredManifest),
-      });
-      break;
-    case 'openclaw':
-      files.push({
-        path: 'package.json',
-        content: generateOpenClawPackageManifest(filteredManifest),
-      });
-      files.push({
-        path: 'plugin.json',
-        content: generateOpenClawManifest(filteredManifest),
-      });
-      files.push({
-        path: 'openclaw.plugin.json',
-        content: JSON.stringify(
-          {
-            name: manifest.name,
-            version: manifest.version,
-            description: manifest.description,
-            entrypoint: 'extensions/index.ts',
-            hooks: generateOpenClawNativeHooksSection(filteredManifest, targetProfile),
-            capabilities: ['orchestration', 'process-management', 'human-in-the-loop'],
-          },
-          null,
-          2
-        ) + '\n',
-      });
-      break;
+  const adapter = getAdapter(targetProfile.name);
+  if (adapter) {
+    const adapterFiles = adapter.generateManifestFiles(sourceDir, filteredManifest, targetProfile, _diagnostics, manifest);
+    files.push(...adapterFiles);
   }
 
   // Generate package.json for npm-distributed targets that don't already have one
@@ -523,11 +407,10 @@ export function generateExtraFiles(
       files.push({ path: 'scripts/post-install.js', content: fs.readFileSync(postInstallPath, 'utf-8'), executable: true });
     }
   }
-  if (targetProfile.name === 'opencode') {
-    const accomplishSkill = generateOpenCodeAccomplishSkill(manifest);
-    if (accomplishSkill) {
-      files.push({ path: `accomplish-skills/${manifest.name}/SKILL.md`, content: accomplishSkill });
-    }
+  const adapter = getAdapter(targetProfile.name);
+  if (adapter) {
+    const adapterExtraFiles = adapter.generateExtraTargetFiles(sourceDir, manifest, targetProfile, _diagnostics);
+    files.push(...adapterExtraFiles);
   }
   return files;
 }

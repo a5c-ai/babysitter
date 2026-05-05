@@ -1,6 +1,36 @@
 // Utility functions for UPF compilation
 
-import type { FrontmatterData, ParsedFrontmatter } from './types.js';
+import * as fs from 'fs';
+import * as path from 'path';
+import type { A5cPluginManifest, FrontmatterData, ParsedFrontmatter } from './types.js';
+
+function toOutputPath(value: string): string {
+  return value.replace(/\\/g, '/');
+}
+
+export function getCommandPaths(
+  sourceDir: string,
+  manifest: A5cPluginManifest
+): string[] {
+  if (!manifest.commands) return [];
+
+  const commandPaths: string[] = [];
+  if (typeof manifest.commands === 'string') {
+    const commandDir = path.join(sourceDir, manifest.commands);
+    if (fs.existsSync(commandDir)) {
+      const entries = fs.readdirSync(commandDir);
+      for (const entry of entries) {
+        if (entry.endsWith('.md')) {
+          commandPaths.push(toOutputPath(path.join(manifest.commands, entry)));
+        }
+      }
+    }
+  } else {
+    commandPaths.push(...manifest.commands.map(toOutputPath));
+  }
+
+  return commandPaths;
+}
 
 /**
  * Parse YAML frontmatter from a markdown file.
