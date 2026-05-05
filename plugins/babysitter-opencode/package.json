@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-opencode",
-  "version": "5.0.0",
+  "version": "5.0.1-staging.dfac8e4a",
   "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval",
   "scripts": {
     "deploy": "npm publish --access public",
@@ -36,7 +36,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "5.0.0"
+    "@a5c-ai/babysitter-sdk": "5.0.1-staging.dfac8e4a"
   },
   "repository": {
     "type": "git",

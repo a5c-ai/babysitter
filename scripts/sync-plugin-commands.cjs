@@ -15,6 +15,7 @@ const targetArgIndex = process.argv.indexOf('--target');
 const requestedTarget = targetArgIndex >= 0 ? process.argv[targetArgIndex + 1] : null;
 
 const TARGET_DIR_MAP = {
+  'claude-code': 'plugins/babysitter',
   codex: 'plugins/babysitter-codex',
   cursor: 'plugins/babysitter-cursor',
   gemini: 'plugins/babysitter-gemini',

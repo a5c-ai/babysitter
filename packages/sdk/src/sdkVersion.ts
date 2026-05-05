@@ -10,7 +10,7 @@ export const BABYSITTER_SDK_VERSION =
     ? pkg.version
     : "0.0.0-unknown";
 
-export function withSdkVersion<T extends Record<string, unknown>>(record: T): T & { sdkVersion: string } {
+export function withSdkVersion<T extends object>(record: T): T & { sdkVersion: string } {
   return {
     ...record,
     sdkVersion: BABYSITTER_SDK_VERSION,
