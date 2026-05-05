@@ -18,12 +18,18 @@ vi.mock("node:child_process", () => ({
   execFile: vi.fn(),
 }));
 
-// Mock node:fs to control detectConfig behaviour.
-vi.mock("node:fs", () => ({
-  promises: {
-    access: vi.fn().mockRejectedValue(new Error("ENOENT")),
-  },
-}));
+// Mock node:fs to control detectConfig behaviour while preserving sync helpers
+// that other imported modules use during initialization.
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    promises: {
+      ...actual.promises,
+      access: vi.fn().mockRejectedValue(new Error("ENOENT")),
+    },
+  };
+});
 
 // Force discoverHarnessesViaAmux to throw so legacy probe path is exercised.
 vi.mock("../install", () => ({
