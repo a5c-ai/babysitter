@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Tag } from "@a5c-ai/compendium";
 import { clsx } from "clsx";
