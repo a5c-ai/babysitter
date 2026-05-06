@@ -33,6 +33,16 @@
   ],
   "surfaces": [
     {
+      "surface": "packages/atlas",
+      "packageName": "@a5c-ai/atlas",
+      "description": "Atlas catalog graph SDK, CLI, and data.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/atlas/README.md",
+      "supporting": [],
+      "note": "Public npm package for the Atlas catalog graph index and query SDK."
+    },
+    {
       "surface": "packages/agent-catalog",
       "packageName": "@a5c-ai/agent-catalog",
       "description": "Public package for the shared agent ontology, discovery catalog, and packaged evidence graph consumed across the Babysitter toolchain.",

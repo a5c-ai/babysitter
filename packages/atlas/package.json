@@ -2,7 +2,16 @@
   "name": "@a5c-ai/atlas",
   "version": "0.1.0",
   "description": "Atlas catalog graph data, SDK, and CLI.",
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/atlas"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
