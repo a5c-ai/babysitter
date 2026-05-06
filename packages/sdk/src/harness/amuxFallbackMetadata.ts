@@ -178,7 +178,7 @@ const LOCAL_FALLBACK_METADATA: Record<string, AmuxAdapterMetadata> = {
 
 function buildStaticFallbackMetadata(): Record<string, AmuxAdapterMetadata> {
   try {
-    return Object.fromEntries(
+    const catalogMetadata = Object.fromEntries(
       Object.values(listCatalogFallbackHarnessMetadata()).map((metadata) => [
         metadata.adapterName,
         {
@@ -189,6 +189,7 @@ function buildStaticFallbackMetadata(): Record<string, AmuxAdapterMetadata> {
         },
       ]),
     );
+    return Object.keys(catalogMetadata).length > 0 ? catalogMetadata : LOCAL_FALLBACK_METADATA;
   } catch {
     return LOCAL_FALLBACK_METADATA;
   }

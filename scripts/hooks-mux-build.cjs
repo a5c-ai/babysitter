@@ -43,6 +43,10 @@ if (mode === 'test') {
 }
 
 for (const pkg of packages) {
+  if (mode === 'test' && !pkg.startsWith('packages/hooks-mux/')) {
+    console.log(`\n=== ${pkg} (${mode}) skipped: hooks-mux test mode only runs hooks packages ===`);
+    continue;
+  }
   const dir = path.resolve(__dirname, '..', pkg);
   const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
   const scriptName = mode === 'lint' ? 'lint' : mode;
