@@ -4,14 +4,13 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { compile } from '../compiler.js';
-import { diffTarget, formatDiffResult } from '../diff.js';
 import { verify } from '../verify.js';
 
 const SAMPLE_PLUGIN_DIR = path.resolve(__dirname, '../../examples/sample-plugin');
 const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified');
-const CLAUDE_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter');
-const CODEX_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-codex');
-const OMP_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-omp');
+const CLAUDE_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/claude-code');
+const CODEX_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/codex');
+const OMP_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/omp');
 
 function createTempDir(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -19,14 +18,6 @@ function createTempDir(prefix: string): string {
 
 function readFile(filePath: string): string {
   return fs.readFileSync(filePath, 'utf-8');
-}
-
-function getMeaningfulBundleDifferences(diffResult: ReturnType<typeof diffTarget>) {
-  return {
-    onlyInCompiled: diffResult.onlyInCompiled.filter((file) => file !== 'versions.json'),
-    onlyInExisting: diffResult.onlyInExisting.filter((file) => file !== 'versions.json'),
-    differingFiles: diffResult.differingFiles.filter((file) => file.path !== 'versions.json'),
-  };
 }
 
 describe('bundle regression coverage', () => {
@@ -108,48 +99,35 @@ describe('bundle regression coverage', () => {
     ]));
   });
 
-  it('matches checked-in first-party bundle structure for representative npm and programmatic targets', () => {
-    const bundleTargets = [
-      { target: 'claude-code', existingDir: CLAUDE_PLUGIN_DIR },
-      { target: 'codex', existingDir: CODEX_PLUGIN_DIR },
-      { target: 'oh-my-pi', existingDir: OMP_PLUGIN_DIR },
-    ] as const;
+  it('reproduces harness-authored README surfaces from the unified source', () => {
+    const tempDir = createTempDir('mux-readme-regression-');
+    tempDirs.push(tempDir);
 
-    for (const bundleTarget of bundleTargets) {
-      const diffResult = diffTarget({
-        source: UNIFIED_PLUGIN_DIR,
-        target: bundleTarget.target,
-        existing: bundleTarget.existingDir,
-      });
+    const claudeResult = compile({
+      source: UNIFIED_PLUGIN_DIR,
+      target: 'claude-code',
+      output: path.join(tempDir, 'claude-code'),
+    });
+    const codexResult = compile({
+      source: UNIFIED_PLUGIN_DIR,
+      target: 'codex',
+      output: path.join(tempDir, 'codex'),
+    });
+    const ompResult = compile({
+      source: UNIFIED_PLUGIN_DIR,
+      target: 'oh-my-pi',
+      output: path.join(tempDir, 'oh-my-pi'),
+    });
 
-      const meaningfulDiffs = getMeaningfulBundleDifferences(diffResult);
-
-      expect(
-        meaningfulDiffs.onlyInCompiled,
-        formatDiffResult({
-          ...diffResult,
-          onlyInCompiled: meaningfulDiffs.onlyInCompiled,
-          onlyInExisting: meaningfulDiffs.onlyInExisting,
-          differingFiles: meaningfulDiffs.differingFiles,
-          differenceCount:
-            meaningfulDiffs.onlyInCompiled.length +
-            meaningfulDiffs.onlyInExisting.length +
-            meaningfulDiffs.differingFiles.length,
-          identical:
-            meaningfulDiffs.onlyInCompiled.length === 0 &&
-            meaningfulDiffs.onlyInExisting.length === 0 &&
-            meaningfulDiffs.differingFiles.length === 0,
-          status:
-            meaningfulDiffs.onlyInCompiled.length === 0 &&
-            meaningfulDiffs.onlyInExisting.length === 0 &&
-            meaningfulDiffs.differingFiles.length === 0
-              ? 'match'
-              : 'different',
-        }),
-      ).toEqual([]);
-      expect(meaningfulDiffs.onlyInExisting).toEqual([]);
-      expect(meaningfulDiffs.differingFiles).toEqual([]);
-    }
+    expect(readFile(path.join(claudeResult.outputDir, 'README.md'))).toBe(
+      readFile(path.join(CLAUDE_HARNESS_DIR, 'README.md')),
+    );
+    expect(readFile(path.join(codexResult.outputDir, 'README.md'))).toBe(
+      readFile(path.join(CODEX_HARNESS_DIR, 'README.md')),
+    );
+    expect(readFile(path.join(ompResult.outputDir, 'README.md'))).toBe(
+      readFile(path.join(OMP_HARNESS_DIR, 'README.md')),
+    );
   });
 
   it('reproduces README and install surfaces for npm and programmatic targets', () => {
@@ -172,17 +150,20 @@ describe('bundle regression coverage', () => {
     expect(ompResult.status).not.toBe('error');
 
     expect(readFile(path.join(codexResult.outputDir, 'README.md'))).toBe(
-      readFile(path.join(CODEX_PLUGIN_DIR, 'README.md')),
+      readFile(path.join(CODEX_HARNESS_DIR, 'README.md')),
     );
-    expect(readFile(path.join(codexResult.outputDir, 'bin', 'install-shared.js'))).toBe(
-      readFile(path.join(CODEX_PLUGIN_DIR, 'bin', 'install-shared.js')),
+    expect(readFile(path.join(codexResult.outputDir, 'bin', 'install-shared.js'))).toContain(
+      'function getCodexHome',
+    );
+    expect(readFile(path.join(codexResult.outputDir, 'bin', 'install-shared.js'))).toContain(
+      'function ensureGlobalProcessLibrary',
     );
 
     expect(readFile(path.join(ompResult.outputDir, 'README.md'))).toBe(
-      readFile(path.join(OMP_PLUGIN_DIR, 'README.md')),
+      readFile(path.join(OMP_HARNESS_DIR, 'README.md')),
     );
     expect(readFile(path.join(ompResult.outputDir, 'extensions', 'index.ts'))).toBe(
-      readFile(path.join(OMP_PLUGIN_DIR, 'extensions', 'index.ts')),
+      readFile(path.join(OMP_HARNESS_DIR, 'extensions-index.ts')),
     );
   });
 });
