@@ -1,0 +1,490 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/processes-packages-and-paths.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:sessionSemantics:claude:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:claude:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:claude:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:claude:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:codex:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:codex:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:codex:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: sessionSemantics:codex:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:cursor:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:cursor:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:cursor:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: sessionSemantics:cursor:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:gemini:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:gemini:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:gemini:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: sessionSemantics:gemini:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:copilot:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:copilot:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:copilot:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:copilot:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:pi:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:pi:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:pi:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:pi:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:omp:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:omp:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:omp:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:omp:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:opencode:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:opencode:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:opencode:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:opencode:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:openclaw:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: sessionSemantics:openclaw:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:sessionSemantics:openclaw:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: sessionSemantics:openclaw:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:openclaw:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: sessionSemantics:openclaw:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:lifecycleSemantics:claude:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:claude:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:claude:ge-0-0-0:claim:repo-target-claude
+    relation: supported_by_claim
+    from: lifecycleSemantics:claude:ge-0-0-0
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:lifecycleSemantics:claude:ge-0-0-0:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: lifecycleSemantics:claude:ge-0-0-0
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0:claim:repo-target-codex
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:lifecycleSemantics:codex:ge-0-119-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-119-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:codex:ge-0-119-0:claim:repo-target-codex
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-119-0
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:lifecycleSemantics:codex:ge-0-119-0:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: lifecycleSemantics:codex:ge-0-119-0
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:lifecycleSemantics:cursor:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:cursor:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:cursor:ge-0-0-0:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: lifecycleSemantics:cursor:ge-0-0-0
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:lifecycleSemantics:gemini:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:gemini:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:gemini:ge-0-0-0:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: lifecycleSemantics:gemini:ge-0-0-0
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:lifecycleSemantics:gemini:ge-0-0-0:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: lifecycleSemantics:gemini:ge-0-0-0
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:lifecycleSemantics:copilot:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:copilot:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:copilot:ge-0-0-0:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: lifecycleSemantics:copilot:ge-0-0-0
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:lifecycleSemantics:copilot:ge-0-0-0:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: lifecycleSemantics:copilot:ge-0-0-0
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:lifecycleSemantics:pi:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:pi:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:omp:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:omp:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:opencode:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:opencode:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:opencode:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: lifecycleSemantics:opencode:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:lifecycleSemantics:openclaw:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: lifecycleSemantics:openclaw:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:openclaw:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: lifecycleSemantics:openclaw:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:.a5c-runs:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:.a5c-runs
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:agent-catalog-graph:claim:repo-agent-catalog-package
+    relation: supported_by_claim
+    from: path:agent-catalog-graph
+    to: claim:repo-agent-catalog-package
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:path:catalog-api:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: path:catalog-api
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:path:transport-mux:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: path:transport-mux
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:path:transport-mux:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: path:transport-mux
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:path:auto:packages-catalog-process-library-catalog-js:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: path:auto:packages-catalog-process-library-catalog-js
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:path:auto:packages-catalog-src-app:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: path:auto:packages-catalog-src-app
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:path:auto:packages-catalog-src-lib:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: path:auto:packages-catalog-src-lib
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:path:auto:packages-agent-mux-processes-model-catalog-js:claim:repo-agent-mux-model-catalog
+    relation: supported_by_claim
+    from: path:auto:packages-agent-mux-processes-model-catalog-js
+    to: claim:repo-agent-mux-model-catalog
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-claude-code-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-claude-code-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-anthropics-claude-code:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-anthropics-claude-code
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-codex-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-codex-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-openai-codex:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-openai-codex
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-cursor-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-cursor-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-cursor-cursor-agent:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-cursor-cursor-agent
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-gemini-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-gemini-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-google-gemini-cli:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-google-gemini-cli
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-github-copilot-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-github-copilot-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-github-copilot-cli:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-github-copilot-cli
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-pi-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-pi-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-a5c-ai-pi:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-a5c-ai-pi
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-oh-my-pi-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-oh-my-pi-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-a5c-ai-omp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-a5c-ai-omp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-opencode-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-opencode-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-anomalyco-opencode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-anomalyco-opencode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:path:auto:packages-agent-plugins-mux-src-targets-openclaw-ts:claim:repo-target-index
+    relation: supported_by_claim
+    from: path:auto:packages-agent-plugins-mux-src-targets-openclaw-ts
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:path:auto:ghcr-io-openclaw-openclaw:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: path:auto:ghcr-io-openclaw-openclaw
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:process:packages/catalog/process-library-catalog:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: process:packages/catalog/process-library-catalog
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:process:agent-mux/model-catalog:claim:repo-agent-mux-model-catalog
+    relation: supported_by_claim
+    from: process:agent-mux/model-catalog
+    to: claim:repo-agent-mux-model-catalog
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: edge:package:@a5c-ai/agent-catalog:claim:repo-agent-catalog-package
+    relation: supported_by_claim
+    from: package:@a5c-ai/agent-catalog
+    to: claim:repo-agent-catalog-package
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:package:@a5c-ai/babysitter-sdk:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: package:@a5c-ai/babysitter-sdk
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:package:@a5c-ai/hooks-mux-core:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: package:@a5c-ai/hooks-mux-core
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:package:@a5c-ai/agent-plugins-mux:claim:repo-target-index
+    relation: supported_by_claim
+    from: package:@a5c-ai/agent-plugins-mux
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:package:@a5c-ai/agent-mux-core:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: package:@a5c-ai/agent-mux-core
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:package:@a5c-ai/catalog:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: package:@a5c-ai/catalog
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:package:@a5c-ai/transport-mux:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: package:@a5c-ai/transport-mux
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:package:@a5c-ai/transport-mux:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: package:@a5c-ai/transport-mux
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:ci:@a5c-ai/agent-catalog:claim:repo-agent-catalog-package
+    relation: supported_by_claim
+    from: ci:@a5c-ai/agent-catalog
+    to: claim:repo-agent-catalog-package
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:ci:@a5c-ai/catalog:claim:repo-process-catalog
+    relation: supported_by_claim
+    from: ci:@a5c-ai/catalog
+    to: claim:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog

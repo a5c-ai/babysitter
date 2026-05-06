@@ -9,6 +9,10 @@ attributes:
   adapterName: copilot
   skillHandling: derived-from-commands
   hookRegistrationFormat: github-copilot
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
   marketplacePath: null
   pluginRootEnvVar: COPILOT_PLUGIN_DIR
   scriptVariants:

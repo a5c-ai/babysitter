@@ -1,0 +1,65 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/pi.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:pi:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+  - id: capabilitySupport:pi:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: *a1
+  - id: capabilitySupport:pi:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: *a1
+  - id: capabilitySupport:pi:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: *a1
+  - id: capabilitySupport:pi:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: *a1
+  - id: capabilitySupport:pi:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:pi:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:pi:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    evidenceRefs: *a1

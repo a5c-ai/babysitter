@@ -1,0 +1,399 @@
+kind: NodeDocument
+documentPath: nodes/hooks-and-plugins/hook-mappings.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: hookMapping:session-start:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:session-start:claude-code
+    hookId: session-start
+    targetId: claude-code
+    nativeName: SessionStart
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs: &a1
+      - repo-target-index
+  - id: hookMapping:session-start:codex
+    kind: HookMapping
+    mappingId: hookMapping:session-start:codex
+    hookId: session-start
+    targetId: codex
+    nativeName: SessionStart
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: codex
+    evidenceRefs: *a1
+  - id: hookMapping:session-start:cursor
+    kind: HookMapping
+    mappingId: hookMapping:session-start:cursor
+    hookId: session-start
+    targetId: cursor
+    nativeName: sessionStart
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: cursor
+    evidenceRefs: *a1
+  - id: hookMapping:session-start:gemini
+    kind: HookMapping
+    mappingId: hookMapping:session-start:gemini
+    hookId: session-start
+    targetId: gemini
+    nativeName: SessionStart
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: gemini
+    evidenceRefs: *a1
+  - id: hookMapping:session-start:github-copilot
+    kind: HookMapping
+    mappingId: hookMapping:session-start:github-copilot
+    hookId: session-start
+    targetId: github-copilot
+    nativeName: sessionStart
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: copilot
+    evidenceRefs: *a1
+  - id: hookMapping:session-start:opencode
+    kind: HookMapping
+    mappingId: hookMapping:session-start:opencode
+    hookId: session-start
+    targetId: opencode
+    nativeName: session.created
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: opencode
+    evidenceRefs: *a1
+  - id: hookMapping:session-start:openclaw
+    kind: HookMapping
+    mappingId: hookMapping:session-start:openclaw
+    hookId: session-start
+    targetId: openclaw
+    nativeName: session_start
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: openclaw
+    evidenceRefs: *a1
+  - id: hookMapping:stop:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:stop:claude-code
+    hookId: stop
+    targetId: claude-code
+    nativeName: Stop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs: &a2
+      - repo-target-index
+  - id: hookMapping:stop:codex
+    kind: HookMapping
+    mappingId: hookMapping:stop:codex
+    hookId: stop
+    targetId: codex
+    nativeName: Stop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: codex
+    evidenceRefs: *a2
+  - id: hookMapping:stop:cursor
+    kind: HookMapping
+    mappingId: hookMapping:stop:cursor
+    hookId: stop
+    targetId: cursor
+    nativeName: stop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: cursor
+    evidenceRefs: *a2
+  - id: hookMapping:user-prompt-submit:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:user-prompt-submit:claude-code
+    hookId: user-prompt-submit
+    targetId: claude-code
+    nativeName: UserPromptSubmit
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs: &a3
+      - repo-target-index
+  - id: hookMapping:user-prompt-submit:codex
+    kind: HookMapping
+    mappingId: hookMapping:user-prompt-submit:codex
+    hookId: user-prompt-submit
+    targetId: codex
+    nativeName: UserPromptSubmit
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: codex
+    evidenceRefs: *a3
+  - id: hookMapping:user-prompt-submit:github-copilot
+    kind: HookMapping
+    mappingId: hookMapping:user-prompt-submit:github-copilot
+    hookId: user-prompt-submit
+    targetId: github-copilot
+    nativeName: userPromptSubmitted
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: copilot
+    evidenceRefs: *a3
+  - id: hookMapping:pre-tool-use:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:pre-tool-use:claude-code
+    hookId: pre-tool-use
+    targetId: claude-code
+    nativeName: PreToolUse
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs: &a4
+      - repo-target-index
+  - id: hookMapping:pre-tool-use:opencode
+    kind: HookMapping
+    mappingId: hookMapping:pre-tool-use:opencode
+    hookId: pre-tool-use
+    targetId: opencode
+    nativeName: tool.execute.before
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: opencode
+    evidenceRefs: *a4
+  - id: hookMapping:post-tool-use:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:post-tool-use:claude-code
+    hookId: post-tool-use
+    targetId: claude-code
+    nativeName: PostToolUse
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs: &a5
+      - repo-target-index
+  - id: hookMapping:post-tool-use:opencode
+    kind: HookMapping
+    mappingId: hookMapping:post-tool-use:opencode
+    hookId: post-tool-use
+    targetId: opencode
+    nativeName: tool.execute.after
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: opencode
+    evidenceRefs: *a5
+  - id: hookMapping:subagent-stop:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:subagent-stop:claude-code
+    hookId: subagent-stop
+    targetId: claude-code
+    nativeName: SubagentStop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:notification:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:notification:claude-code
+    hookId: notification
+    targetId: claude-code
+    nativeName: Notification
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:pre-compact:claude-code
+    kind: HookMapping
+    mappingId: hookMapping:pre-compact:claude-code
+    hookId: pre-compact
+    targetId: claude-code
+    nativeName: PreCompact
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: claude
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:after-agent:gemini
+    kind: HookMapping
+    mappingId: hookMapping:after-agent:gemini
+    hookId: after-agent
+    targetId: gemini
+    nativeName: AfterAgent
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: gemini
+    evidenceRefs: &a6
+      - repo-target-index
+      - repo-target-gemini
+  - id: hookMapping:after-agent:openclaw
+    kind: HookMapping
+    mappingId: hookMapping:after-agent:openclaw
+    hookId: after-agent
+    targetId: openclaw
+    nativeName: agent_end
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: openclaw
+    evidenceRefs: *a6
+  - id: hookMapping:session-end:github-copilot
+    kind: HookMapping
+    mappingId: hookMapping:session-end:github-copilot
+    hookId: session-end
+    targetId: github-copilot
+    nativeName: sessionEnd
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: copilot
+    evidenceRefs: &a7
+      - repo-target-index
+      - repo-target-copilot
+  - id: hookMapping:session-end:openclaw
+    kind: HookMapping
+    mappingId: hookMapping:session-end:openclaw
+    hookId: session-end
+    targetId: openclaw
+    nativeName: session_end
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: openclaw
+    evidenceRefs: *a7
+  - id: hookMapping:session-idle:opencode
+    kind: HookMapping
+    mappingId: hookMapping:session-idle:opencode
+    hookId: session-idle
+    targetId: opencode
+    nativeName: session.idle
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: opencode
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:shell-env:opencode
+    kind: HookMapping
+    mappingId: hookMapping:shell-env:opencode
+    hookId: shell-env
+    targetId: opencode
+    nativeName: shell.env
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: opencode
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:user-prompt-submit:pi
+    kind: HookMapping
+    mappingId: hookMapping:user-prompt-submit:pi
+    hookId: user-prompt-submit
+    targetId: pi
+    nativeName: context
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:pre-tool-use:pi
+    kind: HookMapping
+    mappingId: hookMapping:pre-tool-use:pi
+    hookId: pre-tool-use
+    targetId: pi
+    nativeName: tool_call
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:before-provider-request:pi
+    kind: HookMapping
+    mappingId: hookMapping:before-provider-request:pi
+    hookId: before-provider-request
+    targetId: pi
+    nativeName: before_provider_request
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:session-start:pi
+    kind: HookMapping
+    mappingId: hookMapping:session-start:pi
+    hookId: session-start
+    targetId: pi
+    nativeName: session_start
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:stop:pi
+    kind: HookMapping
+    mappingId: hookMapping:stop:pi
+    hookId: stop
+    targetId: pi
+    nativeName: stop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:user-prompt-submit:oh-my-pi
+    kind: HookMapping
+    mappingId: hookMapping:user-prompt-submit:oh-my-pi
+    hookId: user-prompt-submit
+    targetId: oh-my-pi
+    nativeName: context
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: omp
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:pre-tool-use:oh-my-pi
+    kind: HookMapping
+    mappingId: hookMapping:pre-tool-use:oh-my-pi
+    hookId: pre-tool-use
+    targetId: oh-my-pi
+    nativeName: tool_call
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: omp
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:before-provider-request:oh-my-pi
+    kind: HookMapping
+    mappingId: hookMapping:before-provider-request:oh-my-pi
+    hookId: before-provider-request
+    targetId: oh-my-pi
+    nativeName: before_provider_request
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: omp
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:session-start:oh-my-pi
+    kind: HookMapping
+    mappingId: hookMapping:session-start:oh-my-pi
+    hookId: session-start
+    targetId: oh-my-pi
+    nativeName: session_start
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: omp
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:stop:oh-my-pi
+    kind: HookMapping
+    mappingId: hookMapping:stop:oh-my-pi
+    hookId: stop
+    targetId: oh-my-pi
+    nativeName: stop
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: omp
+    evidenceRefs:
+      - repo-target-index
+  - id: hookMapping:before-prompt-build:openclaw
+    kind: HookMapping
+    mappingId: hookMapping:before-prompt-build:openclaw
+    hookId: before-prompt-build
+    targetId: openclaw
+    nativeName: before_prompt_build
+    versionRange: ">=0.0.0"
+    requiresRuntimeHooks: true
+    adapterFamily: openclaw
+    evidenceRefs:
+      - repo-target-index

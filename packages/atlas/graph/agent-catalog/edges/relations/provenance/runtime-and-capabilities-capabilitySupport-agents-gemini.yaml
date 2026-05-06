@@ -1,0 +1,143 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-gemini.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:skills:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:skills
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:skills:claim:web-gemini-cli-skills
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:skills
+    to: claim:web-gemini-cli-skills
+    evidenceRefs:
+      - web-gemini-cli-skills
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:thinking:claim:web-gemini-cli-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:thinking
+    to: claim:web-gemini-cli-core-agentic
+    evidenceRefs:
+      - web-gemini-cli-index
+      - web-gemini-cli-reference
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:interactive-mode:claim:web-gemini-cli-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+    to: claim:web-gemini-cli-core-agentic
+    evidenceRefs:
+      - web-gemini-cli-index
+      - web-gemini-cli-reference
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stdin-injection:claim:web-gemini-cli-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+    to: claim:web-gemini-cli-stdin-injection
+    evidenceRefs:
+      - web-gemini-cli-headless
+      - web-gemini-cli-reference
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:image-input:claim:web-gemini-cli-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:image-input
+    to: claim:web-gemini-cli-image-input
+    evidenceRefs:
+      - web-gemini-cli-index
+      - web-gemini-cli-changelog
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:runtime-hooks:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:runtime-hooks:claim:web-gemini-cli-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    to: claim:web-gemini-cli-hooks
+    evidenceRefs:
+      - web-gemini-cli-hooks
+      - web-gemini-cli-index
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stop-hook:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stop-hook:claim:web-gemini-cli-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    to: claim:web-gemini-cli-hooks
+    evidenceRefs:
+      - web-gemini-cli-hooks
+      - web-gemini-cli-index
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:session-resume:claim:web-gemini-cli-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:gemini:ge-0-0-0:session-resume
+    to: claim:web-gemini-cli-session-resume
+    evidenceRefs:
+      - web-gemini-cli-session-management
+      - web-gemini-cli-checkpointing

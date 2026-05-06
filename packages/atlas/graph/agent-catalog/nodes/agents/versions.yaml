@@ -1,0 +1,282 @@
+kind: NodeDocument
+documentPath: nodes/agents/versions.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: agentVersion:claude:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:claude:ge-0-0-0
+    agentId: claude
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds:
+      - claude-code-default
+    defaultModelProviderIds:
+      - anthropic
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Claude Code
+    summary: Anthropic CLI harness with native lifecycle hooks, approvals, tool use, and background-agent evidence.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux + plugins/babysitter
+    aliases:
+      - claude-code
+    pluginTargetIds:
+      - claude-code
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    agentId: codex
+    versionRange: ">=0.0.0 <0.119.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds:
+      - codex-default
+    defaultModelProviderIds:
+      - openai
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Codex
+    summary: OpenAI terminal harness with hooks, skills, and a version-specific Windows lifecycle limitation below 0.119.0.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux + plugins/babysitter-codex
+    aliases:
+      - codex
+    pluginTargetIds:
+      - codex
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: agentVersion:codex:ge-0-119-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:codex:ge-0-119-0
+    agentId: codex
+    versionRange: ">=0.119.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds:
+      - codex-default
+    defaultModelProviderIds:
+      - openai
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Codex
+    summary: OpenAI terminal harness with hooks, skills, and documented Windows hook support starting in 0.119.0.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux + plugins/babysitter-codex
+    aliases:
+      - codex
+    pluginTargetIds:
+      - codex
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: agentVersion:cursor:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:cursor:ge-0-0-0
+    agentId: cursor
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Cursor
+    summary: Cursor shell-hook target with derived skills and sessionStart/stop lifecycle mapping.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux
+    aliases:
+      - cursor
+    pluginTargetIds:
+      - cursor
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: agentVersion:gemini:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:gemini:ge-0-0-0
+    agentId: gemini
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds:
+      - gemini-cli-default
+    defaultModelProviderIds:
+      - google
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Gemini CLI
+    summary: Gemini CLI target with SessionStart and AfterAgent hooks plus extension-backed runtime metadata.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux + plugins/babysitter-gemini
+    aliases:
+      - gemini-cli
+      - gemini
+    pluginTargetIds:
+      - gemini
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: agentVersion:copilot:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:copilot:ge-0-0-0
+    agentId: copilot
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds:
+      - copilot-default
+    defaultModelProviderIds:
+      - github
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: GitHub Copilot
+    summary: GitHub Copilot target with session lifecycle hooks, derived skills, and agentic workflow evidence.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux
+    aliases:
+      - github-copilot
+      - copilot
+    pluginTargetIds:
+      - github-copilot
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: agentVersion:pi:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:pi:ge-0-0-0
+    agentId: pi
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Pi
+    summary: Pi fallback harness with interactive sessions but no runtime-hook support in current shared metadata.
+    sourcePackage: packages/sdk/src/harness
+    aliases:
+      - pi
+    pluginTargetIds:
+      - pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: agentVersion:omp:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:omp:ge-0-0-0
+    agentId: omp
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Oh-My-Pi
+    summary: Oh-My-Pi fallback harness reusing Pi-like session semantics and no runtime hooks in current fallback metadata.
+    sourcePackage: packages/sdk/src/harness
+    aliases:
+      - oh-my-pi
+      - omp
+    pluginTargetIds:
+      - oh-my-pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: agentVersion:opencode:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:opencode:ge-0-0-0
+    agentId: opencode
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: OpenCode
+    summary: OpenCode exposes event-style session and tool hooks plus standard interactive fallback metadata.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux
+    aliases:
+      - opencode
+    pluginTargetIds:
+      - opencode
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: agentVersion:openclaw:ge-0-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:openclaw:ge-0-0-0
+    agentId: openclaw
+    versionRange: ">=0.0.0"
+    releaseChannel: stable
+    since: null
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: cli-harness
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: OpenClaw
+    summary: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    sourcePackage: packages/sdk/src/harness + packages/agent-plugins-mux
+    aliases:
+      - openclaw
+    pluginTargetIds:
+      - openclaw
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index

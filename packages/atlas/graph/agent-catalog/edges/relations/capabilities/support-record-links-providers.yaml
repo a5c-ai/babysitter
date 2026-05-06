@@ -1,0 +1,40 @@
+kind: EdgeDocument
+documentPath: edges/relations/capabilities/support-record-links-providers.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:anthropic:streaming:subject
+    relation: supports_capability
+    from: providerVersion:anthropic:ge-0-0-0
+    to: capabilitySupport:anthropic:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:anthropic:tool-calling:subject
+    relation: supports_capability
+    from: providerVersion:anthropic:ge-0-0-0
+    to: capabilitySupport:anthropic:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:openai:streaming:subject
+    relation: supports_capability
+    from: providerVersion:openai:ge-0-0-0
+    to: capabilitySupport:openai:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:openai:tool-calling:subject
+    relation: supports_capability
+    from: providerVersion:openai:ge-0-0-0
+    to: capabilitySupport:openai:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:google:streaming:subject
+    relation: supports_capability
+    from: providerVersion:google:ge-0-0-0
+    to: capabilitySupport:google:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:google:tool-calling:subject
+    relation: supports_capability
+    from: providerVersion:google:ge-0-0-0
+    to: capabilitySupport:google:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture

@@ -1,0 +1,177 @@
+kind: NodeDocument
+documentPath: nodes/evidence/gemini-cli-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-gemini-cli-index
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-index
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/index.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: documentation index and feature map
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-reference
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-reference
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/cli-reference.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: CLI commands and resume flags
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-skills
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-skills
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: agent skills discovery and management
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-headless
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-headless
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/headless.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: headless and automation mode
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-session-management
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-session-management
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/session-management.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: resume, list, and manage sessions
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-checkpointing
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-checkpointing
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/checkpointing.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: checkpoint creation and restore
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-hooks
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/hooks/index.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: hook events and lifecycle impact
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-cli-changelog
+    kind: EvidenceSource
+    evidenceId: web-gemini-cli-changelog
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/blob/main/docs/changelogs/index.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: recent multimodal and approval changes
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:web-gemini-cli-core-agentic
+    kind: Claim
+    claimId: web-gemini-cli-core-agentic
+    statement: Gemini CLI is documented as a terminal-based coding agent with interactive and automation-oriented workflows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-gemini-cli-index
+      - web-gemini-cli-reference
+    unresolvedGaps: []
+  - id: claim:web-gemini-cli-skills
+    kind: Claim
+    claimId: web-gemini-cli-skills
+    statement: Gemini CLI supports discoverable agent skills across workspace, user, and extension tiers.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-gemini-cli-skills
+    unresolvedGaps:
+      - The skills claim currently rests on one official page rather than multiple corroborating sources.
+  - id: claim:web-gemini-cli-hooks
+    kind: Claim
+    claimId: web-gemini-cli-hooks
+    statement: Gemini CLI exposes a native hook system with documented lifecycle events including SessionStart, SessionEnd, and AfterAgent-style end-of-loop controls.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-gemini-cli-hooks
+      - web-gemini-cli-index
+    unresolvedGaps: []
+  - id: claim:web-gemini-cli-stdin-injection
+    kind: Claim
+    claimId: web-gemini-cli-stdin-injection
+    statement: Gemini CLI documents headless and piped execution paths, providing a first-party basis for scripted prompt injection.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-gemini-cli-headless
+      - web-gemini-cli-reference
+    unresolvedGaps: []
+  - id: claim:web-gemini-cli-image-input
+    kind: Claim
+    claimId: web-gemini-cli-image-input
+    statement: Gemini CLI public docs and release notes include multimodal input surfaces, including recent clipboard image support in the CLI.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-gemini-cli-index
+      - web-gemini-cli-changelog
+    unresolvedGaps:
+      - The public evidence mixes general multimodal support with changelog notes instead of a dedicated CLI image-input contract.
+  - id: claim:web-gemini-cli-session-resume
+    kind: Claim
+    claimId: web-gemini-cli-session-resume
+    statement: Gemini CLI supports resuming and restoring previous work through session-management and checkpointing flows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-gemini-cli-session-management
+      - web-gemini-cli-checkpointing
+    unresolvedGaps: []

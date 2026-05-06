@@ -9,6 +9,9 @@ attributes:
   commandFormat: markdown-commands
   skillHandling: derived-from-commands
   hookRegistrationFormat: null
+  hookRegistrationOutputPath: null
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
   marketplacePath: null
   pluginRootEnvVarForExtension: PI_PLUGIN_ROOT
   scriptVariants:

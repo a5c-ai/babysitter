@@ -1,0 +1,70 @@
+kind: EdgeDocument
+documentPath: edges/relations/capabilities/capability-vocabulary-links-transports.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:terminal-cli:interactive-mode:capability
+    relation: for_capability
+    from: capabilitySupport:terminal-cli:interactive-mode
+    to: capability:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:terminal-cli:stdin-injection:capability
+    relation: for_capability
+    from: capabilitySupport:terminal-cli:stdin-injection
+    to: capability:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:shell-hook-runtime:runtime-hooks:capability
+    relation: for_capability
+    from: capabilitySupport:shell-hook-runtime:runtime-hooks
+    to: capability:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:shell-hook-runtime:stop-hook:capability
+    relation: for_capability
+    from: capabilitySupport:shell-hook-runtime:stop-hook
+    to: capability:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:shell-hook-runtime:stdin-injection:capability
+    relation: for_capability
+    from: capabilitySupport:shell-hook-runtime:stdin-injection
+    to: capability:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:shell-hook-runtime:interactive-mode:capability
+    relation: for_capability
+    from: capabilitySupport:shell-hook-runtime:interactive-mode
+    to: capability:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:amux-proxy:streaming:capability
+    relation: for_capability
+    from: capabilitySupport:amux-proxy:streaming
+    to: capability:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:proxy-transport-emulation:capability
+    relation: for_capability
+    from: capabilitySupport:amux-proxy:proxy-transport-emulation
+    to: capability:proxy-transport-emulation
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:model-discovery:capability
+    relation: for_capability
+    from: capabilitySupport:amux-proxy:model-discovery
+    to: capability:model-discovery
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:token-counting:capability
+    relation: for_capability
+    from: capabilitySupport:amux-proxy:token-counting
+    to: capability:token-counting
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:tool-calling:capability
+    relation: for_capability
+    from: capabilitySupport:amux-proxy:tool-calling
+    to: capability:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture

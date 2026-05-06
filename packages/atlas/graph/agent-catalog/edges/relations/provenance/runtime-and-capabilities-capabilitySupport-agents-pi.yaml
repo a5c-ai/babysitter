@@ -1,0 +1,40 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-pi.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:pi:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:pi:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback

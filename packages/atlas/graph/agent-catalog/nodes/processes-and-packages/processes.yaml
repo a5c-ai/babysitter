@@ -1,0 +1,44 @@
+kind: NodeDocument
+documentPath: nodes/processes-and-packages/processes.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: process:packages/catalog/process-library-catalog
+    kind: ProcessDescriptor
+    processId: packages/catalog/process-library-catalog
+    displayName: Process Library Catalog
+    category: catalog
+    description: Current Next.js catalog application for browsing processes, skills, domains, specializations, and agents.
+    paths:
+      - packages/catalog/process-library-catalog.js
+      - packages/catalog/src/app
+      - packages/catalog/src/lib
+    inputs:
+      - projectName
+      - outputDir
+      - targetQuality
+    outputs:
+      - success
+      - routes
+      - components
+      - apiEndpoints
+      - artifacts
+    ownerPackage: "@a5c-ai/catalog"
+    executionKinds:
+      - babysitter-process
+    evidenceRefs:
+      - repo-process-catalog
+  - id: process:agent-mux/model-catalog
+    kind: ProcessDescriptor
+    processId: agent-mux/model-catalog
+    displayName: Agent Mux Model Catalog
+    category: catalog
+    description: Brownfield workflow for model catalog and model configuration management inside agent-mux.
+    paths:
+      - packages/agent-mux/processes/model-catalog.js
+    inputs: []
+    outputs: []
+    ownerPackage: "@a5c-ai/agent-mux-core"
+    executionKinds:
+      - babysitter-process
+    evidenceRefs:
+      - repo-agent-mux-model-catalog

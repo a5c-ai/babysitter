@@ -1,0 +1,89 @@
+kind: NodeDocument
+documentPath: nodes/processes-and-packages/packages.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: package:@a5c-ai/agent-catalog
+    kind: PackageSurface
+    packageId: "@a5c-ai/agent-catalog"
+    packageName: "@a5c-ai/agent-catalog"
+    workspacePath: packages/agent-catalog
+    moduleType: commonjs
+    surfaceKinds:
+      - graph-source
+      - sdk
+      - cli
+      - ui
+      - internal-workspace-package
+    sourceOfTruthRole: graph-source-of-truth
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: package:@a5c-ai/babysitter-sdk
+    kind: PackageSurface
+    packageId: "@a5c-ai/babysitter-sdk"
+    packageName: "@a5c-ai/babysitter-sdk"
+    workspacePath: packages/sdk
+    moduleType: typescript
+    surfaceKinds:
+      - sdk-consumer
+    sourceOfTruthRole: wrapper-over-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: package:@a5c-ai/hooks-mux-core
+    kind: PackageSurface
+    packageId: "@a5c-ai/hooks-mux-core"
+    packageName: "@a5c-ai/hooks-mux-core"
+    workspacePath: packages/hooks-mux/core
+    moduleType: typescript
+    surfaceKinds:
+      - discovery-consumer
+    sourceOfTruthRole: wrapper-over-graph
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: package:@a5c-ai/agent-plugins-mux
+    kind: PackageSurface
+    packageId: "@a5c-ai/agent-plugins-mux"
+    packageName: "@a5c-ai/agent-plugins-mux"
+    workspacePath: packages/agent-plugins-mux
+    moduleType: typescript
+    surfaceKinds:
+      - plugin-consumer
+    sourceOfTruthRole: wrapper-over-graph
+    evidenceRefs:
+      - repo-target-index
+  - id: package:@a5c-ai/agent-mux-core
+    kind: PackageSurface
+    packageId: "@a5c-ai/agent-mux-core"
+    packageName: "@a5c-ai/agent-mux-core"
+    workspacePath: packages/agent-mux/core
+    moduleType: typescript
+    surfaceKinds:
+      - host-detection-consumer
+      - invocation-consumer
+    sourceOfTruthRole: wrapper-over-graph
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: package:@a5c-ai/catalog
+    kind: PackageSurface
+    packageId: "@a5c-ai/catalog"
+    packageName: "@a5c-ai/catalog"
+    workspacePath: packages/catalog
+    moduleType: nextjs
+    surfaceKinds:
+      - ui-consumer
+      - api-consumer
+    sourceOfTruthRole: wrapper-over-graph
+    evidenceRefs:
+      - repo-process-catalog
+  - id: package:@a5c-ai/transport-mux
+    kind: PackageSurface
+    packageId: "@a5c-ai/transport-mux"
+    packageName: "@a5c-ai/transport-mux"
+    workspacePath: packages/transport-mux
+    moduleType: typescript
+    surfaceKinds:
+      - transport-runtime
+      - provider-ontology-source
+    sourceOfTruthRole: ontology-input
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture

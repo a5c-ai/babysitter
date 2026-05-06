@@ -1,0 +1,190 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-transports.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:terminal-cli:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:terminal-cli:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:terminal-cli:interactive-mode:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capabilitySupport:terminal-cli:interactive-mode
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capabilitySupport:terminal-cli:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:terminal-cli:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:terminal-cli:stdin-injection:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capabilitySupport:terminal-cli:stdin-injection
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capabilitySupport:shell-hook-runtime:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:shell-hook-runtime:runtime-hooks:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:runtime-hooks
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:shell-hook-runtime:runtime-hooks:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:runtime-hooks
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:shell-hook-runtime:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:shell-hook-runtime:stop-hook:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stop-hook
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:shell-hook-runtime:stop-hook:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stop-hook
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:shell-hook-runtime:stdin-injection:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stdin-injection
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:shell-hook-runtime:stdin-injection:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stdin-injection
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:shell-hook-runtime:stdin-injection:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:stdin-injection
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:shell-hook-runtime:interactive-mode:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:interactive-mode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:shell-hook-runtime:interactive-mode:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:interactive-mode
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:shell-hook-runtime:interactive-mode:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:shell-hook-runtime:interactive-mode
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:amux-proxy:streaming:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:streaming
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:streaming:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:streaming
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:amux-proxy:streaming:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:streaming
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capabilitySupport:amux-proxy:proxy-transport-emulation:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:proxy-transport-emulation
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:proxy-transport-emulation:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:proxy-transport-emulation
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:amux-proxy:proxy-transport-emulation:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:proxy-transport-emulation
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capabilitySupport:amux-proxy:model-discovery:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:model-discovery
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:model-discovery:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:model-discovery
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:amux-proxy:model-discovery:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:model-discovery
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capabilitySupport:amux-proxy:token-counting:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:token-counting
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:token-counting:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:token-counting
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:amux-proxy:token-counting:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:token-counting
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capabilitySupport:amux-proxy:tool-calling:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:tool-calling
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:amux-proxy:tool-calling:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:tool-calling
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:amux-proxy:tool-calling:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capabilitySupport:amux-proxy:tool-calling
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration

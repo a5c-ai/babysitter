@@ -1,0 +1,202 @@
+kind: NodeDocument
+documentPath: nodes/transports.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: transportProtocol:terminal-cli
+    kind: TransportProtocol
+    transportId: terminal-cli
+    label: Interactive terminal CLI
+    protocolKind: cli-stdio
+    interactive: true
+    streaming: true
+    requestShape: stdin / CLI arguments
+    responseShape: stdout / terminal session
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: transportProtocol:shell-hook-runtime
+    kind: TransportProtocol
+    transportId: shell-hook-runtime
+    label: Shell hook lifecycle runtime
+    protocolKind: shell-hooks
+    interactive: true
+    streaming: true
+    requestShape: hook invocation payload
+    responseShape: shell hook status and output
+    evidenceRefs:
+      - repo-target-index
+      - repo-target-claude
+      - repo-target-codex
+  - id: transportProtocol:anthropic
+    kind: TransportProtocol
+    transportId: anthropic
+    label: Anthropic Messages API
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /v1/messages
+    responseShape: Anthropic message response
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:openai-chat
+    kind: TransportProtocol
+    transportId: openai-chat
+    label: OpenAI Chat Completions
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /v1/chat/completions
+    responseShape: chat.completion
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:openai-responses
+    kind: TransportProtocol
+    transportId: openai-responses
+    label: OpenAI Responses API
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /v1/responses
+    responseShape: response
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:google
+    kind: TransportProtocol
+    transportId: google
+    label: Google GenerateContent
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /v1beta/models/*
+    responseShape: candidates[]
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:passthrough
+    kind: TransportProtocol
+    transportId: passthrough
+    label: Passthrough upstream protocol
+    status: scorecard-gated
+    protocolKind: http-proxy
+    interactive: false
+    streaming: true
+    requestShape: provider-native path
+    responseShape: provider-native response
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:bedrock-converse
+    kind: TransportProtocol
+    transportId: bedrock-converse
+    label: Bedrock Converse
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /converse
+    responseShape: Bedrock output.message
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:vertex-native
+    kind: TransportProtocol
+    transportId: vertex-native
+    label: Vertex native GenerateContent
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /v1/projects/...:generateContent
+    responseShape: Vertex candidates[]
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+  - id: transportProtocol:azure-foundry
+    kind: TransportProtocol
+    transportId: azure-foundry
+    label: Azure Foundry Chat Completions
+    status: scorecard-gated
+    protocolKind: http-json
+    interactive: false
+    streaming: true
+    requestShape: POST /models/chat/completions
+    responseShape: Azure Foundry chat completion
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+  - id: transportRuntime:terminal-cli
+    kind: TransportRuntime
+    runtimeId: terminal-cli
+    transportId: terminal-cli
+    label: Interactive terminal CLI runtime
+    runtimeKind: local-process
+    persistentSession: true
+    stdinInjection: true
+    blockingStopHook: false
+    mcpSupport: false
+    containerizable: true
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: transportRuntime:shell-hook-runtime
+    kind: TransportRuntime
+    runtimeId: shell-hook-runtime
+    transportId: shell-hook-runtime
+    label: Runtime hook execution surface
+    runtimeKind: shell-hooks
+    persistentSession: true
+    stdinInjection: true
+    blockingStopHook: true
+    mcpSupport: false
+    containerizable: false
+    evidenceRefs:
+      - repo-target-index
+      - repo-target-claude
+      - repo-target-codex
+  - id: transportRuntime:amux-proxy
+    kind: TransportRuntime
+    runtimeId: amux-proxy
+    transportId: openai-responses
+    label: amux-proxy protocol/provider bridge
+    status: scorecard-gated
+    runtimeKind: http-proxy-bridge
+    persistentSession: false
+    stdinInjection: false
+    blockingStopHook: false
+    mcpSupport: false
+    containerizable: true
+    exposedTransportIds:
+      - anthropic
+      - openai-chat
+      - openai-responses
+      - google
+      - passthrough
+      - bedrock-converse
+      - vertex-native
+      - azure-foundry
+    providerIds:
+      - openai
+      - anthropic
+      - google
+      - bedrock
+      - vertex
+      - foundry
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-migration
+      - repo-transport-mux-scorecard

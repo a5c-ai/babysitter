@@ -1,0 +1,137 @@
+kind: EdgeDocument
+documentPath: edges/relations/agent-runtime/session-and-lifecycle.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:agentVersion:claude:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:claude:ge-0-0-0
+    to: sessionSemantics:claude:ge-0-0-0
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agentVersion:claude:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:claude:ge-0-0-0
+    to: lifecycleSemantics:claude:ge-0-0-0
+    evidenceRefs: *a1
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:session
+    relation: uses_session_semantics
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: sessionSemantics:codex:ge-0-0-0
+    evidenceRefs: &a2
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-119-0:session
+    relation: uses_session_semantics
+    from: agentVersion:codex:ge-0-119-0
+    to: sessionSemantics:codex:ge-0-0-0
+    evidenceRefs: &a3
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-119-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:codex:ge-0-119-0
+    to: lifecycleSemantics:codex:ge-0-119-0
+    evidenceRefs: *a3
+  - id: edge:agentVersion:cursor:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:cursor:ge-0-0-0
+    to: sessionSemantics:cursor:ge-0-0-0
+    evidenceRefs: &a4
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:agentVersion:cursor:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:cursor:ge-0-0-0
+    to: lifecycleSemantics:cursor:ge-0-0-0
+    evidenceRefs: *a4
+  - id: edge:agentVersion:gemini:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:gemini:ge-0-0-0
+    to: sessionSemantics:gemini:ge-0-0-0
+    evidenceRefs: &a5
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: edge:agentVersion:gemini:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:gemini:ge-0-0-0
+    to: lifecycleSemantics:gemini:ge-0-0-0
+    evidenceRefs: *a5
+  - id: edge:agentVersion:copilot:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:copilot:ge-0-0-0
+    to: sessionSemantics:copilot:ge-0-0-0
+    evidenceRefs: &a6
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: edge:agentVersion:copilot:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:copilot:ge-0-0-0
+    to: lifecycleSemantics:copilot:ge-0-0-0
+    evidenceRefs: *a6
+  - id: edge:agentVersion:pi:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:pi:ge-0-0-0
+    to: sessionSemantics:pi:ge-0-0-0
+    evidenceRefs: &a7
+      - repo-sdk-fallback
+  - id: edge:agentVersion:pi:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:pi:ge-0-0-0
+    to: lifecycleSemantics:pi:ge-0-0-0
+    evidenceRefs: *a7
+  - id: edge:agentVersion:omp:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:omp:ge-0-0-0
+    to: sessionSemantics:omp:ge-0-0-0
+    evidenceRefs: &a8
+      - repo-sdk-fallback
+  - id: edge:agentVersion:omp:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:omp:ge-0-0-0
+    to: lifecycleSemantics:omp:ge-0-0-0
+    evidenceRefs: *a8
+  - id: edge:agentVersion:opencode:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:opencode:ge-0-0-0
+    to: sessionSemantics:opencode:ge-0-0-0
+    evidenceRefs: &a9
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:agentVersion:opencode:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:opencode:ge-0-0-0
+    to: lifecycleSemantics:opencode:ge-0-0-0
+    evidenceRefs: *a9
+  - id: edge:agentVersion:openclaw:ge-0-0-0:session
+    relation: uses_session_semantics
+    from: agentVersion:openclaw:ge-0-0-0
+    to: sessionSemantics:openclaw:ge-0-0-0
+    evidenceRefs: &a10
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: edge:agentVersion:openclaw:ge-0-0-0:lifecycle
+    relation: uses_lifecycle_semantics
+    from: agentVersion:openclaw:ge-0-0-0
+    to: lifecycleSemantics:openclaw:ge-0-0-0
+    evidenceRefs: *a10

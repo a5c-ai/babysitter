@@ -1,0 +1,102 @@
+kind: NodeDocument
+documentPath: nodes/providers/products.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: provider:anthropic
+    kind: ModelProviderProduct
+    providerId: anthropic
+    displayName: Anthropic
+    kindLabel: foundation-model-provider
+    vendor: Anthropic
+    homepage: https://www.anthropic.com/product/claude-code
+    apiFamilies:
+      - messages
+    authKinds:
+      - ANTHROPIC_API_KEY
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+      - web-anthropic-claude-code
+  - id: provider:openai
+    kind: ModelProviderProduct
+    providerId: openai
+    displayName: OpenAI
+    kindLabel: foundation-model-provider
+    vendor: OpenAI
+    homepage: https://developers.openai.com/codex
+    apiFamilies:
+      - responses
+      - chat
+    authKinds:
+      - OPENAI_API_KEY
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - web-openai-codex-skills
+  - id: provider:google
+    kind: ModelProviderProduct
+    providerId: google
+    displayName: Google
+    kindLabel: foundation-model-provider
+    vendor: Google
+    homepage: null
+    apiFamilies:
+      - generateContent
+    authKinds:
+      - GOOGLE_API_KEY
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: provider:github
+    kind: ModelProviderProduct
+    providerId: github
+    displayName: GitHub
+    kindLabel: model-access-broker
+    vendor: GitHub
+    homepage: null
+    apiFamilies:
+      - chat
+    authKinds:
+      - GITHUB_TOKEN
+      - COPILOT_GITHUB_TOKEN
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: provider:bedrock
+    kind: ModelProviderProduct
+    providerId: bedrock
+    displayName: Bedrock
+    kindLabel: cloud-provider
+    vendor: Bedrock
+    homepage: null
+    apiFamilies: []
+    authKinds: []
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: provider:vertex
+    kind: ModelProviderProduct
+    providerId: vertex
+    displayName: Vertex
+    kindLabel: cloud-provider
+    vendor: Vertex
+    homepage: null
+    apiFamilies: []
+    authKinds: []
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: provider:foundry
+    kind: ModelProviderProduct
+    providerId: foundry
+    displayName: Foundry
+    kindLabel: cloud-provider
+    vendor: Foundry
+    homepage: null
+    apiFamilies: []
+    authKinds: []
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture

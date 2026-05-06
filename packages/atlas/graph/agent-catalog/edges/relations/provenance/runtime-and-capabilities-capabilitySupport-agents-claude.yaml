@@ -1,0 +1,210 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-claude.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:claude:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:skills:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:skills
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:claude:ge-0-0-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:claude:ge-0-0-0:skills:claim:web-claude-code-commands-and-skills
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:skills
+    to: claim:web-claude-code-commands-and-skills
+    evidenceRefs:
+      - web-claude-code-commands
+      - web-claude-code-skills
+      - web-claude-code-claude-directory
+  - id: edge:capabilitySupport:claude:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:thinking:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:thinking
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:capabilitySupport:claude:ge-0-0-0:thinking:claim:web-claude-code-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:thinking
+    to: claim:web-claude-code-core-agentic
+    evidenceRefs:
+      - web-claude-code-overview
+      - web-claude-code-quickstart
+      - web-claude-code-interactive-mode
+  - id: edge:capabilitySupport:claude:ge-0-0-0:mcp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:mcp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:mcp:claim:web-claude-code-mcp
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:mcp
+    to: claim:web-claude-code-mcp
+    evidenceRefs:
+      - web-claude-code-mcp
+      - web-claude-code-tools-reference
+  - id: edge:capabilitySupport:claude:ge-0-0-0:tool-approval:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:tool-approval
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:tool-approval:claim:web-claude-code-tool-approval
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:tool-approval
+    to: claim:web-claude-code-tool-approval
+    evidenceRefs:
+      - web-claude-code-permissions
+      - web-claude-code-permission-modes
+      - web-anthropic-claude-code-auto-mode
+  - id: edge:capabilitySupport:claude:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:interactive-mode:claim:web-claude-code-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:interactive-mode
+    to: claim:web-claude-code-core-agentic
+    evidenceRefs:
+      - web-claude-code-overview
+      - web-claude-code-quickstart
+      - web-claude-code-interactive-mode
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stdin-injection:claim:web-claude-code-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stdin-injection
+    to: claim:web-claude-code-stdin-injection
+    evidenceRefs:
+      - web-claude-code-headless
+      - web-claude-code-cli-reference
+  - id: edge:capabilitySupport:claude:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:image-input:claim:web-claude-code-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:image-input
+    to: claim:web-claude-code-image-input
+    evidenceRefs:
+      - web-claude-platform-vision
+      - web-claude-code-overview
+  - id: edge:capabilitySupport:claude:ge-0-0-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:runtime-hooks:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:claude:ge-0-0-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:claude:ge-0-0-0:runtime-hooks:claim:web-claude-code-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    to: claim:web-claude-code-hooks
+    evidenceRefs:
+      - web-claude-code-hooks
+      - web-claude-code-hooks-guide
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stop-hook:claim:repo-target-claude
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stop-hook
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stop-hook:claim:web-claude-code-stop-hook
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:stop-hook
+    to: claim:web-claude-code-stop-hook
+    evidenceRefs:
+      - web-claude-code-hooks
+      - repo-target-claude
+      - repo-target-index
+  - id: edge:capabilitySupport:claude:ge-0-0-0:subagent-dispatch:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:subagent-dispatch:claim:web-claude-code-subagents
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+    to: claim:web-claude-code-subagents
+    evidenceRefs:
+      - web-claude-code-subagents
+      - web-claude-code-features-overview
+      - web-claude-code-claude-directory
+  - id: edge:capabilitySupport:claude:ge-0-0-0:parallel-execution:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:parallel-execution
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:parallel-execution:claim:web-claude-code-parallel-work
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:parallel-execution
+    to: claim:web-claude-code-parallel-work
+    evidenceRefs:
+      - web-claude-code-agent-teams
+      - web-claude-code-subagents
+      - web-claude-code-quickstart
+  - id: edge:capabilitySupport:claude:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:session-resume:claim:web-claude-code-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:claude:ge-0-0-0:session-resume
+    to: claim:web-claude-code-session-resume
+    evidenceRefs:
+      - web-claude-code-checkpointing
+      - web-claude-code-headless
+      - web-claude-code-cli-reference

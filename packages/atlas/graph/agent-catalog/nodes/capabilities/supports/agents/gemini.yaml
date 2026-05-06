@@ -1,0 +1,104 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/gemini.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:gemini:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Gemini CLI documents first-class agent skills across workspace, user, and extension tiers.
+    evidenceRefs: &geminiSkills
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-cli-skills
+  - id: capabilitySupport:gemini:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Gemini CLI is documented as an interactive and automation-capable terminal agent surface.
+    evidenceRefs: &geminiCore
+      - repo-sdk-fallback
+      - web-gemini-cli-index
+      - web-gemini-cli-reference
+  - id: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Interactive REPL semantics are documented directly in the Gemini CLI reference.
+    evidenceRefs: *geminiCore
+  - id: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Headless and piped execution are documented separately from interactive usage.
+    evidenceRefs: &geminiStdin
+      - repo-sdk-fallback
+      - web-gemini-cli-headless
+      - web-gemini-cli-reference
+  - id: capabilitySupport:gemini:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Public Gemini CLI evidence for image input is weaker than for hooks or resume, but the docs and changelog do describe multimodal CLI support.
+    evidenceRefs: &geminiImages
+      - repo-sdk-fallback
+      - web-gemini-cli-index
+      - web-gemini-cli-changelog
+  - id: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Gemini CLI hook events are documented directly, instead of relying on local hook-name mapping alone.
+    evidenceRefs: &geminiHooks
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-cli-hooks
+  - id: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: The normalized stop-hook capability is backed by Gemini's documented end-of-loop hook events rather than a literal Stop event name.
+    evidenceRefs: *geminiHooks
+  - id: capabilitySupport:gemini:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:gemini:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:gemini:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Gemini CLI resume semantics are documented through both session management and checkpoint restoration.
+    evidenceRefs: &geminiResume
+      - repo-sdk-fallback
+      - web-gemini-cli-session-management
+      - web-gemini-cli-checkpointing

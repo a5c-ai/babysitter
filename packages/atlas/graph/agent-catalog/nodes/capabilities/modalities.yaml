@@ -1,0 +1,74 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/modalities.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: modality:text
+    kind: Modality
+    modalityId: text
+    direction: bidirectional
+    label: Text prompts and responses
+    mediaType: text/plain
+    semanticCategory: text
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-anthropic-claude-code
+  - id: modality:image
+    kind: Modality
+    modalityId: image
+    direction: input
+    label: Image input
+    mediaType: image/*
+    semanticCategory: image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: modality:hooks
+    kind: Modality
+    modalityId: hooks
+    direction: bidirectional
+    label: Lifecycle hooks
+    mediaType: text/plain
+    semanticCategory: hooks
+    evidenceRefs:
+      - repo-target-index
+      - web-gemini-hooks
+  - id: modality:mcp
+    kind: Modality
+    modalityId: mcp
+    direction: bidirectional
+    label: Model Context Protocol
+    mediaType: text/plain
+    semanticCategory: mcp
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-github-copilot-agent
+  - id: modality:commands
+    kind: Modality
+    modalityId: commands
+    direction: input
+    label: Slash commands and command surfaces
+    mediaType: text/plain
+    semanticCategory: commands
+    evidenceRefs:
+      - repo-target-claude
+      - repo-target-codex
+      - repo-target-cursor
+      - repo-target-copilot
+  - id: modality:json
+    kind: Modality
+    modalityId: json
+    direction: bidirectional
+    label: Structured JSON payloads
+    mediaType: application/json
+    semanticCategory: json
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: modality:stream-events
+    kind: Modality
+    modalityId: stream-events
+    direction: output
+    label: Streaming events
+    mediaType: text/plain
+    semanticCategory: stream-events
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture

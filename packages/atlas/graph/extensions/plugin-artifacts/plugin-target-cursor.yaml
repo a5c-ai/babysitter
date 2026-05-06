@@ -9,6 +9,11 @@ attributes:
   adapterName: cursor
   skillHandling: derived-from-commands
   hookRegistrationFormat: cursor
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths:
+    - "hooks/hooks-cursor.json"
+  harnessManifestPath: ".cursor-plugin/plugin.json"
+  pluginRootEnvVarForExtension: null
   marketplacePath: null
   pluginRootEnvVar: CURSOR_PLUGIN_ROOT
   scriptVariants:

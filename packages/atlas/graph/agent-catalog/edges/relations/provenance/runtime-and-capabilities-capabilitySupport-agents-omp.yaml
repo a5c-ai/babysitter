@@ -1,0 +1,76 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-omp.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:omp:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:skills:claim:web-omp-skills
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:skills
+    to: claim:web-omp-skills
+    evidenceRefs:
+      - web-omp-skills
+  - id: edge:capabilitySupport:omp:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:thinking:claim:web-omp-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:thinking
+    to: claim:web-omp-core-agentic
+    evidenceRefs:
+      - web-omp-readme
+  - id: edge:capabilitySupport:omp:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:interactive-mode:claim:web-omp-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:interactive-mode
+    to: claim:web-omp-core-agentic
+    evidenceRefs:
+      - web-omp-readme
+  - id: edge:capabilitySupport:omp:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:stdin-injection:claim:web-omp-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:stdin-injection
+    to: claim:web-omp-stdin-injection
+    evidenceRefs:
+      - web-omp-readme
+  - id: edge:capabilitySupport:omp:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:image-input:claim:web-omp-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:image-input
+    to: claim:web-omp-core-agentic
+    evidenceRefs:
+      - web-omp-readme
+  - id: edge:capabilitySupport:omp:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:session-resume:claim:web-omp-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:omp:ge-0-0-0:session-resume
+    to: claim:web-omp-session-resume
+    evidenceRefs:
+      - web-omp-session-resume

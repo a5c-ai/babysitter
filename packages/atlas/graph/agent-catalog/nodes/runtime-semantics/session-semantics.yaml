@@ -1,0 +1,214 @@
+kind: NodeDocument
+documentPath: nodes/runtime-semantics/session-semantics.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: sessionSemantics:claude:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:claude:ge-0-0-0
+    agentId: claude
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - CLAUDE_ENV_FILE
+      - CLAUDE_CODE_SESSION_ID
+    resumeSemantics: Session binding is mediated by Claude env files plus a shared .a5c run directory.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CLAUDE_CODE_SESSION_ID
+      - key: env_file
+        envVars:
+          - CLAUDE_ENV_FILE
+      - key: project_dir
+        envVars:
+          - CLAUDE_PROJECT_DIR
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: sessionSemantics:codex:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:codex:ge-0-0-0
+    agentId: codex
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - CODEX_THREAD_ID
+      - CODEX_SESSION_ID
+      - CODEX_PLUGIN_ROOT
+    resumeSemantics: Codex session binding relies on thread/session IDs and plugin-root state.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CODEX_SESSION_ID
+      - key: run_id
+        envVars:
+          - CODEX_RUN_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: sessionSemantics:cursor:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:cursor:ge-0-0-0
+    agentId: cursor
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - CURSOR_PROJECT_DIR
+      - CURSOR_VERSION
+    resumeSemantics: Cursor detection is environment-driven and anchored to project-directory signals.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CURSOR_SESSION
+          - CURSOR_AGENT_SESSION
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: sessionSemantics:gemini:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:gemini:ge-0-0-0
+    agentId: gemini
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - GEMINI_SESSION_ID
+      - GEMINI_CWD
+      - GEMINI_PROJECT_DIR
+    resumeSemantics: Gemini sessions are detected from CLI extension/runtime environment variables.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - GEMINI_SESSION_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: sessionSemantics:copilot:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:copilot:ge-0-0-0
+    agentId: copilot
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - COPILOT_SESSION_ID
+      - COPILOT_CLI_SESSION
+      - GH_COPILOT_SESSION
+    resumeSemantics: Copilot surfaces session IDs from CLI and GitHub session variables.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - COPILOT_CLI_SESSION
+          - GH_COPILOT_SESSION
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: sessionSemantics:pi:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:pi:ge-0-0-0
+    agentId: pi
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - PI_SESSION_ID
+      - PI_RUN_ID
+    resumeSemantics: Pi sessions are keyed by explicit run/session identifiers.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - PI_SESSION_ID
+      - key: run_id
+        envVars:
+          - PI_RUN_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: sessionSemantics:omp:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:omp:ge-0-0-0
+    agentId: omp
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - OMP_SESSION_ID
+      - OMP_RUN_ID
+    resumeSemantics: Oh-My-Pi reuses Pi-style run/session identifiers.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OMP_SESSION_ID
+      - key: run_id
+        envVars:
+          - OMP_RUN_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: sessionSemantics:opencode:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:opencode:ge-0-0-0
+    agentId: opencode
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - AGENT_SESSION_ID
+      - OPENCODE_SESSION_ID
+      - OPENCODE_RUN_ID
+    resumeSemantics: OpenCode uses agent session IDs with optional run IDs for shell and hook flows.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OPENCODE_SESSION
+      - key: run_id
+        envVars:
+          - OPENCODE_RUN_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: sessionSemantics:openclaw:ge-0-0-0
+    kind: SessionSemantics
+    sessionSemanticsId: sessionSemantics:openclaw:ge-0-0-0
+    agentId: openclaw
+    versionRange: ">=0.0.0"
+    sessionDirStrategy: .a5c/runs
+    sessionIdSources:
+      - OPENCLAW_SESSION
+      - OPENCLAW_RUN_ID
+      - OPENCLAW_SHELL
+      - OPENCLAW_HOME
+    resumeSemantics: OpenClaw detection is currently env-driven with no shared runtime-hook support in fallback metadata.
+    stateFilePatterns:
+      - .a5c/runs/**
+    pidMarkerPolicy: env-or-run-dir
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OPENCLAW_SESSION
+      - key: run_id
+        envVars:
+          - OPENCLAW_RUN_ID
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-agent-mux-host

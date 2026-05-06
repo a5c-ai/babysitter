@@ -9,6 +9,10 @@ attributes:
   commandFormat: extension-manifest
   skillHandling: native
   hookRegistrationFormat: gemini
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
   marketplacePath: null
   pluginRootEnvVar: GEMINI_EXTENSION_PATH
   scriptVariants:

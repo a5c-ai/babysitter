@@ -1,0 +1,43 @@
+kind: NodeDocument
+documentPath: nodes/agents/babysitter-agent.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: agent:babysitter-agent
+    kind: AgentProduct
+    agentId: babysitter-agent
+    displayName: Babysitter Agent
+    aliases:
+      - babysitter-agent
+    vendor: a5c.ai
+    families:
+      - cli-agent
+      - orchestration-runtime
+    homepage: https://github.com/a5c-ai/babysitter
+    repoUrls:
+      - https://github.com/a5c-ai/babysitter
+    status: active
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli
+  - id: agentVersion:babysitter-agent:ge-5-0-0
+    kind: AgentVersion
+    agentVersionId: agentVersion:babysitter-agent:ge-5-0-0
+    agentId: babysitter-agent
+    versionRange: ">=5.0.0"
+    releaseChannel: stable
+    since: 2026-04-24T00:00:00.000Z
+    until: null
+    defaultModelIds: []
+    defaultModelProviderIds: []
+    runtimeFamily: orchestration-agent-cli
+    osSupport:
+      - darwin
+      - linux
+      - win32
+    displayName: Babysitter Agent
+    summary: Optional Babysitter runtime CLI that creates and resumes runs, invokes harnesses, and exposes daemon, observer, and MCP server surfaces.
+    sourcePackage: packages/babysitter-agent
+    aliases:
+      - babysitter-agent
+    pluginTargetIds: []
+    evidenceRefs: *a1

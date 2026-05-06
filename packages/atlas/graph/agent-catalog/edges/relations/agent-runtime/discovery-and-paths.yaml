@@ -1,0 +1,433 @@
+kind: EdgeDocument
+documentPath: edges/relations/agent-runtime/discovery-and-paths.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:agentVersion:claude:ge-0-0-0:discovery:discovery:claude:host-env
+    relation: discovered_by
+    from: agentVersion:claude:ge-0-0-0
+    to: discovery:claude:host-env
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agentVersion:claude:ge-0-0-0:discovery:discovery:claude:hooks-mux:1
+    relation: discovered_by
+    from: agentVersion:claude:ge-0-0-0
+    to: discovery:claude:hooks-mux:1
+    evidenceRefs: *a1
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:discovery:discovery:codex:host-env
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: discovery:codex:host-env
+    evidenceRefs: &a2
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:discovery:discovery:codex:hooks-mux:2
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: discovery:codex:hooks-mux:2
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:discovery:discovery:codex:hooks-mux:3
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: discovery:codex:hooks-mux:3
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-119-0:discovery:discovery:codex:host-env
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-119-0
+    to: discovery:codex:host-env
+    evidenceRefs: &a3
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-119-0:discovery:discovery:codex:hooks-mux:2
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-119-0
+    to: discovery:codex:hooks-mux:2
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:discovery:discovery:codex:hooks-mux:3
+    relation: discovered_by
+    from: agentVersion:codex:ge-0-119-0
+    to: discovery:codex:hooks-mux:3
+    evidenceRefs: *a3
+  - id: edge:agentVersion:cursor:ge-0-0-0:discovery:discovery:cursor:host-env
+    relation: discovered_by
+    from: agentVersion:cursor:ge-0-0-0
+    to: discovery:cursor:host-env
+    evidenceRefs: &a4
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:agentVersion:cursor:ge-0-0-0:discovery:discovery:cursor:hooks-mux:6
+    relation: discovered_by
+    from: agentVersion:cursor:ge-0-0-0
+    to: discovery:cursor:hooks-mux:6
+    evidenceRefs: *a4
+  - id: edge:agentVersion:gemini:ge-0-0-0:discovery:discovery:gemini:host-env
+    relation: discovered_by
+    from: agentVersion:gemini:ge-0-0-0
+    to: discovery:gemini:host-env
+    evidenceRefs: &a5
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: edge:agentVersion:gemini:ge-0-0-0:discovery:discovery:gemini:hooks-mux:4
+    relation: discovered_by
+    from: agentVersion:gemini:ge-0-0-0
+    to: discovery:gemini:hooks-mux:4
+    evidenceRefs: *a5
+  - id: edge:agentVersion:copilot:ge-0-0-0:discovery:discovery:copilot:host-env
+    relation: discovered_by
+    from: agentVersion:copilot:ge-0-0-0
+    to: discovery:copilot:host-env
+    evidenceRefs: &a6
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: edge:agentVersion:copilot:ge-0-0-0:discovery:discovery:copilot:hooks-mux:5
+    relation: discovered_by
+    from: agentVersion:copilot:ge-0-0-0
+    to: discovery:copilot:hooks-mux:5
+    evidenceRefs: *a6
+  - id: edge:agentVersion:pi:ge-0-0-0:discovery:discovery:pi:host-env
+    relation: discovered_by
+    from: agentVersion:pi:ge-0-0-0
+    to: discovery:pi:host-env
+    evidenceRefs: &a7
+      - repo-sdk-fallback
+  - id: edge:agentVersion:pi:ge-0-0-0:discovery:discovery:pi:hooks-mux:7
+    relation: discovered_by
+    from: agentVersion:pi:ge-0-0-0
+    to: discovery:pi:hooks-mux:7
+    evidenceRefs: *a7
+  - id: edge:agentVersion:omp:ge-0-0-0:discovery:discovery:omp:host-env
+    relation: discovered_by
+    from: agentVersion:omp:ge-0-0-0
+    to: discovery:omp:host-env
+    evidenceRefs: &a8
+      - repo-sdk-fallback
+  - id: edge:agentVersion:omp:ge-0-0-0:discovery:discovery:oh-my-pi:hooks-mux:8
+    relation: discovered_by
+    from: agentVersion:omp:ge-0-0-0
+    to: discovery:oh-my-pi:hooks-mux:8
+    evidenceRefs: *a8
+  - id: edge:agentVersion:opencode:ge-0-0-0:discovery:discovery:opencode:host-env
+    relation: discovered_by
+    from: agentVersion:opencode:ge-0-0-0
+    to: discovery:opencode:host-env
+    evidenceRefs: &a9
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:agentVersion:opencode:ge-0-0-0:discovery:discovery:opencode:hooks-mux:9
+    relation: discovered_by
+    from: agentVersion:opencode:ge-0-0-0
+    to: discovery:opencode:hooks-mux:9
+    evidenceRefs: *a9
+  - id: edge:agentVersion:openclaw:ge-0-0-0:discovery:discovery:openclaw:host-env
+    relation: discovered_by
+    from: agentVersion:openclaw:ge-0-0-0
+    to: discovery:openclaw:host-env
+    evidenceRefs: &a10
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: edge:agentVersion:openclaw:ge-0-0-0:discovery:discovery:openclaw:hooks-mux:10
+    relation: discovered_by
+    from: agentVersion:openclaw:ge-0-0-0
+    to: discovery:openclaw:hooks-mux:10
+    evidenceRefs: *a10
+  - id: edge:process:packages/catalog/process-library-catalog:path:path:auto:packages-catalog-process-library-catalog-js
+    relation: references_path
+    from: process:packages/catalog/process-library-catalog
+    to: path:auto:packages-catalog-process-library-catalog-js
+    evidenceRefs: &a11
+      - repo-process-catalog
+  - id: edge:process:packages/catalog/process-library-catalog:path:path:auto:packages-catalog-src-app
+    relation: references_path
+    from: process:packages/catalog/process-library-catalog
+    to: path:auto:packages-catalog-src-app
+    evidenceRefs: *a11
+  - id: edge:process:packages/catalog/process-library-catalog:path:path:auto:packages-catalog-src-lib
+    relation: references_path
+    from: process:packages/catalog/process-library-catalog
+    to: path:auto:packages-catalog-src-lib
+    evidenceRefs: *a11
+  - id: edge:process:agent-mux/model-catalog:path:path:auto:packages-agent-mux-processes-model-catalog-js
+    relation: references_path
+    from: process:agent-mux/model-catalog
+    to: path:auto:packages-agent-mux-processes-model-catalog-js
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: edge:sessionSemantics:claude:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:claude:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:codex:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:codex:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:cursor:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:cursor:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:gemini:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:gemini:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+  - id: edge:sessionSemantics:copilot:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:copilot:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:pi:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:pi:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:omp:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:omp:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:opencode:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:opencode:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: edge:sessionSemantics:openclaw:ge-0-0-0:path:runs
+    relation: references_path
+    from: sessionSemantics:openclaw:ge-0-0-0
+    to: path:.a5c-runs
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-agent-mux-host
+  - id: edge:lifecycleSemantics:claude:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:claude:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-claude
+      - web-anthropic-claude-code-autonomy
+  - id: edge:lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-codex-windows-hooks
+  - id: edge:lifecycleSemantics:codex:ge-0-119-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:codex:ge-0-119-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-codex-windows-hooks
+  - id: edge:lifecycleSemantics:cursor:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:cursor:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-cursor
+  - id: edge:lifecycleSemantics:gemini:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:gemini:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: edge:lifecycleSemantics:copilot:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:copilot:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: edge:lifecycleSemantics:pi:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:pi:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:omp:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:omp:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:lifecycleSemantics:opencode:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:opencode:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:lifecycleSemantics:openclaw:ge-0-0-0:path:graph
+    relation: references_path
+    from: lifecycleSemantics:openclaw:ge-0-0-0
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:package:@a5c-ai/agent-catalog:path:graph
+    relation: references_path
+    from: package:@a5c-ai/agent-catalog
+    to: path:agent-catalog-graph
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:package:@a5c-ai/catalog:path:catalog-api
+    relation: references_path
+    from: package:@a5c-ai/catalog
+    to: path:catalog-api
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:package:@a5c-ai/transport-mux:path:transport-mux
+    relation: references_path
+    from: package:@a5c-ai/transport-mux
+    to: path:transport-mux
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: edge:pluginArtifact:claude-code:manifest:path
+    relation: references_path
+    from: pluginArtifact:claude-code:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-claude-code-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:claude-code:container-image:path
+    relation: references_path
+    from: pluginArtifact:claude-code:container-image
+    to: path:auto:ghcr-io-anthropics-claude-code
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:codex:manifest:path
+    relation: references_path
+    from: pluginArtifact:codex:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-codex-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:codex:container-image:path
+    relation: references_path
+    from: pluginArtifact:codex:container-image
+    to: path:auto:ghcr-io-openai-codex
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:cursor:manifest:path
+    relation: references_path
+    from: pluginArtifact:cursor:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-cursor-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:cursor:container-image:path
+    relation: references_path
+    from: pluginArtifact:cursor:container-image
+    to: path:auto:ghcr-io-cursor-cursor-agent
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:gemini:manifest:path
+    relation: references_path
+    from: pluginArtifact:gemini:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-gemini-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:gemini:container-image:path
+    relation: references_path
+    from: pluginArtifact:gemini:container-image
+    to: path:auto:ghcr-io-google-gemini-cli
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:github-copilot:manifest:path
+    relation: references_path
+    from: pluginArtifact:github-copilot:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-github-copilot-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:github-copilot:container-image:path
+    relation: references_path
+    from: pluginArtifact:github-copilot:container-image
+    to: path:auto:ghcr-io-github-copilot-cli
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:pi:manifest:path
+    relation: references_path
+    from: pluginArtifact:pi:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-pi-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:pi:container-image:path
+    relation: references_path
+    from: pluginArtifact:pi:container-image
+    to: path:auto:ghcr-io-a5c-ai-pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:oh-my-pi:manifest:path
+    relation: references_path
+    from: pluginArtifact:oh-my-pi:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-oh-my-pi-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:oh-my-pi:container-image:path
+    relation: references_path
+    from: pluginArtifact:oh-my-pi:container-image
+    to: path:auto:ghcr-io-a5c-ai-omp
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:opencode:manifest:path
+    relation: references_path
+    from: pluginArtifact:opencode:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-opencode-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:opencode:container-image:path
+    relation: references_path
+    from: pluginArtifact:opencode:container-image
+    to: path:auto:ghcr-io-anomalyco-opencode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:openclaw:manifest:path
+    relation: references_path
+    from: pluginArtifact:openclaw:manifest
+    to: path:auto:packages-agent-plugins-mux-src-targets-openclaw-ts
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:openclaw:container-image:path
+    relation: references_path
+    from: pluginArtifact:openclaw:container-image
+    to: path:auto:ghcr-io-openclaw-openclaw
+    evidenceRefs:
+      - repo-sdk-fallback

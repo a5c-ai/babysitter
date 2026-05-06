@@ -1,0 +1,112 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-providers.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:anthropic:streaming:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:streaming
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:anthropic:streaming:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:streaming
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capabilitySupport:anthropic:streaming:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:streaming
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:capabilitySupport:anthropic:tool-calling:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:tool-calling
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:anthropic:tool-calling:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:tool-calling
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capabilitySupport:anthropic:tool-calling:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: capabilitySupport:anthropic:tool-calling
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:capabilitySupport:openai:streaming:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:openai:streaming
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openai:streaming:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: capabilitySupport:openai:streaming
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:capabilitySupport:openai:streaming:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: capabilitySupport:openai:streaming
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:capabilitySupport:openai:tool-calling:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:openai:tool-calling
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openai:tool-calling:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: capabilitySupport:openai:tool-calling
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:capabilitySupport:openai:tool-calling:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: capabilitySupport:openai:tool-calling
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:capabilitySupport:google:streaming:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:google:streaming
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:google:streaming:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: capabilitySupport:google:streaming
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:capabilitySupport:google:streaming:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:google:streaming
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:capabilitySupport:google:tool-calling:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:google:tool-calling
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:google:tool-calling:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: capabilitySupport:google:tool-calling
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:capabilitySupport:google:tool-calling:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:google:tool-calling
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks

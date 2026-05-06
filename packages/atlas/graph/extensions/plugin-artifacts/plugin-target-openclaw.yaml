@@ -9,6 +9,10 @@ attributes:
   adapterName: openclaw
   skillHandling: derived-from-commands
   hookRegistrationFormat: openclaw
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
   marketplacePath: null
   scriptVariants:
     - bash

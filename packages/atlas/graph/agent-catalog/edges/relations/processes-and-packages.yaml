@@ -1,0 +1,71 @@
+kind: EdgeDocument
+documentPath: edges/relations/processes-and-packages.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:package:@a5c-ai/catalog:process:process:packages/catalog/process-library-catalog
+    relation: surfaces_process
+    from: package:@a5c-ai/catalog
+    to: process:packages/catalog/process-library-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:package:@a5c-ai/agent-mux-core:process:process:agent-mux/model-catalog
+    relation: surfaces_process
+    from: package:@a5c-ai/agent-mux-core
+    to: process:agent-mux/model-catalog
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: edge:package:@a5c-ai/agent-catalog:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/agent-catalog
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:package:@a5c-ai/babysitter-sdk:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/babysitter-sdk
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:package:@a5c-ai/hooks-mux-core:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/hooks-mux-core
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:package:@a5c-ai/agent-plugins-mux:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/agent-plugins-mux
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:package:@a5c-ai/agent-mux-core:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/agent-mux-core
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:package:@a5c-ai/catalog:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/catalog
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:package:@a5c-ai/transport-mux:wraps-graph
+    relation: wraps_graph
+    from: package:@a5c-ai/transport-mux
+    to: graph:agent-catalog
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: edge:@a5c-ai/agent-catalog:ci
+    relation: validated_by_ci
+    from: package:@a5c-ai/agent-catalog
+    to: ci:@a5c-ai/agent-catalog
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:@a5c-ai/catalog:ci
+    relation: validated_by_ci
+    from: package:@a5c-ai/catalog
+    to: ci:@a5c-ai/catalog
+    evidenceRefs:
+      - repo-process-catalog

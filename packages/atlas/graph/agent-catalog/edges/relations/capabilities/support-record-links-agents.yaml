@@ -1,0 +1,478 @@
+kind: EdgeDocument
+documentPath: edges/relations/capabilities/support-record-links-agents.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:claude:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:mcp:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:mcp
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:tool-approval:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:tool-approval
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:subagent-dispatch:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:parallel-execution:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:parallel-execution
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:claude:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:claude:ge-0-0-0
+    to: capabilitySupport:claude:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:codex:ge-0-119-0
+    to: capabilitySupport:codex:ge-0-119-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:cursor:ge-0-0-0
+    to: capabilitySupport:cursor:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:gemini:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:gemini:ge-0-0-0
+    to: capabilitySupport:gemini:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:mcp:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:mcp
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:copilot:ge-0-0-0
+    to: capabilitySupport:copilot:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:pi:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:pi:ge-0-0-0
+    to: capabilitySupport:pi:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:omp:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:omp:ge-0-0-0
+    to: capabilitySupport:omp:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:runtime-hooks:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:runtime-hooks
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:stop-hook:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:stop-hook
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:opencode:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:opencode:ge-0-0-0
+    to: capabilitySupport:opencode:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:skills:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:skills
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:thinking:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:thinking
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:interactive-mode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:stdin-injection
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:image-input:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:image-input
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:openclaw:ge-0-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:openclaw:ge-0-0-0
+    to: capabilitySupport:openclaw:ge-0-0-0:session-resume
+    evidenceRefs:
+      - repo-sdk-fallback

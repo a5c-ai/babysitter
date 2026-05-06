@@ -1,0 +1,88 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/catalog-core-models.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:model:claude-code-default:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: model:claude-code-default
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:model:claude-code-default:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: model:claude-code-default
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:model:codex-default:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: model:codex-default
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:model:gemini-cli-default:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: model:gemini-cli-default
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:model:gemini-cli-default:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: model:gemini-cli-default
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:model:copilot-default:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: model:copilot-default
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:model:copilot-default:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: model:copilot-default
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:modelVersion:claude-code-default:ge-0-0-0:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: modelVersion:claude-code-default:ge-0-0-0
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:modelVersion:claude-code-default:ge-0-0-0:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: modelVersion:claude-code-default:ge-0-0-0
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:modelVersion:codex-default:ge-0-0-0:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: modelVersion:codex-default:ge-0-0-0
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:modelVersion:gemini-cli-default:ge-0-0-0:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: modelVersion:gemini-cli-default:ge-0-0-0
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:modelVersion:gemini-cli-default:ge-0-0-0:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: modelVersion:gemini-cli-default:ge-0-0-0
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:modelVersion:copilot-default:ge-0-0-0:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: modelVersion:copilot-default:ge-0-0-0
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:modelVersion:copilot-default:ge-0-0-0:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: modelVersion:copilot-default:ge-0-0-0
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent

@@ -1,0 +1,462 @@
+kind: EdgeDocument
+documentPath: edges/relations/hooks-and-plugins.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:agentVersion:claude:ge-0-0-0:pluginTarget:claude-code
+    relation: targets_plugin_surface
+    from: agentVersion:claude:ge-0-0-0
+    to: pluginTarget:claude-code
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agentVersion:claude:ge-0-0-0:hookMapping:session-start:claude-code
+    relation: emits_hook
+    from: agentVersion:claude:ge-0-0-0
+    to: hookMapping:session-start:claude-code
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:hookMapping:stop:claude-code
+    relation: emits_hook
+    from: agentVersion:claude:ge-0-0-0
+    to: hookMapping:stop:claude-code
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:hookMapping:user-prompt-submit:claude-code
+    relation: emits_hook
+    from: agentVersion:claude:ge-0-0-0
+    to: hookMapping:user-prompt-submit:claude-code
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:hookMapping:pre-tool-use:claude-code
+    relation: emits_hook
+    from: agentVersion:claude:ge-0-0-0
+    to: hookMapping:pre-tool-use:claude-code
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:hookMapping:post-tool-use:claude-code
+    relation: emits_hook
+    from: agentVersion:claude:ge-0-0-0
+    to: hookMapping:post-tool-use:claude-code
+    evidenceRefs: *a1
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:pluginTarget:codex
+    relation: targets_plugin_surface
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: pluginTarget:codex
+    evidenceRefs: &a2
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:hookMapping:session-start:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: hookMapping:session-start:codex
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:hookMapping:stop:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: hookMapping:stop:codex
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:hookMapping:user-prompt-submit:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: hookMapping:user-prompt-submit:codex
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-119-0:pluginTarget:codex
+    relation: targets_plugin_surface
+    from: agentVersion:codex:ge-0-119-0
+    to: pluginTarget:codex
+    evidenceRefs: &a3
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-119-0:hookMapping:session-start:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-119-0
+    to: hookMapping:session-start:codex
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:hookMapping:stop:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-119-0
+    to: hookMapping:stop:codex
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:hookMapping:user-prompt-submit:codex
+    relation: emits_hook
+    from: agentVersion:codex:ge-0-119-0
+    to: hookMapping:user-prompt-submit:codex
+    evidenceRefs: *a3
+  - id: edge:agentVersion:cursor:ge-0-0-0:pluginTarget:cursor
+    relation: targets_plugin_surface
+    from: agentVersion:cursor:ge-0-0-0
+    to: pluginTarget:cursor
+    evidenceRefs: &a4
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:agentVersion:cursor:ge-0-0-0:hookMapping:session-start:cursor
+    relation: emits_hook
+    from: agentVersion:cursor:ge-0-0-0
+    to: hookMapping:session-start:cursor
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:hookMapping:stop:cursor
+    relation: emits_hook
+    from: agentVersion:cursor:ge-0-0-0
+    to: hookMapping:stop:cursor
+    evidenceRefs: *a4
+  - id: edge:agentVersion:gemini:ge-0-0-0:pluginTarget:gemini
+    relation: targets_plugin_surface
+    from: agentVersion:gemini:ge-0-0-0
+    to: pluginTarget:gemini
+    evidenceRefs: &a5
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: edge:agentVersion:gemini:ge-0-0-0:hookMapping:session-start:gemini
+    relation: emits_hook
+    from: agentVersion:gemini:ge-0-0-0
+    to: hookMapping:session-start:gemini
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:hookMapping:after-agent:gemini
+    relation: emits_hook
+    from: agentVersion:gemini:ge-0-0-0
+    to: hookMapping:after-agent:gemini
+    evidenceRefs: *a5
+  - id: edge:agentVersion:copilot:ge-0-0-0:pluginTarget:github-copilot
+    relation: targets_plugin_surface
+    from: agentVersion:copilot:ge-0-0-0
+    to: pluginTarget:github-copilot
+    evidenceRefs: &a6
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: edge:agentVersion:copilot:ge-0-0-0:hookMapping:session-start:github-copilot
+    relation: emits_hook
+    from: agentVersion:copilot:ge-0-0-0
+    to: hookMapping:session-start:github-copilot
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:hookMapping:session-end:github-copilot
+    relation: emits_hook
+    from: agentVersion:copilot:ge-0-0-0
+    to: hookMapping:session-end:github-copilot
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:hookMapping:user-prompt-submit:github-copilot
+    relation: emits_hook
+    from: agentVersion:copilot:ge-0-0-0
+    to: hookMapping:user-prompt-submit:github-copilot
+    evidenceRefs: *a6
+  - id: edge:agentVersion:pi:ge-0-0-0:pluginTarget:pi
+    relation: targets_plugin_surface
+    from: agentVersion:pi:ge-0-0-0
+    to: pluginTarget:pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:omp:ge-0-0-0:pluginTarget:oh-my-pi
+    relation: targets_plugin_surface
+    from: agentVersion:omp:ge-0-0-0
+    to: pluginTarget:oh-my-pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:opencode:ge-0-0-0:pluginTarget:opencode
+    relation: targets_plugin_surface
+    from: agentVersion:opencode:ge-0-0-0
+    to: pluginTarget:opencode
+    evidenceRefs: &a7
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:agentVersion:opencode:ge-0-0-0:hookMapping:session-start:opencode
+    relation: emits_hook
+    from: agentVersion:opencode:ge-0-0-0
+    to: hookMapping:session-start:opencode
+    evidenceRefs: *a7
+  - id: edge:agentVersion:opencode:ge-0-0-0:hookMapping:pre-tool-use:opencode
+    relation: emits_hook
+    from: agentVersion:opencode:ge-0-0-0
+    to: hookMapping:pre-tool-use:opencode
+    evidenceRefs: *a7
+  - id: edge:agentVersion:opencode:ge-0-0-0:hookMapping:post-tool-use:opencode
+    relation: emits_hook
+    from: agentVersion:opencode:ge-0-0-0
+    to: hookMapping:post-tool-use:opencode
+    evidenceRefs: *a7
+  - id: edge:agentVersion:opencode:ge-0-0-0:hookMapping:session-idle:opencode
+    relation: emits_hook
+    from: agentVersion:opencode:ge-0-0-0
+    to: hookMapping:session-idle:opencode
+    evidenceRefs: *a7
+  - id: edge:agentVersion:opencode:ge-0-0-0:hookMapping:shell-env:opencode
+    relation: emits_hook
+    from: agentVersion:opencode:ge-0-0-0
+    to: hookMapping:shell-env:opencode
+    evidenceRefs: *a7
+  - id: edge:agentVersion:openclaw:ge-0-0-0:pluginTarget:openclaw
+    relation: targets_plugin_surface
+    from: agentVersion:openclaw:ge-0-0-0
+    to: pluginTarget:openclaw
+    evidenceRefs: &a8
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: edge:agentVersion:openclaw:ge-0-0-0:hookMapping:session-start:openclaw
+    relation: emits_hook
+    from: agentVersion:openclaw:ge-0-0-0
+    to: hookMapping:session-start:openclaw
+    evidenceRefs: *a8
+  - id: edge:agentVersion:openclaw:ge-0-0-0:hookMapping:after-agent:openclaw
+    relation: emits_hook
+    from: agentVersion:openclaw:ge-0-0-0
+    to: hookMapping:after-agent:openclaw
+    evidenceRefs: *a8
+  - id: edge:agentVersion:openclaw:ge-0-0-0:hookMapping:session-end:openclaw
+    relation: emits_hook
+    from: agentVersion:openclaw:ge-0-0-0
+    to: hookMapping:session-end:openclaw
+    evidenceRefs: *a8
+  - id: edge:agentVersion:openclaw:ge-0-0-0:hookMapping:before-prompt-build:openclaw
+    relation: emits_hook
+    from: agentVersion:openclaw:ge-0-0-0
+    to: hookMapping:before-prompt-build:openclaw
+    evidenceRefs: *a8
+  - id: edge:hookMapping:session-start:claude-code:hook
+    relation: maps_hook
+    from: hookMapping:session-start:claude-code
+    to: hook:session-start
+    evidenceRefs: &a9
+      - repo-target-index
+  - id: edge:hookMapping:session-start:codex:hook
+    relation: maps_hook
+    from: hookMapping:session-start:codex
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:session-start:cursor:hook
+    relation: maps_hook
+    from: hookMapping:session-start:cursor
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:session-start:gemini:hook
+    relation: maps_hook
+    from: hookMapping:session-start:gemini
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:session-start:github-copilot:hook
+    relation: maps_hook
+    from: hookMapping:session-start:github-copilot
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:session-start:opencode:hook
+    relation: maps_hook
+    from: hookMapping:session-start:opencode
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:session-start:openclaw:hook
+    relation: maps_hook
+    from: hookMapping:session-start:openclaw
+    to: hook:session-start
+    evidenceRefs: *a9
+  - id: edge:hookMapping:stop:claude-code:hook
+    relation: maps_hook
+    from: hookMapping:stop:claude-code
+    to: hook:stop
+    evidenceRefs: &a10
+      - repo-target-index
+  - id: edge:hookMapping:stop:codex:hook
+    relation: maps_hook
+    from: hookMapping:stop:codex
+    to: hook:stop
+    evidenceRefs: *a10
+  - id: edge:hookMapping:stop:cursor:hook
+    relation: maps_hook
+    from: hookMapping:stop:cursor
+    to: hook:stop
+    evidenceRefs: *a10
+  - id: edge:hookMapping:user-prompt-submit:claude-code:hook
+    relation: maps_hook
+    from: hookMapping:user-prompt-submit:claude-code
+    to: hook:user-prompt-submit
+    evidenceRefs: &a11
+      - repo-target-index
+  - id: edge:hookMapping:user-prompt-submit:codex:hook
+    relation: maps_hook
+    from: hookMapping:user-prompt-submit:codex
+    to: hook:user-prompt-submit
+    evidenceRefs: *a11
+  - id: edge:hookMapping:user-prompt-submit:github-copilot:hook
+    relation: maps_hook
+    from: hookMapping:user-prompt-submit:github-copilot
+    to: hook:user-prompt-submit
+    evidenceRefs: *a11
+  - id: edge:hookMapping:pre-tool-use:claude-code:hook
+    relation: maps_hook
+    from: hookMapping:pre-tool-use:claude-code
+    to: hook:pre-tool-use
+    evidenceRefs: &a12
+      - repo-target-index
+  - id: edge:hookMapping:pre-tool-use:opencode:hook
+    relation: maps_hook
+    from: hookMapping:pre-tool-use:opencode
+    to: hook:pre-tool-use
+    evidenceRefs: *a12
+  - id: edge:hookMapping:post-tool-use:claude-code:hook
+    relation: maps_hook
+    from: hookMapping:post-tool-use:claude-code
+    to: hook:post-tool-use
+    evidenceRefs: &a13
+      - repo-target-index
+  - id: edge:hookMapping:post-tool-use:opencode:hook
+    relation: maps_hook
+    from: hookMapping:post-tool-use:opencode
+    to: hook:post-tool-use
+    evidenceRefs: *a13
+  - id: edge:hookMapping:after-agent:gemini:hook
+    relation: maps_hook
+    from: hookMapping:after-agent:gemini
+    to: hook:after-agent
+    evidenceRefs: &a14
+      - repo-target-index
+      - repo-target-gemini
+  - id: edge:hookMapping:after-agent:openclaw:hook
+    relation: maps_hook
+    from: hookMapping:after-agent:openclaw
+    to: hook:after-agent
+    evidenceRefs: *a14
+  - id: edge:hookMapping:session-end:github-copilot:hook
+    relation: maps_hook
+    from: hookMapping:session-end:github-copilot
+    to: hook:session-end
+    evidenceRefs: &a15
+      - repo-target-index
+      - repo-target-copilot
+  - id: edge:hookMapping:session-end:openclaw:hook
+    relation: maps_hook
+    from: hookMapping:session-end:openclaw
+    to: hook:session-end
+    evidenceRefs: *a15
+  - id: edge:hookMapping:session-idle:opencode:hook
+    relation: maps_hook
+    from: hookMapping:session-idle:opencode
+    to: hook:session-idle
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:shell-env:opencode:hook
+    relation: maps_hook
+    from: hookMapping:shell-env:opencode
+    to: hook:shell-env
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:before-prompt-build:openclaw:hook
+    relation: maps_hook
+    from: hookMapping:before-prompt-build:openclaw
+    to: hook:before-prompt-build
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:claude-code:artifact:pluginArtifact:claude-code:manifest
+    relation: emits_artifact
+    from: pluginTarget:claude-code
+    to: pluginArtifact:claude-code:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:claude-code:artifact:pluginArtifact:claude-code:container-image
+    relation: emits_artifact
+    from: pluginTarget:claude-code
+    to: pluginArtifact:claude-code:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:codex:artifact:pluginArtifact:codex:manifest
+    relation: emits_artifact
+    from: pluginTarget:codex
+    to: pluginArtifact:codex:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:codex:artifact:pluginArtifact:codex:container-image
+    relation: emits_artifact
+    from: pluginTarget:codex
+    to: pluginArtifact:codex:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:cursor:artifact:pluginArtifact:cursor:manifest
+    relation: emits_artifact
+    from: pluginTarget:cursor
+    to: pluginArtifact:cursor:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:cursor:artifact:pluginArtifact:cursor:container-image
+    relation: emits_artifact
+    from: pluginTarget:cursor
+    to: pluginArtifact:cursor:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:gemini:artifact:pluginArtifact:gemini:manifest
+    relation: emits_artifact
+    from: pluginTarget:gemini
+    to: pluginArtifact:gemini:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:gemini:artifact:pluginArtifact:gemini:container-image
+    relation: emits_artifact
+    from: pluginTarget:gemini
+    to: pluginArtifact:gemini:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:github-copilot:artifact:pluginArtifact:github-copilot:manifest
+    relation: emits_artifact
+    from: pluginTarget:github-copilot
+    to: pluginArtifact:github-copilot:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:github-copilot:artifact:pluginArtifact:github-copilot:container-image
+    relation: emits_artifact
+    from: pluginTarget:github-copilot
+    to: pluginArtifact:github-copilot:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:pi:artifact:pluginArtifact:pi:manifest
+    relation: emits_artifact
+    from: pluginTarget:pi
+    to: pluginArtifact:pi:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:pi:artifact:pluginArtifact:pi:container-image
+    relation: emits_artifact
+    from: pluginTarget:pi
+    to: pluginArtifact:pi:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:oh-my-pi:artifact:pluginArtifact:oh-my-pi:manifest
+    relation: emits_artifact
+    from: pluginTarget:oh-my-pi
+    to: pluginArtifact:oh-my-pi:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:oh-my-pi:artifact:pluginArtifact:oh-my-pi:container-image
+    relation: emits_artifact
+    from: pluginTarget:oh-my-pi
+    to: pluginArtifact:oh-my-pi:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:opencode:artifact:pluginArtifact:opencode:manifest
+    relation: emits_artifact
+    from: pluginTarget:opencode
+    to: pluginArtifact:opencode:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:opencode:artifact:pluginArtifact:opencode:container-image
+    relation: emits_artifact
+    from: pluginTarget:opencode
+    to: pluginArtifact:opencode:container-image
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginTarget:openclaw:artifact:pluginArtifact:openclaw:manifest
+    relation: emits_artifact
+    from: pluginTarget:openclaw
+    to: pluginArtifact:openclaw:manifest
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:openclaw:artifact:pluginArtifact:openclaw:container-image
+    relation: emits_artifact
+    from: pluginTarget:openclaw
+    to: pluginArtifact:openclaw:container-image
+    evidenceRefs:
+      - repo-sdk-fallback

@@ -1,0 +1,67 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/openclaw.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:openclaw:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: capabilitySupport:openclaw:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: *a1
+  - id: capabilitySupport:openclaw:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: *a1
+  - id: capabilitySupport:openclaw:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: *a1
+  - id: capabilitySupport:openclaw:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: *a1
+  - id: capabilitySupport:openclaw:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openclaw:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:openclaw:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: OpenClaw has mapped hook names in plugins-mux but current fallback metadata still marks runtime hooks and stop hooks unsupported.
+    evidenceRefs: *a1

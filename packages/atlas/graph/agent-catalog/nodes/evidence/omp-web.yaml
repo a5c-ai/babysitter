@@ -1,0 +1,129 @@
+kind: NodeDocument
+documentPath: nodes/evidence/omp-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-omp-readme
+    kind: EvidenceSource
+    evidenceId: web-omp-readme
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/can1357/oh-my-pi/blob/main/README.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: terminal agent overview and feature list
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-omp-skills
+    kind: EvidenceSource
+    evidenceId: web-omp-skills
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/can1357/oh-my-pi/blob/main/docs/skills.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: skill discovery and runtime exposure
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-omp-hooks
+    kind: EvidenceSource
+    evidenceId: web-omp-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/can1357/oh-my-pi/blob/main/docs/hooks.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: hook subsystem and lifecycle events
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-omp-session-resume
+    kind: EvidenceSource
+    evidenceId: web-omp-session-resume
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/can1357/oh-my-pi/blob/main/docs/session-operations-export-share-fork-resume.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: resume, continue, export, fork, and session switching
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-omp-mcp
+    kind: EvidenceSource
+    evidenceId: web-omp-mcp
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/can1357/oh-my-pi/blob/main/docs/mcp-config.md
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: MCP configuration and discovery
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:web-omp-core-agentic
+    kind: Claim
+    claimId: web-omp-core-agentic
+    statement: Oh-My-Pi is documented as a terminal coding agent with interactive workflows and a broad tool surface.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-omp-readme
+    unresolvedGaps:
+      - The current evidence is a single README source rather than a multi-page product documentation set.
+  - id: claim:web-omp-stdin-injection
+    kind: Claim
+    claimId: web-omp-stdin-injection
+    statement: Oh-My-Pi publicly documents an interactive terminal agent surface, but non-interactive stdin injection is still inferred rather than described as a dedicated operator workflow.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-omp-readme
+    unresolvedGaps:
+      - The current Oh-My-Pi public docs do not explicitly document piped or headless prompt injection.
+  - id: claim:web-omp-skills
+    kind: Claim
+    claimId: web-omp-skills
+    statement: Oh-My-Pi documents file-backed skills that are discovered at startup and exposed on demand.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-omp-skills
+    unresolvedGaps:
+      - The skills claim currently relies on one first-party document.
+  - id: claim:web-omp-hooks
+    kind: Claim
+    claimId: web-omp-hooks
+    statement: Oh-My-Pi documents a hook subsystem with session and tool lifecycle events, even though the current runtime prefers the extension runner path by default.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-omp-hooks
+    unresolvedGaps:
+      - The hook subsystem is documented, but stronger corroboration is still needed for normalized lifecycle mapping and default runtime behavior.
+  - id: claim:web-omp-session-resume
+    kind: Claim
+    claimId: web-omp-session-resume
+    statement: Oh-My-Pi documents resume, continue, fork, and session switching flows as part of the operator-visible session lifecycle.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-omp-session-resume
+    unresolvedGaps:
+      - The operator-visible session flows are documented on one page, without an additional source corroborating normalized resume semantics.

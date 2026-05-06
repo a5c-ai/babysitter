@@ -1,0 +1,46 @@
+kind: EdgeDocument
+documentPath: edges/relations/capabilities/babysitter-agent-links.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:mcp:subject
+    relation: supports_capability
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode:subject
+    relation: supports_capability
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection:subject
+    relation: supports_capability
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:session-resume:subject
+    relation: supports_capability
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:mcp:capability
+    relation: for_capability
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+    to: capability:mcp
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode:capability
+    relation: for_capability
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+    to: capability:interactive-mode
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection:capability
+    relation: for_capability
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+    to: capability:stdin-injection
+    evidenceRefs: *a1
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:session-resume:capability
+    relation: for_capability
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+    to: capability:session-resume
+    evidenceRefs: *a1

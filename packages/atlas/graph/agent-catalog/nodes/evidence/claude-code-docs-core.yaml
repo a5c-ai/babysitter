@@ -1,0 +1,103 @@
+kind: NodeDocument
+documentPath: nodes/evidence/claude-code-docs-core.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-claude-code-overview
+    kind: EvidenceSource
+    evidenceId: web-claude-code-overview
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/overview
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: Claude Code overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-quickstart
+    kind: EvidenceSource
+    evidenceId: web-claude-code-quickstart
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/quickstart
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: terminal quickstart
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-cli-reference
+    kind: EvidenceSource
+    evidenceId: web-claude-code-cli-reference
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/cli-reference
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: CLI flags and commands
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-headless
+    kind: EvidenceSource
+    evidenceId: web-claude-code-headless
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/headless
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: headless mode and continue flags
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-interactive-mode
+    kind: EvidenceSource
+    evidenceId: web-claude-code-interactive-mode
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/interactive-mode
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: interactive session controls
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-permissions
+    kind: EvidenceSource
+    evidenceId: web-claude-code-permissions
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/permissions
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: fine-grained permissions
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-permission-modes
+    kind: EvidenceSource
+    evidenceId: web-claude-code-permission-modes
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/permission-modes
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: permission mode selection
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-checkpointing
+    kind: EvidenceSource
+    evidenceId: web-claude-code-checkpointing
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/checkpointing
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: checkpointed session state and rewind
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-platform-vision
+    kind: EvidenceSource
+    evidenceId: web-claude-platform-vision
+    kindLabel: web
+    sourcePathOrUrl: https://platform.claude.com/docs/en/build-with-claude/vision
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: image input and vision support
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45

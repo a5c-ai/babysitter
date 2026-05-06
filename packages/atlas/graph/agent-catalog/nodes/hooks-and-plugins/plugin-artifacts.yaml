@@ -1,0 +1,229 @@
+kind: NodeDocument
+documentPath: nodes/hooks-and-plugins/plugin-artifacts.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: pluginArtifact:claude-code:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:claude-code:manifest
+    targetId: claude-code
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/claude-code.ts
+    scriptVariants:
+      - markdown-commands
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/claude-code.ts
+    installerSurface: plugin.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:claude-code:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:claude-code:container-image
+    targetId: claude-code
+    artifactKind: container-image
+    pathPattern: ghcr.io/anthropics/claude-code
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:codex:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:codex:manifest
+    targetId: codex
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/codex.ts
+    scriptVariants:
+      - package-json commands
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/codex.ts
+    installerSurface: package.json + hooks.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:codex:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:codex:container-image
+    targetId: codex
+    artifactKind: container-image
+    pathPattern: ghcr.io/openai/codex
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:cursor:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:cursor:manifest
+    targetId: cursor
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/cursor.ts
+    scriptVariants:
+      - markdown-commands
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/cursor.ts
+    installerSurface: plugin.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:cursor:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:cursor:container-image
+    targetId: cursor
+    artifactKind: container-image
+    pathPattern: ghcr.io/cursor/cursor-agent
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:gemini:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:gemini:manifest
+    targetId: gemini
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/gemini.ts
+    scriptVariants:
+      - extension-manifest
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/gemini.ts
+    installerSurface: plugin.json + gemini-extension.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:gemini:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:gemini:container-image
+    targetId: gemini
+    artifactKind: container-image
+    pathPattern: ghcr.io/google/gemini-cli
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:github-copilot:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:github-copilot:manifest
+    targetId: github-copilot
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/github-copilot.ts
+    scriptVariants:
+      - markdown-commands
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/github-copilot.ts
+    installerSurface: plugin.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:github-copilot:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:github-copilot:container-image
+    targetId: github-copilot
+    artifactKind: container-image
+    pathPattern: ghcr.io/github/copilot-cli
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:pi:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:pi:manifest
+    targetId: pi
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/pi.ts
+    scriptVariants:
+      - none
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/pi.ts
+    installerSurface: state-only
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:pi:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:pi:container-image
+    targetId: pi
+    artifactKind: container-image
+    pathPattern: ghcr.io/a5c-ai/pi
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:oh-my-pi:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:oh-my-pi:manifest
+    targetId: oh-my-pi
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/oh-my-pi.ts
+    scriptVariants:
+      - none
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/oh-my-pi.ts
+    installerSurface: state-only
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:oh-my-pi:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:oh-my-pi:container-image
+    targetId: oh-my-pi
+    artifactKind: container-image
+    pathPattern: ghcr.io/a5c-ai/omp
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:opencode:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:opencode:manifest
+    targetId: opencode
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/opencode.ts
+    scriptVariants:
+      - event-hooks
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/opencode.ts
+    installerSurface: plugin.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:opencode:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:opencode:container-image
+    targetId: opencode
+    artifactKind: container-image
+    pathPattern: ghcr.io/anomalyco/opencode
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: pluginArtifact:openclaw:manifest
+    kind: PluginArtifact
+    artifactId: pluginArtifact:openclaw:manifest
+    targetId: openclaw
+    artifactKind: manifest
+    pathPattern: packages/agent-plugins-mux/src/targets/openclaw.ts
+    scriptVariants:
+      - event-hooks
+    contextFiles:
+      - packages/agent-plugins-mux/src/targets/openclaw.ts
+    installerSurface: plugin.json
+    evidenceRefs:
+      - repo-target-index
+  - id: pluginArtifact:openclaw:container-image
+    kind: PluginArtifact
+    artifactId: pluginArtifact:openclaw:container-image
+    targetId: openclaw
+    artifactKind: container-image
+    pathPattern: ghcr.io/openclaw/openclaw
+    scriptVariants:
+      - preinstalled
+    contextFiles: []
+    installerSurface: latest
+    evidenceRefs:
+      - repo-sdk-fallback

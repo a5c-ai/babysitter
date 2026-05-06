@@ -1,0 +1,31 @@
+kind: EdgeDocument
+documentPath: edges/relations/agent-runtime/babysitter-agent.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a1
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: modality:text
+    evidenceRefs: *a1
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:modality:mcp
+    relation: supports_modality
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: modality:mcp
+    evidenceRefs: *a1
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: modality:commands
+    evidenceRefs: *a1

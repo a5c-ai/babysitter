@@ -1,0 +1,74 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/omp.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:omp:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Oh-My-Pi documents file-backed skills explicitly, so this row no longer relies only on the fallback metadata.
+    evidenceRefs: &ompSkills
+      - repo-sdk-fallback
+      - web-omp-skills
+  - id: capabilitySupport:omp:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Oh-My-Pi publicly describes itself as a terminal coding agent with a broad tool surface.
+    evidenceRefs: &ompCore
+      - repo-sdk-fallback
+      - web-omp-readme
+  - id: capabilitySupport:omp:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Interactive terminal behavior is grounded in the upstream product README instead of only the local fallback metadata.
+    evidenceRefs: *ompCore
+  - id: capabilitySupport:omp:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Public operator docs are thin for non-interactive prompting, so this row keeps the local fallback metadata as the main source of truth.
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-omp-readme
+  - id: capabilitySupport:omp:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: The public README advertises image support, but public technical detail is thinner than for sessions or hooks.
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-omp-readme
+  - id: capabilitySupport:omp:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:omp:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:omp:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Oh-My-Pi documents resume, continue, fork, and session switching as first-class session operations.
+    evidenceRefs: &ompResume
+      - repo-sdk-fallback
+      - web-omp-session-resume

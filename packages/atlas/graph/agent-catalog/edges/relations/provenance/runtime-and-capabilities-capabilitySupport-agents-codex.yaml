@@ -1,0 +1,302 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-codex.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills:claim:web-codex-skills
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    to: claim:web-codex-skills
+    evidenceRefs:
+      - web-codex-skills
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking:claim:web-codex-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+    to: claim:web-codex-core-agentic
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode:claim:web-codex-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+    to: claim:web-codex-core-agentic
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection:claim:web-codex-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+    to: claim:web-codex-stdin-injection
+    evidenceRefs:
+      - web-codex-noninteractive
+      - web-codex-cli-reference
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input:claim:web-codex-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+    to: claim:web-codex-image-input
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks:claim:web-codex-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    to: claim:web-codex-hooks
+    evidenceRefs:
+      - web-codex-hooks
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook:claim:web-codex-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    to: claim:web-codex-hooks
+    evidenceRefs:
+      - web-codex-hooks
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume:claim:web-codex-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+    to: claim:web-codex-session-resume
+    evidenceRefs:
+      - web-codex-cli-features
+      - web-codex-cli-reference
+  - id: edge:capabilitySupport:codex:ge-0-119-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:skills:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:skills
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-119-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-119-0:skills:claim:web-codex-skills
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:skills
+    to: claim:web-codex-skills
+    evidenceRefs:
+      - web-codex-skills
+  - id: edge:capabilitySupport:codex:ge-0-119-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:thinking:claim:web-codex-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:thinking
+    to: claim:web-codex-core-agentic
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-119-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:interactive-mode:claim:web-codex-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:interactive-mode
+    to: claim:web-codex-core-agentic
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stdin-injection:claim:web-codex-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stdin-injection
+    to: claim:web-codex-stdin-injection
+    evidenceRefs:
+      - web-codex-noninteractive
+      - web-codex-cli-reference
+  - id: edge:capabilitySupport:codex:ge-0-119-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:image-input:claim:web-codex-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:image-input
+    to: claim:web-codex-image-input
+    evidenceRefs:
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:capabilitySupport:codex:ge-0-119-0:runtime-hooks:claim:web-codex-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    to: claim:web-codex-hooks
+    evidenceRefs:
+      - web-codex-hooks
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:claim:repo-target-codex
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stop-hook
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stop-hook
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:capabilitySupport:codex:ge-0-119-0:stop-hook:claim:web-codex-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:stop-hook
+    to: claim:web-codex-hooks
+    evidenceRefs:
+      - web-codex-hooks
+  - id: edge:capabilitySupport:codex:ge-0-119-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:codex:ge-0-119-0:session-resume:claim:web-codex-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:codex:ge-0-119-0:session-resume
+    to: claim:web-codex-session-resume
+    evidenceRefs:
+      - web-codex-cli-features
+      - web-codex-cli-reference

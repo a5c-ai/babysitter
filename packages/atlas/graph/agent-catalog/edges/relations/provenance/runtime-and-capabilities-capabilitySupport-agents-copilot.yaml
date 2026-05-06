@@ -1,0 +1,170 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-copilot.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:skills:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:skills
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:skills:claim:web-github-copilot-cli-skills
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:skills
+    to: claim:web-github-copilot-cli-skills
+    evidenceRefs:
+      - web-github-copilot-cli-plugins
+      - web-github-copilot-cli-plugin-reference
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:thinking:claim:web-github-copilot-cli-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:thinking
+    to: claim:web-github-copilot-cli-core-agentic
+    evidenceRefs:
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+      - web-github-copilot-agent
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:interactive-mode:claim:web-github-copilot-cli-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+    to: claim:web-github-copilot-cli-core-agentic
+    evidenceRefs:
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+      - web-github-copilot-agent
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stdin-injection:claim:web-github-copilot-cli-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+    to: claim:web-github-copilot-cli-core-agentic
+    evidenceRefs:
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:image-input:claim:web-github-copilot-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:image-input
+    to: claim:web-github-copilot-image-input
+    evidenceRefs:
+      - web-github-copilot-sdk-image-input
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:runtime-hooks:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:runtime-hooks:claim:web-github-copilot-cli-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    to: claim:web-github-copilot-cli-hooks
+    evidenceRefs:
+      - web-github-copilot-cli-hooks
+      - web-github-copilot-hooks-config
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stop-hook:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:stop-hook:claim:web-github-copilot-cli-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    to: claim:web-github-copilot-cli-hooks
+    evidenceRefs:
+      - web-github-copilot-cli-hooks
+      - web-github-copilot-hooks-config
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:mcp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:mcp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:mcp:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:mcp
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:mcp:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:mcp
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:mcp:claim:web-github-copilot-cli-mcp
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:mcp
+    to: claim:web-github-copilot-cli-mcp
+    evidenceRefs:
+      - web-github-copilot-cli-mcp
+      - web-github-copilot-mcp
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:copilot:ge-0-0-0:session-resume:claim:web-github-copilot-cli-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:copilot:ge-0-0-0:session-resume
+    to: claim:web-github-copilot-cli-session-resume
+    evidenceRefs:
+      - web-github-copilot-cli-config-dir
+      - web-github-copilot-cli-getting-started

@@ -1,0 +1,121 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/copilot.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:copilot:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Copilot CLI plugins explicitly bundle reusable agents, skills, hooks, and integrations.
+    evidenceRefs: &copilotSkills
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-cli-plugins
+      - web-github-copilot-cli-plugin-reference
+  - id: capabilitySupport:copilot:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: GitHub documents Copilot CLI and Copilot coding-agent workflows as interactive agentic coding surfaces.
+    evidenceRefs: &copilotCore
+      - repo-sdk-fallback
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+      - web-github-copilot-agent
+  - id: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Interactive Copilot CLI usage is documented directly instead of being inferred from the cloud-agent docs.
+    evidenceRefs: *copilotCore
+  - id: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: The public Copilot CLI docs cover command-line prompting flows, which is the strongest official basis for non-interactive input semantics.
+    evidenceRefs: &copilotStdin
+      - repo-sdk-fallback
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+  - id: capabilitySupport:copilot:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Public image-input evidence is strongest in the Copilot SDK rather than the CLI docs, so this row keeps lower-confidence external support.
+    evidenceRefs: &copilotImages
+      - repo-sdk-fallback
+      - web-github-copilot-sdk-image-input
+  - id: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Copilot CLI exposes hooks directly and the local target profile refines the canonical hook-name mapping into the ontology.
+    evidenceRefs: &copilotHooks
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-cli-hooks
+      - web-github-copilot-hooks-config
+  - id: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: The normalized stop-hook capability is derived from Copilot's documented lifecycle hooks plus the local hook-name mapping.
+    evidenceRefs: *copilotHooks
+  - id: capabilitySupport:copilot:ge-0-0-0:mcp
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:mcp
+    capabilityId: mcp
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: GitHub documents MCP both for Copilot CLI and for the Copilot cloud agent.
+    evidenceRefs: &copilotMcp
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-cli-mcp
+      - web-github-copilot-mcp
+  - id: capabilitySupport:copilot:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:copilot:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:copilot:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Public session persistence evidence comes from Copilot CLI config-directory documentation rather than the generic coding-agent docs.
+    evidenceRefs: &copilotResume
+      - repo-sdk-fallback
+      - web-github-copilot-cli-config-dir
+      - web-github-copilot-cli-getting-started

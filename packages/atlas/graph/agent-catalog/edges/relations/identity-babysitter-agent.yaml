@@ -1,0 +1,11 @@
+kind: EdgeDocument
+documentPath: edges/relations/identity-babysitter-agent.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:babysitter-agent:has-version:agentVersion:babysitter-agent:ge-5-0-0
+    relation: has_version
+    from: agent:babysitter-agent
+    to: agentVersion:babysitter-agent:ge-5-0-0
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli

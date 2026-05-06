@@ -1,0 +1,529 @@
+kind: OntologySchema
+schemaId: schema:agent-catalog-ontology
+id: schema:agent-catalog-ontology
+version: 2026.04.agent-catalog-v2
+versionScopingRules:
+  - Conceptual products use has_version edges to connect to version-scoped fact nodes.
+  - Version ranges are stored on version nodes and support nodes, not on product nodes.
+  - Wrappers query YAML graph documents; no consumer should own duplicate metadata tables.
+deprecationRules:
+  - supersedes edges mark a newer semantic or version node replacing an older range.
+  - Claims remain immutable evidence records even when a node is superseded.
+nodeKinds:
+  GraphDocument:
+    requiredAttributes:
+      - graphId
+      - schemaVersion
+      - catalogVersion
+      - generatedAt
+      - owners
+      - imports
+      - defaultNamespace
+      - evidencePolicy
+  OntologySchema:
+    requiredAttributes:
+      - schemaId
+      - version
+      - nodeKinds
+      - edgeKinds
+      - versionScopingRules
+      - deprecationRules
+  AgentProduct:
+    requiredAttributes:
+      - id
+      - agentId
+      - displayName
+      - aliases
+      - vendor
+      - families
+      - status
+  AgentVersion:
+    requiredAttributes:
+      - id
+      - agentVersionId
+      - agentId
+      - versionRange
+      - displayName
+      - summary
+      - sourcePackage
+  ModelProviderProduct:
+    requiredAttributes:
+      - id
+      - providerId
+      - displayName
+      - kindLabel
+      - vendor
+      - authKinds
+  ModelProviderVersion:
+    requiredAttributes:
+      - id
+      - providerVersionId
+      - providerId
+      - versionRange
+      - authSignals
+      - envSignals
+  ModelFamily:
+    requiredAttributes:
+      - id
+      - modelId
+      - providerId
+      - label
+      - modalities
+      - status
+  ModelVersion:
+    requiredAttributes:
+      - id
+      - modelVersionId
+      - modelId
+      - versionRange
+      - toolCallSupport
+      - visionSupport
+      - streamingSupport
+  TransportProtocol:
+    requiredAttributes:
+      - id
+      - transportId
+      - label
+      - protocolKind
+      - interactive
+      - streaming
+      - requestShape
+      - responseShape
+  TransportRuntime:
+    requiredAttributes:
+      - id
+      - runtimeId
+      - transportId
+      - label
+      - runtimeKind
+      - persistentSession
+      - stdinInjection
+      - blockingStopHook
+      - containerizable
+  Capability:
+    requiredAttributes:
+      - id
+      - capabilityId
+      - namespace
+      - label
+      - description
+      - stability
+  CapabilitySupport:
+    requiredAttributes:
+      - id
+      - supportId
+      - capabilityId
+      - supportLevel
+      - subjectKind
+      - subjectId
+      - versionRange
+  Modality:
+    requiredAttributes:
+      - id
+      - modalityId
+      - direction
+      - label
+      - mediaType
+      - semanticCategory
+  HookSurface:
+    requiredAttributes:
+      - id
+      - hookId
+      - canonicalName
+      - phase
+      - blocking
+  HookMapping:
+    requiredAttributes:
+      - id
+      - mappingId
+      - hookId
+      - targetId
+      - nativeName
+      - versionRange
+      - requiresRuntimeHooks
+  PluginTarget:
+    requiredAttributes:
+      - id
+      - targetId
+      - displayName
+      - adapterName
+      - pluginRootEnvVar
+      - pluginRootEnvVarForExtension
+      - manifestFormat
+      - commandFormat
+      - skillHandling
+      - hookRegistrationFormat
+      - scriptVariants
+      - adapterFamily
+      - distribution
+      - distributionModel
+      - installLayout
+      - packageMetadata
+      - componentSupport
+      - npmPublishable
+  PluginArtifact:
+    requiredAttributes:
+      - id
+      - artifactId
+      - targetId
+      - artifactKind
+      - pathPattern
+      - installerSurface
+  DiscoverySignal:
+    requiredAttributes:
+      - id
+      - signalId
+      - signalKind
+      - key
+      - matchMode
+      - confidence
+      - scope
+      - signals
+      - argvMatches
+  SessionSemantics:
+    requiredAttributes:
+      - id
+      - sessionSemanticsId
+      - agentId
+      - versionRange
+      - sessionDirStrategy
+      - sessionIdSources
+      - resumeSemantics
+  LifecycleSemantics:
+    requiredAttributes:
+      - id
+      - lifecycleSemanticsId
+      - agentId
+      - versionRange
+      - runtimeHookMode
+      - stopHookMode
+      - backgroundTaskMode
+      - checkpointMode
+  ProcessDescriptor:
+    requiredAttributes:
+      - id
+      - processId
+      - displayName
+      - category
+      - paths
+      - inputs
+      - outputs
+      - ownerPackage
+  PackageSurface:
+    requiredAttributes:
+      - id
+      - packageId
+      - packageName
+      - workspacePath
+      - moduleType
+      - surfaceKinds
+      - sourceOfTruthRole
+  PathDescriptor:
+    requiredAttributes:
+      - id
+      - pathId
+      - path
+      - pathKind
+      - ownerKind
+      - ownerId
+      - platform
+  CiSurface:
+    requiredAttributes:
+      - id
+      - ciId
+      - packageId
+      - scripts
+      - publishStrategy
+      - releaseChannels
+      - validationCommands
+  EvidenceSource:
+    requiredAttributes:
+      - id
+      - evidenceId
+      - kindLabel
+      - sourcePathOrUrl
+      - capturedAt
+      - locator
+      - trustLevel
+  Claim:
+    requiredAttributes:
+      - id
+      - claimId
+      - statement
+      - subjectKind
+      - subjectId
+      - confidence
+      - provenanceKind
+      - evidenceStrength
+      - status
+      - evidenceIds
+      - unresolvedGaps
+edgeKinds:
+  has_schema:
+    from:
+      - GraphDocument
+    to:
+      - OntologySchema
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  has_version:
+    from:
+      - AgentProduct
+      - ModelProviderProduct
+      - ModelFamily
+    to:
+      - AgentVersion
+      - ModelProviderVersion
+      - ModelVersion
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  provided_by:
+    from:
+      - ModelVersion
+    to:
+      - ModelProviderVersion
+      - ModelProviderProduct
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  defaults_to_model:
+    from:
+      - AgentVersion
+    to:
+      - ModelVersion
+      - ModelFamily
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  uses_transport:
+    from:
+      - AgentVersion
+    to:
+      - TransportRuntime
+      - TransportProtocol
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  supports_capability:
+    from:
+      - AgentVersion
+      - ModelProviderVersion
+      - TransportRuntime
+      - PluginTarget
+    to:
+      - CapabilitySupport
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  for_capability:
+    from:
+      - CapabilitySupport
+    to:
+      - Capability
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  supports_modality:
+    from:
+      - AgentVersion
+      - ModelVersion
+      - TransportRuntime
+    to:
+      - Modality
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  emits_hook:
+    from:
+      - AgentVersion
+      - PluginTarget
+    to:
+      - HookMapping
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  maps_hook:
+    from:
+      - HookMapping
+    to:
+      - HookSurface
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  targets_plugin_surface:
+    from:
+      - AgentVersion
+    to:
+      - PluginTarget
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  emits_artifact:
+    from:
+      - PluginTarget
+    to:
+      - PluginArtifact
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  discovered_by:
+    from:
+      - AgentVersion
+      - ModelProviderVersion
+      - PluginTarget
+    to:
+      - DiscoverySignal
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  uses_session_semantics:
+    from:
+      - AgentVersion
+    to:
+      - SessionSemantics
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  uses_lifecycle_semantics:
+    from:
+      - AgentVersion
+    to:
+      - LifecycleSemantics
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  references_path:
+    from:
+      - ProcessDescriptor
+      - PackageSurface
+      - PluginArtifact
+      - SessionSemantics
+      - LifecycleSemantics
+    to:
+      - PathDescriptor
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  surfaces_process:
+    from:
+      - PackageSurface
+    to:
+      - ProcessDescriptor
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  wraps_graph:
+    from:
+      - PackageSurface
+    to:
+      - GraphDocument
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  validated_by_ci:
+    from:
+      - PackageSurface
+    to:
+      - CiSurface
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  supported_by_claim:
+    from:
+      - AgentProduct
+      - AgentVersion
+      - ModelProviderProduct
+      - ModelProviderVersion
+      - ModelFamily
+      - ModelVersion
+      - TransportProtocol
+      - TransportRuntime
+      - Capability
+      - CapabilitySupport
+      - Modality
+      - HookSurface
+      - HookMapping
+      - PluginTarget
+      - PluginArtifact
+      - DiscoverySignal
+      - SessionSemantics
+      - LifecycleSemantics
+      - ProcessDescriptor
+      - PackageSurface
+      - PathDescriptor
+      - CiSurface
+    to:
+      - Claim
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  sourced_from:
+    from:
+      - Claim
+    to:
+      - EvidenceSource
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to
+  supersedes:
+    from:
+      - AgentVersion
+      - ModelProviderVersion
+      - ModelVersion
+      - LifecycleSemantics
+      - SessionSemantics
+    to:
+      - AgentVersion
+      - ModelProviderVersion
+      - ModelVersion
+      - LifecycleSemantics
+      - SessionSemantics
+    requiredAttributes:
+      - id
+      - relation
+      - from
+      - to

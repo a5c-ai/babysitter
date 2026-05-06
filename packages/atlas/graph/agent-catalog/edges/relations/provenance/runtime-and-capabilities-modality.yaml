@@ -1,0 +1,88 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-modality.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:modality:text:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: modality:text
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:modality:text:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: modality:text
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:modality:image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: modality:image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:modality:hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: modality:hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:modality:hooks:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: modality:hooks
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:modality:mcp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: modality:mcp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:modality:mcp:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: modality:mcp
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:modality:commands:claim:repo-target-claude
+    relation: supported_by_claim
+    from: modality:commands
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:modality:commands:claim:repo-target-codex
+    relation: supported_by_claim
+    from: modality:commands
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:modality:commands:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: modality:commands
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:modality:commands:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: modality:commands
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:modality:json:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: modality:json
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:modality:stream-events:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: modality:stream-events
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:modality:stream-events:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: modality:stream-events
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture

@@ -1,0 +1,218 @@
+kind: EdgeDocument
+documentPath: edges/relations/identity.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:graph-has-schema
+    relation: has_schema
+    from: graph:agent-catalog
+    to: schema:agent-catalog-ontology
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:claude:has-version:agentVersion:claude:ge-0-0-0
+    relation: has_version
+    from: agent:claude
+    to: agentVersion:claude:ge-0-0-0
+    evidenceRefs: &a5
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:codex:has-version:agentVersion:codex:ge-0-0-0-lt-0-119-0
+    relation: has_version
+    from: agent:codex
+    to: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    evidenceRefs: &a6
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:codex:has-version:agentVersion:codex:ge-0-119-0
+    relation: has_version
+    from: agent:codex
+    to: agentVersion:codex:ge-0-119-0
+    evidenceRefs: &a7
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:cursor:has-version:agentVersion:cursor:ge-0-0-0
+    relation: has_version
+    from: agent:cursor
+    to: agentVersion:cursor:ge-0-0-0
+    evidenceRefs: &a8
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:gemini:has-version:agentVersion:gemini:ge-0-0-0
+    relation: has_version
+    from: agent:gemini
+    to: agentVersion:gemini:ge-0-0-0
+    evidenceRefs: &a9
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: edge:copilot:has-version:agentVersion:copilot:ge-0-0-0
+    relation: has_version
+    from: agent:copilot
+    to: agentVersion:copilot:ge-0-0-0
+    evidenceRefs: &a10
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: edge:pi:has-version:agentVersion:pi:ge-0-0-0
+    relation: has_version
+    from: agent:pi
+    to: agentVersion:pi:ge-0-0-0
+    evidenceRefs: &a11
+      - repo-sdk-fallback
+  - id: edge:omp:has-version:agentVersion:omp:ge-0-0-0
+    relation: has_version
+    from: agent:omp
+    to: agentVersion:omp:ge-0-0-0
+    evidenceRefs: &a12
+      - repo-sdk-fallback
+  - id: edge:opencode:has-version:agentVersion:opencode:ge-0-0-0
+    relation: has_version
+    from: agent:opencode
+    to: agentVersion:opencode:ge-0-0-0
+    evidenceRefs: &a13
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:openclaw:has-version:agentVersion:openclaw:ge-0-0-0
+    relation: has_version
+    from: agent:openclaw
+    to: agentVersion:openclaw:ge-0-0-0
+    evidenceRefs: &a14
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: edge:anthropic:has-version:providerVersion:anthropic:ge-0-0-0
+    relation: has_version
+    from: provider:anthropic
+    to: providerVersion:anthropic:ge-0-0-0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+      - web-anthropic-claude-code
+  - id: edge:openai:has-version:providerVersion:openai:ge-0-0-0
+    relation: has_version
+    from: provider:openai
+    to: providerVersion:openai:ge-0-0-0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - web-openai-codex-skills
+  - id: edge:google:has-version:providerVersion:google:ge-0-0-0
+    relation: has_version
+    from: provider:google
+    to: providerVersion:google:ge-0-0-0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: edge:github:has-version:providerVersion:github:ge-0-0-0
+    relation: has_version
+    from: provider:github
+    to: providerVersion:github:ge-0-0-0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: edge:bedrock:has-version:providerVersion:bedrock:ge-0-0-0
+    relation: has_version
+    from: provider:bedrock
+    to: providerVersion:bedrock:ge-0-0-0
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: edge:vertex:has-version:providerVersion:vertex:ge-0-0-0
+    relation: has_version
+    from: provider:vertex
+    to: providerVersion:vertex:ge-0-0-0
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: edge:foundry:has-version:providerVersion:foundry:ge-0-0-0
+    relation: has_version
+    from: provider:foundry
+    to: providerVersion:foundry:ge-0-0-0
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: edge:claude-code-default:has-version:modelVersion:claude-code-default:ge-0-0-0
+    relation: has_version
+    from: model:claude-code-default
+    to: modelVersion:claude-code-default:ge-0-0-0
+    evidenceRefs: &a1
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:codex-default:has-version:modelVersion:codex-default:ge-0-0-0
+    relation: has_version
+    from: model:codex-default
+    to: modelVersion:codex-default:ge-0-0-0
+    evidenceRefs: &a2
+      - web-openai-codex-skills
+  - id: edge:gemini-cli-default:has-version:modelVersion:gemini-cli-default:ge-0-0-0
+    relation: has_version
+    from: model:gemini-cli-default
+    to: modelVersion:gemini-cli-default:ge-0-0-0
+    evidenceRefs: &a3
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: edge:copilot-default:has-version:modelVersion:copilot-default:ge-0-0-0
+    relation: has_version
+    from: model:copilot-default
+    to: modelVersion:copilot-default:ge-0-0-0
+    evidenceRefs: &a4
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: edge:modelVersion:claude-code-default:ge-0-0-0:provider
+    relation: provided_by
+    from: modelVersion:claude-code-default:ge-0-0-0
+    evidenceRefs: *a1
+    to: providerVersion:anthropic:ge-0-0-0
+  - id: edge:modelVersion:codex-default:ge-0-0-0:provider
+    relation: provided_by
+    from: modelVersion:codex-default:ge-0-0-0
+    evidenceRefs: *a2
+    to: providerVersion:openai:ge-0-0-0
+  - id: edge:modelVersion:gemini-cli-default:ge-0-0-0:provider
+    relation: provided_by
+    from: modelVersion:gemini-cli-default:ge-0-0-0
+    evidenceRefs: *a3
+    to: providerVersion:google:ge-0-0-0
+  - id: edge:modelVersion:copilot-default:ge-0-0-0:provider
+    relation: provided_by
+    from: modelVersion:copilot-default:ge-0-0-0
+    evidenceRefs: *a4
+    to: providerVersion:github:ge-0-0-0
+  - id: edge:agentVersion:claude:ge-0-0-0:model:claude-code-default
+    relation: defaults_to_model
+    from: agentVersion:claude:ge-0-0-0
+    to: modelVersion:claude-code-default:ge-0-0-0
+    evidenceRefs: *a5
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:model:codex-default
+    relation: defaults_to_model
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: modelVersion:codex-default:ge-0-0-0
+    evidenceRefs: *a6
+  - id: edge:agentVersion:codex:ge-0-119-0:model:codex-default
+    relation: defaults_to_model
+    from: agentVersion:codex:ge-0-119-0
+    to: modelVersion:codex-default:ge-0-0-0
+    evidenceRefs: *a7
+  - id: edge:agentVersion:gemini:ge-0-0-0:model:gemini-cli-default
+    relation: defaults_to_model
+    from: agentVersion:gemini:ge-0-0-0
+    to: modelVersion:gemini-cli-default:ge-0-0-0
+    evidenceRefs: *a9
+  - id: edge:agentVersion:copilot:ge-0-0-0:model:copilot-default
+    relation: defaults_to_model
+    from: agentVersion:copilot:ge-0-0-0
+    to: modelVersion:copilot-default:ge-0-0-0
+    evidenceRefs: *a10

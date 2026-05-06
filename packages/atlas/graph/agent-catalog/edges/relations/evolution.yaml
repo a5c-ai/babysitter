@@ -1,0 +1,16 @@
+kind: EdgeDocument
+documentPath: edges/relations/evolution.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:codex-lifecycle-supersedes
+    relation: supersedes
+    from: lifecycleSemantics:codex:ge-0-119-0
+    to: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:codex-agent-supersedes
+    relation: supersedes
+    from: agentVersion:codex:ge-0-119-0
+    to: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    evidenceRefs:
+      - repo-codex-windows-hooks

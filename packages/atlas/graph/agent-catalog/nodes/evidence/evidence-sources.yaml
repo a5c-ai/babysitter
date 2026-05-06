@@ -1,0 +1,206 @@
+kind: NodeDocument
+documentPath: nodes/evidence/evidence-sources.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:repo-sdk-fallback
+    kind: EvidenceSource
+    evidenceId: repo-sdk-fallback
+    kindLabel: repo
+    sourcePathOrUrl: packages/sdk/src/harness/amuxFallbackMetadata.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-170
+    trustLevel: repo
+  - id: evidence:repo-agent-mux-host
+    kind: EvidenceSource
+    evidenceId: repo-agent-mux-host
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-mux/core/src/host-detection.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-200
+    trustLevel: repo
+  - id: evidence:repo-hooks-detector
+    kind: EvidenceSource
+    evidenceId: repo-hooks-detector
+    kindLabel: repo
+    sourcePathOrUrl: packages/hooks-mux/core/src/discovery/detector.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-140
+    trustLevel: repo
+  - id: evidence:repo-target-index
+    kind: EvidenceSource
+    evidenceId: repo-target-index
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/index.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-78
+    trustLevel: repo
+  - id: evidence:repo-target-claude
+    kind: EvidenceSource
+    evidenceId: repo-target-claude
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/claude-code.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-21
+    trustLevel: repo
+  - id: evidence:repo-target-codex
+    kind: EvidenceSource
+    evidenceId: repo-target-codex
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/codex.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-18
+    trustLevel: repo
+  - id: evidence:repo-target-cursor
+    kind: EvidenceSource
+    evidenceId: repo-target-cursor
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/cursor.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-18
+    trustLevel: repo
+  - id: evidence:repo-target-gemini
+    kind: EvidenceSource
+    evidenceId: repo-target-gemini
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/gemini.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-17
+    trustLevel: repo
+  - id: evidence:repo-target-copilot
+    kind: EvidenceSource
+    evidenceId: repo-target-copilot
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-plugins-mux/src/targets/github-copilot.ts
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-20
+    trustLevel: repo
+  - id: evidence:repo-process-catalog
+    kind: EvidenceSource
+    evidenceId: repo-process-catalog
+    kindLabel: repo
+    sourcePathOrUrl: packages/catalog/process-library-catalog.js
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-170
+    trustLevel: repo
+  - id: evidence:repo-agent-mux-model-catalog
+    kind: EvidenceSource
+    evidenceId: repo-agent-mux-model-catalog
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-mux/processes/model-catalog.js
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 1-120
+    trustLevel: repo
+  - id: evidence:repo-codex-windows-hooks
+    kind: EvidenceSource
+    evidenceId: repo-codex-windows-hooks
+    kindLabel: repo
+    sourcePathOrUrl: plugins/babysitter-codex/bin/install-shared.js
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: lines 748-756
+    trustLevel: repo
+  - id: evidence:web-anthropic-claude-code
+    kind: EvidenceSource
+    evidenceId: web-anthropic-claude-code
+    kindLabel: web
+    sourcePathOrUrl: https://www.anthropic.com/product/claude-code
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: product overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-anthropic-claude-code-autonomy
+    kind: EvidenceSource
+    evidenceId: web-anthropic-claude-code-autonomy
+    kindLabel: web
+    sourcePathOrUrl: https://www.anthropic.com/news/enabling-claude-code-to-work-more-autonomously
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: Sep 29 2025 product update
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-openai-codex-skills
+    kind: EvidenceSource
+    evidenceId: web-openai-codex-skills
+    kindLabel: web
+    sourcePathOrUrl: https://developers.openai.com/codex/skills
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: Codex skills guide
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-agent
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-agent
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: Copilot coding agent documentation
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-gemini-hooks
+    kind: EvidenceSource
+    evidenceId: web-gemini-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://github.com/google-gemini/gemini-cli/tree/main/docs/hooks
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: Gemini CLI hooks docs
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:repo-transport-mux-readme
+    kind: EvidenceSource
+    evidenceId: repo-transport-mux-readme
+    kindLabel: repo
+    sourcePathOrUrl: packages/transport-mux/README.md
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: "sections: protocol layer, provider layer, route contract"
+    trustLevel: repo
+  - id: evidence:repo-transport-mux-architecture
+    kind: EvidenceSource
+    evidenceId: repo-transport-mux-architecture
+    kindLabel: repo
+    sourcePathOrUrl: packages/transport-mux/architecture.md
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: "sections: terminology, protocol layer, provider layer, route contract"
+    trustLevel: repo
+  - id: evidence:repo-transport-mux-migration
+    kind: EvidenceSource
+    evidenceId: repo-transport-mux-migration
+    kindLabel: repo
+    sourcePathOrUrl: packages/transport-mux/migration.md
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: "sections: staged order, server surface, auth surface"
+    trustLevel: repo
+  - id: evidence:repo-transport-mux-scorecard
+    kind: EvidenceSource
+    evidenceId: repo-transport-mux-scorecard
+    kindLabel: repo
+    sourcePathOrUrl: packages/transport-mux/scripts/migration-scorecard.mjs
+    capturedAt: 2026-04-25T00:00:00.000Z
+    locator: "checks: docs honesty, launcher ownership, publish/CI convergence, executable ownership"
+    trustLevel: repo
+  - id: evidence:repo-agent-catalog-package
+    kind: EvidenceSource
+    evidenceId: repo-agent-catalog-package
+    kindLabel: repo
+    sourcePathOrUrl: packages/agent-catalog/package.json
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: package metadata and scripts
+    trustLevel: repo
+  - id: evidence:web-github-copilot-mcp
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-mcp
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/concepts/agents/cloud-agent/mcp-and-cloud-agent
+    capturedAt: 2026-04-23T00:00:00.000Z
+    locator: Overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45

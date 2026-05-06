@@ -1,0 +1,185 @@
+kind: NodeDocument
+documentPath: nodes/runtime-semantics/discovery-signals-hooks.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: discovery:claude:hooks-mux:1
+    kind: DiscoverySignal
+    signalId: discovery:claude:hooks-mux:1
+    signalKind: env-ordered-rule
+    key: claude
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - CLAUDE_PLUGIN_ROOT
+      - CLAUDE_ENV_FILE
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:codex:hooks-mux:2
+    kind: DiscoverySignal
+    signalId: discovery:codex:hooks-mux:2
+    signalKind: env-ordered-rule
+    key: codex
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - CODEX_PLUGIN_ROOT
+      - CODEX_THREAD_ID
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:codex:hooks-mux:3
+    kind: DiscoverySignal
+    signalId: discovery:codex:hooks-mux:3
+    signalKind: env-ordered-rule
+    key: codex
+    matchMode: all-present-with-absences
+    confidence: medium
+    scope: hooks-mux
+    signals:
+      - OPENAI_API_KEY
+    absentSignals:
+      - CLAUDE_PLUGIN_ROOT
+      - CLAUDE_ENV_FILE
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:gemini:hooks-mux:4
+    kind: DiscoverySignal
+    signalId: discovery:gemini:hooks-mux:4
+    signalKind: env-ordered-rule
+    key: gemini
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - GEMINI_EXTENSION_PATH
+      - BABYSITTER_EXTENSION_PATH
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:copilot:hooks-mux:5
+    kind: DiscoverySignal
+    signalId: discovery:copilot:hooks-mux:5
+    signalKind: env-ordered-rule
+    key: copilot
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - COPILOT_HOME
+      - COPILOT_GITHUB_TOKEN
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:cursor:hooks-mux:6
+    kind: DiscoverySignal
+    signalId: discovery:cursor:hooks-mux:6
+    signalKind: env-ordered-rule
+    key: cursor
+    matchMode: all
+    confidence: medium
+    scope: hooks-mux
+    signals:
+      - CURSOR_PROJECT_DIR
+      - CURSOR_VERSION
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:pi:hooks-mux:7
+    kind: DiscoverySignal
+    signalId: discovery:pi:hooks-mux:7
+    signalKind: env-ordered-rule
+    key: pi
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - PI_PLUGIN_ROOT
+      - PI_SESSION_ID
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:oh-my-pi:hooks-mux:8
+    kind: DiscoverySignal
+    signalId: discovery:oh-my-pi:hooks-mux:8
+    signalKind: env-ordered-rule
+    key: oh-my-pi
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - OMP_PLUGIN_ROOT
+      - OMP_SESSION_ID
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:opencode:hooks-mux:9
+    kind: DiscoverySignal
+    signalId: discovery:opencode:hooks-mux:9
+    signalKind: env-ordered-rule
+    key: opencode
+    matchMode: all
+    confidence: high
+    scope: hooks-mux
+    signals:
+      - OPENCODE_CONFIG
+      - ACCOMPLISH_TASK_ID
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: discovery:openclaw:hooks-mux:10
+    kind: DiscoverySignal
+    signalId: discovery:openclaw:hooks-mux:10
+    signalKind: env-ordered-rule
+    key: openclaw
+    matchMode: all
+    confidence: medium
+    scope: hooks-mux
+    signals:
+      - OPENCLAW_SHELL
+      - OPENCLAW_HOME
+    absentSignals: []
+    argvMatches: []
+    metadataFields: []
+    consumer: hooks-mux-core
+    notes: Ordered adapter auto-detection rule used by hooks-mux.
+    evidenceRefs:
+      - repo-hooks-detector

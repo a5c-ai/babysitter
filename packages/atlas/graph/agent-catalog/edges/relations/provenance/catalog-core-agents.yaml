@@ -1,0 +1,370 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/catalog-core-agents.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:agent:claude:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:claude:claim:repo-target-claude
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:agent:claude:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:claude:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:agent:claude:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agent:codex:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:codex
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:codex:claim:repo-target-codex
+    relation: supported_by_claim
+    from: agent:codex
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:agent:codex:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:codex
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:codex:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: agent:codex
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:agent:codex:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: agent:codex
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:agent:cursor:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:cursor
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:cursor:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: agent:cursor
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:agent:cursor:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:cursor
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:gemini:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:gemini
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:gemini:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: agent:gemini
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:agent:gemini:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:gemini
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:gemini:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: agent:gemini
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:agent:copilot:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:copilot
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:copilot:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: agent:copilot
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:agent:copilot:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:copilot
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:copilot:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: agent:copilot
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:agent:pi:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:pi
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:omp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:omp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:opencode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:opencode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agent:openclaw:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agent:openclaw
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agent:openclaw:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: agent:openclaw
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:agent:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: agent:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:repo-target-claude
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:claim:repo-target-codex
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-119-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-119-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:codex:ge-0-119-0:claim:repo-target-codex
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-119-0
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:agentVersion:codex:ge-0-119-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-119-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:codex:ge-0-119-0:claim:repo-codex-windows-hooks
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-119-0
+    to: claim:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:agentVersion:codex:ge-0-119-0:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: agentVersion:codex:ge-0-119-0
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:agentVersion:cursor:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:cursor:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:cursor:ge-0-0-0:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: agentVersion:cursor:ge-0-0-0
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:agentVersion:cursor:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:cursor:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:gemini:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:gemini:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:gemini:ge-0-0-0:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: agentVersion:gemini:ge-0-0-0
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:agentVersion:gemini:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:gemini:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:gemini:ge-0-0-0:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: agentVersion:gemini:ge-0-0-0
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:agentVersion:copilot:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:copilot:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:copilot:ge-0-0-0:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: agentVersion:copilot:ge-0-0-0
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:agentVersion:copilot:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:copilot:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:copilot:ge-0-0-0:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: agentVersion:copilot:ge-0-0-0
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:agentVersion:pi:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:pi:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:omp:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:omp:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:opencode:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:opencode:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:opencode:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:opencode:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:agentVersion:openclaw:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: agentVersion:openclaw:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:agentVersion:openclaw:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: agentVersion:openclaw:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:agentVersion:openclaw:ge-0-0-0:claim:repo-target-index
+    relation: supported_by_claim
+    from: agentVersion:openclaw:ge-0-0-0
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index

@@ -1,0 +1,73 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/provider-versions.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:anthropic:streaming
+    kind: CapabilitySupport
+    supportId: capabilitySupport:anthropic:streaming
+    capabilityId: streaming
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:anthropic:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: anthropic
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+      - web-anthropic-claude-code
+  - id: capabilitySupport:anthropic:tool-calling
+    kind: CapabilitySupport
+    supportId: capabilitySupport:anthropic:tool-calling
+    capabilityId: tool-calling
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:anthropic:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: anthropic
+    evidenceRefs: *a1
+  - id: capabilitySupport:openai:streaming
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openai:streaming
+    capabilityId: streaming
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:openai:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: openai
+    evidenceRefs: &a2
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - web-openai-codex-skills
+  - id: capabilitySupport:openai:tool-calling
+    kind: CapabilitySupport
+    supportId: capabilitySupport:openai:tool-calling
+    capabilityId: tool-calling
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:openai:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: openai
+    evidenceRefs: *a2
+  - id: capabilitySupport:google:streaming
+    kind: CapabilitySupport
+    supportId: capabilitySupport:google:streaming
+    capabilityId: streaming
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:google:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: google
+    evidenceRefs: &a3
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: capabilitySupport:google:tool-calling
+    kind: CapabilitySupport
+    supportId: capabilitySupport:google:tool-calling
+    capabilityId: tool-calling
+    supportLevel: provider-specific
+    subjectKind: ModelProviderVersion
+    subjectId: providerVersion:google:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: google
+    evidenceRefs: *a3

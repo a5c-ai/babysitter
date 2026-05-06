@@ -1,0 +1,160 @@
+kind: NodeDocument
+documentPath: nodes/hooks-and-plugins/hook-surfaces.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: hook:session-start
+    kind: HookSurface
+    hookId: session-start
+    canonicalName: SessionStart
+    phase: session
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:stop
+    kind: HookSurface
+    hookId: stop
+    canonicalName: Stop
+    phase: agent
+    blocking: true
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:user-prompt-submit
+    kind: HookSurface
+    hookId: user-prompt-submit
+    canonicalName: UserPromptSubmit
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:pre-tool-use
+    kind: HookSurface
+    hookId: pre-tool-use
+    canonicalName: PreToolUse
+    phase: tool
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:post-tool-use
+    kind: HookSurface
+    hookId: post-tool-use
+    canonicalName: PostToolUse
+    phase: tool
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:after-agent
+    kind: HookSurface
+    hookId: after-agent
+    canonicalName: AfterAgent
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+      - repo-target-gemini
+  - id: hook:session-end
+    kind: HookSurface
+    hookId: session-end
+    canonicalName: SessionEnd
+    phase: session
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+      - repo-target-copilot
+  - id: hook:session-idle
+    kind: HookSurface
+    hookId: session-idle
+    canonicalName: SessionIdle
+    phase: session
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:shell-env
+    kind: HookSurface
+    hookId: shell-env
+    canonicalName: ShellEnv
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:before-prompt-build
+    kind: HookSurface
+    hookId: before-prompt-build
+    canonicalName: BeforePromptBuild
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:subagent-stop
+    kind: HookSurface
+    hookId: subagent-stop
+    canonicalName: SubagentStop
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:notification
+    kind: HookSurface
+    hookId: notification
+    canonicalName: Notification
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:pre-compact
+    kind: HookSurface
+    hookId: pre-compact
+    canonicalName: PreCompact
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index
+  - id: hook:before-provider-request
+    kind: HookSurface
+    hookId: before-provider-request
+    canonicalName: BeforeProviderRequest
+    phase: agent
+    blocking: false
+    payloadSchemaHint: runtime-specific
+    resultSchemaHint: runtime-specific
+    requiresRuntimeHooks: true
+    evidenceRefs:
+      - repo-target-index

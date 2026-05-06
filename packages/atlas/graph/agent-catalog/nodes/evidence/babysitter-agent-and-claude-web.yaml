@@ -1,0 +1,83 @@
+kind: NodeDocument
+documentPath: nodes/evidence/babysitter-agent-and-claude-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:repo-babysitter-agent-package
+    kind: EvidenceSource
+    evidenceId: repo-babysitter-agent-package
+    kindLabel: repo
+    sourcePathOrUrl: packages/babysitter-agent/package.json
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: package metadata, bin entry, and dependency surface
+    trustLevel: repo
+  - id: evidence:repo-babysitter-agent-cli
+    kind: EvidenceSource
+    evidenceId: repo-babysitter-agent-cli
+    kindLabel: repo
+    sourcePathOrUrl: packages/babysitter-agent/src/cli/dispatch.ts
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: lines 20-53 and 111-202
+    trustLevel: repo
+  - id: evidence:web-anthropic-claude-code-auto-mode
+    kind: EvidenceSource
+    evidenceId: web-anthropic-claude-code-auto-mode
+    kindLabel: web
+    sourcePathOrUrl: https://www.anthropic.com/engineering/claude-code-auto-mode
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: published Mar 25 2026; permission automation and approval-safety design
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-anthropic-claude-code-sandboxing
+    kind: EvidenceSource
+    evidenceId: web-anthropic-claude-code-sandboxing
+    kindLabel: web
+    sourcePathOrUrl: https://www.anthropic.com/engineering/claude-code-sandboxing
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: filesystem and network isolation for Claude Code sandboxing
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:repo-babysitter-agent-package
+    kind: Claim
+    claimId: repo-babysitter-agent-package
+    statement: babysitter-agent is an optional a5c.ai runtime CLI package published separately from the SDK.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-babysitter-agent-package
+    unresolvedGaps: []
+  - id: claim:repo-babysitter-agent-cli
+    kind: Claim
+    claimId: repo-babysitter-agent-cli
+    statement: babysitter-agent exposes create-run and resume flows plus harness invocation, daemon, observer, and MCP server commands.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli
+    unresolvedGaps: []
+  - id: claim:web-anthropic-claude-code-safety
+    kind: Claim
+    claimId: web-anthropic-claude-code-safety
+    statement: Anthropic documents Claude Code safety and autonomy controls through both auto mode approval delegation and sandboxing that isolates filesystem and network access.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+    unresolvedGaps: []

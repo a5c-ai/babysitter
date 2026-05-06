@@ -1,0 +1,163 @@
+kind: NodeDocument
+documentPath: nodes/agents/products.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: agent:claude
+    kind: AgentProduct
+    agentId: claude
+    displayName: Claude Code
+    aliases:
+      - claude-code
+    vendor: Anthropic
+    families:
+      - cli-agent
+      - harness
+    homepage: https://www.anthropic.com/product/claude-code
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: agent:codex
+    kind: AgentProduct
+    agentId: codex
+    displayName: Codex
+    aliases:
+      - codex
+    vendor: OpenAI
+    families:
+      - cli-agent
+      - harness
+    homepage: https://developers.openai.com/codex
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: agent:cursor
+    kind: AgentProduct
+    agentId: cursor
+    displayName: Cursor
+    aliases:
+      - cursor
+    vendor: Cursor
+    families:
+      - cli-agent
+      - harness
+    homepage: https://www.cursor.com
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: agent:gemini
+    kind: AgentProduct
+    agentId: gemini
+    displayName: Gemini CLI
+    aliases:
+      - gemini-cli
+      - gemini
+    vendor: Google
+    families:
+      - cli-agent
+      - harness
+    homepage: https://github.com/google-gemini/gemini-cli
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: agent:copilot
+    kind: AgentProduct
+    agentId: copilot
+    displayName: GitHub Copilot
+    aliases:
+      - github-copilot
+      - copilot
+    vendor: GitHub
+    families:
+      - cli-agent
+      - harness
+    homepage: https://docs.github.com/en/copilot
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: agent:pi
+    kind: AgentProduct
+    agentId: pi
+    displayName: Pi
+    aliases:
+      - pi
+    vendor: a5c.ai
+    families:
+      - cli-agent
+      - harness
+    homepage: https://github.com/a5c-ai/babysitter
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: agent:omp
+    kind: AgentProduct
+    agentId: omp
+    displayName: Oh-My-Pi
+    aliases:
+      - oh-my-pi
+      - omp
+    vendor: a5c.ai
+    families:
+      - cli-agent
+      - harness
+    homepage: https://github.com/a5c-ai/babysitter
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: agent:opencode
+    kind: AgentProduct
+    agentId: opencode
+    displayName: OpenCode
+    aliases:
+      - opencode
+    vendor: OpenCode
+    families:
+      - cli-agent
+      - harness
+    homepage: https://github.com
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: agent:openclaw
+    kind: AgentProduct
+    agentId: openclaw
+    displayName: OpenClaw
+    aliases:
+      - openclaw
+    vendor: OpenClaw
+    families:
+      - cli-agent
+      - harness
+    homepage: https://github.com
+    repoUrls: []
+    status: active
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index

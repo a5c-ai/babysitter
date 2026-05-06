@@ -9,6 +9,10 @@ attributes:
   adapterName: codex
   skillHandling: derived-from-commands
   hookRegistrationFormat: codex
+  hookRegistrationOutputPath: "hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: ".codex-plugin/plugin.json"
+  pluginRootEnvVarForExtension: null
   scriptVariants:
     - bash
   distribution:

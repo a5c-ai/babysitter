@@ -1,0 +1,166 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/hooks-plugins-and-discovery-plugins.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:pluginTarget:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:codex:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:codex
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:cursor:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:cursor
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:gemini:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:gemini
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:github-copilot:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:github-copilot
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:pi:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:pi
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:oh-my-pi:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:oh-my-pi
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginTarget:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginTarget:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:claude-code:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:claude-code:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:claude-code:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:claude-code:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:codex:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:codex:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:codex:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:codex:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:cursor:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:cursor:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:cursor:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:cursor:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:gemini:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:gemini:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:gemini:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:gemini:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:github-copilot:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:github-copilot:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:github-copilot:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:github-copilot:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:pi:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:pi:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:pi:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:pi:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:oh-my-pi:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:oh-my-pi:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:oh-my-pi:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:oh-my-pi:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:opencode:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:opencode:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:opencode:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:opencode:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:pluginArtifact:openclaw:manifest:claim:repo-target-index
+    relation: supported_by_claim
+    from: pluginArtifact:openclaw:manifest
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:pluginArtifact:openclaw:container-image:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: pluginArtifact:openclaw:container-image
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback

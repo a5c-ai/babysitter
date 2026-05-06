@@ -1,0 +1,40 @@
+kind: EdgeDocument
+documentPath: edges/relations/capabilities/capability-vocabulary-links-providers.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:anthropic:streaming:capability
+    relation: for_capability
+    from: capabilitySupport:anthropic:streaming
+    to: capability:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:anthropic:tool-calling:capability
+    relation: for_capability
+    from: capabilitySupport:anthropic:tool-calling
+    to: capability:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:openai:streaming:capability
+    relation: for_capability
+    from: capabilitySupport:openai:streaming
+    to: capability:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:openai:tool-calling:capability
+    relation: for_capability
+    from: capabilitySupport:openai:tool-calling
+    to: capability:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capabilitySupport:google:streaming:capability
+    relation: for_capability
+    from: capabilitySupport:google:streaming
+    to: capability:streaming
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capabilitySupport:google:tool-calling:capability
+    relation: for_capability
+    from: capabilitySupport:google:tool-calling
+    to: capability:tool-calling
+    evidenceRefs:
+      - repo-transport-mux-architecture

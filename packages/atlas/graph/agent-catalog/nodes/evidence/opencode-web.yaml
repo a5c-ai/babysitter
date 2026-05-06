@@ -1,0 +1,144 @@
+kind: NodeDocument
+documentPath: nodes/evidence/opencode-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-opencode-tui
+    kind: EvidenceSource
+    evidenceId: web-opencode-tui
+    kindLabel: web
+    sourcePathOrUrl: https://opencode.ai/docs/tui/
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: terminal UI overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-opencode-commands
+    kind: EvidenceSource
+    evidenceId: web-opencode-commands
+    kindLabel: web
+    sourcePathOrUrl: https://opencode.ai/docs/commands/
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: built-in and custom commands
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-opencode-plugins
+    kind: EvidenceSource
+    evidenceId: web-opencode-plugins
+    kindLabel: web
+    sourcePathOrUrl: https://opencode.ai/docs/plugins/
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: plugin and hook-based extensibility
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-opencode-providers
+    kind: EvidenceSource
+    evidenceId: web-opencode-providers
+    kindLabel: web
+    sourcePathOrUrl: https://opencode.ai/docs/providers/
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: model provider configuration
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-opencode-windows-wsl
+    kind: EvidenceSource
+    evidenceId: web-opencode-windows-wsl
+    kindLabel: web
+    sourcePathOrUrl: https://opencode.ai/docs/windows-wsl/
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: config and session storage locations
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:web-opencode-core-agentic
+    kind: Claim
+    claimId: web-opencode-core-agentic
+    statement: OpenCode documents an interactive terminal UI for project work and provider-backed coding workflows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-opencode-tui
+      - web-opencode-providers
+    unresolvedGaps: []
+  - id: claim:web-opencode-commands
+    kind: Claim
+    claimId: web-opencode-commands
+    statement: OpenCode documents built-in and custom command surfaces, which is the strongest first-party basis for reusable task-specific guidance in the local ontology.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-opencode-commands
+    unresolvedGaps:
+      - OpenCode commands are the closest public analogue to reusable skills, but the shared skills capability remains a local normalization.
+  - id: claim:web-opencode-stdin-injection
+    kind: Claim
+    claimId: web-opencode-stdin-injection
+    statement: OpenCode's public docs describe interactive command-driven terminal workflows, but non-interactive stdin injection remains an inferred capability rather than an explicitly documented contract.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-opencode-tui
+      - web-opencode-commands
+    unresolvedGaps:
+      - The public docs do not publish a dedicated headless or piped-input mode for OpenCode.
+  - id: claim:web-opencode-image-input
+    kind: Claim
+    claimId: web-opencode-image-input
+    statement: OpenCode public docs establish a rich terminal coding surface, but image-input support is still an ontology-level inference rather than a documented first-party capability contract.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-opencode-tui
+    unresolvedGaps:
+      - No first-party OpenCode doc in the current evidence set explicitly documents image attachments or image-aware prompts.
+  - id: claim:web-opencode-plugins
+    kind: Claim
+    claimId: web-opencode-plugins
+    statement: OpenCode plugins extend runtime behavior through hooks and custom functionality, providing a first-party basis for runtime extensibility.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-opencode-plugins
+    unresolvedGaps:
+      - Plugin-driven extensibility is documented, but stronger corroboration is still needed for exact runtime-hook and stop-hook semantics.
+  - id: claim:web-opencode-session-storage
+    kind: Claim
+    claimId: web-opencode-session-storage
+    statement: OpenCode documents where local config and sessions are stored, which is the strongest first-party public basis for persisted session semantics.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-opencode-windows-wsl
+    unresolvedGaps:
+      - Session persistence is inferred from storage documentation rather than an explicit resume or continue feature contract.

@@ -1,0 +1,122 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/transport-runtimes.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:terminal-cli:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:terminal-cli:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:terminal-cli
+    versionRange: ">=0.0.0"
+    notes: Interactive terminal CLI runtime
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: capabilitySupport:terminal-cli:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:terminal-cli:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:terminal-cli
+    versionRange: ">=0.0.0"
+    notes: Interactive terminal CLI runtime
+    evidenceRefs: *a1
+  - id: capabilitySupport:shell-hook-runtime:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:shell-hook-runtime:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:shell-hook-runtime
+    versionRange: ">=0.0.0"
+    notes: Runtime hook execution surface
+    evidenceRefs: &a2
+      - repo-target-index
+      - repo-target-claude
+      - repo-target-codex
+  - id: capabilitySupport:shell-hook-runtime:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:shell-hook-runtime:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:shell-hook-runtime
+    versionRange: ">=0.0.0"
+    notes: Runtime hook execution surface
+    evidenceRefs: *a2
+  - id: capabilitySupport:shell-hook-runtime:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:shell-hook-runtime:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:shell-hook-runtime
+    versionRange: ">=0.0.0"
+    notes: Runtime hook execution surface
+    evidenceRefs: *a2
+  - id: capabilitySupport:shell-hook-runtime:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:shell-hook-runtime:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:shell-hook-runtime
+    versionRange: ">=0.0.0"
+    notes: Runtime hook execution surface
+    evidenceRefs: *a2
+  - id: capabilitySupport:amux-proxy:streaming
+    kind: CapabilitySupport
+    supportId: capabilitySupport:amux-proxy:streaming
+    capabilityId: streaming
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:amux-proxy
+    versionRange: ">=0.0.0"
+    notes: amux-proxy protocol/provider bridge
+    evidenceRefs: &a3
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+      - repo-transport-mux-migration
+  - id: capabilitySupport:amux-proxy:proxy-transport-emulation
+    kind: CapabilitySupport
+    supportId: capabilitySupport:amux-proxy:proxy-transport-emulation
+    capabilityId: proxy-transport-emulation
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:amux-proxy
+    versionRange: ">=0.0.0"
+    notes: amux-proxy protocol/provider bridge
+    evidenceRefs: *a3
+  - id: capabilitySupport:amux-proxy:model-discovery
+    kind: CapabilitySupport
+    supportId: capabilitySupport:amux-proxy:model-discovery
+    capabilityId: model-discovery
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:amux-proxy
+    versionRange: ">=0.0.0"
+    notes: amux-proxy protocol/provider bridge
+    evidenceRefs: *a3
+  - id: capabilitySupport:amux-proxy:token-counting
+    kind: CapabilitySupport
+    supportId: capabilitySupport:amux-proxy:token-counting
+    capabilityId: token-counting
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:amux-proxy
+    versionRange: ">=0.0.0"
+    notes: amux-proxy protocol/provider bridge
+    evidenceRefs: *a3
+  - id: capabilitySupport:amux-proxy:tool-calling
+    kind: CapabilitySupport
+    supportId: capabilitySupport:amux-proxy:tool-calling
+    capabilityId: tool-calling
+    supportLevel: native
+    subjectKind: TransportRuntime
+    subjectId: transportRuntime:amux-proxy
+    versionRange: ">=0.0.0"
+    notes: amux-proxy protocol/provider bridge
+    evidenceRefs: *a3

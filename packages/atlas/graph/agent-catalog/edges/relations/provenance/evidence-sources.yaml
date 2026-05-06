@@ -1,0 +1,136 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/evidence-sources.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:claim:repo-sdk-fallback:evidence:repo-sdk-fallback
+    relation: sourced_from
+    from: claim:repo-sdk-fallback
+    to: evidence:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:claim:repo-agent-mux-host:evidence:repo-agent-mux-host
+    relation: sourced_from
+    from: claim:repo-agent-mux-host
+    to: evidence:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:claim:repo-hooks-detector:evidence:repo-hooks-detector
+    relation: sourced_from
+    from: claim:repo-hooks-detector
+    to: evidence:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:claim:repo-target-index:evidence:repo-target-index
+    relation: sourced_from
+    from: claim:repo-target-index
+    to: evidence:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:claim:repo-target-claude:evidence:repo-target-claude
+    relation: sourced_from
+    from: claim:repo-target-claude
+    to: evidence:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:claim:repo-target-codex:evidence:repo-target-codex
+    relation: sourced_from
+    from: claim:repo-target-codex
+    to: evidence:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:claim:repo-target-cursor:evidence:repo-target-cursor
+    relation: sourced_from
+    from: claim:repo-target-cursor
+    to: evidence:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:claim:repo-target-gemini:evidence:repo-target-gemini
+    relation: sourced_from
+    from: claim:repo-target-gemini
+    to: evidence:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:claim:repo-target-copilot:evidence:repo-target-copilot
+    relation: sourced_from
+    from: claim:repo-target-copilot
+    to: evidence:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:claim:repo-process-catalog:evidence:repo-process-catalog
+    relation: sourced_from
+    from: claim:repo-process-catalog
+    to: evidence:repo-process-catalog
+    evidenceRefs:
+      - repo-process-catalog
+  - id: edge:claim:repo-agent-mux-model-catalog:evidence:repo-agent-mux-model-catalog
+    relation: sourced_from
+    from: claim:repo-agent-mux-model-catalog
+    to: evidence:repo-agent-mux-model-catalog
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: edge:claim:repo-codex-windows-hooks:evidence:repo-codex-windows-hooks
+    relation: sourced_from
+    from: claim:repo-codex-windows-hooks
+    to: evidence:repo-codex-windows-hooks
+    evidenceRefs:
+      - repo-codex-windows-hooks
+  - id: edge:claim:web-anthropic-claude-code:evidence:web-anthropic-claude-code
+    relation: sourced_from
+    from: claim:web-anthropic-claude-code
+    to: evidence:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:claim:web-anthropic-claude-code-autonomy:evidence:web-anthropic-claude-code-autonomy
+    relation: sourced_from
+    from: claim:web-anthropic-claude-code-autonomy
+    to: evidence:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:claim:web-openai-codex-skills:evidence:web-openai-codex-skills
+    relation: sourced_from
+    from: claim:web-openai-codex-skills
+    to: evidence:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:claim:web-github-copilot-agent:evidence:web-github-copilot-agent
+    relation: sourced_from
+    from: claim:web-github-copilot-agent
+    to: evidence:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:claim:web-gemini-hooks:evidence:web-gemini-hooks
+    relation: sourced_from
+    from: claim:web-gemini-hooks
+    to: evidence:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:claim:repo-transport-mux-readme:evidence:repo-transport-mux-readme
+    relation: sourced_from
+    from: claim:repo-transport-mux-readme
+    to: evidence:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:claim:repo-transport-mux-architecture:evidence:repo-transport-mux-architecture
+    relation: sourced_from
+    from: claim:repo-transport-mux-architecture
+    to: evidence:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:claim:repo-transport-mux-migration:evidence:repo-transport-mux-migration
+    relation: sourced_from
+    from: claim:repo-transport-mux-migration
+    to: evidence:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:claim:repo-agent-catalog-package:evidence:repo-agent-catalog-package
+    relation: sourced_from
+    from: claim:repo-agent-catalog-package
+    to: evidence:repo-agent-catalog-package
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: edge:claim:web-github-copilot-mcp:evidence:web-github-copilot-mcp
+    relation: sourced_from
+    from: claim:web-github-copilot-mcp
+    to: evidence:web-github-copilot-mcp
+    evidenceRefs:
+      - web-github-copilot-mcp

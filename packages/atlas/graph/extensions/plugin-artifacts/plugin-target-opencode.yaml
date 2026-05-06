@@ -9,6 +9,10 @@ attributes:
   adapterName: opencode
   skillHandling: derived-from-commands
   hookRegistrationFormat: opencode
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: null
+  pluginRootEnvVarForExtension: null
   marketplacePath: null
   pluginRootEnvVar: OPENCODE_PLUGIN_ROOT
   scriptVariants:

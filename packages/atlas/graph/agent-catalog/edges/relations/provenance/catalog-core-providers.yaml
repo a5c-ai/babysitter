@@ -1,0 +1,220 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/catalog-core-providers.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:provider:anthropic:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: provider:anthropic
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:provider:anthropic:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: provider:anthropic
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:provider:anthropic:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: provider:anthropic
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:provider:openai:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: provider:openai
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:provider:openai:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: provider:openai
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:provider:openai:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: provider:openai
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:provider:google:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: provider:google
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:provider:google:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: provider:google
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:provider:google:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: provider:google
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:provider:github:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: provider:github
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:provider:github:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: provider:github
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:provider:github:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: provider:github
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:provider:bedrock:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: provider:bedrock
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:provider:bedrock:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: provider:bedrock
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:provider:vertex:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: provider:vertex
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:provider:vertex:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: provider:vertex
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:provider:foundry:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: provider:foundry
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:provider:foundry:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: provider:foundry
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:providerVersion:anthropic:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: providerVersion:anthropic:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:providerVersion:anthropic:ge-0-0-0:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: providerVersion:anthropic:ge-0-0-0
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:providerVersion:anthropic:ge-0-0-0:claim:web-anthropic-claude-code
+    relation: supported_by_claim
+    from: providerVersion:anthropic:ge-0-0-0
+    to: claim:web-anthropic-claude-code
+    evidenceRefs:
+      - web-anthropic-claude-code
+  - id: edge:providerVersion:openai:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: providerVersion:openai:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:providerVersion:openai:ge-0-0-0:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: providerVersion:openai:ge-0-0-0
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:providerVersion:openai:ge-0-0-0:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: providerVersion:openai:ge-0-0-0
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:providerVersion:google:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: providerVersion:google:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:providerVersion:google:ge-0-0-0:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: providerVersion:google:ge-0-0-0
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:providerVersion:google:ge-0-0-0:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: providerVersion:google:ge-0-0-0
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:providerVersion:github:ge-0-0-0:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: providerVersion:github:ge-0-0-0
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:providerVersion:github:ge-0-0-0:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: providerVersion:github:ge-0-0-0
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:providerVersion:github:ge-0-0-0:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: providerVersion:github:ge-0-0-0
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:providerVersion:bedrock:ge-0-0-0:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: providerVersion:bedrock:ge-0-0-0
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:providerVersion:bedrock:ge-0-0-0:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: providerVersion:bedrock:ge-0-0-0
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:providerVersion:vertex:ge-0-0-0:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: providerVersion:vertex:ge-0-0-0
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:providerVersion:vertex:ge-0-0-0:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: providerVersion:vertex:ge-0-0-0
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:providerVersion:foundry:ge-0-0-0:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: providerVersion:foundry:ge-0-0-0
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:providerVersion:foundry:ge-0-0-0:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: providerVersion:foundry:ge-0-0-0
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture

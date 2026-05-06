@@ -1,0 +1,190 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/codex.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Codex skills are documented directly, while the local target profile explains how command-derived skills map into the shared ontology.
+    evidenceRefs: &codexSkills
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - web-codex-skills
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Codex CLI is documented as an interactive coding-agent surface with persistent threads and tool-assisted execution.
+    evidenceRefs: &codexCore
+      - repo-sdk-fallback
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Interactive terminal usage is grounded in Codex CLI docs rather than inferred from the skills page.
+    evidenceRefs: *codexCore
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Non-interactive Codex execution is documented separately for scripting and CI usage.
+    evidenceRefs: &codexStdin
+      - repo-sdk-fallback
+      - web-codex-noninteractive
+      - web-codex-cli-reference
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Multimodal Codex support is documented, but the public evidence is broader than a single CLI-only image-input flag.
+    evidenceRefs: &codexImages
+      - repo-sdk-fallback
+      - web-codex-cli
+      - web-codex-cli-features
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Codex has first-party hook docs, while pre-0.119.0 Windows hook support remains a repo-specific lifecycle nuance.
+    evidenceRefs: &codexHooksPre119
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-codex-hooks
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping, with the Windows version nuance kept explicit.
+    evidenceRefs: *codexHooksPre119
+  - id: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-0-0-lt-0-119-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    versionRange: ">=0.0.0 <0.119.0"
+    notes: Session continuation is supported through transcript and thread persistence rather than piggybacking on the hooks docs.
+    evidenceRefs: &codexResume
+      - repo-sdk-fallback
+      - web-codex-cli-features
+      - web-codex-cli-reference
+  - id: capabilitySupport:codex:ge-0-119-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Codex skills are documented directly, while the local target profile explains how command-derived skills map into the shared ontology.
+    evidenceRefs: *codexSkills
+  - id: capabilitySupport:codex:ge-0-119-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Codex CLI is documented as an interactive coding-agent surface with persistent threads and tool-assisted execution.
+    evidenceRefs: *codexCore
+  - id: capabilitySupport:codex:ge-0-119-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Interactive terminal usage is grounded in Codex CLI docs rather than inferred from the skills page.
+    evidenceRefs: *codexCore
+  - id: capabilitySupport:codex:ge-0-119-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Non-interactive Codex execution is documented separately for scripting and CI usage.
+    evidenceRefs: *codexStdin
+  - id: capabilitySupport:codex:ge-0-119-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Multimodal Codex support is documented, but the public evidence is broader than a single CLI-only image-input flag.
+    evidenceRefs: *codexImages
+  - id: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Codex has first-party hook docs, and 0.119.0+ removes the local Windows hook caveat.
+    evidenceRefs: &codexHooksPost119
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-codex-hooks
+  - id: capabilitySupport:codex:ge-0-119-0:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Stop-hook mapping is normalized from the documented Codex hook system plus the local target-name mapping.
+    evidenceRefs: *codexHooksPost119
+  - id: capabilitySupport:codex:ge-0-119-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:codex:ge-0-119-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:codex:ge-0-119-0
+    versionRange: ">=0.119.0"
+    notes: Session continuation is supported through transcript and thread persistence rather than piggybacking on the hooks docs.
+    evidenceRefs: *codexResume

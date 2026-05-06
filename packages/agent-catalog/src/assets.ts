@@ -3,6 +3,7 @@ import path from "node:path";
 
 const PACKAGE_NAME = "@a5c-ai/agent-catalog";
 const PACKAGE_ROOT = path.resolve(__dirname, "..");
+const ATLAS_GRAPH_ROOT = path.resolve(__dirname, "..", "..", "atlas", "graph", "agent-catalog");
 const ALLOWED_ASSET_ROOTS = new Set(["graph", "evidence", "docs"]);
 
 function normalizeAssetPath(relativeAssetPath: string): string {
@@ -61,6 +62,15 @@ function resolvePackageRootCandidates(): string[] {
 
 export function resolveCatalogAssetPath(relativeAssetPath: string): string {
   const normalized = normalizeAssetPath(relativeAssetPath);
+
+  // Prefer Atlas graph directory for graph assets
+  if (normalized.startsWith("graph/")) {
+    const atlasPath = path.join(ATLAS_GRAPH_ROOT, normalized.slice("graph/".length));
+    if (fs.existsSync(atlasPath)) {
+      return atlasPath;
+    }
+  }
+
   const exportedPath = resolveExportedAssetPath(normalized);
   if (exportedPath && fs.existsSync(exportedPath)) {
     return exportedPath;

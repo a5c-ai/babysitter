@@ -1,0 +1,151 @@
+kind: NodeDocument
+documentPath: nodes/runtime-semantics/lifecycle-semantics.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: lifecycleSemantics:claude:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:claude:ge-0-0-0
+    agentId: claude
+    versionRange: ">=0.0.0"
+    runtimeHookMode: native-shell-hooks
+    stopHookMode: blocking-stop-hook
+    backgroundTaskMode: supported
+    checkpointMode: documented
+    pluginContextMode: plugin.json + marketplace hooks
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-claude
+      - web-anthropic-claude-code-autonomy
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:codex:ge-0-0-0-lt-0-119-0
+    agentId: codex
+    versionRange: ">=0.0.0 <0.119.0"
+    runtimeHookMode: native-shell-hooks
+    stopHookMode: blocking-stop-hook
+    backgroundTaskMode: unsupported-documented
+    checkpointMode: unspecified
+    pluginContextMode: package.json + hooks.json
+    platformNuances:
+      - windows-hook-threshold:0.119.0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-codex-windows-hooks
+  - id: lifecycleSemantics:codex:ge-0-119-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:codex:ge-0-119-0
+    agentId: codex
+    versionRange: ">=0.119.0"
+    runtimeHookMode: native-shell-hooks-with-windows-support
+    stopHookMode: blocking-stop-hook
+    backgroundTaskMode: unsupported-documented
+    checkpointMode: unspecified
+    pluginContextMode: package.json + hooks.json
+    platformNuances:
+      - windows-hook-threshold:0.119.0
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-codex-windows-hooks
+  - id: lifecycleSemantics:cursor:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:cursor:ge-0-0-0
+    agentId: cursor
+    versionRange: ">=0.0.0"
+    runtimeHookMode: native-shell-hooks
+    stopHookMode: blocking-stop-hook
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: plugin.json
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-cursor
+  - id: lifecycleSemantics:gemini:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:gemini:ge-0-0-0
+    agentId: gemini
+    versionRange: ">=0.0.0"
+    runtimeHookMode: native-hooks-with-extension-manifest
+    stopHookMode: after-agent-hook
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: plugin.json + gemini-extension.json
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: lifecycleSemantics:copilot:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:copilot:ge-0-0-0
+    agentId: copilot
+    versionRange: ">=0.0.0"
+    runtimeHookMode: native-shell-hooks
+    stopHookMode: session-end-hook
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: plugin.json
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: lifecycleSemantics:pi:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:pi:ge-0-0-0
+    agentId: pi
+    versionRange: ">=0.0.0"
+    runtimeHookMode: unsupported-in-fallback
+    stopHookMode: unsupported-in-fallback
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: skills-and-state-only
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: lifecycleSemantics:omp:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:omp:ge-0-0-0
+    agentId: omp
+    versionRange: ">=0.0.0"
+    runtimeHookMode: unsupported-in-fallback
+    stopHookMode: unsupported-in-fallback
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: skills-and-state-only
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: lifecycleSemantics:opencode:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:opencode:ge-0-0-0
+    agentId: opencode
+    versionRange: ">=0.0.0"
+    runtimeHookMode: native-event-hooks
+    stopHookMode: session-idle-hook
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: plugin.json + event hooks
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: lifecycleSemantics:openclaw:ge-0-0-0
+    kind: LifecycleSemantics
+    lifecycleSemanticsId: lifecycleSemantics:openclaw:ge-0-0-0
+    agentId: openclaw
+    versionRange: ">=0.0.0"
+    runtimeHookMode: event-hooks-mapped-but-fallback-unsupported
+    stopHookMode: fallback-unsupported
+    backgroundTaskMode: unknown
+    checkpointMode: unspecified
+    pluginContextMode: plugin.json + adapter events
+    platformNuances: []
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index

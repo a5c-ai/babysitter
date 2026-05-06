@@ -1,0 +1,114 @@
+kind: NodeDocument
+documentPath: nodes/evidence/claude-code-docs-extensions.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-claude-code-features-overview
+    kind: EvidenceSource
+    evidenceId: web-claude-code-features-overview
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/features-overview
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: extension surface overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-claude-directory
+    kind: EvidenceSource
+    evidenceId: web-claude-code-claude-directory
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/claude-directory
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: .claude directory layout
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-commands
+    kind: EvidenceSource
+    evidenceId: web-claude-code-commands
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/commands
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: built-in commands and bundled skills
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-skills
+    kind: EvidenceSource
+    evidenceId: web-claude-code-skills
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/skills
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: skill creation and invocation
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-hooks
+    kind: EvidenceSource
+    evidenceId: web-claude-code-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/hooks
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: lifecycle hook reference
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-hooks-guide
+    kind: EvidenceSource
+    evidenceId: web-claude-code-hooks-guide
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/hooks-guide
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: workflow automation guide for hooks
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-mcp
+    kind: EvidenceSource
+    evidenceId: web-claude-code-mcp
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/mcp
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: MCP integration
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-subagents
+    kind: EvidenceSource
+    evidenceId: web-claude-code-subagents
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/sub-agents
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: custom subagents
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-agent-teams
+    kind: EvidenceSource
+    evidenceId: web-claude-code-agent-teams
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/agent-teams
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: parallel Claude Code team orchestration
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-claude-code-tools-reference
+    kind: EvidenceSource
+    evidenceId: web-claude-code-tools-reference
+    kindLabel: web
+    sourcePathOrUrl: https://code.claude.com/docs/en/tools-reference
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: built-in tool and MCP references
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45

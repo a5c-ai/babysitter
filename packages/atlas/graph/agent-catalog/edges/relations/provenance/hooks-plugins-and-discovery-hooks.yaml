@@ -1,0 +1,244 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/hooks-plugins-and-discovery-hooks.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:hook:session-start:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:session-start
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:stop:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:stop
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:user-prompt-submit:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:user-prompt-submit
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:pre-tool-use:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:pre-tool-use
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:post-tool-use:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:post-tool-use
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:after-agent:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:after-agent
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:after-agent:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: hook:after-agent
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:hook:session-end:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:session-end
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:session-end:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: hook:session-end
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:hook:session-idle:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:session-idle
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:shell-env:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:shell-env
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hook:before-prompt-build:claim:repo-target-index
+    relation: supported_by_claim
+    from: hook:before-prompt-build
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:codex:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:codex
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:cursor:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:cursor
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:gemini:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:gemini
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:github-copilot:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:github-copilot
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-start:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-start:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:stop:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:stop:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:stop:codex:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:stop:codex
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:stop:cursor:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:stop:cursor
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:user-prompt-submit:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:user-prompt-submit:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:user-prompt-submit:codex:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:user-prompt-submit:codex
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:user-prompt-submit:github-copilot:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:user-prompt-submit:github-copilot
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:pre-tool-use:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:pre-tool-use:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:pre-tool-use:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:pre-tool-use:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:post-tool-use:claude-code:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:post-tool-use:claude-code
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:post-tool-use:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:post-tool-use:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:after-agent:gemini:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:after-agent:gemini
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:after-agent:gemini:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: hookMapping:after-agent:gemini
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:hookMapping:after-agent:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:after-agent:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:after-agent:openclaw:claim:repo-target-gemini
+    relation: supported_by_claim
+    from: hookMapping:after-agent:openclaw
+    to: claim:repo-target-gemini
+    evidenceRefs:
+      - repo-target-gemini
+  - id: edge:hookMapping:session-end:github-copilot:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-end:github-copilot
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-end:github-copilot:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: hookMapping:session-end:github-copilot
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:hookMapping:session-end:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-end:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:session-end:openclaw:claim:repo-target-copilot
+    relation: supported_by_claim
+    from: hookMapping:session-end:openclaw
+    to: claim:repo-target-copilot
+    evidenceRefs:
+      - repo-target-copilot
+  - id: edge:hookMapping:session-idle:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:session-idle:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:shell-env:opencode:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:shell-env:opencode
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:hookMapping:before-prompt-build:openclaw:claim:repo-target-index
+    relation: supported_by_claim
+    from: hookMapping:before-prompt-build:openclaw
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index

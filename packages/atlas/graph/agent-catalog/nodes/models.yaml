@@ -1,0 +1,103 @@
+kind: NodeDocument
+documentPath: nodes/models.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: model:claude-code-default
+    kind: ModelFamily
+    modelId: claude-code-default
+    providerId: anthropic
+    label: Claude Code default model family
+    modalities:
+      - text
+      - image
+    reasoningFamily: coding-agent-default
+    status: active
+    evidenceRefs: &a1
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: model:codex-default
+    kind: ModelFamily
+    modelId: codex-default
+    providerId: openai
+    label: Codex default model family
+    modalities:
+      - text
+      - image
+    reasoningFamily: coding-agent-default
+    status: active
+    evidenceRefs: &a2
+      - web-openai-codex-skills
+  - id: model:gemini-cli-default
+    kind: ModelFamily
+    modelId: gemini-cli-default
+    providerId: google
+    label: Gemini CLI default model family
+    modalities:
+      - text
+      - image
+    reasoningFamily: coding-agent-default
+    status: active
+    evidenceRefs: &a3
+      - repo-target-gemini
+      - web-gemini-hooks
+  - id: model:copilot-default
+    kind: ModelFamily
+    modelId: copilot-default
+    providerId: github
+    label: Copilot coding agent default model family
+    modalities:
+      - text
+      - image
+    reasoningFamily: coding-agent-default
+    status: active
+    evidenceRefs: &a4
+      - repo-target-copilot
+      - web-github-copilot-agent
+  - id: modelVersion:claude-code-default:ge-0-0-0
+    kind: ModelVersion
+    modelVersionId: modelVersion:claude-code-default:ge-0-0-0
+    modelId: claude-code-default
+    versionRange: ">=0.0.0"
+    contextWindow: null
+    toolCallSupport: true
+    visionSupport: true
+    streamingSupport: true
+    costMetadata: {}
+    evidenceRefs: *a1
+    providerId: anthropic
+  - id: modelVersion:codex-default:ge-0-0-0
+    kind: ModelVersion
+    modelVersionId: modelVersion:codex-default:ge-0-0-0
+    modelId: codex-default
+    versionRange: ">=0.0.0"
+    contextWindow: null
+    toolCallSupport: true
+    visionSupport: true
+    streamingSupport: true
+    costMetadata: {}
+    evidenceRefs: *a2
+    providerId: openai
+  - id: modelVersion:gemini-cli-default:ge-0-0-0
+    kind: ModelVersion
+    modelVersionId: modelVersion:gemini-cli-default:ge-0-0-0
+    modelId: gemini-cli-default
+    versionRange: ">=0.0.0"
+    contextWindow: null
+    toolCallSupport: true
+    visionSupport: true
+    streamingSupport: true
+    costMetadata: {}
+    evidenceRefs: *a3
+    providerId: google
+  - id: modelVersion:copilot-default:ge-0-0-0
+    kind: ModelVersion
+    modelVersionId: modelVersion:copilot-default:ge-0-0-0
+    modelId: copilot-default
+    versionRange: ">=0.0.0"
+    contextWindow: null
+    toolCallSupport: true
+    visionSupport: true
+    streamingSupport: true
+    costMetadata: {}
+    evidenceRefs: *a4
+    providerId: github

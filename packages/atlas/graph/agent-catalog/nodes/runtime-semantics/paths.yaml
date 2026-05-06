@@ -1,0 +1,289 @@
+kind: NodeDocument
+documentPath: nodes/runtime-semantics/paths.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: path:.a5c-runs
+    kind: PathDescriptor
+    pathId: .a5c-runs
+    path: .a5c/runs
+    pathKind: session-state-dir
+    ownerKind: GraphDocument
+    ownerId: graph:agent-catalog
+    platform: cross-platform
+    notes: Shared fallback run/session directory for harness metadata.
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:agent-catalog-graph
+    kind: PathDescriptor
+    pathId: agent-catalog-graph
+    path: packages/agent-catalog/graph
+    pathKind: source-of-truth-dir
+    ownerKind: PackageSurface
+    ownerId: package:@a5c-ai/agent-catalog
+    platform: repo
+    notes: Authoritative YAML graph source for agent-catalog.
+    evidenceRefs:
+      - repo-agent-catalog-package
+  - id: path:catalog-api
+    kind: PathDescriptor
+    pathId: catalog-api
+    path: packages/catalog/src/app/api/agents
+    pathKind: api-surface
+    ownerKind: PackageSurface
+    ownerId: package:@a5c-ai/catalog
+    platform: repo
+    notes: UI/API consumer of graph-backed agent catalog rows.
+    evidenceRefs:
+      - repo-process-catalog
+  - id: path:transport-mux
+    kind: PathDescriptor
+    pathId: transport-mux
+    path: packages/transport-mux
+    pathKind: ontology-source
+    ownerKind: PackageSurface
+    ownerId: package:@a5c-ai/transport-mux
+    platform: repo
+    notes: Protocol/provider ontology reference package.
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: path:auto:packages-catalog-process-library-catalog-js
+    kind: PathDescriptor
+    pathId: path:auto:packages-catalog-process-library-catalog-js
+    path: packages/catalog/process-library-catalog.js
+    pathKind: repo-path
+    ownerKind: ProcessDescriptor
+    ownerId: process:packages/catalog/process-library-catalog
+    platform: repo
+    notes: Process Library Catalog
+    evidenceRefs: &a1
+      - repo-process-catalog
+  - id: path:auto:packages-catalog-src-app
+    kind: PathDescriptor
+    pathId: path:auto:packages-catalog-src-app
+    path: packages/catalog/src/app
+    pathKind: repo-path
+    ownerKind: ProcessDescriptor
+    ownerId: process:packages/catalog/process-library-catalog
+    platform: repo
+    notes: Process Library Catalog
+    evidenceRefs: *a1
+  - id: path:auto:packages-catalog-src-lib
+    kind: PathDescriptor
+    pathId: path:auto:packages-catalog-src-lib
+    path: packages/catalog/src/lib
+    pathKind: repo-path
+    ownerKind: ProcessDescriptor
+    ownerId: process:packages/catalog/process-library-catalog
+    platform: repo
+    notes: Process Library Catalog
+    evidenceRefs: *a1
+  - id: path:auto:packages-agent-mux-processes-model-catalog-js
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-mux-processes-model-catalog-js
+    path: packages/agent-mux/processes/model-catalog.js
+    pathKind: repo-path
+    ownerKind: ProcessDescriptor
+    ownerId: process:agent-mux/model-catalog
+    platform: repo
+    notes: Agent Mux Model Catalog
+    evidenceRefs:
+      - repo-agent-mux-model-catalog
+  - id: path:auto:packages-agent-plugins-mux-src-targets-claude-code-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-claude-code-ts
+    path: packages/agent-plugins-mux/src/targets/claude-code.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:claude-code:manifest
+    platform: repo
+    notes: claude-code
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-anthropics-claude-code
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-anthropics-claude-code
+    path: ghcr.io/anthropics/claude-code
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:claude-code:container-image
+    platform: repo
+    notes: claude-code
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-codex-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-codex-ts
+    path: packages/agent-plugins-mux/src/targets/codex.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:codex:manifest
+    platform: repo
+    notes: codex
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-openai-codex
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-openai-codex
+    path: ghcr.io/openai/codex
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:codex:container-image
+    platform: repo
+    notes: codex
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-cursor-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-cursor-ts
+    path: packages/agent-plugins-mux/src/targets/cursor.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:cursor:manifest
+    platform: repo
+    notes: cursor
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-cursor-cursor-agent
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-cursor-cursor-agent
+    path: ghcr.io/cursor/cursor-agent
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:cursor:container-image
+    platform: repo
+    notes: cursor
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-gemini-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-gemini-ts
+    path: packages/agent-plugins-mux/src/targets/gemini.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:gemini:manifest
+    platform: repo
+    notes: gemini
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-google-gemini-cli
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-google-gemini-cli
+    path: ghcr.io/google/gemini-cli
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:gemini:container-image
+    platform: repo
+    notes: gemini
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-github-copilot-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-github-copilot-ts
+    path: packages/agent-plugins-mux/src/targets/github-copilot.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:github-copilot:manifest
+    platform: repo
+    notes: github-copilot
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-github-copilot-cli
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-github-copilot-cli
+    path: ghcr.io/github/copilot-cli
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:github-copilot:container-image
+    platform: repo
+    notes: github-copilot
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-pi-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-pi-ts
+    path: packages/agent-plugins-mux/src/targets/pi.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:pi:manifest
+    platform: repo
+    notes: pi
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-a5c-ai-pi
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-a5c-ai-pi
+    path: ghcr.io/a5c-ai/pi
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:pi:container-image
+    platform: repo
+    notes: pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-oh-my-pi-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-oh-my-pi-ts
+    path: packages/agent-plugins-mux/src/targets/oh-my-pi.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:oh-my-pi:manifest
+    platform: repo
+    notes: oh-my-pi
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-a5c-ai-omp
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-a5c-ai-omp
+    path: ghcr.io/a5c-ai/omp
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:oh-my-pi:container-image
+    platform: repo
+    notes: oh-my-pi
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-opencode-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-opencode-ts
+    path: packages/agent-plugins-mux/src/targets/opencode.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:opencode:manifest
+    platform: repo
+    notes: opencode
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-anomalyco-opencode
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-anomalyco-opencode
+    path: ghcr.io/anomalyco/opencode
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:opencode:container-image
+    platform: repo
+    notes: opencode
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: path:auto:packages-agent-plugins-mux-src-targets-openclaw-ts
+    kind: PathDescriptor
+    pathId: path:auto:packages-agent-plugins-mux-src-targets-openclaw-ts
+    path: packages/agent-plugins-mux/src/targets/openclaw.ts
+    pathKind: manifest
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:openclaw:manifest
+    platform: repo
+    notes: openclaw
+    evidenceRefs:
+      - repo-target-index
+  - id: path:auto:ghcr-io-openclaw-openclaw
+    kind: PathDescriptor
+    pathId: path:auto:ghcr-io-openclaw-openclaw
+    path: ghcr.io/openclaw/openclaw
+    pathKind: container-image
+    ownerKind: PluginArtifact
+    ownerId: pluginArtifact:openclaw:container-image
+    platform: repo
+    notes: openclaw
+    evidenceRefs:
+      - repo-sdk-fallback

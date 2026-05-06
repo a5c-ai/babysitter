@@ -1,0 +1,254 @@
+kind: NodeDocument
+documentPath: nodes/runtime-semantics/discovery-signals-host.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: discovery:claude:host-env
+    kind: DiscoverySignal
+    signalId: discovery:claude:host-env
+    signalKind: env-any
+    key: claude
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - CLAUDECODE
+      - CLAUDE_CODE_SESSION_ID
+      - CLAUDE_CODE
+      - CLAUDE_PROJECT_DIR
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CLAUDE_CODE_SESSION_ID
+      - key: env_file
+        envVars:
+          - CLAUDE_ENV_FILE
+      - key: project_dir
+        envVars:
+          - CLAUDE_PROJECT_DIR
+    argvMatches:
+      - claude-code
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:codex:host-env
+    kind: DiscoverySignal
+    signalId: discovery:codex:host-env
+    signalKind: env-any
+    key: codex
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - CODEX_SESSION_ID
+      - CODEX_RUN_ID
+      - CODEX_CLI
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CODEX_SESSION_ID
+      - key: run_id
+        envVars:
+          - CODEX_RUN_ID
+    argvMatches:
+      - codex
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:gemini:host-env
+    kind: DiscoverySignal
+    signalId: discovery:gemini:host-env
+    signalKind: env-any
+    key: gemini
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - GEMINI_CLI
+      - GEMINI_SESSION_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - GEMINI_SESSION_ID
+    argvMatches:
+      - gemini-cli
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:copilot:host-env
+    kind: DiscoverySignal
+    signalId: discovery:copilot:host-env
+    signalKind: env-any
+    key: copilot
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - COPILOT_CLI_SESSION
+      - GH_COPILOT_SESSION
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - COPILOT_CLI_SESSION
+          - GH_COPILOT_SESSION
+    argvMatches:
+      - copilot
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:cursor:host-env
+    kind: DiscoverySignal
+    signalId: discovery:cursor:host-env
+    signalKind: env-any
+    key: cursor
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - CURSOR_SESSION
+      - CURSOR_AGENT_SESSION
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - CURSOR_SESSION
+          - CURSOR_AGENT_SESSION
+    argvMatches:
+      - cursor-cli
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:opencode:host-env
+    kind: DiscoverySignal
+    signalId: discovery:opencode:host-env
+    signalKind: env-any
+    key: opencode
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - OPENCODE_SESSION
+      - OPENCODE_RUN_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OPENCODE_SESSION
+      - key: run_id
+        envVars:
+          - OPENCODE_RUN_ID
+    argvMatches:
+      - opencode
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:pi:host-env
+    kind: DiscoverySignal
+    signalId: discovery:pi:host-env
+    signalKind: env-any
+    key: pi
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - PI_RUN_ID
+      - PI_SESSION_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - PI_SESSION_ID
+      - key: run_id
+        envVars:
+          - PI_RUN_ID
+    argvMatches:
+      - pi
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:omp:host-env
+    kind: DiscoverySignal
+    signalId: discovery:omp:host-env
+    signalKind: env-any
+    key: omp
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - OMP_RUN_ID
+      - OMP_SESSION_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OMP_SESSION_ID
+      - key: run_id
+        envVars:
+          - OMP_RUN_ID
+    argvMatches:
+      - oh-my-pi
+      - omp
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:openclaw:host-env
+    kind: DiscoverySignal
+    signalId: discovery:openclaw:host-env
+    signalKind: env-any
+    key: openclaw
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - OPENCLAW_SESSION
+      - OPENCLAW_RUN_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - OPENCLAW_SESSION
+      - key: run_id
+        envVars:
+          - OPENCLAW_RUN_ID
+    argvMatches:
+      - openclaw
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: discovery:hermes:host-env
+    kind: DiscoverySignal
+    signalId: discovery:hermes:host-env
+    signalKind: env-any
+    key: hermes
+    matchMode: any
+    confidence: medium
+    scope: host-detection
+    signals:
+      - HERMES_SESSION
+      - HERMES_RUN_ID
+    absentSignals: []
+    metadataFields:
+      - key: session_id
+        envVars:
+          - HERMES_SESSION
+      - key: run_id
+        envVars:
+          - HERMES_RUN_ID
+    argvMatches:
+      - hermes
+    consumer: agent-mux-core
+    notes: Host harness detection signals used by agent-mux.
+    evidenceRefs:
+      - repo-agent-mux-host

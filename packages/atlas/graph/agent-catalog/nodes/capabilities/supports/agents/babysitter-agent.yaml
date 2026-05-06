@@ -1,0 +1,46 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/babysitter-agent.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+    kind: CapabilitySupport
+    supportId: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+    capabilityId: mcp
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:babysitter-agent:ge-5-0-0
+    versionRange: ">=5.0.0"
+    notes: babysitter-agent can launch a built-in MCP server and agent-facing MCP integration surfaces.
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+      - repo-babysitter-agent-cli
+  - id: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:babysitter-agent:ge-5-0-0
+    versionRange: ">=5.0.0"
+    notes: babysitter-agent is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows.
+    evidenceRefs: *a1
+  - id: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:babysitter-agent:ge-5-0-0
+    versionRange: ">=5.0.0"
+    notes: babysitter-agent accepts prompts, command templates, and harness invocations via CLI input arguments.
+    evidenceRefs: *a1
+  - id: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:babysitter-agent:ge-5-0-0
+    versionRange: ">=5.0.0"
+    notes: babysitter-agent resumes runs and sessions through explicit resume-run and session-history command surfaces.
+    evidenceRefs: *a1

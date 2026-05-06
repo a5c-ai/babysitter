@@ -1,0 +1,172 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-transport.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:transportProtocol:terminal-cli:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: transportProtocol:terminal-cli
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:transportProtocol:terminal-cli:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: transportProtocol:terminal-cli
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:transportProtocol:shell-hook-runtime:claim:repo-target-index
+    relation: supported_by_claim
+    from: transportProtocol:shell-hook-runtime
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:transportProtocol:shell-hook-runtime:claim:repo-target-claude
+    relation: supported_by_claim
+    from: transportProtocol:shell-hook-runtime
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:transportProtocol:shell-hook-runtime:claim:repo-target-codex
+    relation: supported_by_claim
+    from: transportProtocol:shell-hook-runtime
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:transportProtocol:anthropic:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:anthropic
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:anthropic:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportProtocol:anthropic
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportProtocol:openai-chat:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:openai-chat
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:openai-chat:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: transportProtocol:openai-chat
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:transportProtocol:openai-responses:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:openai-responses
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:openai-responses:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: transportProtocol:openai-responses
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:transportProtocol:google:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:google
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:google:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportProtocol:google
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportProtocol:passthrough:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:passthrough
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:bedrock-converse:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:bedrock-converse
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:bedrock-converse:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportProtocol:bedrock-converse
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportProtocol:vertex-native:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:vertex-native
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:vertex-native:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportProtocol:vertex-native
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportProtocol:azure-foundry:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportProtocol:azure-foundry
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportProtocol:azure-foundry:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportProtocol:azure-foundry
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportRuntime:terminal-cli:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: transportRuntime:terminal-cli
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:transportRuntime:terminal-cli:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: transportRuntime:terminal-cli
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:transportRuntime:shell-hook-runtime:claim:repo-target-index
+    relation: supported_by_claim
+    from: transportRuntime:shell-hook-runtime
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:transportRuntime:shell-hook-runtime:claim:repo-target-claude
+    relation: supported_by_claim
+    from: transportRuntime:shell-hook-runtime
+    to: claim:repo-target-claude
+    evidenceRefs:
+      - repo-target-claude
+  - id: edge:transportRuntime:shell-hook-runtime:claim:repo-target-codex
+    relation: supported_by_claim
+    from: transportRuntime:shell-hook-runtime
+    to: claim:repo-target-codex
+    evidenceRefs:
+      - repo-target-codex
+  - id: edge:transportRuntime:amux-proxy:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: transportRuntime:amux-proxy
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:transportRuntime:amux-proxy:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: transportRuntime:amux-proxy
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:transportRuntime:amux-proxy:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: transportRuntime:amux-proxy
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration

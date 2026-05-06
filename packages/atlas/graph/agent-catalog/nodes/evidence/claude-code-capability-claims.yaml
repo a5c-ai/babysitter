@@ -1,0 +1,170 @@
+kind: NodeDocument
+documentPath: nodes/evidence/claude-code-capability-claims.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: claim:web-claude-code-core-agentic
+    kind: Claim
+    claimId: web-claude-code-core-agentic
+    statement: Claude Code is an agentic coding tool with interactive terminal and multi-surface workflows that reads code, edits files, and runs commands.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-overview
+      - web-claude-code-quickstart
+      - web-claude-code-interactive-mode
+    unresolvedGaps: []
+  - id: claim:web-claude-code-commands-and-skills
+    kind: Claim
+    claimId: web-claude-code-commands-and-skills
+    statement: Claude Code documents first-class commands and skills, and the .claude directory defines where commands, skills, and related extension assets live.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-commands
+      - web-claude-code-skills
+      - web-claude-code-claude-directory
+      - web-claude-code-features-overview
+    unresolvedGaps: []
+  - id: claim:web-claude-code-hooks
+    kind: Claim
+    claimId: web-claude-code-hooks
+    statement: Claude Code exposes lifecycle hooks with event schemas, stdin payloads, automation guidance, and MCP tool hook support.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-hooks
+      - web-claude-code-hooks-guide
+    unresolvedGaps: []
+  - id: claim:web-claude-code-stop-hook
+    kind: Claim
+    claimId: web-claude-code-stop-hook
+    statement: Claude Code includes a stop-phase lifecycle hook, so stop handling is part of the native hook surface rather than only a repo-level convention.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-claude-code-hooks
+      - repo-target-claude
+      - repo-target-index
+    unresolvedGaps:
+      - The stop-phase hook exists in vendor docs, but the normalized stop-hook capability still depends on local target mapping.
+  - id: claim:web-claude-code-mcp
+    kind: Claim
+    claimId: web-claude-code-mcp
+    statement: Claude Code connects to external tools through MCP and treats MCP tools as part of its usable tool surface.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-mcp
+      - web-claude-code-tools-reference
+      - web-claude-code-features-overview
+    unresolvedGaps: []
+  - id: claim:web-claude-code-tool-approval
+    kind: Claim
+    claimId: web-claude-code-tool-approval
+    statement: Claude Code uses permission modes and permission rules to gate edits, shell commands, and network access, with auto mode offering delegated approvals within explicit boundaries.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-permissions
+      - web-claude-code-permission-modes
+      - web-anthropic-claude-code-auto-mode
+    unresolvedGaps: []
+  - id: claim:web-claude-code-stdin-injection
+    kind: Claim
+    claimId: web-claude-code-stdin-injection
+    statement: Claude Code documents prompt-mode CLI workflows where input is supplied non-interactively and continues can be driven through CLI flags for scripted usage.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-headless
+      - web-claude-code-cli-reference
+    unresolvedGaps: []
+  - id: claim:web-claude-code-subagents
+    kind: Claim
+    claimId: web-claude-code-subagents
+    statement: Claude Code supports specialized subagents that execute side tasks in isolated context and return summaries to the main session.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-subagents
+      - web-claude-code-features-overview
+      - web-claude-code-claude-directory
+    unresolvedGaps: []
+  - id: claim:web-claude-code-parallel-work
+    kind: Claim
+    claimId: web-claude-code-parallel-work
+    statement: Claude Code documents both agent teams and parallel session workflows, so parallel execution is an inherent part of its task decomposition story.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-claude-code-agent-teams
+      - web-claude-code-subagents
+      - web-claude-code-quickstart
+    unresolvedGaps:
+      - The docs support parallel task decomposition, but they do not fully specify scheduler-level guarantees for parallel execution as a normalized capability.
+  - id: claim:web-claude-code-session-resume
+    kind: Claim
+    claimId: web-claude-code-session-resume
+    statement: Claude Code preserves and resumes session state through checkpointing and documented CLI continue flows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-claude-code-checkpointing
+      - web-claude-code-headless
+      - web-claude-code-cli-reference
+    unresolvedGaps: []
+  - id: claim:web-claude-code-image-input
+    kind: Claim
+    claimId: web-claude-code-image-input
+    statement: Claude models support image input through Claude interfaces, providing the multimodal basis for image-aware Claude Code experiences.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-claude-platform-vision
+      - web-claude-code-overview
+    unresolvedGaps:
+      - Claude Code does not currently publish a dedicated image-input capability page, so this capability is inferred from broader Claude multimodal documentation.

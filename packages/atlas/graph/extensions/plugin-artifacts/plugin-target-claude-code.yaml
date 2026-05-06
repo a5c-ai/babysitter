@@ -10,7 +10,11 @@ attributes:
   commandFormat: markdown-commands
   skillHandling: native
   hookRegistrationFormat: claude-code
+  hookRegistrationOutputPath: "hooks/hooks.json"
+  hookRegistrationAliasPaths: []
+  harnessManifestPath: ".claude-plugin/plugin.json"
   pluginRootEnvVar: CLAUDE_PLUGIN_ROOT
+  pluginRootEnvVarForExtension: null
   scriptVariants:
     - bash
   distribution:

@@ -1,0 +1,124 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/hooks-plugins-and-discovery-discovery.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:discovery:claude:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:claude:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:codex:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:codex:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:gemini:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:gemini:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:copilot:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:copilot:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:cursor:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:cursor:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:opencode:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:opencode:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:pi:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:pi:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:omp:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:omp:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:openclaw:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:openclaw:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:hermes:host-env:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: discovery:hermes:host-env
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:discovery:claude:hooks-mux:1:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:claude:hooks-mux:1
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:codex:hooks-mux:2:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:codex:hooks-mux:2
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:codex:hooks-mux:3:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:codex:hooks-mux:3
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:gemini:hooks-mux:4:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:gemini:hooks-mux:4
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:copilot:hooks-mux:5:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:copilot:hooks-mux:5
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:cursor:hooks-mux:6:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:cursor:hooks-mux:6
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:pi:hooks-mux:7:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:pi:hooks-mux:7
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:oh-my-pi:hooks-mux:8:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:oh-my-pi:hooks-mux:8
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:opencode:hooks-mux:9:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:opencode:hooks-mux:9
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:discovery:openclaw:hooks-mux:10:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: discovery:openclaw:hooks-mux:10
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector

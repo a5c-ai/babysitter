@@ -1,0 +1,315 @@
+kind: NodeDocument
+documentPath: nodes/evidence/claims.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: claim:repo-sdk-fallback
+    kind: Claim
+    claimId: repo-sdk-fallback
+    statement: Static fallback metadata defines per-harness host env signals, orchestration capabilities, and the shared session directory.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-sdk-fallback
+    unresolvedGaps: []
+  - id: claim:repo-agent-mux-host
+    kind: Claim
+    claimId: repo-agent-mux-host
+    statement: Agent-mux maintains host-harness env signal precedence plus metadata extraction for session and run identifiers.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-agent-mux-host
+    unresolvedGaps: []
+  - id: claim:repo-hooks-detector
+    kind: Claim
+    claimId: repo-hooks-detector
+    statement: Hooks-mux uses ordered detection rules with confidence levels and env-signal conditions for harness auto-detection.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-hooks-detector
+    unresolvedGaps: []
+  - id: claim:repo-target-index
+    kind: Claim
+    claimId: repo-target-index
+    statement: Agent-plugins-mux centralizes supported plugin targets and canonical-to-native hook-name mappings.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-index
+    unresolvedGaps: []
+  - id: claim:repo-target-claude
+    kind: Claim
+    claimId: repo-target-claude
+    statement: Claude Code exposes a plugin.json target with native markdown commands and named hooks including SessionStart, Stop, and tool hooks.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-claude
+    unresolvedGaps: []
+  - id: claim:repo-target-codex
+    kind: Claim
+    claimId: repo-target-codex
+    statement: Codex is modeled as a package.json target with derived skills and shell-hook registration.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-codex
+    unresolvedGaps: []
+  - id: claim:repo-target-cursor
+    kind: Claim
+    claimId: repo-target-cursor
+    statement: Cursor is modeled with sessionStart and stop hooks, markdown commands, and derived skills.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-cursor
+    unresolvedGaps: []
+  - id: claim:repo-target-gemini
+    kind: Claim
+    claimId: repo-target-gemini
+    statement: Gemini CLI exposes SessionStart and AfterAgent hooks and ships a multi-file manifest surface.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-gemini
+    unresolvedGaps: []
+  - id: claim:repo-target-copilot
+    kind: Claim
+    claimId: repo-target-copilot
+    statement: GitHub Copilot maps session lifecycle and user-prompt hook names and derives skills from command surfaces.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-target-copilot
+    unresolvedGaps: []
+  - id: claim:repo-process-catalog
+    kind: Claim
+    claimId: repo-process-catalog
+    statement: The current catalog process is a Next.js application that browses processes, skills, domains, specializations, and agents through indexed API routes.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-process-catalog
+    unresolvedGaps: []
+  - id: claim:repo-agent-mux-model-catalog
+    kind: Claim
+    claimId: repo-agent-mux-model-catalog
+    statement: Agent-mux already ships a model-catalog process, so the new ontology can assimilate process discovery beyond the old packages/catalog browser.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-agent-mux-model-catalog
+    unresolvedGaps: []
+  - id: claim:repo-codex-windows-hooks
+    kind: Claim
+    claimId: repo-codex-windows-hooks
+    statement: "The Codex plugin documents a version-specific lifecycle nuance: Windows hooks require Codex CLI 0.119.0 or newer."
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-codex-windows-hooks
+    unresolvedGaps: []
+  - id: claim:web-anthropic-claude-code
+    kind: Claim
+    claimId: web-anthropic-claude-code
+    statement: Anthropic positions Claude Code as an agentic coding system that edits code, runs tests, and works across the toolchain.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-anthropic-claude-code
+    unresolvedGaps:
+      - Anthropic's overview page is a single-source product description rather than a capability-by-capability corroboration set.
+  - id: claim:web-anthropic-claude-code-autonomy
+    kind: Claim
+    claimId: web-anthropic-claude-code-autonomy
+    statement: Anthropic documents Claude Code support for subagents, hooks, checkpoints, and background tasks.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-anthropic-claude-code-autonomy
+    unresolvedGaps:
+      - The autonomy announcement bundles several features together, so individual capability boundaries still need stronger per-feature corroboration.
+  - id: claim:web-openai-codex-skills
+    kind: Claim
+    claimId: web-openai-codex-skills
+    statement: OpenAI documents explicit and implicit skill activation for Codex, including CLI and IDE skill discovery.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-openai-codex-skills
+    unresolvedGaps:
+      - The Codex skills page is a single official source and does not by itself corroborate every local skill-normalization assumption.
+  - id: claim:web-github-copilot-agent
+    kind: Claim
+    claimId: web-github-copilot-agent
+    statement: GitHub documents Copilot as a coding agent workflow and references agentic coding tools with MCP support.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-github-copilot-agent
+    unresolvedGaps:
+      - The agent workflow page is broad product documentation and does not fully separate CLI-native capabilities from wider Copilot surfaces.
+  - id: claim:web-gemini-hooks
+    kind: Claim
+    claimId: web-gemini-hooks
+    statement: The first-party Gemini CLI repository documents a hooks surface, supporting the repo's local hook mapping for Gemini CLI.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-gemini-hooks
+    unresolvedGaps:
+      - This claim depends on one first-party repository page and still relies on local normalization for exact hook-name mapping.
+  - id: claim:repo-transport-mux-readme
+    kind: Claim
+    claimId: repo-transport-mux-readme
+    statement: transport-mux README documents the harness-facing protocol split and exposed amux-proxy transport ids, but those runtime assertions stay provisional unless the migration scorecard is green.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: scorecard-gated
+    evidenceIds:
+      - repo-transport-mux-readme
+      - repo-transport-mux-scorecard
+    unresolvedGaps:
+      - Treat transport-mux README runtime claims as provisional whenever scorecard:migration is not green.
+  - id: claim:repo-transport-mux-architecture
+    kind: Claim
+    claimId: repo-transport-mux-architecture
+    statement: transport-mux architecture documents the protocol/provider seam and normalized route/auth contracts, but downstream runtime truth depends on the migration scorecard remaining green.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: scorecard-gated
+    evidenceIds:
+      - repo-transport-mux-architecture
+      - repo-transport-mux-scorecard
+    unresolvedGaps:
+      - Architecture docs alone are not sufficient runtime truth if scorecard:migration goes red.
+  - id: claim:repo-transport-mux-migration
+    kind: Claim
+    claimId: repo-transport-mux-migration
+    statement: transport-mux migration records the amux-proxy cutover state and preserves the external contract, but downstream runtime truth stays provisional until the migration scorecard is green.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: scorecard-gated
+    evidenceIds:
+      - repo-transport-mux-migration
+      - repo-transport-mux-scorecard
+    unresolvedGaps:
+      - Migration docs describe cutover intent and state; use the scorecard to determine whether runtime truth is active.
+  - id: claim:repo-transport-mux-scorecard
+    kind: Claim
+    claimId: repo-transport-mux-scorecard
+    statement: transport-mux runtime and release truth is active only while the migration scorecard remains green; otherwise doc-derived downstream catalog assertions must be treated as provisional.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-transport-mux-scorecard
+    unresolvedGaps: []
+  - id: claim:repo-agent-catalog-package
+    kind: Claim
+    claimId: repo-agent-catalog-package
+    statement: agent-catalog is the shared workspace package for graph-backed ontology, wrappers, and CI/version validation.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: high
+    provenanceKind: repo-observation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - repo-agent-catalog-package
+    unresolvedGaps: []
+  - id: claim:web-github-copilot-mcp
+    kind: Claim
+    claimId: web-github-copilot-mcp
+    statement: GitHub documents MCP support for Copilot cloud agent and local/remote MCP server integration.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-github-copilot-mcp
+    unresolvedGaps:
+      - The linked GitHub MCP documentation confirms support, but broader cloud-agent claims still need cleaner separation from CLI-specific behavior.

@@ -1,0 +1,146 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capabilitySupport-agents-cursor.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:skills:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:skills
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:skills:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:skills
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:skills:claim:web-cursor-rules
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:skills
+    to: claim:web-cursor-rules
+    evidenceRefs:
+      - web-cursor-rules
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:thinking:claim:web-cursor-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:thinking
+    to: claim:web-cursor-core-agentic
+    evidenceRefs:
+      - web-cursor-agent-overview
+      - web-cursor-cli-overview
+      - web-cursor-cli-using
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:interactive-mode:claim:web-cursor-core-agentic
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:interactive-mode
+    to: claim:web-cursor-core-agentic
+    evidenceRefs:
+      - web-cursor-agent-overview
+      - web-cursor-cli-overview
+      - web-cursor-cli-using
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stdin-injection:claim:web-cursor-stdin-injection
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stdin-injection
+    to: claim:web-cursor-stdin-injection
+    evidenceRefs:
+      - web-cursor-cli-headless
+      - web-cursor-cli-using
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:image-input:claim:web-cursor-image-input
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:image-input
+    to: claim:web-cursor-image-input
+    evidenceRefs:
+      - web-cursor-agent-overview
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:runtime-hooks:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:runtime-hooks:claim:web-cursor-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:runtime-hooks
+    to: claim:web-cursor-hooks
+    evidenceRefs:
+      - web-cursor-hooks
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stop-hook:claim:repo-target-cursor
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stop-hook
+    to: claim:repo-target-cursor
+    evidenceRefs:
+      - repo-target-cursor
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:stop-hook:claim:web-cursor-hooks
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:stop-hook
+    to: claim:web-cursor-hooks
+    evidenceRefs:
+      - web-cursor-hooks
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capabilitySupport:cursor:ge-0-0-0:session-resume:claim:web-cursor-session-resume
+    relation: supported_by_claim
+    from: capabilitySupport:cursor:ge-0-0-0:session-resume
+    to: claim:web-cursor-session-resume
+    evidenceRefs:
+      - web-cursor-agent-overview
+      - web-cursor-cli-shell-mode

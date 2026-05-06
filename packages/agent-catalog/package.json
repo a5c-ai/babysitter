@@ -56,6 +56,7 @@
     "version:check": "node ./scripts/check-version.cjs"
   },
   "dependencies": {
+    "@a5c-ai/atlas": "*",
     "yaml": "^2.8.3"
   },
   "devDependencies": {

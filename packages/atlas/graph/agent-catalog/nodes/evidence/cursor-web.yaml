@@ -1,0 +1,191 @@
+kind: NodeDocument
+documentPath: nodes/evidence/cursor-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-cursor-agent-overview
+    kind: EvidenceSource
+    evidenceId: web-cursor-agent-overview
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/agent/overview
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: agent overview, tools, checkpoints, and image-capable reads
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-cli-overview
+    kind: EvidenceSource
+    evidenceId: web-cursor-cli-overview
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/cli/overview
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: terminal CLI overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-cli-using
+    kind: EvidenceSource
+    evidenceId: web-cursor-cli-using
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/cli/using
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: agent use from the CLI
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-cli-headless
+    kind: EvidenceSource
+    evidenceId: web-cursor-cli-headless
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/cli/headless
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: non-interactive and CI usage
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-cli-shell-mode
+    kind: EvidenceSource
+    evidenceId: web-cursor-cli-shell-mode
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/cli/shell-mode
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: persistent CLI context and command history
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-rules
+    kind: EvidenceSource
+    evidenceId: web-cursor-rules
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/rules
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: persistent instructions and project rules
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-hooks
+    kind: EvidenceSource
+    evidenceId: web-cursor-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/hooks
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: built-in hook system
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-mcp
+    kind: EvidenceSource
+    evidenceId: web-cursor-mcp
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/mcp
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: MCP integration surface
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-cursor-subagents
+    kind: EvidenceSource
+    evidenceId: web-cursor-subagents
+    kindLabel: web
+    sourcePathOrUrl: https://cursor.com/docs/subagents
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: specialized task-specific subagents
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:web-cursor-core-agentic
+    kind: Claim
+    claimId: web-cursor-core-agentic
+    statement: Cursor documents both IDE and CLI agent surfaces for autonomous coding tasks, command execution, and file editing.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-cursor-agent-overview
+      - web-cursor-cli-overview
+      - web-cursor-cli-using
+    unresolvedGaps: []
+  - id: claim:web-cursor-rules
+    kind: Claim
+    claimId: web-cursor-rules
+    statement: Cursor provides persistent rule files and AGENTS.md integration, which is the first-party basis for reusable guidance and skill-like context.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-cursor-rules
+    unresolvedGaps:
+      - Cursor rules are the closest public analogue to reusable skills, but the exact skill-equivalence remains a local normalization choice.
+  - id: claim:web-cursor-hooks
+    kind: Claim
+    claimId: web-cursor-hooks
+    statement: Cursor exposes a built-in hook system, with local target metadata refining which hook names map into the normalized ontology.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-cursor-hooks
+      - repo-target-cursor
+      - repo-target-index
+    unresolvedGaps:
+      - The docs confirm hooks exist, but the normalized hook-name mapping still depends on local target metadata.
+  - id: claim:web-cursor-stdin-injection
+    kind: Claim
+    claimId: web-cursor-stdin-injection
+    statement: Cursor documents headless and CLI prompting flows that support non-interactive execution.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-cursor-cli-headless
+      - web-cursor-cli-using
+    unresolvedGaps: []
+  - id: claim:web-cursor-image-input
+    kind: Claim
+    claimId: web-cursor-image-input
+    statement: Cursor documents image-capable file reads and image generation within agent workflows, providing a first-party basis for multimodal support.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-cursor-agent-overview
+    unresolvedGaps:
+      - Cursor documents image-aware reads broadly, but it does not publish a standalone capability contract for normalized image-input semantics.
+  - id: claim:web-cursor-session-resume
+    kind: Claim
+    claimId: web-cursor-session-resume
+    statement: Cursor documents checkpoint restoration and persistent CLI shell-mode context, which together form the strongest first-party basis for resuming work across turns.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-cursor-agent-overview
+      - web-cursor-cli-shell-mode
+    unresolvedGaps:
+      - The current evidence supports checkpoint restoration and persistent context, but a dedicated CLI resume command contract is not explicitly documented.

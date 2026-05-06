@@ -1,0 +1,234 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/capabilities.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capability:skills
+    kind: Capability
+    capabilityId: skills
+    namespace: agent
+    label: Skills
+    description: Harness can discover or activate reusable skills.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+      - packages/agent-plugins-mux
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-openai-codex-skills
+  - id: capability:thinking
+    kind: Capability
+    capabilityId: thinking
+    namespace: agent
+    label: Thinking
+    description: Harness exposes an explicit reasoning or extended-thinking mode.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: capability:mcp
+    kind: Capability
+    capabilityId: mcp
+    namespace: agent
+    label: MCP
+    description: Harness supports MCP or equivalent tool protocol exposure.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-github-copilot-agent
+  - id: capability:tool-approval
+    kind: Capability
+    capabilityId: tool-approval
+    namespace: agent
+    label: Tool approval
+    description: Harness enforces explicit approval for shell or tool execution.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: capability:interactive-mode
+    kind: Capability
+    capabilityId: interactive-mode
+    namespace: agent
+    label: Interactive mode
+    description: Harness runs as an interactive CLI session.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+      - packages/agent-mux/core
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: capability:stdin-injection
+    kind: Capability
+    capabilityId: stdin-injection
+    namespace: agent
+    label: STDIN injection
+    description: Harness accepts prompts or commands via standard input.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+      - packages/agent-mux/core
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host
+  - id: capability:subagent-dispatch
+    kind: Capability
+    capabilityId: subagent-dispatch
+    namespace: agent
+    label: Subagent dispatch
+    description: Harness can delegate subordinate agent tasks.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-anthropic-claude-code-autonomy
+  - id: capability:parallel-execution
+    kind: Capability
+    capabilityId: parallel-execution
+    namespace: agent
+    label: Parallel execution
+    description: Harness can sustain parallel task execution from the same session context.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+      - web-anthropic-claude-code-autonomy
+  - id: capability:image-input
+    kind: Capability
+    capabilityId: image-input
+    namespace: modality
+    label: Image input
+    description: Harness accepts images alongside text input.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: capability:runtime-hooks
+    kind: Capability
+    capabilityId: runtime-hooks
+    namespace: extensibility
+    label: Runtime hooks
+    description: Harness supports shell or runtime lifecycle hooks.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+      - packages/agent-plugins-mux
+      - packages/hooks-mux/core
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+      - repo-hooks-detector
+      - web-gemini-hooks
+  - id: capability:stop-hook
+    kind: Capability
+    capabilityId: stop-hook
+    namespace: extensibility
+    label: Stop hook
+    description: Harness exposes a blocking stop or after-response lifecycle hook.
+    stability: stable
+    requires:
+      - runtime-hooks
+    producerPackages:
+      - packages/sdk
+      - packages/agent-plugins-mux
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: capability:streaming
+    kind: Capability
+    capabilityId: streaming
+    namespace: transport
+    label: Streaming
+    description: Can render or preserve incremental streaming responses.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/transport-mux
+      - packages/agent-mux/core
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: capability:tool-calling
+    kind: Capability
+    capabilityId: tool-calling
+    namespace: agent
+    label: Tool calling
+    description: Can preserve or expose tool-call semantics across the runtime boundary.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/transport-mux
+      - packages/sdk
+    evidenceRefs:
+      - repo-transport-mux-architecture
+      - web-github-copilot-mcp
+  - id: capability:proxy-transport-emulation
+    kind: Capability
+    capabilityId: proxy-transport-emulation
+    namespace: transport
+    label: Proxy transport emulation
+    description: Can expose one harness-facing protocol while targeting a distinct upstream provider contract.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/transport-mux
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-migration
+  - id: capability:model-discovery
+    kind: Capability
+    capabilityId: model-discovery
+    namespace: transport
+    label: Model discovery
+    description: Can enumerate or surface configured models for discovery endpoints.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/transport-mux
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-migration
+  - id: capability:token-counting
+    kind: Capability
+    capabilityId: token-counting
+    namespace: transport
+    label: Token counting
+    description: Can count tokens directly or expose a fallback token-counting interface.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/transport-mux
+    evidenceRefs:
+      - repo-transport-mux-readme
+      - repo-transport-mux-architecture
+  - id: capability:session-resume
+    kind: Capability
+    capabilityId: session-resume
+    namespace: agent
+    label: Session resume
+    description: Can resume work from persisted session or run state.
+    stability: stable
+    requires: []
+    producerPackages:
+      - packages/sdk
+      - packages/agent-mux/core
+    evidenceRefs:
+      - repo-sdk-fallback
+      - repo-agent-mux-host

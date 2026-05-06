@@ -1,0 +1,387 @@
+kind: EdgeDocument
+documentPath: edges/relations/agent-runtime/transports-and-modalities.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:agentVersion:claude:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:claude:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a1
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-anthropic-claude-code
+      - web-anthropic-claude-code-autonomy
+  - id: edge:agentVersion:claude:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:claude:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:claude:ge-0-0-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:claude:ge-0-0-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:claude:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:claude:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:claude:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:modality:mcp
+    relation: supports_modality
+    from: agentVersion:claude:ge-0-0-0
+    to: modality:mcp
+    evidenceRefs: *a1
+  - id: edge:agentVersion:claude:ge-0-0-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:claude:ge-0-0-0
+    to: modality:commands
+    evidenceRefs: *a1
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a2
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:modality:text
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: modality:text
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:modality:image
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: modality:image
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: modality:hooks
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-0-0-lt-0-119-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-0-0-lt-0-119-0
+    to: modality:commands
+    evidenceRefs: *a2
+  - id: edge:agentVersion:codex:ge-0-119-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-119-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a3
+      - repo-sdk-fallback
+      - repo-target-codex
+      - repo-target-index
+      - repo-codex-windows-hooks
+      - web-openai-codex-skills
+  - id: edge:agentVersion:codex:ge-0-119-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-119-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-119-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:codex:ge-0-119-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:modality:text
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-119-0
+    to: modality:text
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:modality:image
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-119-0
+    to: modality:image
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-119-0
+    to: modality:hooks
+    evidenceRefs: *a3
+  - id: edge:agentVersion:codex:ge-0-119-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:codex:ge-0-119-0
+    to: modality:commands
+    evidenceRefs: *a3
+  - id: edge:agentVersion:cursor:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:cursor:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a4
+      - repo-sdk-fallback
+      - repo-target-cursor
+      - repo-target-index
+  - id: edge:agentVersion:cursor:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:cursor:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:cursor:ge-0-0-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:cursor:ge-0-0-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:cursor:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:cursor:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:cursor:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a4
+  - id: edge:agentVersion:cursor:ge-0-0-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:cursor:ge-0-0-0
+    to: modality:commands
+    evidenceRefs: *a4
+  - id: edge:agentVersion:gemini:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:gemini:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a5
+      - repo-sdk-fallback
+      - repo-target-gemini
+      - repo-target-index
+      - web-gemini-hooks
+  - id: edge:agentVersion:gemini:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:gemini:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:gemini:ge-0-0-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:gemini:ge-0-0-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:gemini:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:gemini:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:gemini:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a5
+  - id: edge:agentVersion:gemini:ge-0-0-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:gemini:ge-0-0-0
+    to: modality:commands
+    evidenceRefs: *a5
+  - id: edge:agentVersion:copilot:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:copilot:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a6
+      - repo-sdk-fallback
+      - repo-target-copilot
+      - repo-target-index
+      - web-github-copilot-agent
+  - id: edge:agentVersion:copilot:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:copilot:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:copilot:ge-0-0-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:copilot:ge-0-0-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:copilot:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:copilot:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:copilot:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:modality:mcp
+    relation: supports_modality
+    from: agentVersion:copilot:ge-0-0-0
+    to: modality:mcp
+    evidenceRefs: *a6
+  - id: edge:agentVersion:copilot:ge-0-0-0:modality:commands
+    relation: supports_modality
+    from: agentVersion:copilot:ge-0-0-0
+    to: modality:commands
+    evidenceRefs: *a6
+  - id: edge:agentVersion:pi:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:pi:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a7
+      - repo-sdk-fallback
+  - id: edge:agentVersion:pi:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:pi:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a7
+  - id: edge:agentVersion:pi:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:pi:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a7
+  - id: edge:agentVersion:pi:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:pi:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a7
+  - id: edge:agentVersion:omp:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:omp:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a8
+      - repo-sdk-fallback
+  - id: edge:agentVersion:omp:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:omp:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a8
+  - id: edge:agentVersion:omp:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:omp:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a8
+  - id: edge:agentVersion:omp:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:omp:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a8
+  - id: edge:agentVersion:opencode:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:opencode:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a9
+      - repo-sdk-fallback
+      - repo-target-index
+  - id: edge:agentVersion:opencode:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:opencode:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a9
+  - id: edge:agentVersion:opencode:ge-0-0-0:transportRuntime:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:opencode:ge-0-0-0
+    to: transportRuntime:shell-hook-runtime
+    evidenceRefs: *a9
+  - id: edge:agentVersion:opencode:ge-0-0-0:transportProtocol:shell-hook-runtime
+    relation: uses_transport
+    from: agentVersion:opencode:ge-0-0-0
+    to: transportProtocol:shell-hook-runtime
+    evidenceRefs: *a9
+  - id: edge:agentVersion:opencode:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:opencode:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a9
+  - id: edge:agentVersion:opencode:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:opencode:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a9
+  - id: edge:agentVersion:opencode:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:opencode:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a9
+  - id: edge:agentVersion:openclaw:ge-0-0-0:transportRuntime:terminal-cli
+    relation: uses_transport
+    from: agentVersion:openclaw:ge-0-0-0
+    to: transportRuntime:terminal-cli
+    evidenceRefs: &a10
+      - repo-sdk-fallback
+      - repo-hooks-detector
+      - repo-target-index
+  - id: edge:agentVersion:openclaw:ge-0-0-0:transportProtocol:terminal-cli
+    relation: uses_transport
+    from: agentVersion:openclaw:ge-0-0-0
+    to: transportProtocol:terminal-cli
+    evidenceRefs: *a10
+  - id: edge:agentVersion:openclaw:ge-0-0-0:modality:text
+    relation: supports_modality
+    from: agentVersion:openclaw:ge-0-0-0
+    to: modality:text
+    evidenceRefs: *a10
+  - id: edge:agentVersion:openclaw:ge-0-0-0:modality:image
+    relation: supports_modality
+    from: agentVersion:openclaw:ge-0-0-0
+    to: modality:image
+    evidenceRefs: *a10
+  - id: edge:agentVersion:openclaw:ge-0-0-0:modality:hooks
+    relation: supports_modality
+    from: agentVersion:openclaw:ge-0-0-0
+    to: modality:hooks
+    evidenceRefs: *a10

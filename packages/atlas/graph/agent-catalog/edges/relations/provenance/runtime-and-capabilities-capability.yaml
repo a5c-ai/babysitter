@@ -1,0 +1,202 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/runtime-and-capabilities-capability.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+edges:
+  - id: edge:capability:skills:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:skills
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:skills:claim:web-openai-codex-skills
+    relation: supported_by_claim
+    from: capability:skills
+    to: claim:web-openai-codex-skills
+    evidenceRefs:
+      - web-openai-codex-skills
+  - id: edge:capability:thinking:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:thinking
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:mcp:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:mcp
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:mcp:claim:web-github-copilot-agent
+    relation: supported_by_claim
+    from: capability:mcp
+    to: claim:web-github-copilot-agent
+    evidenceRefs:
+      - web-github-copilot-agent
+  - id: edge:capability:tool-approval:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:tool-approval
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:interactive-mode:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:interactive-mode
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:interactive-mode:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capability:interactive-mode
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capability:stdin-injection:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:stdin-injection
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:stdin-injection:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capability:stdin-injection
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host
+  - id: edge:capability:subagent-dispatch:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:subagent-dispatch
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:subagent-dispatch:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: capability:subagent-dispatch
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:capability:parallel-execution:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:parallel-execution
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:parallel-execution:claim:web-anthropic-claude-code-autonomy
+    relation: supported_by_claim
+    from: capability:parallel-execution
+    to: claim:web-anthropic-claude-code-autonomy
+    evidenceRefs:
+      - web-anthropic-claude-code-autonomy
+  - id: edge:capability:image-input:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:image-input
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:runtime-hooks:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:runtime-hooks
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:runtime-hooks:claim:repo-target-index
+    relation: supported_by_claim
+    from: capability:runtime-hooks
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capability:runtime-hooks:claim:repo-hooks-detector
+    relation: supported_by_claim
+    from: capability:runtime-hooks
+    to: claim:repo-hooks-detector
+    evidenceRefs:
+      - repo-hooks-detector
+  - id: edge:capability:runtime-hooks:claim:web-gemini-hooks
+    relation: supported_by_claim
+    from: capability:runtime-hooks
+    to: claim:web-gemini-hooks
+    evidenceRefs:
+      - web-gemini-hooks
+  - id: edge:capability:stop-hook:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:stop-hook
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:stop-hook:claim:repo-target-index
+    relation: supported_by_claim
+    from: capability:stop-hook
+    to: claim:repo-target-index
+    evidenceRefs:
+      - repo-target-index
+  - id: edge:capability:streaming:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capability:streaming
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capability:streaming:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capability:streaming
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capability:tool-calling:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capability:tool-calling
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capability:tool-calling:claim:web-github-copilot-mcp
+    relation: supported_by_claim
+    from: capability:tool-calling
+    to: claim:web-github-copilot-mcp
+    evidenceRefs:
+      - web-github-copilot-mcp
+  - id: edge:capability:proxy-transport-emulation:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capability:proxy-transport-emulation
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capability:proxy-transport-emulation:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capability:proxy-transport-emulation
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capability:model-discovery:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capability:model-discovery
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capability:model-discovery:claim:repo-transport-mux-migration
+    relation: supported_by_claim
+    from: capability:model-discovery
+    to: claim:repo-transport-mux-migration
+    evidenceRefs:
+      - repo-transport-mux-migration
+  - id: edge:capability:token-counting:claim:repo-transport-mux-readme
+    relation: supported_by_claim
+    from: capability:token-counting
+    to: claim:repo-transport-mux-readme
+    evidenceRefs:
+      - repo-transport-mux-readme
+  - id: edge:capability:token-counting:claim:repo-transport-mux-architecture
+    relation: supported_by_claim
+    from: capability:token-counting
+    to: claim:repo-transport-mux-architecture
+    evidenceRefs:
+      - repo-transport-mux-architecture
+  - id: edge:capability:session-resume:claim:repo-sdk-fallback
+    relation: supported_by_claim
+    from: capability:session-resume
+    to: claim:repo-sdk-fallback
+    evidenceRefs:
+      - repo-sdk-fallback
+  - id: edge:capability:session-resume:claim:repo-agent-mux-host
+    relation: supported_by_claim
+    from: capability:session-resume
+    to: claim:repo-agent-mux-host
+    evidenceRefs:
+      - repo-agent-mux-host

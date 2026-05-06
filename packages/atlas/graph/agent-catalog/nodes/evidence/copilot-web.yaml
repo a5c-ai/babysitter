@@ -1,0 +1,213 @@
+kind: NodeDocument
+documentPath: nodes/evidence/copilot-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+nodes:
+  - id: evidence:web-github-copilot-cli-overview
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-overview
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/overview
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: Copilot CLI agent overview
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-getting-started
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-getting-started
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-getting-started
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: interactive CLI getting started
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-plugins
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-plugins
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-cli-plugins
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: plugins with reusable agents, skills, hooks, and integrations
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-plugin-reference
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-plugin-reference
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: plugin.json and component layout
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-hooks
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-hooks
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: hooks usage in Copilot CLI
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-hooks-config
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-hooks-config
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/reference/hooks-configuration
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: hook configuration reference
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-config-dir
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-config-dir
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: session data and customization storage
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-cli-mcp
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-cli-mcp
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: CLI MCP server setup
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-custom-instructions
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-custom-instructions
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/configure-custom-instructions
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: persistent custom instructions
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: evidence:web-github-copilot-sdk-image-input
+    kind: EvidenceSource
+    evidenceId: web-github-copilot-sdk-image-input
+    kindLabel: web
+    sourcePathOrUrl: https://docs.github.com/en/copilot/how-tos/copilot-sdk/use-copilot-sdk/image-input
+    capturedAt: 2026-04-24T00:00:00.000Z
+    locator: image attachments in Copilot SDK sessions
+    trustLevel: official-web
+    reviewOwner: "@a5c-ai/agent-catalog"
+    reviewedAt: 2026-04-24T00:00:00.000Z
+    freshnessWindowDays: 45
+  - id: claim:web-github-copilot-cli-core-agentic
+    kind: Claim
+    claimId: web-github-copilot-cli-core-agentic
+    statement: GitHub Copilot CLI is documented as an interactive agentic coding workflow with repository-aware execution.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-github-copilot-cli-overview
+      - web-github-copilot-cli-getting-started
+    unresolvedGaps: []
+  - id: claim:web-github-copilot-cli-skills
+    kind: Claim
+    claimId: web-github-copilot-cli-skills
+    statement: GitHub documents Copilot CLI plugins as reusable packages that can bundle agents, skills, hooks, and integrations.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-github-copilot-cli-plugins
+      - web-github-copilot-cli-plugin-reference
+    unresolvedGaps: []
+  - id: claim:web-github-copilot-cli-hooks
+    kind: Claim
+    claimId: web-github-copilot-cli-hooks
+    statement: Copilot CLI exposes a first-party hooks system for repository and CLI execution flows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-github-copilot-cli-hooks
+      - web-github-copilot-hooks-config
+    unresolvedGaps: []
+  - id: claim:web-github-copilot-cli-mcp
+    kind: Claim
+    claimId: web-github-copilot-cli-mcp
+    statement: Copilot CLI and Copilot cloud agent both document MCP integration as a native extensibility surface.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-documentation
+    evidenceStrength: corroborated
+    status: current
+    evidenceIds:
+      - web-github-copilot-cli-mcp
+      - web-github-copilot-mcp
+    unresolvedGaps: []
+  - id: claim:web-github-copilot-cli-session-resume
+    kind: Claim
+    claimId: web-github-copilot-cli-session-resume
+    statement: GitHub documents Copilot CLI session and customization storage in the local configuration directory, providing a first-party basis for persisted session flows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-github-copilot-cli-config-dir
+      - web-github-copilot-cli-getting-started
+    unresolvedGaps:
+      - GitHub documents persisted local state, but an explicit CLI resume contract is still inferred from storage-oriented docs.
+  - id: claim:web-github-copilot-custom-instructions
+    kind: Claim
+    claimId: web-github-copilot-custom-instructions
+    statement: GitHub documents persistent custom instructions for Copilot, which is the first-party basis for durable skill-like contextual guidance in the broader Copilot surface.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: medium
+    provenanceKind: vendor-inference
+    evidenceStrength: partial
+    status: current
+    evidenceIds:
+      - web-github-copilot-custom-instructions
+    unresolvedGaps:
+      - Persistent custom instructions are adjacent to skills, but the reusable-skill equivalence remains an ontology-level inference.
+  - id: claim:web-github-copilot-image-input
+    kind: Claim
+    claimId: web-github-copilot-image-input
+    statement: Copilot SDK sessions support image attachments, which provides the strongest first-party public evidence for image-aware Copilot agent flows.
+    subjectKind: catalog
+    subjectId: graph:agent-catalog
+    confidence: low
+    provenanceKind: vendor-inference
+    evidenceStrength: inferred
+    status: current
+    evidenceIds:
+      - web-github-copilot-sdk-image-input
+    unresolvedGaps:
+      - Public image-input evidence is SDK-scoped and does not fully corroborate the same capability for Copilot CLI.

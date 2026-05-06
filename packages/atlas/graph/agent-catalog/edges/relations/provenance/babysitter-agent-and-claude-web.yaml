@@ -1,0 +1,102 @@
+kind: EdgeDocument
+documentPath: edges/relations/provenance/babysitter-agent-and-claude-web.yaml
+generatedAt: 2026-04-24T00:00:00.000Z
+edges:
+  - id: edge:claim:repo-babysitter-agent-package:evidence:repo-babysitter-agent-package
+    relation: sourced_from
+    from: claim:repo-babysitter-agent-package
+    to: evidence:repo-babysitter-agent-package
+    evidenceRefs:
+      - repo-babysitter-agent-package
+  - id: edge:claim:repo-babysitter-agent-cli:evidence:repo-babysitter-agent-package
+    relation: sourced_from
+    from: claim:repo-babysitter-agent-cli
+    to: evidence:repo-babysitter-agent-package
+    evidenceRefs:
+      - repo-babysitter-agent-package
+  - id: edge:claim:repo-babysitter-agent-cli:evidence:repo-babysitter-agent-cli
+    relation: sourced_from
+    from: claim:repo-babysitter-agent-cli
+    to: evidence:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:claim:web-anthropic-claude-code-safety:evidence:web-anthropic-claude-code-auto-mode
+    relation: sourced_from
+    from: claim:web-anthropic-claude-code-safety
+    to: evidence:web-anthropic-claude-code-auto-mode
+    evidenceRefs:
+      - web-anthropic-claude-code-auto-mode
+  - id: edge:claim:web-anthropic-claude-code-safety:evidence:web-anthropic-claude-code-sandboxing
+    relation: sourced_from
+    from: claim:web-anthropic-claude-code-safety
+    to: evidence:web-anthropic-claude-code-sandboxing
+    evidenceRefs:
+      - web-anthropic-claude-code-sandboxing
+  - id: edge:agent:babysitter-agent:claim:repo-babysitter-agent-package
+    relation: supported_by_claim
+    from: agent:babysitter-agent
+    to: claim:repo-babysitter-agent-package
+    evidenceRefs: &a1
+      - repo-babysitter-agent-package
+  - id: edge:agent:babysitter-agent:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: agent:babysitter-agent
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:claim:repo-babysitter-agent-package
+    relation: supported_by_claim
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: claim:repo-babysitter-agent-package
+    evidenceRefs: *a1
+  - id: edge:agentVersion:babysitter-agent:ge-5-0-0:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: agentVersion:babysitter-agent:ge-5-0-0
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:agent:claude:claim:web-anthropic-claude-code-safety
+    relation: supported_by_claim
+    from: agent:claude
+    to: claim:web-anthropic-claude-code-safety
+    evidenceRefs:
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: edge:agentVersion:claude:ge-0-0-0:claim:web-anthropic-claude-code-safety
+    relation: supported_by_claim
+    from: agentVersion:claude:ge-0-0-0
+    to: claim:web-anthropic-claude-code-safety
+    evidenceRefs:
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: edge:lifecycleSemantics:claude:ge-0-0-0:claim:web-anthropic-claude-code-safety
+    relation: supported_by_claim
+    from: lifecycleSemantics:claude:ge-0-0-0
+    to: claim:web-anthropic-claude-code-safety
+    evidenceRefs:
+      - web-anthropic-claude-code-auto-mode
+      - web-anthropic-claude-code-sandboxing
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:mcp:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:mcp
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:interactive-mode
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:stdin-injection
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli
+  - id: edge:capabilitySupport:babysitter-agent:ge-5-0-0:session-resume:claim:repo-babysitter-agent-cli
+    relation: supported_by_claim
+    from: capabilitySupport:babysitter-agent:ge-5-0-0:session-resume
+    to: claim:repo-babysitter-agent-cli
+    evidenceRefs:
+      - repo-babysitter-agent-cli

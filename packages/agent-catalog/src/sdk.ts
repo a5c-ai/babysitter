@@ -15,6 +15,8 @@ import {
   getCatalogDataState,
 } from "./data";
 import { getCatalogGraph, listGraphNodes, listRelationshipsByRelation } from "./graph";
+import { atlas } from "@a5c-ai/atlas";
+import { buildHookNameMapFromAtlas } from "./atlas-bridge";
 import { effectiveTransportMuxClaimStatus, shouldSurfaceTransportProtocol } from "./transport-mux-cutover";
 import type {
   AgentCapabilitySupportMatrix,
@@ -1122,11 +1124,7 @@ export function getHookCatalog(): HookDescriptor[] {
 }
 
 export function getHookNameMap(): Record<string, Record<string, string>> {
-  const map: Record<string, Record<string, string>> = {};
-  for (const hook of HOOKS) {
-    map[hook.canonicalName] = { ...hook.targetNames };
-  }
-  return map;
+  return buildHookNameMapFromAtlas(atlas);
 }
 
 export function getAgentVersionSlug(agent: Pick<AgentVersion, "agentId" | "versionRange">): string {

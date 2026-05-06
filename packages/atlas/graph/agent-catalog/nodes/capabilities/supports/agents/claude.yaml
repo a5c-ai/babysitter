@@ -1,0 +1,166 @@
+kind: NodeDocument
+documentPath: nodes/capabilities/supports/agents/claude.yaml
+generatedAt: 2026-04-23T00:00:00.000Z
+nodes:
+  - id: capabilitySupport:claude:ge-0-0-0:skills
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:skills
+    capabilityId: skills
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Claude Code documents skills and slash commands directly, while the local target mapping anchors how plugin surfaces map into the ontology.
+    evidenceRefs: &skillsEvidence
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-claude-code-commands
+      - web-claude-code-skills
+      - web-claude-code-claude-directory
+  - id: capabilitySupport:claude:ge-0-0-0:thinking
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:thinking
+    capabilityId: thinking
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Claude Code is documented as an interactive agentic coding surface that reasons over the codebase and executes tool-assisted work.
+    evidenceRefs: &coreAgenticEvidence
+      - repo-sdk-fallback
+      - web-anthropic-claude-code
+      - web-claude-code-overview
+      - web-claude-code-quickstart
+      - web-claude-code-interactive-mode
+  - id: capabilitySupport:claude:ge-0-0-0:mcp
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:mcp
+    capabilityId: mcp
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: MCP support now points to official Claude Code documentation instead of inheriting only the generic Claude product pages.
+    evidenceRefs: &mcpEvidence
+      - repo-sdk-fallback
+      - web-claude-code-mcp
+      - web-claude-code-tools-reference
+      - web-claude-code-features-overview
+  - id: capabilitySupport:claude:ge-0-0-0:tool-approval
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:tool-approval
+    capabilityId: tool-approval
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Permission modes and auto mode document Claude Code's native approval boundary model for tools and edits.
+    evidenceRefs: &toolApprovalEvidence
+      - repo-sdk-fallback
+      - web-claude-code-permissions
+      - web-claude-code-permission-modes
+      - web-anthropic-claude-code-auto-mode
+  - id: capabilitySupport:claude:ge-0-0-0:interactive-mode
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:interactive-mode
+    capabilityId: interactive-mode
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Interactive CLI usage is directly documented rather than inferred from generic product marketing.
+    evidenceRefs: *coreAgenticEvidence
+  - id: capabilitySupport:claude:ge-0-0-0:stdin-injection
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:stdin-injection
+    capabilityId: stdin-injection
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Scripted prompt-mode CLI flows and continue flags provide the strongest official basis for non-interactive input semantics.
+    evidenceRefs: &stdinEvidence
+      - repo-sdk-fallback
+      - web-claude-code-headless
+      - web-claude-code-cli-reference
+  - id: capabilitySupport:claude:ge-0-0-0:image-input
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:image-input
+    capabilityId: image-input
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Image input remains backed by official Claude multimodal documentation, with lower confidence than the Claude Code-specific docs used elsewhere.
+    evidenceRefs: &imageEvidence
+      - repo-sdk-fallback
+      - web-claude-platform-vision
+      - web-claude-code-overview
+  - id: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:runtime-hooks
+    capabilityId: runtime-hooks
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Runtime hooks are now tied to the official hook reference and guide plus the local plugin target shape.
+    evidenceRefs: &hookEvidence
+      - repo-sdk-fallback
+      - repo-target-claude
+      - repo-target-index
+      - web-claude-code-hooks
+      - web-claude-code-hooks-guide
+  - id: capabilitySupport:claude:ge-0-0-0:stop-hook
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:stop-hook
+    capabilityId: stop-hook
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Stop-hook support is modeled separately so the stop lifecycle claim is not diluted into the generic hook bundle.
+    evidenceRefs: *hookEvidence
+  - id: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:subagent-dispatch
+    capabilityId: subagent-dispatch
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Subagent dispatch is backed by the official custom-subagents documentation.
+    evidenceRefs: &subagentEvidence
+      - repo-sdk-fallback
+      - web-claude-code-subagents
+      - web-claude-code-features-overview
+      - web-claude-code-claude-directory
+  - id: capabilitySupport:claude:ge-0-0-0:parallel-execution
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:parallel-execution
+    capabilityId: parallel-execution
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Parallel execution is tied to official subagent and agent-team references rather than the generic autonomy announcement alone.
+    evidenceRefs: &parallelEvidence
+      - repo-sdk-fallback
+      - web-claude-code-subagents
+      - web-claude-code-agent-teams
+      - web-claude-code-quickstart
+  - id: capabilitySupport:claude:ge-0-0-0:session-resume
+    kind: CapabilitySupport
+    supportId: capabilitySupport:claude:ge-0-0-0:session-resume
+    capabilityId: session-resume
+    supportLevel: native
+    subjectKind: AgentVersion
+    subjectId: agentVersion:claude:ge-0-0-0
+    versionRange: ">=0.0.0"
+    notes: Session resume is tied to checkpointing and continue flows rather than only background-agent marketing.
+    evidenceRefs: &sessionEvidence
+      - repo-sdk-fallback
+      - web-claude-code-checkpointing
+      - web-claude-code-headless
+      - web-claude-code-cli-reference
