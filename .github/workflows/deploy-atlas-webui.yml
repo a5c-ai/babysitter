@@ -36,12 +36,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check Azure deployment configuration
+        id: config
+        shell: bash
+        env:
+          AZURE_APPLICATION_CLIENT_ID: ${{ secrets.AZURE_APPLICATION_CLIENT_ID }}
+          AZURE_APPLICATION_CLIENT_SECRET: ${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AZURE_APPLICATION_CLIENT_ID}" ]] || missing+=("secrets.AZURE_APPLICATION_CLIENT_ID")
+          [[ -n "${AZURE_APPLICATION_CLIENT_SECRET}" ]] || missing+=("secrets.AZURE_APPLICATION_CLIENT_SECRET")
+          [[ -n "${AZURE_SUBSCRIPTION_ID}" ]] || missing+=("vars.AZURE_SUBSCRIPTION_ID")
+          [[ -n "${AZURE_TENANT_ID}" ]] || missing+=("vars.AZURE_TENANT_ID")
+          [[ -n "${ACR_NAME}" ]] || missing+=("vars.AZURE_ACR_NAME")
+          [[ -n "${AKS_CLUSTER_NAME}" ]] || missing+=("vars.AZURE_AKS_CLUSTER_NAME")
+          [[ -n "${AKS_RESOURCE_GROUP}" ]] || missing+=("vars.AZURE_RESOURCE_GROUP_NAME")
+
+          if (( ${#missing[@]} == 0 )); then
+            echo "deploy_enabled=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "deploy_enabled=false" >> "$GITHUB_OUTPUT"
+          echo "Skipping Atlas WebUI deploy; missing configuration: ${missing[*]}"
+
       - name: Azure login
+        if: steps.config.outputs.deploy_enabled == 'true'
         uses: azure/login@v2
         with:
           creds: '{"clientId":"${{ secrets.AZURE_APPLICATION_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}","subscriptionId":"${{ env.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ env.AZURE_TENANT_ID }}"}'
 
       - name: Resolve deployment target
+        if: steps.config.outputs.deploy_enabled == 'true'
         shell: bash
         run: |
           case "${GITHUB_REF_NAME}" in
@@ -69,7 +96,12 @@ jobs:
           echo "SERVICE_NAME=${APP_NAME}" >> "$GITHUB_ENV"
           echo "DEPLOYMENT_NAME=${APP_NAME}" >> "$GITHUB_ENV"
 
+      - name: Skip deploy when Azure configuration is unavailable
+        if: steps.config.outputs.deploy_enabled != 'true'
+        run: echo "Atlas WebUI deployment skipped because Azure credentials or target variables are not configured for this repository."
+
       - name: Build and push image
+        if: steps.config.outputs.deploy_enabled == 'true'
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
@@ -80,9 +112,11 @@ jobs:
           echo "IMAGE=$image" >> "$GITHUB_ENV"
 
       - name: Connect to AKS
+        if: steps.config.outputs.deploy_enabled == 'true'
         run: az aks get-credentials --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --overwrite-existing
 
       - name: Deploy web app
+        if: steps.config.outputs.deploy_enabled == 'true'
         shell: bash
         run: |
           kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
