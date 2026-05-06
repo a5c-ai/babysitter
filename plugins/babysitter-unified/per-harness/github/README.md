@@ -36,11 +36,10 @@ copilot plugin install babysitter
 
 ### Direct GitHub install
 
-Install directly from the Git repository using Copilot CLI. Copilot CLI
-discovers the plugin via `.github/plugin/marketplace.json` at the repo root:
+Install directly from the generated external plugin repository:
 
 ```bash
-copilot plugin install a5c-ai/babysitter
+copilot plugin install a5c-ai/babysitter-github-copilot
 ```
 
 ### Alternative Installation (npm / development)
@@ -61,11 +60,11 @@ npm install -g @a5c-ai/babysitter-github
 babysitter-github install
 ```
 
-Or install from source:
+Or install from generated source:
 
 ```bash
-cd plugins/babysitter-github
-node bin/install.js
+npm run generate:plugins
+node artifacts/generated-plugins/github-copilot/bin/install.js
 ```
 
 Install into a specific workspace:
@@ -253,8 +252,7 @@ Copilot CLI looks for the plugin manifest in these paths, checked in order:
 The first match wins. This plugin uses `plugin.json` at the package root.
 
 For marketplace discovery, Copilot CLI looks for `.github/plugin/marketplace.json`
-at the repository root. This file lists all available plugins in the repo and is
-used when installing via `copilot plugin install OWNER/REPO`.
+at the repository root of the generated plugin repository.
 
 ### plugin.json Schema
 
@@ -404,7 +402,7 @@ repository root in `.github/plugin/marketplace.json`:
       "name": "babysitter",
       "description": "Multi-step workflow orchestration with event-sourced state",
       "version": "0.1.0",
-      "source": "./plugins/babysitter-github"
+      "source": "./"
     }
   ]
 }
@@ -461,7 +459,7 @@ These registries are available without running `marketplace add`.
 ## Plugin Structure (Directory Layout)
 
 ```
-plugins/babysitter-github/
+artifacts/generated-plugins/github-copilot/
   plugin.json              # Plugin manifest (skills, hooks, metadata)
   .github/plugin.json      # Plugin manifest (alternate discovery path)
   hooks.json               # Hook configuration (sessionStart, sessionEnd, userPromptSubmitted)
@@ -579,14 +577,14 @@ compatibility where PowerShell execution is available.
 git clone https://github.com/a5c-ai/babysitter.git
 cd babysitter
 npm install
-cd plugins/babysitter-github
+npm run generate:plugins
 node bin/install.js
 ```
 
 ### Publishing
 
 ```bash
-cd plugins/babysitter-github
+cd artifacts/generated-plugins/github-copilot
 npm run deploy            # Publish to npm (public)
 npm run deploy:staging    # Publish to npm with staging tag
 ```
@@ -594,7 +592,7 @@ npm run deploy:staging    # Publish to npm with staging tag
 ### Team installation
 
 ```bash
-cd plugins/babysitter-github
+cd artifacts/generated-plugins/github-copilot
 npm run team:install
 ```
 

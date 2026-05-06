@@ -62,7 +62,7 @@ driver, custom tools, or direct run mutation logic.
 ## Plugin Layout
 
 ```text
-plugins/babysitter-omp/
+artifacts/generated-plugins/oh-my-pi/
 |-- package.json
 |-- versions.json
 |-- extensions/
@@ -116,7 +116,7 @@ omp plugin uninstall @a5c-ai/babysitter-omp
 ## Tests
 
 ```bash
-cd plugins/babysitter-omp
+cd artifacts/generated-plugins/oh-my-pi
 npm test
 ```
 

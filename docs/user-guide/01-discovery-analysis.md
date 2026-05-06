@@ -556,8 +556,8 @@ Based on analysis of existing documentation:
 | Document | Path | Key Insights |
 |----------|------|--------------|
 | Main README | `/README.md` | Value proposition, installation, examples |
-| Plugin Specification | `/plugins/babysitter/BABYSITTER_PLUGIN_SPECIFICATION.md` | Technical architecture, hooks |
-| Skill Documentation | `/plugins/babysitter/skills/babysit/SKILL.md` | Orchestration workflow |
+| Plugin Specification | `/plugins/babysitter-unified/plugin.json` | Canonical plugin metadata and target profiles |
+| Skill Documentation | `/plugins/babysitter-unified/skills/babysit/SKILL.md` | Orchestration workflow |
 | CLI Spec | `/notes/babysitter_cli_surface_spec.md` | CLI commands and behavior |
 | CLI Examples | `/docs/cli-examples.md` | Usage patterns |
 | Breakpoints README | `/packages/breakpoints/README.md` | Human approval system |

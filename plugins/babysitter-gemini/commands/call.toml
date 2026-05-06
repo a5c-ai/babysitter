@@ -1,3 +1,0 @@
-description = "Orchestrate a babysitter run. use this command to start babysitting a complex workflow."
-
-prompt = "Invoke the babysitter:babysit skill (using the Skill tool) and follow its instructions (SKILL.md)."

@@ -46,19 +46,23 @@ Plugins can be stored globally (`~/.a5c/`) or per-project (`<project>/.a5c/`). B
 <!-- supported-harness-plugins:start -->
 ## Supported harness plugin packages
 
+`plugins/babysitter-unified/` is the only maintained source tree in this repo.
+Harness-specific bundles are generated from it and published as npm packages or
+external plugin repos; they are not maintained as checked-in directories here.
+
 Use this table when you need the canonical entrypoint for a specific Babysitter harness/plugin package rather than the broader plugin-system explanation.
 
 | Surface | Canonical docs home | Status note |
 | --- | --- | --- |
-| `plugins/babysitter` | [plugins/babysitter/README.md](../plugins/babysitter/README.md) | Canonical Claude Code plugin surface. This repo plugin is discoverable from the docs-site plugin landing page and the root README install guide. |
-| `plugins/babysitter-codex` | [plugins/babysitter-codex/README.md](../plugins/babysitter-codex/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-cursor` | [plugins/babysitter-cursor/README.md](../plugins/babysitter-cursor/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-gemini` | [plugins/babysitter-gemini/README.md](../plugins/babysitter-gemini/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-github` | [plugins/babysitter-github/README.md](../plugins/babysitter-github/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-omp` | [plugins/babysitter-omp/README.md](../plugins/babysitter-omp/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-openclaw` | [plugins/babysitter-openclaw/README.md](../plugins/babysitter-openclaw/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-opencode` | [plugins/babysitter-opencode/README.md](../plugins/babysitter-opencode/README.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-pi` | [plugins/babysitter-pi/README.md](../plugins/babysitter-pi/README.md) | README is the canonical package-level contract. |
+| `plugins/babysitter-unified` | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md) | Canonical authoring source plus Claude Code surface. |
+| `@a5c-ai/babysitter-codex` | [plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-cursor` | [plugins/babysitter-unified/per-harness/cursor/README.md](../plugins/babysitter-unified/per-harness/cursor/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-gemini` | [plugins/babysitter-unified/per-harness/gemini/README.md](../plugins/babysitter-unified/per-harness/gemini/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-github` | [plugins/babysitter-unified/per-harness/github/README.md](../plugins/babysitter-unified/per-harness/github/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-omp` | [plugins/babysitter-unified/per-harness/omp/README.md](../plugins/babysitter-unified/per-harness/omp/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-openclaw` | [plugins/babysitter-unified/per-harness/openclaw/README.md](../plugins/babysitter-unified/per-harness/openclaw/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-opencode` | [plugins/babysitter-unified/per-harness/opencode/README.md](../plugins/babysitter-unified/per-harness/opencode/README.md) | Generated from the unified source; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-pi` | [plugins/babysitter-unified/per-harness/pi/README.md](../plugins/babysitter-unified/per-harness/pi/README.md) | Generated from the unified source; README is the canonical package-level contract. |
 <!-- supported-harness-plugins:end -->
 
 ## How a Plugin Install Actually Works

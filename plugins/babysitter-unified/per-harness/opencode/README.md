@@ -9,7 +9,7 @@ complex multi-step workflows -- powered by the Babysitter SDK.
 ## Plugin Structure
 
 ```
-plugins/babysitter-opencode/
+artifacts/generated-plugins/opencode/
   bin/
     cli.cjs              CLI entry point (babysitter-opencode command)
     install.cjs          Installation script
@@ -206,7 +206,7 @@ babysitter process-library:active --json
 ## Running Tests
 
 ```bash
-cd plugins/babysitter-opencode
+cd artifacts/generated-plugins/opencode
 npm test
 ```
 

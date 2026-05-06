@@ -125,7 +125,7 @@ The orchestration framework for Claude Code that enables deterministic, event-so
 
 The primary Claude Code skill for orchestrating runs. The skill manages the orchestration loop, executing iterations until completion.
 
-**Location:** `plugins/babysitter/skills/babysit/SKILL.md`
+**Location:** `plugins/babysitter-unified/skills/babysit/SKILL.md`
 
 **Invocation:**
 ```bash
@@ -345,7 +345,7 @@ A shell script executed at specific lifecycle points during orchestration. Hooks
 **Discovery Priority:**
 1. Per-repo: `.a5c/hooks/<hook-name>/`
 2. Per-user: `~/.config/babysitter/hooks/<hook-name>/`
-3. Plugin: `plugins/babysitter/hooks/<hook-name>/`
+3. Plugin: `plugins/babysitter-unified/hooks/<hook-name>/`
 
 **Hook Types:**
 - `on-run-start` - When run is created
@@ -364,7 +364,7 @@ A shell script executed at specific lifecycle points during orchestration. Hooks
 
 ### Hook Dispatcher
 
-The component that discovers and executes hooks. Located at `plugins/babysitter/hooks/hook-dispatcher.sh`. Responsible for finding hooks, executing them with payloads, and collecting results.
+The component that discovers and executes hooks. The maintained hook source lives under `plugins/babysitter-unified/hooks/`. It is responsible for finding hooks, executing them with payloads, and collecting results.
 
 **Related:** [Hook](#hook)
 
@@ -979,7 +979,7 @@ A monotonically increasing number tracking state changes. Increments with each j
 
 A Claude Code hook that intercepts exit attempts during in-session loops. Decides whether to allow exit or continue the loop.
 
-**Location:** `plugins/babysitter/hooks/babysitter-stop-hook.sh`
+**Location:** generated from `plugins/babysitter-unified/hooks/stop.sh`
 
 **Output (block):**
 ```json

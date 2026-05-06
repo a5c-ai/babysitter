@@ -71,7 +71,7 @@ The plugin dispatches native Babysitter hooks from these priority tiers:
 
 1. `.a5c/hooks/<hook-type>/`
 2. `~/.config/babysitter/hooks/<hook-type>/`
-3. `plugins/babysitter/hooks/<hook-type>/`
+3. `plugins/babysitter-unified/hooks/<hook-type>/`
 
 Common hook points:
 
@@ -86,9 +86,9 @@ Common hook points:
 
 ## Key Files
 
-- `plugins/babysitter/plugin.json`
-- `plugins/babysitter/hooks/`
-- `plugins/babysitter/skills/babysit/SKILL.md`
+- `plugins/babysitter-unified/plugin.json`
+- `plugins/babysitter-unified/hooks/`
+- `plugins/babysitter-unified/skills/babysit/SKILL.md`
 - `library/`
 
 ## Installation
@@ -113,8 +113,10 @@ plugin copy.
 ## Claude Cowork Installation
 
 Claude Cowork can install this same plugin package without any plugin-structure
-changes. This repository already includes a Claude marketplace manifest at
-`.claude-plugin/marketplace.json` that points at `plugins/babysitter/`.
+changes. This repository includes a Claude marketplace manifest at
+`.claude-plugin/marketplace.json` that points to the generated external
+`a5c-ai/babysitter-claude` marketplace repo, while the maintained source in
+this repo lives under `plugins/babysitter-unified/`.
 
 ### Personal install from this repository
 

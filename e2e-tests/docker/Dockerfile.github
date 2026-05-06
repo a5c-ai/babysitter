@@ -23,14 +23,18 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 COPY packages/sdk/package.json ./packages/sdk/
-COPY plugins/babysitter-github/package.json ./plugins/babysitter-github/
+COPY packages/agent-catalog/package.json ./packages/agent-catalog/
+COPY packages/agent-plugins-mux/package.json ./packages/agent-plugins-mux/
 COPY third_party/webpackbar ./third_party/webpackbar
 
 RUN npm install --include=dev
 
 COPY . .
 
-RUN npm run build:sdk
+RUN npm run build:sdk && \
+    npm run build --workspace=@a5c-ai/agent-catalog && \
+    npm run build --workspace=@a5c-ai/agent-plugins-mux && \
+    node /app/packages/agent-plugins-mux/dist/cli.js compile --target github-copilot --source /app/plugins/babysitter-unified --output /app/plugins/babysitter-github --verify
 
 RUN mkdir -p /workspace && chown -R github:github /app /home/github /workspace
 

@@ -7,7 +7,7 @@ export const CONTAINER = "babysitter-e2e-container";
 export const BUILD_IMAGE_TIMEOUT_MS = 900_000;
 
 // Read plugin version from plugin.json (single source of truth)
-const pluginJsonPath = path.resolve(__dirname, "../../plugins/babysitter/plugin.json");
+const pluginJsonPath = path.resolve(__dirname, "../../plugins/babysitter-unified/plugin.json");
 const PLUGIN_VERSION = JSON.parse(readFileSync(pluginJsonPath, "utf-8")).version as string;
 export const PLUGIN_DIR =
   `/home/claude/.claude/plugins/cache/a5c-ai/babysitter/${PLUGIN_VERSION}`;

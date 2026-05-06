@@ -20,7 +20,37 @@ const HOOK_SCRIPT_EXTENSIONS = new Set([".sh", ".js", ".ts", ".py", ".bash"]);
 export interface DiscoveredHook {
   path: string;
   name: string;
-  location: "per-repo" | "per-user";
+  location: "per-repo" | "per-user" | "plugin";
+}
+
+function findPluginHookPath(startCwd: string, hookType: string): string | null {
+  const candidateNames = Array.from(HOOK_SCRIPT_EXTENSIONS, (ext) => `${hookType}${ext}`);
+  const adapterPluginRoot = getAdapter().resolvePluginRoot({});
+  if (adapterPluginRoot) {
+    for (const candidateName of candidateNames) {
+      const candidate = path.join(adapterPluginRoot, "hooks", candidateName);
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+
+  let current = path.resolve(startCwd);
+  for (let i = 0; i < 50; i++) {
+    const hookRoots = [
+      path.join(current, "plugins", "babysitter-unified", "hooks"),
+      path.join(current, "plugins", "babysitter", "hooks"),
+    ];
+    for (const hookRoot of hookRoots) {
+      for (const candidateName of candidateNames) {
+        const candidate = path.join(hookRoot, candidateName);
+        if (existsSync(candidate)) return candidate;
+      }
+    }
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return null;
 }
 
 /**
@@ -64,7 +94,17 @@ export async function discoverHooks(
     readHooksFromDir(userHookDir, "per-user"),
   ]);
 
-  return [...projectHooks, ...userHooks];
+  const hooks: DiscoveredHook[] = [...projectHooks, ...userHooks];
+  const pluginHookPath = findPluginHookPath(cwd, hookType);
+  if (pluginHookPath) {
+    hooks.push({
+      path: pluginHookPath,
+      name: path.basename(pluginHookPath),
+      location: "plugin",
+    });
+  }
+
+  return hooks;
 }
 
 /**
@@ -132,7 +172,7 @@ async function executeDiscoveredHooks(
 }
 
 /**
- * Find `plugins/babysitter/hooks/hook-dispatcher.sh` by walking up from cwd.
+ * Find `plugins/babysitter-unified/hooks/hook-dispatcher.sh` by walking up from cwd.
  * This allows running from nested projects/fixtures inside a mono-repo.
  *
  * First checks the active harness adapter for a harness-specific path
@@ -148,8 +188,13 @@ export function findHookDispatcherPath(startCwd: string): string | null {
   let current = path.resolve(startCwd);
   // Guard against infinite loops: stop once we stop making progress.
   for (let i = 0; i < 50; i++) {
-    const candidate = path.join(current, "plugins", "babysitter", "hooks", "hook-dispatcher.sh");
-    if (existsSync(candidate)) return candidate;
+    const candidates = [
+      path.join(current, "plugins", "babysitter-unified", "hooks", "hook-dispatcher.sh"),
+      path.join(current, "plugins", "babysitter", "hooks", "hook-dispatcher.sh"),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) return candidate;
+    }
     const parent = path.dirname(current);
     if (parent === current) break;
     current = parent;
@@ -173,19 +218,15 @@ export async function callHook(
 
   const dispatcherPath = findHookDispatcherPath(cwd);
   if (!dispatcherPath) {
-    // Fall back to filesystem-discovered hooks
     const discoveredHooks = await discoverHooks(hookType, cwd);
-    if (discoveredHooks.length > 0) {
-      return executeDiscoveredHooks(discoveredHooks, payload, hookType, cwd, timeout);
+    if (discoveredHooks.length === 0) {
+      return {
+        hookType,
+        success: true,
+        executedHooks: [],
+      };
     }
-    return {
-      hookType,
-      success: false,
-      error:
-        `Hook dispatcher not found. Expected plugins/babysitter/hooks/hook-dispatcher.sh ` +
-        `in ${cwd} or any parent directory.`,
-      executedHooks: [],
-    };
+    return executeDiscoveredHooks(discoveredHooks, payload, hookType, cwd, timeout);
   }
 
   const payloadJson = JSON.stringify(payload);

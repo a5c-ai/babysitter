@@ -58,11 +58,11 @@ npm install -g @a5c-ai/babysitter-cursor
 babysitter-cursor install
 ```
 
-#### From source
+#### From generated source
 
 ```bash
-cd plugins/babysitter-cursor
-node bin/install.js
+npm run generate:plugins
+node artifacts/generated-plugins/cursor/bin/install.js
 ```
 
 #### Manual installation
@@ -70,9 +70,9 @@ node bin/install.js
 Copy the plugin directory to your local Cursor plugins path:
 
 ```bash
-cp -r plugins/babysitter-cursor ~/.cursor/plugins/local/babysitter-cursor
+cp -r artifacts/generated-plugins/cursor ~/.cursor/plugins/local/babysitter-cursor
 # Or symlink for faster iteration:
-ln -s "$(pwd)/plugins/babysitter-cursor" ~/.cursor/plugins/local/babysitter-cursor
+ln -s "$(pwd)/artifacts/generated-plugins/cursor" ~/.cursor/plugins/local/babysitter-cursor
 ```
 
 ## Uninstallation
@@ -90,7 +90,7 @@ npm uninstall -g @a5c-ai/babysitter-cursor
 ## Plugin Structure (Directory Layout)
 
 ```
-plugins/babysitter-cursor/
+artifacts/generated-plugins/cursor/
   .cursor-plugin/
     plugin.json              # Cursor plugin manifest (skills, commands, hooks, metadata)
   plugin.json                # Babysitter plugin manifest (skills dir, hooks path, metadata)
@@ -311,7 +311,7 @@ The Cursor marketplace manifest lives at `.cursor-plugin/plugin.json`:
     "email": "support@a5c.ai",
     "url": "https://github.com/a5c-ai/babysitter"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-cursor#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-unified/per-harness/cursor#readme",
   "repository": "https://github.com/a5c-ai/babysitter",
   "license": "MIT",
   "skills": "skills/",
@@ -438,14 +438,14 @@ or WSL. The Cursor hook manifest includes explicit `powershell` entries alongsid
 git clone https://github.com/a5c-ai/babysitter.git
 cd babysitter
 npm install
-cd plugins/babysitter-cursor
+npm run generate:plugins
 node bin/install.js
 ```
 
 ### Publishing
 
 ```bash
-cd plugins/babysitter-cursor
+cd artifacts/generated-plugins/cursor
 npm run deploy            # Publish to npm (public)
 npm run deploy:staging    # Publish to npm with staging tag
 ```
@@ -453,7 +453,7 @@ npm run deploy:staging    # Publish to npm with staging tag
 ### Team installation
 
 ```bash
-cd plugins/babysitter-cursor
+cd artifacts/generated-plugins/cursor
 npm run team:install
 ```
 

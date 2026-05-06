@@ -31,7 +31,7 @@ Use it to answer three questions quickly:
 | --- | --- | --- | --- | --- |
 | `packages/agent-mux` | Public family overview | [packages/agent-mux/README.md](../packages/agent-mux/README.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | Use this family README to enter the agent-mux workspace tree before dropping into package-specific READMEs. |
 | `packages/hooks-mux` | Public family overview | [packages/hooks-mux/README.md](../packages/hooks-mux/README.md) | [packages/hooks-mux/core/README.md](../packages/hooks-mux/core/README.md)<br />[packages/hooks-mux/cli/README.md](../packages/hooks-mux/cli/README.md) | Use this family README for the hooks-mux package set and adapter lineup. |
-| `plugins` | Public plugin overview | [docs/plugins.md](./plugins.md) | [plugins/babysitter/README.md](../plugins/babysitter/README.md)<br />[plugins/babysitter-codex/README.md](../plugins/babysitter-codex/README.md) | The docs-site plugin landing page is the canonical discovery entrypoint for harness plugin packages and plugin-system concepts. |
+| `plugins` | Public plugin overview | [docs/plugins.md](./plugins.md) | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md)<br />[plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | `plugins/babysitter-unified/` is the canonical source. Generated harness bundles are published from that source and are not maintained as checked-in directories here. |
 
 ## Public core and runtime packages
 
@@ -84,15 +84,15 @@ Use it to answer three questions quickly:
 
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
-| `plugins/babysitter` | Public harness plugin | [plugins/babysitter/README.md](../plugins/babysitter/README.md) | [docs/plugins.md](./plugins.md) | Canonical Claude Code plugin surface. This repo plugin is discoverable from the docs-site plugin landing page and the root README install guide. |
-| `plugins/babysitter-codex` | Public harness plugin | [plugins/babysitter-codex/README.md](../plugins/babysitter-codex/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-cursor` | Public harness plugin | [plugins/babysitter-cursor/README.md](../plugins/babysitter-cursor/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-gemini` | Public harness plugin | [plugins/babysitter-gemini/README.md](../plugins/babysitter-gemini/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-github` | Public harness plugin | [plugins/babysitter-github/README.md](../plugins/babysitter-github/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-omp` | Public harness plugin | [plugins/babysitter-omp/README.md](../plugins/babysitter-omp/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-openclaw` | Public harness plugin | [plugins/babysitter-openclaw/README.md](../plugins/babysitter-openclaw/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-opencode` | Public harness plugin | [plugins/babysitter-opencode/README.md](../plugins/babysitter-opencode/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
-| `plugins/babysitter-pi` | Public harness plugin | [plugins/babysitter-pi/README.md](../plugins/babysitter-pi/README.md) | [docs/plugins.md](./plugins.md) | README is the canonical package-level contract. |
+| `plugins/babysitter-unified` | Public harness plugin source | [plugins/babysitter-unified/per-harness/claude-code/README.md](../plugins/babysitter-unified/per-harness/claude-code/README.md) | [docs/plugins.md](./plugins.md) | Canonical source tree for all harness plugins plus the Claude Code surface. |
+| `@a5c-ai/babysitter-codex` | Public harness plugin | [plugins/babysitter-unified/per-harness/codex/README.md](../plugins/babysitter-unified/per-harness/codex/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-cursor` | Public harness plugin | [plugins/babysitter-unified/per-harness/cursor/README.md](../plugins/babysitter-unified/per-harness/cursor/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-gemini` | Public harness plugin | [plugins/babysitter-unified/per-harness/gemini/README.md](../plugins/babysitter-unified/per-harness/gemini/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-github` | Public harness plugin | [plugins/babysitter-unified/per-harness/github/README.md](../plugins/babysitter-unified/per-harness/github/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-omp` | Public harness plugin | [plugins/babysitter-unified/per-harness/omp/README.md](../plugins/babysitter-unified/per-harness/omp/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-openclaw` | Public harness plugin | [plugins/babysitter-unified/per-harness/openclaw/README.md](../plugins/babysitter-unified/per-harness/openclaw/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-opencode` | Public harness plugin | [plugins/babysitter-unified/per-harness/opencode/README.md](../plugins/babysitter-unified/per-harness/opencode/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
+| `@a5c-ai/babysitter-pi` | Public harness plugin | [plugins/babysitter-unified/per-harness/pi/README.md](../plugins/babysitter-unified/per-harness/pi/README.md) | [docs/plugins.md](./plugins.md) | Generated from `plugins/babysitter-unified/`; README is the canonical package-level contract. |
 
 ## Internal-only workspaces and companion apps
 

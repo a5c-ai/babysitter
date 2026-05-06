@@ -22,6 +22,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
+generated/
+artifacts/generated-plugins/
 
 
 _ci_artifacts/**

@@ -134,7 +134,7 @@ describe("configure_show", () => {
 describe("skill_discover", () => {
   it("returns discovered skills, agents, and processes", async () => {
     mockedDiscoverSkillsInternal.mockResolvedValue({
-      skills: [{ name: "babysit", path: "/plugins/babysitter/skills/babysit" }],
+      skills: [{ name: "babysit", path: "/plugins/babysitter-unified/skills/babysit" }],
       agents: [{ name: "code-reviewer", path: "/agents/code-reviewer.md" }],
       processes: [{ name: "tdd", path: "/processes/tdd.js" }],
       summary: "Found 1 skill, 1 agent, 1 process",

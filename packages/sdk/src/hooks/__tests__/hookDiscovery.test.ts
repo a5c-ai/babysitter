@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { discoverHooks } from "../dispatcher";
+import { callHook, discoverHooks } from "../dispatcher";
 
 describe("discoverHooks", () => {
   const tempDirs: string[] = [];
@@ -86,6 +86,28 @@ describe("discoverHooks", () => {
     expect(hooks).toEqual([]);
   });
 
+  it("discovers plugin hooks from the unified plugin source tree", async () => {
+    const repoRoot = makeTempDir();
+    const worktree = path.join(repoRoot, "packages", "demo");
+    fs.mkdirSync(worktree, { recursive: true });
+
+    const pluginHook = path.join(
+      repoRoot,
+      "plugins",
+      "babysitter-unified",
+      "hooks",
+      "on-task-complete.sh",
+    );
+    fs.mkdirSync(path.dirname(pluginHook), { recursive: true });
+    fs.writeFileSync(pluginHook, "#!/bin/sh\necho plugin\n");
+
+    const hooks = await discoverHooks("on-task-complete", worktree);
+
+    expect(hooks).toHaveLength(1);
+    expect(hooks[0].location).toBe("plugin");
+    expect(hooks[0].path).toBe(pluginHook);
+  });
+
   it("skips non-script files", async () => {
     const tmpDir = makeTempDir();
 
@@ -99,5 +121,19 @@ describe("discoverHooks", () => {
     expect(hooks).toHaveLength(1);
     expect(hooks[0].name).toBe("valid-hook.sh");
     expect(hooks.some((h) => h.name === "notes.txt")).toBe(false);
+  });
+
+  it("treats missing hooks and missing dispatcher as a no-op success", async () => {
+    const tmpDir = makeTempDir();
+
+    const result = await callHook({
+      hookType: "on-task-complete",
+      payload: { ok: true },
+      cwd: tmpDir,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.executedHooks).toEqual([]);
+    expect(result.error).toBeUndefined();
   });
 });

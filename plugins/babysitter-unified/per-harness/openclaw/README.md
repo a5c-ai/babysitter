@@ -204,7 +204,7 @@ When the `babysitter` CLI is not available globally, hooks fall back to `npx -y 
 ## Plugin Layout
 
 ```text
-plugins/babysitter-openclaw/
+artifacts/generated-plugins/openclaw/
 |-- package.json              # npm package manifest
 |-- plugin.json               # Babysitter plugin manifest
 |-- openclaw.plugin.json      # OpenClaw-native plugin manifest
@@ -262,7 +262,7 @@ npm install
 ### Running Tests
 
 ```bash
-cd plugins/babysitter-openclaw
+cd artifacts/generated-plugins/openclaw
 npm test
 npm run test:integration
 npm run test:packaged-install

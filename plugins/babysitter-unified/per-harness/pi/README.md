@@ -69,7 +69,7 @@ custom tools, or direct run mutation logic.
 ## Plugin Layout
 
 ```text
-plugins/babysitter-pi/
+artifacts/generated-plugins/pi/
 |-- package.json
 |-- versions.json
 |-- extensions/
@@ -111,7 +111,7 @@ pi remove npm:@a5c-ai/babysitter-pi
 ## Tests
 
 ```bash
-cd plugins/babysitter-pi
+cd artifacts/generated-plugins/pi
 npm test
 ```
 

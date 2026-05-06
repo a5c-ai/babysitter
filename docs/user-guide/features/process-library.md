@@ -117,7 +117,7 @@ The built-in library lives under [`library/`](../../../library/README.md). Harne
 ### How The Layers Relate
 
 1. **Built-in library**: [`library/`](../../../library/README.md) is the canonical source tree for built-in processes, methodologies, shared components, references, and examples.
-2. **Plugin package**: the harness plugin ships skills, hooks, and packaging files such as [`plugins/babysitter-codex/skills/babysit/SKILL.md`](../../../plugins/babysitter-codex/skills/babysit/SKILL.md), then asks the SDK which process-library binding is active.
+2. **Plugin package**: the harness plugin ships skills, hooks, and packaging files such as [`plugins/babysitter-unified/skills/babysit/SKILL.md`](../../../plugins/babysitter-unified/skills/babysit/SKILL.md), then asks the SDK which process-library binding is active.
 3. **Project-local `.a5c/` copies**: files like `.a5c/processes/`, `.a5c/skills/`, and `.a5c/agents/` inside a workspace override the shared library when present.
 
 ### Active Lookup Order
