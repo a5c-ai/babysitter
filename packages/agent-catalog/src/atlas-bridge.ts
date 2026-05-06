@@ -83,13 +83,13 @@ const BABYSITTER_TARGETS = new Set([
 export function buildPluginTargetDescriptorsFromAtlas(
   atlas: AtlasGraph,
 ): PluginTargetDescriptor[] {
-  const targets = atlas
+  const targets: AtlasRecord[] = atlas
     .getRecordsByKind("PluginTarget")
-    .filter((r) => BABYSITTER_TARGETS.has(r.id));
+    .filter((r: AtlasRecord) => BABYSITTER_TARGETS.has(r.id));
 
-  const hookMappings = atlas.getRecordsByKind("HookMapping");
+  const hookMappings: AtlasRecord[] = atlas.getRecordsByKind("HookMapping");
 
-  return targets.map((target) => {
+  return targets.map((target: AtlasRecord) => {
     const targetId = targetIdFromRecord(target);
     const adapterName = str(target.adapterName);
 
@@ -180,9 +180,9 @@ export function buildHookNameMapFromAtlas(
   atlas: AtlasGraph,
 ): Record<string, Record<string, string>> {
   const result: Record<string, Record<string, string>> = {};
-  const targets = atlas
+  const targets: AtlasRecord[] = atlas
     .getRecordsByKind("PluginTarget")
-    .filter((r) => BABYSITTER_TARGETS.has(r.id));
+    .filter((r: AtlasRecord) => BABYSITTER_TARGETS.has(r.id));
 
   for (const target of targets) {
     const targetId = targetIdFromRecord(target);
