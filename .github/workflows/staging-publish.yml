@@ -1123,3 +1123,11 @@ jobs:
           set -euo pipefail
           npm publish --access public --tag staging
         working-directory: packages/babysitter
+
+  create_release_tag:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Create Release Tag
+    needs:
+      - publish_staging_metapackage
+    uses: ./.github/workflows/release-tags.yml
+    secrets: inherit

@@ -1,10 +1,14 @@
 name: Create Release Tags
 
 on:
-  push:
+  # Called by staging-publish after all validation and publish jobs succeed
+  workflow_call:
+  # For develop/main branches, wait for CI to pass before tagging
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches:
       - develop
-      - staging
       - main
   workflow_dispatch:
 
@@ -17,7 +21,12 @@ concurrency:
 
 jobs:
   create_release_tag:
-    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '[skip release]') && !contains(github.event.head_commit.message, '[skip staging]')) }}
+    # Skip if CI workflow failed (workflow_run trigger) or commit says skip
+    if: >-
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+      (github.event_name != 'workflow_run' ||
+        (!contains(github.event.workflow_run.head_commit.message, '[skip release]') &&
+         !contains(github.event.workflow_run.head_commit.message, '[skip staging]')))
     runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
@@ -29,6 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - name: Setup Node.js
@@ -41,13 +51,18 @@ jobs:
           set -euo pipefail
           SHORT_SHA=$(git rev-parse --short=12 HEAD)
           VERSION=$(node -p "require('./package.json').version")
-          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+          BRANCH="${GITHUB_REF_NAME}"
+          # For workflow_run, use the source branch
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+          fi
+          if [ "${BRANCH}" = "staging" ]; then
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
             NEXT_PATCH=$((PATCH + 1))
             VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
-            TAG="babysitter/${GITHUB_REF_NAME}/v${VERSION}"
+            TAG="babysitter/${BRANCH}/v${VERSION}"
           else
-            TAG="babysitter/${GITHUB_REF_NAME}/v${VERSION}-${SHORT_SHA}"
+            TAG="babysitter/${BRANCH}/v${VERSION}-${SHORT_SHA}"
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

@@ -1,0 +1,183 @@
+name: Deploy Atlas WebUI to AKS
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+    paths:
+      - packages/atlas/webui/**
+      - packages/atlas/src/**
+      - packages/atlas/graph/**
+      - packages/atlas/package.json
+      - .github/workflows/deploy-atlas-webui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+  AKS_CLUSTER_NAME: ${{ vars.AZURE_AKS_CLUSTER_NAME }}
+  AKS_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP_NAME }}
+  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  APP_NAME: atlas-webui
+
+concurrency:
+  group: deploy-atlas-webui-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_APPLICATION_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}","subscriptionId":"${{ env.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ env.AZURE_TENANT_ID }}"}'
+
+      - name: Resolve deployment target
+        shell: bash
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            main)
+              echo "KUBE_NAMESPACE=atlas" >> "$GITHUB_ENV"
+              echo "APP_HOST=atlas.a5c.ai" >> "$GITHUB_ENV"
+              ;;
+            staging)
+              echo "KUBE_NAMESPACE=atlas-staging" >> "$GITHUB_ENV"
+              echo "APP_HOST=atlas-staging.a5c.ai" >> "$GITHUB_ENV"
+              ;;
+            develop)
+              echo "KUBE_NAMESPACE=atlas-develop" >> "$GITHUB_ENV"
+              echo "APP_HOST=atlas-develop.a5c.ai" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unsupported branch: ${GITHUB_REF_NAME}" >&2
+              exit 1
+              ;;
+          esac
+          echo "ACR_LOGIN_SERVER=${ACR_NAME}.azurecr.io" >> "$GITHUB_ENV"
+          echo "IMAGE_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+          echo "TLS_SECRET=${APP_NAME}-tls" >> "$GITHUB_ENV"
+          echo "INGRESS_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+          echo "SERVICE_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+          echo "DEPLOYMENT_NAME=${APP_NAME}" >> "$GITHUB_ENV"
+
+      - name: Build and push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          az acr login --name "$ACR_NAME"
+          image="$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG"
+          docker build -f packages/atlas/webui/Dockerfile -t "$image" .
+          docker push "$image"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+
+      - name: Connect to AKS
+        run: az aks get-credentials --resource-group "$AKS_RESOURCE_GROUP" --name "$AKS_CLUSTER_NAME" --overwrite-existing
+
+      - name: Deploy web app
+        shell: bash
+        run: |
+          kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${DEPLOYMENT_NAME}
+            namespace: ${KUBE_NAMESPACE}
+            labels:
+              app.kubernetes.io/name: ${APP_NAME}
+              app.kubernetes.io/component: web
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: ${APP_NAME}
+            template:
+              metadata:
+                labels:
+                  app.kubernetes.io/name: ${APP_NAME}
+                  app.kubernetes.io/component: web
+              spec:
+                containers:
+                  - name: ${APP_NAME}
+                    image: ${IMAGE}
+                    imagePullPolicy: Always
+                    ports:
+                      - containerPort: 3000
+                        name: http
+                    env:
+                      - name: NODE_ENV
+                        value: production
+                      - name: PORT
+                        value: "3000"
+                      - name: HOSTNAME
+                        value: 0.0.0.0
+                    readinessProbe:
+                      httpGet:
+                        path: /
+                        port: http
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                    livenessProbe:
+                      httpGet:
+                        path: /
+                        port: http
+                      initialDelaySeconds: 30
+                      periodSeconds: 20
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${SERVICE_NAME}
+            namespace: ${KUBE_NAMESPACE}
+            labels:
+              app.kubernetes.io/name: ${APP_NAME}
+              app.kubernetes.io/component: web
+          spec:
+            selector:
+              app.kubernetes.io/name: ${APP_NAME}
+            ports:
+              - name: http
+                port: 80
+                targetPort: http
+            type: ClusterIP
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: ${INGRESS_NAME}
+            namespace: ${KUBE_NAMESPACE}
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-production
+              external-dns.alpha.kubernetes.io/hostname: ${APP_HOST}
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          spec:
+            ingressClassName: nginx
+            tls:
+              - hosts:
+                  - ${APP_HOST}
+                secretName: ${TLS_SECRET}
+            rules:
+              - host: ${APP_HOST}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: ${SERVICE_NAME}
+                          port:
+                            number: 80
+          EOF
+
+          kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$DEPLOYMENT_NAME" --timeout=300s
+          kubectl -n "$KUBE_NAMESPACE" get ingress "$INGRESS_NAME"
