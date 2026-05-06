@@ -55,7 +55,7 @@ export default async function RecordPage({
   const baseTabHref = (t: string) => `/n/${encodeURIComponent(id)}${t === "overview" ? "" : `?tab=${t}`}`;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -66,30 +66,28 @@ export default async function RecordPage({
 
       <div className="mt-2 mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-xs text-muted-foreground">{getDisplayName(rec)}</div>
-          <h1 className="text-xl font-mono break-all">{id}</h1>
-          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+          <div className="text-xs" style={{ color: 'var(--fg-3)' }}>{getDisplayName(rec)}</div>
+          <h1 className="text-xl font-mono break-all" style={{ color: 'var(--fg)' }}>{id}</h1>
+          <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: 'var(--fg-2)' }}>
             <Link href={`/kind/${encodeURIComponent(rec._kind)}`}>
               <Badge variant="secondary">{rec._kind}</Badge>
             </Link>
             <span className="font-mono">{rec._file}</span>
             <span>·</span>
-            <Link href={`/graph?seed=${encodeURIComponent(id)}`} className="hover:underline">
+            <Link href={`/graph?seed=${encodeURIComponent(id)}`} className="hover:underline" style={{ color: 'var(--brass)' }}>
               Open in Graph →
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="border-b mb-4 flex gap-4 text-sm">
+      <div className="mb-4 flex gap-4 text-sm" style={{ borderBottom: '1px solid var(--rule)' }}>
         {(["overview", ...(hasArticle ? ["article"] : []), "json", "graph"] as const).map((t) => (
           <Link
             key={t}
             href={baseTabHref(t)}
             className={`px-1 pb-2 -mb-px border-b-2 transition-colors capitalize ${
-              tabActive === t
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              tabActive === t ? "cpd-tab-active" : "cpd-tab-inactive"
             }`}
           >
             {t}
@@ -100,17 +98,17 @@ export default async function RecordPage({
       {tabActive === "overview" && (
         <div className="grid grid-cols-12 gap-6">
           <section className="col-span-12 md:col-span-7">
-            <h2 className="text-sm font-semibold mb-2">Attributes</h2>
+            <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--fg-2)' }}>Attributes</h2>
             <AttributeTable attributes={rec as Record<string, unknown>} />
           </section>
           <section className="col-span-12 md:col-span-5 space-y-4">
             {relatedPages.length > 0 && (
               <div>
-                <h2 className="text-sm font-semibold mb-2">Wiki pages</h2>
+                <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--fg-2)' }}>Wiki pages</h2>
                 <ul className="space-y-1">
                   {relatedPages.map((page) => (
                     <li key={page.id} className="text-xs">
-                      <Link href={`/wiki/${String(page.slug ?? "").split("/").map(encodeURIComponent).join("/")}`} className="text-primary hover:underline">
+                      <Link href={`/wiki/${String(page.slug ?? "").split("/").map(encodeURIComponent).join("/")}`} className="hover:underline" style={{ color: 'var(--brass)' }}>
                         {String(page.title ?? page.id)}
                       </Link>
                     </li>
@@ -119,14 +117,14 @@ export default async function RecordPage({
               </div>
             )}
             <div>
-              <h2 className="text-sm font-semibold mb-2">
-                Outgoing edges <span className="text-xs text-muted-foreground">({out.length})</span>
+              <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--fg-2)' }}>
+                Outgoing edges <span className="text-xs" style={{ color: 'var(--fg-3)' }}>({out.length})</span>
               </h2>
               <EdgeList edges={out} direction="outgoing" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold mb-2">
-                Incoming edges <span className="text-xs text-muted-foreground">({inc.length})</span>
+              <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--fg-2)' }}>
+                Incoming edges <span className="text-xs" style={{ color: 'var(--fg-3)' }}>({inc.length})</span>
               </h2>
               <EdgeList edges={inc} direction="incoming" />
             </div>
@@ -137,11 +135,19 @@ export default async function RecordPage({
       {tabActive === "article" && articlePage && (
         <div className="space-y-4">
           {articlePage.id !== rec.id && (
-            <div className="rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+            <div
+              className="rounded-md p-3 text-xs"
+              style={{
+                background: 'var(--bg-2)',
+                border: '1px solid var(--rule)',
+                color: 'var(--fg-2)',
+              }}
+            >
               Article source:{" "}
               <Link
                 href={`/wiki/${String(articlePage.slug ?? "").split("/").map(encodeURIComponent).join("/")}`}
-                className="text-primary hover:underline"
+                className="hover:underline"
+                style={{ color: 'var(--brass)' }}
               >
                 {String(articlePage.title ?? articlePage.id)}
               </Link>
@@ -155,7 +161,14 @@ export default async function RecordPage({
       )}
 
       {tabActive === "json" && (
-        <pre className="text-xs font-mono bg-muted/30 border rounded-md p-4 overflow-x-auto">
+        <pre
+          className="text-xs font-mono rounded-md p-4 overflow-x-auto"
+          style={{
+            background: 'var(--ground-ink)',
+            border: '1px solid var(--rule)',
+            color: 'var(--glyph-bone)',
+          }}
+        >
           {JSON.stringify(
             {
               id,

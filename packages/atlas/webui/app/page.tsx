@@ -19,10 +19,10 @@ export default function Home() {
   );
 
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-semibold">Atlas Graph Explorer</h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <h1 className="text-2xl font-semibold" style={{ color: 'var(--fg)' }}>Atlas Graph Explorer</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--fg-2)' }}>
           Browse the Atlas catalog: {stats.totalRecords.toLocaleString()} records across{" "}
           {stats.totalNodeKinds} NodeKinds and {stats.totalEdgeKinds} EdgeKinds.
         </p>
@@ -39,7 +39,7 @@ export default function Home() {
       <div className="space-y-6">
         {sortedClusters.map(([cluster, def]) => (
           <section key={cluster}>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--fg-3)' }}>
               {cluster}
               <span className="ml-2 text-xs font-normal normal-case tracking-normal">
                 ({def.recordCount.toLocaleString()} records)
@@ -50,11 +50,11 @@ export default function Home() {
                 const def_ = nodeKinds[nk];
                 const samples = getRecordsByKind(nk).slice(0, 3);
                 return (
-                  <Card key={nk} className="hover:border-primary/40 transition-colors">
+                  <Card key={nk} className="transition-colors">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-sm">
-                          <Link href={`/kind/${encodeURIComponent(nk)}`} className="hover:underline">
+                          <Link href={`/kind/${encodeURIComponent(nk)}`} className="hover:underline" style={{ color: 'var(--brass)' }}>
                             {nk}
                           </Link>
                         </CardTitle>
@@ -72,14 +72,15 @@ export default function Home() {
                           <li key={r.id} className="text-xs">
                             <Link
                               href={`/n/${encodeURIComponent(r.id)}`}
-                              className="text-muted-foreground hover:text-foreground hover:underline truncate block"
+                              className="hover:underline truncate block transition-colors"
+                              style={{ color: 'var(--fg-3)' }}
                             >
                               {r.id}
                             </Link>
                           </li>
                         ))}
                         {samples.length === 0 && (
-                          <li className="text-xs text-muted-foreground italic">No records</li>
+                          <li className="text-xs italic" style={{ color: 'var(--fg-3)' }}>No records</li>
                         )}
                       </ul>
                     </CardContent>
@@ -91,8 +92,9 @@ export default function Home() {
         ))}
       </div>
 
-      <footer className="text-xs text-muted-foreground border-t pt-4">
-        Read-only. Graph data, SDK, CLI, and wiki pages are served from <code className="font-mono px-1 py-0.5 rounded bg-muted">@a5c-ai/atlas</code>.
+      <footer className="text-xs pt-4" style={{ borderTop: '1px solid var(--rule)', color: 'var(--fg-3)' }}>
+        Read-only. Graph data, SDK, CLI, and wiki pages are served from{" "}
+        <code className="font-mono px-1 py-0.5 rounded" style={{ background: 'var(--bg-2)' }}>@a5c-ai/atlas</code>.
       </footer>
     </div>
   );
@@ -102,8 +104,8 @@ function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider">{label}</div>
-        <div className="text-2xl font-semibold tabular-nums mt-1">{value.toLocaleString()}</div>
+        <div className="text-xs uppercase tracking-wider" style={{ color: 'var(--fg-3)' }}>{label}</div>
+        <div className="text-2xl font-semibold tabular-nums mt-1" style={{ color: 'var(--brass)' }}>{value.toLocaleString()}</div>
       </CardContent>
     </Card>
   );

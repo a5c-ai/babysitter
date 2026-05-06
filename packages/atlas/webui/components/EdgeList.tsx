@@ -11,7 +11,7 @@ export function EdgeList({
   direction: "outgoing" | "incoming";
 }) {
   if (edges.length === 0) {
-    return <div className="text-xs text-muted-foreground italic">None.</div>;
+    return <div className="text-xs italic" style={{ color: 'var(--fg-3)' }}>None.</div>;
   }
   const grouped = new Map<string, Edge[]>();
   for (const e of edges) {
@@ -24,29 +24,37 @@ export function EdgeList({
       {Array.from(grouped.entries())
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([kind, items]) => (
-          <div key={kind} className="border rounded-md">
-            <div className="px-3 py-1.5 bg-muted/50 border-b flex items-center justify-between">
+          <div key={kind} className="rounded-md" style={{ border: '1px solid var(--rule)' }}>
+            <div
+              className="px-3 py-1.5 flex items-center justify-between"
+              style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--rule)' }}
+            >
               <Badge variant="outline" className="font-mono">{kind}</Badge>
-              <span className="text-xs text-muted-foreground tabular-nums">{items.length}</span>
+              <span className="text-xs tabular-nums" style={{ color: 'var(--fg-3)' }}>{items.length}</span>
             </div>
-            <ul className="divide-y">
+            <ul>
               {items.map((e, i) => {
                 const otherId = direction === "outgoing" ? e.to : e.from;
                 const other = getRecord(otherId);
                 return (
-                  <li key={i} className="px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-muted/30">
+                  <li
+                    key={i}
+                    className="px-3 py-1.5 text-xs flex items-center gap-2 cpd-row-hover transition-colors"
+                    style={i > 0 ? { borderTop: '1px solid var(--rule)' } : undefined}
+                  >
                     <Link
                       href={`/n/${encodeURIComponent(otherId)}`}
-                      className="font-mono text-primary hover:underline truncate"
+                      className="font-mono hover:underline truncate"
+                      style={{ color: 'var(--brass)' }}
                     >
                       {otherId}
                     </Link>
                     {other && (
                       <>
-                        <span className="text-muted-foreground">·</span>
-                        <span className="text-muted-foreground truncate">{other._kind}</span>
+                        <span style={{ color: 'var(--fg-3)' }}>·</span>
+                        <span className="truncate" style={{ color: 'var(--fg-3)' }}>{other._kind}</span>
                         {getDisplayName(other) !== other.id && (
-                          <span className="truncate text-foreground/80">{getDisplayName(other)}</span>
+                          <span className="truncate" style={{ color: 'var(--fg-2)' }}>{getDisplayName(other)}</span>
                         )}
                       </>
                     )}

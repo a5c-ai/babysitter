@@ -52,24 +52,25 @@ export default async function GraphPage({
   };
 
   return (
-    <div className="p-4 max-w-[120rem] mx-auto">
+    <div className="max-w-[120rem] mx-auto">
       <div className="mb-2 flex items-baseline justify-between">
-        <h1 className="text-xl font-semibold">Graph Explorer</h1>
-        <div className="text-xs text-muted-foreground">
-          Use <code className="font-mono px-1 rounded bg-muted">?seed=&lt;id&gt;</code> to start anywhere.
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--fg)' }}>Graph Explorer</h1>
+        <div className="text-xs" style={{ color: 'var(--fg-3)' }}>
+          Use <code className="font-mono px-1 rounded" style={{ background: 'var(--bg-2)' }}>?seed=&lt;id&gt;</code> to start anywhere.
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
         <aside className="col-span-12 md:col-span-3 space-y-4 text-xs">
           <div>
-            <div className="font-semibold mb-1">Depth</div>
+            <div className="font-semibold mb-1" style={{ color: 'var(--fg)' }}>Depth</div>
             <div className="flex gap-1">
               {[1, 2, 3].map((d) => (
                 <Link
                   key={d}
                   href={buildHref({ depth: String(d) })}
-                  className={`px-2 py-1 rounded border ${depth === d ? "bg-accent" : "hover:bg-accent"}`}
+                  className={`px-2 py-1 rounded cpd-hover transition-colors ${depth === d ? "cpd-filter-active" : ""}`}
+                  style={depth === d ? undefined : { border: '1px solid var(--rule)', color: 'var(--fg)' }}
                 >
                   {d}
                 </Link>
@@ -77,11 +78,11 @@ export default async function GraphPage({
             </div>
           </div>
           <div>
-            <div className="font-semibold mb-1">Seed</div>
-            <div className="font-mono break-all p-2 border rounded bg-muted/30">{seed}</div>
+            <div className="font-semibold mb-1" style={{ color: 'var(--fg)' }}>Seed</div>
+            <div className="font-mono break-all p-2 rounded" style={{ border: '1px solid var(--rule)', background: 'var(--bg-2)', color: 'var(--fg)' }}>{seed}</div>
           </div>
           <div>
-            <div className="font-semibold mb-1">EdgeKinds (top 30)</div>
+            <div className="font-semibold mb-1" style={{ color: 'var(--fg)' }}>EdgeKinds (top 30)</div>
             <ul className="max-h-64 overflow-y-auto space-y-px">
               {edgeKinds.map((k) => {
                 const active = edgeKindFilter?.has(k.name);
@@ -92,10 +93,10 @@ export default async function GraphPage({
                       href={buildHref({
                         edgeKinds: next.size ? Array.from(next).join(",") : undefined,
                       })}
-                      className={`flex justify-between px-2 py-0.5 rounded hover:bg-accent ${active ? "bg-accent" : ""}`}
+                      className={`flex justify-between px-2 py-1 rounded cpd-hover transition-colors ${active ? "cpd-filter-active" : ""}`}
                     >
                       <span className="truncate">{k.name}</span>
-                      <span className="text-muted-foreground tabular-nums">{k.count}</span>
+                      <span className="tabular-nums" style={{ color: active ? 'var(--glyph-bone)' : 'var(--fg-3)' }}>{k.count}</span>
                     </Link>
                   </li>
                 );
@@ -103,7 +104,7 @@ export default async function GraphPage({
             </ul>
           </div>
           <div>
-            <div className="font-semibold mb-1">NodeKinds (top 30)</div>
+            <div className="font-semibold mb-1" style={{ color: 'var(--fg)' }}>NodeKinds (top 30)</div>
             <ul className="max-h-64 overflow-y-auto space-y-px">
               {nodeKinds.map((k) => {
                 const active = nodeKindFilter?.has(k.name);
@@ -114,10 +115,10 @@ export default async function GraphPage({
                       href={buildHref({
                         nodeKinds: next.size ? Array.from(next).join(",") : undefined,
                       })}
-                      className={`flex justify-between px-2 py-0.5 rounded hover:bg-accent ${active ? "bg-accent" : ""}`}
+                      className={`flex justify-between px-2 py-1 rounded cpd-hover transition-colors ${active ? "cpd-filter-active" : ""}`}
                     >
                       <span className="truncate">{k.name}</span>
-                      <span className="text-muted-foreground tabular-nums">{k.count}</span>
+                      <span className="tabular-nums" style={{ color: active ? 'var(--glyph-bone)' : 'var(--fg-3)' }}>{k.count}</span>
                     </Link>
                   </li>
                 );
@@ -132,7 +133,7 @@ export default async function GraphPage({
               <Badge key={`n-${k}`} variant="outline">n:{k}</Badge>
             ))}
           </div>
-          <Link href="/graph" className="text-xs underline text-muted-foreground hover:text-foreground">
+          <Link href="/graph" className="text-xs underline" style={{ color: 'var(--fg-3)' }}>
             Reset
           </Link>
         </aside>

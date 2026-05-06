@@ -107,8 +107,8 @@ export function GraphCanvas({ seed, depth, edgeKindFilter, nodeKindFilter }: Pro
         source: e.from,
         target: e.to,
         label: e.kind,
-        labelStyle: { fontSize: 9, fill: "#94a3b8" },
-        style: { stroke: "#64748b" },
+        labelStyle: { fontSize: 9, fill: "#A89980" },
+        style: { stroke: "#A88557" },
       });
     }
     return { nodes, edges: rfEdges };
@@ -122,16 +122,19 @@ export function GraphCanvas({ seed, depth, edgeKindFilter, nodeKindFilter }: Pro
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  if (error) return <div className="p-4 text-sm text-destructive">Failed to load: {error}</div>;
-  if (!idx) return <div className="p-4 text-sm text-muted-foreground">Loading graph…</div>;
+  if (error) return <div className="p-4 text-sm" style={{ color: 'var(--accent-cinnabar)' }}>Failed to load: {error}</div>;
+  if (!idx) return <div className="p-4 text-sm" style={{ color: 'var(--fg-3)' }}>Loading graph...</div>;
   if (!idx.records[seed])
-    return <div className="p-4 text-sm text-destructive">Seed record not found: {seed}</div>;
+    return <div className="p-4 text-sm" style={{ color: 'var(--accent-cinnabar)' }}>Seed record not found: {seed}</div>;
 
   return (
-    <div className="border rounded-md" style={{ width: "100%", height: 720 }}>
-      <div className="px-3 py-1.5 text-xs text-muted-foreground border-b flex items-center justify-between bg-muted/20">
+    <div className="rounded-md" style={{ width: "100%", height: 720, border: '1px solid var(--rule)' }}>
+      <div
+        className="px-3 py-1.5 text-xs flex items-center justify-between"
+        style={{ color: 'var(--fg-3)', borderBottom: '1px solid var(--rule)', background: 'var(--bg-2)' }}
+      >
         <span>
-          seed: <span className="font-mono text-foreground">{seed}</span> · depth {depth}
+          seed: <span className="font-mono" style={{ color: 'var(--fg)' }}>{seed}</span> · depth {depth}
         </span>
         <span className="tabular-nums">
           {nodes.length} nodes · {edges.length} edges
@@ -148,7 +151,7 @@ export function GraphCanvas({ seed, depth, edgeKindFilter, nodeKindFilter }: Pro
           minZoom={0.1}
           maxZoom={3}
         >
-          <Background gap={16} size={1} color="#1f2937" />
+          <Background gap={16} size={1} color="#2B2A6B" />
           <Controls position="bottom-right" />
           <MiniMap pannable zoomable maskColor="rgba(0,0,0,0.6)" />
         </ReactFlow>
@@ -163,9 +166,9 @@ function shortLabel(id: string, kind?: string) {
 }
 function nodeStyle(center: boolean): React.CSSProperties {
   return {
-    background: center ? "hsl(var(--primary))" : "hsl(var(--card))",
-    color: center ? "hsl(var(--primary-foreground))" : "hsl(var(--card-foreground))",
-    border: center ? "2px solid hsl(var(--ring))" : "1px solid hsl(var(--border))",
+    background: center ? "#2F6F5E" : "#181624",
+    color: center ? "#F0E6D1" : "#F0E6D1",
+    border: center ? "2px solid #C98A3E" : "1px solid #6B4A22",
     borderRadius: 6,
     padding: 6,
     fontSize: 10,

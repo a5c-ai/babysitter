@@ -124,7 +124,7 @@ export default async function KindPage({
   const cluster = all[0]?._cluster;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -134,14 +134,14 @@ export default async function KindPage({
       />
       <div className="mt-2 mb-4 flex items-baseline justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold">{nodeKind}</h1>
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--fg)' }}>{nodeKind}</h1>
           {def.description && (
-            <p className="text-xs text-muted-foreground mt-1 max-w-3xl line-clamp-3">
+            <p className="text-xs mt-1 max-w-3xl line-clamp-3" style={{ color: 'var(--fg-2)' }}>
               {String(def.description).slice(0, 400)}
             </p>
           )}
         </div>
-        <div className="text-xs text-muted-foreground tabular-nums">
+        <div className="text-xs tabular-nums" style={{ color: 'var(--fg-3)' }}>
           {filtered.length.toLocaleString()} of {all.length.toLocaleString()} records
         </div>
       </div>
@@ -149,8 +149,8 @@ export default async function KindPage({
       <div className="grid grid-cols-12 gap-4">
         <aside className="col-span-12 md:col-span-3 space-y-4">
           {activeFilters.length > 0 && (
-            <div className="border rounded-md p-2 bg-muted/40">
-              <div className="text-xs font-semibold mb-1">Active filters</div>
+            <div className="rounded-md p-2" style={{ background: 'var(--bg-2)', border: '1px solid var(--rule)' }}>
+              <div className="text-xs font-semibold mb-1" style={{ color: 'var(--fg)' }}>Active filters</div>
               <div className="flex flex-wrap gap-1">
                 {activeFilters.map(([k, v]) => (
                   <Link
@@ -158,14 +158,15 @@ export default async function KindPage({
                     href={buildHref({ [`attr.${k}`]: undefined, page: undefined })}
                     className="text-xs"
                   >
-                    <Badge variant="outline" className="hover:bg-destructive/20 cursor-pointer">
-                      {k}: {v} ✕
+                    <Badge variant="outline" className="cursor-pointer">
+                      {k}: {v} x
                     </Badge>
                   </Link>
                 ))}
                 <Link
                   href={`/kind/${encodeURIComponent(nodeKind)}`}
-                  className="text-xs text-muted-foreground hover:underline"
+                  className="text-xs hover:underline"
+                  style={{ color: 'var(--fg-3)' }}
                 >
                   clear all
                 </Link>
@@ -173,8 +174,8 @@ export default async function KindPage({
             </div>
           )}
           {facets.map((f) => (
-            <div key={f.key} className="border rounded-md p-2">
-              <div className="text-xs font-semibold mb-1 truncate">{f.key}</div>
+            <div key={f.key} className="rounded-md p-2" style={{ border: '1px solid var(--rule)' }}>
+              <div className="text-xs font-semibold mb-1 truncate" style={{ color: 'var(--fg)' }}>{f.key}</div>
               <ul className="space-y-px">
                 {f.values.map(([val, count]) => {
                   const active = activeFilters.some(([k, v]) => k === f.key && v === val);
@@ -185,12 +186,12 @@ export default async function KindPage({
                           [`attr.${f.key}`]: active ? undefined : val,
                           page: undefined,
                         })}
-                        className={`flex items-center justify-between text-xs px-1.5 py-0.5 rounded hover:bg-accent ${
-                          active ? "bg-accent" : ""
+                        className={`flex items-center justify-between text-xs px-1.5 py-1 rounded cpd-hover transition-colors ${
+                          active ? "cpd-filter-active" : ""
                         }`}
                       >
                         <span className="truncate">{val}</span>
-                        <span className="text-muted-foreground tabular-nums ml-2">{count}</span>
+                        <span className="tabular-nums ml-2" style={{ color: active ? 'var(--glyph-bone)' : 'var(--fg-3)' }}>{count}</span>
                       </Link>
                     </li>
                   );
@@ -203,45 +204,46 @@ export default async function KindPage({
         <div className="col-span-12 md:col-span-9">
           <div className="flex items-center justify-between mb-2 gap-2 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">Sort:</span>
+              <span style={{ color: 'var(--fg-3)' }}>Sort:</span>
               {(["id-asc", "id-desc", "name-asc", "name-desc"] as const).map((s) => (
                 <Link
                   key={s}
                   href={buildHref({ sort: s, page: undefined })}
-                  className={`px-2 py-0.5 rounded ${sort === s ? "bg-accent" : "hover:bg-accent"}`}
+                  className={`px-2 py-0.5 rounded cpd-hover transition-colors ${sort === s ? "cpd-filter-active" : ""}`}
                 >
                   {s}
                 </Link>
               ))}
             </div>
           </div>
-          <div className="border rounded-md overflow-hidden">
+          <div className="rounded-md overflow-hidden" style={{ border: '1px solid var(--rule)' }}>
             <table className="w-full text-xs">
-              <thead className="bg-muted/50 text-left">
+              <thead style={{ background: 'var(--bg-2)', color: 'var(--fg-2)' }} className="text-left">
                 <tr>
-                  <th className="px-3 py-2 font-medium">id</th>
-                  <th className="px-3 py-2 font-medium">displayName</th>
-                  <th className="px-3 py-2 font-medium">cluster</th>
+                  <th className="px-3 py-2.5 font-medium">id</th>
+                  <th className="px-3 py-2.5 font-medium">displayName</th>
+                  <th className="px-3 py-2.5 font-medium">cluster</th>
                 </tr>
               </thead>
               <tbody>
                 {pageRecords.map((r) => (
-                  <tr key={r.id} className="border-t hover:bg-muted/30">
-                    <td className="px-3 py-1.5 font-mono">
+                  <tr key={r.id} className="cpd-row-hover transition-colors" style={{ borderTop: '1px solid var(--rule)' }}>
+                    <td className="px-3 py-2 font-mono">
                       <Link
                         href={`/n/${encodeURIComponent(r.id)}`}
-                        className="hover:underline text-foreground"
+                        className="hover:underline"
+                        style={{ color: 'var(--fg)' }}
                       >
                         {r.id}
                       </Link>
                     </td>
-                    <td className="px-3 py-1.5 truncate max-w-[24rem]">{getDisplayName(r)}</td>
-                    <td className="px-3 py-1.5 text-muted-foreground">{r._cluster}</td>
+                    <td className="px-3 py-2 truncate max-w-[24rem]" style={{ color: 'var(--fg-2)' }}>{getDisplayName(r)}</td>
+                    <td className="px-3 py-2" style={{ color: 'var(--fg-3)' }}>{r._cluster}</td>
                   </tr>
                 ))}
                 {pageRecords.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-6 text-center text-muted-foreground italic">
+                    <td colSpan={3} className="px-3 py-6 text-center italic" style={{ color: 'var(--fg-3)' }}>
                       No records match the current filters.
                     </td>
                   </tr>
@@ -251,14 +253,15 @@ export default async function KindPage({
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-3 text-xs">
-              <div className="text-muted-foreground">
+              <div style={{ color: 'var(--fg-3)' }}>
                 Page {page} of {totalPages}
               </div>
               <div className="flex gap-2">
                 {page > 1 && (
                   <Link
                     href={buildHref({ page: String(page - 1) })}
-                    className="px-2 py-1 border rounded hover:bg-accent"
+                    className="px-2 py-1 rounded cpd-hover transition-colors"
+                    style={{ border: '1px solid var(--rule)', color: 'var(--fg)' }}
                   >
                     Prev
                   </Link>
@@ -266,7 +269,8 @@ export default async function KindPage({
                 {page < totalPages && (
                   <Link
                     href={buildHref({ page: String(page + 1) })}
-                    className="px-2 py-1 border rounded hover:bg-accent"
+                    className="px-2 py-1 rounded cpd-hover transition-colors"
+                    style={{ border: '1px solid var(--rule)', color: 'var(--fg)' }}
                   >
                     Next
                   </Link>

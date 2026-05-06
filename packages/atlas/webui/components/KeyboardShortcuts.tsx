@@ -49,15 +49,17 @@ export function KeyboardShortcuts() {
       onClick={() => setShowHelp(false)}
     >
       <div
-        className="bg-card border rounded-lg shadow-xl p-5 max-w-md w-full text-sm"
+        className="rounded-lg shadow-xl p-5 max-w-md w-full text-sm"
+        style={{ background: 'var(--ground-ink)', border: '1px solid var(--edge-fade)', color: 'var(--glyph-bone)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Keyboard shortcuts</h2>
+          <h2 className="font-semibold" style={{ color: 'var(--glyph-bone)' }}>Keyboard shortcuts</h2>
           <button
             type="button"
             onClick={() => setShowHelp(false)}
-            className="text-muted-foreground hover:text-foreground text-xs"
+            className="text-xs"
+            style={{ color: 'var(--glyph-fade)' }}
           >
             close (Esc)
           </button>
@@ -73,8 +75,8 @@ export function KeyboardShortcuts() {
             ["Esc", "Close dialogs"],
           ].map(([k, v]) => (
             <li key={k} className="flex justify-between">
-              <kbd className="px-1.5 py-0.5 border rounded bg-muted font-mono">{k}</kbd>
-              <span className="text-muted-foreground">{v}</span>
+              <kbd className="px-1.5 py-0.5 rounded font-mono" style={{ background: 'var(--bg-2)', border: '1px solid var(--rule)' }}>{k}</kbd>
+              <span style={{ color: 'var(--glyph-fade)' }}>{v}</span>
             </li>
           ))}
         </ul>

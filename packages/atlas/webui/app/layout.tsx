@@ -13,12 +13,20 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
+    <html lang="en" className="cpd-dark h-full antialiased">
+      <body
+        className="min-h-full flex flex-col"
+        style={{ background: 'var(--bg)', color: 'var(--fg)' }}
+      >
         <Header />
         <div className="flex flex-1 min-h-0">
           <Sidebar />
-          <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+          <main
+            className="flex-1 min-w-0 overflow-y-auto p-6"
+            style={{ background: 'var(--bg)' }}
+          >
+            {children}
+          </main>
         </div>
         <KeyboardShortcuts />
       </body>

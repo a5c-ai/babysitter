@@ -52,8 +52,8 @@ export function MiniGraph({ centerId, centerKind, outgoing, incoming }: MiniGrap
         source: centerId,
         target: o.to,
         label: o.kind,
-        labelStyle: { fontSize: 10, fill: "#9ca3af" },
-        style: { stroke: "#64748b" },
+        labelStyle: { fontSize: 10, fill: "#A89980" },
+        style: { stroke: "#A88557" },
       });
     });
     incoming.forEach((iE, i) => {
@@ -62,17 +62,17 @@ export function MiniGraph({ centerId, centerKind, outgoing, incoming }: MiniGrap
         source: iE.from,
         target: centerId,
         label: iE.kind,
-        labelStyle: { fontSize: 10, fill: "#9ca3af" },
-        style: { stroke: "#475569", strokeDasharray: "4 2" },
+        labelStyle: { fontSize: 10, fill: "#A89980" },
+        style: { stroke: "#8C7E65", strokeDasharray: "4 2" },
       });
     });
     return { nodes, edges };
   }, [centerId, centerKind, outgoing, incoming]);
 
   return (
-    <div style={{ width: "100%", height: 480 }} className="border rounded-md">
+    <div style={{ width: "100%", height: 480, border: '1px solid var(--rule)', borderRadius: 6 }}>
       <ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.2 }} minZoom={0.2} maxZoom={2}>
-        <Background gap={16} size={1} color="#1f2937" />
+        <Background gap={16} size={1} color="#2B2A6B" />
         <Controls position="bottom-right" />
       </ReactFlow>
     </div>
@@ -85,9 +85,9 @@ function shortLabel(id: string, kind?: string) {
 }
 function nodeStyle(center: boolean): React.CSSProperties {
   return {
-    background: center ? "hsl(var(--primary))" : "hsl(var(--card))",
-    color: center ? "hsl(var(--primary-foreground))" : "hsl(var(--card-foreground))",
-    border: "1px solid hsl(var(--border))",
+    background: center ? "#2F6F5E" : "#181624",
+    color: center ? "#F0E6D1" : "#F0E6D1",
+    border: center ? "2px solid #C98A3E" : "1px solid #6B4A22",
     borderRadius: 6,
     padding: 6,
     fontSize: 10,

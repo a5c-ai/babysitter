@@ -38,12 +38,12 @@ function inlineParts(text: string, articlePath?: string): React.ReactNode[] {
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(text))) {
     if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
-    if (match[1]) parts.push(<code key={parts.length} className="rounded bg-muted px-1 py-0.5 font-mono text-[0.9em]">{match[1]}</code>);
+    if (match[1]) parts.push(<code key={parts.length} className="rounded px-1 py-0.5 font-mono text-[0.9em]" style={{ background: 'var(--bg-2)' }}>{match[1]}</code>);
     else if (match[2] && match[3]) {
       const resolved = resolveHref(match[3], articlePath);
       if (resolved.internal) {
         parts.push(
-          <Link key={parts.length} href={resolved.href} className="text-primary underline underline-offset-2">
+          <Link key={parts.length} href={resolved.href} className="underline underline-offset-2" style={{ color: 'var(--brass)' }}>
             {match[2]}
           </Link>,
         );
@@ -52,7 +52,8 @@ function inlineParts(text: string, articlePath?: string): React.ReactNode[] {
           <a
             key={parts.length}
             href={resolved.href}
-            className="text-primary underline underline-offset-2"
+            className="underline underline-offset-2"
+            style={{ color: 'var(--brass)' }}
             target={resolved.href.startsWith("#") ? undefined : "_blank"}
             rel={resolved.href.startsWith("#") ? undefined : "noreferrer"}
           >
@@ -92,13 +93,13 @@ export function MarkdownArticle({ markdown, articlePath }: { markdown: string; a
 
   const flushParagraph = () => {
     if (!paragraph.length) return;
-    blocks.push(<p key={blocks.length} className="leading-7 text-sm text-foreground/90">{inlineParts(paragraph.join(" "), articlePath)}</p>);
+    blocks.push(<p key={blocks.length} className="leading-7 text-sm" style={{ color: 'var(--fg)' }}>{inlineParts(paragraph.join(" "), articlePath)}</p>);
     paragraph = [];
   };
   const flushList = () => {
     if (!list.length) return;
     blocks.push(
-      <ul key={blocks.length} className="list-disc pl-6 space-y-1 text-sm text-foreground/90">
+      <ul key={blocks.length} className="list-disc pl-6 space-y-1 text-sm" style={{ color: 'var(--fg)' }}>
         {list.map((item, index) => <li key={index}>{inlineParts(item, articlePath)}</li>)}
       </ul>,
     );
@@ -107,7 +108,7 @@ export function MarkdownArticle({ markdown, articlePath }: { markdown: string; a
   const flushQuote = () => {
     if (!quote.length) return;
     blocks.push(
-      <blockquote key={blocks.length} className="border-l-4 border-border/80 pl-4 italic text-sm text-foreground/80 space-y-2">
+      <blockquote key={blocks.length} className="pl-4 italic text-sm space-y-2" style={{ borderLeft: '4px solid var(--edge-fade)', color: 'var(--fg-2)' }}>
         {quote.map((item, index) => (
           <p key={index}>{inlineParts(item, articlePath)}</p>
         ))}
@@ -120,7 +121,7 @@ export function MarkdownArticle({ markdown, articlePath }: { markdown: string; a
     const line = lines[index];
     if (line.startsWith("```")) {
       if (code) {
-        blocks.push(<pre key={blocks.length} className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs"><code>{code.join("\n")}</code></pre>);
+        blocks.push(<pre key={blocks.length} className="overflow-x-auto rounded-md p-3 text-xs" style={{ background: 'var(--ground-ink)', border: '1px solid var(--rule)', color: 'var(--glyph-bone)' }}><code>{code.join("\n")}</code></pre>);
         code = null;
       } else {
         flushParagraph();
@@ -158,12 +159,12 @@ export function MarkdownArticle({ markdown, articlePath }: { markdown: string; a
         index += 1;
       }
       blocks.push(
-        <div key={blocks.length} className="overflow-x-auto rounded-md border">
+        <div key={blocks.length} className="overflow-x-auto rounded-md" style={{ border: '1px solid var(--rule)' }}>
           <table className="min-w-full text-sm">
-            <thead className="bg-muted/50 text-left">
+            <thead className="text-left" style={{ background: 'var(--bg-2)' }}>
               <tr>
                 {header.map((cell, cellIndex) => (
-                  <th key={cellIndex} className="px-3 py-2 font-medium">
+                  <th key={cellIndex} className="px-3 py-2 font-medium" style={{ color: 'var(--fg-2)' }}>
                     {inlineParts(cell, articlePath)}
                   </th>
                 ))}
@@ -171,9 +172,9 @@ export function MarkdownArticle({ markdown, articlePath }: { markdown: string; a
             </thead>
             <tbody>
               {rows.map((row, rowIndex) => (
-                <tr key={rowIndex} className="border-t">
+                <tr key={rowIndex} style={{ borderTop: '1px solid var(--rule)' }}>
                   {header.map((_, cellIndex) => (
-                    <td key={cellIndex} className="px-3 py-2 align-top text-foreground/90">
+                    <td key={cellIndex} className="px-3 py-2 align-top" style={{ color: 'var(--fg)' }}>
                       {inlineParts(row[cellIndex] ?? "", articlePath)}
                     </td>
                   ))}

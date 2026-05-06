@@ -1,17 +1,69 @@
 @import "tailwindcss";
 @import "@a5c-ai/compendium/css";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 * {
-  border-color: var(--color-border, hsl(217.2 32.6% 17.5%));
+  border-color: var(--rule);
 }
 
 body {
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  background: var(--bg);
+  color: var(--fg);
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+h1, h2, h3, h4 {
+  color: var(--fg);
+}
+
+code, pre {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+::selection {
+  background: var(--brass-light);
+  color: var(--fg);
+}
+
+/* Sidebar nav item hover/active */
+.sidebar-link:hover {
+  background: var(--bg-2);
+  color: var(--glyph-bone);
+}
+.sidebar-link.active {
+  background: var(--accent-viridian);
+  color: var(--glyph-bone);
+}
+
+/* Generic hover backgrounds using compendium tokens */
+.cpd-hover:hover {
+  background: var(--bg-2);
+}
+
+/* Search/kind filter active state */
+.cpd-filter-active {
+  background: var(--accent-indigo);
+  color: var(--glyph-bone);
+}
+
+/* Table row hover */
+.cpd-row-hover:hover {
+  background: color-mix(in srgb, var(--bg-2) 50%, transparent);
+}
+
+/* Tab active border */
+.cpd-tab-active {
+  border-bottom-color: var(--brass);
+  color: var(--fg);
+}
+.cpd-tab-inactive {
+  border-bottom-color: transparent;
+  color: var(--fg-3);
+}
+.cpd-tab-inactive:hover {
+  color: var(--fg);
 }

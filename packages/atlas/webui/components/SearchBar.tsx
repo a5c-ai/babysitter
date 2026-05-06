@@ -32,7 +32,7 @@ export function SearchBar() {
       }}
       className="relative w-full max-w-md"
     >
-      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: 'var(--fg-3)' }} />
       <Input
         ref={inputRef}
         value={q}

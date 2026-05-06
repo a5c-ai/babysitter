@@ -18,7 +18,7 @@ type SlimRecord = {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm" style={{ color: 'var(--fg-3)' }}>Loading...</div>}>
       <SearchPageInner />
     </Suspense>
   );
@@ -81,8 +81,8 @@ function SearchPageInner() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-xl font-semibold mb-3">Search</h1>
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-xl font-semibold mb-3" style={{ color: 'var(--fg)' }}>Search</h1>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -98,13 +98,13 @@ function SearchPageInner() {
         />
       </form>
 
-      {error && <div className="text-xs text-destructive">Failed to load index: {error}</div>}
-      {!corpus && !error && <div className="text-xs text-muted-foreground">Loading index…</div>}
+      {error && <div className="text-xs" style={{ color: 'var(--accent-cinnabar)' }}>Failed to load index: {error}</div>}
+      {!corpus && !error && <div className="text-xs" style={{ color: 'var(--fg-3)' }}>Loading index...</div>}
 
       {corpus && (
         <div className="grid grid-cols-12 gap-4">
           <aside className="col-span-12 md:col-span-3 space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--fg-3)' }}>
               Filter by NodeKind
             </div>
             <ul className="space-y-px">
@@ -115,12 +115,13 @@ function SearchPageInner() {
                     setKind("");
                     submit(q, "");
                   }}
-                  className={`w-full text-left text-xs px-2 py-1 rounded hover:bg-accent flex justify-between ${
-                    kind === "" ? "bg-accent" : ""
+                  className={`w-full text-left text-xs px-2 py-1.5 rounded cpd-hover flex justify-between transition-colors ${
+                    kind === "" ? "cpd-filter-active" : ""
                   }`}
+                  style={kind === "" ? undefined : { color: 'var(--fg)' }}
                 >
                   <span>All</span>
-                  <span className="text-muted-foreground tabular-nums">{allResults.length}</span>
+                  <span className="tabular-nums" style={{ color: kind === "" ? 'var(--glyph-bone)' : 'var(--fg-3)' }}>{allResults.length}</span>
                 </button>
               </li>
               {kindCounts.map(([k, c]) => (
@@ -131,12 +132,13 @@ function SearchPageInner() {
                       setKind(k);
                       submit(q, k);
                     }}
-                    className={`w-full text-left text-xs px-2 py-1 rounded hover:bg-accent flex justify-between ${
-                      kind === k ? "bg-accent" : ""
+                    className={`w-full text-left text-xs px-2 py-1.5 rounded cpd-hover flex justify-between transition-colors ${
+                      kind === k ? "cpd-filter-active" : ""
                     }`}
+                    style={kind === k ? undefined : { color: 'var(--fg)' }}
                   >
                     <span className="truncate">{k}</span>
-                    <span className="text-muted-foreground tabular-nums">{c}</span>
+                    <span className="tabular-nums" style={{ color: kind === k ? 'var(--glyph-bone)' : 'var(--fg-3)' }}>{c}</span>
                   </button>
                 </li>
               ))}
@@ -145,33 +147,37 @@ function SearchPageInner() {
 
           <div className="col-span-12 md:col-span-9">
             {q.trim() === "" ? (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm" style={{ color: 'var(--fg-2)' }}>
                 Type a query above. {corpus.length.toLocaleString()} records indexed.
               </div>
             ) : top.length === 0 ? (
-              <div className="text-sm text-muted-foreground italic">
+              <div className="text-sm italic" style={{ color: 'var(--fg-2)' }}>
                 No results for &quot;{q}&quot;.
               </div>
             ) : (
-              <ul className="divide-y border rounded-md">
-                {top.map((r) => (
-                  <li key={r.item.id} className="px-3 py-2 hover:bg-muted/30">
+              <ul className="rounded-md" style={{ border: '1px solid var(--rule)' }}>
+                {top.map((r, idx) => (
+                  <li
+                    key={r.item.id}
+                    className="px-3 py-2.5 cpd-row-hover transition-colors"
+                    style={idx > 0 ? { borderTop: '1px solid var(--rule)' } : undefined}
+                  >
                     <Link href={`/n/${encodeURIComponent(r.item.id)}`}>
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="font-mono text-[10px]">
                           {r.item._kind}
                         </Badge>
-                        <span className="font-mono text-sm text-foreground truncate hover:underline">
+                        <span className="font-mono text-sm truncate hover:underline" style={{ color: 'var(--fg)' }}>
                           {r.item.id}
                         </span>
                       </div>
                       {r.item.displayName && r.item.displayName !== r.item.id && (
-                        <div className="text-xs text-foreground/80 mt-0.5 truncate">
+                        <div className="text-xs mt-0.5 truncate" style={{ color: 'var(--fg-2)' }}>
                           {r.item.displayName}
                         </div>
                       )}
                       {r.item.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                        <div className="text-xs line-clamp-2 mt-0.5" style={{ color: 'var(--fg-3)' }}>
                           {r.item.description}
                         </div>
                       )}

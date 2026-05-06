@@ -9,29 +9,42 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-60 shrink-0 border-r bg-muted/20 overflow-y-auto">
-      <div className="p-3">
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+    <aside
+      className="w-60 shrink-0 overflow-y-auto"
+      style={{
+        background: 'var(--ground-ink)',
+        borderRight: '1px solid var(--rule)',
+      }}
+    >
+      <div className="p-4">
+        <div
+          className="text-xs font-semibold uppercase tracking-wider mb-3"
+          style={{ color: 'var(--glyph-fade)' }}
+        >
           Clusters
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sortedClusters.map(([cluster, def]) => (
             <div key={cluster}>
-              <div className="text-xs font-medium text-foreground/80 px-2 py-1 flex items-center justify-between">
+              <div
+                className="text-xs font-medium px-2 py-1.5 flex items-center justify-between"
+                style={{ color: 'var(--glyph-bone)' }}
+              >
                 <span className="truncate">{cluster}</span>
-                <span className="text-muted-foreground tabular-nums">{def.recordCount}</span>
+                <span style={{ color: 'var(--brass)' }} className="tabular-nums">{def.recordCount}</span>
               </div>
-              <ul className="space-y-px">
+              <ul className="space-y-0.5">
                 {def.nodeKinds.map((nk) => {
                   const c = nodeKinds[nk]?.count ?? 0;
                   return (
                     <li key={nk}>
                       <Link
                         href={`/kind/${encodeURIComponent(nk)}`}
-                        className="flex items-center justify-between px-2 py-1 rounded text-xs hover:bg-accent hover:text-accent-foreground"
+                        className="sidebar-link flex items-center justify-between px-2 py-1.5 rounded text-xs transition-colors"
+                        style={{ color: 'var(--glyph-fade)' }}
                       >
                         <span className="truncate">{nk}</span>
-                        <span className="text-muted-foreground tabular-nums">{c}</span>
+                        <span className="tabular-nums" style={{ color: 'var(--glyph-fade)' }}>{c}</span>
                       </Link>
                     </li>
                   );

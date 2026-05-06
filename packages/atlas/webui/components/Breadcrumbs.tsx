@@ -8,16 +8,16 @@ export interface Crumb {
 
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
-    <nav className="flex items-center gap-1 text-xs text-muted-foreground" aria-label="Breadcrumb">
+    <nav className="flex items-center gap-1 text-xs" style={{ color: 'var(--fg-3)' }} aria-label="Breadcrumb">
       {items.map((c, i) => (
         <span key={i} className="flex items-center gap-1">
           {i > 0 && <ChevronRight className="h-3 w-3" />}
           {c.href ? (
-            <Link href={c.href} className="hover:text-foreground hover:underline">
+            <Link href={c.href} className="hover:underline" style={{ color: 'var(--fg-3)' }}>
               {c.label}
             </Link>
           ) : (
-            <span className="text-foreground">{c.label}</span>
+            <span style={{ color: 'var(--fg)' }}>{c.label}</span>
           )}
         </span>
       ))}
