@@ -5,4 +5,6 @@ attributes:
   description: |
     Networking domain — TCP/IP, routing, switching, load balancing, DNS,
     TLS, service mesh, and software-defined networking.
-edges: {}
+edges:
+  contains:
+    - specialization:network-programming

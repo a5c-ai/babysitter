@@ -13,4 +13,7 @@ attributes:
     compliance frameworks (SOC 2, ISO 27001). It is the broader parent of
     Cybersecurity (offensive/defensive practitioner work) and intersects
     every other domain — every system has a threat model.
-edges: {}
+edges:
+  contains:
+    - specialization:security-research
+    - specialization:cryptography-blockchain

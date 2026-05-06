@@ -14,4 +14,9 @@ attributes:
     Android), cross-platform frameworks (React Native, Flutter), and hybrid
     web-based approaches. It shares code-sharing concerns with Web
     Development and intersects with Cloud Infrastructure for backend APIs.
-edges: {}
+edges:
+  contains:
+    - specialization:mobile-development
+    - specialization:mobile-ios
+    - specialization:react-native-mobile
+    - specialization:flutter-mobile

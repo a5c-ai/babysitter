@@ -6,4 +6,7 @@ attributes:
     Databases domain — relational, document, key-value, time-series,
     graph, and analytical databases; storage engines, query planning,
     replication, and operations.
-edges: {}
+edges:
+  contains:
+    - specialization:postgres-tuning
+    - specialization:redis-ops

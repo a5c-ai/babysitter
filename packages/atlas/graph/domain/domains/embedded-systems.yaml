@@ -5,4 +5,7 @@ attributes:
   description: |
     Embedded Systems domain — firmware, RTOS, microcontrollers, and
     resource-constrained software running on dedicated hardware.
-edges: {}
+edges:
+  contains:
+    - specialization:embedded-systems
+    - specialization:fpga-programming

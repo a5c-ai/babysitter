@@ -14,4 +14,7 @@ attributes:
     into DevOps (pipeline automation) and Cloud Infrastructure (GPU
     compute, managed endpoints). Specializations include LLM fine-tuning
     and ML inference serving.
-edges: {}
+edges:
+  contains:
+    - specialization:llm-fine-tuning
+    - specialization:ml-inference-serving

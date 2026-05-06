@@ -6,4 +6,16 @@ attributes:
     General software engineering — coding, design, code review,
     refactoring, debugging, testing. Used as the catch-all domain
     when nothing more specific applies.
-edges: {}
+edges:
+  contains:
+    - specialization:software-architecture
+    - specialization:qa-testing-automation
+    - specialization:performance-optimization
+    - specialization:technical-documentation
+    - specialization:sdk-platform-development
+    - specialization:cli-mcp-development
+    - specialization:code-migration-modernization
+    - specialization:algorithms-optimization
+    - specialization:ai-agents-conversational
+    - specialization:go-microservices
+    - specialization:rust-systems

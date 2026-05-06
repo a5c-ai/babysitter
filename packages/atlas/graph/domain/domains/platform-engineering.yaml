@@ -6,4 +6,6 @@ attributes:
     Platform Engineering domain — internal developer platforms, golden
     paths, paved roads, and self-service infrastructure for application
     teams.
-edges: {}
+edges:
+  contains:
+    - specialization:k8s-operator

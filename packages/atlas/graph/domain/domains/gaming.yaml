@@ -5,4 +5,6 @@ attributes:
   description: |
     Gaming domain — game engines, real-time rendering, gameplay
     programming, multiplayer netcode, and game tooling.
-edges: {}
+edges:
+  contains:
+    - specialization:game-development

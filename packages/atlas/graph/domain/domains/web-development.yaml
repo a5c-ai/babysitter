@@ -13,4 +13,11 @@ attributes:
     and the developer experience of modern build toolchains (Vite, webpack,
     esbuild). Adjacent to Mobile (shared TypeScript logic) and DevOps
     (deployment pipelines, CDN configuration).
-edges: {}
+edges:
+  contains:
+    - specialization:frontend-react
+    - specialization:web-development
+    - specialization:ux-ui-design
+    - specialization:webapp-fullstack-typescript
+    - specialization:webapp-fullstack-python
+    - specialization:backend-python-django

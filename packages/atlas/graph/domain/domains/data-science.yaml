@@ -13,4 +13,6 @@ attributes:
     of ML-Ops (productionizing models) and downstream of Data Engineering
     (building the pipelines that supply clean data). Python and R are the
     dominant languages; SQL is essential for data access.
-edges: {}
+edges:
+  contains:
+    - specialization:data-engineering-analytics

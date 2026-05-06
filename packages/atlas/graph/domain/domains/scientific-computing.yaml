@@ -5,4 +5,6 @@ attributes:
   description: |
     Scientific Computing domain — numerical methods, HPC, simulation,
     linear algebra at scale, and research-grade computational workflows.
-edges: {}
+edges:
+  contains:
+    - specialization:gpu-programming

@@ -15,4 +15,6 @@ attributes:
     include Bash, Python, Go, and YAML-based configuration.
 edges:
   contains:
-    - target: specialization:devops-sre-platform
+    - specialization:devops-sre-platform
+    - specialization:k8s-ops
+    - specialization:sre

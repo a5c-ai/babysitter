@@ -5,4 +5,6 @@ attributes:
   description: |
     Cloud Infrastructure domain — IaaS/PaaS provisioning across AWS, GCP,
     Azure, and similar clouds; networking, IAM, compute, storage.
-edges: {}
+edges:
+  contains:
+    - specialization:terraform-iac
