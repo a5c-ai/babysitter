@@ -61,19 +61,24 @@ function getVendorPolicy(graphDocument) {
   };
 }
 
-function loadGraphData(rootDir) {
-  const graphDir = path.join(rootDir, "graph");
-  const graphDocument = readYaml(path.join(graphDir, "agent-catalog.graph.yaml"));
-  const nodes = [];
+function loadGraphData(_rootDir) {
+  const atlasPath = path.resolve(__dirname, "..", "..", "atlas");
+  const { atlas } = require(path.join(atlasPath, "dist", "index.js"));
 
-  for (const importPath of ensureArray(graphDocument.imports, "GraphDocument.imports")) {
-    for (const yamlFile of listYamlFilesRecursively(path.join(graphDir, importPath))) {
-      const document = readYaml(yamlFile);
-      if (document.kind === "NodeDocument") {
-        nodes.push(...ensureArray(document.nodes, `${yamlFile}.nodes`));
-      }
-    }
-  }
+  const nodes = atlas
+    .getAllRecords()
+    .map((r) => ({ ...r, kind: r._kind }));
+
+  const graphDocument = {
+    generatedAt: new Date().toISOString(),
+    graphId: "graph:agent-catalog",
+    schemaVersion: "2026.04.agent-catalog-v2",
+    evidencePolicy: {
+      kindLabels: ["web", "docs", "repo"],
+      trustLevels: ["vendor-official", "vendor-adjacent"],
+      maxAgeDays: 90,
+    },
+  };
 
   return { graphDocument, nodes };
 }
