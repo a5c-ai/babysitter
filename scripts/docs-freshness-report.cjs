@@ -195,6 +195,19 @@ function main() {
     fs.readFileSync(path.join(repoRoot, "packages", "sdk", "src", "cli", "main", "program.ts"), "utf8"),
   );
   const knownPackages = new Set(collectKnownPackages());
+  // External plugin packages — published to npm but no longer committed as local bundles
+  for (const ext of [
+    "@a5c-ai/babysitter-codex",
+    "@a5c-ai/babysitter-cursor",
+    "@a5c-ai/babysitter-gemini",
+    "@a5c-ai/babysitter-github",
+    "@a5c-ai/babysitter-omp",
+    "@a5c-ai/babysitter-openclaw",
+    "@a5c-ai/babysitter-opencode",
+    "@a5c-ai/babysitter-pi",
+  ]) {
+    knownPackages.add(ext);
+  }
   const generatedFailures = [];
   const generatedReports = [];
   const humanReports = [];
