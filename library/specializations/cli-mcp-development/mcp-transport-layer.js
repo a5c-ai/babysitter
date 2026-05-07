@@ -20,7 +20,7 @@
  *   specializations: [specialization:cli-mcp-development]
  *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation, skill-area:mcp-sse-transport]
  *   roles: [role:backend-engineer, role:platform-engineer]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:sdk-api-design]
  *   topics: [topic:developer-experience]
  */
 

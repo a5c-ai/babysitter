@@ -17,8 +17,8 @@
  * - AgentBench: https://github.com/THUDM/AgentBench
  * - LLM-as-Judge: https://arxiv.org/abs/2306.05685
  * @graph
- *   domains: [domain:software-engineering, workflow:feature-development]
- *   workflows: [workflow:feature-development]
+ *   domains: [domain:software-engineering, workflow:agent-evaluation-cycle]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

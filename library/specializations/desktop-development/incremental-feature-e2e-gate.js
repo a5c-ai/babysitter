@@ -30,7 +30,7 @@
  *   specializations: [specialization:desktop-development]
  *   skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
  *   roles: [role:desktop-developer, role:fullstack-engineer]
- *   workflows: [workflow:feature-development, workflow:release-management]
+ *   workflows: [workflow:desktop-app-release, workflow:release-management]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

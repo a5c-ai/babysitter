@@ -29,7 +29,7 @@
  * - Uber's Experimentation Platform: https://eng.uber.com/experimentation-platform/
  * @graph
  *   domains: [domain:data-engineering]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:schema-migration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

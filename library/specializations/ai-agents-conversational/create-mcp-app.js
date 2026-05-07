@@ -21,7 +21,7 @@
  * - npm: @modelcontextprotocol/ext-apps
  * @graph
  *   domains: [domain:software-engineering, role:backend-engineer]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -22,7 +22,7 @@
  *   specializations: [specialization:cli-mcp-development]
  *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
  *   roles: [role:backend-engineer, role:platform-engineer]
- *   workflows: [workflow:feature-development, workflow:release-management]
+ *   workflows: [workflow:sdk-api-design, workflow:release-management]
  *   topics: [topic:developer-experience]
  */
 

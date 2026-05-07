@@ -22,7 +22,7 @@
  *   specializations: [specialization:programming-languages]
  *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:parsing-data-formats]
  *   roles: [role:backend-engineer]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:sdk-api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

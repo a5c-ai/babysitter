@@ -18,7 +18,7 @@
  * - User Modeling: https://en.wikipedia.org/wiki/User_modeling
  * @graph
  *   domains: [domain:software-engineering]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

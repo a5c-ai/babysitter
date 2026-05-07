@@ -19,7 +19,7 @@
   * @graph
  *   domains: [domain:project-management]
  *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
- *   workflows: [workflow:project-kickoff, workflow:feature-development]
+ *   workflows: [workflow:project-kickoff, workflow:project-kickoff]
  *   roles: [role:project-manager, role:scrum-master]
  */
 

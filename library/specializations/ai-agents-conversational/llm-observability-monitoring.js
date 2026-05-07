@@ -19,7 +19,7 @@
  * - Helicone: https://docs.helicone.ai/
  * @graph
  *   domains: [domain:software-engineering]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

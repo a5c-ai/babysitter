@@ -21,7 +21,7 @@
  *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:http2-multiplexing]
  *   roles: [role:backend-engineer, role:sre]
  *   topics: [topic:circuit-breakers]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:protocol-implementation-review]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

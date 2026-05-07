@@ -23,7 +23,7 @@
  *   domains: [domain:electrical-engineering]
  *   skillAreas: [skill-area:hardware-abstraction-layer, skill-area:device-drivers, skill-area:firmware-development]
  *   roles: [role:embedded-engineer, role:systems-integration-engineer]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:hardware-software-integration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

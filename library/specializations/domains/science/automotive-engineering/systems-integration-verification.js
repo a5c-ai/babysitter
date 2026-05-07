@@ -24,7 +24,7 @@
  *   domains: [domain:automotive-engineering]
  *   skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
  *   roles: [role:systems-integration-engineer, role:embedded-engineer]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:simulation-validation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

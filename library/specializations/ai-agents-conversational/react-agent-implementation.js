@@ -21,7 +21,7 @@
  * - Anthropic Tool Use: https://docs.anthropic.com/claude/docs/tool-use
  * @graph
  *   domains: [domain:software-engineering, skill-area:react-state-management]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

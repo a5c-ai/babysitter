@@ -18,7 +18,7 @@
  * - Emotion Recognition: https://huggingface.co/models?search=emotion
  * @graph
  *   domains: [domain:software-engineering]
- *   workflows: [workflow:feature-development]
+ *   workflows: [workflow:agent-evaluation-cycle]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
