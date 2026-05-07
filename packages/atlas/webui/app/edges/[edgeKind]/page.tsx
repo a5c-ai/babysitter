@@ -20,7 +20,13 @@ export default async function EdgeKindPage({
   const def = getEdgeKinds()[edgeKind];
   if (!def) notFound();
 
-  const all = getIndex().edges.filter((e) => e.kind === edgeKind);
+  const all = Array.from(
+    new Map(
+      getIndex().edges
+        .filter((e) => e.kind === edgeKind)
+        .map((e) => [`${e.from}|${e.to}|${e.kind}`, e] as const)
+    ).values()
+  );
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
@@ -71,7 +77,7 @@ export default async function EdgeKindPage({
         },
       ]}
     >
-      <div className="atlas-docs-stack">
+      <div className="atlas-docs-body">
         <div className="atlas-docs-ledger atlas-docs-full">
           <table>
             <thead>
@@ -90,8 +96,7 @@ export default async function EdgeKindPage({
                     <td className="font-mono">
                       <Link
                         href={`/n/${encodeURIComponent(e.from)}`}
-                        className="hover:underline"
-                        style={{ color: 'var(--fg)' }}
+                        className="font-mono"
                         title={fromRec ? getDisplayName(fromRec) : ""}
                       >
                         {e.from}
@@ -100,8 +105,7 @@ export default async function EdgeKindPage({
                     <td className="font-mono">
                       <Link
                         href={`/n/${encodeURIComponent(e.to)}`}
-                        className="hover:underline"
-                        style={{ color: 'var(--fg)' }}
+                        className="font-mono"
                         title={toRec ? getDisplayName(toRec) : ""}
                       >
                         {e.to}

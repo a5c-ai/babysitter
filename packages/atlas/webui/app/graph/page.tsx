@@ -100,7 +100,7 @@ export default async function GraphPage({
         },
       ]}
     >
-      <div className="atlas-docs-stack">
+      <div className="atlas-docs-body">
         <div className="atlas-docs-panel atlas-docs-full">
           <div className="atlas-docs-toolbar">
             {[1, 2, 3].map((d) => (

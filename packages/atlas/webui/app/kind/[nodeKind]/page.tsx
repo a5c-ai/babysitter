@@ -174,7 +174,7 @@ export default async function KindPage({
         },
       ]}
     >
-      <div className="atlas-docs-stack">
+      <div className="atlas-docs-body">
         {activeFilters.length > 0 && (
           <div className="atlas-docs-pillrow atlas-docs-full">
             {activeFilters.map(([k, v]) => (
@@ -240,8 +240,7 @@ export default async function KindPage({
                   <td className="font-mono">
                     <Link
                       href={`/n/${encodeURIComponent(r.id)}`}
-                      className="hover:underline"
-                      style={{ color: 'var(--fg)' }}
+                      className="font-mono"
                     >
                       {r.id}
                     </Link>

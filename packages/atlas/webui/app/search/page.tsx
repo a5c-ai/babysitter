@@ -131,7 +131,7 @@ function SearchPageInner() {
         },
       ]}
     >
-      <div className="atlas-docs-stack">
+      <div className="atlas-docs-body">
         <form
           className="atlas-docs-panel atlas-docs-full"
           onSubmit={(e) => {

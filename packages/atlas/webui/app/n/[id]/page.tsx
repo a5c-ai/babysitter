@@ -72,46 +72,7 @@ export default async function RecordPage({
   const recordTitle = getDisplayName(rec);
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <Breadcrumbs
-        items={[
-          { label: "Home", href: "/" },
-          { label: rec._kind, href: `/kind/${encodeURIComponent(rec._kind)}` },
-          { label: id },
-        ]}
-      />
-
-      <div className="mt-2 mb-4 flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="text-xs" style={{ color: 'var(--fg-3)' }}>{getDisplayName(rec)}</div>
-          <h1 className="text-xl font-mono break-all" style={{ color: 'var(--fg)' }}>{id}</h1>
-          <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: 'var(--fg-2)' }}>
-            <Link href={`/kind/${encodeURIComponent(rec._kind)}`}>
-              <Badge variant="secondary">{rec._kind}</Badge>
-            </Link>
-            <span className="font-mono">{rec._file}</span>
-            <span>·</span>
-            <Link href={`/graph?seed=${encodeURIComponent(id)}`} className="hover:underline" style={{ color: 'var(--brass)' }}>
-              Open in Graph →
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-4 flex gap-4 text-sm" style={{ borderBottom: '1px solid var(--rule)' }}>
-        {(["overview", ...(hasArticle ? ["article"] : []), "json", "graph"] as const).map((t) => (
-          <Link
-            key={t}
-            href={baseTabHref(t)}
-            className={`px-1 pb-2 -mb-px border-b-2 transition-colors capitalize ${
-              tabActive === t ? "cpd-tab-active" : "cpd-tab-inactive"
-            }`}
-          >
-            {t}
-          </Link>
-        ))}
-      </div>
-
+    <>
       {tabActive === "overview" && (
         <AtlasDocsScaffold
           runningLeft={<><span className="folio">ii</span><span>Record</span></>}
@@ -145,21 +106,23 @@ export default async function RecordPage({
             },
           ]}
         >
-          <div className="atlas-docs-grid atlas-docs-grid--2 atlas-docs-full">
-            <section className="atlas-docs-panel">
-              <h3>Attributes</h3>
-              <AttributeTable attributes={rec as Record<string, unknown>} />
-            </section>
-            <section className="atlas-docs-stack">
-              <div className="atlas-docs-panel">
-                <h3>Outgoing edges</h3>
-                <EdgeList edges={out} direction="outgoing" />
-              </div>
-              <div className="atlas-docs-panel">
-                <h3>Incoming edges</h3>
-                <EdgeList edges={inc} direction="incoming" />
-              </div>
-            </section>
+          <div className="atlas-docs-body">
+            <div className="atlas-docs-grid atlas-docs-grid--2 atlas-docs-full">
+              <section className="atlas-docs-panel">
+                <h3>Attributes</h3>
+                <AttributeTable attributes={rec as Record<string, unknown>} />
+              </section>
+              <section className="atlas-docs-stack">
+                <div className="atlas-docs-panel">
+                  <h3>Outgoing edges</h3>
+                  <EdgeList edges={out} direction="outgoing" />
+                </div>
+                <div className="atlas-docs-panel">
+                  <h3>Incoming edges</h3>
+                  <EdgeList edges={inc} direction="incoming" />
+                </div>
+              </section>
+            </div>
           </div>
         </AtlasDocsScaffold>
       )}
@@ -253,6 +216,7 @@ export default async function RecordPage({
                 : [<p key="no-pages" className="atlas-docs-note">No related wiki pages for this record.</p>],
             },
           ]}
+          articleFlow="columns"
         >
           <MarkdownArticle
             markdown={String(articlePage.article)}
@@ -285,27 +249,29 @@ export default async function RecordPage({
             },
           ]}
         >
-          <pre
-            className="atlas-docs-pre atlas-docs-full"
-          >
-            <code>
-              {JSON.stringify(
-                {
-                  id,
-                  _kind: rec._kind,
-                  _file: rec._file,
-                  _cluster: rec._cluster,
-                  attributes: Object.fromEntries(
-                    Object.entries(rec).filter(([k]) => !k.startsWith("_") && k !== "id")
-                  ),
-                  outgoingEdges: out,
-                  incomingEdges: inc,
-                },
-                null,
-                2
-              )}
-            </code>
-          </pre>
+          <div className="atlas-docs-body">
+            <pre
+              className="atlas-docs-pre atlas-docs-full"
+            >
+              <code>
+                {JSON.stringify(
+                  {
+                    id,
+                    _kind: rec._kind,
+                    _file: rec._file,
+                    _cluster: rec._cluster,
+                    attributes: Object.fromEntries(
+                      Object.entries(rec).filter(([k]) => !k.startsWith("_") && k !== "id")
+                    ),
+                    outgoingEdges: out,
+                    incomingEdges: inc,
+                  },
+                  null,
+                  2
+                )}
+              </code>
+            </pre>
+          </div>
         </AtlasDocsScaffold>
       )}
 
@@ -332,16 +298,18 @@ export default async function RecordPage({
             },
           ]}
         >
-          <div className="atlas-docs-full">
-            <MiniGraph
-              centerId={id}
-              centerKind={rec._kind}
-              outgoing={out.map((e) => ({ to: e.to, kind: e.kind, toKind: getRecord(e.to)?._kind }))}
-              incoming={inc.map((e) => ({ from: e.from, kind: e.kind, fromKind: getRecord(e.from)?._kind }))}
-            />
+          <div className="atlas-docs-body">
+            <div className="atlas-docs-full">
+              <MiniGraph
+                centerId={id}
+                centerKind={rec._kind}
+                outgoing={out.map((e) => ({ to: e.to, kind: e.kind, toKind: getRecord(e.to)?._kind }))}
+                incoming={inc.map((e) => ({ from: e.from, kind: e.kind, fromKind: getRecord(e.from)?._kind }))}
+              />
+            </div>
           </div>
         </AtlasDocsScaffold>
       )}
-    </div>
+    </>
   );
 }

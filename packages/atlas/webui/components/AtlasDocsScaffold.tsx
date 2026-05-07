@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import {
-  CodexDocsArticle,
   CodexDocsChapterMark,
   CodexDocsMargin,
   CodexDocsShell,
@@ -64,6 +63,7 @@ export function AtlasDocsScaffold({
   meta,
   marginSections,
   children,
+  articleFlow = "stack",
 }: {
   runningLeft: ReactNode;
   runningTitle: ReactNode;
@@ -83,7 +83,13 @@ export function AtlasDocsScaffold({
   meta?: ReactNode;
   marginSections: readonly AtlasDocsMarginSection[];
   children: ReactNode;
+  articleFlow?: "stack" | "columns";
 }) {
+  const contentClassName =
+    articleFlow === "columns"
+      ? "mk-docs__columns atlas-docs-content atlas-docs-content--columns"
+      : "atlas-docs-content atlas-docs-content--stack";
+
   return (
     <div className="atlas-docs-shell">
       <CodexDocsShell
@@ -139,21 +145,18 @@ export function AtlasDocsScaffold({
           </aside>
         }
         article={
-          <CodexDocsArticle
-            chapterMark={
-              <CodexDocsChapterMark
-                num={toCompendiumNode(chapterMark.num) as never}
-                subtitle={toCompendiumNode(chapterMark.subtitle) as never}
-                context={toCompendiumNode(chapterMark.context) as never}
-                readingTime={toCompendiumNode(chapterMark.readingTime) as never}
-              />
-            }
-            title={toCompendiumNode(articleTitle) as never}
-            lead={toCompendiumNode(lead) as never}
-            meta={meta ? (toCompendiumNode(meta) as never) : undefined}
-          >
-            {toCompendiumNode(children) as never}
-          </CodexDocsArticle>
+          <article className="mk-docs__article atlas-docs-article">
+            <CodexDocsChapterMark
+              num={toCompendiumNode(chapterMark.num) as never}
+              subtitle={toCompendiumNode(chapterMark.subtitle) as never}
+              context={toCompendiumNode(chapterMark.context) as never}
+              readingTime={toCompendiumNode(chapterMark.readingTime) as never}
+            />
+            <h2>{toCompendiumNode(articleTitle)}</h2>
+            <p className="lead">{toCompendiumNode(lead)}</p>
+            {meta ? <div className="mk-docs__meta">{toCompendiumNode(meta)}</div> : null}
+            <div className={contentClassName}>{toCompendiumNode(children)}</div>
+          </article>
         }
         margin={
           <CodexDocsMargin

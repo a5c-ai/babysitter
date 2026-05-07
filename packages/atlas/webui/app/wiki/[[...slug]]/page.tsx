@@ -108,6 +108,7 @@ export default async function WikiPage({ params }: { params: Promise<Params> }) 
             : [<p key="no-docs" className="atlas-docs-note">No documented graph nodes on this page.</p>],
         },
       ]}
+      articleFlow="columns"
     >
       <MarkdownArticle markdown={article} articlePath={pagePath} variant="docs" />
     </AtlasDocsScaffold>

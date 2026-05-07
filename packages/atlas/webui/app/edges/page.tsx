@@ -50,43 +50,44 @@ export default function EdgesIndexPage() {
         },
       ]}
     >
-      <div className="atlas-docs-ledger atlas-docs-full">
-        <table>
-          <thead>
-            <tr>
-              <th>name</th>
-              <th>source</th>
-              <th>target</th>
-              <th>cardinality</th>
-              <th className="text-right">count</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((k) => (
-              <tr key={k.name}>
-                <td>
-                  <Link
-                    href={`/edges/${encodeURIComponent(k.name)}`}
-                    className="font-mono hover:underline"
-                    style={{ color: 'var(--brass)' }}
-                  >
-                    {k.name}
-                  </Link>
-                </td>
-                <td style={{ color: 'var(--fg-3)' }}>
-                  {Array.isArray(k.source) ? k.source.join(", ") : k.source ?? "—"}
-                </td>
-                <td style={{ color: 'var(--fg-3)' }}>
-                  {Array.isArray(k.target) ? k.target.join(", ") : k.target ?? "—"}
-                </td>
-                <td style={{ color: 'var(--fg-3)' }}>
-                  {k.cardinality ? <Badge variant="outline">{k.cardinality}</Badge> : "—"}
-                </td>
-                <td className="text-right tabular-nums" style={{ color: 'var(--brass)' }}>{k.count}</td>
+      <div className="atlas-docs-body">
+        <div className="atlas-docs-ledger atlas-docs-full">
+          <table>
+            <thead>
+              <tr>
+                <th>name</th>
+                <th>source</th>
+                <th>target</th>
+                <th>cardinality</th>
+                <th className="text-right">count</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sorted.map((k) => (
+                <tr key={k.name}>
+                  <td>
+                    <Link
+                      href={`/edges/${encodeURIComponent(k.name)}`}
+                      className="font-mono"
+                    >
+                      {k.name}
+                    </Link>
+                  </td>
+                  <td style={{ color: 'var(--fg-3)' }}>
+                    {Array.isArray(k.source) ? k.source.join(", ") : k.source ?? "—"}
+                  </td>
+                  <td style={{ color: 'var(--fg-3)' }}>
+                    {Array.isArray(k.target) ? k.target.join(", ") : k.target ?? "—"}
+                  </td>
+                  <td style={{ color: 'var(--fg-3)' }}>
+                    {k.cardinality ? <Badge variant="outline">{k.cardinality}</Badge> : "—"}
+                  </td>
+                  <td className="text-right tabular-nums" style={{ color: 'var(--brass)' }}>{k.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </AtlasDocsScaffold>
   );

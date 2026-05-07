@@ -97,7 +97,7 @@ export default function Home() {
         },
       ]}
     >
-      <div className="atlas-docs-stack">
+      <div className="atlas-docs-body">
         <div className="atlas-docs-kpis atlas-docs-full">
           <StatCard label="Records" value={stats.totalRecords} />
           <StatCard label="NodeKinds" value={stats.totalNodeKinds} />
