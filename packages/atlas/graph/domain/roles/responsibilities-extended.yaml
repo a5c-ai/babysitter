@@ -162,3 +162,15 @@ attributes:
     Assessing skill gaps, selecting or creating training content, and measuring
     the impact of learning initiatives on performance and retention outcomes.
   cadence: quarterly
+---
+nodeKind: Responsibility
+id: responsibility:regulatory-filing
+attributes:
+  displayName: "Regulatory Filing"
+  description: |
+    Preparing and submitting regulatory filings, compliance reports, and
+    statutory declarations to government bodies and regulatory agencies.
+    Includes tracking filing deadlines, managing submission workflows, and
+    maintaining audit trails for all regulatory correspondence.
+  cadence: periodic
+edges: {}

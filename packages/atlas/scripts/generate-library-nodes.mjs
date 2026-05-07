@@ -52,12 +52,16 @@ function slugify(str) {
 /**
  * Extract specialization name from a library path.
  * e.g. library/specializations/web-development/skills/react/SKILL.md -> web-development
+ *      library/specializations/domains/business/finance-accounting/... -> finance-accounting
  *      library/processes/shared/tdd-triplet.js -> null (shared process)
  */
 function extractSpecialization(filePath) {
   const rel = path.relative(libraryDir, filePath).split(path.sep).join("/");
+  const domainMatch = rel.match(/^specializations\/domains\/[^/]+\/([^/]+)\//);
+  if (domainMatch) return domainMatch[1];
   const match = rel.match(/^specializations\/([^/]+)\//);
-  return match ? match[1] : null;
+  if (match && match[1] !== "domains") return match[1];
+  return null;
 }
 
 /**

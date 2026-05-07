@@ -173,3 +173,13 @@ attributes:
 edges:
   contains:
     - specialization:digital-humanities
+---
+nodeKind: Domain
+id: domain:content-operations
+attributes:
+  displayName: "Content Operations"
+  description: |
+    Content strategy, production workflows, and editorial operations at scale.
+    Covers content governance, taxonomy design, CMS management, and
+    content performance measurement across channels.
+edges: {}

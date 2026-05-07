@@ -198,3 +198,23 @@ attributes:
   description: |
     Revenue operations spanning marketing, sales, and customer success — pipeline, forecasting, and GTM alignment.
 edges: {}
+---
+nodeKind: Domain
+id: domain:compliance
+attributes:
+  displayName: "Compliance"
+  description: |
+    Regulatory compliance, policy management, and audit workflows. Covers
+    GDPR, SOX, HIPAA, and industry-specific compliance frameworks alongside
+    risk assessment and controls monitoring.
+edges: {}
+---
+nodeKind: Domain
+id: domain:machine-learning
+attributes:
+  displayName: "Machine Learning"
+  description: |
+    Machine learning workflows covering model development, training pipelines,
+    evaluation, and deployment. Spans supervised, unsupervised, and reinforcement
+    learning alongside MLOps practices for production model management.
+edges: {}

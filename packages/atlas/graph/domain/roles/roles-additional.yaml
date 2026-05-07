@@ -147,3 +147,53 @@ edges:
       level: intermediate
     - target: domain:software-engineering
       level: intermediate
+---
+nodeKind: Role
+id: role:site-reliability-engineer
+attributes:
+  displayName: "Site Reliability Engineer"
+  isAgentic: false
+  description: |
+    Ensures production system reliability, availability, and performance through
+    SLO/SLI design, capacity planning, and toil automation. Bridges development
+    and operations by applying software engineering principles to infrastructure
+    challenges. Leads incident response, owns error budget policy, and drives
+    post-incident learning culture within engineering organizations.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:performance-optimization
+    - responsibility:capacity-planning
+    - responsibility:documentation
+  requires_skill:
+    - target: domain:devops
+      level: expert
+    - target: domain:cloud-infra
+      level: expert
+    - target: domain:observability
+      level: expert
+    - target: domain:software-engineering
+      level: intermediate
+---
+nodeKind: Role
+id: role:on-call
+attributes:
+  displayName: "On-Call Engineer"
+  isAgentic: false
+  description: |
+    Operational role responsible for responding to production incidents during
+    on-call rotation. Triages alerts, coordinates incident response across
+    teams, escalates appropriately, and ensures service restoration within
+    SLO targets. Documents findings and contributes to blameless postmortem
+    reviews to prevent recurrence.
+  seniority: mid
+edges:
+  holds_responsibility:
+    - responsibility:incident-response
+    - responsibility:on-call
+  requires_skill:
+    - target: domain:devops
+      level: intermediate
+    - target: domain:observability
+      level: intermediate
