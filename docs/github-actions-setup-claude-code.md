@@ -789,4 +789,3 @@ permissions:
 - [Getting Started](./reference/GETTING_STARTED.md)
 - [Process Selection Guide](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/PROCESS_SELECTION.md)
 - [Troubleshooting](https://github.com/a5c-ai/babysitter/blob/main/docs/reference/TROUBLESHOOTING.md)
-

@@ -549,4 +549,3 @@ Enable verbose mode for debugging:
 - [github-actions-cicd-claude-code](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-claude-code/configure.md) — Claude Code specific
 - [github-actions-cicd-codex](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-codex/configure.md) — Codex specific
 - [github-actions-cicd-gemini-cli](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-gemini-cli/configure.md) — Gemini CLI specific
-
