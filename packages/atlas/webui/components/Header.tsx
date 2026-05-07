@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpenText, GitBranch, MessageCircle, Network } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
+import { HeaderAuthState } from "./HeaderAuthState";
 
 export function Header() {
   return (
@@ -21,6 +22,7 @@ export function Header() {
           <Link href="/graph">Graph</Link>
           <Link href="/edges">Edges</Link>
           <Link href="/search">Search</Link>
+          <Link href="/workspace">Workspace</Link>
         </nav>
 
         <div className="atlas-header__actions">
@@ -54,6 +56,7 @@ export function Header() {
             <MessageCircle style={{ width: 15, height: 15 }} />
             <span>Discord</span>
           </a>
+          <HeaderAuthState />
           <ThemeToggle />
         </div>
       </div>

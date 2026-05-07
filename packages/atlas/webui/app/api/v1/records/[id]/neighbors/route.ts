@@ -1,11 +1,6 @@
 import { NextRequest } from "next/server";
-import {
-  getRecord,
-  getOutgoing,
-  getIncoming,
-  getDisplayName,
-} from "@a5c-ai/atlas";
 import { badRequest, jsonResponse, notFound, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +14,8 @@ export async function GET(
 ) {
   const { id } = await ctx.params;
   const decoded = decodeURIComponent(id);
-  if (!getRecord(decoded)) return notFound(`record '${decoded}' not found`);
+  const { graph } = await getCurrentAtlasView();
+  if (!graph.getRecord(decoded)) return notFound(`record '${decoded}' not found`);
 
   const sp = req.nextUrl.searchParams;
   const depth = Math.min(
@@ -45,8 +41,8 @@ export async function GET(
     const next: string[] = [];
     for (const n of frontier) {
       const all = [
-        ...getOutgoing(n).map((e) => ({ ...e })),
-        ...getIncoming(n).map((e) => ({ ...e })),
+        ...graph.getOutgoing(n).map((e) => ({ ...e })),
+        ...graph.getIncoming(n).map((e) => ({ ...e })),
       ];
       for (const e of all) {
         if (edgeFilter.length && !edgeFilter.includes(e.kind)) continue;
@@ -54,7 +50,7 @@ export async function GET(
         if (edgesSeen.has(key)) continue;
 
         const otherId = e.from === n ? e.to : e.from;
-        const otherRec = getRecord(otherId);
+        const otherRec = graph.getRecord(otherId);
         if (
           kindFilter.length &&
           otherRec &&
@@ -74,12 +70,12 @@ export async function GET(
   }
 
   const nodes = Array.from(visited).map((nid) => {
-    const r = getRecord(nid);
+    const r = graph.getRecord(nid);
     return r
       ? {
           id: r.id,
           nodeKind: r._kind,
-          displayName: getDisplayName(r),
+          displayName: graph.getDisplayName(r),
           cluster: r._cluster,
         }
       : { id: nid, missing: true };

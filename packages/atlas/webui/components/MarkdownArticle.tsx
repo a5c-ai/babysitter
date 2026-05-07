@@ -1,9 +1,13 @@
 import Link from "next/link";
 import path from "node:path";
-import { getRecord } from "@a5c-ai/atlas";
+import type { AtlasRecord } from "@a5c-ai/atlas";
 import { MermaidDiagram } from "./MermaidDiagram";
 
-function resolveHref(href: string, articlePath?: string): { href: string; internal: boolean } {
+function resolveHref(
+  href: string,
+  articlePath?: string,
+  recordsById?: Record<string, AtlasRecord>,
+): { href: string; internal: boolean } {
   if (!href) return { href, internal: false };
   if (href.startsWith("http://") || href.startsWith("https://") || href.startsWith("mailto:")) {
     return { href, internal: false };
@@ -12,7 +16,7 @@ function resolveHref(href: string, articlePath?: string): { href: string; intern
     return { href, internal: false };
   }
 
-  const directRecord = getRecord(href);
+  const directRecord = recordsById?.[href];
   if (directRecord) {
     return { href: `/n/${encodeURIComponent(href)}`, internal: true };
   }
@@ -35,6 +39,7 @@ function resolveHref(href: string, articlePath?: string): { href: string; intern
 function inlineParts(
   text: string,
   articlePath?: string,
+  recordsById?: Record<string, AtlasRecord>,
   variant: "default" | "docs" = "default",
 ): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
@@ -54,7 +59,7 @@ function inlineParts(
       );
     }
     else if (match[2] && match[3]) {
-      const resolved = resolveHref(match[3], articlePath);
+      const resolved = resolveHref(match[3], articlePath, recordsById);
       if (resolved.internal) {
         parts.push(
           <Link
@@ -128,10 +133,12 @@ function renderCodeBlock(
 export function MarkdownArticle({
   markdown,
   articlePath,
+  recordsById,
   variant = "default",
 }: {
   markdown: string;
   articlePath?: string;
+  recordsById?: Record<string, AtlasRecord>;
   variant?: "default" | "docs";
 }) {
   const lines = markdown.replace(/\r\n/g, "\n").split("\n");
@@ -146,7 +153,7 @@ export function MarkdownArticle({
     if (!paragraph.length) return;
     blocks.push(
       <p key={blocks.length} className={docs ? undefined : "leading-7 text-sm"} style={docs ? undefined : { color: "var(--fg)" }}>
-        {inlineParts(paragraph.join(" "), articlePath, variant)}
+        {inlineParts(paragraph.join(" "), articlePath, recordsById, variant)}
       </p>,
     );
     paragraph = [];
@@ -159,7 +166,7 @@ export function MarkdownArticle({
         className={docs ? "list-disc pl-6 space-y-2" : "list-disc pl-6 space-y-1 text-sm"}
         style={docs ? undefined : { color: "var(--fg)" }}
       >
-        {list.map((item, index) => <li key={index}>{inlineParts(item, articlePath, variant)}</li>)}
+        {list.map((item, index) => <li key={index}>{inlineParts(item, articlePath, recordsById, variant)}</li>)}
       </ul>,
     );
     list = [];
@@ -173,7 +180,7 @@ export function MarkdownArticle({
         style={docs ? undefined : { borderLeft: "4px solid var(--edge-fade)", color: "var(--fg-2)" }}
       >
         {quote.map((item, index) => (
-          <p key={index}>{inlineParts(item, articlePath, variant)}</p>
+          <p key={index}>{inlineParts(item, articlePath, recordsById, variant)}</p>
         ))}
       </blockquote>,
     );
@@ -234,8 +241,8 @@ export function MarkdownArticle({
             <thead className="text-left" style={docs ? undefined : { background: "var(--bg-2)" }}>
               <tr>
                 {header.map((cell, cellIndex) => (
-                  <th key={cellIndex} className={docs ? undefined : "px-3 py-2 font-medium"} style={docs ? undefined : { color: "var(--fg-2)" }}>
-                    {inlineParts(cell, articlePath, variant)}
+                    <th key={cellIndex} className={docs ? undefined : "px-3 py-2 font-medium"} style={docs ? undefined : { color: "var(--fg-2)" }}>
+                    {inlineParts(cell, articlePath, recordsById, variant)}
                   </th>
                 ))}
               </tr>
@@ -245,7 +252,7 @@ export function MarkdownArticle({
                 <tr key={rowIndex} style={docs ? undefined : { borderTop: "1px solid var(--rule)" }}>
                   {header.map((_, cellIndex) => (
                     <td key={cellIndex} className={docs ? undefined : "px-3 py-2 align-top"} style={docs ? undefined : { color: "var(--fg)" }}>
-                      {inlineParts(row[cellIndex] ?? "", articlePath, variant)}
+                      {inlineParts(row[cellIndex] ?? "", articlePath, recordsById, variant)}
                     </td>
                   ))}
                 </tr>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getEdgeKinds, getIndex, getRecord, getDisplayName } from "@a5c-ai/atlas";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 const PAGE_SIZE = 100;
 
@@ -17,12 +17,13 @@ export default async function EdgeKindPage({
   const { edgeKind: rawKind } = await params;
   const sp = await searchParams;
   const edgeKind = decodeURIComponent(rawKind);
-  const def = getEdgeKinds()[edgeKind];
+  const { graph, index } = await getCurrentAtlasView();
+  const def = index.edgeKinds[edgeKind];
   if (!def) notFound();
 
   const all = Array.from(
     new Map(
-      getIndex().edges
+      index.edges
         .filter((e) => e.kind === edgeKind)
         .map((e) => [`${e.from}|${e.to}|${e.kind}`, e] as const)
     ).values()
@@ -89,15 +90,15 @@ export default async function EdgeKindPage({
             </thead>
             <tbody>
               {slice.map((e, i) => {
-                const fromRec = getRecord(e.from);
-                const toRec = getRecord(e.to);
+                const fromRec = graph.getRecord(e.from);
+                const toRec = graph.getRecord(e.to);
                 return (
                   <tr key={i}>
                     <td className="font-mono">
                       <Link
                         href={`/n/${encodeURIComponent(e.from)}`}
                         className="font-mono"
-                        title={fromRec ? getDisplayName(fromRec) : ""}
+                        title={fromRec ? graph.getDisplayName(fromRec) : ""}
                       >
                         {e.from}
                       </Link>
@@ -106,7 +107,7 @@ export default async function EdgeKindPage({
                       <Link
                         href={`/n/${encodeURIComponent(e.to)}`}
                         className="font-mono"
-                        title={toRec ? getDisplayName(toRec) : ""}
+                        title={toRec ? graph.getDisplayName(toRec) : ""}
                       >
                         {e.to}
                       </Link>

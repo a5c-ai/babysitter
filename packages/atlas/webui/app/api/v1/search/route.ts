@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import Fuse from "fuse.js";
-import { getAllRecords, getDisplayName } from "@a5c-ai/atlas";
 import { badRequest, jsonResponse, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamic = "force-dynamic";
 
@@ -13,27 +13,8 @@ type Doc = {
   description: string;
 };
 
-let _corpus: Doc[] | null = null;
-let _fuse: Fuse<Doc> | null = null;
-
-function corpus(): Doc[] {
-  if (_corpus) return _corpus;
-  _corpus = getAllRecords().map((r) => {
-    const desc = (r as Record<string, unknown>).description;
-    return {
-      id: r.id,
-      _kind: r._kind,
-      _cluster: r._cluster,
-      displayName: getDisplayName(r),
-      description: typeof desc === "string" ? desc : "",
-    };
-  });
-  return _corpus;
-}
-
-function fuse(): Fuse<Doc> {
-  if (_fuse) return _fuse;
-  _fuse = new Fuse(corpus(), {
+function fuse(docs: Doc[]): Fuse<Doc> {
+  return new Fuse(docs, {
     keys: [
       { name: "id", weight: 0.4 },
       { name: "displayName", weight: 0.3 },
@@ -44,7 +25,6 @@ function fuse(): Fuse<Doc> {
     ignoreLocation: true,
     includeScore: true,
   });
-  return _fuse;
 }
 
 function snippetOf(doc: Doc, q: string): string {
@@ -66,6 +46,17 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const q = (sp.get("q") ?? "").trim();
   if (!q) return badRequest("query parameter 'q' is required");
+  const { graph } = await getCurrentAtlasView();
+  const docs: Doc[] = graph.getAllRecords().map((r) => {
+    const desc = (r as Record<string, unknown>).description;
+    return {
+      id: r.id,
+      _kind: r._kind,
+      _cluster: r._cluster,
+      displayName: graph.getDisplayName(r),
+      description: typeof desc === "string" ? desc : "",
+    };
+  });
 
   const kind = sp.get("kind");
   const cluster = sp.get("cluster");
@@ -75,7 +66,7 @@ export async function GET(req: NextRequest) {
   );
   const offset = Math.max(parseInt(sp.get("offset") ?? "0", 10) || 0, 0);
 
-  const all = fuse().search(q);
+  const all = fuse(docs).search(q);
   const filtered = all.filter((r) => {
     if (kind && r.item._kind !== kind) return false;
     if (cluster && r.item._cluster !== cluster) return false;

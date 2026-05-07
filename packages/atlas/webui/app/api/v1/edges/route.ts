@@ -1,16 +1,17 @@
-import { getEdgeKinds, getIndex } from "@a5c-ai/atlas";
 import { jsonResponse, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function OPTIONS() {
   return options();
 }
 
 export async function GET() {
-  const ek = getEdgeKinds();
+  const { index } = await getCurrentAtlasView();
+  const ek = index.edgeKinds;
   const counts = new Map<string, number>();
-  for (const e of getIndex().edges) {
+  for (const e of index.edges) {
     counts.set(e.kind, (counts.get(e.kind) ?? 0) + 1);
   }
   const toArr = (s: string | string[] | undefined): string[] =>

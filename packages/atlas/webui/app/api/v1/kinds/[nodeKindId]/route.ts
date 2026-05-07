@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { getNodeKinds, getRecordsByKind, getDisplayName } from "@a5c-ai/atlas";
 import { jsonResponse, notFound, options, paginate } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,8 @@ export async function GET(
   ctx: { params: Promise<{ nodeKindId: string }> },
 ) {
   const { nodeKindId } = await ctx.params;
-  const kinds = getNodeKinds();
+  const { graph, index } = await getCurrentAtlasView();
+  const kinds = index.nodeKinds;
   const def = kinds[nodeKindId];
   if (!def) return notFound(`NodeKind '${nodeKindId}' not found`);
 
@@ -24,7 +25,7 @@ export async function GET(
   );
   const cursor = sp.get("cursor");
 
-  const records = getRecordsByKind(nodeKindId).sort((a, b) =>
+  const records = Object.values(index.records).filter((record) => record._kind === nodeKindId).sort((a, b) =>
     a.id.localeCompare(b.id),
   );
   const { page, nextCursor } = paginate(records, cursor, limit, (r) => r.id);
@@ -35,7 +36,7 @@ export async function GET(
     cluster: def.cluster ?? null,
     schema: def,
     instanceCount: def.count ?? records.length,
-    instances: page.map((r) => ({ id: r.id, displayName: getDisplayName(r) })),
+    instances: page.map((r) => ({ id: r.id, displayName: graph.getDisplayName(r) })),
     nextCursor,
   });
 }

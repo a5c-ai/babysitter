@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { getEdgeKinds } from "@a5c-ai/atlas";
 import { Badge } from "@/components/ui/badge";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
-export default function EdgesIndexPage() {
-  const ek = getEdgeKinds();
+export default async function EdgesIndexPage() {
+  const { index } = await getCurrentAtlasView();
+  const ek = index.edgeKinds;
   const sorted = Object.values(ek).sort((a, b) => b.count - a.count);
 
   return (

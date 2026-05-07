@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { getNodeKinds } from "@a5c-ai/atlas";
 import { jsonResponse, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +9,9 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: NextRequest) {
+  const { index } = await getCurrentAtlasView();
   const cluster = req.nextUrl.searchParams.get("cluster");
-  const all = Object.values(getNodeKinds());
+  const all = Object.values(index.nodeKinds);
   const filtered = cluster
     ? all.filter((k) => {
         if (!k.cluster) return false;

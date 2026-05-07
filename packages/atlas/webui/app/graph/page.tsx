@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getAllRecords, getEdgeKinds, getNodeKinds } from "@a5c-ai/atlas";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
 import { GraphCanvas } from "@/components/GraphCanvas";
 import { Badge } from "@/components/ui/badge";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 type SearchParams = {
   seed?: string;
@@ -17,17 +17,18 @@ export default async function GraphPage({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const all = getAllRecords();
+  const { graph, index } = await getCurrentAtlasView();
+  const all = graph.getAllRecords();
   const seed = sp.seed ? decodeURIComponent(sp.seed) : all[0]?.id ?? "";
   const depth = Math.max(1, Math.min(3, parseInt(sp.depth ?? "2", 10) || 2));
   const edgeKindFilter = sp.edgeKinds ? new Set(sp.edgeKinds.split(",").filter(Boolean)) : undefined;
   const nodeKindFilter = sp.nodeKinds ? new Set(sp.nodeKinds.split(",").filter(Boolean)) : undefined;
 
-  const edgeKinds = Object.values(getEdgeKinds())
+  const edgeKinds = Object.values(index.edgeKinds)
     .filter((k) => k.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 30);
-  const nodeKinds = Object.values(getNodeKinds())
+  const nodeKinds = Object.values(index.nodeKinds)
     .filter((k) => k.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 30);

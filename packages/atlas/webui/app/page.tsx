@@ -1,18 +1,14 @@
 import Link from "next/link";
-import {
-  getClusters,
-  getNodeKinds,
-  getRecordsByKind,
-  getStats,
-} from "@a5c-ai/atlas";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
-export default function Home() {
-  const stats = getStats();
-  const clusters = getClusters();
-  const nodeKinds = getNodeKinds();
+export default async function Home() {
+  const { index } = await getCurrentAtlasView();
+  const stats = index.stats;
+  const clusters = index.clusters;
+  const nodeKinds = index.nodeKinds;
   const pageCount = nodeKinds.Page?.count ?? 0;
 
   const sortedClusters = Object.entries(clusters).sort(
@@ -115,7 +111,7 @@ export default function Home() {
             <div className="atlas-docs-grid atlas-docs-grid--3">
               {def.nodeKinds.map((nk) => {
                 const def_ = nodeKinds[nk];
-                const samples = getRecordsByKind(nk).slice(0, 3);
+                const samples = Object.values(index.records).filter((record) => record._kind === nk).slice(0, 3);
                 return (
                   <Card key={nk} className="transition-colors">
                     <CardHeader className="pb-2">

@@ -1,14 +1,15 @@
-import { getClusters } from "@a5c-ai/atlas";
 import { jsonResponse, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function OPTIONS() {
   return options();
 }
 
 export async function GET() {
-  const out = Object.entries(getClusters()).map(([id, c]) => ({
+  const { index } = await getCurrentAtlasView();
+  const out = Object.entries(index.clusters).map(([id, c]) => ({
     id,
     nodeKinds: c.nodeKinds,
     recordCount: c.recordCount,

@@ -207,10 +207,27 @@ html[data-theme="void"] .atlas-header__link:focus-visible {
   background: color-mix(in oklab, white 72%, var(--paper));
 }
 
+.atlas-header__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in oklab, var(--rule) 82%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, white 72%, var(--paper));
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
 .atlas-header__link:hover,
-.atlas-header__link:focus-visible {
+.atlas-header__link:focus-visible,
+.atlas-header__button:hover,
+.atlas-header__button:focus-visible {
   border-color: color-mix(in oklab, var(--brass) 36%, transparent);
   background: color-mix(in oklab, var(--paper) 86%, var(--brass-light));
+  color: var(--fg);
+  outline: none;
 }
 
 html[data-theme="void"] .atlas-header__link {
@@ -218,10 +235,20 @@ html[data-theme="void"] .atlas-header__link {
   background: color-mix(in oklab, var(--ground-ink) 84%, transparent);
 }
 
+html[data-theme="void"] .atlas-header__button {
+  border-color: color-mix(in oklab, var(--glyph-fade) 24%, transparent);
+  background: color-mix(in oklab, var(--ground-ink) 84%, transparent);
+  color: color-mix(in oklab, var(--glyph-bone) 68%, var(--glyph-fade));
+}
+
 html[data-theme="void"] .atlas-header__link:hover,
-html[data-theme="void"] .atlas-header__link:focus-visible {
+html[data-theme="void"] .atlas-header__link:focus-visible,
+html[data-theme="void"] .atlas-header__button:hover,
+html[data-theme="void"] .atlas-header__button:focus-visible {
   border-color: color-mix(in oklab, var(--accent-cinnabar) 28%, transparent);
   background: color-mix(in oklab, var(--accent-cinnabar) 12%, transparent);
+  color: var(--glyph-bone);
+  outline: none;
 }
 
 .atlas-header__search {

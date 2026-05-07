@@ -11,6 +11,9 @@ A read-only Next.js app for browsing the Atlas catalog graph. Reusable graph dat
 - `/graph` — full graph canvas (react-flow) with depth 1–3 BFS, NodeKind/EdgeKind filtering
 - `/wiki/[[...slug]]` — wiki-style graph pages backed by `Page` nodes and Markdown frontmatter
 - `/edges` and `/edges/[edgeKind]` — EdgeKind catalog and per-kind wired pairs
+- GitHub sign-in for private Atlas workspace routes
+- PostgreSQL-backed user graph uploads that merge into logged-in Atlas views
+- Company builder for composing systems, assets, integrations, and YAML exports
 - Dark mode by default; Tailwind v4 + hand-rolled shadcn-style primitives
 - Keyboard shortcuts: `/` focuses search, `g h`/`g g`/`g e`/`g s` navigate, `?` shows help
 
@@ -18,9 +21,22 @@ A read-only Next.js app for browsing the Atlas catalog graph. Reusable graph dat
 
 ```bash
 npm install
+set DATABASE_URL=postgres://postgres:postgres@localhost:5432/atlas_webui
+set GITHUB_CLIENT_ID=your-github-oauth-app-client-id
+set GITHUB_CLIENT_SECRET=your-github-oauth-app-client-secret
+npm run db:init -w @a5c-ai/atlas-webui
 npm run dev -w @a5c-ai/atlas-webui
 # open http://localhost:3000
 ```
+
+Authenticated Atlas features now rely on:
+
+- `DATABASE_URL`
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `AUTH_SECRET`
+
+Anonymous browsing still works without a login, but private workspace routes, user graph uploads, and company builder persistence require the database and GitHub OAuth app to be configured.
 
 ## Graph SDK and CLI
 
@@ -53,6 +69,9 @@ node packages/atlas/dist/cli.js reindex --catalog-dir /path/to/graph --out /tmp/
 | `/edges/[edgeKind]` | Wired pairs for an EdgeKind |
 | `/api/search-index.json` | Slim index for client-side search |
 | `/api/graph-index.json` | Slim index for the graph canvas |
+| `/workspace` | Authenticated private workspace |
+| `/workspace/graphs` | User graph uploads and overlay management |
+| `/workspace/company-builder` | Company builder with persisted drafts and YAML export |
 
 ## Notes
 

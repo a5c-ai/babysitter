@@ -1,13 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getNodeKinds,
-  getRecordsByKind,
-  getDisplayName,
-} from "@a5c-ai/atlas";
 import { Badge } from "@/components/ui/badge";
 import { AtlasDocsScaffold } from "@/components/AtlasDocsScaffold";
-import type { Record_ } from "@a5c-ai/atlas";
+import type { AtlasRecord } from "@a5c-ai/atlas";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 type SearchParams = {
   page?: string;
@@ -30,10 +26,12 @@ export default async function KindPage({
   const { nodeKind: rawKind } = await params;
   const sp = await searchParams;
   const nodeKind = decodeURIComponent(rawKind);
-  const def = getNodeKinds()[nodeKind];
+  const { graph, index } = await getCurrentAtlasView();
+  const getDisplayName = (record: AtlasRecord) => graph.getDisplayName(record);
+  const def = index.nodeKinds[nodeKind];
   if (!def) notFound();
 
-  const all = getRecordsByKind(nodeKind);
+  const all = Object.values(index.records).filter((record) => record._kind === nodeKind);
 
   // Build facets from populated string/array attributes
   const facetCandidates = new Map<string, Map<string, number>>();
@@ -93,7 +91,7 @@ export default async function KindPage({
 
   // Sort
   const sort = sp.sort || "id-asc";
-  const sortFn: Record<string, (a: Record_, b: Record_) => number> = {
+  const sortFn: Record<string, (a: AtlasRecord, b: AtlasRecord) => number> = {
     "id-asc": (a, b) => a.id.localeCompare(b.id),
     "id-desc": (a, b) => b.id.localeCompare(a.id),
     "name-asc": (a, b) => getDisplayName(a).localeCompare(getDisplayName(b)),

@@ -1,12 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getRecord,
-  getOutgoing,
-  getIncoming,
-  getDisplayName,
-  getPagesForRecord,
-} from "@a5c-ai/atlas";
 import { Badge } from "@/components/ui/badge";
 import {
   AtlasDocsScaffold,
@@ -18,6 +11,7 @@ import { AttributeTable } from "@/components/AttributeTable";
 import { EdgeList } from "@/components/EdgeList";
 import { MiniGraph } from "@/components/MiniGraph";
 import { MarkdownArticle } from "@/components/MarkdownArticle";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamicParams = true;
 
@@ -33,12 +27,13 @@ export default async function RecordPage({
   const { id: rawId } = await params;
   const { tab } = await searchParams;
   const id = decodeURIComponent(rawId);
-  const rec = getRecord(id);
+  const { graph, index } = await getCurrentAtlasView();
+  const rec = graph.getRecord(id);
   if (!rec) notFound();
 
-  const out = getOutgoing(id);
-  const inc = getIncoming(id);
-  const relatedPages = getPagesForRecord(id)
+  const out = graph.getOutgoing(id);
+  const inc = graph.getIncoming(id);
+  const relatedPages = graph.getPagesForRecord(id)
     .slice()
     .sort((a, b) => String(a.slug ?? a.id).localeCompare(String(b.slug ?? b.id)));
   const selfArticlePage = rec._kind === "Page" && typeof rec.article === "string" ? rec : null;
@@ -69,7 +64,7 @@ export default async function RecordPage({
     href: baseTabHref(t),
     current: tabActive === t,
   }));
-  const recordTitle = getDisplayName(rec);
+  const recordTitle = graph.getDisplayName(rec);
   const overviewLead =
     typeof rec.description === "string" && rec.description.trim()
       ? rec.description.trim()
@@ -112,18 +107,18 @@ export default async function RecordPage({
         >
           <div className="atlas-docs-body">
             <div className="atlas-docs-grid atlas-docs-grid--2 atlas-docs-full">
-              <section className="atlas-docs-panel">
-                <h3>Attributes</h3>
-                <AttributeTable attributes={rec as Record<string, unknown>} />
-              </section>
+                <section className="atlas-docs-panel">
+                  <h3>Attributes</h3>
+                  <AttributeTable attributes={rec as Record<string, unknown>} />
+                </section>
               <section className="atlas-docs-stack">
                 <div className="atlas-docs-panel">
                   <h3>Outgoing edges</h3>
-                  <EdgeList edges={out} direction="outgoing" />
+                  <EdgeList edges={out} direction="outgoing" recordsById={index.records} />
                 </div>
                 <div className="atlas-docs-panel">
                   <h3>Incoming edges</h3>
-                  <EdgeList edges={inc} direction="incoming" />
+                  <EdgeList edges={inc} direction="incoming" recordsById={index.records} />
                 </div>
               </section>
             </div>
@@ -141,7 +136,7 @@ export default async function RecordPage({
           }
           runningTitle={
             <>
-              Agentic AI Atlas · <em>{getDisplayName(rec)}</em>
+              Agentic AI Atlas · <em>{graph.getDisplayName(rec)}</em>
             </>
           }
           runningRight={
@@ -185,7 +180,7 @@ export default async function RecordPage({
           }}
           articleTitle={
             <>
-              {getDisplayName(rec)} <em>reference</em>
+              {graph.getDisplayName(rec)} <em>reference</em>
             </>
           }
           lead={atlasLeadFromMarkdown(String(articlePage.article), `Reference article for ${id} and its linked atlas edges.`)}
@@ -239,6 +234,7 @@ export default async function RecordPage({
           <MarkdownArticle
             markdown={String(articlePage.article)}
             articlePath={typeof articlePage.articlePath === "string" ? articlePage.articlePath : articlePage._file}
+            recordsById={index.records}
             variant="docs"
           />
         </AtlasDocsScaffold>
@@ -321,8 +317,8 @@ export default async function RecordPage({
               <MiniGraph
                 centerId={id}
                 centerKind={rec._kind}
-                outgoing={out.map((e) => ({ to: e.to, kind: e.kind, toKind: getRecord(e.to)?._kind }))}
-                incoming={inc.map((e) => ({ from: e.from, kind: e.kind, fromKind: getRecord(e.from)?._kind }))}
+                outgoing={out.map((e) => ({ to: e.to, kind: e.kind, toKind: graph.getRecord(e.to)?._kind }))}
+                incoming={inc.map((e) => ({ from: e.from, kind: e.kind, fromKind: graph.getRecord(e.from)?._kind }))}
               />
             </div>
           </div>

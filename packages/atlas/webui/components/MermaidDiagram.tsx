@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import mermaid from "mermaid";
+import type mermaidType from "mermaid";
 
 const MERMAID_CONFIG = {
   startOnLoad: false,
@@ -42,6 +42,8 @@ export function MermaidDiagram({
     const renderDiagram = async () => {
       try {
         setError(null);
+        const mermaidModule = (await import("mermaid/dist/mermaid.esm.min.mjs")) as { default: typeof mermaidType };
+        const mermaid = mermaidModule.default;
         mermaid.initialize({
           ...MERMAID_CONFIG,
           theme: resolveMermaidTheme(theme),

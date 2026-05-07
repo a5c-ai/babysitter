@@ -1,15 +1,17 @@
 import Link from "next/link";
-import type { Edge } from "@a5c-ai/atlas";
-import { getDisplayName, getRecord } from "@a5c-ai/atlas";
+import type { AtlasRecord, Edge } from "@a5c-ai/atlas";
 import { Badge } from "@/components/ui/badge";
 
 export function EdgeList({
   edges,
   direction,
+  recordsById,
 }: {
   edges: Edge[];
   direction: "outgoing" | "incoming";
+  recordsById?: Record<string, AtlasRecord>;
 }) {
+  const getDisplayName = (record: AtlasRecord) => String(record.displayName ?? record.title ?? record.id);
   if (edges.length === 0) {
     return <div className="text-xs italic" style={{ color: 'var(--fg-3)' }}>None.</div>;
   }
@@ -35,7 +37,7 @@ export function EdgeList({
             <ul>
               {items.map((e, i) => {
                 const otherId = direction === "outgoing" ? e.to : e.from;
-                const other = getRecord(otherId);
+                const other = recordsById?.[otherId];
                 return (
                   <li
                     key={i}

@@ -1,11 +1,10 @@
 import * as React from "react";
 import Link from "next/link";
-import { getRecord } from "@a5c-ai/atlas";
 
 function isLikelyId(v: string): boolean {
   if (typeof v !== "string") return false;
   if (v.length < 3 || v.length > 200) return false;
-  return /^[a-z][a-z0-9-]*:/.test(v) && !!getRecord(v);
+  return /^[a-z][a-z0-9-]*:/.test(v);
 }
 
 function renderValue(v: unknown, depth = 0): React.ReactNode {

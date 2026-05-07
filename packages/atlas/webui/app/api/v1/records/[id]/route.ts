@@ -1,11 +1,6 @@
 import { NextRequest } from "next/server";
-import {
-  getRecord,
-  getOutgoing,
-  getIncoming,
-  getDisplayName,
-} from "@a5c-ai/atlas";
 import { jsonResponse, notFound, options } from "@/lib/api-helpers";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamic = "force-dynamic";
 
@@ -19,16 +14,17 @@ export async function GET(
 ) {
   const { id } = await ctx.params;
   const decoded = decodeURIComponent(id);
-  const rec = getRecord(decoded);
+  const { graph } = await getCurrentAtlasView();
+  const rec = graph.getRecord(decoded);
   if (!rec) return notFound(`record '${decoded}' not found`);
 
   const expand = req.nextUrl.searchParams.get("expand");
 
-  const outgoing = getOutgoing(decoded).map((e) => ({
+  const outgoing = graph.getOutgoing(decoded).map((e) => ({
     kind: e.kind,
     to: e.to,
   }));
-  const incoming = getIncoming(decoded).map((e) => ({
+  const incoming = graph.getIncoming(decoded).map((e) => ({
     kind: e.kind,
     from: e.from,
   }));
@@ -52,7 +48,7 @@ export async function GET(
     nodeKind: _kind,
     file: _file,
     cluster: _cluster,
-    displayName: getDisplayName(rec),
+    displayName: graph.getDisplayName(rec),
     attributes,
     outgoingEdges: outgoing,
     incomingEdges: incoming,
@@ -63,12 +59,12 @@ export async function GET(
     const expandRec = (rid: string) => {
       if (seen.has(rid)) return null;
       seen.add(rid);
-      const r = getRecord(rid);
+      const r = graph.getRecord(rid);
       if (!r) return { id: rid, missing: true };
       return {
         id: r.id,
         nodeKind: r._kind,
-        displayName: getDisplayName(r),
+        displayName: graph.getDisplayName(r),
         cluster: r._cluster,
       };
     };

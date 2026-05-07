@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOutgoing, getPageBySlug, getPages, getRecord } from "@a5c-ai/atlas";
+import type { AtlasRecord } from "@a5c-ai/atlas";
 import {
   AtlasDocsScaffold,
   atlasLeadFromMarkdown,
@@ -9,6 +9,7 @@ import {
 import { MarkdownArticle } from "@/components/MarkdownArticle";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCurrentAtlasView } from "@/lib/server/atlas-view";
 
 export const dynamicParams = true;
 
@@ -33,7 +34,7 @@ function parentSlug(slug: string): string | null {
   return parts.length > 1 ? parts.slice(0, -1).join("/") : null;
 }
 
-function isNavigableWikiPage(page: ReturnType<typeof getPages>[number]) {
+function isNavigableWikiPage(page: AtlasRecord) {
   const slug = typeof page.slug === "string" ? page.slug : "";
   return Boolean(slug) && !slug.includes("/_") && !slug.endsWith("/_template");
 }
@@ -53,7 +54,7 @@ function sortWikiPages(a: WikiPageSummary, b: WikiPageSummary) {
   return a.slug.localeCompare(b.slug);
 }
 
-function toSummary(page: ReturnType<typeof getPages>[number]): WikiPageSummary {
+function toSummary(page: AtlasRecord & { slug?: string; title?: string; article?: string; articlePath?: string; _file: string }): WikiPageSummary {
   const article = typeof page.article === "string" ? page.article : "";
   return {
     id: page.id,
@@ -127,14 +128,15 @@ function WikiNavCards({
 export default async function WikiPage({ params }: { params: Promise<Params> }) {
   const { slug: parts = [] } = await params;
   const slug = parts.length ? parts.join("/") : "index";
-  const page = getPageBySlug(slug);
+  const { graph, index } = await getCurrentAtlasView();
+  const page = graph.getPageBySlug(slug);
   if (!page) notFound();
 
   const article = typeof page.article === "string" ? page.article : "";
-  const documented = getOutgoing(page.id).filter((edge) => edge.kind === "documents");
+  const documented = graph.getOutgoing(page.id).filter((edge) => edge.kind === "documents");
   const pageTitle = String(page.title ?? page.id);
   const pagePath = typeof page.articlePath === "string" ? page.articlePath : page._file;
-  const allPages = getPages().filter(isNavigableWikiPage).map(toSummary);
+  const allPages = graph.getPages().filter(isNavigableWikiPage).map(toSummary);
   const pagesBySlug = new Map(allPages.map((entry) => [entry.slug, entry]));
   const currentPage = pagesBySlug.get(slug) ?? toSummary(page);
   const parent = parentSlug(slug);
@@ -159,7 +161,7 @@ export default async function WikiPage({ params }: { params: Promise<Params> }) 
   ];
 
   const documentedItems = documented.slice(0, 8).map((edge) => {
-    const target = getRecord(edge.to);
+    const target = graph.getRecord(edge.to);
     return {
       label: target ? `${String(target.displayName ?? edge.to)} · ${target._kind}` : edge.to,
       href: `/n/${encodeURIComponent(edge.to)}`,
@@ -279,7 +281,7 @@ export default async function WikiPage({ params }: { params: Promise<Params> }) 
           title: "Documents",
           items: documented.length
             ? documented.slice(0, 8).map((edge) => {
-                const target = getRecord(edge.to);
+                const target = graph.getRecord(edge.to);
                 return (
                   <Link key={edge.to} href={`/n/${encodeURIComponent(edge.to)}`}>
                     {target ? `${String(target.displayName ?? edge.to)} · ${target._kind}` : edge.to}
@@ -332,7 +334,7 @@ export default async function WikiPage({ params }: { params: Promise<Params> }) 
           </section>
         ) : null}
         <section className="atlas-docs-full atlas-docs-stack">
-          <MarkdownArticle markdown={article} articlePath={pagePath} variant="docs" />
+          <MarkdownArticle markdown={article} articlePath={pagePath} recordsById={index.records} variant="docs" />
         </section>
       </div>
     </AtlasDocsScaffold>
