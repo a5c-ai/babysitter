@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@a5c-ai/compendium/css";
-@import "@a5c-ai/compendium/css/CodexPrimitives";
 
 :root,
 html[data-theme="vellum"] {
