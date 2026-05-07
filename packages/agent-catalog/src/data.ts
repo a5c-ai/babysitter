@@ -509,17 +509,19 @@ function buildHarnessImages(): HarnessImageEntry[] {
     }));
 }
 
-const PLUGIN_TARGET_HOOK_FAMILIES: Record<string, string[]> = {
-  "claude-code": ["claude"],
-  codex: ["codex"],
-  cursor: ["cursor"],
-  gemini: ["gemini", "gemini-cli"],
-  "github-copilot": ["copilot", "github-copilot"],
-  "oh-my-pi": ["oh-my-pi", "omp"],
-  opencode: ["opencode"],
-  openclaw: ["openclaw"],
-  pi: ["pi"],
-};
+// Derive hook families from Atlas PluginTarget.adapterName
+function getPluginTargetHookFamilies(): Record<string, string[]> {
+  const families: Record<string, string[]> = {};
+  for (const node of listNodesByKind("PluginTarget")) {
+    const targetId = pluginTargetId(node.id);
+    const adapterName = valueAsString(node.adapterName);
+    if (targetId && adapterName) {
+      families[targetId] = [adapterName];
+      if (targetId !== adapterName) families[targetId].push(targetId);
+    }
+  }
+  return families;
+}
 
 function canonicalHookName(hookId: string): string {
   return hookId
@@ -532,237 +534,114 @@ function canonicalHookName(hookId: string): string {
 }
 
 function supportedHooksForTarget(targetId: string): Record<string, string> {
-  const families = new Set(PLUGIN_TARGET_HOOK_FAMILIES[targetId] ?? [targetId]);
+  const hookFamilies = getPluginTargetHookFamilies();
+  const families = new Set(hookFamilies[targetId] ?? [targetId]);
   const supportedHooks = Object.fromEntries(
     listNodesByKind("HookMapping")
       .filter((mapping) => families.has(valueAsString(mapping.adapterFamily)))
       .map((mapping) => [canonicalHookName(valueAsString(mapping.hookId)), valueAsString(mapping.nativeName)] as const)
       .filter(([canonical, native]) => Boolean(canonical && native)),
   );
-  if (targetId === "github-copilot") {
-    supportedHooks.SessionStart = "sessionStart";
-    supportedHooks.SessionEnd = "sessionEnd";
-  }
   return supportedHooks;
 }
 
-function buildPluginTargetDescriptors(_hooks: HookDescriptor[]): PluginTargetDescriptor[] {
-  const descriptors: Array<Omit<PluginTargetDescriptor, "supportedHooks" | "evidenceIds"> & { evidenceIds?: string[] }> = [
-    {
-      targetId: "claude-code",
-      displayName: "Claude Code",
-      adapterName: "claude",
-      pluginRootEnvVar: "CLAUDE_PLUGIN_ROOT",
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json + openclaw.plugin.json",
-      commandFormat: "markdown-commands",
-      skillHandling: "native",
-      hookRegistrationFormat: "claude-code",
-      hookRegistrationOutputPath: "hooks/hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: ".claude-plugin/plugin.json",
-      scriptVariants: ["bash"],
-      adapterFamily: "shell-hook",
-      distribution: "marketplace",
-      distributionModel: "workspace-generated",
-      marketplacePath: ".claude-plugin/marketplace.json",
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: null, pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "none", activationMessage: "restart", extraPackageFiles: [], extraScripts: {}, emitCjsWrappers: false },
-      componentSupport: { agents: "unsupported", context: "unsupported" },
-    },
-    {
-      targetId: "codex",
-      displayName: "Codex",
-      adapterName: "codex",
-      pluginRootEnvVar: null,
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "package.json + hooks.json",
-      commandFormat: "package-json commands",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: "codex",
-      hookRegistrationOutputPath: "hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: ".codex-plugin/plugin.json",
-      scriptVariants: ["bash"],
-      adapterFamily: "shell-hook",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: ".agents/plugins/marketplace.json",
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: ".codex", pluginsDirRelative: ".agents/plugins", marketplacePathRelative: ".agents/plugins/marketplace.json" },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "none", activationMessage: "codex-open-plugins", extraPackageFiles: [], extraScripts: {}, emitCjsWrappers: false },
-      componentSupport: { agents: "unsupported", context: "unsupported" },
-    },
-    {
-      targetId: "cursor",
-      displayName: "Cursor",
-      adapterName: "cursor",
-      pluginRootEnvVar: "CURSOR_PLUGIN_ROOT",
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json",
-      commandFormat: "markdown-commands",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: "cursor",
-      hookRegistrationOutputPath: "hooks.json",
-      hookRegistrationAliasPaths: ["hooks/hooks-cursor.json"],
-      harnessManifestPath: ".cursor-plugin/plugin.json",
-      scriptVariants: ["bash", "powershell"],
-      adapterFamily: "shell-hook",
-      distribution: "both",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: ".cursor", pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "postinstall", activationMessage: "restart", extraPackageFiles: ["hooks.json"], extraScripts: {}, emitCjsWrappers: false },
-      componentSupport: { agents: "unsupported", context: "unsupported" },
-    },
-    {
-      targetId: "gemini",
-      displayName: "Gemini CLI",
-      adapterName: "gemini",
-      pluginRootEnvVar: "GEMINI_EXTENSION_PATH",
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json + gemini-extension.json",
-      commandFormat: "extension-manifest",
-      skillHandling: "native",
-      hookRegistrationFormat: "gemini",
-      hookRegistrationOutputPath: "hooks/hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["bash"],
-      adapterFamily: "shell-hook",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: null, pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "plugin-scripts", activationMessage: "restart", extraPackageFiles: [], extraScripts: {}, emitCjsWrappers: false },
-      componentSupport: { agents: "unsupported", context: "native" },
-    },
-    {
-      targetId: "github-copilot",
-      displayName: "GitHub Copilot",
-      adapterName: "copilot",
-      pluginRootEnvVar: "COPILOT_PLUGIN_DIR",
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json",
-      commandFormat: "markdown-commands",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: "github-copilot",
-      hookRegistrationOutputPath: "hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["bash", "powershell"],
-      adapterFamily: "shell-hook",
-      distribution: "both",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: true,
-      installLayout: { harnessHomeRelative: ".copilot", pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "plugin-scripts", activationMessage: "restart", extraPackageFiles: ["hooks.json", "AGENTS.md"], extraScripts: {}, emitCjsWrappers: false },
-      componentSupport: { agents: "native", context: "native" },
-    },
-    {
-      targetId: "pi",
-      displayName: "Pi",
-      adapterName: "pi",
-      pluginRootEnvVar: null,
-      pluginRootEnvVarForExtension: "PI_PLUGIN_ROOT",
-      manifestFormat: "state-only",
-      commandFormat: "markdown-commands",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: undefined,
-      hookRegistrationOutputPath: null,
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["javascript"],
-      adapterFamily: "programmatic",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: true,
-      installLayout: { harnessHomeRelative: null, pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "module", binScriptExt: ".cjs", installLifecycle: "none", activationMessage: "restart", extraPackageFiles: [], extraScripts: {}, peerDependencyPackage: "@mariozechner/pi-coding-agent", emitCjsWrappers: false },
-      componentSupport: { agents: "native", context: "native" },
-    },
-    {
-      targetId: "oh-my-pi",
-      displayName: "Oh-My-Pi",
-      adapterName: "omp",
-      pluginRootEnvVar: null,
-      pluginRootEnvVarForExtension: "OMP_PLUGIN_ROOT",
-      manifestFormat: "state-only",
-      commandFormat: "markdown-commands",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: undefined,
-      hookRegistrationOutputPath: null,
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["javascript"],
-      adapterFamily: "programmatic",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: true,
-      installLayout: { harnessHomeRelative: null, pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "module", binScriptExt: ".cjs", installLifecycle: "none", activationMessage: "restart", extraPackageFiles: [], extraScripts: {}, peerDependencyPackage: "@oh-my-pi/pi-coding-agent", emitCjsWrappers: false },
-      componentSupport: { agents: "native", context: "native" },
-    },
-    {
-      targetId: "opencode",
-      displayName: "OpenCode",
-      adapterName: "opencode",
-      pluginRootEnvVar: "OPENCODE_PLUGIN_ROOT",
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json",
-      commandFormat: "event-hooks",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: "opencode",
-      hookRegistrationOutputPath: "hooks/hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["javascript"],
-      adapterFamily: "programmatic",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: ".opencode", pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "commonjs", binScriptExt: ".js", installLifecycle: "postinstall", activationMessage: "restart", extraPackageFiles: [], extraScripts: { test: "node test/integration.test.js" }, emitCjsWrappers: true },
-      componentSupport: { agents: "unsupported", context: "unsupported" },
-    },
-    {
-      targetId: "openclaw",
-      displayName: "OpenClaw",
-      adapterName: "openclaw",
-      pluginRootEnvVar: null,
-      pluginRootEnvVarForExtension: null,
-      manifestFormat: "plugin.json",
-      commandFormat: "event-hooks",
-      skillHandling: "derived-from-commands",
-      hookRegistrationFormat: "openclaw",
-      hookRegistrationOutputPath: "hooks.json",
-      hookRegistrationAliasPaths: [],
-      harnessManifestPath: null,
-      scriptVariants: ["bash", "typescript"],
-      adapterFamily: "programmatic",
-      distribution: "npm-cli",
-      distributionModel: "workspace-generated",
-      marketplacePath: undefined,
-      npmPublishable: false,
-      installLayout: { harnessHomeRelative: ".openclaw", pluginsDirRelative: null, marketplacePathRelative: null },
-      packageMetadata: { moduleType: "module", binScriptExt: ".cjs", installLifecycle: "none", activationMessage: "restart", extraPackageFiles: [], extraScripts: {}, peerDependencyPackage: "openclaw", emitCjsWrappers: false },
-      componentSupport: { agents: "unsupported", context: "unsupported" },
-    },
-  ];
+// Known babysitter plugin targets (subset of Atlas PluginTargets)
+const BABYSITTER_PLUGIN_TARGETS = new Set([
+  "plugin-target:claude-code", "plugin-target:codex", "plugin-target:cursor",
+  "plugin-target:gemini-cli", "plugin-target:copilot-cli", "plugin-target:pi",
+  "plugin-target:omp", "plugin-target:opencode", "plugin-target:openclaw",
+]);
 
-  return descriptors.map((descriptor) => ({
-    ...descriptor,
-    supportedHooks: supportedHooksForTarget(descriptor.targetId),
-    evidenceIds: descriptor.evidenceIds ?? [],
-  }));
+// Atlas uses different IDs for some targets
+const TARGET_ID_ALIASES: Record<string, string> = {
+  "plugin-target:gemini-cli": "gemini",
+  "plugin-target:copilot-cli": "github-copilot",
+  "plugin-target:omp": "oh-my-pi",
+};
+
+function buildPluginTargetDescriptors(_hooks: HookDescriptor[]): PluginTargetDescriptor[] {
+  const atlasTargets = listNodesByKind("PluginTarget")
+    .filter((node) => BABYSITTER_PLUGIN_TARGETS.has(node.id));
+
+  if (atlasTargets.length === 0) {
+    return [];
+  }
+
+  return atlasTargets.map((node) => {
+    const targetId = TARGET_ID_ALIASES[node.id] ?? pluginTargetId(node.id);
+    const installLayout = node.installLayout && typeof node.installLayout === "object"
+      ? {
+          harnessHomeRelative: valueAsString((node.installLayout as GraphNode).harnessHomeRelative) || null,
+          pluginsDirRelative: valueAsString((node.installLayout as GraphNode).pluginsDirRelative) || null,
+          marketplacePathRelative: valueAsString((node.installLayout as GraphNode).marketplacePathRelative) || null,
+        }
+      : undefined;
+    const packageMetadata = node.packageMetadata && typeof node.packageMetadata === "object"
+      ? {
+          moduleType: (valueAsString((node.packageMetadata as GraphNode).moduleType) as PluginPackageMetadata["moduleType"]) || undefined,
+          binScriptExt: (valueAsString((node.packageMetadata as GraphNode).binScriptExt) as PluginPackageMetadata["binScriptExt"]) || undefined,
+          installLifecycle: (valueAsString((node.packageMetadata as GraphNode).installLifecycle) as PluginPackageMetadata["installLifecycle"]) || undefined,
+          activationMessage: (valueAsString((node.packageMetadata as GraphNode).activationMessage) as PluginPackageMetadata["activationMessage"]) || undefined,
+          extraPackageFiles: stringArray((node.packageMetadata as GraphNode).extraPackageFiles),
+          extraScripts: ((node.packageMetadata as GraphNode).extraScripts as Record<string, string> | undefined) ?? undefined,
+          peerDependencyPackage: valueAsString((node.packageMetadata as GraphNode).peerDependencyPackage) || undefined,
+          emitCjsWrappers: Boolean((node.packageMetadata as GraphNode).emitCjsWrappers),
+        }
+      : undefined;
+    const componentSupport = node.componentSupport && typeof node.componentSupport === "object"
+      ? {
+          agents: (valueAsString((node.componentSupport as GraphNode).agents) as PluginComponentSupport["agents"]) || "unsupported",
+          context: (valueAsString((node.componentSupport as GraphNode).context) as PluginComponentSupport["context"]) || "unsupported",
+        }
+      : undefined;
+
+    // Normalize distribution: Atlas uses array, agent-catalog uses single string
+    const distArray = stringArray(node.distribution);
+    let distribution: PluginTargetDescriptor["distribution"];
+    if (distArray.includes("marketplace") && (distArray.includes("npm-cli") || distArray.length > 1)) {
+      distribution = "both";
+    } else if (distArray.includes("marketplace")) {
+      distribution = "marketplace";
+    } else {
+      distribution = "npm-cli";
+    }
+
+    // Normalize adapterFamily
+    const adapterFamily: PluginTargetDescriptor["adapterFamily"] =
+      valueAsString(node.adapterFamily) === "programmatic" ||
+      ["pi", "omp", "opencode", "openclaw"].includes(valueAsString(node.adapterName))
+        ? "programmatic"
+        : "shell-hook";
+
+    return {
+      targetId,
+      displayName: valueAsString(node.displayName),
+      adapterName: valueAsString(node.adapterName),
+      manifestFormat: valueAsString(node.manifestFormat),
+      commandFormat: valueAsString(node.commandFormat),
+      distributionModel: valueAsString(node.distributionModel),
+      npmPublishable: Boolean(node.npmPublishable),
+      pluginRootEnvVar: node.pluginRootEnvVar === null ? null : valueAsString(node.pluginRootEnvVar) || undefined,
+      pluginRootEnvVarForExtension: node.pluginRootEnvVarForExtension === null ? null : valueAsString(node.pluginRootEnvVarForExtension) || undefined,
+      skillHandling: (valueAsString(node.skillHandling) as PluginTargetDescriptor["skillHandling"]) || undefined,
+      hookRegistrationFormat: valueAsString(node.hookRegistrationFormat) || undefined,
+      hookRegistrationOutputPath: node.hookRegistrationOutputPath === null ? null : valueAsString(node.hookRegistrationOutputPath) || undefined,
+      hookRegistrationAliasPaths: stringArray(node.hookRegistrationAliasPaths),
+      harnessManifestPath: node.harnessManifestPath === null ? null : valueAsString(node.harnessManifestPath) || undefined,
+      scriptVariants: stringArray(node.scriptVariants),
+      adapterFamily,
+      distribution,
+      marketplacePath: valueAsString(node.marketplacePath) || undefined,
+      installLayout,
+      packageMetadata,
+      componentSupport,
+      supportedHooks: supportedHooksForTarget(targetId),
+      evidenceIds: [],
+    };
+  });
 }
+
+
 
 
 interface AgentCatalogDataState {
