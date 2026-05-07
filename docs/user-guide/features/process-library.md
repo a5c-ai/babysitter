@@ -187,7 +187,7 @@ Process files follow a consistent naming pattern:
 The catalog data in this section is refreshed from the live `library/` tree. The explanatory prose on this page remains hand-written.
 
 <!-- process-library:catalog:start -->
-Snapshot refreshed from the live `library/` tree on 2026-04-30.
+Snapshot refreshed from the live `library/` tree on 2026-05-07.
 
 - [Current snapshot counts](#current-snapshot-counts)
 - [Methodology families](#methodology-families)
@@ -214,7 +214,7 @@ Snapshot refreshed from the live `library/` tree on 2026-04-30.
 | **Social-sciences-and-humanities specialization processes** | 160 | [`library/specializations/domains/social-sciences-humanities/`](../../../library/specializations/domains/social-sciences-humanities/) |
 | **Skill definition files** | 2,021 | [`library/`](../../../library/) |
 | **Agent definition files** | 1,342 | [`library/`](../../../library/) |
-| **README files under library** | 1,815 | [`library/`](../../../library/) |
+| **README files under library** | 1,816 | [`library/`](../../../library/) |
 
 ## Methodology Families
 

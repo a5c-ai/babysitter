@@ -1,9 +1,9 @@
 /**
  * Live integration test: verifies the REAL round-trip by spawning the
- * actual babysitter CLI with `--output-format amux-events` and parsing
+ * actual babysitter-agent CLI with `--output-format amux-events` and parsing
  * its JSONL output.
  *
- * These tests are skipped when the babysitter CLI is not available on
+ * These tests are skipped when the babysitter-agent CLI is not available on
  * PATH, so they are safe to run in any environment (CI or local).
  *
  * @module harness/amux/__tests__/live-integration
@@ -30,7 +30,7 @@ const CLI_AVAILABLE = (() => {
 // ---------------------------------------------------------------------------
 
 /**
- * Spawn babysitter with the given args and collect stdout lines.
+ * Spawn babysitter-agent with the given args and collect stdout lines.
  * Returns { lines, exitCode, stderr }.
  */
 function spawnBabysitter(
@@ -91,23 +91,23 @@ function tryParseJson(line: string): Record<string, unknown> | null {
 // ---------------------------------------------------------------------------
 
 describe(
-  "Live integration: babysitter CLI amux-events output",
+  "Live integration: babysitter-agent CLI amux-events output",
   { timeout: 30000 },
   () => {
-    describe.skipIf(!CLI_AVAILABLE)("with babysitter CLI", () => {
-      it("harness:invoke with --output-format amux-events produces valid JSONL", async () => {
-        // Use harness:discover which is fast and does not require a real harness.
+    describe.skipIf(!CLI_AVAILABLE)("with babysitter-agent CLI", () => {
+      it("invoke with --output-format amux-events produces valid JSONL", async () => {
+        // Use invoke with a fast-failing prompt so no real harness is required for availability.
         // We invoke it with --output-format amux-events to test that the CLI
         // accepts the flag. If the command doesn't support --output-format,
         // babysitter-agent should still emit session_start/session_end.
         //
-        // NOTE: harness:invoke requires a harness name and prompt, so we use
+        // NOTE: invoke requires a harness name and prompt, so we use
         // a command that will fail fast but still exercise the amux-events
-        // output pathway. We use harness:discover --json as a fallback
-        // if harness:invoke is not available.
+        // output pathway. We use discover --json as a fallback
+        // if invoke is not available.
         const { lines, exitCode } = await spawnBabysitter(
           [
-            "harness:invoke",
+            "invoke",
             "claude-code",
             "--prompt",
             "echo test",

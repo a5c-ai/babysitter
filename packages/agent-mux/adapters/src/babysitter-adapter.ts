@@ -1,7 +1,7 @@
 /**
  * BabysitterAdapter — Babysitter orchestration harness adapter.
  *
- * Spawns the `babysitter` CLI (harness:invoke / harness:call) and
+ * Spawns the `babysitter-agent` CLI (`invoke` / `call`) and
  * parses its JSONL output into normalized AgentEvent streams.
  */
 
@@ -272,7 +272,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
       } as AgentEvent;
     }
 
-    // Legacy format: babysitter harness:invoke output
+    // Legacy format: older babysitter harness invoke output
     if (obj['status'] === 'completed') {
       return {
         ...base,

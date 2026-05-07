@@ -51,7 +51,7 @@ The nearest concrete validations available now are:
 - plugin `validate:ci` checks for packaged plugin behavior,
 - docs QA and metadata checks for publication hygiene.
 
-Docker-based E2E coverage is being reset from scratch and should not be treated as an available or required repository gate until a new strategy lands.
+Docker-based E2E coverage is being reset from scratch and should not be treated as an available or required repository gate until a new strategy lands. The proposed replacement strategy now lives in [Testing Strategy](../testing/).
 
 ## Current Slice: Architecture-Gate Validation
 

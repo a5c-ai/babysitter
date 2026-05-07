@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30",
+  "generatedAt": "2026-05-07",
   "generatedBy": "scripts/generate-cli-examples-artifacts.cjs",
   "docsSurface": {
     "cliExamples": "docs/cli-examples.md",

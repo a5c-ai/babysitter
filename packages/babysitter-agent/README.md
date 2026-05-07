@@ -16,7 +16,7 @@ npm install -g @a5c-ai/babysitter-agent
 
 ## Usage
 
-This package provides the `babysitter-agent` command:
+This package provides the `babysitter-agent` command. Use it for runtime orchestration; `babysitter harness:call` is a deprecated compatibility alias from the main CLI.
 
 ```bash
 babysitter-agent --help

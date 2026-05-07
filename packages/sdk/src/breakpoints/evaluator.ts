@@ -16,7 +16,7 @@ import type { BreakpointConfig } from "../profiles/types";
 import { parsePattern, matchPattern } from "./patterns";
 
 // ---------------------------------------------------------------------------
-// Inlined posture helpers (canonical implementation moved to babysitter-harness)
+// Inlined posture helpers (canonical implementation moved to babysitter-agent)
 // ---------------------------------------------------------------------------
 
 const DEFAULT_POSTURES: Record<ActionCategory, ApprovalPosture> = {

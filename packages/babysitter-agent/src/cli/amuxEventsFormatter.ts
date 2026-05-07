@@ -2,7 +2,7 @@
  * Formats babysitter-agent invocation results as agent-mux compatible
  * JSONL events.
  *
- * When `--output-format amux-events` is used, the harness:invoke command
+ * When `--output-format amux-events` is used, the `invoke` command
  * outputs one JSON object per line to stdout so agent-mux's babysitter
  * adapter can parse our output as a normalised event stream.
  *

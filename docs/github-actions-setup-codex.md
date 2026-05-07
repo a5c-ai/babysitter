@@ -49,7 +49,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install Babysitter SDK
-        run: npm install -g @a5c-ai/babysitter-sdk
+        run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 
       - name: Run Codex with Babysitter
         uses: openai/codex-action@v1
@@ -92,7 +92,7 @@ Since Codex does not have a native plugin marketplace like Claude Code, install 
 
 ```yaml
 - name: Install Babysitter SDK
-  run: npm install -g @a5c-ai/babysitter-sdk
+  run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 ```
 
 The `babysitter` CLI will then be available to Codex during execution.
@@ -122,7 +122,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install Babysitter SDK
-        run: npm install -g @a5c-ai/babysitter-sdk
+        run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 
       - name: Run Babysitter PR Review
         uses: openai/codex-action@v1
@@ -142,7 +142,7 @@ jobs:
             - Performance implications
             - Test coverage
 
-            Run: babysitter harness:call --harness codex --prompt "review this PR" --workspace .
+            Run: babysitter-agent call --harness codex --prompt "review this PR" --workspace .
 ```
 
 ### Example 2: Feature Development with TDD
@@ -171,7 +171,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install Babysitter SDK
-        run: npm install -g @a5c-ai/babysitter-sdk
+        run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 
       - name: Run Babysitter TDD
         uses: openai/codex-action@v1
@@ -220,7 +220,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install Babysitter SDK
-        run: npm install -g @a5c-ai/babysitter-sdk
+        run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 
       - name: Run Babysitter GSD
         uses: openai/codex-action@v1
@@ -369,7 +369,7 @@ Ensure the SDK is installed before the Codex step:
 
 ```yaml
 - name: Install Babysitter SDK
-  run: npm install -g @a5c-ai/babysitter-sdk
+  run: npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-agent
 ```
 
 ### Sandbox Permission Errors

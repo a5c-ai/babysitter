@@ -10,6 +10,7 @@ const strictDocInclude = [
   'github-actions-setup-codex.md',
   'github-actions-setup-gemini-cli.md',
   'release-pipeline.md',
+  'testing/**',
   'reference/GETTING_STARTED.md',
   'reference/babysitter_cli_surface_spec.md',
   'v6-spec-and-roadmap/**'

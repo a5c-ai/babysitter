@@ -22,7 +22,7 @@ export async function handleMcpServe(args: {
   if (transportType === "ws" || transportType === "websocket") {
     process.stderr.write(
       "WebSocket transport has moved to @a5c-ai/babysitter-agent.\n" +
-      "Use babysitter-harness mcp:serve --transport websocket instead.\n",
+      "Use babysitter-agent mcp:serve --transport websocket instead.\n",
     );
     return 1;
   }

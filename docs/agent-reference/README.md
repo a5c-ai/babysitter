@@ -24,5 +24,6 @@ Use this directory as the source of truth for repository-level AI agent guidance
 
 ## Related Docs
 
+- [Testing Strategy](../testing/)
 - [Plugins Overview](../plugins.md)
 - [Plugin CLI Reference](../plugins/cli-reference.md)
