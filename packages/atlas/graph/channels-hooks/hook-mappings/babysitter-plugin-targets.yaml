@@ -106,27 +106,6 @@ edges:
     - target: hook-surface:session-start
 ---
 nodeKind: HookMapping
-id: hook-mapping:session-start-openclaw
-attributes:
-  mappingId: hook-mapping:session-start-openclaw
-  hookId: hook-surface:session-start
-  targetId: agent-version:openclaw@current
-  nativeName: session_start
-  versionRange: ">=0.0.0"
-  requiresRuntimeHooks: true
-  adapterFamily: openclaw
-  delivery: shell
-  blocking: false
-  supportLevel: supported
-  canonicalPhase: session.start
-  blockCapability: false
-  mutationCapability: false
-  scope: session
-edges:
-  maps_hook:
-    - target: hook-surface:session-start
----
-nodeKind: HookMapping
 id: hook-mapping:stop-codex
 attributes:
   mappingId: hook-mapping:stop-codex
@@ -274,27 +253,6 @@ edges:
     - target: hook-surface:after-agent
 ---
 nodeKind: HookMapping
-id: hook-mapping:after-agent-openclaw
-attributes:
-  mappingId: hook-mapping:after-agent-openclaw
-  hookId: hook-surface:after-agent
-  targetId: agent-version:openclaw@current
-  nativeName: agent_end
-  versionRange: ">=0.0.0"
-  requiresRuntimeHooks: true
-  adapterFamily: openclaw
-  delivery: shell
-  blocking: false
-  supportLevel: supported
-  canonicalPhase: turn.stop
-  blockCapability: true
-  mutationCapability: false
-  scope: turn
-edges:
-  maps_hook:
-    - target: hook-surface:after-agent
----
-nodeKind: HookMapping
 id: hook-mapping:session-end-github-copilot
 attributes:
   mappingId: hook-mapping:session-end-github-copilot
@@ -304,27 +262,6 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: copilot
-  delivery: shell
-  blocking: false
-  supportLevel: supported
-  canonicalPhase: session.end
-  blockCapability: false
-  mutationCapability: false
-  scope: session
-edges:
-  maps_hook:
-    - target: hook-surface:session-end
----
-nodeKind: HookMapping
-id: hook-mapping:session-end-openclaw
-attributes:
-  mappingId: hook-mapping:session-end-openclaw
-  hookId: hook-surface:session-end
-  targetId: agent-version:openclaw@current
-  nativeName: session_end
-  versionRange: ">=0.0.0"
-  requiresRuntimeHooks: true
-  adapterFamily: openclaw
   delivery: shell
   blocking: false
   supportLevel: supported
@@ -566,24 +503,3 @@ attributes:
 edges:
   maps_hook:
     - target: hook-surface:stop
----
-nodeKind: HookMapping
-id: hook-mapping:before-prompt-build-openclaw
-attributes:
-  mappingId: hook-mapping:before-prompt-build-openclaw
-  hookId: hook-surface:before-prompt-build
-  targetId: agent-version:openclaw@current
-  nativeName: before_prompt_build
-  versionRange: ">=0.0.0"
-  requiresRuntimeHooks: true
-  adapterFamily: openclaw
-  delivery: shell
-  blocking: false
-  supportLevel: supported
-  canonicalPhase: turn.user_prompt_submitted
-  blockCapability: false
-  mutationCapability: false
-  scope: turn
-edges:
-  maps_hook:
-    - target: hook-surface:before-prompt-build

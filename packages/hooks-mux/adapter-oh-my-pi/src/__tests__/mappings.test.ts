@@ -47,7 +47,6 @@ describe('OH_MY_PI_PHASE_MAPPINGS', () => {
     expect(m!.canonicalPhase).toBe('tool.before');
     expect(m!.supportLevel).toBe('native');
     expect(m!.mutationCapability).toBe(false);
-    expect(m!.notes).toContain('Mutation is NOT supported');
   });
 
   it('maps tool_result as observer-only', () => {

@@ -462,3 +462,300 @@ attributes:
 edges:
   maps_hook:
     - target: hook-surface:session-end
+---
+# oh-my-pi missing phase mappings
+nodeKind: HookMapping
+id: hook-mapping:session-end-oh-my-pi
+attributes:
+  mappingId: hook-mapping:session-end-oh-my-pi
+  hookId: hook-surface:session-end
+  targetId: agent-version:omp@current
+  nativeName: session_end
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:tool-result-oh-my-pi
+attributes:
+  mappingId: hook-mapping:tool-result-oh-my-pi
+  hookId: hook-surface:post-tool-use
+  targetId: agent-version:omp@current
+  nativeName: tool_result
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:prompt-oh-my-pi
+attributes:
+  mappingId: hook-mapping:prompt-oh-my-pi
+  hookId: hook-surface:user-prompt-submit
+  targetId: agent-version:omp@current
+  nativeName: prompt
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:error-oh-my-pi
+attributes:
+  mappingId: hook-mapping:error-oh-my-pi
+  hookId: hook-surface:error
+  targetId: agent-version:omp@current
+  nativeName: error
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: oh-my-pi
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.error
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:error
+---
+# openclaw plugin hook mappings
+nodeKind: HookMapping
+id: hook-mapping:plugin-session-start-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-session-start-openclaw
+  hookId: hook-surface:session-start
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.session.start
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-session-end-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-session-end-openclaw
+  hookId: hook-surface:session-end
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.session.end
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-tool-before-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-tool-before-openclaw
+  hookId: hook-surface:pre-tool-use
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.tool.before
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: true
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:pre-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-tool-after-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-tool-after-openclaw
+  hookId: hook-surface:post-tool-use
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.tool.after
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
+edges:
+  maps_hook:
+    - target: hook-surface:post-tool-use
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-turn-stop-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-turn-stop-openclaw
+  hookId: hook-surface:stop
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.turn.stop
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: true
+  supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:stop
+---
+nodeKind: HookMapping
+id: hook-mapping:plugin-prompt-submitted-openclaw
+attributes:
+  mappingId: hook-mapping:plugin-prompt-submitted-openclaw
+  hookId: hook-surface:user-prompt-submit
+  targetId: agent-version:openclaw@current
+  nativeName: plugin.prompt.submitted
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+# openclaw gateway hook mappings
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-received-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-received-openclaw
+  hookId: hook-surface:session-start
+  targetId: agent-version:openclaw@current
+  nativeName: gateway.request.received
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:session-start
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-routed-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-routed-openclaw
+  hookId: hook-surface:user-prompt-submit
+  targetId: agent-version:openclaw@current
+  nativeName: gateway.request.routed
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: turn.before_agent
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:user-prompt-submit
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-request-completed-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-request-completed-openclaw
+  hookId: hook-surface:session-end
+  targetId: agent-version:openclaw@current
+  nativeName: gateway.request.completed
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:session-end
+---
+nodeKind: HookMapping
+id: hook-mapping:gateway-auth-check-openclaw
+attributes:
+  mappingId: hook-mapping:gateway-auth-check-openclaw
+  hookId: hook-surface:tool-permission-request
+  targetId: agent-version:openclaw@current
+  nativeName: gateway.auth.check
+  versionRange: ">=0.0.0"
+  requiresRuntimeHooks: false
+  adapterFamily: openclaw
+  delivery: shell
+  blocking: false
+  supportLevel: lossy
+  canonicalPhase: tool.permission_request
+  blockCapability: false
+  mutationCapability: false
+  scope: gateway
+edges:
+  maps_hook:
+    - target: hook-surface:tool-permission-request

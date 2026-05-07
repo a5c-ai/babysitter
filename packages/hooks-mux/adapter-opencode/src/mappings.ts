@@ -32,6 +32,9 @@ function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping
   };
 }
 
+/** Native hooks excluded from the standard phase mapping table. */
+const EXCLUDED_NATIVE_HOOKS = new Set(['shell.env']);
+
 function buildFromCatalog(): PhaseMapping[] {
   const mappings = listHookMappingsByAdapterFamily('opencode');
   if (mappings.length === 0) {
@@ -39,7 +42,8 @@ function buildFromCatalog(): PhaseMapping[] {
   }
   const phaseMappings = mappings
     .map(hookMappingToPhaseMapping)
-    .filter((m): m is PhaseMapping => m !== null);
+    .filter((m): m is PhaseMapping => m !== null)
+    .filter((m) => !EXCLUDED_NATIVE_HOOKS.has(m.nativeHook));
   const seen = new Set<string>();
   return phaseMappings.filter((m) => {
     if (seen.has(m.nativeHook)) return false;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createPromptContextFromCatalog, createPromptContextFromCatalog } from '../context';
+import { createPromptContextFromCatalog } from '../context';
 import {
   tagPart,
   PART_STRATA_MAP,

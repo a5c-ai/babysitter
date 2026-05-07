@@ -460,22 +460,10 @@ function main() {
 
     const edges = buildEdges(id, graphMeta, specialization);
 
-    // Add uses_agent edges for task associations
-    for (const agentName of usesAgents) {
-      const agentSlug = slugify(agentName);
-      const agentId = specialization
-        ? `lib-agent:${slugify(specialization)}--${agentSlug}`
-        : `lib-agent:shared--${agentSlug}`;
-      edges.push({ kind: "uses_agent", to: agentId });
-    }
-    // Add uses_skill edges for task associations
-    for (const skillName of usesSkills) {
-      const skillSlug = slugify(skillName);
-      const skillId = specialization
-        ? `lib-skill:${slugify(specialization)}--${skillSlug}`
-        : `lib-skill:shared--${skillSlug}`;
-      edges.push({ kind: "uses_skill", to: skillId });
-    }
+    // Add uses_agent/uses_skill edges — deferred until agent/skill IDs are known
+    // Store raw names for now; resolved in the second pass below
+    const pendingAgentRefs = usesAgents;
+    const pendingSkillRefs = usesSkills;
 
     processNodes.push({
       id,
@@ -489,6 +477,8 @@ function main() {
       usesAgents: usesAgents.length > 0 ? usesAgents : null,
       usesSkills: usesSkills.length > 0 ? usesSkills : null,
       edges,
+      _pendingAgentRefs: pendingAgentRefs,
+      _pendingSkillRefs: pendingSkillRefs,
     });
   }
 
@@ -593,6 +583,53 @@ function main() {
       expertise,
       edges,
     });
+  }
+
+  // ── Resolve uses_agent/uses_skill edges (only for known library IDs) ─────
+
+  const knownAgentIds = new Set(agentNodes.map(n => n.id));
+  const knownSkillIds = new Set(skillNodes.map(n => n.id));
+  // Also build a name→id map for fuzzy matching across specializations
+  const agentNameMap = new Map();
+  for (const n of agentNodes) {
+    const name = n.id.split("--")[1];
+    if (name && !agentNameMap.has(name)) agentNameMap.set(name, n.id);
+  }
+  const skillNameMap = new Map();
+  for (const n of skillNodes) {
+    const name = n.id.split("--")[1];
+    if (name && !skillNameMap.has(name)) skillNameMap.set(name, n.id);
+  }
+
+  for (const proc of processNodes) {
+    if (proc._pendingAgentRefs) {
+      for (const agentName of proc._pendingAgentRefs) {
+        const agentSlug = slugify(agentName);
+        // Try same-specialization first
+        const specSlug = proc.specialization ? slugify(proc.specialization) : "shared";
+        const sameSpecId = `lib-agent:${specSlug}--${agentSlug}`;
+        if (knownAgentIds.has(sameSpecId)) {
+          proc.edges.push({ kind: "uses_agent", to: sameSpecId });
+        } else if (agentNameMap.has(agentSlug)) {
+          proc.edges.push({ kind: "uses_agent", to: agentNameMap.get(agentSlug) });
+        }
+        // Skip if no match — don't create dangling edges
+      }
+      delete proc._pendingAgentRefs;
+    }
+    if (proc._pendingSkillRefs) {
+      for (const skillName of proc._pendingSkillRefs) {
+        const skillSlug = slugify(skillName);
+        const specSlug = proc.specialization ? slugify(proc.specialization) : "shared";
+        const sameSpecId = `lib-skill:${specSlug}--${skillSlug}`;
+        if (knownSkillIds.has(sameSpecId)) {
+          proc.edges.push({ kind: "uses_skill", to: sameSpecId });
+        } else if (skillNameMap.has(skillSlug)) {
+          proc.edges.push({ kind: "uses_skill", to: skillNameMap.get(skillSlug) });
+        }
+      }
+      delete proc._pendingSkillRefs;
+    }
   }
 
   // ── Write output ──────────────────────────────────────────────────────────

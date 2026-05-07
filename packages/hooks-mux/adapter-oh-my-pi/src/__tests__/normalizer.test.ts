@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { normalizeOhMyPiEvent, parseEventContext, ADAPTER_NAME } from '../normalizer';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { normalizeOhMyPiEvent, parseEventContext, ADAPTER_NAME, setAdapterName } from '../normalizer';
 import {
   SESSION_START_PAYLOAD,
   SESSION_END_PAYLOAD,
@@ -11,6 +11,10 @@ import {
   MALFORMED_JSON_STRING,
   BASE_ENV,
 } from './fixtures/oh-my-pi-events';
+
+beforeAll(() => {
+  setAdapterName('oh-my-pi');
+});
 
 describe('parseEventContext', () => {
   it('parses a valid object', () => {
