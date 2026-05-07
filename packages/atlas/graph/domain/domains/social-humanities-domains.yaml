@@ -5,7 +5,9 @@ attributes:
   displayName: "Healthcare"
   description: |
     Healthcare operations, clinical systems, patient safety, and health informatics.
-edges: {}
+edges:
+  contains:
+    - specialization:clinical-informatics
 ---
 nodeKind: Domain
 id: domain:education
@@ -13,7 +15,9 @@ attributes:
   displayName: "Education"
   description: |
     Educational technology, curriculum design, learning management, and assessment.
-edges: {}
+edges:
+  contains:
+    - specialization:instructional-design
 ---
 nodeKind: Domain
 id: domain:arts-culture
@@ -45,7 +49,9 @@ attributes:
   displayName: "Supply Chain"
   description: |
     End-to-end supply chain management, procurement, and logistics optimization.
-edges: {}
+edges:
+  contains:
+    - specialization:supply-chain-optimization
 ---
 nodeKind: Domain
 id: domain:decision-intelligence
@@ -148,7 +154,9 @@ attributes:
     moral and political philosophy, analytic and continental traditions, and
     applied ethics in technology, law, and medicine. Provides foundational
     reasoning frameworks used across AI alignment, law, and decision theory.
-edges: {}
+edges:
+  contains:
+    - specialization:applied-ethics
 ---
 nodeKind: Domain
 id: domain:humanities
@@ -160,4 +168,6 @@ attributes:
     and cultural studies. Employs close reading, archival research, comparative
     analysis, and critical theory. Increasingly intersects with computational
     methods (digital humanities), NLP, and corpus linguistics.
-edges: {}
+edges:
+  contains:
+    - specialization:digital-humanities

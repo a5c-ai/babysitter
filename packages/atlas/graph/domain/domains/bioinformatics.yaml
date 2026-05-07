@@ -6,4 +6,6 @@ attributes:
     Bioinformatics domain — sequence analysis, genomics pipelines,
     structural biology tooling, and computational analysis of biological
     data.
-edges: {}
+edges:
+  contains:
+    - specialization:biomedical-informatics

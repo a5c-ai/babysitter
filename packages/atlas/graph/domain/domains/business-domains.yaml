@@ -29,7 +29,9 @@ attributes:
   displayName: "Finance"
   description: |
     Financial planning, accounting, budgeting, and audit.
-edges: {}
+edges:
+  contains:
+    - specialization:corporate-finance
 ---
 nodeKind: Domain
 id: domain:human-resources
@@ -37,7 +39,9 @@ attributes:
   displayName: "Human Resources"
   description: |
     Recruiting, onboarding, performance management, and culture.
-edges: {}
+edges:
+  contains:
+    - specialization:talent-management
 ---
 nodeKind: Domain
 id: domain:legal
@@ -45,7 +49,9 @@ attributes:
   displayName: "Legal"
   description: |
     Contract management, compliance, IP, and regulatory affairs.
-edges: {}
+edges:
+  contains:
+    - specialization:legal-compliance
 ---
 nodeKind: Domain
 id: domain:operations
@@ -85,7 +91,9 @@ attributes:
   displayName: "Digital Marketing"
   description: |
     SEO, SEM, social media, content marketing, and growth.
-edges: {}
+edges:
+  contains:
+    - specialization:digital-marketing-strategy
 ---
 nodeKind: Domain
 id: domain:project-management
@@ -149,7 +157,9 @@ attributes:
   displayName: "Strategy"
   description: |
     Corporate and product strategy, competitive analysis, market research, and strategic planning.
-edges: {}
+edges:
+  contains:
+    - specialization:strategic-consulting
 ---
 nodeKind: Domain
 id: domain:community

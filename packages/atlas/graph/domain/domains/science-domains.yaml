@@ -5,7 +5,9 @@ attributes:
   displayName: "Aerospace Engineering"
   description: |
     Aerodynamics, propulsion, avionics, and space systems.
-edges: {}
+edges:
+  contains:
+    - specialization:aerospace-engineering
 ---
 nodeKind: Domain
 id: domain:automotive-engineering
@@ -114,7 +116,11 @@ attributes:
     underpinning cryptography, AI, databases, and distributed systems research.
     Distinct from software engineering in its focus on mathematical foundations
     and provable correctness rather than production delivery.
-edges: {}
+edges:
+  contains:
+    - specialization:quantum-computing
+    - specialization:theoretical-computer-science
+    - specialization:formal-methods
 ---
 nodeKind: Domain
 id: domain:mathematics
@@ -127,7 +133,10 @@ attributes:
     the foundational language for physics, computer science, economics, and
     machine learning — and is increasingly relevant to formal verification and
     AI reasoning research.
-edges: {}
+edges:
+  contains:
+    - specialization:computational-mathematics
+    - specialization:statistical-methods
 ---
 nodeKind: Domain
 id: domain:scientific-discovery
@@ -140,4 +149,6 @@ attributes:
     synthesis, open science practices, and AI-assisted discovery workflows.
     Acts as a meta-domain enabling rigor and creativity across all scientific
     and engineering fields.
-edges: {}
+edges:
+  contains:
+    - specialization:scientific-research-methods
