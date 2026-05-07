@@ -3,12 +3,12 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { buildContinuityContext, renderContinuityOverlay } from '../continuityOverlay';
-import { createClaudeCodeContext } from '../context';
+import { createPromptContextFromCatalog } from '../context';
 import { tagPart, PART_STRATA_MAP, composeByStrata } from '../strata';
 import { composeBabysitSkillPrompt } from '../compose';
 import type { PromptContext, ContinuityContext } from '../types';
 
-const mockCtx = createClaudeCodeContext();
+const mockCtx = createPromptContextFromCatalog('claude-code');
 
 let tmpDir: string;
 

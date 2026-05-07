@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createClaudeCodeContext, createCodexContext } from '../context';
+import { createPromptContextFromCatalog, createPromptContextFromCatalog } from '../context';
 import {
   tagPart,
   PART_STRATA_MAP,
@@ -11,7 +11,7 @@ import {
 } from '../strata';
 import type { PromptStratum, StratumTaggedPart, ComposeByStrataOptions, StratumChecksums } from '../types';
 
-const mockCtx = createClaudeCodeContext();
+const mockCtx = createPromptContextFromCatalog('claude-code');
 
 describe('GAP-PROMPT-001: Prompt Strata Model', () => {
   describe('PromptStratum type', () => {
@@ -369,8 +369,8 @@ describe('GAP-PERF-005: Cache-Aware Prompt Assembly', () => {
       const parts: StratumTaggedPart[] = [
         tagPart('dynamic', 'runtime', (ctx) => `harness: ${ctx.harness}`, 30),
       ];
-      const ccCtx = createClaudeCodeContext();
-      const codexCtx = createCodexContext();
+      const ccCtx = createPromptContextFromCatalog('claude-code');
+      const codexCtx = createPromptContextFromCatalog('codex');
       const result1 = composeByStrataWithMeta(parts, ccCtx);
       const result2 = composeByStrataWithMeta(parts, codexCtx);
       expect(result1.stratumChecksums.runtime).not.toBe(result2.stratumChecksums.runtime);

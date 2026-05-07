@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { createClaudeCodeContext } from '../context';
+import { createPromptContextFromCatalog } from '../context';
 import { composeBabysitSkillPrompt } from '../compose';
 import { PART_STRATA_MAP, composeByStrata } from '../strata';
 import * as parts from '../parts';
 
-const ctx = createClaudeCodeContext();
+const ctx = createPromptContextFromCatalog('claude-code');
 
 describe('GAP-PROMPT-001: --show-strata flag integration', () => {
   describe('showStrata output annotations', () => {
