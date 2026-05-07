@@ -16,6 +16,8 @@ This section collects pages that are produced directly from graph data to explai
 |---|---|
 | [`universal-agentic-stack`](./universal-agentic-stack/README.md) | A guided entry point into the universal agentic stack map. |
 | [`universal-agentic-stack/02-landscape-diagram.md`](./universal-agentic-stack/02-landscape-diagram.md) | The full visual stack diagram as a dedicated page. |
+| [`universal-agentic-stack/04-worked-examples.md`](./universal-agentic-stack/04-worked-examples.md) | Worked placements for common product shapes and stack patterns. |
+| [`universal-agentic-stack/05-common-confusions.md`](./universal-agentic-stack/05-common-confusions.md) | A cleanup page for the terms teams keep mixing together. |
 | [`universal-agentic-stack/layers.md`](./universal-agentic-stack/layers.md) | Layer-by-layer reference derived from the graph. |
 | [`universal-agentic-stack/source-map.md`](./universal-agentic-stack/source-map.md) | Traceability back to the graph sources used for the generated stack documentation. |
 

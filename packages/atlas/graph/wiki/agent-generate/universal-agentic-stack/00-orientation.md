@@ -21,6 +21,14 @@ documents:
 
 The stack is easiest to understand if you read it as four connected bands rather than 11 unrelated boxes.
 
+## What a layer means here
+
+A layer is not a branding category. It is a responsibility boundary.
+
+The question is not "Does this product mention tools, memory, or agents?"
+
+The question is "Which responsibility does this part of the system actually own?"
+
 ## The four bands
 
 | Band | Layers | What it answers |
@@ -29,6 +37,16 @@ The stack is easiest to understand if you read it as four connected bands rather
 | Agent system | 4-6 | How the agent thinks, what runtime hosts it, and what platform or extension system surrounds it. |
 | Operating boundary | 7-9 | Where the agent works, where actions execute, and what policy constrains them. |
 | Surface | 10-11 | What actions are exposed and how humans or systems experience the result. |
+
+## The three ownership modes
+
+When you place a product in the stack, mark each layer one of three ways:
+
+- Owned: the product directly implements the responsibility.
+- Exposed: the product presents the layer to the user, but depends on another component behind it.
+- Delegated: the layer exists, but is provided by the host environment or another system.
+
+This is the fastest way to stop category inflation.
 
 ## Read top-down or bottom-up
 
@@ -46,6 +64,16 @@ The stack is easiest to understand if you read it as four connected bands rather
 
 If two tools answer different questions, they belong to different layers even if marketing puts them under the same label.
 
+## The most important split in the whole map
+
+Layers 4, 5, and 6 are where people collapse too much:
+
+- Layer 4 is the decision loop.
+- Layer 5 is the runtime that hosts the loop.
+- Layer 6 is the platform and extension surface around runtimes.
+
+If you only remember one distinction from this section, remember that one.
+
 ## Common mistakes
 
 - Treating a provider or gateway as if it were an agent core.
@@ -53,3 +81,9 @@ If two tools answer different questions, they belong to different layers even if
 - Treating installed skills or plugins as runtime details instead of platform concerns.
 - Ignoring workspace, execution, and sandbox because they are less visible in demos.
 - Assuming the UI layer explains the compute path. It usually does not.
+
+## What to do next
+
+- Open [`04-worked-examples.md`](./04-worked-examples.md) if you want concrete product shapes.
+- Open [`05-common-confusions.md`](./05-common-confusions.md) if your team keeps using the same words for different layers.
+- Open [`03-placement-checklist.md`](./03-placement-checklist.md) if you already have a real product to classify.
