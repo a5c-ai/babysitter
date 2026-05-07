@@ -1,30 +1,29 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
+import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Creates the Codex adapter with its capability metadata.
  *
- * Codex CLI is a shell-hook adapter with experimental status.
- * Tool interception is partial (Bash-only), and env propagation
- * is wrapper-based only -- there is no native env file mechanism.
- * The notes array is the authoritative machine-readable caveat surface
- * for doctor output and doc parity checks.
+ * Reads capability data from the Atlas graph via the agent-catalog.
+ * Falls back to hardcoded defaults if the catalog is unavailable.
  *
  * Spec section 17.2.
  */
 export function createAdapter(name = 'codex'): AdapterCapabilities {
+  const target = getPluginTargetDescriptor(name);
   return {
     name,
-    family: 'shell-hook',
-    sessionIdQuality: 'native',
-    supportsOrderedFanout: true,
-    supportsNativeAdditionalContext: false,
-    supportsBlock: true,
-    supportsAsk: false,
-    supportsToolInputMutation: false,
-    supportsToolResultMutation: false,
-    supportsPersistedEnv: false,
-    envPersistenceMode: 'wrapper_only',
-    toolInterceptionScope: 'partial_shell_only',
+    family: (target?.hooksMuxFamily as AdapterCapabilities['family']) ?? 'shell-hook',
+    sessionIdQuality: (target?.sessionIdQuality as AdapterCapabilities['sessionIdQuality']) ?? 'native',
+    supportsOrderedFanout: target?.supportsOrderedFanout ?? true,
+    supportsNativeAdditionalContext: target?.supportsNativeAdditionalContext ?? false,
+    supportsBlock: target?.supportsBlock ?? true,
+    supportsAsk: target?.supportsAsk ?? false,
+    supportsToolInputMutation: target?.supportsToolInputMutation ?? false,
+    supportsToolResultMutation: target?.supportsToolResultMutation ?? false,
+    supportsPersistedEnv: target?.supportsPersistedEnv ?? false,
+    envPersistenceMode: (target?.envPersistenceMode as AdapterCapabilities['envPersistenceMode']) ?? 'wrapper_only',
+    toolInterceptionScope: (target?.toolInterceptionScope as AdapterCapabilities['toolInterceptionScope']) ?? 'partial_shell_only',
     notes: [
       'experimental',
       'tool interception is bash-only',

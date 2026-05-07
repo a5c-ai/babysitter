@@ -1,41 +1,33 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
+import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Creates the OpenClaw adapter capability descriptor.
  *
- * OpenClaw is a library-first (in-process) harness that exposes two distinct
- * hook layers:
+ * Reads capability data from the Atlas graph via the agent-catalog.
+ * Falls back to hardcoded defaults if the catalog is unavailable.
  *
- *   1. **Gateway hooks** — internal lifecycle events fired by the OpenClaw
- *      gateway/router (e.g. request routing, auth, rate-limiting). These are
- *      infrastructure-level and do NOT map to canonical agent-lifecycle phases.
- *
- *   2. **Plugin hooks** — lifecycle events fired by OpenClaw plugins that
- *      participate in the agent conversation loop (session, tool, turn).
- *      These map cleanly to canonical phases.
- *
- * The adapter preserves this distinction by tagging normalized events with
- * an `origin` field ('gateway' | 'plugin') in execution metadata, and by
- * mapping only plugin hooks to canonical phases. Gateway hooks are mapped
- * to scope 'gateway' with supportLevel 'lossy' to signal they are not
- * semantically equivalent to agent-lifecycle phases.
+ * OpenClaw exposes two distinct hook layers:
+ *   1. Gateway hooks — infrastructure-level (request routing, auth, rate-limiting)
+ *   2. Plugin hooks — agent-lifecycle (session, tool, turn)
  *
  * Spec section 17.9.
  */
 export function createAdapter(name = 'openclaw'): AdapterCapabilities {
+  const target = getPluginTargetDescriptor(name);
   return {
     name,
-    family: 'in-process',
-    sessionIdQuality: 'derived',
-    supportsOrderedFanout: true,
-    supportsNativeAdditionalContext: false,
-    supportsBlock: true,
-    supportsAsk: false,
-    supportsToolInputMutation: true,
-    supportsToolResultMutation: false,
-    supportsPersistedEnv: false,
-    envPersistenceMode: 'runtime_hook',
-    toolInterceptionScope: 'all',
+    family: (target?.hooksMuxFamily as AdapterCapabilities['family']) ?? 'in-process',
+    sessionIdQuality: (target?.sessionIdQuality as AdapterCapabilities['sessionIdQuality']) ?? 'derived',
+    supportsOrderedFanout: target?.supportsOrderedFanout ?? true,
+    supportsNativeAdditionalContext: target?.supportsNativeAdditionalContext ?? false,
+    supportsBlock: target?.supportsBlock ?? true,
+    supportsAsk: target?.supportsAsk ?? false,
+    supportsToolInputMutation: target?.supportsToolInputMutation ?? true,
+    supportsToolResultMutation: target?.supportsToolResultMutation ?? false,
+    supportsPersistedEnv: target?.supportsPersistedEnv ?? false,
+    envPersistenceMode: (target?.envPersistenceMode as AdapterCapabilities['envPersistenceMode']) ?? 'runtime_hook',
+    toolInterceptionScope: (target?.toolInterceptionScope as AdapterCapabilities['toolInterceptionScope']) ?? 'all',
     notes: [
       'Gateway hooks (request.received, request.routed, request.completed, auth.check) are infrastructure-level; do not treat as agent lifecycle',
       'Plugin hooks (plugin.session.start, plugin.session.end, plugin.tool.before, plugin.tool.after, plugin.turn.stop) map to canonical phases',

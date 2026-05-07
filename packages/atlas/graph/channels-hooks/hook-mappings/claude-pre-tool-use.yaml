@@ -11,6 +11,10 @@ attributes:
   delivery: shell
   blocking: true
   supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: true
+  mutationCapability: false
+  scope: tool
   payloadShape:
     type: object
     required: [tool_name, tool_input, session_id, transcript_path]

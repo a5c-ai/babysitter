@@ -11,6 +11,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: tool.before
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
 edges:
   maps_hook:
     - target: hook-surface:post-tool-use

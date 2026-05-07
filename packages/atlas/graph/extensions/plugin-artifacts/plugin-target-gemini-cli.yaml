@@ -66,6 +66,17 @@ attributes:
   defaultStepCount: 8
   skillSystemLabel: "Installed skill"
   defaultTransportId: google
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: derived
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: true
+  supportsAsk: true
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: all
 
 edges:
   hosted_by:

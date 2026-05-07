@@ -81,6 +81,17 @@ attributes:
   defaultStepCount: 4
   skillSystemLabel: "Claude Code skill"
   defaultTransportId: anthropic
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: true
+  supportsBlock: true
+  supportsAsk: true
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: native_env_file
+  toolInterceptionScope: all
   description: |
     Claude Code as a plugin host — accepts plugin.json + marketplace
     manifests + container/binary plugin artifacts. Native plugin

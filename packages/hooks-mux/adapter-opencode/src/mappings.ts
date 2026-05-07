@@ -1,20 +1,30 @@
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * OpenCode native event name to canonical phase mappings.
  *
- * OpenCode exposes four hook events:
- *   session.created, tool.execute.before, tool.execute.after, shell.env
- *
- * The `shell.env` event is used for runtime env injection and does not
- * map directly to a standard lifecycle phase; it is mapped to
- * `session.start` with a 'lossy' support level since it is an env
- * propagation mechanism rather than a true session start signal.
+ * Phase mappings are built from the Atlas graph HookMapping records
+ * via the agent-catalog. Falls back to hardcoded defaults if the
+ * catalog is unavailable.
  *
  * Spec section 8.2 / 17.8.
  */
-export const OPENCODE_PHASE_MAPPINGS: PhaseMapping[] = [
-  // --- Session lifecycle ---
+
+function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping | null {
+  if (!mapping.canonicalPhase) return null;
+  return {
+    canonicalPhase: mapping.canonicalPhase as PhaseMapping['canonicalPhase'],
+    nativeHook: mapping.nativeName,
+    supportLevel: 'native',
+    blockCapability: mapping.blockCapability ?? false,
+    mutationCapability: mapping.mutationCapability ?? false,
+    scope: (mapping.scope ?? 'session') as PhaseMapping['scope'],
+  };
+}
+
+const FALLBACK_MAPPINGS: PhaseMapping[] = [
   {
     canonicalPhase: 'session.start',
     nativeHook: 'session.created',
@@ -24,8 +34,6 @@ export const OPENCODE_PHASE_MAPPINGS: PhaseMapping[] = [
     scope: 'session',
     notes: 'Fires when the OpenCode session is initialized.',
   },
-
-  // --- Tool lifecycle ---
   {
     canonicalPhase: 'tool.before',
     nativeHook: 'tool.execute.before',
@@ -45,6 +53,26 @@ export const OPENCODE_PHASE_MAPPINGS: PhaseMapping[] = [
     notes: 'Observer-only post-tool hook.',
   },
 ];
+
+function buildFromCatalog(): PhaseMapping[] | null {
+  try {
+    const mappings = listHookMappingsByAdapterFamily('opencode');
+    if (mappings.length === 0) return null;
+    const phaseMappings = mappings
+      .map(hookMappingToPhaseMapping)
+      .filter((m): m is PhaseMapping => m !== null);
+    const seen = new Set<string>();
+    return phaseMappings.filter((m) => {
+      if (seen.has(m.nativeHook)) return false;
+      seen.add(m.nativeHook);
+      return true;
+    });
+  } catch {
+    return null;
+  }
+}
+
+export const OPENCODE_PHASE_MAPPINGS: PhaseMapping[] = buildFromCatalog() ?? FALLBACK_MAPPINGS;
 
 /**
  * The shell.env event is a special env-injection hook, not a standard

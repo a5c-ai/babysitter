@@ -1,28 +1,29 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
+import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Creates the OpenCode adapter capability descriptor.
  *
- * OpenCode is a library-only (in-process) adapter with native runtime env
- * injection via its `shell.env` hook. It supports `session.created`,
- * `tool.execute.before`, `tool.execute.after`, and `shell.env` events.
+ * Reads capability data from the Atlas graph via the agent-catalog.
+ * Falls back to hardcoded defaults if the catalog is unavailable.
  *
  * Spec section 17.8.
  */
 export function createAdapter(name = 'opencode'): AdapterCapabilities {
+  const target = getPluginTargetDescriptor(name);
   return {
     name,
-    family: 'in-process',
-    sessionIdQuality: 'native',
-    supportsOrderedFanout: false,
-    supportsNativeAdditionalContext: false,
-    supportsBlock: true,
-    supportsAsk: false,
-    supportsToolInputMutation: true,
-    supportsToolResultMutation: false,
-    supportsPersistedEnv: true,
-    envPersistenceMode: 'runtime_hook',
-    toolInterceptionScope: 'all',
+    family: (target?.hooksMuxFamily as AdapterCapabilities['family']) ?? 'in-process',
+    sessionIdQuality: (target?.sessionIdQuality as AdapterCapabilities['sessionIdQuality']) ?? 'native',
+    supportsOrderedFanout: target?.supportsOrderedFanout ?? false,
+    supportsNativeAdditionalContext: target?.supportsNativeAdditionalContext ?? false,
+    supportsBlock: target?.supportsBlock ?? true,
+    supportsAsk: target?.supportsAsk ?? false,
+    supportsToolInputMutation: target?.supportsToolInputMutation ?? true,
+    supportsToolResultMutation: target?.supportsToolResultMutation ?? false,
+    supportsPersistedEnv: target?.supportsPersistedEnv ?? true,
+    envPersistenceMode: (target?.envPersistenceMode as AdapterCapabilities['envPersistenceMode']) ?? 'runtime_hook',
+    toolInterceptionScope: (target?.toolInterceptionScope as AdapterCapabilities['toolInterceptionScope']) ?? 'all',
     notes: [
       'Library-only adapter; no CLI shell-hook mode',
       'Native env injection via shell.env hook',

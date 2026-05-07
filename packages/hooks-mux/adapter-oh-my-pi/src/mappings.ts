@@ -1,18 +1,30 @@
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Oh-My-Pi native event to canonical phase mapping table.
  *
- * Oh-My-Pi uses the Pi extension API lifecycle events. The adapter
- * maps these to canonical phases. Tool mutation is not supported
- * (unlike the base Pi adapter), so tool.before has no mutation
- * capability.
+ * Phase mappings are built from the Atlas graph HookMapping records
+ * via the agent-catalog. Falls back to hardcoded defaults if the
+ * catalog is unavailable.
  *
- * Spec section 17.7: "preserve chained context behavior and
- * session-before short-circuit semantics."
+ * Spec section 17.7.
  */
-export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = [
-  // --- Session lifecycle ---
+
+function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping | null {
+  if (!mapping.canonicalPhase) return null;
+  return {
+    canonicalPhase: mapping.canonicalPhase as PhaseMapping['canonicalPhase'],
+    nativeHook: mapping.nativeName,
+    supportLevel: 'native',
+    blockCapability: mapping.blockCapability ?? false,
+    mutationCapability: mapping.mutationCapability ?? false,
+    scope: (mapping.scope ?? 'session') as PhaseMapping['scope'],
+  };
+}
+
+const FALLBACK_MAPPINGS: PhaseMapping[] = [
   {
     canonicalPhase: 'session.start',
     nativeHook: 'session_start',
@@ -40,8 +52,6 @@ export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = [
     scope: 'session',
     notes: 'Context injection event from the Pi extension API.',
   },
-
-  // --- Turn lifecycle ---
   {
     canonicalPhase: 'turn.user_prompt_submitted',
     nativeHook: 'prompt',
@@ -60,8 +70,6 @@ export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = [
     scope: 'turn',
     notes: 'Fires on runtime error during a turn.',
   },
-
-  // --- Tool lifecycle ---
   {
     canonicalPhase: 'tool.before',
     nativeHook: 'tool_call',
@@ -80,8 +88,6 @@ export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = [
     scope: 'tool',
     notes: 'Fires after tool execution completes. Observer-only.',
   },
-
-  // --- Model lifecycle ---
   {
     canonicalPhase: 'model.before_request',
     nativeHook: 'before_provider_request',
@@ -92,6 +98,26 @@ export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = [
     notes: 'Fires before a request is sent to the model provider.',
   },
 ];
+
+function buildFromCatalog(): PhaseMapping[] | null {
+  try {
+    const mappings = listHookMappingsByAdapterFamily('oh-my-pi');
+    if (mappings.length === 0) return null;
+    const phaseMappings = mappings
+      .map(hookMappingToPhaseMapping)
+      .filter((m): m is PhaseMapping => m !== null);
+    const seen = new Set<string>();
+    return phaseMappings.filter((m) => {
+      if (seen.has(m.nativeHook)) return false;
+      seen.add(m.nativeHook);
+      return true;
+    });
+  } catch {
+    return null;
+  }
+}
+
+export const OH_MY_PI_PHASE_MAPPINGS: PhaseMapping[] = buildFromCatalog() ?? FALLBACK_MAPPINGS;
 
 /**
  * Quick lookup from native event name to phase mapping.

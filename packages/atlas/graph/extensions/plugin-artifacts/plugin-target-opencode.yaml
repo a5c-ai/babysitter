@@ -65,6 +65,17 @@ attributes:
   defaultStepCount: 8
   skillSystemLabel: "Installed skill"
   defaultTransportId: openai-chat
+  hooksMuxFamily: in-process
+  sessionIdQuality: native
+  supportsOrderedFanout: false
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: true
+  supportsToolResultMutation: false
+  supportsPersistedEnv: true
+  envPersistenceMode: runtime_hook
+  toolInterceptionScope: all
 
 edges:
   hosted_by:

@@ -326,6 +326,10 @@ export interface HookMappingDescriptor {
   nativeName: string;
   versionRange: string;
   requiresRuntimeHooks: boolean;
+  canonicalPhase?: string;
+  blockCapability?: boolean;
+  mutationCapability?: boolean;
+  scope?: string;
   evidenceIds: string[];
 }
 
@@ -506,6 +510,17 @@ export interface PluginTargetDescriptor {
   defaultStepCount?: number;
   skillSystemLabel?: string;
   defaultTransportId?: string;
+  hooksMuxFamily?: string;
+  sessionIdQuality?: string;
+  supportsOrderedFanout?: boolean;
+  supportsNativeAdditionalContext?: boolean;
+  supportsBlock?: boolean;
+  supportsAsk?: boolean;
+  supportsToolInputMutation?: boolean;
+  supportsToolResultMutation?: boolean;
+  supportsPersistedEnv?: boolean;
+  envPersistenceMode?: string;
+  toolInterceptionScope?: string;
   supportedHooks: Record<string, string>;
   evidenceIds: string[];
 }

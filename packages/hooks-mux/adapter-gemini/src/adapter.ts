@@ -1,29 +1,29 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
+import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Creates the Gemini CLI adapter capability descriptor.
  *
- * Gemini CLI is a shell-hook harness with derived session IDs
- * (from GEMINI_SESSION_ID env or workspace-based derivation),
- * wrapper-only env persistence, and support for blocking, asking,
- * and tool input mutation.
+ * Reads capability data from the Atlas graph via the agent-catalog.
+ * Falls back to hardcoded defaults if the catalog is unavailable.
  *
  * Spec section 17.3.
  */
 export function createAdapter(name = 'gemini'): AdapterCapabilities {
+  const target = getPluginTargetDescriptor(name === 'gemini' ? 'gemini-cli' : name);
   return {
     name,
-    family: 'shell-hook',
-    sessionIdQuality: 'derived',
-    supportsOrderedFanout: true,
-    supportsNativeAdditionalContext: true,
-    supportsBlock: true,
-    supportsAsk: true,
-    supportsToolInputMutation: true,
-    supportsToolResultMutation: false,
-    supportsPersistedEnv: false,
-    envPersistenceMode: 'wrapper_only',
-    toolInterceptionScope: 'all',
+    family: (target?.hooksMuxFamily as AdapterCapabilities['family']) ?? 'shell-hook',
+    sessionIdQuality: (target?.sessionIdQuality as AdapterCapabilities['sessionIdQuality']) ?? 'derived',
+    supportsOrderedFanout: target?.supportsOrderedFanout ?? true,
+    supportsNativeAdditionalContext: target?.supportsNativeAdditionalContext ?? true,
+    supportsBlock: target?.supportsBlock ?? true,
+    supportsAsk: target?.supportsAsk ?? true,
+    supportsToolInputMutation: target?.supportsToolInputMutation ?? true,
+    supportsToolResultMutation: target?.supportsToolResultMutation ?? false,
+    supportsPersistedEnv: target?.supportsPersistedEnv ?? false,
+    envPersistenceMode: (target?.envPersistenceMode as AdapterCapabilities['envPersistenceMode']) ?? 'wrapper_only',
+    toolInterceptionScope: (target?.toolInterceptionScope as AdapterCapabilities['toolInterceptionScope']) ?? 'all',
     notes: [
       'BeforeToolSelection has union-style aggregation',
       'Logs must go to stderr; final JSON to stdout only',

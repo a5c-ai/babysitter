@@ -12,6 +12,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: tool.after
+  blockCapability: false
+  mutationCapability: false
+  scope: tool
 edges:
   maps_hook:
     - target: hook-surface:post-tool-use
@@ -31,6 +35,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:stop
@@ -50,6 +58,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: subagent.end
+  blockCapability: false
+  mutationCapability: false
+  scope: subagent
 edges:
   maps_hook:
     - target: hook-surface:subagent-stop
@@ -69,6 +81,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: notification
+  blockCapability: false
+  mutationCapability: false
+  scope: notification
 edges:
   maps_hook:
     - target: hook-surface:notification
@@ -88,6 +104,10 @@ attributes:
   delivery: shell
   blocking: true
   supportLevel: supported
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:user-prompt-submit
@@ -107,6 +127,10 @@ attributes:
   delivery: shell
   blocking: true
   supportLevel: supported
+  canonicalPhase: session.compact.before
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:pre-compact

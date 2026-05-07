@@ -8,6 +8,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: cursor
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:cursor.session-start
@@ -24,6 +28,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: gemini
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start
@@ -40,6 +48,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: copilot
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start
@@ -56,6 +68,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: opencode
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start
@@ -72,6 +88,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: openclaw
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start
@@ -88,6 +108,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: pi
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start
@@ -104,6 +128,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: oh-my-pi
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-start

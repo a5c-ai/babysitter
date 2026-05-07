@@ -1,28 +1,29 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
+import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Creates the Pi adapter capability descriptor.
  *
- * Pi is an in-process harness with native session IDs,
- * extension-state persistence, and mutable tool input semantics
- * (later handlers see earlier mutations).
+ * Reads capability data from the Atlas graph via the agent-catalog.
+ * Falls back to hardcoded defaults if the catalog is unavailable.
  *
  * Spec section 17.6.
  */
 export function createAdapter(name = 'pi'): AdapterCapabilities {
+  const target = getPluginTargetDescriptor(name);
   return {
     name,
-    family: 'in-process',
-    sessionIdQuality: 'native',
-    supportsOrderedFanout: true,
-    supportsNativeAdditionalContext: false,
-    supportsBlock: true,
-    supportsAsk: false,
-    supportsToolInputMutation: true,
-    supportsToolResultMutation: false,
-    supportsPersistedEnv: true,
-    envPersistenceMode: 'runtime_hook',
-    toolInterceptionScope: 'all',
+    family: (target?.hooksMuxFamily as AdapterCapabilities['family']) ?? 'in-process',
+    sessionIdQuality: (target?.sessionIdQuality as AdapterCapabilities['sessionIdQuality']) ?? 'native',
+    supportsOrderedFanout: target?.supportsOrderedFanout ?? true,
+    supportsNativeAdditionalContext: target?.supportsNativeAdditionalContext ?? false,
+    supportsBlock: target?.supportsBlock ?? true,
+    supportsAsk: target?.supportsAsk ?? false,
+    supportsToolInputMutation: target?.supportsToolInputMutation ?? true,
+    supportsToolResultMutation: target?.supportsToolResultMutation ?? false,
+    supportsPersistedEnv: target?.supportsPersistedEnv ?? true,
+    envPersistenceMode: (target?.envPersistenceMode as AdapterCapabilities['envPersistenceMode']) ?? 'runtime_hook',
+    toolInterceptionScope: (target?.toolInterceptionScope as AdapterCapabilities['toolInterceptionScope']) ?? 'all',
     notes: [
       'Library-only adapter — Pi hooks are in-process, not shell subprocesses',
       'Tool input mutation is in-place; later handlers see earlier mutations',

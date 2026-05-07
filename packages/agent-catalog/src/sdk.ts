@@ -359,6 +359,10 @@ function toHookMapping(node: GraphNode): HookMappingDescriptor {
     nativeName: valueAsString(node.nativeName),
     versionRange: valueAsString(node.versionRange),
     requiresRuntimeHooks: Boolean(node.requiresRuntimeHooks),
+    canonicalPhase: valueAsString(node.canonicalPhase) || undefined,
+    blockCapability: node.blockCapability === true || node.blockCapability === "true" ? true : node.blockCapability === false || node.blockCapability === "false" ? false : undefined,
+    mutationCapability: node.mutationCapability === true || node.mutationCapability === "true" ? true : node.mutationCapability === false || node.mutationCapability === "false" ? false : undefined,
+    scope: valueAsString(node.scope) || undefined,
     evidenceIds: nodeEvidenceIds(node),
   };
 }
@@ -1128,6 +1132,14 @@ export function listPluginTargetDescriptors(): PluginTargetDescriptor[] {
 export function getPluginTargetDescriptor(targetId: string): PluginTargetDescriptor | undefined {
   const target = PLUGIN_TARGETS.find((entry) => entry.targetId === targetId);
   return target ? clone(target) : undefined;
+}
+
+export function listHookMappingsByAdapterFamily(adapterFamily: string): HookMappingDescriptor[] {
+  const graph = getSdkState().graph;
+  return graph.nodes
+    .filter((node) => node.kind === "HookMapping" && valueAsString(node.adapterFamily) === adapterFamily)
+    .map(toHookMapping)
+    .map(clone);
 }
 
 export function getHookCatalog(): HookDescriptor[] {

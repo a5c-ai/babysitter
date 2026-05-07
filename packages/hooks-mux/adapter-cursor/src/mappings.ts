@@ -1,16 +1,30 @@
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * Cursor native event to canonical phase mapping table.
  *
- * Cursor's hook surface is now documented and stable for both IDE and CLI.
- * All listed events (sessionStart, sessionEnd, preToolUse, postToolUse, stop)
- * are native hooks per Cursor's official docs.
+ * Phase mappings are built from the Atlas graph HookMapping records
+ * via the agent-catalog. Falls back to hardcoded defaults if the
+ * catalog is unavailable.
  *
  * Spec section 17.5.
  */
-export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
-  // --- Session lifecycle ---
+
+function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping | null {
+  if (!mapping.canonicalPhase) return null;
+  return {
+    canonicalPhase: mapping.canonicalPhase as PhaseMapping['canonicalPhase'],
+    nativeHook: mapping.nativeName,
+    supportLevel: 'native',
+    blockCapability: mapping.blockCapability ?? false,
+    mutationCapability: mapping.mutationCapability ?? false,
+    scope: (mapping.scope ?? 'session') as PhaseMapping['scope'],
+  };
+}
+
+const FALLBACK_MAPPINGS: PhaseMapping[] = [
   {
     canonicalPhase: 'session.start',
     nativeHook: 'sessionStart',
@@ -18,7 +32,6 @@ export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
     blockCapability: false,
     mutationCapability: false,
     scope: 'session',
-    notes: 'Documented and stable. Fires on session initialization.',
   },
   {
     canonicalPhase: 'session.end',
@@ -27,10 +40,7 @@ export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
     blockCapability: false,
     mutationCapability: false,
     scope: 'session',
-    notes: 'Fires on session end. Observer-only.',
   },
-
-  // --- Turn lifecycle ---
   {
     canonicalPhase: 'turn.stop',
     nativeHook: 'stop',
@@ -38,10 +48,7 @@ export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
     blockCapability: true,
     mutationCapability: false,
     scope: 'turn',
-    notes: 'Documented and stable. Can continue session. Guard against recursion.',
   },
-
-  // --- Tool lifecycle ---
   {
     canonicalPhase: 'tool.before',
     nativeHook: 'preToolUse',
@@ -49,7 +56,6 @@ export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
     blockCapability: true,
     mutationCapability: false,
     scope: 'tool',
-    notes: 'Documented and stable. Fires before tool execution. Can block (deny).',
   },
   {
     canonicalPhase: 'tool.after',
@@ -58,9 +64,28 @@ export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = [
     blockCapability: false,
     mutationCapability: false,
     scope: 'tool',
-    notes: 'Documented and stable. Observer-only post-tool hook.',
   },
 ];
+
+function buildFromCatalog(): PhaseMapping[] | null {
+  try {
+    const mappings = listHookMappingsByAdapterFamily('cursor');
+    if (mappings.length === 0) return null;
+    const phaseMappings = mappings
+      .map(hookMappingToPhaseMapping)
+      .filter((m): m is PhaseMapping => m !== null);
+    const seen = new Set<string>();
+    return phaseMappings.filter((m) => {
+      if (seen.has(m.nativeHook)) return false;
+      seen.add(m.nativeHook);
+      return true;
+    });
+  } catch {
+    return null;
+  }
+}
+
+export const CURSOR_PHASE_MAPPINGS: PhaseMapping[] = buildFromCatalog() ?? FALLBACK_MAPPINGS;
 
 /**
  * Quick lookup from native event name to phase mapping.

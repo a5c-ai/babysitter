@@ -71,6 +71,17 @@ attributes:
   defaultStepCount: 8
   skillSystemLabel: "Installed skill"
   defaultTransportId: openai-responses
+  hooksMuxFamily: shell-hook
+  sessionIdQuality: native
+  supportsOrderedFanout: true
+  supportsNativeAdditionalContext: false
+  supportsBlock: true
+  supportsAsk: false
+  supportsToolInputMutation: false
+  supportsToolResultMutation: false
+  supportsPersistedEnv: false
+  envPersistenceMode: wrapper_only
+  toolInterceptionScope: partial_shell_only
 
 edges:
   hosted_by:

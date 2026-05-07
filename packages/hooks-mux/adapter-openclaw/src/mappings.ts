@@ -1,4 +1,6 @@
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
 
 /**
  * OpenClaw hook origin type.
@@ -11,19 +13,34 @@ export type OpenClawHookOrigin = 'gateway' | 'plugin';
 /**
  * OpenClaw native event to canonical phase mappings.
  *
+ * Phase mappings are built from the Atlas graph HookMapping records
+ * via the agent-catalog. Falls back to hardcoded defaults if the
+ * catalog is unavailable.
+ *
  * KEY DESIGN DECISION: Gateway hooks and plugin hooks are mapped separately.
  * Gateway hooks use scope 'gateway' and supportLevel 'lossy' because they
- * are NOT semantically equivalent to agent-lifecycle phases. Plugin hooks
- * use standard scopes and 'native' support level.
+ * are NOT semantically equivalent to agent-lifecycle phases.
  *
  * Spec section 8.2 / 17.9.
  */
+
+function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping | null {
+  if (!mapping.canonicalPhase) return null;
+  return {
+    canonicalPhase: mapping.canonicalPhase as PhaseMapping['canonicalPhase'],
+    nativeHook: mapping.nativeName,
+    supportLevel: 'native',
+    blockCapability: mapping.blockCapability ?? false,
+    mutationCapability: mapping.mutationCapability ?? false,
+    scope: (mapping.scope ?? 'session') as PhaseMapping['scope'],
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Plugin hooks — these map to canonical agent-lifecycle phases
 // ---------------------------------------------------------------------------
 
-export const OPENCLAW_PLUGIN_MAPPINGS: PhaseMapping[] = [
+const FALLBACK_PLUGIN_MAPPINGS: PhaseMapping[] = [
   {
     canonicalPhase: 'session.start',
     nativeHook: 'plugin.session.start',
@@ -84,7 +101,7 @@ export const OPENCLAW_PLUGIN_MAPPINGS: PhaseMapping[] = [
 // Gateway hooks — infrastructure-level, NOT agent-lifecycle equivalents
 // ---------------------------------------------------------------------------
 
-export const OPENCLAW_GATEWAY_MAPPINGS: PhaseMapping[] = [
+const FALLBACK_GATEWAY_MAPPINGS: PhaseMapping[] = [
   {
     canonicalPhase: 'session.start',
     nativeHook: 'gateway.request.received',
@@ -129,6 +146,36 @@ export const OPENCLAW_GATEWAY_MAPPINGS: PhaseMapping[] = [
       'Do not treat as an agent-level permission gate.',
   },
 ];
+
+function buildFromCatalog(): { plugin: PhaseMapping[]; gateway: PhaseMapping[] } | null {
+  try {
+    const mappings = listHookMappingsByAdapterFamily('openclaw');
+    if (mappings.length === 0) return null;
+    const phaseMappings = mappings
+      .map(hookMappingToPhaseMapping)
+      .filter((m): m is PhaseMapping => m !== null);
+    // Split into plugin and gateway
+    const plugin = phaseMappings.filter((m) => m.scope !== 'gateway');
+    const gateway = phaseMappings.filter((m) => m.scope === 'gateway');
+    // Deduplicate by nativeHook within each group
+    const dedup = (arr: PhaseMapping[]) => {
+      const seen = new Set<string>();
+      return arr.filter((m) => {
+        if (seen.has(m.nativeHook)) return false;
+        seen.add(m.nativeHook);
+        return true;
+      });
+    };
+    return { plugin: dedup(plugin), gateway: dedup(gateway) };
+  } catch {
+    return null;
+  }
+}
+
+const catalogMappings = buildFromCatalog();
+
+export const OPENCLAW_PLUGIN_MAPPINGS: PhaseMapping[] = catalogMappings?.plugin ?? FALLBACK_PLUGIN_MAPPINGS;
+export const OPENCLAW_GATEWAY_MAPPINGS: PhaseMapping[] = catalogMappings?.gateway ?? FALLBACK_GATEWAY_MAPPINGS;
 
 /**
  * All OpenClaw phase mappings (plugin + gateway).

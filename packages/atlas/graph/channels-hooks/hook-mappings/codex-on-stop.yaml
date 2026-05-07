@@ -11,6 +11,10 @@ attributes:
   delivery: shell
   blocking: false
   supportLevel: supported
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:stop

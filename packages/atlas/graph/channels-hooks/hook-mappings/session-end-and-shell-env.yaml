@@ -8,6 +8,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: openclaw
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-end
@@ -24,6 +28,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: copilot
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:session-end
@@ -41,6 +49,10 @@ attributes:
   requiresRuntimeHooks: true
   adapterFamily: opencode
   notes: "Opencode shell environment hook (resolves env vars before invocation)."
+  canonicalPhase: session.start
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:opencode.shell-env
@@ -57,6 +69,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: opencode
+  canonicalPhase: session.end
+  blockCapability: false
+  mutationCapability: false
+  scope: session
 edges:
   maps_hook:
     - target: hook-surface:opencode.session-idle
@@ -74,6 +90,10 @@ attributes:
   requiresRuntimeHooks: true
   adapterFamily: pi
   notes: "Pi pre-provider-request hook surface (proxy-shaped event)."
+  canonicalPhase: model.before_request
+  blockCapability: false
+  mutationCapability: false
+  scope: model
 edges:
   maps_hook:
     - target: hook-surface:pi.on-event
@@ -90,6 +110,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: oh-my-pi
+  canonicalPhase: model.before_request
+  blockCapability: false
+  mutationCapability: false
+  scope: model
 edges:
   maps_hook:
     - target: hook-surface:omp.on-event
@@ -106,6 +130,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: openclaw
+  canonicalPhase: turn.user_prompt_submitted
+  blockCapability: false
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:openclaw.on-event
@@ -122,6 +150,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: gemini
+  canonicalPhase: turn.after_agent
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:gemini.post-response
@@ -138,6 +170,10 @@ attributes:
   versionRange: ">=0.0.0"
   requiresRuntimeHooks: true
   adapterFamily: openclaw
+  canonicalPhase: turn.stop
+  blockCapability: true
+  mutationCapability: false
+  scope: turn
 edges:
   maps_hook:
     - target: hook-surface:openclaw.on-event
