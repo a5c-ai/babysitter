@@ -5,10 +5,10 @@
  * @outputs { success: boolean, violations: Array<object>, suggestedBranch?: string }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:version-control]
- *   topics: [topic:git-workflow, topic:code-review]
- *   workflows: [workflow:code-review, workflow:feature-development]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   specializations: [specialization:collaboration]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:gitops]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:platform-engineer, role:engineering-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

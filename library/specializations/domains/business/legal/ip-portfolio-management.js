@@ -16,11 +16,12 @@
  * @references
  * - AIPLA IP Management: https://www.aipla.org/
  * - WIPO IP Management: https://www.wipo.int/
- * @graph
+  * @graph
  *   domains: [domain:legal]
- *   skillAreas: [skill-area:legal-analysis]
- *   topics: [topic:contract-management, topic:compliance]
- *   roles: [role:legal-counsel]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

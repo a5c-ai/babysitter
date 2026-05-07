@@ -20,9 +20,8 @@ metadata:
   background: Prototype testing, validation, certification
 graph:
   domains: [domain:mechanical-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:systems-modeling]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:physics-simulation, skill-area:mathematical-reasoning, skill-area:motion-planning]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Test and Validation Specialist Agent

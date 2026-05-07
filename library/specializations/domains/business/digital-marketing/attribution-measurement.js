@@ -3,11 +3,11 @@
  * @description Process for developing and implementing attribution models and measurement frameworks to understand marketing effectiveness and inform budget allocation
  * @inputs { businessQuestions: array, trackingData: object, conversionData: object, channelSpend: object, outputDir: string }
  * @outputs { success: boolean, attributionModels: array, measurementFramework: object, dashboards: array, budgetRecommendations: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

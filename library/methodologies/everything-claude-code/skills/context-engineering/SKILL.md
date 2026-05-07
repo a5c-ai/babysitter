@@ -4,18 +4,10 @@ description: Dynamic context injection, mode switching (dev/review/research), se
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Context Engineering
-
-## Overview
-
-Context management methodology adapted from the Everything Claude Code project. Optimizes context window usage through dynamic injection, mode switching, selective loading, and strategic compaction.
-
-## Context Modes
-
-### Dev Mode
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Load: architecture docs, active code files, test files, recent changes
 - Skip: historical discussions, completed milestones, research notes
 - Priority: implementation speed

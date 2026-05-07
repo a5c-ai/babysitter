@@ -4,9 +4,10 @@ description: Stratify patient populations by risk level using claims data, clini
 allowed-tools: Read, Grep, Write, Edit, Glob, Bash, WebFetch
 graph:
   domains: [domain:healthcare]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Population Health Stratification

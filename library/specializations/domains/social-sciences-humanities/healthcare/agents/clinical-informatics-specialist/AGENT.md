@@ -4,9 +4,10 @@ description: Implement and optimize health IT systems including EHR, HIE, and cl
 required-skills: health-data-integration, clinical-decision-support-rules, clinical-workflow-analysis
 graph:
   domains: [domain:healthcare]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Clinical Informatics Specialist Agent

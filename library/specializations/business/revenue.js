@@ -9,9 +9,10 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/business/revenue-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:revenue-modeling, topic:product-strategy]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   skillAreas: [skill-area:business-analysis, skill-area:financial-modeling, skill-area:business-model-design, skill-area:strategic-planning]
+ *   topics: [topic:developer-experience]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:business-analyst, role:tech-lead, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

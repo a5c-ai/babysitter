@@ -4,9 +4,10 @@ description: Design and align K-12 or higher education curricula with educationa
 required-skills: learning-objectives-writing, standards-alignment-mapping, curriculum-gap-analysis
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Curriculum Development Specialist Agent

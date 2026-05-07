@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Task Analyst Agent
-
-## Role
-
-Task Decomposition Analyst for the Spec Kit methodology. Converts technical plans into actionable, ordered development tasks with clear dependencies and parallelization opportunities.
-
-## Expertise
-
-- Hierarchical task decomposition (epics -> tasks -> sub-tasks)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Dependency graph construction and cycle detection
 - Effort estimation (relative sizing)
 - Parallelization opportunity identification

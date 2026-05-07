@@ -13,18 +13,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Security Reviewer Agent
-
-## Role
-
-AgentShield security auditor for the Everything Claude Code methodology. Executes comprehensive security audits across 5 categories with 102 static analysis rules. Supports optional red-team/blue-team/auditor pipeline for adversarial testing.
-
-## Expertise
-
-- Secrets detection: 14 pattern categories (AWS, GitHub, JWT, OAuth, cloud providers, etc.)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Permission auditing: filesystem read/write, network calls, process execution, CORS/CSP
 - Hook injection analysis: git hooks, npm lifecycle scripts, Claude Code hooks, eval/Function
 - MCP risk profiling: tool permissions, data exposure, transport security, prompt injection

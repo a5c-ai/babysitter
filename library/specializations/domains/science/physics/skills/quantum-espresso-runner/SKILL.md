@@ -15,9 +15,9 @@ metadata:
   phase: 6
 graph:
   domains: [domain:physics]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:scientific-computing, topic:research-methodology]
-  roles: [role:tech-lead, role:data-engineer]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Quantum ESPRESSO Runner

@@ -4,18 +4,10 @@ description: WASM-based instant code transforms for simple tasks, achieving 352x
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Agent Booster
-
-## Overview
-
-WASM-compiled code transformation engine for simple, well-defined tasks. Bypasses LLM inference entirely for pattern-matched transforms, achieving sub-millisecond execution at zero cost.
-
-## When to Use
-
-- Simple, deterministic code transforms
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - High-frequency repetitive modifications
 - When latency is critical (<1ms requirement)
 - Cost-sensitive batch operations

@@ -16,8 +16,9 @@ metadata:
     - Sales domain knowledge
 graph:
   domains: [domain:sales]
-  skillAreas: [skill-area:sales-methodology]
-  roles: [role:sales-manager]
+  skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+  workflows: [workflow:customer-journey-optimization]
+  roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
 ---
 
 # SPIN Coach Agent

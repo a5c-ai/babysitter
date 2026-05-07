@@ -4,12 +4,11 @@ description: Cross-references GitHub, Linear, Slack, and PostHog data with bidir
 role: Cross-Platform Integration & Team Intelligence
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Team Synthesizer Agent
-
-**Name:** Team Synthesizer
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Cross-Platform Integration & Team Intelligence
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
 

@@ -10,9 +10,10 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/media/image-editing-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:ai-agent-development]
- *   topics: [topic:image-processing, topic:generative-ai]
- *   roles: [role:platform-engineer]
+ *   specializations: [specialization:media]
+ *   skillAreas: [skill-area:image-processing, skill-area:media-encoding, skill-area:visual-design]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:media-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

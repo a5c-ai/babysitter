@@ -3,11 +3,11 @@
  * @description Structured workflow for escalating complex issues through support tiers with clear handoff protocols and communication standards
  * @inputs { ticket: object, currentAgent: object, escalationReason: string, customerContext: object, targetTier: number }
  * @outputs { success: boolean, escalationRecord: object, handoffPackage: object, communicationPlan: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:customer-experience]
- *   skillAreas: [skill-area:customer-success]
- *   topics: [topic:customer-journey-mapping, topic:voice-of-customer]
- *   roles: [role:customer-success-manager]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

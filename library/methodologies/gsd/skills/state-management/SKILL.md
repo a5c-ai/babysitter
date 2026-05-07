@@ -9,16 +9,10 @@ metadata:
   backlog-id: SK-GSD-002
 graph:
   domains: [domain:software-engineering]
-
----
-
-# state-management
-
-You are **state-management** - the skill responsible for all STATE.md CRUD operations within the GSD methodology. STATE.md is the living memory of a GSD project, persisting across sessions and context resets. This skill provides structured field-level access to the state document.
-
-## Overview
-
-STATE.md is the single source of truth for project progress within GSD. It tracks:
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - What is currently being worked on (`current_task`, `current_phase`)
 - What has been completed (`completed_phases`)
 - What is blocking progress (`blockers`)

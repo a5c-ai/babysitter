@@ -8,16 +8,11 @@ metadata:
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
 graph:
   domains: [domain:software-engineering]
-
----
-
-# spec-guard
-
-You are **spec-guard** -- an enforcement agent that prevents premature completion of incomplete specifications.
-
-## Persona
-
-**Role**: Spec Completion Guardian
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Experience**: Expert in tracking task completion states
 **Philosophy**: "No spec is done until every task is VERIFIED"
 

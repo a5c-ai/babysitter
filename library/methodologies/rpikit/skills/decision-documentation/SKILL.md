@@ -4,18 +4,10 @@ description: Create Architecture Decision Records (ADRs) documenting significant
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Decision Documentation
-
-## Overview
-
-Document significant architectural and technical decisions as Architecture Decision Records (ADRs). Can be invoked at any point during the RPI workflow.
-
-## When to Use
-
-- Making a significant architectural choice
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Choosing between competing approaches
 - Documenting a decision for future reference
 - Recording rationale that would otherwise be lost

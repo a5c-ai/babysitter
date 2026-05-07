@@ -16,9 +16,10 @@ metadata:
   phase: 6
 graph:
   domains: [domain:scientific-discovery]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:research-methodology, topic:scientific-computing]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:scientific-research-methods]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:deep-web-research]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Elicit Research Assistant

@@ -13,8 +13,9 @@ metadata:
   skill-id: SK-014
 graph:
   domains: [domain:entrepreneurship]
-  skillAreas: [skill-area:strategic-planning]
-  roles: [role:founder]
+  skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+  workflows: [workflow:product-discovery]
+  roles: [role:strategic-planner, role:product-manager]
 ---
 
 # Investor CRM Manager Skill

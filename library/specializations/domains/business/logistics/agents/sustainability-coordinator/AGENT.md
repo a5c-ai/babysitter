@@ -15,8 +15,8 @@ required-skills:
   - network-optimization-modeler
 graph:
   domains: [domain:logistics]
-  skillAreas: [skill-area:supply-chain-management]
-  roles: [role:logistics-manager]
+  skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+  roles: [role:supply-chain-analyst, role:operations-analyst]
 ---
 
 # Sustainability Coordinator

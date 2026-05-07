@@ -4,18 +4,10 @@ description: Clarify vague requirements through exploratory questioning and opti
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Brainstorming
-
-## Overview
-
-When requirements are vague and "what to build" is unclear, brainstorming clarifies the problem space through structured questioning and option generation.
-
-## When to Use
-
-- Requirements lack clarity or specificity
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Multiple valid approaches exist and trade-offs need exploration
 - The problem space needs definition before research
 - Stakeholders have not converged on a direction

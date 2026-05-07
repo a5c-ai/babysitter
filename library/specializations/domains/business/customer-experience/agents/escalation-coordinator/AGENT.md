@@ -16,8 +16,9 @@ metadata:
   id: AG-010
 graph:
   domains: [domain:customer-experience]
-  skillAreas: [skill-area:customer-success]
-  roles: [role:customer-success-manager]
+  skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+  workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+  roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
 ---
 
 # Support Escalation Coordinator Agent

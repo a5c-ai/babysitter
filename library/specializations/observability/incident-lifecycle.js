@@ -5,9 +5,10 @@
  * @outputs { success: boolean, severity: "SEV1"|"SEV2"|"SEV3"|"SEV4"|"non-incident", mitigation: object, recoveryVerified: boolean, postmortemUrl?: string, actionItems: Array<object>, slaBreaches?: Array<string> }
  * @graph
  *   domains: [domain:observability]
- *   skillAreas: [skill-area:incident-management]
- *   topics: [topic:incident-management, topic:slo-sli]
- *   roles: [role:platform-engineer, role:site-reliability-engineer]
+ *   specializations: [specialization:observability]
+ *   skillAreas: [skill-area:incident-response, skill-area:alerting-oncall, skill-area:observability-instrumentation, skill-area:sli-slo-management]
+ *   workflows: [workflow:incident-response, workflow:on-call-rotation, workflow:post-mortem-review]
+ *   roles: [role:sre, role:observability-engineer, role:devops-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

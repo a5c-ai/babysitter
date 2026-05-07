@@ -4,18 +4,10 @@ description: Establish project governing principles including dev guidelines, co
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Constitution Creation
-
-## Overview
-
-Establish the project constitution -- the governing document that defines development principles, quality standards, and constraints for all subsequent specification and implementation work.
-
-## When to Use
-
-- Starting a new project that needs governance foundations
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Formalizing existing project standards into a constitution
 - Updating governance principles for an evolving project
 - Before writing specifications for a new feature area

@@ -3,11 +3,12 @@
  * @description Annual strategic planning process including preparation, analysis, formulation, and implementation planning
  * @inputs { organizationName: string, planningPeriod: string, currentStrategy: object, environmentalData: object }
  * @outputs { success: boolean, strategicPlan: object, implementationRoadmap: object, communicationPlan: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:strategy]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:corporate-strategy, topic:innovation-management]
- *   roles: [role:strategy-consultant]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

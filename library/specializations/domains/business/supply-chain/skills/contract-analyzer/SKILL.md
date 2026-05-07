@@ -14,8 +14,10 @@ metadata:
   priority: future
 graph:
   domains: [domain:supply-chain]
-  skillAreas: [skill-area:supply-chain-management]
-  roles: [role:supply-chain-manager]
+  specializations: [specialization:supply-chain-optimization]
+  skillAreas: [skill-area:procurement-management, skill-area:vendor-management-ops]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:supply-chain-analyst, role:procurement-manager]
 ---
 
 # Contract Analyzer

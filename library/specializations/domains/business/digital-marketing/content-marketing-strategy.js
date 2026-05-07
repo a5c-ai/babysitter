@@ -3,11 +3,11 @@
  * @description Process for developing a comprehensive content marketing strategy aligned with business objectives, including content audit, topic cluster development, editorial calendar creation, and distribution planning
  * @inputs { businessObjectives: object, seoData: object, audienceResearch: object, competitiveContentAnalysis: object, outputDir: string }
  * @outputs { success: boolean, strategyDocument: string, topicClusterMap: object, editorialCalendar: object, contentBriefTemplates: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -5,11 +5,10 @@
  * @category Internal Communications
  * @inputs { eventPurpose: object, audience: object, executives: object[], contentTopics: string[] }
  * @outputs { success: boolean, eventPlan: object, contentPlan: object, facilitationGuide: object, quality: number }
- * @graph
+  * @graph
  *   domains: [domain:public-relations]
- *   skillAreas: [skill-area:communications-strategy]
- *   topics: [topic:media-relations, topic:brand-management]
- *   roles: [role:communications-manager]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,16 +9,10 @@ allowed-tools:
   - git-commit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# COG URL Extraction Skill
-
-Save URLs and automatically extract insights including title, summary, key takeaways, and credibility assessment.
-
-## Capabilities
-
-- Fetch and analyze URLs for key insights
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Extract: title, summary, key takeaways, relevant quotes
 - Assess source credibility and assign confidence levels
 - Classify extracted insights by domain

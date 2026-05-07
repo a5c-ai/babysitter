@@ -14,11 +14,10 @@
  * @references
  * - SCOR Model: https://www.ascm.org/corporate-transformation/standards/scor/
  * - Inventory Classification: https://www.apics.org/
- * @graph
+  * @graph
  *   domains: [domain:logistics]
- *   skillAreas: [skill-area:supply-chain-management]
- *   topics: [topic:logistics-management, topic:warehouse-operations]
- *   roles: [role:logistics-manager]
+ *   skillAreas: [skill-area:procurement-management, skill-area:organizational-design]
+ *   roles: [role:supply-chain-analyst, role:operations-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

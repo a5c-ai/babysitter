@@ -4,9 +4,8 @@ description: Exhibition design and installation specialist agent for spatial des
 required-skills: exhibition-design, accessibility-compliance, digital-engagement-strategy
 graph:
   domains: [domain:arts-culture]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:content-creation, topic:knowledge-management]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:visual-design, skill-area:motion-design, skill-area:data-analysis]
+  roles: [role:creative-director, role:design-lead]
 ---
 
 # Exhibition Designer Agent

@@ -3,11 +3,11 @@
  * @description Map and measure customer touchpoints across channels, identify drop-off points, and optimize conversion funnels through data analysis.
  * @inputs { touchpointData: object, conversionData: object, channelData: object, segments: array }
  * @outputs { success: boolean, journeyMaps: array, funnelAnalysis: object, dropOffAnalysis: object, optimizationRecommendations: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:marketing-strategy, topic:customer-segmentation]
- *   roles: [role:marketing-manager]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -16,11 +16,11 @@
  * - Porter's Five Forces: https://www.isc.hbs.edu/strategy/business-strategy/
  * - Blue Ocean Strategy: https://www.blueoceanstrategy.com/
  * - Competitive Strategy - Michael Porter
- * @graph
+  * @graph
  *   domains: [domain:entrepreneurship]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:startup-strategy, topic:product-market-fit]
- *   roles: [role:founder]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

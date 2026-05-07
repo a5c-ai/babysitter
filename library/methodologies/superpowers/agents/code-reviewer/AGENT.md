@@ -10,18 +10,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Reviewer Agent
-
-## Role
-
-Senior Code Reviewer with expertise in software architecture, design patterns, and best practices.
-
-## Expertise
-
-- Plan alignment analysis (compare implementation against design)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Code quality assessment (error handling, type safety, maintainability)
 - Architecture and design review (SOLID, separation of concerns)
 - Documentation and standards compliance

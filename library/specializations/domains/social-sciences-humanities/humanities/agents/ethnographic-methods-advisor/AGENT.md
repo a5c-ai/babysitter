@@ -4,9 +4,10 @@ description: Support ethnographic research design and qualitative analysis inclu
 required-skills: ethnographic-coding-thematics, research-ethics-irb-navigation, oral-history-interview-technique
 graph:
   domains: [domain:humanities]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-engineer]
 ---
 
 # Ethnographic Methods Advisor Agent

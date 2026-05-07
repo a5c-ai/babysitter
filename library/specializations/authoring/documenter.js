@@ -10,9 +10,11 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/development/documenter-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:documentation, topic:developer-experience]
- *   roles: [role:tech-lead, role:backend-engineer]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:api-doc-generation]
+ *   topics: [topic:developer-experience]
+ *   workflows: [workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:technical-writer, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,18 +4,10 @@ description: AIDefence security layer with prompt injection blocking, input vali
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Security Hardening
-
-## Overview
-
-Multi-layered security audit pipeline implementing the AIDefence architecture. Protects against prompt injection, path traversal, and other attack vectors while ensuring compliance with security best practices.
-
-## When to Use
-
-- Before deploying code to production
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When processing untrusted inputs
 - Security audits of agent-generated code
 - Compliance verification (OWASP Top 10, CIS)

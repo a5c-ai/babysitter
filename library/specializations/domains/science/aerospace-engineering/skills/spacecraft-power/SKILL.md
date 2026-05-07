@@ -20,9 +20,9 @@ metadata:
     - batteries
 graph:
   domains: [domain:aerospace-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:scientific-computing]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:aerospace-engineering]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:sensor-fusion]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Spacecraft Power Analysis Skill

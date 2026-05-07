@@ -4,18 +4,10 @@ description: Parallel research agent orchestration dispatching 5-10 concurrent a
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Research Orchestration
-
-## Overview
-
-Orchestrates 5-10 parallel research agents for comprehensive, multi-source research. Achieves up to 90% faster results compared to sequential research through concurrent execution.
-
-## Research Depths
-
-| Depth | Agent Count | Use Case |
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 |-------|------------|----------|
 | Shallow | 5 | Quick fact-finding, simple queries |
 | Medium | 7 | Standard research, moderate complexity |

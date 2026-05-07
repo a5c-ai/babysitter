@@ -18,8 +18,8 @@ metadata:
     - simdynamics
 graph:
   domains: [domain:business-intelligence]
-  skillAreas: [skill-area:data-analysis]
-  roles: [role:data-analyst]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+  roles: [role:data-analyst, role:business-analyst]
 ---
 
 # System Dynamics Modeler

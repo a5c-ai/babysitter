@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Implementation Engineer Agent
-
-## Role
-
-Code Generation Engineer for the Spec Kit methodology. Executes individual development tasks to produce code, tests, and configuration artifacts that satisfy specification requirements and comply with constitution standards.
-
-## Expertise
-
-- Code generation following constitution coding standards
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Test writing (unit, integration, end-to-end)
 - Configuration file generation
 - Build system and CI/CD integration

@@ -14,11 +14,11 @@
  * @references
  * - The Founder's Dilemmas (Noam Wasserman): https://www.amazon.com/Founders-Dilemmas-Noam-Wasserman/dp/0691158304
  * - Slicing Pie: https://slicingpie.com/
- * @graph
+  * @graph
  *   domains: [domain:entrepreneurship]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:startup-strategy, topic:product-market-fit]
- *   roles: [role:founder]
+ *   skillAreas: [skill-area:business-model-design, skill-area:growth-strategy, skill-area:product-strategy]
+ *   workflows: [workflow:product-discovery]
+ *   roles: [role:strategic-planner, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

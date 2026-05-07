@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Planner Agent
-
-## Role
-
-Strategic planning agent for the PLAN workflow. Researches existing solutions, brainstorms alternatives, creates comprehensive plans with phases and milestones, and saves them for BUILD workflow continuity.
-
-## Expertise
-
-- External research via github-researcher
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Alternative approach generation and trade-off analysis
 - Phase-based plan structure with dependencies
 - Risk assessment and mitigation strategies

@@ -3,11 +3,10 @@
  * @description Evaluation of technology stack, product architecture, code quality, technical debt, intellectual property portfolio, and R&D capabilities with expert reviewers
  * @inputs { companyName: string, techStack: object, codebaseAccess: boolean, productInfo: object }
  * @outputs { success: boolean, techAssessment: object, codeQuality: object, ipPortfolio: object, rdCapabilities: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:venture-capital]
- *   skillAreas: [skill-area:investment-analysis]
- *   topics: [topic:startup-funding, topic:portfolio-management]
- *   roles: [role:venture-capitalist]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

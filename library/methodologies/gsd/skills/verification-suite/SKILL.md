@@ -9,16 +9,10 @@ metadata:
   backlog-id: SK-GSD-007
 graph:
   domains: [domain:software-engineering]
-
----
-
-# verification-suite
-
-You are **verification-suite** - the skill that validates GSD artifacts for structural correctness, completeness, and integrity. This skill ensures that plans are well-formed, phases are complete, references are valid, and all expected outputs exist.
-
-## Overview
-
-The verification suite is the quality gate for GSD processes. It answers questions like:
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Is this plan structurally valid? (XML task format, required sections, frontmatter)
 - Is this phase complete? (all plans executed, summaries written, state updated)
 - Do all references resolve? (no broken links, missing files, stale references)

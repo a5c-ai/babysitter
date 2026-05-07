@@ -9,9 +9,10 @@
  * Source: a5c-ai/registry/prompts/research/novelties-scanner-base-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:research-methodology]
- *   roles: [role:tech-lead]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:docs-as-code]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

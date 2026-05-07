@@ -4,18 +4,10 @@ description: Convert technical plans into actionable development tasks with depe
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Task Decomposition
-
-## Overview
-
-Decompose a technical plan into actionable development tasks. Each task is atomic, has clear acceptance criteria traceable to specification requirements, and includes dependency information for optimal execution ordering.
-
-## When to Use
-
-- After technical plan is approved, before implementation
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When breaking down a large feature into implementable units
 - When identifying parallelization opportunities in a task set
 - When estimating effort and critical path for a feature

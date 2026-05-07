@@ -10,18 +10,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Test Runner Agent
-
-## Role
-
-Test Execution Specialist for the RPIKit implementation phase. Runs test suites, reports coverage, and diagnoses failures.
-
-## Expertise
-
-- Detecting and running test frameworks (vitest, jest, mocha, pytest)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Coverage metric collection and reporting
 - Test failure root cause identification
 - Regression detection

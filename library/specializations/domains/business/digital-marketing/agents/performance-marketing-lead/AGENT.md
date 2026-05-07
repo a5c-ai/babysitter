@@ -18,8 +18,9 @@ metadata:
   agent-id: AG-012
 graph:
   domains: [domain:digital-marketing]
-  skillAreas: [skill-area:marketing-analytics]
-  roles: [role:digital-marketing-manager]
+  specializations: [specialization:digital-marketing-strategy]
+  skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+  roles: [role:marketing-strategist, role:marketing-manager]
 ---
 
 # Performance Marketing Lead Agent

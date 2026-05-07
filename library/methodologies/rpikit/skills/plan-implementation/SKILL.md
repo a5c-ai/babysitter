@@ -4,18 +4,10 @@ description: Disciplined execution of approved plans with step-by-step verificat
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Plan Implementation
-
-## Overview
-
-Execute approved plans with discipline. Each step follows a read-modify-verify loop. Phase checkpoints require human approval. Failures trigger investigation before proceeding.
-
-## When to Use
-
-- After a plan has been approved via the planning phase
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - For medium and high stakes changes (low stakes can proceed inline)
 - When structured execution with verification is needed
 

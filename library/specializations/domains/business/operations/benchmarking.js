@@ -26,11 +26,11 @@
  *   projectParameters: { timeline: "6-months", resources: {...}, budget: 50000 }
  * }
  * @references APQC Benchmarking, Xerox Benchmarking Model, Camp's Benchmarking Process
- * @graph
+  * @graph
  *   domains: [domain:operations]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:process-optimization, topic:operational-excellence]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -27,11 +27,12 @@
  * - Qualtrics Employee Experience Methodology
  * - Culture Amp Best Practices
  * - Bersin Employee Listening Strategy
- * @graph
+  * @graph
  *   domains: [domain:human-resources]
- *   skillAreas: [skill-area:talent-management]
- *   topics: [topic:employee-development, topic:performance-management]
- *   roles: [role:hr-manager]
+ *   specializations: [specialization:talent-management]
+ *   skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+ *   workflows: [workflow:talent-acquisition-pipeline]
+ *   roles: [role:hr-manager, role:talent-recruiter]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

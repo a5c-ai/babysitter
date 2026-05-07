@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Performance Analyst Agent
-
-## Role
-
-Identifies performance bottlenecks, resource leaks, and optimization opportunities in code changes.
-
-## Expertise
-
-- Algorithmic complexity: flags O(n^2) or worse with suggested alternatives
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Resource leaks: unclosed handles, event listener accumulation, timer leaks
 - Database: N+1 queries, missing indexes, unbounded result sets
 - Caching: missed opportunities, invalid invalidation strategies

@@ -16,11 +16,10 @@
  * @references
  * - IBM Decision Optimization: https://www.ibm.com/analytics/decision-optimization
  * - Operations Research: Hillier and Lieberman
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:data-analysis]
- *   topics: [topic:decision-analysis, topic:data-driven-decisions]
- *   roles: [role:data-analyst]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

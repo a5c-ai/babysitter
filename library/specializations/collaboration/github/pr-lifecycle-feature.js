@@ -5,10 +5,10 @@
  * @outputs { success: boolean, stages: object, blockers: string[], readyToMerge: boolean }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:version-control]
- *   topics: [topic:code-review, topic:git-workflow]
- *   workflows: [workflow:code-review, workflow:feature-development]
- *   roles: [role:tech-lead, role:backend-engineer]
+ *   specializations: [specialization:collaboration]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:gitops, skill-area:code-analysis-linting]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:backend-engineer, role:engineering-manager]
  */
 
 import { process as prPolicies } from './pr-policies.js';

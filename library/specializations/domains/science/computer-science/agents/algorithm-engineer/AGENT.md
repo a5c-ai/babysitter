@@ -15,9 +15,10 @@ metadata:
   phase: 6
 graph:
   domains: [domain:computer-science]
-  skillAreas: [skill-area:software-architecture]
-  topics: [topic:algorithm-design, topic:formal-methods]
-  roles: [role:tech-lead, role:backend-engineer]
+  specializations: [specialization:theoretical-computer-science]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:graph-algorithms]
+  workflows: [workflow:research-grant-lifecycle]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # Algorithm Engineer

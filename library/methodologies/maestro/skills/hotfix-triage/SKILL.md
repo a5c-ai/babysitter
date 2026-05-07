@@ -4,8 +4,10 @@ description: Urgent issue classification, root cause analysis, and fast-path rou
 allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]
 graph:
   domains: [domain:software-engineering]
-
----
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 # Hotfix Triage
 
 ## Capabilities

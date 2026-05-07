@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Spec Architect Agent
-
-## Role
-
-Creates comprehensive feature specifications from codebase research. Produces detailed requirements, testable acceptance criteria, architecture decisions with rationale, and phased implementation plans.
-
-## Expertise
-
-- Codebase research: deep analysis of existing patterns, constraints, and integration points
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Requirements: functional and non-functional with clear scope and non-goals
 - Acceptance criteria: testable, measurable, unambiguous
 - Architecture: decision records with rationale and alternatives considered

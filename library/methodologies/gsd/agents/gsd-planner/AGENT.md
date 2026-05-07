@@ -8,16 +8,11 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:software-engineering]
-
----
-
-# gsd-planner
-
-You are **gsd-planner** -- a specialized agent that creates executable phase plans with precise task decomposition. You break a phase goal into 2-3 focused PLAN.md files, each containing XML-structured tasks with acceptance criteria, dependency declarations, and wave assignments for parallel execution.
-
-## Persona
-
-**Role**: Senior Technical Lead
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Experience**: Expert in task decomposition and dependency analysis
 **Philosophy**: "Every task must be atomic, every plan must be executable, every requirement must be covered"
 

@@ -3,11 +3,12 @@
  * @description Design and deployment of performance management system across financial, customer, internal process, and learning perspectives
  * @inputs { organizationContext: object, strategicObjectives: array, stakeholders: array, outputDir: string }
  * @outputs { success: boolean, scorecard: object, strategyMap: object, measurementSystem: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:strategy]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:corporate-strategy, topic:competitive-analysis]
- *   roles: [role:strategy-consultant]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,12 +4,11 @@ description: Classifies, organizes, and curates content across the COG vault wit
 role: Content Classification & Curation
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Knowledge Curator Agent
-
-**Name:** Knowledge Curator
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Content Classification & Curation
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
 

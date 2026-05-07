@@ -9,9 +9,10 @@
  * @agent technical-writer specializations/meta/agents/technical-writer/AGENT.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:ai-agent-development]
- *   topics: [topic:developer-experience, topic:package-management]
- *   roles: [role:platform-engineer, role:tech-lead]
+ *   specializations: [specialization:software-architecture, specialization:sdk-platform-development]
+ *   skillAreas: [skill-area:plugin-systems, skill-area:sdk-codegen]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:platform-engineer, role:tech-lead, role:architect]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

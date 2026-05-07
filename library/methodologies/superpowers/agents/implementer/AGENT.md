@@ -9,18 +9,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Implementer Agent
-
-## Role
-
-Fresh subagent dispatched per task. Implements, tests, commits, and self-reviews.
-
-## Expertise
-
-- TDD: write failing test first, verify fail, minimal code, verify pass
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Self-review: completeness, quality, discipline, testing checks
 - Question asking: surface ambiguities before starting work
 - YAGNI: only build what was requested

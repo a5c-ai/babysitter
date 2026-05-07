@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Security Auditor Agent
-
-## Role
-
-Worker agent specializing in security auditing. Detects vulnerabilities, performs threat modeling, validates compliance, and recommends hardening measures.
-
-## Expertise
-
-- Static analysis vulnerability detection (SAST)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - STRIDE threat modeling (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege)
 - OWASP Top 10 compliance verification
 - Prompt injection and AI-specific attack detection

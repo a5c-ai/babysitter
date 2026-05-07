@@ -4,18 +4,10 @@ description: Transform research findings into actionable implementation plans wi
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Plan Writing
-
-## Overview
-
-Convert research findings into actionable implementation plans. Scales planning rigor to stakes level. Every code-changing task specifies tests before implementation.
-
-## When to Use
-
-- After research phase identifies what needs to change
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Before implementing any medium or high stakes changes
 - When requirements are clear and codebase is understood
 

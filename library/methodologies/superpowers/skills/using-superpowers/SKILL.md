@@ -3,22 +3,10 @@ name: using-superpowers
 description: Use when starting any conversation. Establishes how to find and use skills, requiring skill invocation before any response.
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Using Superpowers
-
-## Overview
-
-Invoke relevant skills BEFORE any response or action. Even a 1% chance means invoke the skill.
-
-## The Rule
-
-Check for applicable skills before any task. Skills are mandatory workflows, not suggestions.
-
-## Skill Priority
-
-1. **Process skills first** (brainstorming, debugging) - determine HOW to approach
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **Implementation skills second** - guide execution
 
 ## Skill Types

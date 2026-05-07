@@ -4,9 +4,10 @@ description: Coordinate care across settings and providers for complex patients,
 required-skills: care-transition-coordination, population-health-stratification, clinical-workflow-analysis
 graph:
   domains: [domain:healthcare]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Care Management Coordinator Agent

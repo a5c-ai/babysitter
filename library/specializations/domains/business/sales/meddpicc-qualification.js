@@ -17,11 +17,11 @@
  * @references
  * - MEDDIC Academy: https://meddic.academy/
  * - MEDDICC - The Book: https://www.amazon.com/MEDDICC-enterprise-salespeople-qualifying-opportunities/dp/1838231951
- * @graph
+  * @graph
  *   domains: [domain:sales]
- *   skillAreas: [skill-area:sales-methodology]
- *   topics: [topic:pipeline-management, topic:account-management]
- *   roles: [role:sales-manager]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

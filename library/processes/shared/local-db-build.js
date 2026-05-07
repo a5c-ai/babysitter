@@ -58,9 +58,10 @@
  *
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:backend-api-development]
- *   topics: [topic:database-management, topic:developer-experience]
- *   roles: [role:backend-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

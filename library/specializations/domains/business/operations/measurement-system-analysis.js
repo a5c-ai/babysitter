@@ -18,11 +18,11 @@
  * - AIAG MSA Manual (4th Edition)
  * - Montgomery, D.C. (2019). Introduction to Statistical Quality Control
  * - Wheeler, D.J. & Lyday, R.W. (1989). Evaluating the Measurement Process
- * @graph
+  * @graph
  *   domains: [domain:operations]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:process-optimization, topic:operational-excellence]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

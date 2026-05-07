@@ -3,11 +3,11 @@
  * @description Comprehensive process for guiding new customers through implementation, training, and time-to-value acceleration with milestone tracking and success metrics
  * @inputs { customerName: string, productTier: string, implementationPlan: object, stakeholders: array, objectives: array }
  * @outputs { success: boolean, onboardingPlan: object, trainingSchedule: object, successMilestones: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:customer-experience]
- *   skillAreas: [skill-area:customer-success]
- *   topics: [topic:customer-journey-mapping, topic:voice-of-customer]
- *   roles: [role:customer-success-manager]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

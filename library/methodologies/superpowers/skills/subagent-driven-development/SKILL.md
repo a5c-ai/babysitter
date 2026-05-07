@@ -3,20 +3,10 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session. Dispatches fresh subagent per task.
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Subagent-Driven Development
-
-## Overview
-
-Execute plan by dispatching fresh subagent per task with two-stage review: spec compliance first, then code quality.
-
-**Core principle:** Fresh subagent per task + two-stage review = high quality, fast iteration.
-
-## When to Use
-
-- Have implementation plan with mostly independent tasks
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Want to stay in current session
 - Want automatic review checkpoints
 

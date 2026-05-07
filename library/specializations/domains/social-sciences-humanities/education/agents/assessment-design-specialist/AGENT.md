@@ -4,9 +4,10 @@ description: Develop valid, reliable assessments and rubrics that accurately mea
 required-skills: assessment-item-development, rubric-design-validation, learning-objectives-writing
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Assessment Design Specialist Agent

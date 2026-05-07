@@ -4,9 +4,10 @@ description: Conduct language documentation and linguistic analysis including ph
 required-skills: ipa-transcription-phonological, morphosyntactic-analysis, topic-modeling-text-mining
 graph:
   domains: [domain:humanities]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-engineer]
 ---
 
 # Documentary Linguist Agent

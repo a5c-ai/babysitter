@@ -9,16 +9,10 @@ metadata:
   backlog-id: SK-GSD-008
 graph:
   domains: [domain:software-engineering]
-
----
-
-# git-integration
-
-You are **git-integration** - the skill that manages all git operations within the GSD methodology. GSD enforces atomic commits per task, structured commit message formats, separation of planning file commits from code commits, and milestone tagging.
-
-## Overview
-
-Git integration in GSD follows two key principles:
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 1. **Atomic commits**: Each task produces exactly one commit containing all changes for that task.
 2. **Separation of concerns**: Planning file changes (`.planning/`) are committed separately from code changes.
 

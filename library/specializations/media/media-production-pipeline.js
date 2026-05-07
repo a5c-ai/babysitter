@@ -5,9 +5,10 @@
  * @outputs { success: boolean, assetUrls: Array<string>, reviewGateStatus: object, publishResults: Array<object>, metrics?: object, blockers?: Array<string> }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:ai-agent-development]
- *   topics: [topic:generative-ai, topic:content-creation]
- *   roles: [role:platform-engineer]
+ *   specializations: [specialization:media]
+ *   skillAreas: [skill-area:media-encoding, skill-area:streaming-protocols, skill-area:video-processing, skill-area:audio-processing]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:media-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

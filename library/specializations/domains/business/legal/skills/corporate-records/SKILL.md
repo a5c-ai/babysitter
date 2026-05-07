@@ -15,8 +15,10 @@ metadata:
   skill-id: SK-022
 graph:
   domains: [domain:legal]
-  skillAreas: [skill-area:legal-analysis]
-  roles: [role:legal-counsel]
+  specializations: [specialization:legal-compliance]
+  skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+  workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+  roles: [role:legal-counsel, role:compliance-officer]
 ---
 
 # Corporate Records Skill

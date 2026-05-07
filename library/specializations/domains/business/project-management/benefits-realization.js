@@ -18,11 +18,11 @@
  * - MSP (Managing Successful Programmes): https://www.axelos.com/certifications/msp
  * - PMI Benefits Realization Management: https://www.pmi.org/learning/library/benefits-realization-management-framework-10206
  * - Gartner Benefits Management: https://www.gartner.com/en/documents/3895263
- * @graph
+  * @graph
  *   domains: [domain:project-management]
- *   skillAreas: [skill-area:project-management]
- *   topics: [topic:project-planning, topic:agile-methodology]
- *   roles: [role:project-manager]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+ *   workflows: [workflow:project-kickoff, workflow:feature-development]
+ *   roles: [role:project-manager, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,11 +3,11 @@
  * @description Process for monitoring brand mentions, industry conversations, and audience sentiment across social platforms and the web, enabling proactive engagement and crisis management
  * @inputs { brandKeywords: array, competitorList: array, industryTopics: array, alertThresholds: object, outputDir: string }
  * @outputs { success: boolean, monitoringDashboards: array, sentimentReports: array, competitiveIntelligence: object, crisisAlerts: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

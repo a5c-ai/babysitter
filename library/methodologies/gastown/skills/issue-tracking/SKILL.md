@@ -4,18 +4,10 @@ description: Track beads as git-backed issues with persistent attribution, suppo
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Issue Tracking
-
-## Overview
-
-Track work through Gas Town's bead system: git-backed atomic work units that carry persistent attribution. Each bead is an issue/task with full lifecycle tracking from creation through completion.
-
-## When to Use
-
-- Creating new beads for a convoy
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Tracking bead progress and status
 - Managing bead dependencies
 - Collecting attribution data for agent evaluation

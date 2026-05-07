@@ -15,9 +15,9 @@ metadata:
   skill-id: BME-SK-025
 graph:
   domains: [domain:biomedical-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:data-analysis, skill-area:sensor-fusion, skill-area:statistical-analysis]
+  workflows: [workflow:experiment-design, workflow:peer-review-cycle]
+  roles: [role:biomedical-engineer, role:research-engineer]
 ---
 
 # Adverse Event Reporter Skill

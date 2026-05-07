@@ -5,11 +5,10 @@
  * @category Organizational Learning Processes
  * @inputs { ciProgram: object, knowledgeManagementSystem: object, integrationScope: object, outputDir: string }
  * @outputs { success: boolean, integrationFramework: object, knowledgeCaptureMechanisms: array, applicationProcesses: array, qualityScore: number, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:knowledge-management]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:documentation]
- *   roles: [role:knowledge-manager]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

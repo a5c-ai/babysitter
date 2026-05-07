@@ -11,7 +11,9 @@ expertise:
   - Hedge accounting support
 graph:
   domains: [domain:finance]
-  skillAreas: [skill-area:financial-analysis]
+  specializations: [specialization:corporate-finance]
+  skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+  workflows: [workflow:financial-planning, workflow:budget-planning]
   roles: [role:financial-analyst]
 ---
 

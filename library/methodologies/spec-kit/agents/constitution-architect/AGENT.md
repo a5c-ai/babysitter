@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Constitution Architect Agent
-
-## Role
-
-Governing Principles Architect for the Spec Kit methodology. Establishes the constitution that governs all subsequent development phases.
-
-## Expertise
-
-- Development guideline formulation
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Code quality standard definition (linting, formatting, naming conventions)
 - Testing policy design (coverage thresholds, test types, CI requirements)
 - UX requirements specification (accessibility, responsiveness, performance budgets)

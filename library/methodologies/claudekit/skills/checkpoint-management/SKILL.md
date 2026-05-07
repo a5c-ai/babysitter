@@ -4,18 +4,10 @@ description: Git-backed state management for safe rollback. Create and restore c
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Checkpoint Management
-
-## Overview
-
-Git-backed checkpoint system providing safe rollback points during development sessions. Each checkpoint creates a tagged commit with descriptive metadata for easy identification and restoration.
-
-## Operations
-
-### Create Checkpoint
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Stage all current changes
 - Create commit with [CHECKPOINT] prefix
 - Tag with claudekit-checkpoint-{timestamp}

@@ -3,11 +3,12 @@
  * @description Create Responsible-Accountable-Consulted-Informed matrices to clarify roles and responsibilities across processes, projects, and organizational functions. Support governance and decision-making clarity.
  * @inputs { projectName: string, activities: array, stakeholders: array, organizationStructure: object }
  * @outputs { success: boolean, raciMatrix: object, roleDefinitions: object, escalationProcedures: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:business-analysis]
- *   topics: [topic:business-process-modeling, topic:requirements-engineering]
- *   roles: [role:business-analyst]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

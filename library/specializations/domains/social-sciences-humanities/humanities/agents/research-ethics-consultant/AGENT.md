@@ -4,9 +4,10 @@ description: Navigate IRB processes and community-based research ethics includin
 required-skills: research-ethics-irb-navigation, oral-history-interview-technique, grant-narrative-writing
 graph:
   domains: [domain:humanities]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-engineer]
 ---
 
 # Research Ethics Consultant Agent

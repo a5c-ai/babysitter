@@ -3,20 +3,10 @@ name: executing-plans
 description: Use when you have a written implementation plan to execute in a separate session with review checkpoints between batches.
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Executing Plans
-
-## Overview
-
-Load plan, review critically, execute tasks in batches, report for human review between batches. Supports resume via `.tasks.json` persistence.
-
-**Core principle:** Batch execution with checkpoints for architect review.
-
-## When to Use
-
-- You have a written implementation plan on disk
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Executing in a separate/parallel session
 - Want human checkpoints between task batches
 

@@ -4,9 +4,10 @@ description: Configure and manage learning management systems, integrations, and
 required-skills: lms-configuration-administration, learning-analytics-interpretation, accessibility-compliance-auditing
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Learning Technology Administrator Agent

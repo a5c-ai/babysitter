@@ -20,8 +20,13 @@
  * - METHONTOLOGY enhanced with agile practices
  * - NeOn methodology for networked ontologies
  * - Enterprise Knowledge Graph Development patterns
-  * @graph
+   * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:domain-driven-design, skill-area:c4-modeling, skill-area:adr-writing]
+ *   workflows: [workflow:architecture-decision-record]
+ *   topics: [topic:domain-driven-design, topic:clean-architecture]
+ *   roles: [role:architect, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

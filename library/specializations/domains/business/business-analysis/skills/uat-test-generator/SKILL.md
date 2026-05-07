@@ -14,8 +14,10 @@ metadata:
   category: Testing
 graph:
   domains: [domain:business-intelligence]
-  skillAreas: [skill-area:business-analysis]
-  roles: [role:business-analyst]
+  specializations: [specialization:strategic-consulting]
+  skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+  workflows: [workflow:market-analysis]
+  roles: [role:business-analyst, role:strategic-planner]
 ---
 
 # UAT Test Case Generator

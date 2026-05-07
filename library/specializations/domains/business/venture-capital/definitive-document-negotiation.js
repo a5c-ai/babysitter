@@ -3,11 +3,10 @@
  * @description Managing negotiation of definitive agreements including Stock Purchase Agreement, Investors' Rights Agreement, Voting Agreement, and Right of First Refusal Agreement
  * @inputs { companyName: string, termSheet: object, parties: array, existingDocuments: object }
  * @outputs { success: boolean, documentStatus: object, negotiationPoints: array, closingChecklist: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:venture-capital]
- *   skillAreas: [skill-area:investment-analysis]
- *   topics: [topic:startup-funding, topic:portfolio-management]
- *   roles: [role:venture-capitalist]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

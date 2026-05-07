@@ -4,18 +4,10 @@ description: Fresh adversarial code review with binary PASS/FAIL verdicts, evide
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Adversarial Review
-
-## Overview
-
-Independent adversarial code review checking spec compliance. Uses binary PASS/FAIL verdicts (not subjective feedback) with required file:line evidence citations.
-
-## When to Use
-
-- After quality gates pass in the execution loop
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - For final comprehensive cross-unit review
 - When verifying spec compliance of any implementation
 

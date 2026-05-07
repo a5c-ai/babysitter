@@ -4,18 +4,10 @@ description: Automatic codebase indexing for invisible context injection. Catalo
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Codebase Mapping
-
-## Overview
-
-Auto-indexes the project structure to build a comprehensive codebase map. This map is used for invisible context injection via the UserPromptSubmit hook, providing Claude with project awareness without explicit user prompting.
-
-## Map Contents
-
-### Project Structure
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Directory tree with depth-limited enumeration
 - Key file identification (entry points, configs, lock files)
 

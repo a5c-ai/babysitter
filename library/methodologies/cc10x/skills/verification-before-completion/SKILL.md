@@ -4,18 +4,10 @@ description: Evidence requirement enforcement ensuring all claims are backed by 
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Verification Before Completion
-
-## Overview
-
-Enforces the evidence-first principle: every claim of success, fix, or completion must be backed by concrete evidence. Exit codes, test output, and logs are the only acceptable proof.
-
-## Evidence Types
-
-1. **Exit codes**: zero = success, non-zero = failure
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **Test output**: pass/fail counts, coverage percentages
 3. **Logs**: error messages, stack traces, resolution confirmation
 4. **Build output**: compilation success/failure with timestamps

@@ -4,9 +4,10 @@ description: Generate compliant physician queries to clarify clinical documentat
 allowed-tools: Read, Grep, Write, Edit, Glob
 graph:
   domains: [domain:healthcare]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:clinical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:data-governance]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # Clinical Documentation Query

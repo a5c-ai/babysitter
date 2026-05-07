@@ -10,8 +10,8 @@ expertise:
   - State and local tax coordination
 graph:
   domains: [domain:venture-capital]
-  skillAreas: [skill-area:investment-analysis]
-  roles: [role:venture-capitalist]
+  skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+  roles: [role:financial-analyst]
 ---
 
 # Tax Coordinator

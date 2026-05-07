@@ -3,11 +3,11 @@
  * @description Process for conducting comprehensive keyword research and developing an SEO content strategy to capture organic search opportunities and build topical authority
  * @inputs { businessPriorities: object, seedKeywords: array, competitiveLandscape: object, outputDir: string }
  * @outputs { success: boolean, keywordDatabase: object, contentGapAnalysis: object, topicClusterMap: object, prioritizedContentRoadmap: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

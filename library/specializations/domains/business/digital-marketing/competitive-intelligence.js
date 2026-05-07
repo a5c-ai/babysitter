@@ -3,11 +3,11 @@
  * @description Process for monitoring competitor marketing activities and analyzing market trends to inform strategic decisions and identify opportunities
  * @inputs { competitorList: array, monitoringToolsAccess: object, industryContext: object, outputDir: string }
  * @outputs { success: boolean, competitiveIntelligenceReports: array, trendAnalysis: object, opportunityRecommendations: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -5,10 +5,10 @@
  * @outputs { success: boolean, semverImpact: string, mergeAction: string, blockers: string[] }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:version-control, skill-area:dependency-management]
- *   topics: [topic:code-review, topic:package-management]
- *   workflows: [workflow:code-review]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   specializations: [specialization:collaboration]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:dependency-upgrade-strategies, skill-area:dependency-vulnerability-mgmt]
+ *   workflows: [workflow:code-review, workflow:dependency-update, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:platform-engineer, role:engineering-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

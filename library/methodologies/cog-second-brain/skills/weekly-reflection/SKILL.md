@@ -8,16 +8,10 @@ allowed-tools:
   - git-commit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# COG Weekly Reflection Skill
-
-Perform weekly check-in with cross-domain pattern analysis spanning personal, professional, and project domains.
-
-## Capabilities
-
-- Gather and analyze the past week's vault entries across all sections
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Identify patterns in personal domain (energy, mood, productivity)
 - Identify patterns in professional domain (skills, career, industry)
 - Identify patterns in project domain (velocity, blockers, progress)

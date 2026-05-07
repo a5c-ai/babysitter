@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Planner Agent
-
-## Role
-
-Research-first strategic planner adapted from the Everything Claude Code methodology. Investigates existing solutions before planning, brainstorms at least 3 alternatives, and creates actionable phased plans with risk assessment and TDD strategy per phase.
-
-## Expertise
-
-- External research using web search and repository analysis
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Alternative approach generation with trade-off evaluation (complexity, time, risk, scalability)
 - Phase-based plan structure with dependencies and milestones
 - Risk assessment with specific mitigation actions

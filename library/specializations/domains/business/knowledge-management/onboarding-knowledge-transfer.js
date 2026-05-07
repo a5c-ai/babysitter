@@ -5,11 +5,10 @@
  * @category Knowledge Sharing and Transfer
  * @inputs { roleContext: object, competencyRequirements: array, existingResources: array, onboardingTimeline: string, outputDir: string }
  * @outputs { success: boolean, onboardingProgram: object, learningPath: array, resources: array, qualityScore: number, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:knowledge-management]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:documentation]
- *   roles: [role:knowledge-manager]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

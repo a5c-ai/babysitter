@@ -4,11 +4,11 @@
  * using Playwright to catch CSS/layout regressions. Designed for injection into CI,
  * quality-gate, and convergence processes that need to verify UI integrity.
  * @graph
- *   domains: [domain:web-development, domain:software-engineering]
- *   skillAreas: [skill-area:visual-regression-testing, skill-area:e2e-testing, skill-area:frontend-e2e-testing, skill-area:smoke-testing]
- *   topics: [topic:trunk-based-development]
- *   roles: [role:frontend-engineer, role:qa-engineer, role:fullstack-engineer]
- *   workflows: [workflow:pull-request-lifecycle, workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  *
  * The module exposes three surfaces:
  * - `createVisualSmokeTest(config)` — factory that builds two `defineTask` descriptors:

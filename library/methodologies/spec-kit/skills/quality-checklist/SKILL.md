@@ -4,18 +4,10 @@ description: Validate implementation quality through custom checklists, scoring 
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Quality Checklist
-
-## Overview
-
-Post-implementation quality gate that validates the completed work against constitution standards, specification requirements, and custom quality checks. Produces a scored assessment with remediation recommendations for any failures.
-
-## When to Use
-
-- After implementation is complete, before declaring done
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When validating code quality against constitution standards
 - When verifying specification requirement coverage
 - When running custom project-specific quality checks

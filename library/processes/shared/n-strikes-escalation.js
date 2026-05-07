@@ -6,10 +6,10 @@
  *   than silently being treated as approval.
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing]
- *   topics: [topic:code-review-best-practices]
- *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
- *   workflows: [workflow:pull-request-lifecycle, workflow:bug-triage]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  *
  *   Generalized from the spec/quality retry blocks in
  *   joe-habu/superbabysitter/process/subagent-tdd-loop.js (lines 320-359 and

@@ -4,18 +4,10 @@ description: 6-agent parallel code review orchestration covering architecture, s
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Review Orchestration
-
-## Overview
-
-Orchestrates 6 specialized review agents running in parallel across independent dimensions. Each agent scores independently, and results are aggregated into a weighted final score with a clear recommendation.
-
-## Six Dimensions
-
-### Architecture (weight: 20%)
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 Module boundaries, dependency direction, design pattern adherence, architectural drift.
 
 ### Security (weight: 25%)

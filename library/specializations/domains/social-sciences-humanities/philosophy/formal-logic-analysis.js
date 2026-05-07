@@ -8,9 +8,10 @@
  *
  * @graph
  *   domains: [domain:philosophy]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:research-methodology, topic:knowledge-management]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   specializations: [specialization:applied-ethics]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code, skill-area:data-analysis]
+ *   workflows: [workflow:peer-review-cycle]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

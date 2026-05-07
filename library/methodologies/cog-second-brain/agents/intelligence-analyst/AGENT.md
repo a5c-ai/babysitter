@@ -4,12 +4,11 @@ description: Gathers, verifies, and synthesizes news intelligence with 7-day fre
 role: News & Source Verification
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Intelligence Analyst Agent
-
-**Name:** Intelligence Analyst
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** News & Source Verification
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
 

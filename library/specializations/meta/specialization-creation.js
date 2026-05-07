@@ -3,6 +3,12 @@
  * @description Create a new specialization with all 7 phases in sequence - from research to integration
  * @inputs { name: string, domain: string|null, description: string, scope: string, outputDir: string }
  * @outputs { success: boolean, specialization: object, phases: object, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:orchestration-loop, skill-area:prompt-engineering, skill-area:agentic-loops]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:tech-lead, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

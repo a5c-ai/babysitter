@@ -3,9 +3,9 @@
  * @description Parallel task combinator - fan-out/fan-in patterns for concurrent task execution with shared dependencies
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:orchestration-loop]
- *   topics: [topic:developer-experience, topic:performance-optimization]
- *   roles: [role:platform-engineer, role:backend-engineer]
+ *   skillAreas: [skill-area:orchestration-loop, skill-area:agentic-loops, skill-area:concurrency-multithreading]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:platform-engineer, role:backend-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

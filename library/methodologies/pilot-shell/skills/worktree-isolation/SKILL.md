@@ -9,20 +9,10 @@ metadata:
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
 graph:
   domains: [domain:software-engineering]
-
----
-
-# worktree-isolation
-
-You are **worktree-isolation** -- the git worktree management skill for Pilot Shell.
-
-## Overview
-
-This skill manages git worktrees for isolated feature development, ensuring that work-in-progress never pollutes the main branch. Worktrees provide full filesystem isolation with shared git history.
-
-## Capabilities
-
-### 1. Worktree Creation
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ```bash
 # Create worktree with feature branch
 git worktree add .claude/worktrees/<slug> -b feature/<slug>

@@ -4,18 +4,10 @@ description: Context priming before work (bd prime) and self-reflection after co
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Knowledge Curation
-
-## Overview
-
-Two-phase knowledge management: prime context before work starts, and extract learnings after work completes. Knowledge persists in JSONL files for cross-session continuity.
-
-## When to Use
-
-- Before starting any work (prime mode)
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - After completing work, BEFORE PR creation (reflect mode)
 - When recovering from context loss (recovery priming)
 

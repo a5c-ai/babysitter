@@ -9,9 +9,11 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/communication/slack-manager-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:api-integration]
- *   topics: [topic:developer-experience, topic:community-management]
- *   roles: [role:platform-engineer]
+ *   specializations: [specialization:communication]
+ *   skillAreas: [skill-area:api-clients-sdks, skill-area:community-management]
+ *   topics: [topic:developer-experience]
+ *   workflows: [workflow:post-mortem-review]
+ *   roles: [role:platform-engineer, role:engineering-manager, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

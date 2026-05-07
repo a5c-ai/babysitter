@@ -5,10 +5,10 @@
  * @outputs { success: boolean, stages: object, disclosureWindow?: string, blockers: string[] }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:version-control, skill-area:security-audit]
- *   topics: [topic:code-review, topic:security-hardening]
- *   workflows: [workflow:code-review]
- *   roles: [role:tech-lead, role:security-engineer]
+ *   specializations: [specialization:collaboration, specialization:security-compliance]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:application-security-testing, skill-area:vulnerability-management]
+ *   workflows: [workflow:code-review, workflow:security-audit, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:security-engineer, role:engineering-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

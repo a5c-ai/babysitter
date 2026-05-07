@@ -4,18 +4,10 @@ description: Hierarchical coordination and drift detection with frequent checkpo
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Anti-Drift
-
-## Overview
-
-Prevent agent swarms from drifting away from the original task goal through hierarchical coordination, frequent checkpoints, and shared memory validation.
-
-## When to Use
-
-- Long-running multi-agent orchestrations
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Tasks with high risk of scope creep
 - When multiple agents work on related subtasks
 - Critical tasks where deviation is costly

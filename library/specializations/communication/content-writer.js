@@ -9,9 +9,10 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/communication/content-writer-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:documentation]
- *   roles: [role:tech-lead]
+ *   specializations: [specialization:communication]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:content-marketing]
+ *   workflows: [workflow:post-mortem-review]
+ *   roles: [role:tech-lead, role:engineering-manager, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,20 +9,10 @@ metadata:
   backlog-id: SK-GSD-005
 graph:
   domains: [domain:software-engineering]
-
----
-
-# frontmatter-parsing
-
-You are **frontmatter-parsing** - the skill for all YAML frontmatter operations within GSD artifacts. Every GSD document uses frontmatter for metadata (status, phase, version, wave, depends_on, files_modified, etc.). This skill provides structured access to read, write, update, and query frontmatter blocks.
-
-## Overview
-
-GSD documents use YAML frontmatter (delimited by `---`) to store machine-readable metadata alongside human-readable markdown content. This skill corresponds to the original `lib/frontmatter.cjs` module.
-
-Frontmatter appears at the top of every GSD artifact:
-
-```markdown
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 ---
 status: in-progress
 phase: 72

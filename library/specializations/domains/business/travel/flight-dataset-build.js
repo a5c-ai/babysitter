@@ -33,11 +33,11 @@
  * agent pattern:
  *   - https://github.com/mluggy
  *   - https://www.linkedin.com/posts/mluggy_%D7%9B%D7%9E%D7%95-%D7%9E%D7%99%D7%9C%D7%99%D7%95%D7%A0%D7%99-%D7%99%D7%A9%D7%A8%D7%90%D7%9C%D7%99%D7%9D-%D7%92%D7%9D-%D7%90%D7%A0%D7%97%D7%A0%D7%95-%D7%9E%D7%AA%D7%9B%D7%A0%D7%A0%D7%99%D7%9D-%D7%97%D7%95%D7%A4%D7%A9%D7%95%D7%AA-ugcPost-7448843353275858944-b7d4
- * @graph
+  * @graph
  *   domains: [domain:travel]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:travel-operations]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:travel-itinerary-planning, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:product-manager, role:operations-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

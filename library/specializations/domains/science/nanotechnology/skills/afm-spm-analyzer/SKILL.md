@@ -20,9 +20,9 @@ metadata:
     - SPIP
 graph:
   domains: [domain:nanotechnology]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:scientific-computing, topic:research-methodology]
-  roles: [role:tech-lead, role:data-engineer]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:physics-simulation, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # AFM-SPM Analyzer

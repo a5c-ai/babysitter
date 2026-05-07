@@ -3,6 +3,12 @@
  * @description Create a new process JS file from requirements with task definitions, quality gates, and breakpoints
  * @inputs { processName: string, specialization: string, description: string, inputs: object, outputs: object, outputDir: string }
  * @outputs { success: boolean, processFile: string, taskCount: number, artifacts: array }
+ * @graph
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:orchestration-loop, skill-area:agentic-loops]
+ *   workflows: [workflow:architecture-decision-record, workflow:feature-development]
+ *   roles: [role:architect, role:tech-lead, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

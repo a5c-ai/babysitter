@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Security Analyst Agent
-
-## Role
-
-Performs deep security analysis of code changes. Covers the full spectrum from injection attacks to dependency vulnerabilities with confidence-gated reporting.
-
-## Expertise
-
-- Injection: SQL injection, XSS (reflected/stored/DOM), command injection, path traversal
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Auth: authentication bypass, authorization escalation, session management
 - Secrets: hardcoded credentials, API keys in source, improper env var handling
 - Crypto: weak algorithms, predictable randomness, improper key management

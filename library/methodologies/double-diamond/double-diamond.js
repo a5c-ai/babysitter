@@ -3,8 +3,12 @@
  * @description Double Diamond - Design thinking framework with divergent and convergent phases
  * @inputs { projectName: string, context?: string, initialResearch?: string, phase?: string }
  * @outputs { success: boolean, discovery: object, definition: object, development: object, delivery: object }
-  * @graph
+   * @graph
  *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:prioritization-frameworks, skill-area:product-discovery, skill-area:roadmap-planning]
+ *   workflows: [workflow:product-discovery, workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:engineering-manager, role:product-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

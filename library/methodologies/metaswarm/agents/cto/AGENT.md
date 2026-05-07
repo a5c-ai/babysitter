@@ -10,18 +10,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# CTO Agent
-
-## Role
-
-Validates TDD readiness, codebase alignment, and overall technical risk. One of 6 mandatory design review gate approvers.
-
-## Expertise
-
-- TDD readiness assessment (are work units testable?)
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Codebase alignment (does the plan fit existing architecture?)
 - Technical risk quantification
 - Technology choice validation

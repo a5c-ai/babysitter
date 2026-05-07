@@ -3,11 +3,11 @@
  * @description Structured process for preparing and conducting executive business reviews demonstrating value delivered and planning future success
  * @inputs { customerName: string, accountData: object, stakeholders: array, reviewPeriod: object, previousQBR: object }
  * @outputs { success: boolean, qbrDocument: object, presentation: object, valueReport: object, actionPlan: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:customer-experience]
- *   skillAreas: [skill-area:customer-success]
- *   topics: [topic:customer-journey-mapping, topic:voice-of-customer]
- *   roles: [role:customer-success-manager]
+ *   skillAreas: [skill-area:customer-success, skill-area:user-research, skill-area:product-discovery]
+ *   workflows: [workflow:customer-journey-optimization, workflow:user-feedback-loop]
+ *   roles: [role:product-designer, role:customer-success-manager, role:ux-researcher]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

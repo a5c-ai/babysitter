@@ -5,11 +5,11 @@
  * registration. Parameterized by package type, name, and an optional reference package to
  * clone conventions from.
  * @graph
- *   domains: [domain:software-engineering, domain:devops]
- *   skillAreas: [skill-area:deployment-infrastructure-management, skill-area:configuration-management]
- *   topics: [topic:microservices, topic:trunk-based-development]
- *   roles: [role:backend-engineer, role:platform-engineer, role:fullstack-engineer]
- *   workflows: [workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  *
  * The module exposes three surfaces:
  * - `createPackageScaffold(config)` — factory that builds task definitions for analyzing

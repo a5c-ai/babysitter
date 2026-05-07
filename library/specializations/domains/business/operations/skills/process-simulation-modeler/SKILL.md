@@ -13,8 +13,9 @@ metadata:
   category: operational-analytics
 graph:
   domains: [domain:operations]
-  skillAreas: [skill-area:operations-management]
-  roles: [role:operations-manager]
+  skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:procurement-manager]
 ---
 
 # Process Simulation Modeler

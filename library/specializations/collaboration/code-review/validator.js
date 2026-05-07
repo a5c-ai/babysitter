@@ -10,10 +10,10 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/development/validator-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:code-analysis-linting]
- *   topics: [topic:code-review, topic:quality-assurance]
- *   workflows: [workflow:code-review]
- *   roles: [role:tech-lead, role:backend-engineer]
+ *   specializations: [specialization:collaboration, specialization:qa-testing-automation]
+ *   skillAreas: [skill-area:code-analysis-linting, skill-area:code-review-practice, skill-area:application-security-testing]
+ *   workflows: [workflow:code-review, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:backend-engineer, role:engineering-manager, role:qa-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

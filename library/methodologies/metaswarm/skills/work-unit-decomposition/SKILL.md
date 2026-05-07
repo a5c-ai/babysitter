@@ -4,18 +4,10 @@ description: Decompose implementation plans into discrete work units with enumer
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Work Unit Decomposition
-
-## Overview
-
-Break implementation plans into discrete, testable work units. Each unit has enumerated Definition of Done items, declared file scope, dependency mapping, and optional human checkpoint flags.
-
-## When to Use
-
-- After plan review gate approval
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When decomposing a large feature into implementable chunks
 - When preparing for orchestrated execution
 

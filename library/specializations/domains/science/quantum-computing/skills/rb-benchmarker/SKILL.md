@@ -15,9 +15,10 @@ metadata:
   phase: 6
 graph:
   domains: [domain:quantum-computing]
-  skillAreas: [skill-area:software-architecture]
-  topics: [topic:algorithm-design, topic:scientific-computing]
-  roles: [role:tech-lead, role:backend-engineer]
+  specializations: [specialization:quantum-computing]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:compiler-implementation, skill-area:language-design]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # RB Benchmarker

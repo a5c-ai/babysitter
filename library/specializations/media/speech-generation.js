@@ -9,9 +9,10 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/media/speech-generation-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:ai-agent-development]
- *   topics: [topic:generative-ai, topic:audio-processing]
- *   roles: [role:platform-engineer]
+ *   specializations: [specialization:media]
+ *   skillAreas: [skill-area:audio-processing, skill-area:media-encoding, skill-area:streaming-protocols]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:media-engineer, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

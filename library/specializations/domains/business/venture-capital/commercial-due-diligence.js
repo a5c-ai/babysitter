@@ -3,11 +3,10 @@
  * @description Comprehensive market analysis including TAM/SAM/SOM sizing, competitive landscape mapping, customer validation interviews, and go-to-market assessment
  * @inputs { companyName: string, industry: string, productDescription: string, targetMarkets: array }
  * @outputs { success: boolean, marketAnalysis: object, competitiveLandscape: object, customerValidation: object, gtmAssessment: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:venture-capital]
- *   skillAreas: [skill-area:investment-analysis]
- *   topics: [topic:startup-funding, topic:portfolio-management]
- *   roles: [role:venture-capitalist]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,18 +4,10 @@ description: Test-first development practice where test specifications are writt
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Test-Driven Development
-
-## Overview
-
-Every code-changing task must enumerate tests before implementation. Test specification is always the first sub-step of each task in the plan.
-
-## When to Use
-
-- During plan writing (test strategy per task)
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - During implementation (write tests before code)
 - When verifying step completion
 

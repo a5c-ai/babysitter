@@ -4,9 +4,10 @@ description: Ensure learning experiences are accessible and inclusive for all le
 required-skills: multimedia-learning-design, accessibility-compliance-auditing, quality-assurance-review
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Accessibility and UDL Specialist Agent

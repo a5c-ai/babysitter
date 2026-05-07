@@ -15,9 +15,9 @@ metadata:
   skill-id: CE-SK-002
 graph:
   domains: [domain:chemical-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:scientific-computing]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:statistical-analysis, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # HYSYS Dynamic Simulator Skill

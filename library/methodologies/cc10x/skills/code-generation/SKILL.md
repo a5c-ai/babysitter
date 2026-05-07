@@ -4,18 +4,10 @@ description: Minimal, pattern-matching code output. Write the least code that sa
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Generation
-
-## Overview
-
-Guides code output to be minimal and pattern-matching. Write the least amount of code that satisfies the requirements while following existing project conventions.
-
-## Principles
-
-1. **Minimal**: Write the least code that makes tests pass
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **Pattern-matching**: Follow existing project conventions (check patterns.md)
 3. **Tool discipline**: Use Write/Edit for files, Bash only for runners and linters
 4. **No gold plating**: Do not add features beyond what is required

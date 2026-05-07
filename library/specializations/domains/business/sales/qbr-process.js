@@ -16,11 +16,11 @@
  * @references
  * - Gainsight Customer Success: https://www.gainsight.com/
  * - QBR Best Practices: https://www.clientsuccess.com/blog/quarterly-business-review/
- * @graph
+  * @graph
  *   domains: [domain:sales]
- *   skillAreas: [skill-area:sales-methodology]
- *   topics: [topic:pipeline-management, topic:account-management]
- *   roles: [role:sales-manager]
+ *   skillAreas: [skill-area:sales-methodology, skill-area:customer-success, skill-area:revenue-operations]
+ *   workflows: [workflow:customer-journey-optimization]
+ *   roles: [role:account-executive, role:sales-engineer, role:customer-success-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

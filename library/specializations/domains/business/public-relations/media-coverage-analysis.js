@@ -5,11 +5,10 @@
  * @category Measurement and Analytics
  * @inputs { coverageData: object, analysisScope: object, messagingFramework: object, competitors: object[] }
  * @outputs { success: boolean, analysisReport: object, insights: object[], recommendations: object[], quality: number }
- * @graph
+  * @graph
  *   domains: [domain:public-relations]
- *   skillAreas: [skill-area:communications-strategy]
- *   topics: [topic:media-relations, topic:brand-management]
- *   roles: [role:communications-manager]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

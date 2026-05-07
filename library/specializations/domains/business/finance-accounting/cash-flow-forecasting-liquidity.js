@@ -2,10 +2,11 @@
  * @file cash-flow-forecasting-liquidity.js
  * @description Daily, weekly, and monthly cash forecasting with working capital optimization and liquidity stress testing
  * @module specializations/domains/business/finance-accounting
- * @graph
+  * @graph
  *   domains: [domain:finance]
- *   skillAreas: [skill-area:financial-analysis]
- *   topics: [topic:financial-modeling, topic:accounting]
+ *   specializations: [specialization:corporate-finance]
+ *   skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+ *   workflows: [workflow:financial-planning, workflow:budget-planning]
  *   roles: [role:financial-analyst]
  */
 

@@ -4,18 +4,10 @@ description: Create, track, and land convoys of related beads as primary work or
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Convoy Management
-
-## Overview
-
-Manage the full lifecycle of Gas Town convoys: creation from a goal, bead decomposition, agent assignment, progress tracking, and landing (merge). Convoys are the primary work-order unit wrapping related beads.
-
-## When to Use
-
-- Starting a new multi-agent work effort
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Coordinating parallel bead execution across agents
 - Tracking progress of distributed work
 - Landing (merging) completed convoy results

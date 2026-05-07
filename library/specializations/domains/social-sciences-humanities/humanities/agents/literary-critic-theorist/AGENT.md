@@ -4,9 +4,10 @@ description: Apply theoretical frameworks to textual analysis including close re
 required-skills: literary-close-reading, critical-theory-application, citation-scholarly-apparatus
 graph:
   domains: [domain:humanities]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:research-methodology, topic:knowledge-management]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:digital-humanities]
+  skillAreas: [skill-area:data-analysis, skill-area:deep-web-research, skill-area:docs-as-code]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:research-engineer]
 ---
 
 # Literary Critic and Theorist Agent

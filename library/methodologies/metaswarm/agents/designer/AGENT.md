@@ -10,18 +10,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Designer Agent
-
-## Role
-
-Reviews UX/API design and developer experience. One of 6 mandatory design review gate approvers.
-
-## Expertise
-
-- UX flow assessment and usability analysis
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - API design consistency and ergonomics
 - Developer experience evaluation
 - Interface pattern compliance

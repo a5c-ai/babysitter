@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Adaptive Queen Agent
-
-## Role
-
-Adaptive Queen in the Ruflo agent hierarchy. Specializes in real-time optimization by monitoring execution patterns, triggering SONA adaptations, and dynamically adjusting swarm behavior based on observed performance.
-
-## Expertise
-
-- Real-time execution pattern analysis
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - SONA self-optimizing adaptation triggering
 - Dynamic routing adjustments based on performance
 - Anomaly detection in agent behavior

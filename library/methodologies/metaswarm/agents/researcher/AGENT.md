@@ -10,18 +10,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Researcher Agent
-
-## Role
-
-Explores the codebase and analyzes existing patterns, dependencies, and risk areas. Provides the foundation for the Architect's implementation plan.
-
-## Expertise
-
-- Deep codebase exploration and structural analysis
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Dependency graph construction
 - Pattern detection and classification
 - Risk area identification (complex code, high change frequency, missing tests)

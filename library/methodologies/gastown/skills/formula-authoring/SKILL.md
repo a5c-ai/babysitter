@@ -4,18 +4,10 @@ description: Author TOML-based Formula workflow templates that become Protomolec
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Formula Authoring
-
-## Overview
-
-Create and manage TOML-based Formula templates that define repeatable multi-step workflows. Formulas are cooked into Protomolecules (frozen, ready to instantiate) and then activated as Molecules (durable, checkpoint-able workflows).
-
-## When to Use
-
-- Defining repeatable workflow templates
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Creating multi-step processes with variable binding
 - Building workflows that must survive restarts
 - When NDI (Nondeterministic Idempotence) is needed

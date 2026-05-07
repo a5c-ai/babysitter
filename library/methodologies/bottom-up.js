@@ -3,8 +3,12 @@
  * @description Bottom-Up Development - Build foundational components first, compose upward
  * @inputs { task: string, maxCompositionLevels: number, testDriven: boolean }
  * @outputs { success: boolean, componentLibrary: array, compositionTree: object }
-  * @graph
+   * @graph
  *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:tech-lead, role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

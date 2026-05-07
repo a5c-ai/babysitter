@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Strategic Queen Agent
-
-## Role
-
-Strategic Queen in the Ruflo agent hierarchy. Responsible for long-term planning, goal setting, and maintaining strategic alignment across the swarm. Has 3x voting weight in consensus protocols.
-
-## Expertise
-
-- High-level goal decomposition into actionable milestones
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Cross-project pattern recognition and knowledge transfer
 - Resource allocation and agent assignment strategy
 - Risk assessment with proactive mitigation planning

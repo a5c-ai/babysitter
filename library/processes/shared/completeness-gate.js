@@ -10,10 +10,10 @@
  * - `completenessGateTask` — babysitter `defineTask` wrapper for harness-driven execution
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:code-analysis-linting, skill-area:acceptance-testing]
- *   topics: [topic:code-review-best-practices]
- *   roles: [role:qa-engineer, role:tech-lead]
- *   workflows: [workflow:pull-request-lifecycle, workflow:feature-development]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

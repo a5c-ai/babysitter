@@ -15,11 +15,10 @@
  * @references
  * - Decision Quality Book: https://www.wiley.com/en-us/Decision+Quality%3A+Value+Creation+from+Better+Business+Decisions-p-9781119144670
  * - Strategic Decisions Group methodology
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:data-analysis]
- *   topics: [topic:decision-analysis, topic:data-driven-decisions]
- *   roles: [role:data-analyst]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

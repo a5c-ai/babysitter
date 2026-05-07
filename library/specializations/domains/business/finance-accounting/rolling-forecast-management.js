@@ -2,10 +2,11 @@
  * @file rolling-forecast-management.js
  * @description Continuous forecasting methodology that extends the planning horizon each period to maintain a constant forward-looking view of financial performance
  * @module specializations/domains/business/finance-accounting
- * @graph
+  * @graph
  *   domains: [domain:finance]
- *   skillAreas: [skill-area:financial-analysis]
- *   topics: [topic:financial-modeling, topic:accounting]
+ *   specializations: [specialization:corporate-finance]
+ *   skillAreas: [skill-area:financial-modeling, skill-area:budgeting-forecasting, skill-area:investment-analysis, skill-area:valuation-analysis]
+ *   workflows: [workflow:financial-planning, workflow:budget-planning]
  *   roles: [role:financial-analyst]
  */
 

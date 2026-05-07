@@ -5,11 +5,10 @@
  * @category Knowledge Base Development
  * @inputs { knowledgeBaseName: string, contentScope: object, targetAudience: array, contentTypes: array, existingContent: array, qualityStandards: object, outputDir: string }
  * @outputs { success: boolean, contentInventory: array, contentPlan: object, qualityScore: number, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:knowledge-management]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:documentation]
- *   roles: [role:knowledge-manager]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

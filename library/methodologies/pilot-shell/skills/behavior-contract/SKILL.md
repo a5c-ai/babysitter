@@ -9,20 +9,10 @@ metadata:
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
 graph:
   domains: [domain:software-engineering]
-
----
-
-# behavior-contract
-
-You are **behavior-contract** -- the bug formalization skill for Pilot Shell bugfix mode.
-
-## Overview
-
-This skill formalizes bugs as Behavior Contracts -- precise, testable descriptions of what is wrong (Bug Condition), what should happen (Postcondition), and what must not change (Invariants).
-
-## Contract Structure
-
-### Bug Condition
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 The exact input, state, or sequence that triggers the bug. Must be specific enough to write a failing test.
 
 **Example**: "When `processPayment()` receives an amount of exactly $0.00, it throws an unhandled TypeError instead of returning a zero-amount receipt."

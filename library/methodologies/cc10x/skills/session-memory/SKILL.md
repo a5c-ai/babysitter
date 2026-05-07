@@ -4,18 +4,10 @@ description: Mandatory memory persistence system across session resets using thr
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Session Memory
-
-## Overview
-
-Persistent memory system that survives Claude Code's message compaction. Uses three markdown files in `.claude/cc10x/` as a permission-free database for continuity, consistency, and pattern compounding.
-
-## Memory Surfaces
-
-1. **activeContext.md** -- Current focus, decisions, learnings, next steps, blockers
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. **patterns.md** -- Project conventions, architecture decisions, common gotchas, reusable solutions
 3. **progress.md** -- Task completion tracking with verification evidence
 

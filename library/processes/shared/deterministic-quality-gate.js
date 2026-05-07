@@ -5,11 +5,11 @@
  * with `expectedExitCode: 0`, producing binary deterministic outcomes that cannot be negotiated
  * or reinterpreted by an agent.
  * @graph
- *   domains: [domain:software-engineering, domain:devops]
- *   skillAreas: [skill-area:code-analysis-linting, skill-area:unit-testing, skill-area:integration-testing]
- *   topics: [topic:trunk-based-development, topic:feature-flags]
- *   roles: [role:backend-engineer, role:devops-engineer, role:qa-engineer]
- *   workflows: [workflow:pull-request-lifecycle, workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:e2e-testing]
+ *   workflows: [workflow:code-review, workflow:feature-development, workflow:release-management]
+ *   topics: [topic:test-driven-development, topic:code-review-best-practices]
+ *   roles: [role:backend-engineer, role:tech-lead, role:qa-engineer]
  *
  * The module exposes three surfaces:
  * - `deterministicGateTask` — standalone `defineTask` descriptor (kind: 'shell') that runs

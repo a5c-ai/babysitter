@@ -4,18 +4,10 @@ description: Design technical architecture, select technology stack, and define 
 allowed-tools: Read, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Planning Design
-
-## Overview
-
-Convert a specification into a concrete technical plan with architecture decisions, technology selections, implementation strategy, and risk assessment. All decisions must trace back to specification requirements and comply with constitution constraints.
-
-## When to Use
-
-- After specification is approved, before task decomposition
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When evaluating technology stack options for a feature
 - When designing system architecture for new components
 - When assessing implementation risks and defining mitigations

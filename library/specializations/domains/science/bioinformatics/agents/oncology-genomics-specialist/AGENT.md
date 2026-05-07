@@ -14,9 +14,10 @@ metadata:
   category: bioinformatics
 graph:
   domains: [domain:bioinformatics]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:scientific-computing, topic:research-methodology]
-  roles: [role:data-engineer, role:tech-lead]
+  specializations: [specialization:biomedical-informatics]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:python-data-pipelines]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:biomedical-engineer]
 ---
 
 # Oncology Genomics Specialist Agent

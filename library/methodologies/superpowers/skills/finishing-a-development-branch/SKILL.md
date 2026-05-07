@@ -3,20 +3,10 @@ name: finishing-a-development-branch
 description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work.
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Finishing a Development Branch
-
-## Overview
-
-Verify tests, present structured options, execute chosen workflow, clean up.
-
-**Core principle:** Verify tests -> Present options -> Execute choice -> Clean up.
-
-## Options
-
-1. Merge back to base branch locally
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 2. Push and create a Pull Request
 3. Keep the branch as-is
 4. Discard this work (requires typed confirmation)

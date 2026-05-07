@@ -3,11 +3,12 @@
  * @description Systematic collection, analysis, and dissemination of information about competitors, market trends, and industry dynamics
  * @inputs { targetCompetitors: array, industry: string, organizationContext: object, intelligenceRequirements: array, outputDir: string }
  * @outputs { success: boolean, competitorProfiles: array, marketIntelligence: object, strategicInsights: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:strategy]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:corporate-strategy, topic:competitive-analysis]
- *   roles: [role:strategy-consultant]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:business-model-design, skill-area:growth-strategy]
+ *   workflows: [workflow:strategic-planning, workflow:competitive-analysis]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,11 +3,11 @@
  * @description Process for developing and implementing lead scoring models that qualify leads based on demographic fit and behavioral engagement, enabling sales prioritization
  * @inputs { icpDefinition: object, crmData: object, behavioralData: object, salesFeedback: object, outputDir: string }
  * @outputs { success: boolean, leadScoringModel: object, scoringDocumentation: object, mqlCriteria: object, salesAlignmentSLA: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

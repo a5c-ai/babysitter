@@ -15,9 +15,10 @@ metadata:
   phase: 6
 graph:
   domains: [domain:mathematics]
-  skillAreas: [skill-area:data-analysis]
-  topics: [topic:formal-methods, topic:algorithm-design]
-  roles: [role:tech-lead, role:data-engineer]
+  specializations: [specialization:computational-mathematics]
+  skillAreas: [skill-area:statistical-analysis, skill-area:mathematical-reasoning, skill-area:data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer, role:computational-scientist]
 ---
 
 # LaTeX Math Formatter

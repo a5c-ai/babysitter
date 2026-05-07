@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Architect Agent
-
-## Role
-
-Creates detailed implementation plans from research findings. Decomposes work into discrete units with enumerated DoD items, declared file scopes, and dependency mappings.
-
-## Expertise
-
-- Implementation plan creation with clear structure
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Work unit decomposition into testable, reviewable chunks
 - Definition of Done (DoD) enumeration per work unit
 - File scope declaration (which files each unit may modify)

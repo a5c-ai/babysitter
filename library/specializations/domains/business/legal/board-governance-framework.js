@@ -15,11 +15,12 @@
  * @references
  * - NACD Board Leadership: https://www.nacdonline.org/education/certification/
  * - UK Corporate Governance Code: https://www.frc.org.uk/directors/corporate-governance-and-stewardship/uk-corporate-governance-code
- * @graph
+  * @graph
  *   domains: [domain:legal]
- *   skillAreas: [skill-area:legal-analysis]
- *   topics: [topic:contract-management, topic:compliance]
- *   roles: [role:legal-counsel]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

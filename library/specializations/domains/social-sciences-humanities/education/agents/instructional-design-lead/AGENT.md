@@ -4,9 +4,10 @@ description: Lead instructional design projects from analysis through evaluation
 required-skills: learning-needs-analysis, learning-objectives-writing, elearning-storyboarding, learning-transfer-design
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Instructional Design Lead Agent

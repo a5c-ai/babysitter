@@ -5,9 +5,10 @@
  * @outputs { success: boolean, skillPath: string, files: array, artifacts: array }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:ai-agent-development]
+ *   specializations: [specialization:software-architecture]
+ *   skillAreas: [skill-area:prompt-engineering, skill-area:plugin-systems]
  *   topics: [topic:developer-experience]
- *   roles: [role:platform-engineer, role:tech-lead]
+ *   roles: [role:platform-engineer, role:tech-lead, role:architect]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

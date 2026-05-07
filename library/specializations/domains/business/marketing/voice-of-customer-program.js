@@ -3,11 +3,11 @@
  * @description Systematically collect, analyze, and act on customer feedback through surveys, interviews, reviews, and social listening.
  * @inputs { feedbackSources: array, existingProgram: object, businessGoals: object, customerSegments: array }
  * @outputs { success: boolean, vocProgram: object, feedbackChannels: array, analysisFramework: object, actionPlan: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:marketing-strategy, topic:customer-segmentation]
- *   roles: [role:marketing-manager]
+ *   skillAreas: [skill-area:brand-strategy, skill-area:brand-positioning, skill-area:content-marketing]
+ *   workflows: [workflow:brand-campaign-launch]
+ *   roles: [role:marketing-manager, role:marketing-strategist, role:brand-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

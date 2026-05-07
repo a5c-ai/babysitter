@@ -4,18 +4,10 @@ description: Red-Green-Refactor TDD methodology with mandatory failing tests, mi
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# TDD Enforcement
-
-## Overview
-
-Strict test-driven development enforcement adapted from the Everything Claude Code methodology. Mandates the Red-Green-Refactor cycle with evidence-based verification at each phase.
-
-## TDD Process
-
-### 1. RED Phase - Write Failing Tests
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Write tests that define expected behavior
 - Tests MUST fail (exit code 1)
 - Use CI=true or --run flag, never watch mode

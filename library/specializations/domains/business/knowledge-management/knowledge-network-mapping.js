@@ -5,11 +5,10 @@
  * @category Expertise Location and Mapping
  * @inputs { organizationalScope: object, networkTypes: array, dataSourcess: array, outputDir: string }
  * @outputs { success: boolean, networkMap: object, keyConnectors: array, flowPatterns: object, recommendations: array, qualityScore: number, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:knowledge-management]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:documentation]
- *   roles: [role:knowledge-manager]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+ *   roles: [role:information-architect, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,18 +4,10 @@ description: Manage agent sessions including initialization, handoffs, revival (
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Session Management
-
-## Overview
-
-Manage agent sessions in Gas Town: initialize new sessions, handle handoffs between agents, revive dead sessions (seance), and maintain persistent identity across ephemeral Polecat sessions.
-
-## When to Use
-
-- Initializing new agent sessions
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Handing off work between agents
 - Reviving a dead or stuck agent session
 - Managing Polecat identity persistence across sessions

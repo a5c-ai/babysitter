@@ -17,11 +17,10 @@
  * - Storytelling with Data: https://www.storytellingwithdata.com/books
  * - Information Dashboard Design: Stephen Few
  * - Gartner BI Magic Quadrant: https://www.gartner.com/en/information-technology/glossary/business-intelligence-bi
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:data-analysis]
- *   topics: [topic:decision-analysis, topic:data-driven-decisions]
- *   roles: [role:data-analyst]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

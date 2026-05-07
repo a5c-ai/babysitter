@@ -3,11 +3,12 @@
  * @description Resource-based competitive advantage analysis using VRIO framework to identify sustainable competitive advantages
  * @inputs { organizationName: string, resources: array, capabilities: array, competitorBenchmarks: object }
  * @outputs { success: boolean, vrioAnalysis: array, competitiveAdvantages: object, investmentPriorities: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:strategy]
- *   skillAreas: [skill-area:strategic-planning]
- *   topics: [topic:corporate-strategy, topic:innovation-management]
- *   roles: [role:strategy-consultant]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:strategic-planning, skill-area:change-management-leadership, skill-area:market-sizing]
+ *   workflows: [workflow:strategic-planning]
+ *   roles: [role:strategic-planner, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,12 +4,11 @@ description: Designs and maintains the COG vault directory structure, Git integr
 role: Vault Structure Design & Maintenance
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Vault Architect Agent
-
-**Name:** Vault Architect
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Role:** Vault Structure Design & Maintenance
 **Source:** [COG Second Brain](https://github.com/huytieu/COG-second-brain)
 

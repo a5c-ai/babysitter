@@ -17,11 +17,11 @@
  * - AIAG & VDA FMEA Handbook (2019)
  * - SAE J1739 - Potential Failure Mode and Effects Analysis
  * - ISO/TS 16949 / IATF 16949
- * @graph
+  * @graph
  *   domains: [domain:operations]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:process-optimization, topic:operational-excellence]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

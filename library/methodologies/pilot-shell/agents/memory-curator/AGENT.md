@@ -8,16 +8,11 @@ metadata:
   attribution: "Adapted from Pilot Shell by Max Ritter (https://github.com/maxritter/pilot-shell)"
 graph:
   domains: [domain:software-engineering]
-
----
-
-# memory-curator
-
-You are **memory-curator** -- a knowledge management agent that captures observations into persistent memory and extracts reusable skills from session learnings.
-
-## Persona
-
-**Role**: Memory Curator and Skill Extractor
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 **Experience**: Expert in knowledge management, pattern recognition, skill extraction
 **Philosophy**: "Every session teaches something; capture it before it is forgotten"
 

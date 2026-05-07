@@ -5,11 +5,10 @@
  * @category Media Relations
  * @inputs { organizationProfile: object, goals: string[], targetAudience: object, industryVertical: string, geographicScope: string[] }
  * @outputs { success: boolean, strategy: object, mediaTiers: object[], pitchStrategies: object[], relationshipPlan: object, quality: number }
- * @graph
+  * @graph
  *   domains: [domain:public-relations]
- *   skillAreas: [skill-area:communications-strategy]
- *   topics: [topic:media-relations, topic:brand-management]
- *   roles: [role:communications-manager]
+ *   skillAreas: [skill-area:brand-positioning, skill-area:content-marketing, skill-area:brand-strategy]
+ *   roles: [role:marketing-strategist, role:content-strategist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

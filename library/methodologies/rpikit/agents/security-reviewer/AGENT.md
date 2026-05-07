@@ -11,18 +11,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Security Reviewer Agent
-
-## Role
-
-Security Vulnerability Assessor for the RPIKit review phase. Identifies and classifies security issues with actionable remediation steps.
-
-## Expertise
-
-- OWASP Top 10 vulnerability identification
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - SQL/NoSQL/OS injection detection
 - XSS and CSRF vector analysis
 - Authentication and authorization flaws

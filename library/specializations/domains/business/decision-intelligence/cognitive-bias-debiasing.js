@@ -15,11 +15,10 @@
  * @references
  * - Thinking, Fast and Slow: https://www.penguinrandomhouse.com/books/89308/thinking-fast-and-slow-by-daniel-kahneman/
  * - Behavioral Economics in Organizations
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:data-analysis]
- *   topics: [topic:decision-analysis, topic:data-driven-decisions]
- *   roles: [role:data-analyst]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

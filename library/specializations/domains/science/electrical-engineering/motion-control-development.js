@@ -20,9 +20,8 @@
  *
  * @graph
  *   domains: [domain:electrical-engineering]
- *   skillAreas: [skill-area:systems-engineering]
- *   topics: [topic:engineering-design, topic:systems-modeling]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   skillAreas: [skill-area:hardware-abstraction-layer, skill-area:device-drivers, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer, role:systems-integration-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

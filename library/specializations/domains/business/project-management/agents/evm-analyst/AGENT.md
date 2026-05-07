@@ -17,8 +17,9 @@ metadata:
   id: AG-014
 graph:
   domains: [domain:project-management]
-  skillAreas: [skill-area:project-management]
-  roles: [role:project-manager]
+  skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+  workflows: [workflow:project-kickoff, workflow:feature-development]
+  roles: [role:project-manager, role:scrum-master]
 ---
 
 # EVM Analyst Agent

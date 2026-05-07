@@ -5,10 +5,11 @@
  * @outputs { success: boolean, rejected: Array<{ sha, reason }>, accepted: Array<string> }
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:version-control]
- *   topics: [topic:git-workflow, topic:project-management]
- *   workflows: [workflow:feature-development]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   specializations: [specialization:collaboration]
+ *   skillAreas: [skill-area:code-review-practice, skill-area:gitops]
+ *   topics: [topic:code-review-best-practices]
+ *   workflows: [workflow:feature-development, workflow:pull-request-lifecycle]
+ *   roles: [role:tech-lead, role:platform-engineer, role:engineering-manager]
  */
 
 const ISSUE_REF = /#(\d+)\b|(?:close|closes|fix|fixes|resolve|resolves|refs?)\s+#\d+/i;

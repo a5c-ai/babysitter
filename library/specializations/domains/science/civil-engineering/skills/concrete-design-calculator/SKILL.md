@@ -15,9 +15,8 @@ metadata:
   skill-id: CIV-SK-006
 graph:
   domains: [domain:civil-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:systems-modeling]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:mathematical-reasoning, skill-area:computational-geometry, skill-area:data-analysis]
+  roles: [role:systems-integration-engineer, role:research-engineer]
 ---
 
 # Concrete Design Calculator Skill

@@ -3,11 +3,11 @@
  * @description Process for creating, testing, and deploying email marketing campaigns including newsletters, promotional emails, and triggered messages
  * @inputs { campaignBrief: object, audienceSegments: array, content: object, designAssets: object, outputDir: string }
  * @outputs { success: boolean, emailCampaigns: array, testResults: object, performanceReports: array, optimizationRecommendations: array, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:digital-marketing]
- *   skillAreas: [skill-area:marketing-analytics]
- *   topics: [topic:seo-sem, topic:social-media-marketing]
- *   roles: [role:digital-marketing-manager]
+ *   specializations: [specialization:digital-marketing-strategy]
+ *   skillAreas: [skill-area:digital-marketing-analytics, skill-area:seo-sem, skill-area:analytics-tracking]
+ *   roles: [role:marketing-strategist, role:marketing-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

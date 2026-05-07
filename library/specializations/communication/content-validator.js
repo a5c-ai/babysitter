@@ -9,9 +9,11 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/communication/content-validator-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:documentation, topic:quality-assurance]
- *   roles: [role:tech-lead]
+ *   specializations: [specialization:communication]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs]
+ *   topics: [topic:code-review-best-practices]
+ *   workflows: [workflow:post-mortem-review, workflow:peer-review-cycle]
+ *   roles: [role:tech-lead, role:engineering-manager, role:technical-writer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

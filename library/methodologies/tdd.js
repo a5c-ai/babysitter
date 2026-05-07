@@ -3,8 +3,12 @@
  * @description Test-Driven Development — classic Red/Green/Refactor loop per feature unit.
  * @inputs { project: string, feature: string, units?: Array<object>, maxIterations?: number }
  * @outputs { success: boolean, feature: string, units: Array<object>, finalState: string }
-  * @graph
+   * @graph
  *   domains: [domain:software-engineering]
+ *   skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:acceptance-testing]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:test-driven-development]
+ *   roles: [role:backend-engineer, role:qa-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

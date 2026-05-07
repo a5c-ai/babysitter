@@ -3,11 +3,10 @@
  * @description Structured IC preparation including investment memo writing, IC presentation, deal scoring framework application, risk assessment, and decision documentation
  * @inputs { companyName: string, dealData: object, dueDiligenceResults: object, fundStrategy: object }
  * @outputs { success: boolean, investmentMemo: object, icPresentation: object, riskAssessment: object, decision: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:venture-capital]
- *   skillAreas: [skill-area:investment-analysis]
- *   topics: [topic:startup-funding, topic:portfolio-management]
- *   roles: [role:venture-capitalist]
+ *   skillAreas: [skill-area:investment-analysis, skill-area:valuation-analysis, skill-area:financial-modeling]
+ *   roles: [role:financial-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

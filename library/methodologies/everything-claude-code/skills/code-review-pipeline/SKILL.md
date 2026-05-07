@@ -4,18 +4,10 @@ description: Multi-dimensional code review across correctness, security, perform
 allowed-tools: Read, Bash, Grep, Glob
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Review Pipeline
-
-## Overview
-
-Multi-dimensional code review methodology adapted from the Everything Claude Code project. Reviews across 4 dimensions with confidence-gated issue reporting and automated remediation loops.
-
-## Review Dimensions
-
-### Dimension 1: Correctness
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Logic errors and off-by-one mistakes
 - Edge case handling (null, undefined, empty, boundary)
 - Type safety (no implicit any, proper narrowing)

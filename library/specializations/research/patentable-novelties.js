@@ -9,9 +9,10 @@
  * Source: a5c-ai/registry/prompts/research/patentable-novelties-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:research-methodology, topic:knowledge-management]
- *   roles: [role:tech-lead]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:data-analysis, skill-area:statistical-analysis]
+ *   topics: [topic:developer-experience]
+ *   roles: [role:research-engineer, role:tech-lead]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -10,8 +10,9 @@ used-by-processes:
   - specializations/domains/business/travel/travel-plan-compose
 graph:
   domains: [domain:travel]
-  skillAreas: [skill-area:operations-management]
-  roles: [role:operations-manager]
+  skillAreas: [skill-area:travel-itinerary-planning, skill-area:product-discovery]
+  workflows: [workflow:customer-journey-optimization]
+  roles: [role:product-manager, role:operations-analyst]
 ---
 
 # Itinerary Narrator

@@ -16,11 +16,11 @@
  * @references
  * - PMI Change Management: https://www.pmi.org/learning/library/change-management-project-performance-4297
  * - PMBOK Change Control: https://www.pmi.org/pmbok-guide-standards/foundational/pmbok
- * @graph
+  * @graph
  *   domains: [domain:project-management]
- *   skillAreas: [skill-area:project-management]
- *   topics: [topic:project-planning, topic:agile-methodology]
- *   roles: [role:project-manager]
+ *   skillAreas: [skill-area:stakeholder-management, skill-area:roadmap-planning]
+ *   workflows: [workflow:project-kickoff, workflow:feature-development]
+ *   roles: [role:project-manager, role:scrum-master]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

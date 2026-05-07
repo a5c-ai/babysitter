@@ -16,11 +16,12 @@
  * - ISO 27701 Privacy Management: https://www.iso.org/standard/71670.html
  * - GDPR DPIA Requirements: https://gdpr.eu/article-35-impact-assessment/
  * - NIST Privacy Framework: https://www.nist.gov/privacy-framework
- * @graph
+  * @graph
  *   domains: [domain:legal]
- *   skillAreas: [skill-area:legal-analysis]
- *   topics: [topic:contract-management, topic:compliance]
- *   roles: [role:legal-counsel]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,18 +9,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Quality Reviewer Agent
-
-## Role
-
-Verify implementation is well-built: clean, tested, maintainable. Only dispatched AFTER spec compliance passes.
-
-## Expertise
-
-- Code cleanliness and maintainability
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Test quality (behavior tests, not mock tests)
 - Architecture pattern compliance
 - Naming conventions

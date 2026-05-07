@@ -16,11 +16,12 @@
  * @references
  * - Model Business Corporation Act: https://www.americanbar.org/content/dam/aba/administrative/business_law/corplaws/2016_mbca.pdf
  * - Delaware General Corporation Law: https://delcode.delaware.gov/title8/
- * @graph
+  * @graph
  *   domains: [domain:legal]
- *   skillAreas: [skill-area:legal-analysis]
- *   topics: [topic:contract-management, topic:compliance]
- *   roles: [role:legal-counsel]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,9 +4,10 @@ description: Identify gaps, overlaps, and misalignments in curriculum coverage t
 allowed-tools: Read, Grep, Write, Edit, Glob, WebFetch
 graph:
   domains: [domain:education]
-  skillAreas: [skill-area:technical-writing]
-  topics: [topic:knowledge-management, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  specializations: [specialization:instructional-design]
+  skillAreas: [skill-area:tutorial-design, skill-area:docs-as-code, skill-area:learning-development]
+  workflows: [workflow:peer-review-cycle]
+  roles: [role:technical-writer]
 ---
 
 # Curriculum Gap Analysis

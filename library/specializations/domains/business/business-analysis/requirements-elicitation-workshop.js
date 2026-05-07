@@ -3,11 +3,12 @@
  * @description Facilitate structured stakeholder workshops to elicit business and functional requirements using techniques including interviews, brainstorming, prototyping, and document analysis. Produces prioritized requirements aligned with business objectives.
  * @inputs { projectName: string, stakeholders: array, businessContext: object, objectives: array, existingDocuments: array }
  * @outputs { success: boolean, requirementsCatalog: object, workshopAgenda: object, stakeholderSignoff: object, artifacts: array }
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:business-analysis]
- *   topics: [topic:business-process-modeling, topic:requirements-engineering]
- *   roles: [role:business-analyst]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

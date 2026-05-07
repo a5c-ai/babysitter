@@ -11,8 +11,9 @@ expertise:
   - Sustainability assurance
 graph:
   domains: [domain:operations]
-  skillAreas: [skill-area:operations-management]
-  roles: [role:operations-manager]
+  skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+  workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+  roles: [role:operations-analyst, role:procurement-manager]
 ---
 
 # OpEx Program Manager

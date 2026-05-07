@@ -18,8 +18,10 @@ metadata:
   agent-id: AG-006
 graph:
   domains: [domain:human-resources]
-  skillAreas: [skill-area:talent-management]
-  roles: [role:hr-manager]
+  specializations: [specialization:talent-management]
+  skillAreas: [skill-area:talent-acquisition-strategy, skill-area:performance-management, skill-area:organizational-design, skill-area:learning-development]
+  workflows: [workflow:talent-acquisition-pipeline]
+  roles: [role:hr-manager, role:talent-recruiter]
 ---
 
 # Total Rewards Strategist Agent

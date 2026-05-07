@@ -4,18 +4,10 @@ description: Structured code quality assessment with Conventional Comments forma
 allowed-tools: Read, Bash, Grep, Glob, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Code Review
-
-## Overview
-
-Assess code quality, design, correctness, and maintainability through a structured 9-step review workflow. Uses Conventional Comments format with file-specific references.
-
-## When to Use
-
-- After implementation phase completes
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When reviewing code changes before merge
 - As part of the /review-code command
 

@@ -19,8 +19,8 @@ metadata:
   agent-id: AG-008
 graph:
   domains: [domain:knowledge-management]
-  skillAreas: [skill-area:technical-writing]
-  roles: [role:knowledge-manager]
+  skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:data-governance]
+  roles: [role:information-architect, role:technical-writer]
 ---
 
 # Knowledge Graph Specialist Agent

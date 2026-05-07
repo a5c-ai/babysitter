@@ -26,11 +26,11 @@
  *   currentMetrics: { currentThroughput: 800000, currentInventory: 200000, currentOE: 500000 }
  * }
  * @references Throughput Accounting (Corbett), The Goal (Goldratt), TOC Financial Measures
- * @graph
+  * @graph
  *   domains: [domain:operations]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:process-optimization, topic:operational-excellence]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -20,9 +20,8 @@ metadata:
     - sensor-fusion
 graph:
   domains: [domain:automotive-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:systems-modeling]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:sensor-fusion, skill-area:motion-planning, skill-area:physics-simulation]
+  roles: [role:systems-integration-engineer, role:embedded-engineer]
 ---
 
 # Sensor Fusion Skill

@@ -4,18 +4,10 @@ description: Multi-protocol consensus for agent swarms supporting Raft leader el
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Consensus Mechanisms
-
-## Overview
-
-Implement distributed consensus among agent swarms. Select the appropriate protocol based on fault tolerance requirements, swarm size, and communication topology.
-
-## When to Use
-
-- Multiple agents have produced independent solutions needing reconciliation
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Byzantine fault tolerance is required (untrusted or unreliable agents)
 - State synchronization across distributed agent swarms
 - Conflict-free data merging in concurrent operations

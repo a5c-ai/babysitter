@@ -4,18 +4,10 @@ description: Research-first development methodology that investigates existing s
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Research-First Development
-
-## Overview
-
-Research-first development methodology adapted from the Everything Claude Code project. Mandates investigation of existing solutions and alternatives before writing any code.
-
-## Research Process
-
-### 1. Problem Analysis
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Parse the request into specific technical requirements
 - Identify the domain and relevant technology stack
 - List known constraints (time, resources, compatibility)

@@ -16,11 +16,10 @@
  * @references
  * - BCG Henderson Institute: https://www.bcg.com/henderson-institute
  * - Shell Scenario Planning: Pioneering scenario methodology
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:data-analysis]
- *   topics: [topic:decision-analysis, topic:data-driven-decisions]
- *   roles: [role:data-analyst]
+ *   skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:business-analysis]
+ *   roles: [role:data-analyst, role:business-analyst]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

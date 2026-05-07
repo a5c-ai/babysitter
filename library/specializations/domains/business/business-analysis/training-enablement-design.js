@@ -17,11 +17,12 @@
  *   assessmentPlan: object,
  *   sustainmentPlan: object
  * }
- * @graph
+  * @graph
  *   domains: [domain:business-intelligence]
- *   skillAreas: [skill-area:business-analysis]
- *   topics: [topic:business-process-modeling, topic:requirements-engineering]
- *   roles: [role:business-analyst]
+ *   specializations: [specialization:strategic-consulting]
+ *   skillAreas: [skill-area:business-analysis, skill-area:strategic-analysis, skill-area:competitive-intelligence]
+ *   workflows: [workflow:market-analysis]
+ *   roles: [role:business-analyst, role:strategic-planner]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

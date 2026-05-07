@@ -4,18 +4,10 @@ description: System and API design guidance covering component boundaries, data 
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Architecture Patterns
-
-## Overview
-
-Guidance for system architecture and API design decisions within CC10X workflows. Used during PLAN and BUILD workflows for architectural choices.
-
-## Domain Areas
-
-### Component Design
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Single responsibility boundaries
 - Interface contracts and type safety
 - Dependency injection patterns

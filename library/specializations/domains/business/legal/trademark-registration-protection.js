@@ -16,11 +16,12 @@
  * @references
  * - USPTO Trademark Basics: https://www.uspto.gov/trademarks/basics
  * - McCarthy on Trademarks: https://store.legal.thomsonreuters.com/law-products/Treatises/McCarthy-on-Trademarks-and-Unfair-Competition-5th/p/100028885
- * @graph
+  * @graph
  *   domains: [domain:legal]
- *   skillAreas: [skill-area:legal-analysis]
- *   topics: [topic:contract-management, topic:compliance]
- *   roles: [role:legal-counsel]
+ *   specializations: [specialization:legal-compliance]
+ *   skillAreas: [skill-area:financial-regulation, skill-area:compliance-automation]
+ *   workflows: [workflow:contract-lifecycle, workflow:compliance-audit]
+ *   roles: [role:legal-counsel, role:compliance-officer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

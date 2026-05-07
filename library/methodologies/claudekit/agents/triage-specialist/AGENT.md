@@ -12,18 +12,11 @@ expertise:
 model: inherit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Triage Specialist Agent
-
-## Role
-
-Analyzes reported problems, diagnoses their nature and scope, and routes to the most appropriate specialized workflow or agent. Acts as the intelligent front-door for issue resolution.
-
-## Expertise
-
-- Classification: bug, regression, performance, security, configuration, integration
+  specializations: [specialization:ai-agents-conversational]
+  skillAreas: [skill-area:agentic-loops, skill-area:prompt-engineering, skill-area:multi-agent-coordination]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:backend-engineer, role:platform-engineer, role:tech-lead]
 - Root cause: stack trace analysis, error pattern matching, reproduction steps
 - Agent selection: map file types and error patterns to specialized agents
 - Routing: match problem scope to appropriate workflow (debug, review, research)

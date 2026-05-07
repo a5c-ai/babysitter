@@ -9,9 +9,8 @@ metadata:
   backlog-id: SK-IE-023
 graph:
   domains: [domain:industrial-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:process-optimization]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:statistical-analysis, skill-area:organizational-design, skill-area:data-analysis]
+  roles: [role:operations-analyst, role:research-engineer]
 ---
 
 # workstation-layout-designer

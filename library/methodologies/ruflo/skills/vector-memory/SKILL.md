@@ -4,18 +4,10 @@ description: HNSW vector search for pattern similarity retrieval and knowledge g
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Vector Memory
-
-## Overview
-
-High-performance vector search using HNSW (Hierarchical Navigable Small World) graphs for pattern storage and retrieval, combined with a knowledge graph for relational reasoning.
-
-## When to Use
-
-- Retrieving similar patterns from execution history
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Building and querying knowledge graphs for project context
 - Managing cross-session memory across project/local/user scopes
 - Fast similarity search for routing decisions

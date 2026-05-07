@@ -10,9 +10,11 @@
  * Source: https://raw.githubusercontent.com/a5c-ai/registry/main/prompts/research/evangelist-agent.prompt.md
  * @graph
  *   domains: [domain:software-engineering]
- *   skillAreas: [skill-area:technical-writing]
- *   topics: [topic:knowledge-management, topic:developer-experience]
- *   roles: [role:tech-lead, role:platform-engineer]
+ *   specializations: [specialization:research]
+ *   skillAreas: [skill-area:deep-web-research, skill-area:docs-as-code]
+ *   topics: [topic:developer-experience]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:research-engineer, role:tech-lead, role:platform-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -8,9 +8,9 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:environmental-engineering]
-  skillAreas: [skill-area:systems-engineering]
-  topics: [topic:engineering-design, topic:research-methodology]
-  roles: [role:tech-lead, role:platform-engineer]
+  skillAreas: [skill-area:data-analysis, skill-area:statistical-analysis, skill-area:geospatial-data-analysis]
+  workflows: [workflow:experiment-design]
+  roles: [role:research-engineer]
 ---
 
 # remediation-specialist

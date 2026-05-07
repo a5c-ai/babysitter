@@ -8,16 +8,10 @@ allowed-tools:
   - git-commit
 graph:
   domains: [domain:software-engineering]
-
----
-
-# COG Braindump Capture Skill
-
-Capture raw, unstructured thoughts and automatically classify them by domain (personal, professional, project-specific) for routing to appropriate vault sections.
-
-## Capabilities
-
-- Accept raw braindump text of any format
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - Classify content into personal, professional, and project-specific domains
 - Extract embedded URLs for separate processing
 - Route classified content to appropriate vault directories

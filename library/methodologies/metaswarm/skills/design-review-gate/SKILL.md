@@ -4,18 +4,10 @@ description: Parallel design review by 6 specialist agents (PM, Architect, Desig
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
 graph:
   domains: [domain:software-engineering]
-
----
-
-# Design Review Gate
-
-## Overview
-
-Run 6 specialist design reviews in parallel. ALL SIX must approve before implementation begins. Maximum 3 iterations before human escalation.
-
-## When to Use
-
-- After brainstorming and planning, before implementation
+  skillAreas: [skill-area:agentic-loops, skill-area:orchestration-loop]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
+  roles: [role:tech-lead, role:backend-engineer]
 - When validating a new feature design
 - When introducing new architectural patterns
 

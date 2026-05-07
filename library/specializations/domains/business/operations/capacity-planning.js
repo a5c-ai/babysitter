@@ -17,11 +17,11 @@
  * - APICS CPIM Body of Knowledge
  * - Vollmann, T.E. (2005). Manufacturing Planning and Control Systems
  * - Chase, R.B. (2017). Operations and Supply Chain Management
- * @graph
+  * @graph
  *   domains: [domain:operations]
- *   skillAreas: [skill-area:operations-management]
- *   topics: [topic:process-optimization, topic:operational-excellence]
- *   roles: [role:operations-manager]
+ *   skillAreas: [skill-area:organizational-design, skill-area:stakeholder-management]
+ *   workflows: [workflow:vendor-onboarding, workflow:vendor-evaluation]
+ *   roles: [role:operations-analyst, role:procurement-manager]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
