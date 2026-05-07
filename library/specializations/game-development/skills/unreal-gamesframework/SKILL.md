@@ -4,6 +4,9 @@ description: Unreal Engine Gameplay Ability System (GAS) skill for attributes, a
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal GAS Skill

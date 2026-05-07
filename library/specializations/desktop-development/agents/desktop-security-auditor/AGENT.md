@@ -4,6 +4,10 @@ description: Audits desktop applications for security vulnerabilities, insecure 
 expertise: [security, audit, vulnerabilities, sandboxing, code-signing]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # desktop-security-auditor

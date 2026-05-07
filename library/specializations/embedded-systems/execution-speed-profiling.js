@@ -19,6 +19,9 @@
  * - Performance Optimization: https://www.embedded.com/performance-optimization-for-embedded-systems/
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:timing-closure]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

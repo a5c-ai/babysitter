@@ -4,6 +4,10 @@ description: Generate and validate user stories from various inputs including re
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:product-analytics]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # User Story Generator Skill

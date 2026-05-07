@@ -6,6 +6,10 @@ experience: 5+ years cross-chain development
 background: LayerZero, Wormhole, Axelar experience
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:cross-chain-interoperability]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Cross-Chain Bridge Architect Agent

@@ -4,6 +4,10 @@ description: Bug bounty program management and security disclosure expertise for
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch, WebSearch
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Bug Bounty/Security Disclosure Skill

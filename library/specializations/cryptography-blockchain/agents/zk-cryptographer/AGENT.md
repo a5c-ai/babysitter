@@ -6,6 +6,10 @@ experience: 6+ years applied cryptography
 background: Academic research, ZK protocol development (Zcash, Aztec, zkSync methodology)
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # ZK Cryptographer Agent

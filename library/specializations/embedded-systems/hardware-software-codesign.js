@@ -19,6 +19,9 @@
  * - Interface Design: https://embeddedartistry.com/blog/2017/02/06/embedded-driver-development-patterns/
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

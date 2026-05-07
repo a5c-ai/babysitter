@@ -9,6 +9,10 @@ metadata:
   backlog-id: SK-006
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:performance-optimization]
+  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:load-testing]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:observability-driven-development]
 ---
 
 # gatling-load-testing

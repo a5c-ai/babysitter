@@ -5,6 +5,10 @@
  * @outputs { success: boolean, stakeholderMap: object, interviewGuides: array, expectationsDocument: string, decisionFramework: object, communicationPlan: object, artifacts: array }
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:stakeholder-management]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -6,6 +6,10 @@ experience: 5+ years EVM development
 background: High-frequency DeFi, gas-sensitive applications
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:performance-testing]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Gas Optimizer Agent

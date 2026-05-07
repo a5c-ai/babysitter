@@ -27,6 +27,10 @@
  * - Binary Protocol Design: https://www.rfc-editor.org/rfc-index.html
  * @graph
  *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

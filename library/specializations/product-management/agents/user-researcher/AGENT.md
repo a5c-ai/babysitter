@@ -4,6 +4,10 @@ description: Agent specialized in qualitative and quantitative user research met
 required-skills: user-research-synthesis, survey-design, persona-development
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:usability-testing]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # User Research Expert Agent

@@ -13,6 +13,9 @@ expertise:
   - Multi-stage bootloaders
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:bootloader-design]
+  roles: [role:embedded-engineer]
 ---
 
 # Bootloader Expert Agent

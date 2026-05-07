@@ -17,6 +17,10 @@
  * - LMAX Disruptor: https://lmax-exchange.github.io/disruptor/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:concurrency-multithreading]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

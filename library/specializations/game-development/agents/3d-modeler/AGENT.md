@@ -4,6 +4,9 @@ description: 3D modeler agent for asset creation and topology.
 required-skills: blender-integration, maya-integration, zbrush
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # 3D Modeler Agent

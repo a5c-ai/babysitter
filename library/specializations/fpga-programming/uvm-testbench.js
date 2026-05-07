@@ -19,6 +19,9 @@
  * - UVM Cookbook: https://www.mentor.com/
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

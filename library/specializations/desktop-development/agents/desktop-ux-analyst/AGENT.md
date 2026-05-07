@@ -4,6 +4,10 @@ description: Analyzes desktop UX patterns, platform conventions, and user intera
 expertise: [ux, user-experience, desktop-patterns, interaction-design]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # desktop-ux-analyst

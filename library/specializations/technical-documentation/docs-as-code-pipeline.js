@@ -33,6 +33,9 @@
  * - Write the Docs: https://www.writethedocs.org/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs]
+ *   roles: [role:technical-writer, role:documentation-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

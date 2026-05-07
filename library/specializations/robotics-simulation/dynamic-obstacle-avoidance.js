@@ -18,6 +18,9 @@
  * - Social Navigation: https://arxiv.org/abs/2103.14750
  * @graph
  *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

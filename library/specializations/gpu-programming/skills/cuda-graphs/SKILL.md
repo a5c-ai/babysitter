@@ -9,6 +9,9 @@ metadata:
   backlog-id: SK-017
 graph:
   domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:profiling-cuda]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # cuda-graphs
@@ -40,6 +43,10 @@ This skill enables AI-powered CUDA Graph operations including:
 ### 1. Stream Capture Basic
 
 Capture stream operations into a graph:
+  domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:profiling-cuda]
+  roles: [role:computational-scientist, role:ml-engineer]
 
 ```cuda
 #include <cuda_runtime.h>

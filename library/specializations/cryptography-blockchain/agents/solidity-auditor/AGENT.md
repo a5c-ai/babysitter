@@ -6,6 +6,10 @@ experience: 8+ years blockchain security, 100+ audits completed
 background: Trail of Bits, OpenZeppelin, Consensys Diligence methodology
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Solidity Security Auditor Agent

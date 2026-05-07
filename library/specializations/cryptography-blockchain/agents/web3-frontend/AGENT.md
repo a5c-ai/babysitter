@@ -6,6 +6,10 @@ experience: 5+ years frontend, 3+ years Web3
 background: Major dApp development (Uniswap, OpenSea, Blur style)
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:wallet-integration-key-management]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Web3 Frontend Expert Agent

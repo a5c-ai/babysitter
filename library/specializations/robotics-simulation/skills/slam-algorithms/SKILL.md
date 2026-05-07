@@ -9,6 +9,9 @@ metadata:
   backlog-id: SK-007
 graph:
   domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion, skill-area:slam]
+  roles: [role:research-engineer]
 ---
 
 # slam-algorithms

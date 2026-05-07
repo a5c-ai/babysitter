@@ -4,6 +4,9 @@ description: Unreal Engine Nanite skill for virtualized geometry, mesh streaming
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:computational-geometry]
+  roles: [role:game-developer]
 ---
 
 # Unreal Nanite Skill

@@ -11,6 +11,9 @@ expertise:
   - Incremental parsing for IDE support
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # Compiler Frontend Architect Agent

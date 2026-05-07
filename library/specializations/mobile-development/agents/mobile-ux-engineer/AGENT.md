@@ -4,6 +4,11 @@ description: Agent specialized in mobile user experience implementation, includi
 required-skills: lottie-animations, accessibility-testing
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:cross-platform-desktop]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility, topic:responsive-design]
 ---
 
 # Mobile UX Engineer Agent

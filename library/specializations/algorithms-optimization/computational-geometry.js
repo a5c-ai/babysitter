@@ -9,6 +9,9 @@
  * - Computational Geometry: https://cp-algorithms.com/geometry/
  * @graph
  *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms, skill-area:computational-geometry]
+ *   roles: [role:backend-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

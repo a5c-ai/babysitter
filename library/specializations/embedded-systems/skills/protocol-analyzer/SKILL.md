@@ -11,6 +11,9 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:protocol-design]
+  roles: [role:embedded-engineer]
 ---
 
 # Protocol Analyzer Skill

@@ -4,6 +4,10 @@ description: Expert in Qt/C++ development, signal/slot patterns, memory manageme
 expertise: [qt, cpp, cmake, signals-slots, qml, cross-platform]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # qt-cpp-specialist

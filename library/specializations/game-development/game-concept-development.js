@@ -21,6 +21,9 @@
  * - GDC Vault: Game Concept Development Talks
  * @graph
  *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+ *   roles: [role:game-developer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

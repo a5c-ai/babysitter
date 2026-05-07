@@ -4,6 +4,10 @@ description: Expert integration with Slither static analyzer for smart contract 
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Slither Static Analysis Skill

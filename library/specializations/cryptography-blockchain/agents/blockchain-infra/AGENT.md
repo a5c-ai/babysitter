@@ -6,6 +6,10 @@ experience: 6+ years blockchain infrastructure
 background: Ethereum Foundation, node operators, staking services
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Blockchain Infrastructure Engineer Agent

@@ -21,6 +21,11 @@
  * - WCAG Guidelines: https://www.w3.org/WAI/standards-guidelines/wcag/
  * @graph
  *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:cross-platform-desktop]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

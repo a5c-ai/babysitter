@@ -4,6 +4,9 @@ description: Unity DOTS/ECS skill for data-oriented design, jobs system, burst c
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:compiler-implementation]
+  roles: [role:game-developer]
 ---
 
 # Unity ECS Skill

@@ -18,6 +18,10 @@
  * - Aave V3 Documentation: https://docs.aave.com/
  * @graph
  *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

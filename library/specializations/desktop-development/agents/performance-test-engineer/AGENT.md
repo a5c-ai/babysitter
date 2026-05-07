@@ -4,6 +4,10 @@ description: Specializes in desktop performance testing, profiling, and benchmar
 expertise: [performance, profiling, benchmarks, optimization, testing]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:performance-testing]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # performance-test-engineer

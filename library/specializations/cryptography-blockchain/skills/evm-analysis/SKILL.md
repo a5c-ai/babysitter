@@ -4,6 +4,10 @@ description: Deep EVM bytecode analysis and decompilation capabilities for smart
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # EVM/Bytecode Analysis Skill

@@ -4,6 +4,11 @@ description: Agent specialized in mobile application security, OWASP MASVS compl
 required-skills: mobile-security
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:mobile-biometrics]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Mobile Security Engineer Agent

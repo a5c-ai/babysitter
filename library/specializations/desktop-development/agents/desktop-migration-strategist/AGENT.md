@@ -4,6 +4,10 @@ description: Plans and executes migrations between desktop frameworks with stran
 expertise: [migration, framework-transition, strangler-pattern, modernization]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:parallel-run-migration]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # desktop-migration-strategist

@@ -4,6 +4,9 @@ description: Unity New Input System configuration skill for action maps, device 
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:cross-platform-desktop]
+  roles: [role:game-developer]
 ---
 
 # Unity Input System Skill

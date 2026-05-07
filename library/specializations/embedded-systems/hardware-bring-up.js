@@ -21,6 +21,9 @@
  * - Embedded Systems Debugging: https://www.embedded.com/debugging-embedded-systems-with-oscilloscopes/
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

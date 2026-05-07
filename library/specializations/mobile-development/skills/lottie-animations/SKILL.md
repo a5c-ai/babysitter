@@ -4,6 +4,11 @@ description: Lottie animation skill for integrating After Effects animations int
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:cross-platform-desktop]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Lottie Animations Skill

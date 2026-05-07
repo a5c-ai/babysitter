@@ -10,6 +10,11 @@ allowed-tools:
   - Bash
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+  roles: [role:platform-engineer]
+  workflows: [workflow:product-discovery]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Plugin Registry Manager Skill

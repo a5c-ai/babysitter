@@ -5,6 +5,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [swiftui, macos, swift, ui, apple]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:cli-design]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # swiftui-view-generator

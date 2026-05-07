@@ -4,6 +4,10 @@ description: Automated calculation and scoring for product prioritization framew
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:prioritization-frameworks]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Prioritization Calculator Skill

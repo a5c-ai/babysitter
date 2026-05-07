@@ -24,6 +24,10 @@
  * - Prioritization Frameworks Guide: https://www.mindtheproduct.com/prioritization-frameworks/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:prioritization-frameworks]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,6 +4,9 @@ description: Unreal Engine Material Editor skill for PBR workflows, material ins
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:shader-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal Materials Skill

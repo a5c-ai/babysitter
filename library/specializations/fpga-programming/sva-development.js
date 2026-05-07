@@ -19,6 +19,9 @@
  * - Formal Verification with SVA: https://www.synopsys.com/verification/static-and-formal-verification.html
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

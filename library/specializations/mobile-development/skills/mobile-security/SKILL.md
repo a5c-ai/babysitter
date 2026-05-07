@@ -4,6 +4,11 @@ description: Mobile application security skill for implementing OWASP MASVS comp
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:mobile-biometrics]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Mobile Security Skill

@@ -9,6 +9,9 @@ metadata:
   backlog-id: SK-006
 graph:
   domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # cublas-cudnn

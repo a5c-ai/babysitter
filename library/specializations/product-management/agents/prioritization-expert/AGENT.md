@@ -4,6 +4,10 @@ description: Agent specialized in prioritization frameworks and tradeoff analysi
 required-skills: prioritization-calculator, user-research-synthesis, product-analytics
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:prioritization-frameworks]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Prioritization Expert Agent

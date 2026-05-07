@@ -19,6 +19,9 @@
  * - ChipScope: https://docs.amd.com/r/en-US/ug936-vivado-tutorial-programming-debugging
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:fpga-programming]
+ *   skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,6 +4,9 @@ description: Senior FPGA architect for system-level design decisions including a
 role: Principal FPGA Architect
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # fpga-architect

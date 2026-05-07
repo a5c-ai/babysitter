@@ -17,6 +17,9 @@
  * - OCaml Modules: https://ocaml.org/docs/modules
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:programming-languages]
+ *   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+ *   roles: [role:backend-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

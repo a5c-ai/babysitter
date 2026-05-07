@@ -4,6 +4,10 @@ description: Specializes in modernizing legacy desktop apps (MFC, WinForms) to m
 expertise: [legacy, mfc, winforms, modernization, refactoring]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:strangler-fig-pattern]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # legacy-modernization-expert

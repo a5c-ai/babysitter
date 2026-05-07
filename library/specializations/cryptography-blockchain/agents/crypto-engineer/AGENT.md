@@ -6,6 +6,10 @@ experience: 7+ years applied cryptography
 background: Wallet security, key management systems, cryptographic protocol design
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Cryptographic Engineer Agent

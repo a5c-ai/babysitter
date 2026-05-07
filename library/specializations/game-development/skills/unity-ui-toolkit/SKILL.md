@@ -4,6 +4,9 @@ description: Unity UI Toolkit skill for runtime UI development, USS styling, UXM
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unity UI Toolkit Skill

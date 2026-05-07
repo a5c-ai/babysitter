@@ -8,6 +8,11 @@ status: active
 role: Senior Flutter Developer
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:flutter-development]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Flutter Expert Agent

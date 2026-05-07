@@ -10,6 +10,11 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+  roles: [role:backend-engineer, role:sre]
+  workflows: [workflow:product-discovery]
+  topics: [topic:circuit-breakers]
 ---
 
 # Protocol Fuzzer Skill

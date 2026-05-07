@@ -11,6 +11,10 @@
  * 4. Finalize - final review breakpoint, optional tracker update, emit follow-up prompt
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

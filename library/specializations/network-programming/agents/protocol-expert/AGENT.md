@@ -8,6 +8,10 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:networking]
+  specializations: [specialization:network-programming]
+  skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:sre]
+  topics: [topic:circuit-breakers]
 ---
 
 # protocol-expert

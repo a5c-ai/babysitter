@@ -4,6 +4,11 @@ description: Mobile accessibility testing skill for WCAG compliance, VoiceOver/T
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:accessibility-first-design]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # Accessibility Testing Skill

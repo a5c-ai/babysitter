@@ -4,6 +4,9 @@ description: Deep expertise in Xilinx/AMD FPGA ecosystem including Vivado Design
 role: Xilinx/AMD Applications Engineer
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # xilinx-specialist

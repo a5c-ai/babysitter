@@ -20,6 +20,9 @@
  * - HAL Design Patterns: https://www.embedded.com/design-patterns-for-embedded-systems-in-c/
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:device-drivers]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

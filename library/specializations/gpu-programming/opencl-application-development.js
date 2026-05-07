@@ -19,6 +19,9 @@
  * - OpenCL Reference Pages: https://man.opencl.org/
  * @graph
  *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:opencl-programming]
+ *   roles: [role:computational-scientist, role:ml-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

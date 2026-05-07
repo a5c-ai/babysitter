@@ -19,6 +19,11 @@
  * - Spring Boot Migration: https://github.com/spring-projects/spring-boot/wiki
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

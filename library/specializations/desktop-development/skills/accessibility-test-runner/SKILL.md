@@ -5,6 +5,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [accessibility, a11y, testing, wcag, axe-core]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:accessibility-first-design]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # accessibility-test-runner

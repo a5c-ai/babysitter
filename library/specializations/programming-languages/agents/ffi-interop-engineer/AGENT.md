@@ -12,6 +12,9 @@ expertise:
   - Safety and sandboxing
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # FFI and Interop Engineer Agent

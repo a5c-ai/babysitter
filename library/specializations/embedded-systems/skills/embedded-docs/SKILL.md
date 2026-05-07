@@ -4,6 +4,9 @@ description: Embedded firmware documentation generation and maintenance using Do
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob, WebFetch
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Embedded Documentation Skill

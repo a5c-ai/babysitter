@@ -19,6 +19,9 @@
  * - Quantization: https://pytorch.org/docs/stable/quantization.html
  * @graph
  *   domains: [domain:scientific-computing]
+ *   specializations: [specialization:gpu-programming]
+ *   skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders]
+ *   roles: [role:computational-scientist, role:ml-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

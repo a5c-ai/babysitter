@@ -12,6 +12,9 @@ expertise:
   - REPL development
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # Language Tooling Engineer Agent

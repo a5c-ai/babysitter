@@ -4,6 +4,9 @@ description: Unity Netcode for GameObjects skill for multiplayer networking, RPC
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:multiplayer-networking]
+  roles: [role:game-developer]
 ---
 
 # Unity Netcode Skill

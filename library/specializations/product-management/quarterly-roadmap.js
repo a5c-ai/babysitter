@@ -23,6 +23,10 @@
  * - Evidence-Guided Product Development: https://www.svpg.com/product-roadmaps-in-scrum/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:product-management]
+ *   skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:roadmap-management]
+ *   roles: [role:product-manager, role:product-analyst]
+ *   workflows: [workflow:product-discovery, workflow:competitive-analysis]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

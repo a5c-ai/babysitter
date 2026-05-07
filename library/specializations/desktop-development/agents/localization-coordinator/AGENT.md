@@ -4,6 +4,10 @@ description: Coordinates translation workflows, manages locale-specific content,
 expertise: [i18n, l10n, translation, rtl, localization]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # localization-coordinator

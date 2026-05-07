@@ -4,6 +4,10 @@ description: Cross-chain bridge and multi-chain development expertise. Supports 
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption, skill-area:cross-chain-interoperability]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Cross-Chain Development Skill

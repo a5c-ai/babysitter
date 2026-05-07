@@ -11,6 +11,9 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # MISRA C Static Analysis Skill

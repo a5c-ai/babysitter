@@ -7,6 +7,11 @@ slug: offline-storage
 status: active
 graph:
   domains: [domain:mobile]
+  specializations: [specialization:mobile-development]
+  skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:cross-platform-desktop]
+  roles: [role:mobile-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility, topic:offline-first]
 ---
 
 # Mobile Offline Storage Skill

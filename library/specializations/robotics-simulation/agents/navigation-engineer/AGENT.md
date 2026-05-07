@@ -15,6 +15,9 @@ expertise:
   - Fleet navigation coordination
 graph:
   domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # Navigation Engineer Agent

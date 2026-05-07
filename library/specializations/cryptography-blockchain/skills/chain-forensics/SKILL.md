@@ -4,6 +4,10 @@ description: On-chain analysis and transaction forensics for blockchain security
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch, WebSearch
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Chain Analysis/Forensics Skill

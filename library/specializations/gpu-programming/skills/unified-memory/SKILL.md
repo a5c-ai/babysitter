@@ -9,6 +9,9 @@ metadata:
   backlog-id: SK-018
 graph:
   domains: [domain:scientific-computing]
+  specializations: [specialization:gpu-programming]
+  skillAreas: [skill-area:cuda-kernels, skill-area:compute-shaders, skill-area:parallel-run-migration]
+  roles: [role:computational-scientist, role:ml-engineer]
 ---
 
 # unified-memory

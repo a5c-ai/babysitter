@@ -8,6 +8,9 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion, skill-area:ros-development]
+  roles: [role:research-engineer]
 ---
 
 # ros-expert

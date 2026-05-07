@@ -6,6 +6,9 @@
  * @outputs { success: boolean, analyticsDoc: string, eventSchema: object, dashboards: array, artifacts: array }
  * @graph
  *   domains: [domain:gaming]
+ *   specializations: [specialization:game-development]
+ *   skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:game-analytics-monetization]
+ *   roles: [role:game-developer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -9,6 +9,9 @@ metadata:
   backlog-id: SK-002
 graph:
   domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+  roles: [role:research-engineer]
 ---
 
 # gazebo-simulation

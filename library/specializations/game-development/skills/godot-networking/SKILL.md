@@ -4,6 +4,9 @@ description: Godot multiplayer skill for high-level networking API, RPCs, and pe
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:multiplayer-networking]
+  roles: [role:game-developer]
 ---
 
 # Godot Networking Skill

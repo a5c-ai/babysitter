@@ -18,6 +18,9 @@
  * - Real-World Robot Learning: https://arxiv.org/abs/1910.02998
  * @graph
  *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

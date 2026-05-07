@@ -18,6 +18,10 @@
  * - Let's Encrypt: https://letsencrypt.org/docs/
  * @graph
  *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers, topic:ssl-certs]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

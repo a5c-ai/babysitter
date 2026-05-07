@@ -12,6 +12,9 @@ expertise:
   - Phi function placement
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # IR Design Specialist Agent

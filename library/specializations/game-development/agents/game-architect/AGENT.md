@@ -4,6 +4,9 @@ description: Agent specialized in game systems architecture, technical design, c
 required-skills: unity-development, unreal-development, godot-development, behavior-trees
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Game Architect Agent

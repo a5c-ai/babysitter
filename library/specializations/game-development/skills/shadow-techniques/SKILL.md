@@ -4,6 +4,9 @@ description: Shadow mapping skill for cascaded shadows, contact hardening, and o
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Shadow Techniques Skill

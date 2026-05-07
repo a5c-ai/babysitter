@@ -18,7 +18,12 @@
  * - pkg (Node.js): https://github.com/vercel/pkg
  * - PyInstaller: https://pyinstaller.org/
  * @graph
- *   domains: [domain:software-engineering, role:backend-engineer]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

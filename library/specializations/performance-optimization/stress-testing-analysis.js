@@ -16,6 +16,10 @@
  * - Chaos Engineering: https://principlesofchaos.org/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:performance-optimization]
+ *   skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:stress-testing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

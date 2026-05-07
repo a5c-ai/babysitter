@@ -19,6 +19,10 @@
  * - Locust: https://docs.locust.io/
  * @graph
  *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:load-testing]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

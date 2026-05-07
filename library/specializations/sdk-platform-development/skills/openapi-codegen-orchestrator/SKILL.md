@@ -9,6 +9,10 @@ metadata:
   backlog-id: SK-SDK-001
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks, skill-area:api-doc-generation]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # openapi-codegen-orchestrator

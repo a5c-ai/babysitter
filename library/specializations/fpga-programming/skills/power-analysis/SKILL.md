@@ -10,6 +10,9 @@ allowed-tools:
   - Bash
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis, skill-area:low-power-design]
+  roles: [role:embedded-engineer]
 ---
 
 # Power Analysis Skill

@@ -13,6 +13,9 @@ expertise:
   - Clock domain crossing timing
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis, skill-area:timing-closure]
+  roles: [role:embedded-engineer]
 ---
 
 # FPGA Timing Expert Agent

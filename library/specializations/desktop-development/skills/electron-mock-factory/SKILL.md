@@ -5,6 +5,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [electron, testing, mocks, unit-testing, jest]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:graphics-rendering]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # electron-mock-factory

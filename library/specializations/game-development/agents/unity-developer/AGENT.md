@@ -4,6 +4,9 @@ description: Agent specialized in Unity game development, C# scripting, editor e
 required-skills: unity-development, behavior-trees, navmesh
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unity Developer Agent

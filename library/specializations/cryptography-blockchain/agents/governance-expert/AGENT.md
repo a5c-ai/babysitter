@@ -6,6 +6,10 @@ experience: 4+ years DAO governance
 background: MakerDAO, Compound, ENS governance design and operation
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Governance Systems Expert Agent

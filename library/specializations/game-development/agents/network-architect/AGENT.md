@@ -4,6 +4,9 @@ description: Multiplayer architecture agent for protocol selection and scalabili
 required-skills: client-server, state-sync, lag-compensation
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:multiplayer-networking]
+  roles: [role:game-developer]
 ---
 
 # Network Architect Agent

@@ -4,6 +4,9 @@ description: Technical direction agent for engine selection, team technical lead
 required-skills: unity-development, unreal-development, godot-development
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Technical Director Agent

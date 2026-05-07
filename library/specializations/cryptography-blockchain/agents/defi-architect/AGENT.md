@@ -6,6 +6,10 @@ experience: 7+ years financial engineering, 5+ years DeFi
 background: Uniswap, Aave, MakerDAO protocol design methodology
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # DeFi Protocol Architect Agent

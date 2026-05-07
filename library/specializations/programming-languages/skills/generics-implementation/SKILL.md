@@ -4,6 +4,9 @@ description: Expert skill for implementing parametric polymorphism including typ
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:typescript-generic-programming]
+  roles: [role:backend-engineer]
 ---
 
 # Generics Implementation Skill

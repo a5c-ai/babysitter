@@ -4,6 +4,11 @@ description: Generate Cobra/Viper-based Go CLI applications with persistent flag
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:developer-experience]
 
 ---
 

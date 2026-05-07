@@ -19,6 +19,9 @@
  * - STOMP: https://ros-planning.github.io/moveit_tutorials/doc/stomp_planner/stomp_planner_tutorial.html
  * @graph
  *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

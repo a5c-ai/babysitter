@@ -18,6 +18,9 @@
  * - ROS2 Launch: https://docs.ros.org/en/rolling/Tutorials/Intermediate/Launch/Launch-Main.html
  * @graph
  *   domains: [domain:robotics]
+ *   specializations: [specialization:robotics-simulation]
+ *   skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion]
+ *   roles: [role:research-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

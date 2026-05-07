@@ -6,6 +6,10 @@ experience: 6+ years formal methods
 background: Academic formal methods, Certora/Runtime Verification experience
 graph:
   domains: [domain:security]
+  specializations: [specialization:cryptography-blockchain]
+  skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+  roles: [role:security-engineer]
+  topics: [topic:hmac-signing, topic:ssl-certs]
 ---
 
 # Formal Methods Engineer Agent

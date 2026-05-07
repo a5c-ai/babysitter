@@ -7,6 +7,9 @@
  * @outputs { success: boolean, documentation: object, quality: number, artifacts: string[] }
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:technical-documentation]
+ *   skillAreas: [skill-area:docs-as-code, skill-area:reference-docs, skill-area:api-doc-generation]
+ *   roles: [role:technical-writer, role:documentation-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

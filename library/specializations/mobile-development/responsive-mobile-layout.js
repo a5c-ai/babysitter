@@ -20,6 +20,11 @@
  * - iOS Size Classes: https://developer.apple.com/design/human-interface-guidelines/layout
  * @graph
  *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:accessibility, topic:responsive-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

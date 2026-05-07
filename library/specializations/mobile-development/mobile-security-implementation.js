@@ -19,6 +19,11 @@
  * - Android Security: https://developer.android.com/topic/security/best-practices
  * @graph
  *   domains: [domain:mobile]
+ *   specializations: [specialization:mobile-development]
+ *   skillAreas: [skill-area:ios-native, skill-area:android-native, skill-area:symmetric-encryption]
+ *   roles: [role:mobile-engineer]
+ *   workflows: [workflow:feature-development, workflow:release-management]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

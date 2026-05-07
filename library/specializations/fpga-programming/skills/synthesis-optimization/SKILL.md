@@ -4,6 +4,9 @@ description: Expertise in RTL optimization for FPGA synthesis tools. Analyzes sy
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:fpga-programming]
+  skillAreas: [skill-area:hdl-design, skill-area:fpga-synthesis]
+  roles: [role:embedded-engineer]
 ---
 
 # Synthesis Optimization Skill

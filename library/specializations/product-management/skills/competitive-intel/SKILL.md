@@ -11,6 +11,10 @@ allowed-tools:
   - Bash
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:product-management]
+  skillAreas: [skill-area:product-strategy, skill-area:product-analytics, skill-area:competitive-intelligence]
+  roles: [role:product-manager, role:product-analyst]
+  workflows: [workflow:product-discovery, workflow:competitive-analysis]
 ---
 
 # Competitive Intelligence Skill

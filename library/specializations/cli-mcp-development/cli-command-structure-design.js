@@ -16,7 +16,12 @@
  * - CLI Guidelines: https://clig.dev/
  * - Heroku CLI Style Guide: https://devcenter.heroku.com/articles/cli-style-guide
  * @graph
- *   domains: [domain:software-engineering, role:backend-engineer]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:cli-mcp-development]
+ *   skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+ *   roles: [role:backend-engineer, role:platform-engineer]
+ *   workflows: [workflow:feature-development]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

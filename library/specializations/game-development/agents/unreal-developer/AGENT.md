@@ -4,6 +4,9 @@ description: Unreal Engine development agent for C++/Blueprint and plugin develo
 required-skills: unreal-development, unreal-cpp, unreal-blueprint
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Unreal Developer Agent

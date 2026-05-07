@@ -5,6 +5,11 @@ allowed-tools: Read, Grep, Glob, Bash
 tags: [qt, accessibility, wcag, a11y, audit]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop, skill-area:accessibility-first-design]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:accessibility]
 ---
 
 # qt-widget-accessibility-audit

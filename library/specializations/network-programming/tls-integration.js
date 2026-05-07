@@ -23,6 +23,10 @@
  * - TLS 1.3 RFC: https://www.rfc-editor.org/rfc/rfc8446
  * @graph
  *   domains: [domain:networking]
+ *   specializations: [specialization:network-programming]
+ *   skillAreas: [skill-area:protocol-design, skill-area:socket-programming, skill-area:symmetric-encryption]
+ *   roles: [role:backend-engineer, role:sre]
+ *   topics: [topic:circuit-breakers, topic:ssl-certs]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

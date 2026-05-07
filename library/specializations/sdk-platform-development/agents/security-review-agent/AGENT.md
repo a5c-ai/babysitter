@@ -9,6 +9,10 @@ expertise:
   - Security vulnerability assessment
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:sdk-platform-development]
+  skillAreas: [skill-area:sdk-codegen, skill-area:api-clients-sdks]
+  roles: [role:platform-engineer]
+  topics: [topic:api-design, topic:developer-experience]
 ---
 
 # Security Review Agent

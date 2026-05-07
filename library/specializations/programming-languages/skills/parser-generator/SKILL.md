@@ -11,6 +11,9 @@ allowed-tools:
   - Bash
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:parsing-data-formats]
+  roles: [role:backend-engineer]
 ---
 
 # Parser Generator Skill

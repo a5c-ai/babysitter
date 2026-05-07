@@ -4,6 +4,9 @@ description: Agent specialized in implementing gameplay systems, player mechanic
 required-skills: unity-development, unreal-development, godot-development, behavior-trees, navmesh
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  roles: [role:game-developer]
 ---
 
 # Gameplay Programmer Agent

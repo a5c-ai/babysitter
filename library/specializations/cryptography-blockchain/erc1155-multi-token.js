@@ -20,6 +20,10 @@
  * - OpenZeppelin ERC1155: https://docs.openzeppelin.com/contracts/4.x/erc1155
  * @graph
  *   domains: [domain:security]
+ *   specializations: [specialization:cryptography-blockchain]
+ *   skillAreas: [skill-area:symmetric-encryption, skill-area:asymmetric-encryption]
+ *   roles: [role:security-engineer]
+ *   topics: [topic:hmac-signing, topic:ssl-certs]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

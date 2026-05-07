@@ -20,6 +20,9 @@
  * - Real-Time Systems: https://www.freertos.org/Documentation/RTOS_book.html
  * @graph
  *   domains: [domain:embedded-systems]
+ *   specializations: [specialization:embedded-systems]
+ *   skillAreas: [skill-area:rtos-programming, skill-area:firmware-development, skill-area:timing-closure]
+ *   roles: [role:embedded-engineer]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

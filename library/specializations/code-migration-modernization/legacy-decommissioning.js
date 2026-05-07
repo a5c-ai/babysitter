@@ -19,6 +19,11 @@
  * - System Decommissioning: https://www.cisa.gov/uscert/sites/default/files/documents/06-015%20-%20IT%20System%20Disposition.pdf
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:code-migration-modernization]
+ *   skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration]
+ *   roles: [role:architect, role:tech-lead]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   topics: [topic:refactoring]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

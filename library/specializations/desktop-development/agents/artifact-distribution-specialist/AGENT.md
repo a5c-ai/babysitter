@@ -4,6 +4,10 @@ description: Expert in desktop app distribution channels, update servers, and CD
 expertise: [distribution, cdn, update-servers, release-channels]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # artifact-distribution-specialist

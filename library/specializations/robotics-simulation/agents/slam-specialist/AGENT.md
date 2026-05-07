@@ -15,6 +15,9 @@ expertise:
   - Real-time SLAM optimization
 graph:
   domains: [domain:robotics]
+  specializations: [specialization:robotics-simulation]
+  skillAreas: [skill-area:motion-planning, skill-area:sensor-fusion, skill-area:slam]
+  roles: [role:research-engineer]
 ---
 
 # SLAM Specialist Agent

@@ -11,6 +11,9 @@ allowed-tools:
   - Bash
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:concurrency-multithreading]
+  roles: [role:backend-engineer]
 ---
 
 # Concurrency Primitives Skill

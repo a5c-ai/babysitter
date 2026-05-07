@@ -10,6 +10,11 @@ expertise:
   - Scoop manifests
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:cli-mcp-development]
+  skillAreas: [skill-area:cli-design, skill-area:mcp-server-implementation]
+  roles: [role:backend-engineer, role:platform-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
+  topics: [topic:developer-experience]
 
 ---
 

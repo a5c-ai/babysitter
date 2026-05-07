@@ -8,6 +8,9 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:computer-science]
+  specializations: [specialization:algorithms-optimization]
+  skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+  roles: [role:backend-engineer, role:computational-scientist]
 ---
 
 # String Algorithm Matcher Skill

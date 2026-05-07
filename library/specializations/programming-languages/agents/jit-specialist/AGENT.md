@@ -12,6 +12,9 @@ expertise:
   - Code cache management
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # JIT Compiler Specialist Agent

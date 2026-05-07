@@ -4,6 +4,9 @@ description: Expert skill for designing and implementing algebraic effect system
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:programming-languages]
+  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  roles: [role:backend-engineer]
 ---
 
 # Effect Systems Skill

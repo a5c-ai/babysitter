@@ -17,6 +17,9 @@
  * - Competitive Programmer's Handbook: https://cses.fi/book/book.pdf
  * @graph
  *   domains: [domain:computer-science]
+ *   specializations: [specialization:algorithms-optimization]
+ *   skillAreas: [skill-area:dynamic-programming, skill-area:graph-algorithms]
+ *   roles: [role:backend-engineer, role:computational-scientist]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

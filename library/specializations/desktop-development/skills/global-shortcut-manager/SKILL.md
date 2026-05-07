@@ -5,6 +5,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 tags: [keyboard, shortcuts, hotkeys, cross-platform, desktop]
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:desktop-development]
+  skillAreas: [skill-area:desktop-ui-frameworks, skill-area:cross-platform-desktop]
+  roles: [role:desktop-developer, role:fullstack-engineer]
+  workflows: [workflow:feature-development, workflow:release-management]
 ---
 
 # global-shortcut-manager

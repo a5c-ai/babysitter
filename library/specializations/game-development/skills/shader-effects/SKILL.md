@@ -4,6 +4,9 @@ description: Common shader effects skill for dissolve, outline, hologram, toon, 
 allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
+  specializations: [specialization:game-development]
+  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:shader-programming]
+  roles: [role:game-developer]
 ---
 
 # Shader Effects Skill

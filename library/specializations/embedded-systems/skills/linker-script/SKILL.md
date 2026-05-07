@@ -4,6 +4,9 @@ description: GNU linker script generation and optimization for embedded systems.
 allowed-tools: Read, Grep, Write, Edit, Bash, Glob
 graph:
   domains: [domain:embedded-systems]
+  specializations: [specialization:embedded-systems]
+  skillAreas: [skill-area:rtos-programming, skill-area:firmware-development]
+  roles: [role:embedded-engineer]
 ---
 
 # Linker Script Skill
