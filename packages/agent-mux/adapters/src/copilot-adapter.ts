@@ -29,15 +29,13 @@ import {
 } from './session-fs.js';
 
 export class CopilotAdapter extends BaseAgentAdapter {
-  readonly agent: string;
+  readonly agent: string = this.constructor.name.replace(/Adapter$/, "").toLowerCase();
   readonly displayName = 'GitHub Copilot';
-  readonly cliCommand: string;
+  readonly cliCommand: string = this.agent;
   readonly minVersion = '1.0.0';
 
   constructor(agent?: string, cliCommand?: string) {
     super();
-    this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase();
-    this.cliCommand = cliCommand ?? this.agent;
   }
   readonly hostEnvSignals = ['COPILOT_CLI_SESSION', 'GH_COPILOT_SESSION'] as const;
 

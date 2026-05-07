@@ -34,15 +34,13 @@ import {
 } from './session-fs.js';
 
 export class OpenCodeAdapter extends BaseAgentAdapter {
-  readonly agent: string;
+  readonly agent: string = this.constructor.name.replace(/Adapter$/, "").toLowerCase();
   readonly displayName = 'OpenCode';
-  readonly cliCommand: string;
+  readonly cliCommand: string = this.agent;
   readonly minVersion = '0.1.0';
 
   constructor(agent?: string, cliCommand?: string) {
     super();
-    this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase();
-    this.cliCommand = cliCommand ?? this.agent;
   }
   readonly hostEnvSignals = ['OPENCODE_SESSION_ID', 'OPENCODE_CONFIG'] as const;
 

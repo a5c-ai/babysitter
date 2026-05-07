@@ -34,15 +34,13 @@ import {
 } from './session-fs.js';
 
 export class CursorAdapter extends BaseAgentAdapter {
-  readonly agent: string;
+  readonly agent: string = this.constructor.name.replace(/Adapter$/, "").toLowerCase();
   readonly displayName = 'Cursor';
-  readonly cliCommand: string;
+  readonly cliCommand: string = this.agent;
   readonly minVersion = '0.40.0';
 
   constructor(agent?: string, cliCommand?: string) {
     super();
-    this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase();
-    this.cliCommand = cliCommand ?? this.agent;
   }
   readonly hostEnvSignals = ['CURSOR_SESSION', 'CURSOR_AGENT_SESSION'] as const;
 

@@ -34,15 +34,13 @@ import {
 import { setupClaudeRuntimeHooks } from './claude-code/runtime-hooks/lifecycle.js';
 
 export class ClaudeAdapter extends BaseAgentAdapter {
-  readonly agent: string;
+  readonly agent: string = this.constructor.name.replace(/Adapter$/, "").toLowerCase();
   readonly displayName = 'Claude Code';
-  readonly cliCommand: string;
+  readonly cliCommand: string = this.agent;
   readonly minVersion = '1.0.0';
 
   constructor(agent?: string, cliCommand?: string) {
     super();
-    this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase();
-    this.cliCommand = cliCommand ?? this.agent;
   }
   readonly hostEnvSignals = ['CLAUDECODE', 'CLAUDE_CODE_SESSION_ID', 'CLAUDE_CODE', 'CLAUDE_PROJECT_DIR'] as const;
 

@@ -30,15 +30,13 @@ import {
 import { readAuthConfigIdentity } from './auth-config.js';
 
 export class CodexAdapter extends BaseAgentAdapter {
-  readonly agent: string;
+  readonly agent: string = this.constructor.name.replace(/Adapter$/, "").toLowerCase();
   readonly displayName = 'OpenAI Codex';
-  readonly cliCommand: string;
+  readonly cliCommand: string = this.agent;
   readonly minVersion = '0.1.0';
 
   constructor(agent?: string, cliCommand?: string) {
     super();
-    this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase();
-    this.cliCommand = cliCommand ?? this.agent;
   }
   readonly hostEnvSignals = ['CODEX_SESSION_ID', 'CODEX_RUN_ID', 'CODEX_CLI'] as const;
 
