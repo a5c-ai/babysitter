@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@a5c-ai/compendium/css";
-@import "@a5c-ai/compendium/css/CodexPrimitives";
 
 :root,
 html[data-theme="vellum"] {
@@ -317,6 +316,277 @@ html[data-theme="void"] .atlas-theme-toggle .tkc-check-row {
 
 .atlas-docs-shell {
   width: 100%;
+}
+
+.mk-docs {
+  width: 100%;
+  min-height: 820px;
+  background: var(--tk-paper);
+  border: 1px solid #000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.mk-docs__running {
+  border-bottom: var(--tk-rule-strong);
+  padding: 14px 28px 10px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__running > span {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--tk-line);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.mk-docs__running-left,
+.mk-docs__running-right {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+}
+
+.mk-docs__running-right {
+  justify-self: end;
+}
+
+.mk-docs__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--tk-paper);
+  border: var(--tk-rule-strong);
+  padding: 7px 10px;
+  margin-bottom: 22px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__search i {
+  margin-left: auto;
+  border: 1px solid var(--tk-line-soft);
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  font-style: normal;
+}
+
+.mk-docs__layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 260px;
+  min-height: 0;
+}
+
+.mk-docs__toc {
+  border-right: var(--tk-rule-strong);
+  background: var(--tk-paper-2);
+  padding: 24px 22px 40px;
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+
+.mk-docs__toc small {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__toc h3,
+.mk-docs__toc h4 {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.08;
+}
+
+.mk-docs__chapter {
+  border-top: 1px solid color-mix(in oklab, var(--tk-line) 20%, transparent);
+  padding: 10px 0 14px;
+}
+
+.mk-docs__chapter-head {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.mk-docs__chapter-head b {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--tk-cinnabar);
+}
+
+.mk-docs__chapter-head strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.mk-docs__chapter-head span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tk-line-hair);
+}
+
+.mk-docs__chapter-items {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0 0 38px;
+}
+
+.mk-docs__article {
+  padding: 32px 56px 64px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.mk-docs__chapter-mark {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 6px;
+  padding-bottom: 14px;
+  border-bottom: var(--tk-rule-strong);
+}
+
+.mk-docs__chapter-mark b {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 0.9;
+  color: var(--tk-cinnabar);
+}
+
+.mk-docs__chapter-mark small,
+.mk-docs__chapter-mark span {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__chapter-mark p {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__article h2 {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+.mk-docs__article h2 em {
+  color: var(--tk-cinnabar);
+  font-style: italic;
+}
+
+.mk-docs__article .lead {
+  max-width: 58ch;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--tk-line-soft);
+}
+
+.mk-docs__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 0 18px;
+  border-bottom: 1px solid color-mix(in oklab, var(--tk-line) 15%, transparent);
+}
+
+.mk-docs__meta span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--tk-line) 62%, white 38%);
+}
+
+.mk-docs__columns {
+  column-count: 2;
+  column-gap: 40px;
+  column-rule: 1px solid color-mix(in oklab, var(--tk-line) 12%, transparent);
+  padding-top: 22px;
+}
+
+.mk-docs__columns > * {
+  break-inside: avoid;
+}
+
+.mk-docs__columns p,
+.mk-docs__columns ol {
+  margin: 0 0 0.85em;
+  font-size: 15.5px;
+  line-height: 1.62;
+  text-align: justify;
+}
+
+.mk-docs__columns ol {
+  padding-left: 22px;
+}
+
+.mk-docs__margin {
+  border-left: var(--tk-rule-strong);
+  background: var(--tk-paper);
+  padding: 24px 22px 40px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.mk-docs__margin h3,
+.mk-docs__margin h4 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--tk-line) 72%, white 28%);
+}
+
+.mk-docs__margin p {
+  margin: 0;
+  color: color-mix(in oklab, var(--tk-line) 76%, white 24%);
+  line-height: 1.5;
+  font-size: 12.5px;
 }
 
 .atlas-docs-shell .mk-docs {
