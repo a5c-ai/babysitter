@@ -16,6 +16,7 @@ This directory defines the replacement testing strategy after the legacy Docker 
 - [Pipeline Integration](./pipeline-integration.md) defines where each lane belongs in CI, staging, release, scheduled, and manual workflows.
 - [Coverage And Reporting](./coverage-and-reporting.md) defines repo-wide coverage reporting, artifacts, logs, and pass/fail evidence.
 - [Implementation Roadmap](./implementation-roadmap.md) defines rollout slices, exit criteria, and stop conditions.
+- [Current Test Command Inventory](./current-test-command-inventory.md) maps existing package test-like commands to lane, scope, owner, artifact name, and pipeline placement for roadmap slice 0.
 - [Mock And Fixture Contracts](./mock-and-fixture-contracts.md) defines deterministic fixture families and live/mock compatibility rules.
 - [Quality Gates](./quality-gates.md) defines release-evidence gates and adversarial review criteria.
 - [Stack Permutations](./stack-permutations.md) defines valid and invalid layer combinations across the modular stack.

@@ -12,7 +12,7 @@ This roadmap turns the strategy into implementation slices. Each slice must land
 
 | Slice | Primary owner | Lane | Exit criteria | Pipeline target |
 | --- | --- | --- | --- | --- |
-| 0. Inventory and naming | CI maintainers | No-model | Every current test command is mapped to a package, lane, scope, and artifact name | Documentation only, then CI workflow comments |
+| 0. Inventory and naming | CI maintainers | No-model | [Current command inventory](./current-test-command-inventory.md) maps every current test-like command to package, lane, scope, owner, artifact name, and pipeline placement | Documentation only, then CI workflow comments |
 | 1. Mock and fixture contracts | Runtime maintainers | No-model | Mock Codex, Claude Code, agent-core, and gateway transcripts are shared by unit, integration, and UI tests | PR/push CI |
 | 2. SDK harness/plugin setup smoke | SDK and harness maintainers | No-model | `harness:install --dry-run`, `harness:install-plugin --dry-run`, and plugin discovery produce JSON evidence without claiming babysitter-agent runtime coverage | PR/push CI |
 | 3. Mux integration matrix | Agent-mux maintainers | No-model | Transport-mux route/runtime/env/launch-plan coverage, agent-mux gateway, adapters, and WebUI run against compatible fixture sessions | PR/push CI and staging |

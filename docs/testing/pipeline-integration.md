@@ -95,6 +95,11 @@ Stable required-check names prevent branch protection churn:
 - `testing / coverage summary`
 
 Only no-model checks should be required for ordinary PRs at first. Model-backed checks should become required only on `staging` and release branches after their quarantine period ends.
+
+## Current Inventory Naming
+
+Roadmap slice 0 keeps current workflow behavior intact and uses [Current Test Command Inventory](./current-test-command-inventory.md) as the source of truth for existing package scripts. Workflow comments and future reusable jobs should use the inventory artifact names before they introduce new command bundles.
+
 ## Proposed Command Bundles
 
 Status: Proposed. These command names are not current `package.json` scripts unless and until a follow-up implementation slice adds them.
