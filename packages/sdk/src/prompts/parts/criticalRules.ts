@@ -1,5 +1,6 @@
 import { renderTemplate, resolveTemplatePath } from '../templateRenderer';
 import type { PromptContext } from '../types';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Resolve whether the current harness uses codex-style ambient env var
@@ -7,16 +8,9 @@ import type { PromptContext } from '../types';
  * callerEnvVars instead of comparing harness name.
  */
 function hasCodexAmbientSessionBinding(ctx: PromptContext): boolean {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; callerEnvVars?: string[] }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
-    if (target?.callerEnvVars) {
-      return target.callerEnvVars.includes('CODEX_THREAD_ID') || target.callerEnvVars.includes('CODEX_SESSION_ID');
-    }
-  } catch {
-    // Catalog unavailable
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  if (target?.callerEnvVars) {
+    return target.callerEnvVars.includes('CODEX_THREAD_ID') || target.callerEnvVars.includes('CODEX_SESSION_ID');
   }
   return false;
 }

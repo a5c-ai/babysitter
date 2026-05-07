@@ -1,19 +1,13 @@
 import { renderTemplate, resolveTemplatePath } from '../templateRenderer';
 import type { PromptContext } from '../types';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Resolve the skill system label from catalog metadata.
  */
 function resolveSkillSystemLabel(ctx: PromptContext): string {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; skillSystemLabel?: string }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
-    if (target?.skillSystemLabel) return target.skillSystemLabel;
-  } catch {
-    // Catalog unavailable
-  }
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  if (target?.skillSystemLabel) return target.skillSystemLabel;
   return 'Installed skill';
 }
 

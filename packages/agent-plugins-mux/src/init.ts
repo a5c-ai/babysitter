@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import type { A5cPluginManifest } from './types.js';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Build the contextFiles map from catalog data.
@@ -9,20 +10,22 @@ import type { A5cPluginManifest } from './types.js';
  * get a context/ mapping.
  */
 function buildContextFilesMap(): Record<string, string> {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; requiredSurfaceFile?: string | null }>;
-    };
-    const map: Record<string, string> = {};
-    for (const target of listPluginTargetDescriptors()) {
-      if (target.requiredSurfaceFile) {
-        map[target.targetId] = `context/${target.requiredSurfaceFile}`;
-      }
+  const map: Record<string, string> = {};
+  for (const target of listPluginTargetDescriptors()) {
+    if (target.requiredSurfaceFile) {
+      map[target.targetId] = `context/${target.requiredSurfaceFile}`;
     }
-    return map;
-  } catch {
-    return {};
   }
+  return map;
+}
+
+function buildContextSurfaceFiles(name: string, manifest: A5cPluginManifest): TemplateFile[] {
+  const contextFiles = manifest.contextFiles ?? {};
+  const uniquePaths = [...new Set(Object.values(contextFiles))];
+  return uniquePaths.map((contextPath) => ({
+    path: contextPath,
+    content: buildAgentsContext(name),
+  }));
 }
 
 export const INIT_TEMPLATES = ['minimal', 'full', 'hooks-only'] as const;
@@ -153,10 +156,7 @@ function buildTemplateFiles(name: string, template: InitTemplate): TemplateFile[
           content: buildSessionStartHook(),
           executable: true,
         },
-        {
-          path: 'context/AGENTS.md',
-          content: buildAgentsContext(name),
-        },
+        ...buildContextSurfaceFiles(name, manifest),
       ]);
     case 'hooks-only':
       return files.concat([

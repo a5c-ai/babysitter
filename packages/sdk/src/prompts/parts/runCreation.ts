@@ -1,20 +1,14 @@
 import { renderTemplate, resolveTemplatePath } from '../templateRenderer';
 import type { PromptContext } from '../types';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Check whether the harness uses codex-style ambient env var session binding.
  */
 function hasCodexAmbientSessionBinding(ctx: PromptContext): boolean {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; callerEnvVars?: string[] }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
-    if (target?.callerEnvVars) {
-      return target.callerEnvVars.includes('CODEX_THREAD_ID') || target.callerEnvVars.includes('CODEX_SESSION_ID');
-    }
-  } catch {
-    // Catalog unavailable
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  if (target?.callerEnvVars) {
+    return target.callerEnvVars.includes('CODEX_THREAD_ID') || target.callerEnvVars.includes('CODEX_SESSION_ID');
   }
   return false;
 }
@@ -23,15 +17,8 @@ function hasCodexAmbientSessionBinding(ctx: PromptContext): boolean {
  * Check whether the harness uses programmatic adapter family (pi-style).
  */
 function isProgrammaticAdapter(ctx: PromptContext): boolean {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; adapterFamily?: string }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
-    return target?.adapterFamily === 'programmatic';
-  } catch {
-    return false;
-  }
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  return target?.adapterFamily === 'programmatic';
 }
 
 /**

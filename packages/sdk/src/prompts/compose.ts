@@ -6,21 +6,15 @@
 
 import { PromptContext } from './types';
 import * as parts from './parts';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Resolve the orchestration step count from catalog metadata.
  * Harnesses that consolidate steps (e.g. claude-code) report a lower count.
  */
 function resolveStepCount(ctx: PromptContext): string {
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; defaultStepCount?: number }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
-    if (target?.defaultStepCount) return String(target.defaultStepCount);
-  } catch {
-    // Catalog unavailable
-  }
+  const target = listPluginTargetDescriptors().find(t => t.targetId === ctx.harness);
+  if (target?.defaultStepCount) return String(target.defaultStepCount);
   return '8';
 }
 

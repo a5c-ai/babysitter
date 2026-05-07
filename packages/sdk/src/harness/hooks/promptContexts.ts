@@ -13,20 +13,10 @@ import {
   createDefaultCliSetupSnippet,
   createPromptContext,
 } from "../../prompts/contextShared";
-import type { PluginTargetDescriptor } from "@a5c-ai/agent-catalog";
+import { listPluginTargetDescriptors, type PluginTargetDescriptor } from "@a5c-ai/agent-catalog";
 
-let _listPluginTargetDescriptors: (() => PluginTargetDescriptor[]) | undefined;
 function getTargetDescriptors(): PluginTargetDescriptor[] {
-  if (!_listPluginTargetDescriptors) {
-    try {
-      // Dynamic import to avoid circular dependency issues at module load time
-      const catalog = require("@a5c-ai/agent-catalog");
-      _listPluginTargetDescriptors = catalog.listPluginTargetDescriptors;
-    } catch {
-      return [];
-    }
-  }
-  return _listPluginTargetDescriptors?.() ?? [];
+  return listPluginTargetDescriptors();
 }
 
 function resolveCliSetupSnippet(target: PluginTargetDescriptor): string {

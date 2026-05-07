@@ -11,6 +11,7 @@
 import { readPluginRegistry } from '../plugins/registry';
 import { resolveActiveProcessLibrary } from '../processLibrary/active';
 import type { PluginScope } from '../plugins/types';
+import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**
  * Collected capabilities from all runtime signal sources.
@@ -138,16 +139,9 @@ function collectAdapterCapabilities(
 ): string[] {
   if (!options.harness) return [];
 
-  try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
-      listPluginTargetDescriptors: () => Array<{ targetId: string; harnessCapabilities?: string[] }>;
-    };
-    const target = listPluginTargetDescriptors().find(t => t.targetId === options.harness);
-    if (target?.harnessCapabilities) {
-      return capabilityIdsToAdapterCapabilities(target.harnessCapabilities);
-    }
-  } catch {
-    // Catalog not available — return empty
+  const target = listPluginTargetDescriptors().find(t => t.targetId === options.harness);
+  if (target?.harnessCapabilities) {
+    return capabilityIdsToAdapterCapabilities(target.harnessCapabilities);
   }
 
   return [];
