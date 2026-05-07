@@ -9,7 +9,34 @@ import {
   listOutgoingTargets,
   listRelationshipsByRelation,
 } from "./atlas-bridge";
-import { buildClaimsByEvidence, getEvidenceClaimStatement } from "./evidence-projection";
+// Evidence projection — inlined from deleted evidence-projection.ts
+function buildClaimsByEvidence(
+  claimNodes: Iterable<GraphNode>,
+  evidenceNodes: Iterable<GraphNode>,
+  relationships: Iterable<Pick<GraphRelationship, "from" | "to" | "relation">>,
+): Map<string, GraphNode[]> {
+  const claimsByGraphId = new Map(Array.from(claimNodes, (node) => [String(node.id), node] as const));
+  const evidenceByGraphId = new Map(Array.from(evidenceNodes, (node) => [String(node.id), node] as const));
+  const claimsByEvidence = new Map<string, GraphNode[]>();
+  for (const rel of relationships) {
+    if (rel.relation !== "sourced_from") continue;
+    const claimNode = claimsByGraphId.get(rel.from);
+    const evidenceNode = evidenceByGraphId.get(rel.to);
+    if (!claimNode || !evidenceNode) continue;
+    const evidenceId = valueAsString(evidenceNode.evidenceId);
+    const bucket = claimsByEvidence.get(evidenceId);
+    if (bucket) bucket.push(claimNode);
+    else claimsByEvidence.set(evidenceId, [claimNode]);
+  }
+  return claimsByEvidence;
+}
+
+function getEvidenceClaimStatement(
+  evidenceId: string,
+  claimsByEvidence: ReadonlyMap<string, GraphNode[]>,
+): string {
+  return valueAsString(claimsByEvidence.get(evidenceId)?.[0]?.statement);
+}
 import {
   effectiveTransportMuxClaimStatus,
   effectiveTransportMuxUnresolvedGaps,
@@ -30,6 +57,7 @@ import type {
   GraphEdge,
   GraphDocument,
   GraphNode,
+  GraphRelationship,
   HarnessFallbackMetadata,
   HarnessImageEntry,
   HostDetectionRule,

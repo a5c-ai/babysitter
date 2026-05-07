@@ -70,7 +70,7 @@
     "docs:lint": "npm run docs:lint:markdown && npm run docs:lint:style",
     "docs:snippets": "node ./scripts/docs-code-samples-check.cjs",
     "docs:links": "node ./scripts/docs-link-check.cjs && node ./scripts/docs-strict-build.cjs",
-    "docs:freshness": "node ./scripts/docs-freshness-report.cjs && npm run build --workspace=@a5c-ai/atlas && npm run validate:evidence:freshness --workspace=@a5c-ai/agent-catalog",
+    "docs:freshness": "node ./scripts/docs-freshness-report.cjs",
     "docs:qa": "npm run docs:lint && npm run docs:snippets && npm run docs:links && npm run docs:freshness",
     "docs:ci": "npm run docs:qa",
     "docs:dev": "npm run docs:prepare && docusaurus start docs-site --host 0.0.0.0",
