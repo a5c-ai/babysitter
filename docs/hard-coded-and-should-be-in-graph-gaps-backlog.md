@@ -2,7 +2,9 @@
 
 > All data should flow: **Atlas graph → agent-catalog (bridge) → consumer packages**
 >
-> Generated 2026-05-06. Items are ordered by impact.
+> Generated 2026-05-06. Updated 2026-05-07. Items are ordered by impact.
+>
+> **Progress: P1 ✅ (3/3), P2 ✅ (2/2), P3–P7 remaining**
 
 ## Priority 1: Master Target Registries
 
