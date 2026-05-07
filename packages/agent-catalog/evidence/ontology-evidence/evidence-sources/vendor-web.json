@@ -2,7 +2,7 @@
   "kind": "EvidenceShard",
   "entryKind": "evidence-sources",
   "group": "vendor-web",
-  "generatedAt": "2026-05-06T19:15:18.119Z",
+  "generatedAt": "2026-05-07T06:02:59.956Z",
   "entries": [
     {
       "id": "evidence:anthropic-api-thinking-2026-01",
@@ -15,6 +15,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-01-15T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -28,6 +31,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-01-15T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -76,6 +82,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-02-01T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -1362,6 +1371,9 @@
       "sourceUrl": "https://docs.various",
       "observedAt": "2026-05-04T00:00:00Z",
       "observedBy": "a5c-ai-catalog",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "locator": "catalog-vendor-doc-vendor-doc-backfill",
       "kind": "EvidenceSource"
     },
@@ -1395,6 +1407,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-02-01T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -1408,6 +1423,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-02-01T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -1421,6 +1439,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-02-01T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {
@@ -2096,6 +2117,9 @@
       "trustLevel": "trust-level:official-web",
       "observedAt": "2026-02-01T00:00:00Z",
       "observedBy": "a5c-ai-team",
+      "freshnessWindowDays": 90,
+      "reviewOwner": "@a5c-ai/catalog",
+      "reviewedAt": "2026-05-04T00:00:00Z",
       "kind": "EvidenceSource"
     },
     {

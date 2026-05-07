@@ -121,7 +121,7 @@ export function generateInstallScript(
   _manifest: A5cPluginManifest,
   targetProfile: TargetProfile
 ): string {
-  if (targetProfile.name === 'github-copilot') {
+  if (targetProfile.componentSupport?.agents === 'native' && targetProfile.packageMetadata?.installLifecycle === 'plugin-scripts') {
     return `#!/usr/bin/env node
 'use strict';
 
@@ -233,7 +233,7 @@ export function generateUninstallScript(
   _manifest: A5cPluginManifest,
   targetProfile: TargetProfile
 ): string {
-  if (targetProfile.name === 'github-copilot') {
+  if (targetProfile.componentSupport?.agents === 'native' && targetProfile.packageMetadata?.installLifecycle === 'plugin-scripts') {
     return `#!/usr/bin/env node
 'use strict';
 

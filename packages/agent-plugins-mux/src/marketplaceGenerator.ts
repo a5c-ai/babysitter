@@ -18,7 +18,7 @@ export function generateMarketplaceJson(
     ? relativePluginPath
     : `./${relativePluginPath}`;
 
-  if (targetProfile.name === 'codex') {
+  if (targetProfile.packageMetadata?.activationMessage === 'codex-open-plugins') {
     return JSON.stringify({
       name: `${manifest.name}-local`,
       interface: {

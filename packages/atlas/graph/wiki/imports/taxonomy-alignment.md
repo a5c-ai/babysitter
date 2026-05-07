@@ -108,6 +108,55 @@ documents:
   - skill-area:agent-simulation-testing
   - skill-area:agent-debugging-logging
   - skill-area:rlhf-systems
+  - skill-area:device-drivers
+  - skill-area:communication-protocols
+  - skill-area:sensor-libraries
+  - skill-area:hardware-interface-testing
+  - skill-area:real-time-behavior-testing
+  - skill-area:power-consumption-testing
+  - skill-area:environmental-stress-testing
+  - skill-area:safety-critical-testing
+  - skill-area:firmware-testing
+  - skill-area:protocol-conformance-testing
+  - skill-area:game-engines
+  - skill-area:graphics-rendering
+  - skill-area:game-audio-systems
+  - skill-area:game-ai-pathfinding
+  - skill-area:ui-menu-systems
+  - skill-area:save-load-systems
+  - skill-area:game-analytics-monetization
+  - skill-area:smart-contract-development-testing
+  - skill-area:token-nft-management
+  - skill-area:blockchain-node-network-setup
+  - skill-area:on-chain-data-oracle-integration
+  - skill-area:wallet-integration-key-management
+  - skill-area:cross-chain-interoperability
+  - skill-area:blockchain-analytics-explorer
+  - skill-area:transaction-fee-optimization
+  - skill-area:dao-governance-implementation
+  - skill-area:vulnerability-scanning-remediation
+  - skill-area:penetration-testing-ethical-hacking
+  - skill-area:security-monitoring-siem
+  - skill-area:endpoint-security-edr
+  - skill-area:application-security-testing
+  - skill-area:incident-response-forensics
+  - skill-area:data-protection-dlp
+  - skill-area:threat-intelligence-hunting
+  - skill-area:machine-learning-frameworks
+  - skill-area:deep-learning-libraries
+  - skill-area:audio-processing
+  - skill-area:video-processing
+  - skill-area:time-series-analysis
+  - skill-area:big-data-tools
+  - skill-area:visualization-testing
+  - skill-area:scalability-testing
+  - skill-area:model-serving-deployment
+  - skill-area:bias-fairness-analysis
+  - skill-area:explainability-interpretation
+  - skill-area:tool-service-integration-agents
+  - skill-area:chain-of-thought-multistep-orchestration
+  - skill-area:reinforcement-learning-agents
+  - skill-area:prompt-instruction-tuning-agents
   - skill-area:mobile-local-databases
   - skill-area:mobile-location-services
   - skill-area:mobile-sensor-integration
@@ -324,7 +373,6 @@ documents:
   - term:tool-integration-architecture
   - term:state-management-memory-persistence
   - term:multi-agent-coordination-messaging
-  - term:prompt-instruction-tuning-agents
   - term:environment-context-adaptation
   - term:containerization-orchestration
   - term:secret-secure-config-management
@@ -391,6 +439,33 @@ documents:
   - term:chain-of-thought-prompting
   - term:fine-tuning-full-lora-peft
   - term:system-user-prompting-layers
+  - term:coordinator-pattern
+  - term:modular-architecture-mobile
+  - term:gesture-based-interaction
+  - term:composable-ui
+  - term:declarative-ui
+  - term:bottom-sheet
+  - term:navigation-drawer
+  - term:tab-navigation
+  - term:mobx-pattern
+  - term:riverpod-pattern
+  - term:view-recycling
+  - term:memory-cache-management
+  - term:navigation-stack
+  - term:modal-navigation
+  - term:network-aware-pattern
+  - term:resource-pooling
+  - term:lazy-resource-loading
+  - term:batch-training
+  - term:online-training
+  - term:serverless-deployment
+  - term:edge-deployment
+  - term:rolling-updates
+  - term:shadow-deployment
+  - term:feature-importance-analysis
+  - term:counterfactual-explanations
+  - term:partial-dependence-plots
+  - term:surrogate-models-explainability
 ---
 # Curated Taxonomy Alignment
 
@@ -464,6 +539,25 @@ LLM quality, and mobile pattern aliases.
 - Mobile and rendering alias additions: [`term:hydration`](/n/term:hydration), [`term:bloc-architecture`](/n/term:bloc-architecture), [`term:sqlite-database`](/n/term:sqlite-database), [`term:encrypted-storage`](/n/term:encrypted-storage), [`term:cache-synchronization`](/n/term:cache-synchronization), [`term:biometric-authentication`](/n/term:biometric-authentication), [`term:deep-linking`](/n/term:deep-linking), and [`term:ui-automation-testing`](/n/term:ui-automation-testing)
 - ML, agent, and LLM pattern aliases: [`term:transfer-learning`](/n/term:transfer-learning), [`term:continual-learning`](/n/term:continual-learning), [`term:hyperparameter-tuning`](/n/term:hyperparameter-tuning), [`term:model-registry-patterns`](/n/term:model-registry-patterns), [`term:ci-cd-machine-learning`](/n/term:ci-cd-machine-learning), [`term:multi-agent-systems`](/n/term:multi-agent-systems), [`term:memory-based-agents`](/n/term:memory-based-agents), [`term:tool-driven-agent`](/n/term:tool-driven-agent), [`term:instruction-tuned-llms`](/n/term:instruction-tuned-llms), [`term:chain-of-thought-prompting`](/n/term:chain-of-thought-prompting), and [`term:system-user-prompting-layers`](/n/term:system-user-prompting-layers)
 
+## Curated fifth-pass additions
+
+The fifth pass adds broad domain-task surfaces for embedded systems, gaming,
+blockchain, and cybersecurity where Atlas still lacked clear graph-native
+coverage.
+
+- Embedded additions: [`skill-area:device-drivers`](/n/skill-area:device-drivers), [`skill-area:communication-protocols`](/n/skill-area:communication-protocols), [`skill-area:sensor-libraries`](/n/skill-area:sensor-libraries), [`skill-area:hardware-interface-testing`](/n/skill-area:hardware-interface-testing), [`skill-area:real-time-behavior-testing`](/n/skill-area:real-time-behavior-testing), [`skill-area:power-consumption-testing`](/n/skill-area:power-consumption-testing), [`skill-area:environmental-stress-testing`](/n/skill-area:environmental-stress-testing), [`skill-area:safety-critical-testing`](/n/skill-area:safety-critical-testing), [`skill-area:firmware-testing`](/n/skill-area:firmware-testing), [`skill-area:protocol-conformance-testing`](/n/skill-area:protocol-conformance-testing)
+- Game-development additions: [`skill-area:game-engines`](/n/skill-area:game-engines), [`skill-area:graphics-rendering`](/n/skill-area:graphics-rendering), [`skill-area:game-audio-systems`](/n/skill-area:game-audio-systems), [`skill-area:game-ai-pathfinding`](/n/skill-area:game-ai-pathfinding), [`skill-area:ui-menu-systems`](/n/skill-area:ui-menu-systems), [`skill-area:save-load-systems`](/n/skill-area:save-load-systems), [`skill-area:game-analytics-monetization`](/n/skill-area:game-analytics-monetization)
+- Blockchain additions: [`skill-area:smart-contract-development-testing`](/n/skill-area:smart-contract-development-testing), [`skill-area:token-nft-management`](/n/skill-area:token-nft-management), [`skill-area:blockchain-node-network-setup`](/n/skill-area:blockchain-node-network-setup), [`skill-area:on-chain-data-oracle-integration`](/n/skill-area:on-chain-data-oracle-integration), [`skill-area:wallet-integration-key-management`](/n/skill-area:wallet-integration-key-management), [`skill-area:cross-chain-interoperability`](/n/skill-area:cross-chain-interoperability), [`skill-area:blockchain-analytics-explorer`](/n/skill-area:blockchain-analytics-explorer), [`skill-area:transaction-fee-optimization`](/n/skill-area:transaction-fee-optimization), [`skill-area:dao-governance-implementation`](/n/skill-area:dao-governance-implementation)
+- Cybersecurity additions: [`skill-area:vulnerability-scanning-remediation`](/n/skill-area:vulnerability-scanning-remediation), [`skill-area:penetration-testing-ethical-hacking`](/n/skill-area:penetration-testing-ethical-hacking), [`skill-area:security-monitoring-siem`](/n/skill-area:security-monitoring-siem), [`skill-area:endpoint-security-edr`](/n/skill-area:endpoint-security-edr), [`skill-area:application-security-testing`](/n/skill-area:application-security-testing), [`skill-area:incident-response-forensics`](/n/skill-area:incident-response-forensics), [`skill-area:data-protection-dlp`](/n/skill-area:data-protection-dlp), [`skill-area:threat-intelligence-hunting`](/n/skill-area:threat-intelligence-hunting)
+
+## Curated sixth-pass additions
+
+The sixth pass closes more of the remaining ML/data/agent task layer and
+finishes another chunk of mobile/ML pattern aliases.
+
+- ML, data, and agent additions: [`skill-area:machine-learning-frameworks`](/n/skill-area:machine-learning-frameworks), [`skill-area:deep-learning-libraries`](/n/skill-area:deep-learning-libraries), [`skill-area:audio-processing`](/n/skill-area:audio-processing), [`skill-area:video-processing`](/n/skill-area:video-processing), [`skill-area:time-series-analysis`](/n/skill-area:time-series-analysis), [`skill-area:big-data-tools`](/n/skill-area:big-data-tools), [`skill-area:visualization-testing`](/n/skill-area:visualization-testing), [`skill-area:scalability-testing`](/n/skill-area:scalability-testing), [`skill-area:model-serving-deployment`](/n/skill-area:model-serving-deployment), [`skill-area:bias-fairness-analysis`](/n/skill-area:bias-fairness-analysis), [`skill-area:explainability-interpretation`](/n/skill-area:explainability-interpretation), [`skill-area:tool-service-integration-agents`](/n/skill-area:tool-service-integration-agents), [`skill-area:chain-of-thought-multistep-orchestration`](/n/skill-area:chain-of-thought-multistep-orchestration), [`skill-area:reinforcement-learning-agents`](/n/skill-area:reinforcement-learning-agents), [`skill-area:prompt-instruction-tuning-agents`](/n/skill-area:prompt-instruction-tuning-agents)
+- Remaining mobile and ML pattern aliases: [`term:coordinator-pattern`](/n/term:coordinator-pattern), [`term:modular-architecture-mobile`](/n/term:modular-architecture-mobile), [`term:gesture-based-interaction`](/n/term:gesture-based-interaction), [`term:composable-ui`](/n/term:composable-ui), [`term:declarative-ui`](/n/term:declarative-ui), [`term:bottom-sheet`](/n/term:bottom-sheet), [`term:navigation-drawer`](/n/term:navigation-drawer), [`term:tab-navigation`](/n/term:tab-navigation), [`term:mobx-pattern`](/n/term:mobx-pattern), [`term:riverpod-pattern`](/n/term:riverpod-pattern), [`term:batch-training`](/n/term:batch-training), [`term:online-training`](/n/term:online-training), [`term:serverless-deployment`](/n/term:serverless-deployment), [`term:shadow-deployment`](/n/term:shadow-deployment), [`term:feature-importance-analysis`](/n/term:feature-importance-analysis), [`term:counterfactual-explanations`](/n/term:counterfactual-explanations), [`term:partial-dependence-plots`](/n/term:partial-dependence-plots), and [`term:surrogate-models-explainability`](/n/term:surrogate-models-explainability)
+
 ### Added topics
 
 - Architecture: [`topic:clean-architecture`](/n/topic:clean-architecture), [`topic:onion-architecture`](/n/topic:onion-architecture), [`topic:microservices-architecture`](/n/topic:microservices-architecture), [`topic:serverless-architecture`](/n/topic:serverless-architecture), [`topic:backend-for-frontend`](/n/topic:backend-for-frontend)
@@ -498,3 +592,18 @@ library-vs-tool, and framework-vs-service collisions. Examples included
 technology names already present elsewhere in Atlas under more accurate node
 kinds. That import was removed so Atlas remains coherent and connected to its
 existing graph structure.
+
+## Aggregated skills audit
+
+The external aggregated skills file was reviewed after the concept-side
+alignment passes. It is dominated by product, library, framework, database,
+and service leaf entries rather than broad Atlas-native concepts.
+
+That material is intentionally not mirrored into Atlas:
+
+- It would mostly recreate the same vendor and tool duplication problem that
+  the removed raw import already caused.
+- Many entries are better modeled elsewhere in Atlas under existing language,
+  stack-part, topic, or terminology nodes rather than as new parallel records.
+- The small number of genuinely broad non-vendor skill entries already map onto
+  existing Atlas concepts, so they do not justify another import surface.

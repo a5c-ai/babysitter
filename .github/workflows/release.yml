@@ -970,3 +970,15 @@ jobs:
           gh release create "$TAG" "${ASSETS[@]}" \
             --title "Babysitter $TAG" \
             --notes-file release-notes.md
+
+  sync_external_plugins:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    name: Sync External Plugins
+    needs:
+      - prepare_release
+      - finalize_release
+    uses: ./.github/workflows/sync-external-plugins.yml
+    with:
+      branch: main
+      ref: ${{ needs.prepare_release.outputs.release_ref }}
+    secrets: inherit

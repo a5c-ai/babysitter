@@ -136,18 +136,6 @@ attributes:
 edges: {}
 ---
 nodeKind: Term
-id: term:prompt-instruction-tuning-agents
-attributes:
-  canonicalDefinitionId: "# TODO: link canonical definition"
-  displayName: "Prompt and Instruction Tuning for Agents"
-  kind: concept
-  references:
-    - skill-area:prompt-engineering
-  description: |
-    Taxonomy alias term for prompt and instruction iteration in agent systems.
-edges: {}
----
-nodeKind: Term
 id: term:environment-context-adaptation
 attributes:
   canonicalDefinitionId: "# TODO: link canonical definition"

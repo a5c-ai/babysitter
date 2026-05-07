@@ -71,3 +71,40 @@ Observer tooling experiments, SDK language porting analysis, cradle gap closure.
 3. **Keep using phased specialization patterns** (phase1 research + phase2 implementation) — proven reliable
 4. **Archive run insights periodically** (this cleanup process) to prevent .a5c/runs/ from growing unbounded
 5. **Consider auto-cleanup hook** that runs after each completed run to prevent accumulation
+
+---
+
+## Cleanup Round 2 — 2026-05-06
+
+### Summary
+- **240 terminal runs removed** (older than 7 days, ~80MB freed)
+- **359 orphaned process files removed** (~3.8MB freed)
+- **23 recent runs retained** (2026-04-30 to 2026-05-06)
+- Post-cleanup: 2.6MB runs, 919KB processes
+
+### Run Categories (2026-04-30 to 2026-05-06)
+
+**agent-mux webui convergence** (5 runs) — iterative compendium design kit migration with live gateway validation. Multi-batch approach, each run picking up where the last left off.
+
+**Release infrastructure** (4 runs) — release-artifact-reproducibility migration needed 4 attempts to converge. Publish tag fixes, version sync across external plugin repos.
+
+**Triggers package** (3 runs) — refactor, hardening, gap closure. Sequential refinement pattern.
+
+**Atlas migration** (2 runs) — monorepo migration from v6 repo, domain enrichment. Manual orchestration (no hook-driven continuation available).
+
+**Adapter refactoring** (1 run) — agent-plugins-mux per-harness adapter extraction. Partially manual.
+
+**SDK enhancements** (1 run) — version markers in run artifacts.
+
+**Documentation** (2 runs) — overview.md generation, v6 announcement doc.
+
+### Patterns
+
+- **Multi-batch convergence** continues to be the dominant pattern — webui usability used 5 sequential runs
+- **Release pipeline work** is high-retry — 4 attempts for artifact reproducibility
+- **Atlas integration** required manual orchestration due to hook limitations in the current environment
+- **Most runs hit 8 journal events** (typical phase ceiling)
+
+### Data Loss Notice
+
+240 runs were removed before insights were fully aggregated from their journals. Future cleanups must run `aggregate-insights` BEFORE `remove-runs`.

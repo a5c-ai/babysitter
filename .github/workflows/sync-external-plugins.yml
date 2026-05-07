@@ -1,18 +1,37 @@
 name: Sync External Plugins
 
 on:
-  push:
-    branches:
-      - develop
-      - staging
-      - main
+  workflow_call:
+    inputs:
+      branch:
+        description: Branch whose external plugin repositories should be synced.
+        required: true
+        type: string
+      ref:
+        description: Commit, tag, or branch ref to checkout before generating plugins.
+        required: false
+        type: string
   workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch whose external plugin repositories should be synced.
+        required: true
+        default: develop
+        type: choice
+        options:
+          - develop
+          - staging
+          - main
+      ref:
+        description: Optional commit, tag, or branch ref to checkout before generating plugins.
+        required: false
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: sync-external-plugins-${{ github.ref }}
+  group: sync-external-plugins-${{ inputs.branch || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -28,6 +47,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref || github.ref }}
           token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
 
       - name: Setup Node.js
@@ -43,11 +63,13 @@ jobs:
           npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
 
       - name: Generate plugin bundles
+        env:
+          SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           set -euo pipefail
           BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
           TARGET_VERSION="$BASE_VERSION"
-          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+          if [ "${SYNC_BRANCH}" = "staging" ]; then
             IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
             NEXT_PATCH=$((PATCH + 1))
             SHORT_SHA=$(git rev-parse --short=12 HEAD)
@@ -62,7 +84,12 @@ jobs:
       - name: Sync generated plugin repositories
         env:
           GH_TOKEN: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
+          SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           set -euo pipefail
           gh auth setup-git
-          node scripts/sync-external-plugin-repos.mjs --push --branch=${{ github.ref_name }}
+          case "$SYNC_BRANCH" in
+            develop|staging|main) ;;
+            *) echo "Unsupported sync branch: $SYNC_BRANCH" >&2; exit 1 ;;
+          esac
+          node scripts/sync-external-plugin-repos.mjs --push --branch="$SYNC_BRANCH"

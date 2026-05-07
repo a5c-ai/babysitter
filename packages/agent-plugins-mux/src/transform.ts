@@ -284,13 +284,15 @@ function transformHooks(
     }
   }
 
-  if (targetProfile.name === 'openclaw' && typeof manifest.hooks.Stop === 'string') {
+  // Emit Stop hook script for programmatic targets that declare Stop in the
+  // manifest but don't list it in supportedHooks (e.g. openclaw).
+  if (targetProfile.adapterFamily === 'programmatic' && typeof manifest.hooks?.Stop === 'string' && !targetProfile.supportedHooks.has('Stop')) {
     const stopSource = path.join(sourceDir, manifest.hooks.Stop);
     if (fs.existsSync(stopSource)) {
       const rawContent = fs.readFileSync(stopSource, 'utf-8');
       const content = rawContent.replace(
         /ADAPTER_NAME="\$\{ADAPTER_NAME:\?[^}]*\}"/,
-        'ADAPTER_NAME="${ADAPTER_NAME:-openclaw}"'
+        `ADAPTER_NAME="\${ADAPTER_NAME:-${targetProfile.adapterName}}"`
       );
       const stopOutName = hookFilePattern
         ? hookFilePattern

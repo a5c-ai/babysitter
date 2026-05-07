@@ -80,3 +80,14 @@ jobs:
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter-observer-dashboard
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter-agent
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter
+
+  sync_external_plugins_develop:
+    if: startsWith(github.ref_name, 'babysitter/develop/')
+    name: Sync External Plugins (develop)
+    needs:
+      - publish_non_plugin_packages
+    uses: ./.github/workflows/sync-external-plugins.yml
+    with:
+      branch: develop
+      ref: ${{ github.sha }}
+    secrets: inherit

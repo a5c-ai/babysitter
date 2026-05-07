@@ -957,3 +957,14 @@ jobs:
       - publish_staging_metapackage
     uses: ./.github/workflows/release-tags.yml
     secrets: inherit
+
+  sync_external_plugins:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    name: Sync External Plugins
+    needs:
+      - create_release_tag
+    uses: ./.github/workflows/sync-external-plugins.yml
+    with:
+      branch: staging
+      ref: ${{ github.sha }}
+    secrets: inherit
