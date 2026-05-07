@@ -11,8 +11,8 @@ expertise:
 graph:
   domains: [domain:web-development]
   specializations: [specialization:ux-ui-design]
-  skillAreas: [skill-area:design-systems, skill-area:interaction-design]
-  roles: [role:product-designer, role:ux-researcher]
+  skillAreas: [skill-area:user-research, skill-area:prototyping]
+  roles: [role:ux-researcher, role:product-designer]
   workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 

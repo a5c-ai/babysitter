@@ -14,7 +14,7 @@ graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
   skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
-  roles: [role:backend-engineer]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # Type System Engineer Agent

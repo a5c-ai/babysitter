@@ -13,8 +13,8 @@ expertise:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
-  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
-  roles: [role:backend-engineer]
+  skillAreas: [skill-area:profiling-memory, skill-area:compiler-implementation]
+  roles: [role:backend-engineer, role:principal-engineer]
 ---
 
 # Memory Management Expert Agent

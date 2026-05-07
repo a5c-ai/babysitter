@@ -5,7 +5,7 @@ required-skills: maya-integration, blender-integration, substance, unity-shader-
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:shader-programming]
+  skillAreas: [skill-area:asset-pipeline, skill-area:shader-programming]
   roles: [role:game-developer]
 ---
 

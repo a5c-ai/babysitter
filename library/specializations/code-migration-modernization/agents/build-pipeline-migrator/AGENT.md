@@ -10,8 +10,8 @@ skills:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:code-migration-modernization]
-  skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration]
-  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:dependency-upgrade-strategies, skill-area:deployment-infrastructure-management]
+  roles: [role:devops-engineer, role:backend-engineer]
   workflows: [workflow:technical-debt-reduction]
   topics: [topic:refactoring]
 ---

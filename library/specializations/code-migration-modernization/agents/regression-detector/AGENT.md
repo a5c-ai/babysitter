@@ -11,8 +11,8 @@ skills:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:code-migration-modernization]
-  skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:database-migrations-zero-downtime]
-  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:regression-testing, skill-area:contract-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
   workflows: [workflow:technical-debt-reduction]
   topics: [topic:refactoring]
 ---

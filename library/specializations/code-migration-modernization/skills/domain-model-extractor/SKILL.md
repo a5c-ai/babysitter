@@ -5,7 +5,7 @@ allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:code-migration-modernization]
-  skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration]
+  skillAreas: [skill-area:domain-driven-design, skill-area:hexagonal-architecture]
   roles: [role:architect, role:tech-lead]
   workflows: [workflow:technical-debt-reduction]
   topics: [topic:refactoring, topic:monolith-to-microservices]

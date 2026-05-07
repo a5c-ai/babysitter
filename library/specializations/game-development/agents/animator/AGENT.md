@@ -5,7 +5,7 @@ required-skills: unity-animation, animation-blending, motion-matching
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:animation-transitions]
+  skillAreas: [skill-area:animation-transitions, skill-area:gameplay-programming]
   roles: [role:game-developer]
 ---
 

@@ -5,7 +5,7 @@ required-skills: hlsl, glsl, shader-optimization, pbr-rendering
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:graphics-rendering]
+  skillAreas: [skill-area:graphics-rendering, skill-area:shader-programming]
   roles: [role:game-developer]
 ---
 

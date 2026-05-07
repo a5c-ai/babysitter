@@ -10,8 +10,8 @@ metadata:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:performance-optimization]
-  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:load-testing]
-  roles: [role:backend-engineer, role:sre]
+  skillAreas: [skill-area:load-testing, skill-area:performance-testing]
+  roles: [role:backend-engineer, role:qa-engineer]
   topics: [topic:observability-driven-development]
 ---
 

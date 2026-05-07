@@ -10,7 +10,7 @@ metadata:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:performance-optimization]
-  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu]
+  skillAreas: [skill-area:tcp-tuning, skill-area:http2-multiplexing]
   roles: [role:backend-engineer, role:sre]
   topics: [topic:observability-driven-development, topic:ssl-certs]
 ---

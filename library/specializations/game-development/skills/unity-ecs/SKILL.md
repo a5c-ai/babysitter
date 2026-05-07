@@ -5,7 +5,7 @@ allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:compiler-implementation]
+  skillAreas: [skill-area:scene-graphs, skill-area:game-engines]
   roles: [role:game-developer]
 ---
 

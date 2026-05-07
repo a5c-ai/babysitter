@@ -12,7 +12,7 @@ allowed-tools:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
-  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:graph-algorithms]
+  skillAreas: [skill-area:compiler-implementation, skill-area:graph-algorithms]
   roles: [role:backend-engineer]
 ---
 

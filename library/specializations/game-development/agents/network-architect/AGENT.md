@@ -5,8 +5,8 @@ required-skills: client-server, state-sync, lag-compensation
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:multiplayer-networking]
-  roles: [role:game-developer]
+  skillAreas: [skill-area:multiplayer-networking, skill-area:gameplay-programming]
+  roles: [role:game-developer, role:architect]
 ---
 
 # Network Architect Agent

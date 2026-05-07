@@ -5,8 +5,8 @@ required-skills: git-lfs, perforce
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
-  roles: [role:game-developer]
+  skillAreas: [skill-area:asset-pipeline, skill-area:deployment-infrastructure-management]
+  roles: [role:game-developer, role:devops-engineer]
 ---
 
 # Build Engineer Agent

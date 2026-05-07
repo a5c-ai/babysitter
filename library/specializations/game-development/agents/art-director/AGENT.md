@@ -5,8 +5,8 @@ required-skills: substance, blender-integration
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
-  roles: [role:game-developer]
+  skillAreas: [skill-area:asset-pipeline, skill-area:visual-design]
+  roles: [role:game-developer, role:creative-director]
 ---
 
 # Art Director Agent

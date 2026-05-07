@@ -5,7 +5,7 @@ required-skills: unity-development, unreal-development, godot-development, behav
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  skillAreas: [skill-area:gameplay-programming, skill-area:game-engines]
   roles: [role:game-developer]
 ---
 

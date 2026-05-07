@@ -13,7 +13,7 @@ expertise:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
-  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
   roles: [role:backend-engineer]
 ---
 

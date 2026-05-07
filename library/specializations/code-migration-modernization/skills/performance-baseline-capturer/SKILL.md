@@ -5,8 +5,8 @@ allowed-tools: ["Bash", "Read", "Write", "Grep", "Glob", "Edit"]
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:code-migration-modernization]
-  skillAreas: [skill-area:strangler-fig-pattern, skill-area:parallel-run-migration, skill-area:database-migrations-zero-downtime]
-  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:performance-testing, skill-area:performance-monitoring-profiling]
+  roles: [role:backend-engineer, role:sre]
   workflows: [workflow:technical-debt-reduction]
   topics: [topic:refactoring]
 ---

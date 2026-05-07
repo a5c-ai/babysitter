@@ -5,7 +5,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
-  skillAreas: [skill-area:language-design, skill-area:compiler-implementation, skill-area:typescript-generic-programming]
+  skillAreas: [skill-area:compiler-implementation, skill-area:typescript-generic-programming]
   roles: [role:backend-engineer]
 ---
 

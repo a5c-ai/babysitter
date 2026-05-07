@@ -9,8 +9,8 @@ metadata:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:performance-optimization]
-  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu]
-  roles: [role:backend-engineer, role:sre]
+  skillAreas: [skill-area:caching-strategies, skill-area:cache-optimization]
+  roles: [role:backend-engineer, role:architect]
   topics: [topic:observability-driven-development]
 ---
 

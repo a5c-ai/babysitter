@@ -9,8 +9,8 @@ metadata:
 graph:
   domains: [domain:web-development]
   specializations: [specialization:ux-ui-design]
-  skillAreas: [skill-area:design-systems, skill-area:interaction-design, skill-area:typography]
-  roles: [role:product-designer, role:ux-researcher]
+  skillAreas: [skill-area:design-systems, skill-area:visual-design]
+  roles: [role:product-designer]
   workflows: [workflow:user-feedback-loop, workflow:product-discovery]
 ---
 

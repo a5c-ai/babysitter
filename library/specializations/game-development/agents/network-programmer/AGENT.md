@@ -5,7 +5,7 @@ required-skills: unity-netcode, unreal-networking, client-server, state-sync
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:multiplayer-networking]
+  skillAreas: [skill-area:multiplayer-networking, skill-area:gameplay-programming]
   roles: [role:game-developer]
 ---
 

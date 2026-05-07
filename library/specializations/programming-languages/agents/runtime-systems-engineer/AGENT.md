@@ -13,8 +13,8 @@ expertise:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:programming-languages]
-  skillAreas: [skill-area:language-design, skill-area:compiler-implementation]
-  roles: [role:backend-engineer]
+  skillAreas: [skill-area:compiler-implementation, skill-area:language-design]
+  roles: [role:backend-engineer, role:architect]
 ---
 
 # Runtime Systems Engineer Agent

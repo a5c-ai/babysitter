@@ -9,7 +9,7 @@ metadata:
 graph:
   domains: [domain:software-engineering]
   specializations: [specialization:performance-optimization]
-  skillAreas: [skill-area:performance-monitoring-profiling, skill-area:profiling-cpu, skill-area:concurrency-multithreading]
+  skillAreas: [skill-area:concurrency-multithreading, skill-area:profiling-cpu]
   roles: [role:backend-engineer, role:sre]
   topics: [topic:observability-driven-development]
 ---

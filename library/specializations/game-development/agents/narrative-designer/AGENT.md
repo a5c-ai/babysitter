@@ -5,7 +5,7 @@ required-skills: dialogue-ai, localization
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
+  skillAreas: [skill-area:gameplay-programming, skill-area:game-ai-pathfinding]
   roles: [role:game-developer]
 ---
 

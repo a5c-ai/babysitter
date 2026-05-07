@@ -5,8 +5,8 @@ required-skills: unity-urp, unity-hdrp, unreal-materials, pbr-rendering
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming, skill-area:graphics-rendering]
-  roles: [role:game-developer]
+  skillAreas: [skill-area:graphics-rendering, skill-area:shader-programming]
+  roles: [role:game-developer, role:architect]
 ---
 
 # Rendering Architect Agent

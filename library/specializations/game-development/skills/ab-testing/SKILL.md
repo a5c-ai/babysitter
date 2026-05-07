@@ -5,8 +5,8 @@ allowed-tools: Read, Grep, Write, Bash, Edit, Glob, WebFetch
 graph:
   domains: [domain:gaming]
   specializations: [specialization:game-development]
-  skillAreas: [skill-area:game-engine-development, skill-area:gameplay-programming]
-  roles: [role:game-developer]
+  skillAreas: [skill-area:ab-testing-experimentation, skill-area:game-analytics-monetization]
+  roles: [role:game-developer, role:data-analyst]
 ---
 
 # AB Testing Skill
