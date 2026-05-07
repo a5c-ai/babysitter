@@ -10,12 +10,13 @@ These files contain the "source of truth" lists that all other hardcoded referen
 
 ### P1.1 — agent-catalog `buildPluginTargetDescriptors()` (data.ts:539–747)
 - **What:** 9 fully hardcoded `PluginTargetDescriptor` objects with all fields (adapterName, pluginRootEnvVar, installLayout, packageMetadata, componentSupport, supportedHooks, etc.)
-- **Fix:** Already partially addressed — atlas-bridge queries Atlas for PluginTarget records. But `data.ts` still has the old `buildPluginTargetDescriptors()` function as dead code. Remove it and ensure the bridge path is the only path.
-- **Status:** 🟡 In progress (atlas-bridge exists but old code remains)
+- **Fix:** Done — `buildPluginTargetDescriptors()` now reads PluginTarget records from Atlas via the bridge. 230 lines of hardcoded data removed. `PLUGIN_TARGET_HOOK_FAMILIES` replaced with dynamic `getPluginTargetHookFamilies()`. github-copilot hook special case removed.
+- **Status:** 🟢 Complete (d30b5d08)
 
 ### P1.2 — SDK harness registry (packages/sdk/src/harness/registry.ts:32–102)
 - **What:** 9 hardcoded `*_DISCOVERY_SPEC` constants with `callerEnvVars`, `configPaths`, `processNames` per harness. `HARNESS_REGISTRY` array.
-- **Fix:** Read discovery specs from Atlas graph. Add `DiscoverySpec` node kind to Atlas with fields: `callerEnvVars`, `configPaths`, `processNames`, `cliCommand`.
+- **Fix:** Read discovery specs from Atlas graph. Add `callerEnvVars`, `configPaths`, `processNames`, `cliCommand`, `capabilities` fields to Atlas PluginTarget records. Then read via agent-catalog at SDK startup. Adapter factory imports must remain hardcoded (they're code, not data).
+- **Prerequisite:** Atlas schema enrichment for PluginTarget
 - **Status:** 🔴 Hardcoded
 
 ### P1.3 — hooks-mux `deriveProcessNames()` (packages/hooks-mux/core/src/session-store/markers.ts:257–279)
