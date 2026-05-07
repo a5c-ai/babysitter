@@ -5,6 +5,11 @@
  * @outputs { success: boolean, reviewScore: number, riskCatalog: object, recommendations: array, actionPlan: object, artifacts: array }
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:principal-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:caching-strategies]
+ *   topics: [topic:microservices, topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

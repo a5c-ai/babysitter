@@ -26,6 +26,11 @@
  * - SRE Book: https://sre.google/sre-book/table-of-contents/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:sre]
+ *   skillAreas: [skill-area:observability-instrumentation, skill-area:distributed-tracing]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

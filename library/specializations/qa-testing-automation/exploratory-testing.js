@@ -28,7 +28,12 @@
  * - Testing Tours: https://www.satisfice.com/blog/archives/1220
  * - Heuristic Test Strategy Model: https://www.satisfice.com/tools/htsm.pdf
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:bug-triage]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:acceptance-testing, skill-area:functional-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

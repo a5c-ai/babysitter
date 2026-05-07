@@ -30,6 +30,11 @@
  * - Log Management Best Practices: https://www.datadoghq.com/blog/log-management-best-practices/
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre, role:devops-engineer]
+ *   skillAreas: [skill-area:log-aggregation, skill-area:observability-instrumentation]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

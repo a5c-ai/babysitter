@@ -10,6 +10,11 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:mobile-ui-automation, skill-area:cross-platform-testing]
+  roles: [role:qa-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 
 ---
 

@@ -11,6 +11,11 @@ expertise:
   - Chaos engineering for DR
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:sre, role:platform-engineer]
+  skillAreas: [skill-area:capacity-planning-ops]
+  workflows: [workflow:incident-response]
+  topics: [topic:chaos-engineering]
 
 ---
 

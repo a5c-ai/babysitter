@@ -20,7 +20,12 @@
  * - Prisma: https://www.prisma.io/
  * - NextAuth.js: https://next-auth.js.org/
  * @graph
- *   domains: [domain:web-development, role:frontend-engineer]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:fullstack-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:server-side-rendering, skill-area:data-fetching-caching]
+ *   topics: [topic:streaming-ssr, topic:incremental-static-regeneration]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

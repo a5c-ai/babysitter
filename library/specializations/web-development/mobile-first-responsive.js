@@ -6,6 +6,11 @@
  * @references - Responsive Design: https://web.dev/responsive-web-design-basics/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:product-designer]
+ *   skillAreas: [skill-area:ui-styling]
+ *   topics: [topic:responsive-design, topic:mobile-first-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

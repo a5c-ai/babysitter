@@ -31,7 +31,12 @@
  * - Burp Suite: https://portswigger.net/burp/documentation
  * - Security Headers: https://securityheaders.com/
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:security-audit]
+ *   roles: [role:qa-engineer, role:security-engineer]
+ *   skillAreas: [skill-area:security-testing, skill-area:dast]
+ *   topics: [topic:defense-in-depth]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

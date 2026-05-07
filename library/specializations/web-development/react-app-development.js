@@ -21,7 +21,12 @@
  * - Redux Toolkit: https://redux-toolkit.js.org/
  * - TypeScript: https://www.typescriptlang.org/
  * @graph
- *   domains: [domain:web-development, skill-area:react-state-management]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:react-state-management, skill-area:react-testing]
+ *   topics: [topic:component-based-architecture, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

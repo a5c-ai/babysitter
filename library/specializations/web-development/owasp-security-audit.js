@@ -5,7 +5,12 @@
  * @outputs { success: boolean, auditReport: object, vulnerabilities: array, artifacts: array }
  * @references - OWASP: https://owasp.org/www-project-top-ten/
  * @graph
- *   domains: [domain:web-development, role:security-engineer]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:security-audit]
+ *   roles: [role:security-engineer]
+ *   skillAreas: [skill-area:web-security, skill-area:application-security-testing]
+ *   topics: [topic:xss-prevention, topic:defense-in-depth]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

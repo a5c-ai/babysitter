@@ -8,11 +8,12 @@ metadata:
   category: cicd
   backlog-id: SK-004
 graph:
-  domains: [domain:devops, domain:software-engineering]
-  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:configuration-management]
-  topics: [topic:trunk-based-development, topic:blue-green-deployment]
-  roles: [role:devops-engineer, role:platform-engineer, role:sre]
-  workflows: [workflow:pull-request-lifecycle, workflow:release-management]
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:deployment-infrastructure-management]
+  roles: [role:devops-engineer, role:release-manager]
+  workflows: [workflow:release-management]
+  topics: [topic:continuous-integration, topic:continuous-deployment]
 ---
 
 # cicd-pipelines

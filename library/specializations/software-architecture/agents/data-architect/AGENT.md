@@ -12,6 +12,11 @@ expertise:
   - Data lake architecture
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:data-engineer]
+  skillAreas: [skill-area:backend-data-persistence, skill-area:serialization-deserialization]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:domain-driven-design, topic:database-sharding]
 
 ---
 

@@ -9,7 +9,12 @@
  * - NestJS Documentation: https://nestjs.com/
  * - Microservices Patterns: https://microservices.io/
  * @graph
- *   domains: [domain:web-development, topic:microservices]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:messaging-queuing]
+ *   topics: [topic:microservices, topic:dependency-injection]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

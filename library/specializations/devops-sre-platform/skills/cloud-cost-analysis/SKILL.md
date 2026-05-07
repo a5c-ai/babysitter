@@ -11,6 +11,11 @@ allowed-tools:
   - WebFetch
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:capacity-planning-ops]
+  roles: [role:devops-engineer, role:platform-engineer]
+  workflows: [workflow:capacity-planning]
+  topics: [topic:platform-engineering-practices]
 
 ---
 

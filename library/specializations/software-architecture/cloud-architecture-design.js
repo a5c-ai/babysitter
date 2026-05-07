@@ -5,6 +5,11 @@
  * @outputs { success: boolean, architecture: object, cost: object, security: object, iac: object }
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:platform-engineer]
+ *   skillAreas: [skill-area:deployment-infrastructure-management, skill-area:caching-strategies]
+ *   topics: [topic:microservices, topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

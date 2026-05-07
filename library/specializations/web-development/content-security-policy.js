@@ -5,7 +5,12 @@
  * @outputs { success: boolean, cspPolicy: object, directives: array, artifacts: array }
  * @references - CSP: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
  * @graph
- *   domains: [domain:web-development, role:security-engineer]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:security-audit]
+ *   roles: [role:security-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:web-security]
+ *   topics: [topic:content-security-policy, topic:defense-in-depth]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

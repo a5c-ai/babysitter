@@ -28,7 +28,12 @@
  * - Gatling Documentation: https://gatling.io/docs/
  * - Performance Engineering: https://www.infoq.com/articles/performance-engineering/
  * @graph
- *   domains: [domain:software-engineering, skill-area:caching-strategies]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:sre]
+ *   skillAreas: [skill-area:performance-testing, skill-area:load-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

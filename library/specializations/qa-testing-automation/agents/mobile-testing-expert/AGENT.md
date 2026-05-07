@@ -12,6 +12,11 @@ expertise:
   - Mobile accessibility testing
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:mobile-ui-automation, skill-area:cross-platform-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 
 ---
 

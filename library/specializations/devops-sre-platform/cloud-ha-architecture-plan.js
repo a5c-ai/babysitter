@@ -23,6 +23,11 @@
  * }
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:platform-engineer, role:architect]
+ *   skillAreas: [skill-area:capacity-planning-ops]
+ *   topics: [topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

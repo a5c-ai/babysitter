@@ -6,6 +6,11 @@
  * @references - Redux Toolkit: https://redux-toolkit.js.org/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:react-state-management, skill-area:application-state-management]
+ *   topics: [topic:redux-pattern, topic:flux-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

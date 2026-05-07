@@ -9,6 +9,11 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:code-analysis-linting]
+  roles: [role:architect, role:tech-lead]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:design-patterns]
 
 ---
 

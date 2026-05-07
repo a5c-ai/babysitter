@@ -31,6 +31,11 @@
  * - Sloth - SLO Toolkit: https://github.com/slok/sloth
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre]
+ *   skillAreas: [skill-area:sli-slo-management, skill-area:alerting-oncall]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -20,7 +20,12 @@
  * - Vue Router: https://router.vuejs.org/
  * - Vitest: https://vitest.dev/
  * @graph
- *   domains: [domain:web-development, role:frontend-engineer]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:react-components, skill-area:react-state-management]
+ *   topics: [topic:component-based-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

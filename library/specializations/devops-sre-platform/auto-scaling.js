@@ -38,6 +38,11 @@
  * - Karpenter: https://karpenter.sh/docs/
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:capacity-planning]
+ *   roles: [role:devops-engineer, role:sre]
+ *   skillAreas: [skill-area:capacity-planning-ops]
+ *   topics: [topic:auto-scaling, topic:horizontal-scaling]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -21,6 +21,11 @@
  * - Data Modeling Made Simple by Steve Hoberman: https://www.dataversity.net/data-modeling-made-simple/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:data-engineer]
+ *   skillAreas: [skill-area:serialization-deserialization, skill-area:backend-data-persistence]
+ *   topics: [topic:domain-driven-design, topic:database-sharding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

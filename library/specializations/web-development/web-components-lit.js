@@ -6,6 +6,11 @@
  * @references - Lit: https://lit.dev/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:ui-component-libraries]
+ *   topics: [topic:component-based-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -29,7 +29,12 @@
  * - CircleCI Optimization: https://circleci.com/docs/optimization-cookbook/
  * - Build Caching: https://docs.docker.com/build/cache/
  * @graph
- *   domains: [domain:devops, workflow:release-management]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:release-management]
+ *   roles: [role:devops-engineer]
+ *   skillAreas: [skill-area:deployment-infrastructure-management]
+ *   topics: [topic:continuous-integration, topic:continuous-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

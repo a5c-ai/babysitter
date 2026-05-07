@@ -5,7 +5,12 @@
  * @outputs { success: boolean, auditResults: object, remediations: array, artifacts: array }
  * @references - WCAG: https://www.w3.org/WAI/standards-guidelines/wcag/
  * @graph
- *   domains: [domain:web-development, skill-area:accessibility-testing]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:web-accessibility, skill-area:accessibility-testing]
+ *   topics: [topic:accessibility]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -12,6 +12,11 @@ expertise:
   - Trust boundary identification
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:security-engineer, role:architect]
+  skillAreas: [skill-area:threat-modeling]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth, topic:zero-trust-architecture]
 
 ---
 

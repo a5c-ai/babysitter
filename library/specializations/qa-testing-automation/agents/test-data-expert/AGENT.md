@@ -12,6 +12,10 @@ expertise:
   - Environment data management
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:backend-engineer]
+  skillAreas: [skill-area:data-quality-testing]
+  topics: [topic:test-driven-development]
 
 ---
 

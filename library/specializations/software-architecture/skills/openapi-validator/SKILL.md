@@ -8,6 +8,11 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:api-design, skill-area:api-contract-testing]
+  roles: [role:backend-engineer, role:qa-engineer]
+  workflows: [workflow:api-design-review]
+  topics: [topic:api-design]
 
 ---
 

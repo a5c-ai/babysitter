@@ -24,7 +24,12 @@
  * - Test Automation Patterns: https://www.selenium.dev/documentation/test_practices/
  * - Flaky Test Prevention: https://testing.googleblog.com/2016/05/flaky-tests-at-google-and-how-we.html
  * @graph
- *   domains: [domain:software-engineering, workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:e2e-testing, skill-area:cross-browser-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

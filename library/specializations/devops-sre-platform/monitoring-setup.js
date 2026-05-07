@@ -30,6 +30,11 @@
  * - The Three Pillars of Observability: https://www.oreilly.com/library/view/distributed-systems-observability/9781492033431/
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre, role:devops-engineer]
+ *   skillAreas: [skill-area:observability-instrumentation, skill-area:alerting-oncall]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

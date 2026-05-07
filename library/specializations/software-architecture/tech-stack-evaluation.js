@@ -24,7 +24,12 @@
  * - The Twelve-Factor App: https://12factor.net/
  * - Cloud Native Computing Foundation Landscape: https://landscape.cncf.io/
  * @graph
- *   domains: [domain:software-engineering, workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:tech-lead]
+ *   skillAreas: [skill-area:backend-api-design]
+ *   topics: [topic:architecture-decisions, topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

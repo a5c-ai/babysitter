@@ -9,7 +9,12 @@
  * - JWT Specification: https://jwt.io/
  * - OWASP JWT Security: https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
  * @graph
- *   domains: [domain:web-development, skill-area:authentication-authorization]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:security-engineer]
+ *   skillAreas: [skill-area:authentication-authorization, skill-area:backend-auth]
+ *   topics: [topic:jwt-handling, topic:secure-authentication-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

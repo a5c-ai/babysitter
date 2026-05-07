@@ -28,6 +28,11 @@
  * - NIST Guidelines for Key Management: https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:change-management]
+ *   roles: [role:devops-engineer, role:security-engineer]
+ *   skillAreas: [skill-area:configuration-management, skill-area:secrets-rotation]
+ *   topics: [topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

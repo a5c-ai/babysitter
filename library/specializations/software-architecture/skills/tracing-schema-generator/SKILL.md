@@ -8,6 +8,10 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:distributed-tracing, skill-area:observability-instrumentation]
+  roles: [role:sre, role:architect]
+  topics: [topic:observability-driven-development]
 
 ---
 

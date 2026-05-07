@@ -9,6 +9,11 @@ metadata:
   backlog-id: SK-012
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:contract-testing, skill-area:api-contract-testing]
+  roles: [role:qa-engineer, role:backend-engineer]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 
 ---
 

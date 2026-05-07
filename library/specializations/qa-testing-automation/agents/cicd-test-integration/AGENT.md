@@ -12,6 +12,11 @@ expertise:
   - Pipeline debugging and optimization
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:devops-engineer]
+  skillAreas: [skill-area:e2e-testing, skill-area:deployment-infrastructure-management]
+  workflows: [workflow:pull-request-lifecycle, workflow:feature-development]
+  topics: [topic:continuous-integration, topic:test-driven-development]
 
 ---
 

@@ -11,6 +11,11 @@ expertise:
   - Budget alerts and governance
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer, role:devops-engineer]
+  skillAreas: [skill-area:capacity-planning-ops]
+  workflows: [workflow:capacity-planning]
+  topics: [topic:platform-engineering-practices]
 
 ---
 

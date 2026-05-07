@@ -28,6 +28,11 @@
  * - SLI Menu: https://landing.google.com/sre/workbook/chapters/slo-engineering-case-studies/
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre]
+ *   skillAreas: [skill-area:sli-slo-management, skill-area:metrics-dashboarding]
+ *   topics: [topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

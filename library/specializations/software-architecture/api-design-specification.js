@@ -28,7 +28,12 @@
  * - Google API Design Guide: https://cloud.google.com/apis/design
  * - Microsoft REST API Guidelines: https://github.com/microsoft/api-guidelines
  * @graph
- *   domains: [domain:software-engineering, topic:api-design]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:api-design-review]
+ *   roles: [role:architect, role:backend-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:api-design]
+ *   topics: [topic:api-design, topic:rest]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

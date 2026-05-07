@@ -8,6 +8,11 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect]
+  skillAreas: [skill-area:c4-modeling]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions]
 
 ---
 

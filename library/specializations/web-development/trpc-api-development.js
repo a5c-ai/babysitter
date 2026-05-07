@@ -10,6 +10,11 @@
  * - Zod Validation: https://zod.dev/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:api-design-review]
+ *   roles: [role:fullstack-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:data-fetching-caching]
+ *   topics: [topic:api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

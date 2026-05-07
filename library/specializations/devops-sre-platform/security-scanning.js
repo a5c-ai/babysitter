@@ -28,7 +28,12 @@
  * - DevSecOps: https://www.devsecops.org/
  * - SAST/DAST Best Practices: https://owasp.org/www-community/Source_Code_Analysis_Tools
  * @graph
- *   domains: [domain:devops, role:security-engineer]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:security-audit]
+ *   roles: [role:security-engineer, role:devops-engineer]
+ *   skillAreas: [skill-area:container-security, skill-area:vulnerability-scanning-remediation]
+ *   topics: [topic:zero-trust-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

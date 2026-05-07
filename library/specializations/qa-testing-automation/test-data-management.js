@@ -34,6 +34,11 @@
  * - GDPR Compliance: https://gdpr-info.eu/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:data-quality-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

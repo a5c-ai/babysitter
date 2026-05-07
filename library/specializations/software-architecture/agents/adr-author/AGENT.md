@@ -12,6 +12,11 @@ expertise:
   - Status management
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:adr-writing]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions]
 
 ---
 

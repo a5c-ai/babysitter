@@ -9,6 +9,10 @@ metadata:
   backlog-id: SK-002
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:configuration-management]
+  roles: [role:devops-engineer, role:platform-engineer]
+  topics: [topic:infrastructure-as-code]
 
 ---
 

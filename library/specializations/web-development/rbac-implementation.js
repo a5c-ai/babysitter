@@ -10,6 +10,11 @@
  * - CASL Authorization: https://casl.js.org/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:security-engineer]
+ *   skillAreas: [skill-area:authentication-authorization, skill-area:backend-auth]
+ *   topics: [topic:permission-based-access]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

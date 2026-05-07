@@ -34,6 +34,11 @@
  * - Site Reliability Engineering: https://sre.google/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:devops-engineer]
+ *   skillAreas: [skill-area:terraform-infrastructure]
+ *   topics: [topic:infrastructure-as-code, topic:microservices]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

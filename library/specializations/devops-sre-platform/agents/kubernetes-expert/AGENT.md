@@ -8,6 +8,10 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer, role:devops-engineer]
+  skillAreas: [skill-area:configuration-management, skill-area:deployment-infrastructure-management]
+  topics: [topic:infrastructure-as-code]
 
 ---
 

@@ -6,6 +6,11 @@
  * @references - Development Setup: https://code.visualstudio.com/docs
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:engineering-onboarding]
+ *   roles: [role:frontend-engineer, role:fullstack-engineer]
+ *   skillAreas: [skill-area:configuration-management]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

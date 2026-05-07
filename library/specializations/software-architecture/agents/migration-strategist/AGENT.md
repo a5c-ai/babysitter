@@ -12,6 +12,11 @@ expertise:
   - Feature parity validation
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:tech-lead]
+  skillAreas: [skill-area:backend-api-design]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:monolith-to-microservices, topic:technical-debt]
 
 ---
 

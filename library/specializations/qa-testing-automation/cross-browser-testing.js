@@ -30,7 +30,12 @@
  * - Browser Compatibility: https://caniuse.com/
  * - Cross-Browser Testing Guide: https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:cross-browser-testing, skill-area:e2e-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

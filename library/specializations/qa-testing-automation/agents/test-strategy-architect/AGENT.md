@@ -12,10 +12,11 @@ expertise:
   - Test coverage optimization
 graph:
   domains: [domain:software-engineering]
-  skillAreas: [skill-area:unit-testing, skill-area:integration-testing, skill-area:e2e-testing, skill-area:regression-testing]
-  topics: [topic:trunk-based-development, topic:code-review-best-practices]
-  roles: [role:qa-engineer, role:tech-lead, role:backend-engineer]
-  workflows: [workflow:feature-development, workflow:pull-request-lifecycle]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:tech-lead]
+  skillAreas: [skill-area:e2e-testing, skill-area:component-testing]
+  workflows: [workflow:feature-development, workflow:code-review]
+  topics: [topic:test-driven-development, topic:code-review-best-practices]
 ---
 
 # Test Strategy Architect Agent

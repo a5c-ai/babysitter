@@ -8,6 +8,10 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:compliance-automation]
+  roles: [role:architect, role:security-engineer]
+  topics: [topic:architecture-decisions]
 
 ---
 

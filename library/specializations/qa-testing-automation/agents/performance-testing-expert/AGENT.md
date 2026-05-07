@@ -12,6 +12,11 @@ expertise:
   - APM tool integration
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer, role:sre]
+  skillAreas: [skill-area:performance-testing, skill-area:load-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 
 ---
 

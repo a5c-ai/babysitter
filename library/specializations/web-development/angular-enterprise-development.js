@@ -20,7 +20,12 @@
  * - RxJS: https://rxjs.dev/
  * - Angular Material: https://material.angular.io/
  * @graph
- *   domains: [domain:web-development, role:frontend-engineer]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:react-state-management, skill-area:ui-styling]
+ *   topics: [topic:component-based-architecture, topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

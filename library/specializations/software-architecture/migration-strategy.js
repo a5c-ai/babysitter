@@ -22,6 +22,11 @@
  * - Building Microservices (Sam Newman): https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   roles: [role:architect, role:tech-lead]
+ *   skillAreas: [skill-area:backend-api-design]
+ *   topics: [topic:monolith-to-microservices, topic:technical-debt]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

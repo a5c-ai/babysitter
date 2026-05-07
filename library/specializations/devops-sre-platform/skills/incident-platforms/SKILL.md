@@ -11,6 +11,11 @@ allowed-tools:
   - WebFetch
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:incident-management, skill-area:alerting-oncall]
+  roles: [role:sre, role:devops-engineer]
+  workflows: [workflow:incident-response]
+  topics: [topic:chaos-engineering]
 
 ---
 

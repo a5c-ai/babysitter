@@ -11,6 +11,11 @@
  * - AWS SAM: https://aws.amazon.com/serverless/sam/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:fullstack-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:deployment-infrastructure-management]
+ *   topics: [topic:serverless-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

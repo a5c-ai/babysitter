@@ -20,7 +20,12 @@
  * - Microservices Patterns by Chris Richardson: https://microservices.io/patterns/
  * - The Art of Scalability by Martin Abbott: https://theartofscalability.com/
  * @graph
- *   domains: [domain:software-engineering, topic:microservices]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:principal-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:messaging-queuing]
+ *   topics: [topic:microservices, topic:domain-driven-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

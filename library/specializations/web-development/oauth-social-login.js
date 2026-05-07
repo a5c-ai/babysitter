@@ -9,7 +9,12 @@
  * - OAuth 2.0 Specification: https://oauth.net/2/
  * - Passport.js: https://www.passportjs.org/
  * @graph
- *   domains: [domain:web-development, skill-area:authentication-authorization]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:authentication-authorization, skill-area:oauth-flows]
+ *   topics: [topic:oauth-openid-connect]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

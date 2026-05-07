@@ -8,6 +8,11 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:application-security-testing, skill-area:sast]
+  roles: [role:security-engineer, role:architect]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth]
 
 ---
 

@@ -11,6 +11,11 @@ expertise:
   - Team topologies and cognitive load
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer]
+  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:configuration-management]
+  workflows: [workflow:release-management, workflow:change-management]
+  topics: [topic:platform-engineering-practices, topic:infrastructure-as-code]
 
 ---
 

@@ -34,7 +34,12 @@
  * - CI/CD Best Practices: https://www.atlassian.com/continuous-delivery/principles
  * - Test Automation Patterns: https://www.selenium.dev/documentation/test_practices/
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:pull-request-lifecycle, workflow:feature-development]
+ *   roles: [role:qa-engineer, role:devops-engineer]
+ *   skillAreas: [skill-area:e2e-testing]
+ *   topics: [topic:continuous-integration, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

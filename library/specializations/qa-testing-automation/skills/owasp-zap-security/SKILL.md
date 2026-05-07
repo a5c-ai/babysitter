@@ -9,6 +9,11 @@ metadata:
   backlog-id: SK-017
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  skillAreas: [skill-area:security-testing, skill-area:dast]
+  roles: [role:qa-engineer, role:security-engineer]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth]
 
 ---
 

@@ -7,7 +7,12 @@
  * - Web Vitals: https://web.dev/vitals/
  * - Lighthouse: https://developers.google.com/web/tools/lighthouse
  * @graph
- *   domains: [domain:web-development, skill-area:caching-strategies]
+ *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer]
+ *   skillAreas: [skill-area:web-performance, skill-area:frontend-performance-testing]
+ *   topics: [topic:asset-optimization]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -4,7 +4,12 @@
  * @inputs { domain: string, scope: string, participantCount: number, workshopDuration: number }
  * @outputs { success: boolean, domainModel: object, boundedContexts: array, artifacts: object }
  * @graph
- *   domains: [domain:software-engineering, topic:event-sourcing]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:tech-lead]
+ *   skillAreas: [skill-area:domain-driven-design, skill-area:event-sourcing]
+ *   topics: [topic:domain-driven-design, topic:event-driven-architecture]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

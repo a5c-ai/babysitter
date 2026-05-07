@@ -8,6 +8,10 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:configuration-management]
+  roles: [role:architect, role:platform-engineer]
+  topics: [topic:infrastructure-as-code]
 
 ---
 

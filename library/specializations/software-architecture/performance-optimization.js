@@ -24,7 +24,12 @@
  * - APM Best Practices: https://www.datadoghq.com/knowledge-center/apm/
  * - Database Performance: https://use-the-index-luke.com/
  * @graph
- *   domains: [domain:software-engineering, skill-area:caching-strategies]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:technical-debt-reduction]
+ *   roles: [role:principal-engineer, role:sre]
+ *   skillAreas: [skill-area:caching-strategies, skill-area:performance-monitoring-profiling]
+ *   topics: [topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

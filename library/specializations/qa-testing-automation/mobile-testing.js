@@ -37,7 +37,12 @@
  * - Mobile Gestures: https://appium.io/docs/en/commands/interactions/touch/
  * - Real Device Testing: https://appium.io/docs/en/writing-running-appium/running-tests/
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:mobile-ui-automation, skill-area:cross-platform-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

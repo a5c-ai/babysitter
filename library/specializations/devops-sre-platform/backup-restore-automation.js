@@ -28,6 +28,11 @@
  * - RPO/RTO Guidelines: https://www.ibm.com/cloud/learn/rpo-rto
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre, role:devops-engineer]
+ *   skillAreas: [skill-area:configuration-management]
+ *   topics: [topic:chaos-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

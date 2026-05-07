@@ -26,7 +26,12 @@
  * - WebAIM: https://webaim.org/
  * - Playwright Accessibility Testing: https://playwright.dev/docs/accessibility-testing
  * @graph
- *   domains: [domain:software-engineering, skill-area:accessibility-testing]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:accessibility-testing, skill-area:web-accessibility]
+ *   topics: [topic:accessibility, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

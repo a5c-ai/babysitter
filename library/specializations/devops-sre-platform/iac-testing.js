@@ -47,7 +47,12 @@
  * - InSpec: https://www.chef.io/products/chef-inspec
  * - AWS CloudFormation Testing: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-validate-template.html
  * @graph
- *   domains: [domain:devops, workflow:code-review]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:change-management]
+ *   roles: [role:devops-engineer, role:qa-engineer]
+ *   skillAreas: [skill-area:terraform-infrastructure, skill-area:configuration-management]
+ *   topics: [topic:infrastructure-as-code, topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -30,7 +30,12 @@
  * - SBOM Generation: https://www.cisa.gov/sbom
  * - Harbor Registry: https://goharbor.io/docs/
  * @graph
- *   domains: [domain:devops, topic:microservices]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:release-management]
+ *   roles: [role:devops-engineer]
+ *   skillAreas: [skill-area:containerization]
+ *   topics: [topic:immutable-infrastructure]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

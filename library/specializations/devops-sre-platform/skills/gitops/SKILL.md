@@ -10,6 +10,11 @@ allowed-tools:
   - Grep
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:gitops, skill-area:configuration-management]
+  roles: [role:devops-engineer, role:platform-engineer]
+  workflows: [workflow:change-management]
+  topics: [topic:continuous-deployment, topic:infrastructure-as-code]
 
 ---
 

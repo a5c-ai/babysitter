@@ -29,7 +29,12 @@
  * - Chromatic: https://www.chromatic.com/
  * - Visual Regression Testing Best Practices: https://testingjavascript.com/
  * @graph
- *   domains: [domain:software-engineering, workflow:feature-development]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:visual-regression-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

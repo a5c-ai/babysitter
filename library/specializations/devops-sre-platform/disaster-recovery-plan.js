@@ -29,6 +29,11 @@
  * - Site Reliability Engineering: https://sre.google/workbook/implementing-slos/
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre, role:platform-engineer]
+ *   skillAreas: [skill-area:capacity-planning-ops]
+ *   topics: [topic:chaos-engineering]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -6,6 +6,11 @@
  * @references - Can I Use: https://caniuse.com/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:cross-browser-testing, skill-area:browser-compatibility]
+ *   topics: [topic:progressive-enhancement]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

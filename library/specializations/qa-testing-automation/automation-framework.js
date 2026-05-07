@@ -31,6 +31,11 @@
  * - Allure Reporting: https://docs.qameta.io/allure/
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:e2e-testing, skill-area:unit-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

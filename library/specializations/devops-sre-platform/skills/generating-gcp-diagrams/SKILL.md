@@ -6,6 +6,10 @@ compatibility: Requires image analysis capability for image conversion. Scripts 
 allowed-tools: Read Write
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  skillAreas: [skill-area:deployment-infrastructure-management]
+  roles: [role:platform-engineer, role:architect]
+  topics: [topic:infrastructure-as-code]
 
 ---
 

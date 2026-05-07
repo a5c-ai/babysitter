@@ -10,11 +10,12 @@ expertise:
   - Test automation integration
   - Artifact management
 graph:
-  domains: [domain:devops, domain:software-engineering]
-  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:canary-rollouts, skill-area:blue-green-deployment]
-  topics: [topic:trunk-based-development, topic:blue-green-deployment]
-  roles: [role:devops-engineer, role:release-manager, role:platform-engineer]
+  domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:devops-engineer, role:release-manager]
+  skillAreas: [skill-area:deployment-infrastructure-management]
   workflows: [workflow:release-management, workflow:pull-request-lifecycle]
+  topics: [topic:continuous-integration, topic:continuous-deployment]
 ---
 
 # CI/CD Specialist Agent

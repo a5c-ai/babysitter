@@ -20,6 +20,11 @@
  * - NextAuth.js: https://next-auth.js.org/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:fullstack-engineer]
+ *   skillAreas: [skill-area:backend-api-design, skill-area:react-state-management]
+ *   topics: [topic:api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

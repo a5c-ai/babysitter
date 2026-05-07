@@ -86,6 +86,11 @@
  *   - Drift defense: composers `cat` source artifacts at execution time.
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:capacity-planning]
+ *   roles: [role:platform-engineer, role:devops-engineer]
+ *   skillAreas: [skill-area:deployment-infrastructure-management]
+ *   topics: [topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

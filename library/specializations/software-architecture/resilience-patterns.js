@@ -5,6 +5,11 @@
  * @outputs { success: boolean, patternsImplemented: array, resilienceScore: number, artifacts: array }
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:sre]
+ *   skillAreas: [skill-area:chaos-engineering, skill-area:messaging-queuing]
+ *   topics: [topic:circuit-breakers, topic:retry-pattern, topic:bulkhead-pattern]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

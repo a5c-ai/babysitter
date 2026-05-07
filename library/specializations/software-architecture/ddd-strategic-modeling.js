@@ -20,7 +20,12 @@
  * - Patterns, Principles, and Practices of Domain-Driven Design by Scott Millett: https://www.wiley.com/en-us/Patterns%2C+Principles%2C+and+Practices+of+Domain+Driven+Design-p-9781118714706
  * - Strategic DDD Context Mapping: https://github.com/ddd-crew/context-mapping
  * @graph
- *   domains: [domain:software-engineering, role:data-scientist]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:software-architecture]
+ *   workflows: [workflow:architecture-decision-record]
+ *   roles: [role:architect, role:principal-engineer]
+ *   skillAreas: [skill-area:domain-driven-design]
+ *   topics: [topic:domain-driven-design, topic:event-sourcing]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

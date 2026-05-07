@@ -12,6 +12,11 @@ expertise:
   - Chaos tooling (Litmus, Gremlin)
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:sre, role:architect]
+  skillAreas: [skill-area:chaos-engineering]
+  workflows: [workflow:incident-response]
+  topics: [topic:chaos-engineering, topic:circuit-breakers]
 
 ---
 

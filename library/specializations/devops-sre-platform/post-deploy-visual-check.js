@@ -47,7 +47,12 @@
  *
  * @agent general-purpose
  * @graph
- *   domains: [domain:devops, workflow:feature-development]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:release-management]
+ *   roles: [role:devops-engineer, role:qa-engineer]
+ *   skillAreas: [skill-area:deployment-infrastructure-management]
+ *   topics: [topic:continuous-deployment]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

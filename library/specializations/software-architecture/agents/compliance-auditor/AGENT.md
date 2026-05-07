@@ -12,6 +12,11 @@ expertise:
   - Gap analysis
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:security-engineer]
+  skillAreas: [skill-area:compliance-automation]
+  workflows: [workflow:security-audit]
+  topics: [topic:defense-in-depth]
 
 ---
 

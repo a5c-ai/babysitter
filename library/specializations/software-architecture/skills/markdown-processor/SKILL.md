@@ -9,6 +9,10 @@ metadata:
   backlog-id: SK-SA-004
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:api-doc-generation]
+  roles: [role:technical-writer]
+  topics: [topic:developer-experience]
 
 ---
 

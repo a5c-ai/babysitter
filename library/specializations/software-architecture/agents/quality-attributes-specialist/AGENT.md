@@ -12,6 +12,11 @@ expertise:
   - Quality metrics definition
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:scalability-testing]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:architecture-decisions, topic:design-patterns]
 
 ---
 

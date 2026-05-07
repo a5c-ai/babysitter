@@ -20,6 +20,11 @@
  * - Nuxt Modules: https://nuxt.com/modules
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:fullstack-engineer, role:frontend-engineer]
+ *   skillAreas: [skill-area:server-side-rendering, skill-area:data-fetching-caching]
+ *   topics: [topic:static-site-generation]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

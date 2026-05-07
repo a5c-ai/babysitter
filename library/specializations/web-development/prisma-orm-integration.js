@@ -7,6 +7,11 @@
  * - Prisma Documentation: https://www.prisma.io/docs
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer, role:fullstack-engineer]
+ *   skillAreas: [skill-area:object-relational-mapping, skill-area:backend-data-persistence]
+ *   topics: [topic:data-mapper]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

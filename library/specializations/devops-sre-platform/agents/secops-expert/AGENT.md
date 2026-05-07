@@ -11,6 +11,11 @@ expertise:
   - Zero-trust architecture
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:security-engineer, role:devops-engineer]
+  skillAreas: [skill-area:container-security, skill-area:configuration-management]
+  workflows: [workflow:security-audit]
+  topics: [topic:zero-trust-architecture]
 
 ---
 

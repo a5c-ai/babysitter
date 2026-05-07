@@ -11,6 +11,11 @@ expertise:
   - Multi-cloud and hybrid architectures
 graph:
   domains: [domain:devops]
+  specializations: [specialization:devops-sre-platform]
+  roles: [role:platform-engineer, role:architect]
+  skillAreas: [skill-area:terraform-infrastructure, skill-area:configuration-management]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:infrastructure-as-code]
 
 ---
 

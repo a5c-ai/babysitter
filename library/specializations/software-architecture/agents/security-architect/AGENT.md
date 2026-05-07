@@ -12,6 +12,11 @@ expertise:
   - Security controls design
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:security-engineer]
+  skillAreas: [skill-area:threat-modeling, skill-area:application-security-testing]
+  workflows: [workflow:security-audit, workflow:architecture-decision-record]
+  topics: [topic:zero-trust-architecture, topic:defense-in-depth]
 
 ---
 

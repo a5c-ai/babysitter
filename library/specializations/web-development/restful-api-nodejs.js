@@ -11,6 +11,11 @@
  * - OpenAPI/Swagger: https://swagger.io/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:api-design-review]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:backend-api-design]
+ *   topics: [topic:rest, topic:api-design]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

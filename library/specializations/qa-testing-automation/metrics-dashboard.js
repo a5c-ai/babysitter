@@ -33,6 +33,11 @@
  * - Test Analytics: https://testing.googleblog.com/2020/08/code-coverage-best-practices.html
  * @graph
  *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:bug-triage]
+ *   roles: [role:qa-engineer]
+ *   skillAreas: [skill-area:data-quality-testing, skill-area:metrics-dashboarding]
+ *   topics: [topic:test-driven-development, topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

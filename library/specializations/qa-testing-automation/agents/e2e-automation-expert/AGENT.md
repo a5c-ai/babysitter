@@ -12,6 +12,11 @@ expertise:
   - Test data management
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:qa-testing-automation]
+  roles: [role:qa-engineer]
+  skillAreas: [skill-area:e2e-testing, skill-area:cross-browser-testing]
+  workflows: [workflow:feature-development]
+  topics: [topic:test-driven-development]
 
 ---
 

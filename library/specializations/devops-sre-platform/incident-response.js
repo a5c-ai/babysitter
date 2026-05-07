@@ -23,7 +23,12 @@
  * - FireHydrant: https://firehydrant.io/blog/incident-response-process/
  * - Incident.io Best Practices: https://incident.io/guide/incident-response-process
  * @graph
- *   domains: [domain:devops, skill-area:incident-management]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response, workflow:post-mortem-review]
+ *   roles: [role:sre, role:incident-commander]
+ *   skillAreas: [skill-area:incident-management, skill-area:runbook-authoring]
+ *   topics: [topic:chaos-engineering, topic:observability-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

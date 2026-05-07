@@ -12,6 +12,11 @@ expertise:
   - Container orchestration
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:platform-engineer]
+  skillAreas: [skill-area:deployment-infrastructure-management, skill-area:caching-strategies]
+  workflows: [workflow:architecture-decision-record]
+  topics: [topic:microservices, topic:infrastructure-as-code]
 
 ---
 

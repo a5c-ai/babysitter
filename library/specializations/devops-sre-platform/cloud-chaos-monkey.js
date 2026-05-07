@@ -21,7 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * @graph
- *   domains: [domain:devops, topic:chaos-engineering]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:incident-response]
+ *   roles: [role:sre, role:platform-engineer]
+ *   skillAreas: [skill-area:chaos-engineering]
+ *   topics: [topic:chaos-engineering]
  */
 
 /**

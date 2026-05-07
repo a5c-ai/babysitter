@@ -30,7 +30,12 @@
  * - Supertest: https://github.com/ladjs/supertest
  * - Swagger/OpenAPI: https://swagger.io/specification/
  * @graph
- *   domains: [domain:software-engineering, workflow:code-review]
+ *   domains: [domain:software-engineering]
+ *   specializations: [specialization:qa-testing-automation]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:qa-engineer, role:backend-engineer]
+ *   skillAreas: [skill-area:api-contract-testing, skill-area:integration-testing]
+ *   topics: [topic:test-driven-development]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

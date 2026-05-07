@@ -12,6 +12,11 @@ expertise:
   - Modernization patterns
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:principal-engineer]
+  skillAreas: [skill-area:backend-api-design, skill-area:messaging-queuing]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:monolith-to-microservices, topic:technical-debt]
 
 ---
 

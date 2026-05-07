@@ -12,6 +12,11 @@ expertise:
   - IDE refactoring tools
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:tech-lead, role:principal-engineer]
+  skillAreas: [skill-area:code-analysis-linting]
+  workflows: [workflow:technical-debt-reduction]
+  topics: [topic:refactoring, topic:technical-debt, topic:design-patterns]
 
 ---
 

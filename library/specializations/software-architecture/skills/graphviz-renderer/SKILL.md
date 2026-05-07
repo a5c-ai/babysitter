@@ -8,6 +8,10 @@ allowed-tools:
   - Glob
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  skillAreas: [skill-area:c4-modeling]
+  roles: [role:architect]
+  topics: [topic:architecture-decisions]
 
 ---
 

@@ -64,6 +64,11 @@
  *   - Org-wide scope short-circuits per-project enumeration via Cloud Asset Inventory (`gcloud asset search-all-resources --scope=organizations/<id>`) — ~10x faster.
  * @graph
  *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:capacity-planning]
+ *   roles: [role:platform-engineer, role:devops-engineer]
+ *   skillAreas: [skill-area:deployment-infrastructure-management]
+ *   topics: [topic:infrastructure-as-code]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

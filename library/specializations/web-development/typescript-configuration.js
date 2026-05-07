@@ -6,6 +6,11 @@
  * @references - TypeScript: https://www.typescriptlang.org/docs/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:frontend-engineer, role:tech-lead]
+ *   skillAreas: [skill-area:react-components, skill-area:code-analysis-linting]
+ *   topics: [topic:design-patterns]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

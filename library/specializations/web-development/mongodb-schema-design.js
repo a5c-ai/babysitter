@@ -8,6 +8,11 @@
  * - Mongoose: https://mongoosejs.com/
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:backend-engineer]
+ *   skillAreas: [skill-area:backend-data-persistence]
+ *   topics: [topic:database-sharding]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

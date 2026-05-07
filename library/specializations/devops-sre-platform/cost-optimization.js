@@ -28,7 +28,12 @@
  * - Cloud FinOps Book: https://www.oreilly.com/library/view/cloud-finops/9781492054610/
  * - FinOps Framework: https://www.finops.org/framework/
  * @graph
- *   domains: [domain:devops, role:devops-engineer]
+ *   domains: [domain:devops]
+ *   specializations: [specialization:devops-sre-platform]
+ *   workflows: [workflow:capacity-planning]
+ *   roles: [role:platform-engineer, role:devops-engineer]
+ *   skillAreas: [skill-area:capacity-planning-ops]
+ *   topics: [topic:platform-engineering-practices]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

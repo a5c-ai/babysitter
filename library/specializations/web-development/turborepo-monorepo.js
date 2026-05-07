@@ -6,6 +6,11 @@
  * @references - Turborepo: https://turbo.build/repo
  * @graph
  *   domains: [domain:web-development]
+ *   specializations: [specialization:web-development]
+ *   workflows: [workflow:feature-development]
+ *   roles: [role:tech-lead, role:frontend-engineer]
+ *   skillAreas: [skill-area:monorepo-extraction]
+ *   topics: [topic:developer-experience]
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

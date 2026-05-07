@@ -8,6 +8,11 @@ metadata:
   version: "1.0.0"
 graph:
   domains: [domain:software-engineering]
+  specializations: [specialization:software-architecture]
+  roles: [role:architect, role:backend-engineer]
+  skillAreas: [skill-area:backend-api-design, skill-area:api-design]
+  workflows: [workflow:api-design-review]
+  topics: [topic:api-design, topic:rest]
 
 ---
 
